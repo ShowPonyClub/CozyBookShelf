@@ -168,10 +168,10 @@
 
 <script>
 (function(){
-  /* TEMP: sends signups to your personal inbox so you can test now.
-     First signup triggers a one-time FormSubmit activation email - click it once.
-     Later, swap the address back to hello@tatties.app. */
-  var FORMSPREE_ENDPOINT = "https://formsubmit.co/ajax/bram_pijls@hotmail.com";
+  /* Signups are delivered via FormSubmit using a private alias, so no email
+     address appears in the page source. Click "Activate Form" in the FormSubmit
+     email once to start receiving submissions. */
+  var FORMSPREE_ENDPOINT = "https://formsubmit.co/ajax/18beefcce6fc1c73aaa5ed8f840cb146";
   var form=document.getElementById('waitlistForm'),email=document.getElementById('email'),msg=document.getElementById('formMsg');
   function show(t,c){msg.textContent=t;msg.className='form-msg '+c;}
   function valid(v){return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);}
