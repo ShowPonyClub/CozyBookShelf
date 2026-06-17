@@ -176,6 +176,13 @@ h1,h2,h3{font-weight:700;letter-spacing:.01em}
 }
 .merk{display:flex;align-items:center;gap:12px;min-width:0}
 .kop-knoppen{display:flex;align-items:center;gap:8px;flex:none}
+/* Mobiel: header stapelen zodat 'show me your tatties' bóven de menuknoppen staat
+   i.p.v. dat de knoppen over de tekst heen vallen. */
+@media (max-width:560px){
+  .app-header{flex-direction:column;align-items:stretch;gap:8px}
+  .app-header .merk{flex-wrap:wrap}
+  .app-header .kop-knoppen{justify-content:flex-end}
+}
 
 /* ---- Home-samenvatting ---- */
 #home-samenvatting{display:flex;gap:12px;padding:14px}
@@ -675,12 +682,12 @@ form label,
   background:#0e1116;border-radius:14px;overflow:hidden;}
 #stage:active{cursor:grabbing;}
 #stage canvas{display:block;}
-#view-3d #hint{margin:2px 0 0;background:rgba(14,17,22,.5);border:1px solid #262d38;
-  color:#aeb6c2;font-size:12px;padding:8px 12px;border-radius:10px;text-align:center;}
-#t3d-uitleg{background:rgba(14,17,22,.4);border:1px solid #262d38;border-radius:12px;padding:12px 14px;color:#aeb6c2;}
-#t3d-uitleg .t3d-u-titel{font-size:13px;font-weight:600;color:#e8eaed;margin:0 0 8px;}
+#view-3d #hint{margin:2px 0 0;background:var(--veldbg);border:1px solid var(--rand);
+  color:var(--gedempt);font-size:12px;padding:8px 12px;border-radius:10px;text-align:center;}
+#t3d-uitleg{background:var(--veldbg);border:1px solid var(--rand);border-radius:12px;padding:12px 14px;color:var(--gedempt);}
+#t3d-uitleg .t3d-u-titel{font-size:13px;font-weight:600;color:var(--tekst);margin:0 0 8px;}
 #t3d-uitleg ol{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px;font-size:12.5px;line-height:1.45;}
-#t3d-uitleg strong{color:#e8eaed;}
+#t3d-uitleg strong{color:var(--tekst);}
 /* 2D-handleiding onder de plattegrond — zelfde opzet als 3D, maar met thema-kleuren */
 #t2d-uitleg{background:var(--veldbg);border:1px solid var(--rand);border-radius:12px;padding:12px 14px;color:var(--gedempt);margin-top:12px;}
 #t2d-uitleg .t2d-u-titel{font-size:13px;font-weight:600;color:var(--tekst);margin:0 0 8px;}
@@ -897,13 +904,6 @@ form label{text-transform:none;letter-spacing:.005em;font-size:.8rem;color:var(-
       </span>
     </div>
 
-    <div id="start-hint" class="paneel" hidden>
-      <p class="sectiekop" data-i18n="hint.titel">Zo begin je</p>
-      <p class="hint-stap" data-i18n-html="hint.stap1"><strong>1.</strong> Tik op <strong>＋ Nieuwe tattoo</strong> en markeer de plek op het lichaam.</p>
-      <p class="hint-stap" data-i18n-html="hint.stap2"><strong>2.</strong> Voeg foto's toe — de eerste wordt je miniatuur op de kaart.</p>
-      <p class="hint-stap" data-i18n-html="hint.stap3"><strong>3.</strong> Maak af en toe een backup via <strong>Exporteren</strong>.</p>
-      <button class="knop-sec" id="hint-sluit" data-i18n="hint.begrepen" style="margin-top:12px;width:100%">Begrepen</button>
-    </div>
 
     <div id="home-samenvatting" class="paneel" style="margin-top:4px">
       <button type="button" class="samenvat-kaart" id="ga-collectie" data-modus="gezet">
@@ -6563,7 +6563,6 @@ async function herlaad() {
   renderBodyMap();
   renderLijst();
   renderSamenvatting();
-  toonStartHint();
   toonOpslagInfo();
 }
 
@@ -6581,15 +6580,6 @@ async function toonOpslagInfo() {
     }
     el.textContent = tekst;
   } catch { el.textContent = ''; }
-}
-
-/* Eerste-gebruik-hint: één keer, verdwijnt na 'Begrepen' of de eerste tattoo */
-function toonStartHint() {
-  const el = $('#start-hint');
-  if (!el) return;
-  let gezien = false;
-  try { gezien = !!localStorage.getItem('tatties-hint-gezien'); } catch { /* geen vlag-opslag */ }
-  el.hidden = gezien || tattoos.length > 0;
 }
 
 /* ============================================================
@@ -8628,10 +8618,6 @@ async function verwijderVoorbeelden() {
       renderBodyMap();
       renderLijst();
     }));
-  $('#hint-sluit').addEventListener('click', () => {
-    try { localStorage.setItem('tatties-hint-gezien', '1'); } catch { /* geen vlag-opslag */ }
-    $('#start-hint').hidden = true;
-  });
   $('#zoek').addEventListener('input', (e) => { zoekTekst = e.target.value.trim(); renderLijst(); });
   $('#sorteer').addEventListener('change', (e) => { sorteer = e.target.value; renderLijst(); });
   tekenSilhouet();
