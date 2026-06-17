@@ -185,7 +185,7 @@ h1,h2,h3{font-weight:700;letter-spacing:.01em}
 }
 
 /* ---- Home-samenvatting ---- */
-#home-samenvatting{display:flex;gap:12px;padding:14px}
+#stats-samenvatting{display:flex;gap:12px;padding:14px}
 .samenvat-kaart{
   flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;
   background:var(--veldbg);border:1px solid var(--rand);border-radius:14px;
@@ -200,6 +200,8 @@ h1,h2,h3{font-weight:700;letter-spacing:.01em}
   font-family:var(--serif);font-style:normal;
   font-size:.95rem;color:var(--gedempt);margin-top:0;letter-spacing:.04em;line-height:1.2;
 }
+/* Korte toelichting onder een paginatitel (Collectie/Wishlist, Statistieken) */
+.pagina-sub{color:var(--gedempt);font-size:.86rem;line-height:1.4;margin:-6px 0 14px}
 main{padding:16px 16px 32px;max-width:560px;margin:0 auto}
 
 main > section{animation:opkomen .3s ease both}
@@ -733,42 +735,42 @@ form label,
   background:rgba(0,0,0,.62);-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px);}
 .cutmodal.on{display:flex;}
 .cutmodal .cm-card{width:min(560px,94vw);max-height:92vh;display:flex;flex-direction:column;
-  background:#161b22;border:1px solid #262d38;border-radius:16px;overflow:hidden;color:#e8eaed;
+  background:var(--kaart);border:1px solid var(--rand);border-radius:16px;overflow:hidden;color:var(--tekst);
   font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;}
 /* Keuzestand (alleen Foto maken/uploaden): compacte pop-up die om de knoppen sluit */
 .cutmodal.cm-compact .cm-card{width:fit-content;min-width:280px;max-width:94vw;}
-.cutmodal .cm-head{display:flex;justify-content:space-between;align-items:center;padding:14px 16px;border-bottom:1px solid #262d38;font-weight:600;font-size:15px;}
-.cutmodal .cm-x{background:transparent;border:0;color:#8b95a3;font-size:22px;line-height:1;cursor:pointer;}
+.cutmodal .cm-head{display:flex;justify-content:space-between;align-items:center;padding:14px 16px;border-bottom:1px solid var(--rand);font-weight:600;font-size:15px;}
+.cutmodal .cm-x{background:transparent;border:0;color:var(--gedempt);font-size:22px;line-height:1;cursor:pointer;}
 .cutmodal .cm-body{padding:14px 16px;display:flex;flex-direction:column;gap:8px;overflow-y:auto;flex:1;}
 .cutmodal .cm-body>.btn{flex:0 0 auto;padding:10px;}
 .cutmodal .cm-toprow{display:flex;align-items:center;justify-content:center;gap:8px 12px;flex-wrap:wrap;}
 .cutmodal .cm-choose{flex:0 0 auto;padding:8px 12px;font-size:13px;}
 .cutmodal .cm-toprow .chk{margin-top:0;}
 .cutmodal .chk input{width:16px;height:16px;flex:0 0 auto;}
-.cutmodal .cm-prev{flex:1;min-height:280px;border:1px solid #262d38;border-radius:10px;display:flex;align-items:center;justify-content:center;
+.cutmodal .cm-prev{flex:1;min-height:280px;border:1px solid var(--rand);border-radius:10px;display:flex;align-items:center;justify-content:center;
   position:relative;overflow:hidden;touch-action:none;cursor:crosshair;
-  background:linear-gradient(45deg,#2a313c 25%,transparent 25%),linear-gradient(-45deg,#2a313c 25%,transparent 25%),
-    linear-gradient(45deg,transparent 75%,#2a313c 75%),linear-gradient(-45deg,transparent 75%,#2a313c 75%);
-  background-size:18px 18px;background-position:0 0,0 9px,9px -9px,-9px 0;background-color:#161b22;}
+  background:linear-gradient(45deg,rgba(120,120,120,.16) 25%,transparent 25%),linear-gradient(-45deg,rgba(120,120,120,.16) 25%,transparent 25%),
+    linear-gradient(45deg,transparent 75%,rgba(120,120,120,.16) 75%),linear-gradient(-45deg,transparent 75%,rgba(120,120,120,.16) 75%);
+  background-size:18px 18px;background-position:0 0,0 9px,9px -9px,-9px 0;background-color:var(--veldbg);}
 .cutmodal .cutcv,.cutmodal .lassocv{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;}
-.cutmodal .cm-foot{display:flex;gap:10px;padding:12px 16px;border-top:1px solid #262d38;}
-.cutmodal .btn{background:transparent;border:1px solid #262d38;color:#e8eaed;padding:12px;border-radius:8px;
+.cutmodal .cm-foot{display:flex;gap:10px;padding:12px 16px;border-top:1px solid var(--rand);}
+.cutmodal .btn{background:transparent;border:1px solid var(--rand);color:var(--tekst);padding:12px;border-radius:8px;
   font-size:14px;cursor:pointer;font-family:inherit;}
 .cutmodal .cm-foot .btn{flex:1;}
-.cutmodal .btn:hover{border-color:#e0533d;}
-.cutmodal .cm-place{background:#e0533d;border-color:#e0533d;color:#fff;font-weight:600;}
+.cutmodal .btn:hover{border-color:var(--accent);}
+.cutmodal .cm-place{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:600;}
 .cutmodal .cm-place:hover{filter:brightness(1.08);}
-.cutmodal .label{font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:#8b95a3;margin:6px 0 2px;}
+.cutmodal .label{font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--gedempt);margin:6px 0 2px;}
 .cutmodal .cutrow{display:flex;justify-content:space-between;align-items:center;gap:8px;}
-.cutmodal .hintline{font-size:11px;color:#8b95a3;line-height:1.4;}
-.cutmodal .linkbtn{background:transparent;border:0;color:#8b95a3;font-size:11px;text-decoration:underline;cursor:pointer;font-family:inherit;white-space:nowrap;}
-.cutmodal .linkbtn:hover{color:#e0533d;}
+.cutmodal .hintline{font-size:11px;color:var(--gedempt);line-height:1.4;}
+.cutmodal .linkbtn{background:transparent;border:0;color:var(--gedempt);font-size:11px;text-decoration:underline;cursor:pointer;font-family:inherit;white-space:nowrap;}
+.cutmodal .linkbtn:hover{color:var(--accent);}
 .cutmodal .bgrow{justify-content:flex-start;margin-top:6px;}
-.cutmodal .linkbtn.on{color:#e0533d;font-weight:600;}
-.cutmodal .bgswatch{width:18px;height:18px;border-radius:4px;border:1px solid #4a5260;visibility:hidden;flex:0 0 auto;}
-.cutmodal .chk{display:flex;align-items:center;gap:7px;font-size:12px;color:#8b95a3;margin-top:8px;cursor:pointer;}
-.cutmodal .chk input{accent-color:#e0533d;}
-.cutmodal .slider{width:100%;accent-color:#e0533d;height:22px;cursor:pointer;}
+.cutmodal .linkbtn.on{color:var(--accent);font-weight:600;}
+.cutmodal .bgswatch{width:18px;height:18px;border-radius:4px;border:1px solid var(--rand);visibility:hidden;flex:0 0 auto;}
+.cutmodal .chk{display:flex;align-items:center;gap:7px;font-size:12px;color:var(--gedempt);margin-top:8px;cursor:pointer;}
+.cutmodal .chk input{accent-color:var(--accent);}
+.cutmodal .slider{width:100%;accent-color:var(--accent);height:22px;cursor:pointer;}
 
 
 /* ---- huidskleur-kiezer (vakjes + schuif), gedeeld door instellingen en opstartscherm ---- */
@@ -869,12 +871,6 @@ form label{text-transform:none;letter-spacing:.005em;font-size:.8rem;color:var(-
           <g id="markers"></g>
         </svg>
         <button type="button" id="kaart-reset" class="kaart-slotbtn kaart-reset" title="Volledig overzicht" aria-label="Volledig overzicht"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12a8 8 0 1 0 2.3-5.6"/><path d="M3 4v4h4"/></svg></button>
-        <div id="kaart-slots" class="kaart-slots">
-          <button type="button" id="kaart-save" class="kaart-slotbtn kaart-save" title="Plaatsing opslaan" aria-label="Plaatsing opslaan"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h11l3 3v12a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1z"/><path d="M8 4v5h6V4"/><path d="M8 13h8v6H8z"/></svg></button>
-          <button type="button" class="kaart-slotbtn kaart-slot" data-slot="1" title="Plaatsing 1" aria-label="Plaatsing 1">1</button>
-          <button type="button" class="kaart-slotbtn kaart-slot" data-slot="2" title="Plaatsing 2" aria-label="Plaatsing 2">2</button>
-          <button type="button" class="kaart-slotbtn kaart-slot" data-slot="3" title="Plaatsing 3" aria-label="Plaatsing 3">3</button>
-        </div>
         <div class="zijde-balk">
           <div class="silhouet-keuze" role="group" data-i18n-aria="aria.kieszijde" aria-label="Kies zijde">
             <button type="button" data-zijde="voor" data-i18n="zijde.voor">Voorkant</button>
@@ -887,13 +883,13 @@ form label{text-transform:none;letter-spacing:.005em;font-size:.8rem;color:var(-
 
     <!-- informatie & uitleg onder de plattegrond (zelfde opzet als 3D) -->
     <div id="t2d-uitleg">
-      <p class="t2d-u-titel">Zo werkt de 2D-kaart</p>
+      <p class="t2d-u-titel" data-i18n="uitleg.titel2d">Zo werkt de 2D-kaart</p>
       <ol>
-        <li><strong>Inzoomen:</strong> tik op een lichaamsdeel om in te zoomen; met de cirkelknop linksboven ga je terug naar het volledige overzicht.</li>
-        <li><strong>Kant kiezen:</strong> wissel met de knoppen onder de kaart tussen voor- en achterkant.</li>
-        <li><strong>Tattoo plaatsen:</strong> tik op &#43; en markeer de plek, of dubbeltik op de huid en kies een foto.</li>
-        <li><strong>Aanpassen:</strong> versleep een markering om te verplaatsen; bewaar een vaste weergave met de opslaan-knop (vakjes 1&ndash;3).</li>
-        <li><strong>Wisselen:</strong> gebruik de 2D/3D-knop bovenaan voor het 3D-model.</li>
+        <li data-i18n-html="uitleg.2d1"><strong>Inzoomen:</strong> tik op een lichaamsdeel om in te zoomen; met de cirkelknop linksboven ga je terug naar het volledige overzicht.</li>
+        <li data-i18n-html="uitleg.2d2"><strong>Kant kiezen:</strong> wissel met de knoppen onder de kaart tussen voor- en achterkant.</li>
+        <li data-i18n-html="uitleg.2d3"><strong>Tattoo plaatsen:</strong> tik op &#43; en markeer de plek, of dubbeltik op de huid en kies een foto.</li>
+        <li data-i18n-html="uitleg.2d4"><strong>Aanpassen:</strong> versleep een markering om te verplaatsen, of tik erop om de details te openen.</li>
+        <li data-i18n-html="uitleg.2d5"><strong>Wisselen:</strong> gebruik de 2D/3D-knop bovenaan voor het 3D-model.</li>
       </ol>
     </div>
 
@@ -905,16 +901,6 @@ form label{text-transform:none;letter-spacing:.005em;font-size:.8rem;color:var(-
     </div>
 
 
-    <div id="home-samenvatting" class="paneel" style="margin-top:4px">
-      <button type="button" class="samenvat-kaart" id="ga-collectie" data-modus="gezet">
-        <span class="samenvat-getal" id="sv-collectie">0</span>
-        <span class="samenvat-label" data-i18n="sv.collectie">Collectie</span>
-      </button>
-      <button type="button" class="samenvat-kaart" id="ga-wishlist" data-modus="wens">
-        <span class="samenvat-getal" id="sv-wishlist">0</span>
-        <span class="samenvat-label" data-i18n="sv.wishlist">Wishlist</span>
-      </button>
-    </div>
   </section>
 
   <!-- ===================== DETAIL ===================== -->
@@ -929,6 +915,7 @@ form label{text-transform:none;letter-spacing:.005em;font-size:.8rem;color:var(-
       <button class="icoonknop" id="c-terug" data-i18n-aria="aria.terug" aria-label="Terug">←</button>
       <h2 data-i18n="col.titel">Collectie &amp; Wishlist</h2>
     </div>
+    <p class="pagina-sub" data-i18n="sub.collectie">Al je gezette tattoos en je wishlist op één plek — zoek en sorteer ze hier.</p>
     <div class="lijst-tools">
       <div class="silhouet-keuze" role="group" data-i18n-aria="aria.colofwens" aria-label="Collectie of wishlist">
         <button type="button" data-modus="gezet" class="actief" data-i18n="col.collectie">Collectie</button>
@@ -964,12 +951,6 @@ form label{text-transform:none;letter-spacing:.005em;font-size:.8rem;color:var(-
     <div id="stage">
       <div id="t3d-toast"></div>
       <button type="button" id="t3d-reset" title="Beginstand" aria-label="Beginstand"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12a8 8 0 1 0 2.3-5.6"/><path d="M3 4v4h4"/></svg></button>
-      <div id="t3d-slots" class="t3d-slots">
-        <button type="button" id="t3d-save" class="t3d-slotbtn t3d-save" title="Plaatsing opslaan" aria-label="Plaatsing opslaan"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h11l3 3v12a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1z"/><path d="M8 4v5h6V4"/><path d="M8 13h8v6H8z"/></svg></button>
-        <button type="button" class="t3d-slotbtn t3d-slot" data-slot="1" title="Plaatsing 1" aria-label="Plaatsing 1">1</button>
-        <button type="button" class="t3d-slotbtn t3d-slot" data-slot="2" title="Plaatsing 2" aria-label="Plaatsing 2">2</button>
-        <button type="button" class="t3d-slotbtn t3d-slot" data-slot="3" title="Plaatsing 3" aria-label="Plaatsing 3">3</button>
-      </div>
       <div id="t3d-loading"><div class="t3d-spin"></div><span>Laden&#8230;</span></div>
       <div id="editbar" class="t3d-editbar">
         <div class="eb-title">Tattoo</div>
@@ -990,13 +971,13 @@ form label{text-transform:none;letter-spacing:.005em;font-size:.8rem;color:var(-
     <!-- informatie & uitleg onder het 3D-model -->
     <div id="hint">Sleep om te draaien &middot; dubbeltik op de huid om een tattoo te plaatsen</div>
     <div id="t3d-uitleg">
-      <p class="t3d-u-titel">Zo werkt de 3D-weergave</p>
+      <p class="t3d-u-titel" data-i18n="uitleg.titel3d">Zo werkt de 3D-weergave</p>
       <ol>
-        <li><strong>Model kiezen:</strong> stel man of vrouw en je huidskleur in via Instellingen (tandwiel rechtsboven).</li>
-        <li><strong>Draaien:</strong> sleep met je vinger of muis om het model rond te draaien.</li>
-        <li><strong>Tattoo plaatsen:</strong> dubbeltik op de huid en kies een foto. Zet &ldquo;Achtergrond weghalen&rdquo; aan voor een schonere uitsnede.</li>
-        <li><strong>Aanpassen:</strong> tik op een geplaatste tattoo en gebruik de knoppen om te draaien, te schalen of te verwijderen.</li>
-        <li><strong>Wisselen:</strong> gebruik de 2D/3D-knop bovenaan voor de platte lichaamskaart.</li>
+        <li data-i18n-html="uitleg.3d1"><strong>Model kiezen:</strong> stel man of vrouw en je huidskleur in via Instellingen (tandwiel rechtsboven).</li>
+        <li data-i18n-html="uitleg.3d2"><strong>Draaien:</strong> sleep met je vinger of muis om het model rond te draaien.</li>
+        <li data-i18n-html="uitleg.3d3"><strong>Tattoo plaatsen:</strong> dubbeltik op de huid en kies een foto. Zet &ldquo;Achtergrond weghalen&rdquo; aan voor een schonere uitsnede.</li>
+        <li data-i18n-html="uitleg.3d4"><strong>Aanpassen:</strong> tik op een geplaatste tattoo en gebruik de knoppen om te draaien, te schalen of te verwijderen.</li>
+        <li data-i18n-html="uitleg.3d5"><strong>Wisselen:</strong> gebruik de 2D/3D-knop bovenaan voor de platte lichaamskaart.</li>
       </ol>
     </div>
 
@@ -1016,9 +997,9 @@ form label{text-transform:none;letter-spacing:.005em;font-size:.8rem;color:var(-
           <input type="file" id="imgInputCamera" accept="image/*" capture="environment" style="display:none">
           <div id="cmSettings" hidden>
             <label class="chk" style="display:inline-flex;margin:2px 0 8px"><input type="checkbox" id="bgRemove"> Achtergrond weghalen</label>
+            <span class="hintline" style="display:block;margin:0 0 6px">Teken met je vinger of muis een lijn rond de tattoo om hem uit te knippen.</span>
             <div class="cm-prev" id="cutPrev"><canvas id="cutCanvas" class="cutcv"></canvas><canvas id="lassoCanvas" class="lassocv"></canvas></div>
-            <div class="cutrow">
-              <span class="hintline">Teken met je vinger of muis een lijn rond de tattoo om hem uit te knippen.</span>
+            <div class="cutrow" style="justify-content:flex-end">
               <button id="cropReset" class="linkbtn">Reset uitsnede</button>
             </div>
             <div class="label">Gevoeligheid &mdash; sleep tot de achtergrond weg is</div>
@@ -1098,7 +1079,7 @@ form label{text-transform:none;letter-spacing:.005em;font-size:.8rem;color:var(-
   <div class="onboarding-kaart">
     <h1 class="onboarding-titel" data-i18n="onb.titel">Welkom bij Tatties</h1>
     <p class="onboarding-sub" data-i18n="onb.sub">Kies je lichaam en huidskleur om te beginnen.</p>
-    <p class="onboarding-feedback">show me your tatties &middot; stuur mij alle eerlijke feedback</p>
+    <p class="onboarding-feedback" data-i18n="feedback">show me your tatties &middot; stuur mij alle eerlijke feedback</p>
     <p class="inst-label" data-i18n="inst.geslacht">Man / Vrouw</p>
     <div class="silhouet-keuze" id="onb-geslacht" role="group" data-i18n-aria="aria.kiessilhouet" aria-label="Kies silhouet">
       <button type="button" data-onb-geslacht="man" data-i18n="inst.man">Man</button>
@@ -5966,6 +5947,21 @@ const I18N = {
     'hint.begrepen':'Begrepen',
     'onb.titel':'Welkom bij Tatties','onb.sub':'Kies je lichaam en huidskleur om te beginnen.','onb.start':'Aan de slag',
     'sv.collectie':'Collectie','sv.wishlist':'Wishlist',
+    'uitleg.titel3d':'Zo werkt de 3D-weergave',
+    'uitleg.3d1':'<strong>Model kiezen:</strong> stel man of vrouw en je huidskleur in via Instellingen (tandwiel rechtsboven).',
+    'uitleg.3d2':'<strong>Draaien:</strong> sleep met je vinger of muis om het model rond te draaien.',
+    'uitleg.3d3':'<strong>Tattoo plaatsen:</strong> dubbeltik op de huid en kies een foto. Zet “Achtergrond weghalen” aan voor een schonere uitsnede.',
+    'uitleg.3d4':'<strong>Aanpassen:</strong> tik op een geplaatste tattoo en gebruik de knoppen om te draaien, te schalen of te verwijderen.',
+    'uitleg.3d5':'<strong>Wisselen:</strong> gebruik de 2D/3D-knop bovenaan voor de platte lichaamskaart.',
+    'uitleg.titel2d':'Zo werkt de 2D-kaart',
+    'uitleg.2d1':'<strong>Inzoomen:</strong> tik op een lichaamsdeel om in te zoomen; met de cirkelknop linksboven ga je terug naar het volledige overzicht.',
+    'uitleg.2d2':'<strong>Kant kiezen:</strong> wissel met de knoppen onder de kaart tussen voor- en achterkant.',
+    'uitleg.2d3':'<strong>Tattoo plaatsen:</strong> tik op + en markeer de plek, of dubbeltik op de huid en kies een foto.',
+    'uitleg.2d4':'<strong>Aanpassen:</strong> versleep een markering om te verplaatsen, of tik erop om de details te openen.',
+    'uitleg.2d5':'<strong>Wisselen:</strong> gebruik de 2D/3D-knop bovenaan voor het 3D-model.',
+    'sub.collectie':'Al je gezette tattoos en je wishlist op één plek — zoek en sorteer ze hier.',
+    'sub.stats':'Een overzicht van je collectie in cijfers — aantallen, kosten, stijlen en meer.',
+    'feedback':'show me your tatties · stuur mij alle eerlijke feedback',
     'col.titel':'Collectie & Wishlist','col.collectie':'Collectie','col.wishlist':'Wishlist',
     'zoek.ph':'Zoek op naam, artiest of stijl',
     'sort.datumnieuw':'Nieuwste eerst','sort.datumoud':'Oudste eerst','sort.naam':'Naam A–Z','sort.kosten':'Kosten hoog–laag','sort.zone':'Lichaamsdeel',
@@ -6063,6 +6059,21 @@ const I18N = {
     'hint.begrepen':'Got it',
     'onb.titel':'Welcome to Tatties','onb.sub':'Pick your body and skin tone to get started.','onb.start':'Get started',
     'sv.collectie':'Collection','sv.wishlist':'Wishlist',
+    'uitleg.titel3d':'How the 3D view works',
+    'uitleg.3d1':'<strong>Pick a model:</strong> set male or female and your skin tone via Settings (gear, top right).',
+    'uitleg.3d2':'<strong>Rotate:</strong> drag with your finger or mouse to turn the model.',
+    'uitleg.3d3':'<strong>Place a tattoo:</strong> double-tap the skin and pick a photo. Turn on “Remove background” for a cleaner cut-out.',
+    'uitleg.3d4':'<strong>Adjust:</strong> tap a placed tattoo and use the buttons to rotate, scale or delete it.',
+    'uitleg.3d5':'<strong>Switch:</strong> use the 2D/3D button at the top for the flat body map.',
+    'uitleg.titel2d':'How the 2D map works',
+    'uitleg.2d1':'<strong>Zoom in:</strong> tap a body part to zoom in; use the circle button top-left to return to the full overview.',
+    'uitleg.2d2':'<strong>Pick a side:</strong> switch between front and back with the buttons under the map.',
+    'uitleg.2d3':'<strong>Place a tattoo:</strong> tap + and mark the spot, or double-tap the skin and pick a photo.',
+    'uitleg.2d4':'<strong>Adjust:</strong> drag a marker to move it, or tap it to open the details.',
+    'uitleg.2d5':'<strong>Switch:</strong> use the 2D/3D button at the top for the 3D model.',
+    'sub.collectie':'All your done tattoos and your wishlist in one place — search and sort them here.',
+    'sub.stats':'An overview of your collection in numbers — counts, costs, styles and more.',
+    'feedback':'show me your tatties · send me all your honest feedback',
     'col.titel':'Collection & Wishlist','col.collectie':'Collection','col.wishlist':'Wishlist',
     'zoek.ph':'Search by name, artist or style',
     'sort.datumnieuw':'Newest first','sort.datumoud':'Oldest first','sort.naam':'Name A–Z','sort.kosten':'Cost high–low','sort.zone':'Body part',
@@ -6396,9 +6407,13 @@ async function saveTattoo(tattoo) {
   try {
     const db = await openDB();
     return await new Promise((resolve, reject) => {
-      const rq = db.transaction(STORE, 'readwrite').objectStore(STORE).put(tattoo);
-      rq.onsuccess = () => resolve(tattoo);
-      rq.onerror = () => reject(rq.error);
+      const tx = db.transaction(STORE, 'readwrite');
+      tx.objectStore(STORE).put(tattoo);
+      // Pas resolven als de transactie écht commit (niet al bij put-success),
+      // zodat een abort tijdens commit niet als 'opgeslagen' wordt gemeld.
+      tx.oncomplete = () => resolve(tattoo);
+      tx.onerror = () => reject(tx.error);
+      tx.onabort = () => reject(tx.error || new Error('opslag-transactie afgebroken'));
     });
   } catch (e) {
     if (e && (e.name === 'QuotaExceededError' || /quota/i.test(e.message || ''))) {
@@ -6530,7 +6545,6 @@ function toonView(naam) {
   const _v3d = document.getElementById('view-3d');
   if (_v3d) _v3d.classList.add('verborgen');
   if (typeof window.__tatties3DPauze === 'function') window.__tatties3DPauze();
-  if (naam === 'home') renderSamenvatting();
   window.scrollTo(0, 0);
 }
 
@@ -6718,7 +6732,6 @@ function kiesSilhouet(keuze) {
   try { localStorage.setItem('tatties-silhouet', keuze); } catch { /* geen voorkeur-opslag */ }
   tekenSilhouet();
   renderBodyMap();
-  if (typeof updateKaartSlotUI === 'function') updateKaartSlotUI();
 }
 function kiesZijde(zijde) {
   if (zijde === huidigeZijde) return;
@@ -7196,6 +7209,17 @@ function openStats() {
       <button class="icoonknop" id="s-terug" aria-label="${tr('aria.terug')}">←</button>
       <h2>${tr('stats.titel')}</h2>
     </div>
+    <p class="pagina-sub">${tr('sub.stats')}</p>
+    <div id="stats-samenvatting" class="paneel" style="margin-bottom:14px">
+      <button type="button" class="samenvat-kaart" id="ga-collectie" data-modus="gezet">
+        <span class="samenvat-getal" id="sv-collectie">${gezet.length}</span>
+        <span class="samenvat-label">${tr('sv.collectie')}</span>
+      </button>
+      <button type="button" class="samenvat-kaart" id="ga-wishlist" data-modus="wens">
+        <span class="samenvat-getal" id="sv-wishlist">${wens.length}</span>
+        <span class="samenvat-label">${tr('sv.wishlist')}</span>
+      </button>
+    </div>
     ${blok(tr('stats.collectie'),
       rij(tr('stats.aantal'), gezet.length) +
       rij(tr('stats.uitgegeven'), euro.format(som(gezet, t => t.kosten))) +
@@ -7213,6 +7237,14 @@ function openStats() {
       rij(tr('stats.budget'), euro.format(som(wens, t => t.kosten))))}
   `;
   $('#s-terug').addEventListener('click', () => toonView('home'));
+  document.querySelectorAll('#stats-samenvatting .samenvat-kaart').forEach((b) =>
+    b.addEventListener('click', () => {
+      lijstModus = b.dataset.modus;
+      document.querySelectorAll('.lijst-tools button[data-modus]').forEach((x) =>
+        x.classList.toggle('actief', x.dataset.modus === lijstModus));
+      renderLijst();
+      toonView('collectie');
+    }));
   toonView('stats');
 }
 
@@ -8148,8 +8180,8 @@ function openFormulier(id = null) {
       artiest: $('#f-artiest').value.trim(),
       studio: $('#f-studio').value.trim(),
       stijl: $('#f-stijl').value,
-      kosten: parseFloat($('#f-kosten').value) || 0,
-      zituren: parseFloat($('#f-zituren').value) || 0,
+      kosten: Math.max(0, parseFloat($('#f-kosten').value) || 0),
+      zituren: Math.max(0, parseFloat($('#f-zituren').value) || 0),
       sessies: t.sessies || [],
       touchUps: t.touchUps || [],
       nazorg: t.nazorg || '',
@@ -8386,7 +8418,8 @@ let uitgesteldeInstallPrompt = null;
 window.addEventListener('beforeinstallprompt', (e) => {
   e.preventDefault();
   uitgesteldeInstallPrompt = e;
-  $('#install-banner').hidden = false;
+  // Install-banner tijdelijk uitgeschakeld: testers gebruiken de app online.
+  // Zet 'm terug aan met: $('#install-banner').hidden = false;
 });
 $('#install-ja').addEventListener('click', async () => {
   $('#install-banner').hidden = true;
@@ -8422,67 +8455,6 @@ function rondOnboardingAf() {
   try { localStorage.setItem('tatties-onboarding-gedaan', '1'); } catch { /* geen vlag */ }
   const ov = document.getElementById('onboarding');
   if (ov) ov.hidden = true;
-}
-
-/* ---- Plaatsing-presets voor de 2D-kaart (opslaan/terughalen per silhouet) ---- */
-const PLAATS2D_KEY = 'tatties-plaatsing-2d';
-let kaartSaveArm = false;
-let plaatsing2D = { man: {}, vrouw: {} };
-function laadPlaatsing2D() {
-  try {
-    const raw = localStorage.getItem(PLAATS2D_KEY);
-    if (raw) { const o = JSON.parse(raw); plaatsing2D = { man: (o && o.man) || {}, vrouw: (o && o.vrouw) || {} }; }
-  } catch { plaatsing2D = { man: {}, vrouw: {} }; }
-}
-function bewaarPlaatsing2D() {
-  try { localStorage.setItem(PLAATS2D_KEY, JSON.stringify(plaatsing2D)); } catch { /* geen opslag */ }
-}
-function updateKaartSlotUI() {
-  const cont = document.getElementById('kaart-slots');
-  if (!cont) return;
-  cont.classList.toggle('arm', kaartSaveArm);
-  const sb = document.getElementById('kaart-save');
-  if (sb) sb.classList.toggle('arm', kaartSaveArm);
-  const g = plaatsing2D[silhouetKeuze] || {};
-  cont.querySelectorAll('.kaart-slot').forEach(b => b.classList.toggle('gevuld', !!(g && g[b.dataset.slot])));
-}
-function snapshotKaart() {
-  const snap = {};
-  for (const t of tattoos) {
-    if (!t || !t.positie) continue;
-    snap[t.id] = {
-      positie: { x: t.positie.x, y: t.positie.y },
-      zijde: t.zijde || 'voor',
-      schaal: (t.kunst && t.kunst.schaal) || null,
-      rotatie: (t.kunst && t.kunst.rotatie) || 0
-    };
-  }
-  return snap;
-}
-async function opslaanInKaartSlot(n) {
-  const snap = snapshotKaart();
-  if (!Object.keys(snap).length) { toast('Geen geplaatste tattoos om op te slaan'); kaartSaveArm = false; updateKaartSlotUI(); return; }
-  plaatsing2D[silhouetKeuze] = plaatsing2D[silhouetKeuze] || {};
-  plaatsing2D[silhouetKeuze][n] = snap;
-  bewaarPlaatsing2D();
-  kaartSaveArm = false; updateKaartSlotUI();
-  toast('Plaatsing opgeslagen in ' + n);
-}
-async function ladenUitKaartSlot(n) {
-  const snap = (plaatsing2D[silhouetKeuze] || {})[n];
-  if (!snap) { toast('Plaatsing ' + n + ' is leeg'); return; }
-  let cnt = 0;
-  for (const t of tattoos) {
-    const s = snap[t.id];
-    if (!s) continue;
-    t.positie = { x: s.positie.x, y: s.positie.y };
-    if (s.zijde) t.zijde = s.zijde;
-    if (t.kunst) { if (s.schaal != null) t.kunst.schaal = s.schaal; t.kunst.rotatie = s.rotatie || 0; }
-    await saveTattoo(t);
-    cnt++;
-  }
-  renderMarkers();
-  toast(cnt ? ('Plaatsing ' + n + ' geladen') : ('Plaatsing ' + n + ' past niet op deze tattoos'));
 }
 
 /* ---- Instellingen-paneel ---- */
@@ -8567,14 +8539,6 @@ async function verwijderVoorbeelden() {
   $('#btn-stats').addEventListener('click', openStats);
   $('#btn-collectie').addEventListener('click', () => toonView('collectie'));
   $('#c-terug').addEventListener('click', () => toonView('home'));
-  document.querySelectorAll('#home-samenvatting .samenvat-kaart').forEach((b) =>
-    b.addEventListener('click', () => {
-      lijstModus = b.dataset.modus;
-      document.querySelectorAll('.lijst-tools button[data-modus]').forEach((x) =>
-        x.classList.toggle('actief', x.dataset.modus === lijstModus));
-      renderLijst();
-      toonView('collectie');
-    }));
   $('#btn-instellingen').addEventListener('click', openInstellingen);
   $('#inst-sluit').addEventListener('click', sluitInstellingen);
   $('#inst-overlay').addEventListener('click', sluitInstellingen);
@@ -8587,22 +8551,7 @@ async function verwijderVoorbeelden() {
         x.classList.toggle('actief', x === b));
     }));
   $('#onb-start').addEventListener('click', rondOnboardingAf);
-  laadPlaatsing2D();
-  {
-    const ks = document.getElementById('kaart-save');
-    if (ks) ks.addEventListener('click', () => {
-      kaartSaveArm = !kaartSaveArm;
-      updateKaartSlotUI();
-      toast(kaartSaveArm ? 'Kies een vak (1\u20133) om de plaatsing op te slaan' : 'Opslaan geannuleerd');
-    });
-    document.querySelectorAll('#kaart-slots .kaart-slot').forEach(b =>
-      b.addEventListener('click', () => {
-        const n = b.dataset.slot;
-        if (kaartSaveArm) opslaanInKaartSlot(n); else ladenUitKaartSlot(n);
-      }));
-  }
   $('#kaart-reset').addEventListener('click', () => { zetFilter(null); setTimeout(renderMarkers, 320); });
-  updateKaartSlotUI();
   document.querySelectorAll('#taal-keuze button[data-taal]').forEach((b) =>
     b.addEventListener('click', () => pasTaal(b.dataset.taal)));
   pasTaal(taal);
@@ -8899,7 +8848,7 @@ async function verwijderVoorbeelden() {
     if(!ok || editDecal!==m) return;
     clearTimeout(persistT);                 // voorkom dat een nog lopende save de tattoo terugzet
     showSel(false);
-    if(m.obj) body.remove(m.obj);
+    disposeMarker(m);                        // verwijdert mesh én geeft geometry/material/textuur vrij (geen GPU-lek)
     const i=markers.indexOf(m); if(i>=0) markers.splice(i,1);
     editDecal=null;
     const eb=document.getElementById("editbar"); if(eb)eb.classList.remove("on");
@@ -9023,12 +8972,14 @@ async function verwijderVoorbeelden() {
     cutModal.classList.add("on"); toonCutInstellingen(false);
     drawPreview(null); drawLasso();
     const im=new Image();
-    im.onload=()=>{ origImg=im; lassoPts=(k.lasso||[]).slice(); rebuildBase(); updateCutout(); drawLasso(); toonCutInstellingen(true);
+    im.onload=()=>{ origImg=im; lassoPts=(k.lasso||[]).slice(); toonCutInstellingen(true); rebuildBase(); updateCutout(); drawLasso();
       toast("Pas de uitsnede aan en sla op"); };
     im.onerror=()=>toast("Kon de foto niet laden");
     im.src=k.srcUrl;
   }
-  function closeCutModal(){ cutModal.classList.remove("on"); pendingPlace=null; pendingEdit=null; pendingPlace2D=null; toonCutInstellingen(false); }
+  function closeCutModal(){ cutModal.classList.remove("on"); pendingPlace=null; pendingEdit=null; pendingPlace2D=null; toonCutInstellingen(false);
+    if(imgTexture && imgTexture.dispose){ imgTexture.dispose(); } imgTexture=null;   // niet-geplaatste textuur vrijgeven (geen lek)
+  }
   // 2D: open dezelfde uitsnede-modal voor een dubbeltik op de 2D-kaart
   function openCutModal2D(x,y,zone,side){
     pendingPlace2D={x,y,zone,side}; pendingPlace=null; pendingEdit=null;
@@ -9171,8 +9122,8 @@ async function verwijderVoorbeelden() {
     const r=imgRectInBox(cv.width,cv.height,origImg.naturalWidth,origImg.naturalHeight);
     ctx.beginPath();
     lassoPts.forEach((p,i)=>{ const X=r.left+p.nx*r.w, Y=r.top+p.ny*r.h; i?ctx.lineTo(X,Y):ctx.moveTo(X,Y); });
-    if(!drawing && lassoPts.length>=3){ ctx.closePath(); ctx.fillStyle="rgba(224,83,61,.12)"; ctx.fill(); }
-    ctx.lineWidth=2; ctx.lineJoin="round"; ctx.strokeStyle="#e0533d"; ctx.stroke();
+    if(!drawing && lassoPts.length>=3){ ctx.closePath(); ctx.fillStyle="rgba(142,113,240,.14)"; ctx.fill(); }
+    ctx.lineWidth=2; ctx.lineJoin="round"; ctx.strokeStyle="#8e71f0"; ctx.stroke();
   }
   function ptFrom(e){
     const b=cutPrev.getBoundingClientRect(), r=imgRectInBox(b.width,b.height,origImg.naturalWidth,origImg.naturalHeight);
@@ -9204,7 +9155,7 @@ async function verwijderVoorbeelden() {
     const laadFotoBestand=(input)=>{
       const f=input.files[0]; if(!f)return;
       const rd=new FileReader();
-      rd.onload=ev=>{ const im=new Image(); im.onload=()=>{ origImg=im; lassoPts=[]; rebuildBase(); updateCutout(); toonCutInstellingen(true);
+      rd.onload=ev=>{ const im=new Image(); im.onload=()=>{ origImg=im; lassoPts=[]; toonCutInstellingen(true); rebuildBase(); updateCutout();
         toast("Teken een lijn rond de tattoo en stel de grenswaarde in"); }; im.src=ev.target.result; };
       rd.readAsDataURL(f); input.value="";
     };
@@ -9286,6 +9237,7 @@ async function verwijderVoorbeelden() {
           toast("Tattoo geplaatst \u2713");
           if(typeof openFormulier==="function"){ openFormulier(rec.id); }
         }catch(err){ console.error(err); toast("Opslaan mislukt: "+(err&&err.message?err.message:"fout")); }
+        if(imgTexture && imgTexture.dispose){ imgTexture.dispose(); } imgTexture=null;   // 2D gebruikt de PNG, niet de live textuur
         return;
       }
       if(pendingEdit){
@@ -9298,6 +9250,7 @@ async function verwijderVoorbeelden() {
           catch(err){ console.error(err); toast("Opslaan mislukt: "+(err&&err.message?err.message:"fout")); }
         }
         if(typeof renderMarkers==="function"){ try{renderMarkers();}catch(_){} }
+        imgTexture=null;   // marker bezit de textuur nu
         return;
       }
       if(!pendingPlace){ closeCutModal(); return; }
@@ -9319,6 +9272,7 @@ async function verwijderVoorbeelden() {
         const m={ id:rec.id, rec, obj, point:pp.point.clone(), normal:pp.normal.clone(),
           mesh:pp.mesh, rot, size, tex:imgTexture };
         markers.push(m);
+        imgTexture=null;   // marker bezit de textuur nu; voorkom dispose door volgende updateCutout
         if(typeof renderMarkers==="function"){ try{renderMarkers();}catch(_){} }
         enterEditDecal(m);   // direct in aanpasmodus: meteen schalen/verplaatsen/roteren
       }catch(err){ console.error(err); toast("Opslaan mislukt: "+(err&&err.message?err.message:"fout")); }
@@ -9363,6 +9317,20 @@ async function verwijderVoorbeelden() {
       im.src=k.srcUrl;
     });
   }
+  // Bij herstel weten we het punt+normaal maar niet op welke mesh ze liggen.
+  // Bij één samengevoegde mesh is dat pickMeshes[0]; bij meerdere meshes zoeken
+  // we via een raycast langs de normaal de juiste mesh (val terug op [0]).
+  function meshAtPoint(point, normal){
+    if(pickMeshes.length<=1) return pickMeshes[0];
+    try{
+      const rc=new THREE.Raycaster();
+      const o=point.clone().add(normal.clone().multiplyScalar(0.05));
+      rc.set(o, normal.clone().multiplyScalar(-1).normalize());
+      const hits=rc.intersectObjects(pickMeshes,true);
+      if(hits[0] && hits[0].object) return hits[0].object;
+    }catch(e){ /* val terug */ }
+    return pickMeshes[0];
+  }
   async function restore3D(token){
     if(token!==undefined && token!==loadToken) return;
     if(!pickMeshes.length) return;
@@ -9382,10 +9350,11 @@ async function verwijderVoorbeelden() {
       if(!tex) continue;
       const point=new THREE.Vector3(P.point[0],P.point[1],P.point[2]);
       const normal=new THREE.Vector3(P.normal[0],P.normal[1],P.normal[2]);
-      const obj=makeImage(point,normal,P.rot||0,P.size||0.09,tex,pickMeshes[0]);
+      const mesh=meshAtPoint(point,normal);
+      const obj=makeImage(point,normal,P.rot||0,P.size||0.09,tex,mesh);
       if(obj){ obj.renderOrder=(t.stapel)||0;
         markers.push({ id:t.id, rec:t, obj, point:point.clone(), normal:normal.clone(),
-        mesh:pickMeshes[0], rot:P.rot||0, size:P.size||0.09, locked:!!P.locked, tex }); n++;
+        mesh, rot:P.rot||0, size:P.size||0.09, locked:!!P.locked, tex }); n++;
         if(!t.positie || !t.kunst || !t.kunst.src){      // ouder record: 2D-velden bijvullen
           sync2D(t, point, P.side||"voor", P.rot||0, P.size||0.09, tex);
           try{ await saveTattoo(t); }catch(e){ console.error(e); }
@@ -9393,80 +9362,7 @@ async function verwijderVoorbeelden() {
       }
     }
     if(typeof renderMarkers==="function"){ try{renderMarkers();}catch(_){} }
-    if(typeof updateSlotUI==="function"){ try{updateSlotUI();}catch(_){} }
     if(n) toast(n+" tattoo"+(n>1?"s":"")+" hersteld");
-  }
-
-  /* ---- plaatsing-slots: bewaar/wissel 3D-tattooposities (per gender, in localStorage) ---- */
-  const PLAATS_KEY="tatties-plaatsing";
-  let saveArm=false;
-  let placements={man:{}, vrouw:{}};
-  function laadPlacements(){
-    try{ const raw=localStorage.getItem(PLAATS_KEY); if(raw){ const o=JSON.parse(raw);
-      placements={ man:(o&&o.man)||{}, vrouw:(o&&o.vrouw)||{} }; } }
-    catch(e){ placements={man:{},vrouw:{}}; }
-  }
-  function bewaarPlacements(){
-    try{ localStorage.setItem(PLAATS_KEY, JSON.stringify(placements)); }catch(e){ console.error(e); }
-  }
-  function updateSlotUI(){
-    const cont=document.getElementById("t3d-slots"); if(!cont) return;
-    cont.classList.toggle("arm", saveArm);
-    const sb=document.getElementById("t3d-save"); if(sb) sb.classList.toggle("arm", saveArm);
-    const g=placements[currentGender]||{};
-    cont.querySelectorAll(".t3d-slot").forEach(b=>{ b.classList.toggle("gevuld", !!(g&&g[b.dataset.slot])); });
-  }
-  function snapshotPlaatsing(){
-    const snap={};
-    for(const m of markers){ if(!m||!m.id) continue;
-      snap[m.id]={ point:[m.point.x,m.point.y,m.point.z], normal:[m.normal.x,m.normal.y,m.normal.z],
-        rot:m.rot||0, size:m.size||0.09, locked:!!m.locked }; }
-    return snap;
-  }
-  async function persistMarkerNu(m){
-    if(!m||!m.rec) return;
-    const nz=nearestZone(m.point);
-    const P=m.rec.positie3d||(m.rec.positie3d={});
-    P.point=[m.point.x,m.point.y,m.point.z]; P.normal=[m.normal.x,m.normal.y,m.normal.z];
-    P.rot=m.rot||0; P.size=m.size||0.09; P.locked=!!m.locked; P.gender=currentGender; P.zone=nz.zone; P.side=nz.side;
-    m.rec.zijde=nz.side; m.rec.lichaamsdeel=nz.zone;
-    sync2D(m.rec, m.point, nz.side, m.rot, m.size, m.tex);
-    try{ await saveTattoo(m.rec);
-      if(typeof tattoos!=="undefined"&&Array.isArray(tattoos)){ const j=tattoos.findIndex(t=>t.id===m.rec.id); if(j>=0)tattoos[j]=m.rec; } }
-    catch(e){ console.error(e); }
-  }
-  function opslaanInSlot(n){
-    if(!markers.length){ toast("Geen tattoos om op te slaan"); saveArm=false; updateSlotUI(); return; }
-    placements[currentGender]=placements[currentGender]||{};
-    placements[currentGender][n]=snapshotPlaatsing();
-    bewaarPlacements();
-    saveArm=false; updateSlotUI();
-    toast("Plaatsing opgeslagen in "+n);
-  }
-  async function ladenUitSlot(n){
-    const snap=(placements[currentGender]||{})[n];
-    if(!snap){ toast("Plaatsing "+n+" is leeg"); return; }
-    if(editDecal) exitEditDecal();
-    let cnt=0;
-    for(const m of markers){
-      const s=snap[m.id]; if(!s) continue;
-      m.point=new THREE.Vector3(s.point[0],s.point[1],s.point[2]);
-      m.normal=new THREE.Vector3(s.normal[0],s.normal[1],s.normal[2]);
-      m.rot=s.rot||0; m.size=s.size||0.09; m.locked=!!s.locked;
-      rebuildMarker(m); cnt++;
-    }
-    for(const m of markers){ if(snap[m.id]) await persistMarkerNu(m); }
-    if(typeof renderMarkers==="function"){ try{renderMarkers();}catch(_){} }
-    toast(cnt?("Plaatsing "+n+" geladen"):("Plaatsing "+n+" past niet op deze tattoos"));
-  }
-  function bindSlots(){
-    const sb=document.getElementById("t3d-save");
-    if(sb) sb.onclick=()=>{ saveArm=!saveArm; updateSlotUI();
-      toast(saveArm?"Kies een vak (1–3) om de plaatsing op te slaan":"Opslaan geannuleerd"); };
-    document.querySelectorAll("#t3d-slots .t3d-slot").forEach(b=>{
-      b.onclick=()=>{ const n=b.dataset.slot; if(saveArm){ opslaanInSlot(n); } else { ladenUitSlot(n); } };
-    });
-    laadPlacements(); updateSlotUI();
   }
 
   /* ---- render-lus ---- */
@@ -9527,7 +9423,6 @@ async function verwijderVoorbeelden() {
     bindControls();
     bindCutUI();
     bindEditUI();
-    bindSlots();
     window.addEventListener("resize",resize); resize();
     // begin-instellingen overnemen uit het instellingen-paneel van de host
     try{
