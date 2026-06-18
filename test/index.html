@@ -102,7 +102,7 @@
   --kaart:#F8F2E7;
   --veldbg:#FBF7EE;
   --rand:#D9CCB6;
-  --gedempt:#8A7E6C;
+  --gedempt:#6F6453;       /* donkerder voor leesbaarheid op de warme achtergronden (WCAG AA) */
   --raster:#D8CBB2;
   --radius:12px;
   --app-font:'Recoleta', ui-serif, Georgia, 'Times New Roman', serif;
@@ -771,6 +771,22 @@ form label,
 .cutmodal .chk{display:flex;align-items:center;gap:7px;font-size:12px;color:var(--gedempt);margin-top:8px;cursor:pointer;}
 .cutmodal .chk input{accent-color:var(--accent);}
 .cutmodal .slider{width:100%;accent-color:var(--accent);height:22px;cursor:pointer;}
+/* 3D toevoeg-flow: + knop, plaats-banner, info-velden in de modal */
+#t3d-add{position:absolute;right:14px;bottom:14px;z-index:6;width:48px;height:48px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;background:var(--accent);color:#FFF7EE;border:none;
+  font-size:28px;line-height:1;cursor:pointer;box-shadow:0 4px 14px rgba(var(--accent-rgb),.35);}
+#t3d-add:active{transform:scale(.97)}
+#t3d-add[hidden]{display:none;}
+#t3d-banner,#t2d-banner{position:absolute;left:50%;top:14px;transform:translateX(-50%);z-index:7;max-width:90%;
+  background:var(--accent);color:#fff;font-size:13px;font-weight:600;padding:8px 14px;border-radius:999px;
+  box-shadow:0 2px 10px rgba(0,0,0,.3);text-align:center;}
+#t3d-banner[hidden],#t2d-banner[hidden]{display:none;}
+/* 2D selectie-omlijning rond de geselecteerde tattoo (zoals de ring in 3D) */
+.sel-ring-2d{stroke:var(--accent);stroke-width:1.8;stroke-dasharray:5 4;opacity:.9;}
+.cutmodal .cm-veld{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--gedempt);margin:8px 0 0;}
+.cutmodal .cm-veld input{padding:9px 10px;border:1px solid var(--rand);border-radius:8px;background:var(--veldbg);color:var(--tekst);font-size:14px;font-family:inherit;}
+#cmMeerBtn{margin-top:10px;display:inline-block;}
+#cmMeer{margin-top:2px;}
 
 
 /* ---- huidskleur-kiezer (vakjes + schuif), gedeeld door instellingen en opstartscherm ---- */
@@ -869,6 +885,7 @@ form label{text-transform:none;letter-spacing:.005em;font-size:.8rem;color:var(-
           <g id="zones"></g>
           <!-- Geplaatste tattoo-markeringen (gevuld door JS) -->
           <g id="markers"></g>
+          <circle id="sel-ring-2d" class="sel-ring-2d" fill="none" pointer-events="none" visibility="hidden"/>
         </svg>
         <button type="button" id="kaart-reset" class="kaart-slotbtn kaart-reset" title="Volledig overzicht" aria-label="Volledig overzicht"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12a8 8 0 1 0 2.3-5.6"/><path d="M3 4v4h4"/></svg></button>
         <div class="zijde-balk">
@@ -878,6 +895,21 @@ form label{text-transform:none;letter-spacing:.005em;font-size:.8rem;color:var(-
           </div>
         </div>
         <button id="fab" data-i18n-aria="fab.nieuw" aria-label="Nieuwe tattoo" title="Nieuwe tattoo">+</button>
+        <div id="t2d-banner" hidden></div>
+        <div id="editbar2d" class="t3d-editbar">
+          <div class="eb-title">Tattoo</div>
+          <div class="eb-btns">
+            <button type="button" data-act="lock" data-i18n-title="ui.vergrendelen" data-i18n-aria="ui.vergrendelen" title="Vergrendelen" aria-label="Vergrendelen">&#128274;</button>
+            <button type="button" data-act="del" data-i18n-title="ui.verwijderen" data-i18n-aria="ui.verwijderen" title="Verwijderen" aria-label="Verwijderen">&#128465;</button>
+            <button type="button" data-act="recrop" data-i18n-title="ui.aanpassen_bijknippen" data-i18n-aria="ui.aanpassen_bijknippen" title="Aanpassen (bijknippen)" aria-label="Aanpassen">&#128295;</button>
+            <button type="button" data-act="done" class="eb-af" data-i18n-title="ui.klaar" data-i18n-aria="ui.klaar" title="Klaar" aria-label="Klaar">&#10003;</button>
+            <button type="button" data-act="size-" data-i18n-title="ui.kleiner" data-i18n-aria="ui.kleiner" title="Kleiner" aria-label="Kleiner">&#8722;</button>
+            <button type="button" data-act="size+" data-i18n-title="ui.groter" data-i18n-aria="ui.groter" title="Groter" aria-label="Groter">+</button>
+            <button type="button" data-act="rot-" data-i18n-title="ui.links_draaien" data-i18n-aria="ui.links_draaien" title="Linksom draaien" aria-label="Linksom draaien">&#8634;</button>
+            <button type="button" data-act="rot+" data-i18n-title="ui.rechts_draaien" data-i18n-aria="ui.rechts_draaien" title="Rechtsom draaien" aria-label="Rechtsom draaien">&#8635;</button>
+          </div>
+          <div class="eb-hint" data-i18n="ui.eb_hint">Sleep = verplaatsen &middot; knijp = schalen &middot; knijp-draai = roteren</div>
+        </div>
       </div>
     </div>
 
@@ -950,26 +982,28 @@ form label{text-transform:none;letter-spacing:.005em;font-size:.8rem;color:var(-
   <section id="view-3d" class="verborgen">
     <div id="stage">
       <div id="t3d-toast"></div>
-      <button type="button" id="t3d-reset" title="Beginstand" aria-label="Beginstand"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12a8 8 0 1 0 2.3-5.6"/><path d="M3 4v4h4"/></svg></button>
-      <div id="t3d-loading"><div class="t3d-spin"></div><span>Laden&#8230;</span></div>
+      <div id="t3d-banner" hidden></div>
+      <button id="t3d-add" data-i18n-aria="fab.nieuw" aria-label="Nieuwe tattoo" title="Nieuwe tattoo">+</button>
+      <button type="button" id="t3d-reset" data-i18n-title="ui.beginstand" data-i18n-aria="ui.beginstand" title="Beginstand" aria-label="Beginstand"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12a8 8 0 1 0 2.3-5.6"/><path d="M3 4v4h4"/></svg></button>
+      <div id="t3d-loading"><div class="t3d-spin"></div><span data-i18n="ui.laden">Laden&#8230;</span></div>
       <div id="editbar" class="t3d-editbar">
         <div class="eb-title">Tattoo</div>
         <div class="eb-btns">
-          <button type="button" data-act="lock" title="Vergrendelen" aria-label="Vergrendelen">&#128274;</button>
-          <button type="button" data-act="del" title="Verwijderen" aria-label="Verwijderen">&#128465;</button>
-          <button type="button" data-act="recrop" title="Aanpassen (bijknippen)" aria-label="Aanpassen">&#128295;</button>
-          <button type="button" data-act="done" class="eb-af" title="Klaar" aria-label="Klaar">&#10003;</button>
-          <button type="button" data-act="size-" title="Kleiner" aria-label="Kleiner">&#8722;</button>
-          <button type="button" data-act="size+" title="Groter" aria-label="Groter">+</button>
-          <button type="button" data-act="rot-" title="Linksom draaien" aria-label="Linksom draaien">&#8634;</button>
-          <button type="button" data-act="rot+" title="Rechtsom draaien" aria-label="Rechtsom draaien">&#8635;</button>
+          <button type="button" data-act="lock" data-i18n-title="ui.vergrendelen" data-i18n-aria="ui.vergrendelen" title="Vergrendelen" aria-label="Vergrendelen">&#128274;</button>
+          <button type="button" data-act="del" data-i18n-title="ui.verwijderen" data-i18n-aria="ui.verwijderen" title="Verwijderen" aria-label="Verwijderen">&#128465;</button>
+          <button type="button" data-act="recrop" data-i18n-title="ui.aanpassen_bijknippen" data-i18n-aria="ui.aanpassen_bijknippen" title="Aanpassen (bijknippen)" aria-label="Aanpassen">&#128295;</button>
+          <button type="button" data-act="done" class="eb-af" data-i18n-title="ui.klaar" data-i18n-aria="ui.klaar" title="Klaar" aria-label="Klaar">&#10003;</button>
+          <button type="button" data-act="size-" data-i18n-title="ui.kleiner" data-i18n-aria="ui.kleiner" title="Kleiner" aria-label="Kleiner">&#8722;</button>
+          <button type="button" data-act="size+" data-i18n-title="ui.groter" data-i18n-aria="ui.groter" title="Groter" aria-label="Groter">+</button>
+          <button type="button" data-act="rot-" data-i18n-title="ui.links_draaien" data-i18n-aria="ui.links_draaien" title="Linksom draaien" aria-label="Linksom draaien">&#8634;</button>
+          <button type="button" data-act="rot+" data-i18n-title="ui.rechts_draaien" data-i18n-aria="ui.rechts_draaien" title="Rechtsom draaien" aria-label="Rechtsom draaien">&#8635;</button>
         </div>
-        <div class="eb-hint">Sleep = verplaatsen &middot; knijp = schalen &middot; knijp-draai = roteren</div>
+        <div class="eb-hint" data-i18n="ui.eb_hint">Sleep = verplaatsen &middot; knijp = schalen &middot; knijp-draai = roteren</div>
       </div>
     </div>
 
     <!-- informatie & uitleg onder het 3D-model -->
-    <div id="hint">Sleep om te draaien &middot; dubbeltik op de huid om een tattoo te plaatsen</div>
+    <div id="hint" data-i18n="ui.draai_hint">Sleep om te draaien &middot; dubbeltik op de huid om een tattoo te plaatsen</div>
     <div id="t3d-uitleg">
       <p class="t3d-u-titel" data-i18n="uitleg.titel3d">Zo werkt de 3D-weergave</p>
       <ol>
@@ -981,47 +1015,61 @@ form label{text-transform:none;letter-spacing:.005em;font-size:.8rem;color:var(-
       </ol>
     </div>
 
+  </section>
+
+</main>
+
     <!-- volledig uitsnede-scherm -->
-    <div id="cutModal" class="cutmodal">
+    <div id="cutModal" class="cutmodal" role="dialog" aria-modal="true" aria-labelledby="cmTitle">
       <div class="cm-card">
         <div class="cm-head">
-          <span id="cmTitle">Tattoo toevoegen</span>
-          <button id="cmCancel" class="cm-x" title="Annuleer" aria-label="Annuleer">&times;</button>
+          <span id="cmTitle" data-i18n="ui.tattoo_toevoegen">Tattoo toevoegen</span>
+          <button id="cmCancel" class="cm-x" data-i18n-title="form.annuleren" data-i18n-aria="form.annuleren" title="Annuleer" aria-label="Annuleer">&times;</button>
         </div>
         <div class="cm-body">
           <div class="cm-toprow">
-            <button class="btn cm-choose" id="cmCamera">&#128247; Foto maken</button>
-            <button class="btn cm-choose" id="cmChoose">&#128193; Foto uploaden</button>
+            <button class="btn cm-choose" id="cmCamera">&#128247; <span data-i18n="ui.foto_maken">Foto maken</span></button>
+            <button class="btn cm-choose" id="cmChoose">&#128193; <span data-i18n="ui.foto_uploaden">Foto uploaden</span></button>
           </div>
           <input type="file" id="imgInput" accept="image/*" style="display:none">
           <input type="file" id="imgInputCamera" accept="image/*" capture="environment" style="display:none">
           <div id="cmSettings" hidden>
-            <label class="chk" style="display:inline-flex;margin:2px 0 8px"><input type="checkbox" id="bgRemove"> Achtergrond weghalen</label>
-            <span class="hintline" style="display:block;margin:0 0 6px">Teken met je vinger of muis een lijn rond de tattoo om hem uit te knippen.</span>
+            <label class="chk" style="display:inline-flex;margin:2px 0 8px"><input type="checkbox" id="bgRemove"> <span data-i18n="ui.achtergrond_weghalen">Achtergrond weghalen</span></label>
+            <span class="hintline" style="display:block;margin:0 0 6px" data-i18n="ui.cut_hint">Teken met je vinger of muis een lijn rond de tattoo om hem uit te knippen.</span>
             <div class="cm-prev" id="cutPrev"><canvas id="cutCanvas" class="cutcv"></canvas><canvas id="lassoCanvas" class="lassocv"></canvas></div>
             <div class="cutrow" style="justify-content:flex-end">
-              <button id="cropReset" class="linkbtn">Reset uitsnede</button>
+              <button id="cropReset" class="linkbtn" data-i18n="ui.reset_uitsnede">Reset uitsnede</button>
             </div>
-            <div class="label">Gevoeligheid &mdash; sleep tot de achtergrond weg is</div>
-            <input id="cutThresh" type="range" min="60" max="252" value="200" class="slider">
-            <div class="label">Zachte randen meenemen</div>
-            <input id="cutSpread" type="range" min="0" max="160" value="55" class="slider">
+            <div class="label" data-i18n="ui.gevoeligheid">Gevoeligheid &mdash; sleep tot de achtergrond weg is</div>
+            <input id="cutThresh" type="range" min="60" max="252" value="200" class="slider" data-i18n-aria="ui.gevoeligheid" aria-label="Gevoeligheid">
+            <div class="label" data-i18n="ui.zachte_randen">Zachte randen meenemen</div>
+            <input id="cutSpread" type="range" min="0" max="160" value="55" class="slider" data-i18n-aria="ui.zachte_randen" aria-label="Zachte randen meenemen">
             <div class="cutrow bgrow">
-              <button id="bgPickBtn" class="linkbtn">&#128167; Achtergrondkleur kiezen</button>
+              <button id="bgPickBtn" class="linkbtn">&#128167; <span data-i18n="ui.achtergrondkleur">Achtergrondkleur kiezen</span></button>
               <span id="bgSwatch" class="bgswatch" title="gekozen achtergrondkleur"></span>
-              <button id="bgPickReset" class="linkbtn">Auto</button>
+              <button id="bgPickReset" class="linkbtn" data-i18n="ui.auto">Auto</button>
+            </div>
+          </div>
+          <div id="cmInfo" hidden>
+            <label class="cm-veld"><span data-i18n="ui.naam">Naam</span> *
+              <input id="cmNaam" type="text" maxlength="80" autocomplete="off"></label>
+            <button type="button" id="cmMeerBtn" class="linkbtn" data-i18n="ui.meer_details">Meer details</button>
+            <div id="cmMeer" hidden>
+              <label class="cm-veld">Artiest<input id="cmArtiest" type="text"></label>
+              <label class="cm-veld">Studio<input id="cmStudio" type="text"></label>
+              <label class="cm-veld">Stijl<input id="cmStijl" type="text"></label>
+              <label class="cm-veld">Kosten (&euro;)<input id="cmKosten" type="number" min="0" step="0.01" inputmode="decimal"></label>
+              <label class="cm-veld">Datum<input id="cmDatum" type="date"></label>
             </div>
           </div>
         </div>
         <div class="cm-foot">
-          <button id="cmCancel2" class="btn">Annuleren</button>
-          <button id="cmPlace" class="btn cm-place">Plaatsen</button>
+          <button id="cmCancel2" class="btn" data-i18n="form.annuleren">Annuleren</button>
+          <button id="cmPlace" class="btn cm-place" data-i18n="ui.plaatsen">Plaatsen</button>
         </div>
       </div>
     </div>
-  </section>
 
-</main>
 
 <div id="install-banner" hidden>
   <span data-i18n="install.tekst">Zet Tatties op je beginscherm voor offline gebruik</span>
@@ -5962,6 +6010,28 @@ const I18N = {
     'sub.collectie':'Al je gezette tattoos en je wishlist op één plek — zoek en sorteer ze hier.',
     'sub.stats':'Een overzicht van je collectie in cijfers — aantallen, kosten, stijlen en meer.',
     'feedback':'show me your tatties · stuur mij alle eerlijke feedback',
+    'ui.foto_maken':'Foto maken','ui.foto_uploaden':'Foto uploaden','ui.plaatsen':'Plaatsen',
+    'ui.reset_uitsnede':'Reset uitsnede','ui.achtergrond_weghalen':'Achtergrond weghalen',
+    'ui.cut_hint':'Teken met je vinger of muis een lijn rond de tattoo om hem uit te knippen.',
+    'ui.gevoeligheid':'Gevoeligheid — sleep tot de achtergrond weg is','ui.zachte_randen':'Zachte randen meenemen',
+    'ui.achtergrondkleur':'Achtergrondkleur kiezen','ui.auto':'Auto',
+    'ui.tattoo_toevoegen':'Tattoo toevoegen','ui.tattoo_aanpassen':'Tattoo aanpassen',
+    'ui.beginstand':'Beginstand','ui.laden':'Laden…','ui.vergrendelen':'Vergrendelen','ui.verwijderen':'Verwijderen',
+    'ui.aanpassen_bijknippen':'Aanpassen','ui.klaar':'Klaar','ui.kleiner':'Kleiner','ui.groter':'Groter',
+    'ui.links_draaien':'Linksom draaien','ui.rechts_draaien':'Rechtsom draaien',
+    'ui.eb_hint':'Sleep = verplaatsen · knijp = schalen · knijp-draai = roteren',
+    'ui.draai_hint':'Sleep om te draaien · dubbeltik op de huid om een tattoo te plaatsen',
+    'ui.geen_model':'Geen 3D-model gevonden','ui.man_laden':'Manmodel laden…','ui.vrouw_laden':'Vrouwmodel laden…',
+    'ui.klaar_dubbeltik':'Klaar — dubbeltik op de huid','ui.model_mislukt':'Model laden mislukt',
+    'ui.aanpas_hint':'Aanpassen: sleep om te verplaatsen · scroll/knijp om te schalen',
+    'ui.tattoo_verwijderd':'Tattoo verwijderd','ui.vergrendeld':'Tattoo vergrendeld','ui.ontgrendeld':'Tattoo ontgrendeld',
+    'ui.geen_foto_bewaard':'Geen originele foto bewaard voor deze tattoo','ui.pas_aan_sla_op':'Pas de uitsnede aan en sla op',
+    'ui.foto_niet_geladen':'Kon de foto niet laden','ui.teken_lijn':'Teken een lijn rond de tattoo en stel de grenswaarde in',
+    'ui.tik_achtergrond':'Tik op de achtergrond in de foto','ui.pipet_uit':'Pipet uit',
+    'ui.kies_eerst_foto':'Kies eerst een foto en knip de tattoo uit','ui.tattoo_geplaatst':'Tattoo geplaatst ✓',
+    'ui.tattoo_bijgewerkt':'Tattoo bijgewerkt ✓','ui.plaatsen_mislukt':'Plaatsen mislukt','ui.fout':'fout',
+    'ui.hersteld':'{n} tattoo{s} hersteld','ui.verwijder_bevestig':'Weet je zeker dat je deze tattoo wilt verwijderen?',
+    'ui.toevoegen':'Toevoegen','ui.klik_plaatsen':'Klik op het model waar je de tattoo wilt','ui.naam_verplicht':'Geef de tattoo eerst een naam','ui.meer_details':'Meer details','ui.naam':'Naam',
     'col.titel':'Collectie & Wishlist','col.collectie':'Collectie','col.wishlist':'Wishlist',
     'zoek.ph':'Zoek op naam, artiest of stijl',
     'sort.datumnieuw':'Nieuwste eerst','sort.datumoud':'Oudste eerst','sort.naam':'Naam A–Z','sort.kosten':'Kosten hoog–laag','sort.zone':'Lichaamsdeel',
@@ -6074,6 +6144,28 @@ const I18N = {
     'sub.collectie':'All your done tattoos and your wishlist in one place — search and sort them here.',
     'sub.stats':'An overview of your collection in numbers — counts, costs, styles and more.',
     'feedback':'show me your tatties · send me all your honest feedback',
+    'ui.foto_maken':'Take photo','ui.foto_uploaden':'Upload photo','ui.plaatsen':'Place',
+    'ui.reset_uitsnede':'Reset cut-out','ui.achtergrond_weghalen':'Remove background',
+    'ui.cut_hint':'Draw a line around the tattoo with your finger or mouse to cut it out.',
+    'ui.gevoeligheid':'Sensitivity — drag until the background is gone','ui.zachte_randen':'Include soft edges',
+    'ui.achtergrondkleur':'Pick background colour','ui.auto':'Auto',
+    'ui.tattoo_toevoegen':'Add tattoo','ui.tattoo_aanpassen':'Edit tattoo',
+    'ui.beginstand':'Reset view','ui.laden':'Loading…','ui.vergrendelen':'Lock','ui.verwijderen':'Delete',
+    'ui.aanpassen_bijknippen':'Edit','ui.klaar':'Done','ui.kleiner':'Smaller','ui.groter':'Bigger',
+    'ui.links_draaien':'Rotate left','ui.rechts_draaien':'Rotate right',
+    'ui.eb_hint':'Drag = move · pinch = scale · pinch-twist = rotate',
+    'ui.draai_hint':'Drag to rotate · double-tap the skin to place a tattoo',
+    'ui.geen_model':'No 3D model found','ui.man_laden':'Loading male model…','ui.vrouw_laden':'Loading female model…',
+    'ui.klaar_dubbeltik':'Ready — double-tap the skin','ui.model_mislukt':'Loading the model failed',
+    'ui.aanpas_hint':'Editing: drag to move · scroll/pinch to scale',
+    'ui.tattoo_verwijderd':'Tattoo deleted','ui.vergrendeld':'Tattoo locked','ui.ontgrendeld':'Tattoo unlocked',
+    'ui.geen_foto_bewaard':'No original photo saved for this tattoo','ui.pas_aan_sla_op':'Adjust the cut-out and save',
+    'ui.foto_niet_geladen':'Could not load the photo','ui.teken_lijn':'Draw a line around the tattoo and set the threshold',
+    'ui.tik_achtergrond':'Tap the background in the photo','ui.pipet_uit':'Eyedropper off',
+    'ui.kies_eerst_foto':'Pick a photo first and cut out the tattoo','ui.tattoo_geplaatst':'Tattoo placed ✓',
+    'ui.tattoo_bijgewerkt':'Tattoo updated ✓','ui.plaatsen_mislukt':'Placing failed','ui.fout':'error',
+    'ui.hersteld':'{n} tattoo{s} restored','ui.verwijder_bevestig':'Are you sure you want to delete this tattoo?',
+    'ui.toevoegen':'Add','ui.klik_plaatsen':'Click on the model where you want the tattoo','ui.naam_verplicht':'Give the tattoo a name first','ui.meer_details':'More details','ui.naam':'Name',
     'col.titel':'Collection & Wishlist','col.collectie':'Collection','col.wishlist':'Wishlist',
     'zoek.ph':'Search by name, artist or style',
     'sort.datumnieuw':'Newest first','sort.datumoud':'Oldest first','sort.naam':'Name A–Z','sort.kosten':'Cost high–low','sort.zone':'Body part',
@@ -6164,6 +6256,7 @@ function vertaalStatisch(){
   document.querySelectorAll('[data-i18n-html]').forEach(el => { el.innerHTML = tr(el.getAttribute('data-i18n-html')); });
   document.querySelectorAll('[data-i18n-ph]').forEach(el => { el.setAttribute('placeholder', tr(el.getAttribute('data-i18n-ph'))); });
   document.querySelectorAll('[data-i18n-aria]').forEach(el => { el.setAttribute('aria-label', tr(el.getAttribute('data-i18n-aria'))); });
+  document.querySelectorAll('[data-i18n-title]').forEach(el => { el.setAttribute('title', tr(el.getAttribute('data-i18n-title'))); });
 }
 function pasTaal(lang){
   taal = (lang === 'en') ? 'en' : 'nl';
@@ -6498,7 +6591,7 @@ function zoneLabel(id) {
 }
 function fmtDatum(iso) {
   if (!iso) return '—';
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(iso)) return iso;   // onverwacht formaat: toon ruwe waarde
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(iso)) return esc(iso);   // onverwacht formaat: toon ruwe waarde (ge-escaped tegen injectie)
   const [j, m, d] = iso.split('-');
   if (taal === 'en') {
     const dt = new Date(iso + 'T00:00:00');
@@ -6570,6 +6663,8 @@ async function herlaad() {
       t.foto = null; gewijzigd = true;
     }
     if (!Array.isArray(t.nazorgTaken)) { t.nazorgTaken = []; gewijzigd = true; }
+    if (!Array.isArray(t.sessies)) { t.sessies = []; gewijzigd = true; }
+    if (!Array.isArray(t.touchUps)) { t.touchUps = []; gewijzigd = true; }
     if (gewijzigd) teMigreren.push(t);
   }
   for (const t of teMigreren) await saveTattoo(t);
@@ -6862,6 +6957,69 @@ function kunstBasisPos(t) {
       : null);
 }
 
+/* ---- 2D bewerkmodus: selectie-ring + editbar (gelijk aan 3D) ---- */
+let editMarker2D = null, markerTapTimer = null;
+function vindTattoo2D(id){ return tattoos.find(t => t.id === id) || null; }
+function updateSelRing2D(){
+  const ring = document.getElementById('sel-ring-2d'); if(!ring) return;
+  const t = editMarker2D ? vindTattoo2D(editMarker2D) : null;
+  if(!t || zijdeVan(t) !== huidigeZijde){ ring.setAttribute('visibility','hidden'); return; }
+  const basis = t.positie ||
+    (t.positie3d ? plek3DNaar2D(t.positie3d, zijdeVan(t)) : null) ||
+    { x: zonePos(t.lichaamsdeel, huidigeZijde)[0], y: zonePos(t.lichaamsdeel, huidigeZijde)[1] };
+  if(!basis){ ring.setAttribute('visibility','hidden'); return; }
+  const b = Number(t.kunst && t.kunst.schaal) || 14;
+  const h = b * ((t.kunst && t.kunst.aspect) || 1);
+  ring.setAttribute('cx', basis.x); ring.setAttribute('cy', basis.y);
+  ring.setAttribute('r', (Math.max(b, h) * 0.62 + 1.5).toFixed(1));
+  ring.setAttribute('visibility','visible');
+}
+function setLockUI2D(){
+  const t = editMarker2D ? vindTattoo2D(editMarker2D) : null;
+  const b = document.querySelector('#editbar2d [data-act="lock"]');
+  if(b) b.classList.toggle('on', !!(t && t.vergrendeld));
+}
+function enterEdit2D(id){
+  if(!vindTattoo2D(id)) return;
+  editMarker2D = id;
+  const eb = $('#editbar2d'); if(eb) eb.classList.add('on');
+  setLockUI2D();
+  renderMarkers();                  // tekent meteen de ring (via updateSelRing2D)
+  toast(tr('ui.aanpas_hint'));
+}
+async function exitEdit2D(){
+  const id = editMarker2D; editMarker2D = null;
+  const eb = $('#editbar2d'); if(eb) eb.classList.remove('on');
+  updateSelRing2D();
+  const t = id ? vindTattoo2D(id) : null;
+  if(t){ try{ await saveTattoo(t); }catch(e){ console.error(e); } }
+}
+async function edit2DActie(a){
+  const t = editMarker2D ? vindTattoo2D(editMarker2D) : null; if(!t) return;
+  if(a === 'done'){ exitEdit2D(); return; }
+  if(a === 'recrop'){ if(typeof window.__tattiesRecrop2D === 'function') window.__tattiesRecrop2D(t); return; }
+  if(a === 'del'){
+    if(typeof window.__tattiesConfirm === 'function'){ const ok = await window.__tattiesConfirm(tr('ui.verwijder_bevestig')); if(!ok) return; }
+    const id = t.id; editMarker2D = null;
+    const eb = $('#editbar2d'); if(eb) eb.classList.remove('on'); updateSelRing2D();
+    try{ await deleteTattoo(id); }catch(e){ console.error(e); }
+    tattoos = tattoos.filter(x => x.id !== id);
+    renderMarkers(); if(typeof renderSamenvatting === 'function') renderSamenvatting();
+    toast(tr('ui.tattoo_verwijderd')); return;
+  }
+  if(a === 'lock'){ t.vergrendeld = !t.vergrendeld; setLockUI2D(); renderMarkers();
+    try{ await saveTattoo(t); }catch(e){ console.error(e); }
+    toast(t.vergrendeld ? tr('ui.vergrendeld') : tr('ui.ontgrendeld')); return; }
+  if(t.vergrendeld || !t.kunst) return;
+  if(a === 'size-'){ t.kunst.schaal = Math.round(Math.max(8, (Number(t.kunst.schaal)||24) * 0.85)); }
+  else if(a === 'size+'){ t.kunst.schaal = Math.round(Math.min(60, (Number(t.kunst.schaal)||24) * 1.18)); }
+  else if(a === 'rot-'){ t.kunst.rotatie = (((Number(t.kunst.rotatie)||0) - 15) % 360 + 360) % 360; }
+  else if(a === 'rot+'){ t.kunst.rotatie = (((Number(t.kunst.rotatie)||0) + 15) % 360 + 360) % 360; }
+  else return;
+  renderMarkers();
+  try{ await saveTattoo(t); }catch(e){ console.error(e); }
+}
+
 function renderMarkers() {
   const g = $('#markers');
   const ingezoomd = isIngezoomd();
@@ -6924,6 +7082,7 @@ function renderMarkers() {
       if (Date.now() < kaartInteractie.blokkeerKlikTot) return;
       openDetail(m.dataset.id);
     }));
+  updateSelRing2D();
 }
 
 /* ViewBox direct zetten met begrenzing (voor pinch/pan/wiel) */
@@ -7111,7 +7270,9 @@ function initKaartGebaren() {
         toast(tr('toast.plekbij'));
       }
     } else {
-      openDetail(sleep.id);     // tik op een marker
+      // Uitgesteld: zo kan een dubbelklik op de marker bewerken (ring + editbar) i.p.v. detail openen
+      clearTimeout(markerTapTimer);
+      markerTapTimer = setTimeout(() => { markerTapTimer = null; openDetail(sleep.id); }, 280);
     }
   });
 
@@ -8371,8 +8532,14 @@ $('#import-file').addEventListener('change', async (e) => {
         record.fotos = [item.foto];                 // backup uit oudere versie
         record.foto = null;
       }
-      await saveTattoo(record);
-      geimporteerd++;
+      // Geneste lijsten hardenen tegen corrupte/oude backups (voorkomt crashes in detail/sessies)
+      if (!Array.isArray(record.sessies)) record.sessies = [];
+      if (!Array.isArray(record.touchUps)) record.touchUps = [];
+      if (!Array.isArray(record.fotos)) record.fotos = [];
+      if (!Array.isArray(record.nazorgTaken)) record.nazorgTaken = [];
+      // Per-record afvangen: één slecht record breekt de hele import niet meer af
+      try { await saveTattoo(record); geimporteerd++; }
+      catch (e) { console.error('Import: record overgeslagen', e); }
     }
     await herlaad();
     if (geimporteerd > 0) {
@@ -8469,7 +8636,20 @@ function sluitInstellingen() {
   document.body.style.overflow = '';
 }
 
-$('#fab').addEventListener('click', () => openFormulier(null));
+// Esc sluit de bovenste open modal (uitsnede-modal of instellingen).
+// De uitsnede-modal leeft in een aparte IIFE; we sluiten 'm via zijn annuleer-knop.
+document.addEventListener('keydown', (e) => {
+  if (e.key !== 'Escape') return;
+  const cm = document.getElementById('cutModal');
+  if (cm && cm.classList.contains('on')) { const x = document.getElementById('cmCancel'); if (x) x.click(); return; }
+  const inst = document.getElementById('inst-paneel');
+  if (inst && inst.classList.contains('open')) { sluitInstellingen(); }
+});
+
+$('#fab').addEventListener('click', () => {
+  if (typeof window.__tattiesAdd2D === 'function') window.__tattiesAdd2D();
+  else openFormulier(null);
+});
 $('#filter-clear').addEventListener('click', () => zetFilter(null));
 
 /* Ruim eventueel eerder toegevoegde voorbeeldtattoos (testdata) op.
@@ -8513,26 +8693,59 @@ async function verwijderVoorbeelden() {
     if (p.zone && p.best <= 42 * 42) { zetFilter(p.zone); }
     else if (huidigeViewBox[2] < 199) { animeerViewBox(VOLLEDIG_BEELD); setTimeout(renderMarkers, 320); }
   }
-  // Dubbeltik op de huid: tattoo plaatsen (zoals 3D) -> uitsnede-modal
-  function dubbeltikKaart(clientX, clientY) {
-    const p = kaartPunt(clientX, clientY); if (!p) return;
-    if (!(p.zone && p.best <= 60 * 60)) return;
-    if (typeof window.__tattiesPlaats2D === 'function')
-      window.__tattiesPlaats2D(+p.x.toFixed(1), +p.y.toFixed(1), p.zone, huidigeZijde);
+  // Dubbeltik op lege huid plaatst niets meer: toevoegen gaat via de + knop,
+  // bewerken via (later) dubbelklik op een bestaande markering.
+  function dubbeltikKaart() { /* no-op */ }
+
+  // ---- Nieuwe uniforme toevoeg-flow op de 2D-kaart (aangestuurd vanuit de uitsnede-modal) ----
+  let plaats2DData = null;
+  window.__tattiesStartPlaats2D = (payload) => {
+    plaats2DData = payload;
+    toonView('home');                                  // plaatsen gebeurt op de 2D-kaart
+    const b = $('#t2d-banner'); if (b) { b.textContent = tr('ui.klik_plaatsen'); b.hidden = false; }
+  };
+  async function plaatsNieuwe2D(clientX, clientY) {
+    const p = kaartPunt(clientX, clientY);
+    const d = plaats2DData;
+    plaats2DData = null;
+    const b = $('#t2d-banner'); if (b) b.hidden = true;
+    if (!p || !d) return;
+    const zone = p.zone || 'borst';
+    const rec = createTattoo(Object.assign({
+      naam: d.naam, status: 'gezet',
+      lichaamsdeel: zone, zijde: ZONE_ZIJDE[zone] || huidigeZijde,
+      positie: { x: +p.x.toFixed(1), y: +p.y.toFixed(1) },
+      kunst: { src: d.src, schaal: 24, aspect: d.aspect, rotatie: 0 },
+      kunst3d: d.kunst3d
+    }, d.info));
+    try { await saveTattoo(rec); } catch (e) { console.error(e); toast(tr('toast.opslaanmislukt') + (e && e.message ? e.message : tr('ui.fout'))); }
+    tattoos.push(rec);
+    zetFilter(zone);                                   // inzoomen → meteen bewerken mogelijk
+    toast(tr('ui.tattoo_geplaatst'));
+    setTimeout(() => enterEdit2D(rec.id), 340);        // ring + editbar tonen, net als 3D
   }
   let tapTimer2D = null;
   $('#bodymap').addEventListener('click', (e) => {
     if (Date.now() < kaartInteractie.blokkeerKlikTot) return;
+    if (plaats2DData) { clearTimeout(tapTimer2D); plaatsNieuwe2D(e.clientX, e.clientY); return; }
     if (e.target.closest('.marker')) return;
     const cx = e.clientX, cy = e.clientY;
     clearTimeout(tapTimer2D);
     tapTimer2D = setTimeout(() => { tapTimer2D = null; enkeltikKaart(cx, cy); }, 300);
   });
   $('#bodymap').addEventListener('dblclick', (e) => {
-    if (e.target.closest('.marker')) return;
+    const mk = e.target.closest('.marker');
+    if (mk) {
+      clearTimeout(tapTimer2D); tapTimer2D = null;
+      clearTimeout(markerTapTimer); markerTapTimer = null;   // annuleer de uitgestelde detail-tik
+      enterEdit2D(mk.dataset.id);
+      return;
+    }
     clearTimeout(tapTimer2D); tapTimer2D = null;
-    dubbeltikKaart(e.clientX, e.clientY);
+    dubbeltikKaart();
   });
+  { const eb2 = document.getElementById('editbar2d');
+    if (eb2) eb2.querySelectorAll('button').forEach(b => b.onclick = () => edit2DActie(b.dataset.act)); }
   initKaartGebaren();
   pasTintToe();
   tekenTinten();
@@ -8650,7 +8863,16 @@ async function verwijderVoorbeelden() {
       if(m.obj.material && m.obj.material.dispose) m.obj.material.dispose(); }
     if(m.tex && m.tex.dispose) m.tex.dispose();
   }
-  function clearMarkers(){ markers.slice().forEach(disposeMarker); markers.length=0; }
+  function clearMarkers(){
+    // Aanpasmodus afsluiten vóór het weggooien van markers, anders blijft de editbar
+    // naar een verwijderde marker wijzen (bv. bij man/vrouw-wissel tijdens bewerken).
+    if(editDecal){
+      editDecal=null; clearTimeout(persistT); showSel(false);
+      const eb=document.getElementById("editbar"); if(eb)eb.classList.remove("on");
+      const h=document.getElementById("hint"); if(h)h.style.display="";
+    }
+    markers.slice().forEach(disposeMarker); markers.length=0;
+  }
   function setModel(root){
     if(modelRoot){ modelRoot.traverse(o=>{ if(o.isMesh && o.geometry) o.geometry.dispose(); }); body.remove(modelRoot); }
     clearMarkers(); modelRoot=root;
@@ -8669,17 +8891,17 @@ async function verwijderVoorbeelden() {
     const token = ++loadToken;
     const node=document.getElementById(currentGender==="vrouw" ? "model-female" : "model-male");
     const b64=node ? node.textContent.trim() : "";
-    if(!b64){ toast("Geen 3D-model gevonden"); return; }
-    toast(currentGender==="vrouw" ? "Vrouwmodel laden\u2026" : "Manmodel laden\u2026");
+    if(!b64){ toast(tr('ui.geen_model')); return; }
+    toast(currentGender==="vrouw" ? tr('ui.vrouw_laden') : tr('ui.man_laden'));
     showLoading(true);
     try{
       loader.parse(b64ToBuffer(b64),"",gltf=>{
         if(token!==loadToken) return;            // verouderd: er is intussen iets anders gekozen
         setModel(gltf.scene||gltf.scenes[0]);
-        toast("Klaar \u2014 dubbeltik op de huid");
+        toast(tr('ui.klaar_dubbeltik'));
         Promise.resolve(restore3D(token)).finally(()=>{ if(token===loadToken) showLoading(false); });
-      }, err=>{ console.error(err); toast("Model laden mislukt"); showLoading(false); });
-    }catch(e){ console.error(e); toast("Model laden mislukt"); showLoading(false); }
+      }, err=>{ console.error(err); toast(tr('ui.model_mislukt')); showLoading(false); });
+    }catch(e){ console.error(e); toast(tr('ui.model_mislukt')); showLoading(false); }
   }
 
   /* ---- zones ---- */
@@ -8749,9 +8971,29 @@ async function verwijderVoorbeelden() {
     return markers.find(m=>m.obj===hits[0].object) || null;
   }
   function dblAt(x,y){
+    if(plaatsModus){ plaatsNieuwe(x,y); return; }
     const m=pickDecal(x,y);
-    if(m){ enterEditDecal(m); return; }          // bestaande tattoo -> aanpassen
-    const s=surfaceAt(x,y); if(s) openCutModal(s.point,s.normal,s.mesh);
+    if(m){ enterEditDecal(m); return; }          // bestaande tattoo -> bewerken
+    // lege huid: niets; toevoegen gaat via de + knop
+  }
+  async function plaatsNieuwe(x,y){
+    if(!plaatsData){ plaatsModus=false; verbergBanner(); return; }
+    const s=surfaceAt(x,y); if(!s){ toast(tr('ui.klik_plaatsen')); return; }
+    const d=plaatsData; const rot=0, size=0.09;
+    const obj=makeImage(s.point,s.normal,rot,size,d.tex,s.mesh);
+    if(!obj){ toast(tr('ui.plaatsen_mislukt')); return; }
+    const nz=nearestZone(s.point);
+    const rec=createTattoo(Object.assign({ naam:d.naam, status:"gezet", zijde:nz.side, lichaamsdeel:nz.zone,
+      positie3d:{ point:[s.point.x,s.point.y,s.point.z], normal:[s.normal.x,s.normal.y,s.normal.z],
+                  rot, size, gender:currentGender, zone:nz.zone, side:nz.side },
+      kunst3d:d.kunst3d }, d.info));
+    sync2D(rec, s.point, nz.side, rot, size, d.tex);
+    try{ await saveTattoo(rec); }catch(e){ console.error(e); toast(tr('toast.opslaanmislukt')+(e&&e.message?e.message:tr('ui.fout'))); }
+    if(typeof tattoos!=="undefined" && Array.isArray(tattoos)) tattoos.push(rec);
+    const m={ id:rec.id, rec, obj, point:s.point.clone(), normal:s.normal.clone(), mesh:s.mesh, rot, size, tex:d.tex };
+    markers.push(m); plaatsData=null; plaatsModus=false; verbergBanner();
+    if(typeof renderMarkers==="function"){ try{renderMarkers();}catch(_){} }
+    toast(tr('ui.tattoo_geplaatst')); enterEditDecal(m);
   }
 
   /* ---- aanpas-modus voor een geplaatste tattoo ---- */
@@ -8767,7 +9009,7 @@ async function verwijderVoorbeelden() {
     const eb=document.getElementById("editbar"); if(eb)eb.classList.add("on");
     const h=document.getElementById("hint"); if(h)h.style.display="none";
     setLockUI(); showSel(true);
-    toast("Aanpassen: sleep om te verplaatsen \u00b7 scroll/knijp om te schalen");
+    toast(tr('ui.aanpas_hint'));
   }
   function exitEditDecal(){
     const m=editDecal; editDecal=null; showSel(false);
@@ -8844,7 +9086,7 @@ async function verwijderVoorbeelden() {
   }
   async function removeEditDecal(){
     const m=editDecal; if(!m) return;
-    const ok=await askConfirm("Weet je zeker dat je deze tattoo wilt verwijderen?");
+    const ok=await askConfirm(tr('ui.verwijder_bevestig'));
     if(!ok || editDecal!==m) return;
     clearTimeout(persistT);                 // voorkom dat een nog lopende save de tattoo terugzet
     showSel(false);
@@ -8860,7 +9102,7 @@ async function verwijderVoorbeelden() {
       }
       if(typeof renderMarkers==="function"){ try{renderMarkers();}catch(_){} }   // 2D-kaart bijwerken
     }catch(e){ console.error(e); } })();
-    toast("Tattoo verwijderd");
+    toast(tr('ui.tattoo_verwijderd'));
   }
   function setLockUI(){
     const eb=document.getElementById("editbar"); if(!eb) return;
@@ -8876,7 +9118,7 @@ async function verwijderVoorbeelden() {
       if(a==="recrop"){ if(editDecal) openCutModalForEdit(editDecal); return; }
       if(a==="del"){ removeEditDecal(); return; }
       if(a==="lock"){ if(editDecal){ editDecal.locked=!editDecal.locked; setLockUI();
-        toast(editDecal.locked?"Tattoo vergrendeld":"Tattoo ontgrendeld"); persistEdit(editDecal); } return; }
+        toast(editDecal.locked?tr('ui.vergrendeld'):tr('ui.ontgrendeld')); persistEdit(editDecal); } return; }
       if(a==="size-"){ if(editDecal&&!editDecal.locked){ scaleDecal(0.85); persistEdit(editDecal); } return; }
       if(a==="size+"){ if(editDecal&&!editDecal.locked){ scaleDecal(1.18); persistEdit(editDecal); } return; }
       if(a==="rot-"){ if(editDecal&&!editDecal.locked){ rotateDecal(-15); persistEdit(editDecal); } return; }
@@ -8901,7 +9143,10 @@ async function verwijderVoorbeelden() {
     el.addEventListener("pointerup",e=>{ if(e.pointerType==="touch")return;
       if(editDecal){ const did=moved; drag=false; if(did) persistEdit(editDecal); return; }
       const wasTap=!moved && performance.now()-t0<TAP_MS; drag=false;
-      if(wasTap){ clearTimeout(tapTimer); tapTimer=setTimeout(()=>focusAt(e.clientX,e.clientY),300); }});
+      if(wasTap){
+        if(plaatsModus){ clearTimeout(tapTimer); plaatsNieuwe(e.clientX,e.clientY); return; }
+        clearTimeout(tapTimer); tapTimer=setTimeout(()=>focusAt(e.clientX,e.clientY),300);
+      }});
     el.addEventListener("dblclick",e=>{ clearTimeout(tapTimer); dblAt(e.clientX,e.clientY); });
     el.addEventListener("wheel",e=>{ e.preventDefault();
       if(editDecal && surfaceAt(e.clientX,e.clientY)){ scaleDecal(1-e.deltaY*0.001); persistEdit(editDecal); return; }
@@ -8925,7 +9170,9 @@ async function verwijderVoorbeelden() {
     el.addEventListener("touchend",e=>{
       const ct=e.changedTouches[0], wasTap=drag&&!moved&&performance.now()-t0<TAP_MS;
       if(editDecal){ const did=moved; drag=false;pinchD=0;pinchA=null;pinchMid=null;pinchModel=false; if(did||!wasTap) persistEdit(editDecal); return; }
-      if(wasTap&&ct){ const now=performance.now();
+      if(wasTap&&ct){
+        if(plaatsModus){ clearTimeout(tapTimer); plaatsNieuwe(ct.clientX,ct.clientY); lastTapT=0; drag=false;pinchD=0;pinchMid=null; return; }
+        const now=performance.now();
         if(now-lastTapT<320){ clearTimeout(tapTimer); dblAt(ct.clientX,ct.clientY); lastTapT=0; drag=false;pinchD=0;pinchMid=null; return; }
         lastTapT=now; clearTimeout(tapTimer); tapTimer=setTimeout(()=>focusAt(ct.clientX,ct.clientY),330); }
       drag=false;pinchD=0;pinchA=null;pinchMid=null;pinchModel=false;});
@@ -8940,7 +9187,26 @@ async function verwijderVoorbeelden() {
   let bgPickMode=false;   // pipet actief: volgende tik op de preview kiest de kleur
   let setBgPick=(c)=>{ bgPick=c; };   // wordt in bindCutUI vervangen (incl. swatch-update)
   let origImg=null, lassoPts=[], drawing=false, baseCanvas=null, imgTexture=null;
-  let pendingPlace=null, pendingEdit=null, pendingPlace2D=null;
+  let pendingPlace=null, pendingEdit=null, pendingPlace2D=null, pendingEdit2D=null;
+  let pendingNew=null, plaatsModus=false, plaatsData=null, addDoel='3d';   // nieuwe toevoeg-flow (via +); doel = '2d' of '3d'
+  function toonInfo(b){ const e=document.getElementById("cmInfo"); if(e) e.hidden=!b; }
+  function resetInfo(){
+    ["cmNaam","cmArtiest","cmStudio","cmStijl","cmKosten","cmDatum"].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=""; });
+    const m=document.getElementById("cmMeer"); if(m) m.hidden=true;
+  }
+  function toonBanner(txt){ const b=document.getElementById("t3d-banner"); if(b){ b.textContent=txt; b.hidden=false; } }
+  function verbergBanner(){ const b=document.getElementById("t3d-banner"); if(b) b.hidden=true; }
+  function openCutModalAdd(doel){
+    addDoel = doel || '3d';
+    pendingNew=true; pendingPlace=null; pendingEdit=null; pendingPlace2D=null;
+    origImg=null; lassoPts=[]; imgTexture=null; baseCanvas=null;
+    bgPickMode=false; setBgPick(null); if(bgPickBtn)bgPickBtn.classList.remove("on");
+    if(cutSpread) cutSpread.value=55;
+    cmTitle.textContent=tr('ui.tattoo_toevoegen'); cmPlaceBtn.textContent=tr('ui.toevoegen');
+    resetInfo(); toonInfo(false);
+    cutModal.classList.add("on"); toonCutInstellingen(false);
+    drawPreview(null); drawLasso();
+  }
 
   // Toon de uitsnede-instellingen (preview, sliders, achtergrond) pas na een foto
   function toonCutInstellingen(b){
@@ -8953,17 +9219,17 @@ async function verwijderVoorbeelden() {
     origImg=null; lassoPts=[]; imgTexture=null; baseCanvas=null;
     bgPickMode=false; setBgPick(null); if(bgPickBtn)bgPickBtn.classList.remove("on");
     if(cutSpread) cutSpread.value=55;
-    cmTitle.textContent="Tattoo toevoegen"; cmPlaceBtn.textContent="Tattoo toevoegen";
+    cmTitle.textContent=tr('ui.tattoo_toevoegen'); cmPlaceBtn.textContent=tr('ui.tattoo_toevoegen');
     cutModal.classList.add("on"); toonCutInstellingen(false);
     drawPreview(null); drawLasso();
   }
   // Heropen het uitsnede-scherm voor een bestaande tattoo (bijknippen + achtergrond)
   function openCutModalForEdit(m){
     const k = m && m.rec && m.rec.kunst3d;
-    if(!k || !k.srcUrl){ toast("Geen originele foto bewaard voor deze tattoo"); return; }
+    if(!k || !k.srcUrl){ toast(tr('ui.geen_foto_bewaard')); return; }
     pendingPlace=null; pendingEdit=m; pendingPlace2D=null;
     origImg=null; imgTexture=null; baseCanvas=null; lassoPts=[];
-    cmTitle.textContent="Tattoo aanpassen"; cmPlaceBtn.textContent="Opslaan";
+    cmTitle.textContent=tr('ui.tattoo_aanpassen'); cmPlaceBtn.textContent=tr('form.opslaan');
     bgRemove.checked = (k.bg!==false);
     if(k.thresh!=null) cutThresh.value=k.thresh;
     if(cutSpread) cutSpread.value=(k.spread!=null?k.spread:55);
@@ -8973,11 +9239,30 @@ async function verwijderVoorbeelden() {
     drawPreview(null); drawLasso();
     const im=new Image();
     im.onload=()=>{ origImg=im; lassoPts=(k.lasso||[]).slice(); toonCutInstellingen(true); rebuildBase(); updateCutout(); drawLasso();
-      toast("Pas de uitsnede aan en sla op"); };
-    im.onerror=()=>toast("Kon de foto niet laden");
+      toast(tr('ui.pas_aan_sla_op')); };
+    im.onerror=()=>toast(tr('ui.foto_niet_geladen'));
     im.src=k.srcUrl;
   }
-  function closeCutModal(){ cutModal.classList.remove("on"); pendingPlace=null; pendingEdit=null; pendingPlace2D=null; toonCutInstellingen(false);
+  // 2D: opnieuw uitsnijden voor een bestaande 2D-tattoo (sleutel-knop in de 2D-editbar)
+  function openCutModalForEdit2D(rec){
+    const k = rec && rec.kunst3d;
+    if(!k || !k.srcUrl){ toast(tr('ui.geen_foto_bewaard')); return; }
+    pendingPlace=null; pendingEdit=null; pendingPlace2D=null; pendingNew=null; pendingEdit2D=rec;
+    origImg=null; imgTexture=null; baseCanvas=null; lassoPts=[];
+    cmTitle.textContent=tr('ui.tattoo_aanpassen'); cmPlaceBtn.textContent=tr('form.opslaan');
+    bgRemove.checked=(k.bg!==false);
+    if(k.thresh!=null) cutThresh.value=k.thresh;
+    if(cutSpread) cutSpread.value=(k.spread!=null?k.spread:55);
+    bgPickMode=false; if(bgPickBtn)bgPickBtn.classList.remove("on");
+    setBgPick(k.bgColor ? {r:k.bgColor.r,g:k.bgColor.g,b:k.bgColor.b} : null);
+    cutModal.classList.add("on"); toonCutInstellingen(false); toonInfo(false);
+    drawPreview(null); drawLasso();
+    const im=new Image();
+    im.onload=()=>{ origImg=im; lassoPts=(k.lasso||[]).slice(); toonCutInstellingen(true); rebuildBase(); updateCutout(); drawLasso(); toast(tr('ui.pas_aan_sla_op')); };
+    im.onerror=()=>toast(tr('ui.foto_niet_geladen'));
+    im.src=k.srcUrl;
+  }
+  function closeCutModal(){ cutModal.classList.remove("on"); pendingPlace=null; pendingEdit=null; pendingPlace2D=null; pendingNew=null; pendingEdit2D=null; toonCutInstellingen(false); toonInfo(false);
     if(imgTexture && imgTexture.dispose){ imgTexture.dispose(); } imgTexture=null;   // niet-geplaatste textuur vrijgeven (geen lek)
   }
   // 2D: open dezelfde uitsnede-modal voor een dubbeltik op de 2D-kaart
@@ -8986,7 +9271,7 @@ async function verwijderVoorbeelden() {
     origImg=null; lassoPts=[]; imgTexture=null; baseCanvas=null;
     bgPickMode=false; setBgPick(null); if(bgPickBtn)bgPickBtn.classList.remove("on");
     if(cutSpread) cutSpread.value=55;
-    cmTitle.textContent="Tattoo toevoegen"; cmPlaceBtn.textContent="Tattoo toevoegen";
+    cmTitle.textContent=tr('ui.tattoo_toevoegen'); cmPlaceBtn.textContent=tr('ui.tattoo_toevoegen');
     cutModal.classList.add("on"); toonCutInstellingen(false);
     drawPreview(null); drawLasso();
   }
@@ -9151,12 +9436,18 @@ async function verwijderVoorbeelden() {
     document.getElementById("cmCancel").onclick=closeCutModal;
     document.getElementById("cmCancel2").onclick=closeCutModal;
     document.getElementById("cropReset").onclick=()=>{ lassoPts=[]; drawLasso(); updateCutout(); };
+    const addBtn=document.getElementById("t3d-add"); if(addBtn) addBtn.onclick=()=>openCutModalAdd('3d');
+    window.__tattiesAdd2D=()=>openCutModalAdd('2d');   // 2D-FAB opent dezelfde toevoeg-flow
+    window.__tattiesRecrop2D=(rec)=>openCutModalForEdit2D(rec);   // sleutel-knop 2D: opnieuw uitsnijden
+    window.__tattiesConfirm=askConfirm;                // gedeelde bevestig-dialoog (2D-verwijderen)
+    const meerBtn=document.getElementById("cmMeerBtn"); if(meerBtn) meerBtn.onclick=()=>{ const m=document.getElementById("cmMeer"); if(m) m.hidden=!m.hidden; };
 
     const laadFotoBestand=(input)=>{
       const f=input.files[0]; if(!f)return;
       const rd=new FileReader();
       rd.onload=ev=>{ const im=new Image(); im.onload=()=>{ origImg=im; lassoPts=[]; toonCutInstellingen(true); rebuildBase(); updateCutout();
-        toast("Teken een lijn rond de tattoo en stel de grenswaarde in"); }; im.src=ev.target.result; };
+        if(pendingNew) toonInfo(true);
+        toast(tr('ui.teken_lijn')); }; im.src=ev.target.result; };
       rd.readAsDataURL(f); input.value="";
     };
     imgInput.onchange=()=>laadFotoBestand(imgInput);
@@ -9178,7 +9469,7 @@ async function verwijderVoorbeelden() {
     if(bgPickBtn) bgPickBtn.onclick=()=>{
       bgPickMode=!bgPickMode;
       bgPickBtn.classList.toggle("on", bgPickMode);
-      toast(bgPickMode ? "Tik op de achtergrond in de foto" : "Pipet uit");
+      toast(bgPickMode ? tr('ui.tik_achtergrond') : tr('ui.pipet_uit'));
     };
     if(bgPickReset) bgPickReset.onclick=()=>{ bgPick=null; bgPickMode=false; if(bgPickBtn)bgPickBtn.classList.remove("on"); updateSwatch(); onCutChange(); };
     updateSwatch();
@@ -9218,7 +9509,42 @@ async function verwijderVoorbeelden() {
     });
 
     cmPlaceBtn.onclick=async ()=>{
-      if(!imgTexture){ toast("Kies eerst een foto en knip de tattoo uit"); return; }
+      if(!imgTexture){ toast(tr('ui.kies_eerst_foto')); return; }
+      if(pendingEdit2D){
+        const rec=pendingEdit2D; cutModal.classList.remove("on"); pendingEdit2D=null;
+        const cv=imgTexture.image; const src=canvasToPNG(cv,700);
+        const aspect=(cv&&cv.width)?(cv.height/cv.width):1;
+        if(imgTexture && imgTexture.dispose) imgTexture.dispose(); imgTexture=null;
+        rec.kunst=rec.kunst||{}; rec.kunst.src=src; rec.kunst.aspect=aspect;
+        rec.kunst3d={ srcUrl:(origImg?origImg.src:null), lasso:lassoPts.slice(), thresh:+cutThresh.value,
+                 spread:(cutSpread?+cutSpread.value:55), bgColor:(bgPick?{r:bgPick.r,g:bgPick.g,b:bgPick.b}:null), bg:bgRemove.checked };
+        try{ await saveTattoo(rec); }catch(e){ console.error(e); toast(tr('toast.opslaanmislukt')+(e&&e.message?e.message:tr('ui.fout'))); }
+        if(typeof renderMarkers==="function"){ try{renderMarkers();}catch(_){} }
+        toast(tr('ui.tattoo_bijgewerkt'));
+        return;
+      }
+      if(pendingNew){
+        const naamEl=document.getElementById("cmNaam"); const naam=((naamEl&&naamEl.value)||"").trim();
+        if(!naam){ toast(tr('ui.naam_verplicht')); if(naamEl) naamEl.focus(); return; }
+        const v=id=>{ const el=document.getElementById(id); return el?el.value:""; };
+        const info={ artiest:v("cmArtiest").trim(), studio:v("cmStudio").trim(), stijl:v("cmStijl").trim(),
+                 kosten:Math.max(0,parseFloat(v("cmKosten"))||0), datum:v("cmDatum") };
+        const kunst3d={ srcUrl:(origImg?origImg.src:null), lasso:lassoPts.slice(), thresh:+cutThresh.value,
+                 spread:(cutSpread?+cutSpread.value:55), bgColor:(bgPick?{r:bgPick.r,g:bgPick.g,b:bgPick.b}:null), bg:bgRemove.checked };
+        if(addDoel==='2d'){
+          const cv=imgTexture.image; const src=canvasToPNG(cv,700);
+          const aspect=(cv&&cv.width)?(cv.height/cv.width):1;
+          if(imgTexture && imgTexture.dispose) imgTexture.dispose(); imgTexture=null;
+          cutModal.classList.remove("on"); pendingNew=null; toonCutInstellingen(false); toonInfo(false);
+          if(typeof window.__tattiesStartPlaats2D==='function') window.__tattiesStartPlaats2D({ naam, info, kunst3d, src, aspect });
+          return;
+        }
+        plaatsData={ tex:imgTexture, naam, info, kunst3d };
+        imgTexture=null;   // eigendom gaat naar plaatsData; geen dispose
+        cutModal.classList.remove("on"); pendingNew=null; toonCutInstellingen(false); toonInfo(false);
+        plaatsModus=true; toonBanner(tr('ui.klik_plaatsen'));
+        return;
+      }
       if(pendingPlace2D){
         const pp=pendingPlace2D; cutModal.classList.remove("on"); pendingPlace2D=null;
         const cv=imgTexture.image;
@@ -9234,9 +9560,9 @@ async function verwijderVoorbeelden() {
           await saveTattoo(rec);
           if(typeof tattoos!=="undefined" && Array.isArray(tattoos)) tattoos.push(rec);
           if(typeof renderMarkers==="function"){ try{renderMarkers();}catch(_){} }
-          toast("Tattoo geplaatst \u2713");
+          toast(tr('ui.tattoo_geplaatst'));
           if(typeof openFormulier==="function"){ openFormulier(rec.id); }
-        }catch(err){ console.error(err); toast("Opslaan mislukt: "+(err&&err.message?err.message:"fout")); }
+        }catch(err){ console.error(err); toast(tr('toast.opslaanmislukt')+(err&&err.message?err.message:tr('ui.fout'))); }
         if(imgTexture && imgTexture.dispose){ imgTexture.dispose(); } imgTexture=null;   // 2D gebruikt de PNG, niet de live textuur
         return;
       }
@@ -9246,8 +9572,8 @@ async function verwijderVoorbeelden() {
         m.tex=imgTexture; rebuildMarker(m);
         if(m.rec){
           m.rec.kunst3d={ srcUrl:(origImg?origImg.src:null), lasso:lassoPts.slice(), thresh:+cutThresh.value, spread:(cutSpread?+cutSpread.value:55), bgColor:(bgPick?{r:bgPick.r,g:bgPick.g,b:bgPick.b}:null), bg:bgRemove.checked };
-          try{ await saveTattoo(m.rec); toast("Tattoo bijgewerkt \u2713"); }
-          catch(err){ console.error(err); toast("Opslaan mislukt: "+(err&&err.message?err.message:"fout")); }
+          try{ await saveTattoo(m.rec); toast(tr('ui.tattoo_bijgewerkt')); }
+          catch(err){ console.error(err); toast(tr('toast.opslaanmislukt')+(err&&err.message?err.message:tr('ui.fout'))); }
         }
         if(typeof renderMarkers==="function"){ try{renderMarkers();}catch(_){} }
         imgTexture=null;   // marker bezit de textuur nu
@@ -9257,7 +9583,7 @@ async function verwijderVoorbeelden() {
       const pp=pendingPlace; cutModal.classList.remove("on"); pendingPlace=null;
       const rot=0, size=0.09;
       const obj=makeImage(pp.point, pp.normal, rot, size, imgTexture, pp.mesh);
-      if(!obj){ toast("Plaatsen mislukt"); return; }
+      if(!obj){ toast(tr('ui.plaatsen_mislukt')); return; }
       const nz=nearestZone(pp.point);
       try{
         const rec=createTattoo({
@@ -9275,7 +9601,7 @@ async function verwijderVoorbeelden() {
         imgTexture=null;   // marker bezit de textuur nu; voorkom dispose door volgende updateCutout
         if(typeof renderMarkers==="function"){ try{renderMarkers();}catch(_){} }
         enterEditDecal(m);   // direct in aanpasmodus: meteen schalen/verplaatsen/roteren
-      }catch(err){ console.error(err); toast("Opslaan mislukt: "+(err&&err.message?err.message:"fout")); }
+      }catch(err){ console.error(err); toast(tr('toast.opslaanmislukt')+(err&&err.message?err.message:tr('ui.fout'))); }
     };
   }
 
@@ -9362,7 +9688,7 @@ async function verwijderVoorbeelden() {
       }
     }
     if(typeof renderMarkers==="function"){ try{renderMarkers();}catch(_){} }
-    if(n) toast(n+" tattoo"+(n>1?"s":"")+" hersteld");
+    if(n) toast(tr('ui.hersteld').replace('{n}',n).replace('{s}',n>1?'s':''));
   }
 
   /* ---- render-lus ---- */
