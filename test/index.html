@@ -6038,7 +6038,7 @@ form label{text-transform:none;letter-spacing:.005em;font-size:.8rem;color:var(-
    I18N — taalondersteuning (Nederlands / Engels)
    tr() = vertaalfunctie (NIET t(): 't' is overal de tattoo-variabele)
    ============================================================ */
-let taal = 'nl';
+let taal = 'en';   // standaardtaal Engels; localStorage-voorkeur overschrijft dit
 try { const _o = localStorage.getItem('tatties-taal'); if (_o === 'nl' || _o === 'en') taal = _o; } catch { /* geen voorkeur */ }
 let huidigeView = 'home';
 
