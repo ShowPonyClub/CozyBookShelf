@@ -436,6 +436,34 @@ dl.toon-leeg .veldrij.leeg-veld{display:flex}
 /* Collectiekaart: datum + pijn */
 .tcard .info .kaart-datum{font-size:.78rem;color:var(--gedempt);margin:2px 0 0}
 .tcard .info .kaart-pijn{margin:3px 0 0}
+/* Startscherm */
+#view-start{max-width:560px;margin:0 auto}
+.start-wrap{display:flex;flex-direction:column;gap:16px;padding:6px 0 28px}
+.start-hero{text-align:center;margin-top:6px}
+.start-titel{margin:0;font-size:1.55rem;font-weight:800}
+.start-tagline{margin:4px 0 0;color:var(--gedempt);font-family:var(--serif);letter-spacing:.03em}
+.start-cta{width:100%;padding:16px;font-size:1.05rem;font-weight:700;border:0;border-radius:var(--radius);
+  background:var(--accent);color:#fff;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.18)}
+.start-cta:hover{filter:brightness(1.05)}
+.start-stats{display:flex;gap:10px}
+.start-stat{flex:1;background:var(--kaart);border:1px solid var(--rand);border-radius:var(--radius);padding:14px 8px;text-align:center}
+.start-stat-getal{display:block;font-size:1.3rem;font-weight:800;color:var(--accent-diep)}
+.start-stat-label{display:block;font-size:.72rem;text-transform:uppercase;letter-spacing:.06em;color:var(--gedempt);margin-top:4px}
+.start-leeg{margin:0;color:var(--gedempt);text-align:center;padding:8px 0}
+.start-tegels{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.start-tegel{padding:16px;font-size:.95rem;font-weight:600;background:var(--kaart);border:1px solid var(--rand);
+  border-radius:var(--radius);color:var(--tekst);cursor:pointer;text-align:center}
+.start-tegel:hover{border-color:var(--accent)}
+.start-recent{display:flex;flex-direction:column;gap:8px}
+.start-recent-item{display:flex;align-items:center;gap:12px;width:100%;text-align:left;padding:8px;
+  background:var(--kaart);border:1px solid var(--rand);border-radius:var(--radius);color:var(--tekst);cursor:pointer}
+.start-recent-item:hover{border-color:var(--accent)}
+.start-recent-item .sri-thumb{width:44px;height:44px;flex:none;border-radius:10px;background:#f3ece0;
+  display:flex;align-items:center;justify-content:center;font-weight:800;overflow:hidden;color:#5b5142}
+.start-recent-item .sri-thumb img{width:100%;height:100%;object-fit:cover}
+.start-recent-item .sri-naam{font-weight:700}
+.start-recent-item .sri-zone{margin-left:auto;color:var(--gedempt);font-size:.85rem}
+.merk{cursor:pointer}
 
 /* ---- Tabs ---- */
 .tabs{display:flex;gap:2px;margin-bottom:14px;border-bottom:1px solid var(--rand)}
@@ -785,6 +813,8 @@ form label,
 .cutmodal .linkbtn{background:transparent;border:0;color:var(--gedempt);font-size:11px;text-decoration:underline;cursor:pointer;font-family:inherit;white-space:nowrap;}
 .cutmodal .linkbtn:hover{color:var(--accent);}
 .cutmodal .bgrow{justify-content:flex-start;margin-top:6px;}
+.cutmodal .bg-controls{justify-content:flex-start;flex-wrap:wrap;gap:8px 16px;margin:8px 0;}
+.cutmodal .cut-tools{justify-content:flex-start;flex-wrap:wrap;gap:8px 16px;}
 .cutmodal .linkbtn.on{color:var(--accent);font-weight:600;}
 .cutmodal .bgswatch{width:18px;height:18px;border-radius:4px;border:1px solid var(--rand);visibility:hidden;flex:0 0 auto;}
 .cutmodal .chk{display:flex;align-items:center;gap:7px;font-size:12px;color:var(--gedempt);margin-top:8px;cursor:pointer;}
@@ -892,14 +922,35 @@ form label{text-transform:none;letter-spacing:.005em;font-size:.8rem;color:var(-
   <div class="kop-knoppen">
     <button class="icoonknop" id="btn-3d" aria-label="3D-weergave" title="3D-weergave" style="font-weight:700;font-size:13px">3D</button>
     <button class="icoonknop" id="btn-2d" aria-label="2D-kaart" title="2D-kaart" style="font-weight:700;font-size:13px">2D</button>
-    <button class="icoonknop" id="btn-instellingen" data-i18n-aria="aria.instellingen" data-i18n-title="aria.instellingen" aria-label="Instellingen" title="Instellingen"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"/></svg></button>
     <button class="icoonknop" id="btn-collectie" data-i18n-aria="aria.collectie" data-i18n-title="aria.collectie" aria-label="Collectie en wishlist" title="Collectie en wishlist"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/><circle cx="2.5" cy="6" r="0.6" fill="currentColor" stroke="none"/><circle cx="2.5" cy="12" r="0.6" fill="currentColor" stroke="none"/><circle cx="2.5" cy="18" r="0.6" fill="currentColor" stroke="none"/></svg></button>
     <button class="icoonknop" id="btn-stats" data-i18n-aria="aria.stats" data-i18n-title="aria.stats" aria-label="Statistieken" title="Statistieken"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 20V11M12 20V4M19 20v-7"/></svg></button>
+    <button class="icoonknop" id="btn-instellingen" data-i18n-aria="aria.instellingen" data-i18n-title="aria.instellingen" aria-label="Instellingen" title="Instellingen"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"/></svg></button>
   </div>
 </header>
 
 <main>
-  <!-- ===================== STARTSCHERM ===================== -->
+  <!-- ===================== START / LANDINGSSCHERM ===================== -->
+  <section id="view-start" hidden>
+    <div class="start-wrap">
+      <div class="start-hero">
+        <h2 class="start-titel" data-i18n="start.titel">Welkom terug</h2>
+        <p class="start-tagline" data-i18n="start.tagline">show me your tatties</p>
+      </div>
+      <button type="button" class="start-cta" id="start-nieuw" data-i18n="start.nieuw">+ Nieuwe tattoo</button>
+      <div class="start-stats" id="start-stats"></div>
+      <div class="start-tegels">
+        <button type="button" class="start-tegel" data-ga="3d" data-i18n="start.tegel3d">3D-model</button>
+        <button type="button" class="start-tegel" data-ga="2d" data-i18n="start.tegel2d">2D-kaart</button>
+        <button type="button" class="start-tegel" data-ga="collectie" data-i18n="start.tegelcol">Collectie</button>
+        <button type="button" class="start-tegel" data-ga="stats" data-i18n="start.tegelstats">Statistieken</button>
+      </div>
+      <div class="start-recent-blok" id="start-recent-blok" hidden>
+        <p class="sectiekop" data-i18n="start.recent">Recent toegevoegd</p>
+        <div class="start-recent" id="start-recent"></div>
+      </div>
+    </div>
+  </section>
+  <!-- ===================== 2D-KAART ===================== -->
   <section id="view-home">
     <div class="kaart-layout">
       <div id="bodymap-wrap">
@@ -1080,19 +1131,22 @@ form label{text-transform:none;letter-spacing:.005em;font-size:.8rem;color:var(-
           <div id="cmSettings" hidden>
             <span class="hintline" style="display:block;margin:0 0 6px" data-i18n="ui.cut_hint">Teken met je vinger of muis een lijn rond de tattoo om hem uit te knippen.</span>
             <div class="cm-prev" id="cutPrev"><canvas id="cutCanvas" class="cutcv"></canvas><canvas id="lassoCanvas" class="lassocv"></canvas></div>
-            <label class="chk" style="display:inline-flex;margin:8px 0"><input type="checkbox" id="bgRemove"> <span data-i18n="ui.achtergrond_weghalen">Achtergrond weghalen</span></label>
-            <div class="cutrow" style="justify-content:flex-end">
+            <div class="cutrow bg-controls">
+              <label class="chk" style="display:inline-flex;margin:0"><input type="checkbox" id="bgRemove"> <span data-i18n="ui.achtergrond_weghalen">Achtergrond weghalen</span></label>
+              <button id="bgPickBtn" class="linkbtn">&#128167; <span data-i18n="ui.achtergrondkleur">Achtergrondkleur kiezen</span></button>
+              <span id="bgSwatch" class="bgswatch" title="gekozen achtergrondkleur"></span>
+              <button id="bgPickReset" class="linkbtn" data-i18n="ui.auto">Auto</button>
+            </div>
+            <div class="cutrow cut-tools">
+              <button id="spiegelBtn" class="linkbtn">&#8644; <span data-i18n="ui.spiegelen">Spiegelen</span></button>
+              <button id="wandBtn" class="linkbtn">&#129668; <span data-i18n="ui.toverstaf">Toverstaf</span></button>
+              <button id="lassoUndo" class="linkbtn">&#8617; <span data-i18n="ui.ongedaan">Ongedaan</span></button>
               <button id="cropReset" class="linkbtn" data-i18n="ui.reset_uitsnede">Reset uitsnede</button>
             </div>
             <div class="label" data-i18n="ui.gevoeligheid">Gevoeligheid &mdash; sleep tot de achtergrond weg is</div>
             <input id="cutThresh" type="range" min="60" max="252" value="200" class="slider" data-i18n-aria="ui.gevoeligheid" aria-label="Gevoeligheid">
             <div class="label" data-i18n="ui.zachte_randen">Zachte randen meenemen</div>
             <input id="cutSpread" type="range" min="0" max="160" value="55" class="slider" data-i18n-aria="ui.zachte_randen" aria-label="Zachte randen meenemen">
-            <div class="cutrow bgrow">
-              <button id="bgPickBtn" class="linkbtn">&#128167; <span data-i18n="ui.achtergrondkleur">Achtergrondkleur kiezen</span></button>
-              <span id="bgSwatch" class="bgswatch" title="gekozen achtergrondkleur"></span>
-              <button id="bgPickReset" class="linkbtn" data-i18n="ui.auto">Auto</button>
-            </div>
           </div>
         </div>
         <div class="cm-foot">
@@ -6041,9 +6095,14 @@ const I18N = {
     'sub.collectie':'Al je gezette tattoos en je wishlist op één plek — zoek en sorteer ze hier.',
     'sub.stats':'Een overzicht van je collectie in cijfers — aantallen, kosten, stijlen en meer.',
     'feedback':'show me your tatties · stuur mij alle eerlijke feedback',
+    'start.titel':'Welkom terug','start.tagline':'show me your tatties','start.nieuw':'+ Nieuwe tattoo',
+    'start.stat_aantal':'Tattoos','start.leeg':'Nog geen tattoos — voeg je eerste toe.','start.recent':'Recent toegevoegd',
+    'start.tegel3d':'3D-model','start.tegel2d':'2D-kaart','start.tegelcol':'Collectie','start.tegelstats':'Statistieken',
     'ui.foto_maken':'Foto maken','ui.foto_uploaden':'Foto uploaden','ui.foto_toevoegen':'Foto/tattoo toevoegen','ui.andere_foto':'Andere foto','ui.plaatsen':'Plaatsen',
-    'ui.reset_uitsnede':'Reset uitsnede','ui.achtergrond_weghalen':'Achtergrond weghalen',
-    'ui.cut_hint':'Teken met je vinger of muis een lijn rond de tattoo om hem uit te knippen.',
+    'ui.reset_uitsnede':'Reset uitsnede','ui.spiegelen':'Spiegelen','ui.achtergrond_weghalen':'Achtergrond weghalen',
+    'ui.toverstaf':'Toverstaf','ui.ongedaan':'Ongedaan',
+    'ui.tik_uitknippen':'Tik op het deel dat je wilt weghalen','ui.toverstaf_uit':'Toverstaf uit',
+    'ui.cut_hint':'Tik rondom de tattoo om punten te plaatsen; sleep een punt om bij te stellen.',
     'ui.gevoeligheid':'Gevoeligheid — sleep tot de achtergrond weg is','ui.zachte_randen':'Zachte randen meenemen',
     'ui.achtergrondkleur':'Achtergrondkleur kiezen','ui.auto':'Auto',
     'ui.tattoo_toevoegen':'Tattoo toevoegen','ui.tattoo_aanpassen':'Tattoo aanpassen',
@@ -6178,9 +6237,14 @@ const I18N = {
     'sub.collectie':'All your done tattoos and your wishlist in one place — search and sort them here.',
     'sub.stats':'An overview of your collection in numbers — counts, costs, styles and more.',
     'feedback':'show me your tatties · send me all your honest feedback',
+    'start.titel':'Welcome back','start.tagline':'show me your tatties','start.nieuw':'+ New tattoo',
+    'start.stat_aantal':'Tattoos','start.leeg':'No tattoos yet — add your first.','start.recent':'Recently added',
+    'start.tegel3d':'3D model','start.tegel2d':'2D map','start.tegelcol':'Collection','start.tegelstats':'Statistics',
     'ui.foto_maken':'Take photo','ui.foto_uploaden':'Upload photo','ui.foto_toevoegen':'Add photo/tattoo','ui.andere_foto':'Other photo','ui.plaatsen':'Place',
-    'ui.reset_uitsnede':'Reset cut-out','ui.achtergrond_weghalen':'Remove background',
-    'ui.cut_hint':'Draw a line around the tattoo with your finger or mouse to cut it out.',
+    'ui.reset_uitsnede':'Reset cut-out','ui.spiegelen':'Mirror','ui.achtergrond_weghalen':'Remove background',
+    'ui.toverstaf':'Magic wand','ui.ongedaan':'Undo',
+    'ui.tik_uitknippen':'Tap the part you want to remove','ui.toverstaf_uit':'Magic wand off',
+    'ui.cut_hint':'Tap around the tattoo to place points; drag a point to adjust.',
     'ui.gevoeligheid':'Sensitivity — drag until the background is gone','ui.zachte_randen':'Include soft edges',
     'ui.achtergrondkleur':'Pick background colour','ui.auto':'Auto',
     'ui.tattoo_toevoegen':'Add tattoo','ui.tattoo_aanpassen':'Edit tattoo',
@@ -6678,12 +6742,14 @@ function toastMetActie(tekst, label, fn) {
 
 function toonView(naam) {
   huidigeView = naam;
+  $('#view-start').hidden = naam !== 'start';
   $('#view-home').hidden = naam !== 'home';
   $('#view-detail').hidden = naam !== 'detail';
   $('#view-form').hidden = naam !== 'form';
   $('#view-stats').hidden = naam !== 'stats';
   $('#view-collectie').hidden = naam !== 'collectie';
   $('#fab').hidden = naam !== 'home';
+  if (naam === 'start' && typeof renderStart === 'function') renderStart();
   // De 3D-stage wordt los van toonView beheerd; verberg hem bij elke host-view
   const _v3d = document.getElementById('view-3d');
   if (_v3d) _v3d.classList.add('verborgen');
@@ -6697,6 +6763,38 @@ function renderSamenvatting() {
   const wens  = tattoos.filter(t => t.status === 'wens').length;
   const c = $('#sv-collectie'); if (c) c.textContent = gezet;
   const w = $('#sv-wishlist');  if (w) w.textContent = wens;
+}
+
+/* Startscherm: mini-overzicht + recent toegevoegd */
+function renderStart() {
+  const statsEl = $('#start-stats');
+  const recentBlok = $('#start-recent-blok');
+  if (!statsEl) return;
+  if (!tattoos.length) {
+    statsEl.innerHTML = `<p class="start-leeg">${tr('start.leeg')}</p>`;
+    if (recentBlok) recentBlok.hidden = true;
+    return;
+  }
+  const gezet = tattoos.filter(t => t.status !== 'wens');
+  const totUren = gezet.reduce((s, t) =>
+    s + Math.max(Number(t.zituren) || 0, (t.sessies || []).reduce((a, x) => a + (Number(x.duurUren) || 0), 0)), 0);
+  const totKosten = gezet.reduce((s, t) => s + (Number(t.kosten) || 0), 0);
+  const cellen = [
+    { g: tattoos.length, l: tr('start.stat_aantal') },
+    { g: totUren + ' ' + tr('eenheid.uur'), l: tr('stats.zituren') },
+    { g: euro.format(totKosten), l: tr('stats.uitgegeven') },
+  ];
+  statsEl.innerHTML = cellen.map(s =>
+    `<div class="start-stat"><span class="start-stat-getal">${esc(String(s.g))}</span><span class="start-stat-label">${esc(s.l)}</span></div>`).join('');
+  const rec = $('#start-recent');
+  if (rec) {
+    rec.innerHTML = tattoos.slice(0, 3).map(t => {
+      const foto = hoofdFoto(t) || (t.kunst && t.kunst.src) || null;
+      const thumb = foto ? `<img src="${esc(foto)}" alt="">` : esc((String(t.naam ?? '') || '?').charAt(0).toUpperCase());
+      return `<button type="button" class="start-recent-item" data-id="${esc(t.id)}"><span class="sri-thumb">${thumb}</span><span class="sri-naam">${esc(t.naam)}</span><span class="sri-zone">${esc(zoneLabel(t.lichaamsdeel))}</span></button>`;
+    }).join('');
+  }
+  if (recentBlok) recentBlok.hidden = false;
 }
 
 async function herlaad() {
@@ -6723,6 +6821,7 @@ async function herlaad() {
   renderBodyMap();
   renderLijst();
   renderSamenvatting();
+  renderStart();
   toonOpslagInfo();
 }
 
@@ -8887,6 +8986,24 @@ async function verwijderVoorbeelden() {
   $('#btn-collectie').addEventListener('click', () => toonView('collectie'));
   $('#c-terug').addEventListener('click', () => toonView('home'));
   $('#btn-instellingen').addEventListener('click', openInstellingen);
+  // Startscherm: logo → terug naar start; tegels, CTA en recent-items
+  { const merk = document.querySelector('.merk'); if (merk) merk.addEventListener('click', () => toonView('start')); }
+  document.querySelectorAll('#view-start .start-tegel').forEach((b) =>
+    b.addEventListener('click', () => {
+      const ga = b.dataset.ga;
+      if (ga === '3d') $('#btn-3d').click();
+      else if (ga === '2d') $('#btn-2d').click();
+      else if (ga === 'collectie') toonView('collectie');
+      else if (ga === 'stats') openStats();
+    }));
+  { const cta = $('#start-nieuw'); if (cta) cta.addEventListener('click', () => {
+      let lv = '3d'; try { lv = localStorage.getItem('tatties-view') || '3d'; } catch (e) {}
+      if (lv === '2d') { $('#btn-2d').click(); setTimeout(() => { if (typeof window.__tattiesAdd2D === 'function') window.__tattiesAdd2D(); }, 60); }
+      else { $('#btn-3d').click(); setTimeout(() => { const a = $('#t3d-add'); if (a && a.onclick) a.onclick(); }, 60); }
+    }); }
+  { const rec = $('#start-recent'); if (rec) rec.addEventListener('click', (e) => {
+      const b = e.target.closest('.start-recent-item'); if (b) openDetail(b.dataset.id);
+    }); }
   $('#inst-sluit').addEventListener('click', sluitInstellingen);
   $('#inst-overlay').addEventListener('click', sluitInstellingen);
   document.querySelectorAll('#onb-geslacht button[data-onb-geslacht]').forEach((b) =>
@@ -9326,6 +9443,44 @@ async function verwijderVoorbeelden() {
   let bgPickMode=false;   // pipet actief: volgende tik op de preview kiest de kleur
   let setBgPick=(c)=>{ bgPick=c; };   // wordt in bindCutUI vervangen (incl. swatch-update)
   let origImg=null, lassoPts=[], drawing=false, baseCanvas=null, imgTexture=null;
+  let flipH=false;          // horizontaal spiegelen van de uitsnede
+  function zetSpiegelUI(){ const b=document.getElementById('spiegelBtn'); if(b) b.classList.toggle('on', flipH); }
+  let lassoDragIdx=-1;       // index van het lasso-punt dat versleept wordt (-1 = geen)
+  let wandMode=false;        // toverstaf actief: volgende tik knipt een aaneengesloten gebied weg
+  let wandSeeds=[];          // {nx,ny} klikpunten voor de toverstaf
+  const WAND_TOL2=7500;      // kleurtolerantie^2 (≈50/kanaal) voor de toverstaf
+  function zetWandUI(){ const b=document.getElementById('wandBtn'); if(b) b.classList.toggle('on', wandMode); }
+  // dichtstbijzijnde lasso-punt bij een pointer-event (in schermpixels), of -1
+  function lassoPuntBij(e){
+    if(!origImg||!lassoPts.length) return -1;
+    const b=cutPrev.getBoundingClientRect(), r=imgRectInBox(b.width,b.height,origImg.naturalWidth,origImg.naturalHeight);
+    const mx=e.clientX-b.left, my=e.clientY-b.top; let best=-1, bd=18*18;
+    for(let i=0;i<lassoPts.length;i++){ const X=r.left+lassoPts[i].nx*r.w, Y=r.top+lassoPts[i].ny*r.h; const dx=X-mx,dy=Y-my,dd=dx*dx+dy*dy; if(dd<bd){bd=dd;best=i;} }
+    return best;
+  }
+  // Toverstaf: knip vanaf elk klikpunt het aaneengesloten gebied weg dat qua kleur
+  // dicht bij de aangeklikte pixel ligt (zet alpha 0). Werkt los van 'achtergrond weghalen'.
+  function applyWand(x,W,H,seeds){
+    if(!seeds||!seeds.length) return;
+    const d=x.getImageData(0,0,W,H), p=d.data, N=W*H;
+    const visited=new Uint8Array(N), stack=new Int32Array(N);
+    for(const s of seeds){
+      const sxp=Math.min(W-1,Math.max(0,Math.round(s.nx*W))), syp=Math.min(H-1,Math.max(0,Math.round(s.ny*H)));
+      const si=syp*W+sxp; if(p[si*4+3]===0) continue;
+      const sr=p[si*4],sg=p[si*4+1],sb=p[si*4+2];
+      let sp=0; visited.fill(0); stack[sp++]=si; visited[si]=1;
+      while(sp>0){ const idx=stack[--sp], i4=idx*4;
+        if(p[i4+3]===0) continue;
+        const dr=p[i4]-sr,dg=p[i4+1]-sg,db=p[i4+2]-sb; if(dr*dr+dg*dg+db*db>WAND_TOL2) continue;
+        p[i4+3]=0; const xx=idx%W, yy=(idx/W)|0;
+        if(xx>0&&!visited[idx-1]){visited[idx-1]=1;stack[sp++]=idx-1;}
+        if(xx<W-1&&!visited[idx+1]){visited[idx+1]=1;stack[sp++]=idx+1;}
+        if(yy>0&&!visited[idx-W]){visited[idx-W]=1;stack[sp++]=idx-W;}
+        if(yy<H-1&&!visited[idx+W]){visited[idx+W]=1;stack[sp++]=idx+W;}
+      }
+    }
+    x.putImageData(d,0,0);
+  }
   let pendingPlace=null, pendingEdit=null, pendingPlace2D=null, pendingEdit2D=null;
   let pendingNew=null, plaatsModus=false, plaatsData=null, addDoel='3d';   // nieuwe toevoeg-flow (via +); doel = '2d' of '3d'
   function toonInfo(b){ const e=document.getElementById("cmInfo"); if(e) e.hidden=!b; }
@@ -9338,7 +9493,8 @@ async function verwijderVoorbeelden() {
   function openCutModalAdd(doel){
     addDoel = doel || '3d';
     pendingNew=true; pendingPlace=null; pendingEdit=null; pendingPlace2D=null;
-    origImg=null; lassoPts=[]; imgTexture=null; baseCanvas=null;
+    origImg=null; lassoPts=[]; imgTexture=null; baseCanvas=null; flipH=false; zetSpiegelUI();
+    wandSeeds=[]; wandMode=false; zetWandUI(); lassoDragIdx=-1;
     bgPickMode=false; setBgPick(null); if(bgPickBtn)bgPickBtn.classList.remove("on");
     if(cutSpread) cutSpread.value=55;
     cmTitle.textContent=tr('ui.tattoo_toevoegen'); cmPlaceBtn.textContent=tr('ui.toevoegen');
@@ -9357,7 +9513,8 @@ async function verwijderVoorbeelden() {
   }
   function openCutModal(point, normal, mesh){
     pendingPlace={point, normal, mesh}; pendingEdit=null; pendingPlace2D=null;
-    origImg=null; lassoPts=[]; imgTexture=null; baseCanvas=null;
+    origImg=null; lassoPts=[]; imgTexture=null; baseCanvas=null; flipH=false; zetSpiegelUI();
+    wandSeeds=[]; wandMode=false; zetWandUI(); lassoDragIdx=-1;
     bgPickMode=false; setBgPick(null); if(bgPickBtn)bgPickBtn.classList.remove("on");
     if(cutSpread) cutSpread.value=55;
     cmTitle.textContent=tr('ui.tattoo_toevoegen'); cmPlaceBtn.textContent=tr('ui.tattoo_toevoegen');
@@ -9369,7 +9526,8 @@ async function verwijderVoorbeelden() {
     const k = m && m.rec && m.rec.kunst3d;
     if(!k || !k.srcUrl){ toast(tr('ui.geen_foto_bewaard')); return; }
     pendingPlace=null; pendingEdit=m; pendingPlace2D=null;
-    origImg=null; imgTexture=null; baseCanvas=null; lassoPts=[];
+    origImg=null; imgTexture=null; baseCanvas=null; lassoPts=[]; flipH=!!k.flipH; zetSpiegelUI();
+    wandSeeds=(k.wand||[]).slice(); wandMode=false; zetWandUI(); lassoDragIdx=-1;
     cmTitle.textContent=tr('ui.tattoo_aanpassen'); cmPlaceBtn.textContent=tr('form.opslaan');
     bgRemove.checked = (k.bg!==false);
     if(k.thresh!=null) cutThresh.value=k.thresh;
@@ -9389,7 +9547,8 @@ async function verwijderVoorbeelden() {
     const k = rec && rec.kunst3d;
     if(!k || !k.srcUrl){ toast(tr('ui.geen_foto_bewaard')); return; }
     pendingPlace=null; pendingEdit=null; pendingPlace2D=null; pendingNew=null; pendingEdit2D=rec;
-    origImg=null; imgTexture=null; baseCanvas=null; lassoPts=[];
+    origImg=null; imgTexture=null; baseCanvas=null; lassoPts=[]; flipH=!!k.flipH; zetSpiegelUI();
+    wandSeeds=(k.wand||[]).slice(); wandMode=false; zetWandUI(); lassoDragIdx=-1;
     cmTitle.textContent=tr('ui.tattoo_aanpassen'); cmPlaceBtn.textContent=tr('form.opslaan');
     bgRemove.checked=(k.bg!==false);
     if(k.thresh!=null) cutThresh.value=k.thresh;
@@ -9409,7 +9568,8 @@ async function verwijderVoorbeelden() {
   // 2D: open dezelfde uitsnede-modal voor een dubbeltik op de 2D-kaart
   function openCutModal2D(x,y,zone,side){
     pendingPlace2D={x,y,zone,side}; pendingPlace=null; pendingEdit=null;
-    origImg=null; lassoPts=[]; imgTexture=null; baseCanvas=null;
+    origImg=null; lassoPts=[]; imgTexture=null; baseCanvas=null; flipH=false; zetSpiegelUI();
+    wandSeeds=[]; wandMode=false; zetWandUI(); lassoDragIdx=-1;
     bgPickMode=false; setBgPick(null); if(bgPickBtn)bgPickBtn.classList.remove("on");
     if(cutSpread) cutSpread.value=55;
     cmTitle.textContent=tr('ui.tattoo_toevoegen'); cmPlaceBtn.textContent=tr('ui.tattoo_toevoegen');
@@ -9498,8 +9658,12 @@ async function verwijderVoorbeelden() {
     const W=Math.max(1,Math.round(origImg.naturalWidth*sc));
     const H=Math.max(1,Math.round(origImg.naturalHeight*sc));
     const c=document.createElement("canvas"); c.width=W; c.height=H;
-    const x=c.getContext("2d",{willReadFrequently:true}); x.drawImage(origImg,0,0,W,H);
+    const x=c.getContext("2d",{willReadFrequently:true});
+    if(flipH){ x.translate(W,0); x.scale(-1,1); }
+    x.drawImage(origImg,0,0,W,H);
+    x.setTransform(1,0,0,1,0,0);
     if(bgRemove.checked) floodFillBg(x, W, H, +cutThresh.value, (cutSpread?+cutSpread.value:55), bgPick);
+    if(wandSeeds.length) applyWand(x, W, H, wandSeeds);
     return c;
   }
   function rebuildBase(){ baseCanvas = origImg ? buildFullCanvas() : null; }
@@ -9548,8 +9712,12 @@ async function verwijderVoorbeelden() {
     const r=imgRectInBox(cv.width,cv.height,origImg.naturalWidth,origImg.naturalHeight);
     ctx.beginPath();
     lassoPts.forEach((p,i)=>{ const X=r.left+p.nx*r.w, Y=r.top+p.ny*r.h; i?ctx.lineTo(X,Y):ctx.moveTo(X,Y); });
-    if(!drawing && lassoPts.length>=3){ ctx.closePath(); ctx.fillStyle="rgba(142,113,240,.14)"; ctx.fill(); }
+    if(lassoPts.length>=3){ ctx.closePath(); ctx.fillStyle="rgba(142,113,240,.14)"; ctx.fill(); }
     ctx.lineWidth=2; ctx.lineJoin="round"; ctx.strokeStyle="#8e71f0"; ctx.stroke();
+    // sleep-handles op elk punt
+    lassoPts.forEach((p,i)=>{ const X=r.left+p.nx*r.w, Y=r.top+p.ny*r.h;
+      ctx.beginPath(); ctx.arc(X,Y, i===lassoDragIdx?7:5, 0, Math.PI*2);
+      ctx.fillStyle="#8e71f0"; ctx.fill(); ctx.lineWidth=2; ctx.strokeStyle="#fff"; ctx.stroke(); });
   }
   function ptFrom(e){
     const b=cutPrev.getBoundingClientRect(), r=imgRectInBox(b.width,b.height,origImg.naturalWidth,origImg.naturalHeight);
@@ -9576,7 +9744,15 @@ async function verwijderVoorbeelden() {
     imgInputCamera=document.getElementById("imgInputCamera");
     document.getElementById("cmChoose").onclick=()=>imgInput.click();
     document.getElementById("cmCancel").onclick=closeCutModal;
-    document.getElementById("cropReset").onclick=()=>{ lassoPts=[]; drawLasso(); updateCutout(); };
+    document.getElementById("cropReset").onclick=()=>{ lassoPts=[]; wandSeeds=[]; lassoDragIdx=-1; rebuildBase(); drawLasso(); updateCutout(); };
+    { const ub=document.getElementById("lassoUndo"); if(ub) ub.onclick=()=>{ lassoPts.pop(); lassoDragIdx=-1; drawLasso(); updateCutout(); }; }
+    { const wb=document.getElementById("wandBtn"); if(wb) wb.onclick=()=>{ wandMode=!wandMode; if(wandMode){ bgPickMode=false; if(bgPickBtn)bgPickBtn.classList.remove("on"); } zetWandUI(); toast(wandMode?tr('ui.tik_uitknippen'):tr('ui.toverstaf_uit')); }; }
+    { const sp=document.getElementById("spiegelBtn"); if(sp) sp.onclick=()=>{
+        flipH=!flipH;
+        lassoPts=lassoPts.map(p=>({nx:1-p.nx, ny:p.ny}));   // bestaande lasso meespiegelen
+        zetSpiegelUI();
+        if(origImg){ rebuildBase(); updateCutout(); drawLasso(); }
+      }; }
     const addBtn=document.getElementById("t3d-add"); if(addBtn) addBtn.onclick=()=>openCutModalAdd('3d');
     window.__tattiesAdd2D=()=>openCutModalAdd('2d');   // 2D-FAB opent dezelfde toevoeg-flow
     window.__tattiesRecrop2D=(rec)=>openCutModalForEdit2D(rec);   // sleutel-knop 2D: opnieuw uitsnijden
@@ -9633,19 +9809,26 @@ async function verwijderVoorbeelden() {
         rebuildBase(); updateCutout();
         return;
       }
-      drawing=true; lassoPts=[ptFrom(e)]; cutPrev.setPointerCapture(e.pointerId);
-      if(!baseCanvas) rebuildBase(); drawPreview(baseCanvas);
-      drawLasso();
+      if(wandMode){                         // toverstaf: tik knipt een aaneengesloten gebied weg
+        const pt=ptFrom(e); wandSeeds.push({nx:pt.nx, ny:pt.ny});
+        rebuildBase(); updateCutout();
+        return;
+      }
+      if(!baseCanvas) rebuildBase();
+      const idx=lassoPuntBij(e);            // dichtbij bestaand punt? dat verslepen, anders nieuw punt
+      if(idx>=0){ lassoDragIdx=idx; }
+      else { lassoPts.push(ptFrom(e)); lassoDragIdx=lassoPts.length-1; }
+      try{ cutPrev.setPointerCapture(e.pointerId); }catch(_){}
+      drawPreview(baseCanvas); drawLasso();
     });
     cutPrev.addEventListener("pointermove",e=>{
-      if(!drawing)return;
-      const p=ptFrom(e), last=lassoPts[lassoPts.length-1];
-      if(!last || Math.hypot(p.nx-last.nx,p.ny-last.ny)>0.008) lassoPts.push(p);
+      if(lassoDragIdx<0)return;
+      lassoPts[lassoDragIdx]=ptFrom(e);
       drawLasso();
     });
     cutPrev.addEventListener("pointerup",e=>{
-      if(!drawing)return; drawing=false;
-      if(lassoPts.length<3) lassoPts=[];
+      if(lassoDragIdx<0)return;
+      lassoDragIdx=-1;
       drawLasso(); updateCutout();
     });
 
@@ -9658,7 +9841,7 @@ async function verwijderVoorbeelden() {
         if(imgTexture && imgTexture.dispose) imgTexture.dispose(); imgTexture=null;
         rec.kunst=rec.kunst||{}; rec.kunst.src=src; rec.kunst.aspect=aspect;
         rec.kunst3d={ srcUrl:(origImg?origImg.src:null), lasso:lassoPts.slice(), thresh:+cutThresh.value,
-                 spread:(cutSpread?+cutSpread.value:55), bgColor:(bgPick?{r:bgPick.r,g:bgPick.g,b:bgPick.b}:null), bg:bgRemove.checked };
+                 spread:(cutSpread?+cutSpread.value:55), bgColor:(bgPick?{r:bgPick.r,g:bgPick.g,b:bgPick.b}:null), bg:bgRemove.checked, flipH:flipH, wand:wandSeeds.slice() };
         try{ await saveTattoo(rec); }catch(e){ console.error(e); toast(tr('toast.opslaanmislukt')+(e&&e.message?e.message:tr('ui.fout'))); }
         if(typeof renderMarkers==="function"){ try{renderMarkers();}catch(_){} }
         toast(tr('ui.tattoo_bijgewerkt'));
@@ -9674,7 +9857,7 @@ async function verwijderVoorbeelden() {
         const info={ artiest:v("cmArtiest").trim(), studio:v("cmStudio").trim(), stijl:v("cmStijl").trim(),
                  kosten:Math.max(0,parseFloat(v("cmKosten"))||0), pijn:Math.min(5,Math.max(0,parseInt(v("cmPijn"),10)||0)), datum:v("cmDatum") };
         const kunst3d={ srcUrl:(origImg?origImg.src:null), lasso:lassoPts.slice(), thresh:+cutThresh.value,
-                 spread:(cutSpread?+cutSpread.value:55), bgColor:(bgPick?{r:bgPick.r,g:bgPick.g,b:bgPick.b}:null), bg:bgRemove.checked };
+                 spread:(cutSpread?+cutSpread.value:55), bgColor:(bgPick?{r:bgPick.r,g:bgPick.g,b:bgPick.b}:null), bg:bgRemove.checked, flipH:flipH, wand:wandSeeds.slice() };
         if(addDoel==='2d'){
           const cv=imgTexture.image; const src=canvasToPNG(cv,700);
           const aspect=(cv&&cv.width)?(cv.height/cv.width):1;
@@ -9699,7 +9882,7 @@ async function verwijderVoorbeelden() {
             naam:"Tattoo", status:"gezet", zijde:pp.side, lichaamsdeel:pp.zone,
             positie:{x:pp.x,y:pp.y},
             kunst:{ src, schaal:24, aspect, rotatie:0 },
-            kunst3d:{ srcUrl:(origImg?origImg.src:null), lasso:lassoPts.slice(), thresh:+cutThresh.value, spread:(cutSpread?+cutSpread.value:55), bgColor:(bgPick?{r:bgPick.r,g:bgPick.g,b:bgPick.b}:null), bg:bgRemove.checked }
+            kunst3d:{ srcUrl:(origImg?origImg.src:null), lasso:lassoPts.slice(), thresh:+cutThresh.value, spread:(cutSpread?+cutSpread.value:55), bgColor:(bgPick?{r:bgPick.r,g:bgPick.g,b:bgPick.b}:null), bg:bgRemove.checked, flipH:flipH, wand:wandSeeds.slice() }
           });
           await saveTattoo(rec);
           if(typeof tattoos!=="undefined" && Array.isArray(tattoos)) tattoos.push(rec);
@@ -9715,7 +9898,7 @@ async function verwijderVoorbeelden() {
         if(m.tex && m.tex!==imgTexture && m.tex.dispose) m.tex.dispose();   // oude textuur vrijgeven
         m.tex=imgTexture; rebuildMarker(m);
         if(m.rec){
-          m.rec.kunst3d={ srcUrl:(origImg?origImg.src:null), lasso:lassoPts.slice(), thresh:+cutThresh.value, spread:(cutSpread?+cutSpread.value:55), bgColor:(bgPick?{r:bgPick.r,g:bgPick.g,b:bgPick.b}:null), bg:bgRemove.checked };
+          m.rec.kunst3d={ srcUrl:(origImg?origImg.src:null), lasso:lassoPts.slice(), thresh:+cutThresh.value, spread:(cutSpread?+cutSpread.value:55), bgColor:(bgPick?{r:bgPick.r,g:bgPick.g,b:bgPick.b}:null), bg:bgRemove.checked, flipH:flipH, wand:wandSeeds.slice() };
           try{ await saveTattoo(m.rec); toast(tr('ui.tattoo_bijgewerkt')); }
           catch(err){ console.error(err); toast(tr('toast.opslaanmislukt')+(err&&err.message?err.message:tr('ui.fout'))); }
         }
@@ -9734,7 +9917,7 @@ async function verwijderVoorbeelden() {
           naam:"Tattoo", status:"gezet", zijde:nz.side, lichaamsdeel:nz.zone,
           positie3d:{ point:[pp.point.x,pp.point.y,pp.point.z], normal:[pp.normal.x,pp.normal.y,pp.normal.z],
             rot, size, gender:currentGender, zone:nz.zone, side:nz.side },
-          kunst3d:{ srcUrl:(origImg?origImg.src:null), lasso:lassoPts.slice(), thresh:+cutThresh.value, spread:(cutSpread?+cutSpread.value:55), bgColor:(bgPick?{r:bgPick.r,g:bgPick.g,b:bgPick.b}:null), bg:bgRemove.checked }
+          kunst3d:{ srcUrl:(origImg?origImg.src:null), lasso:lassoPts.slice(), thresh:+cutThresh.value, spread:(cutSpread?+cutSpread.value:55), bgColor:(bgPick?{r:bgPick.r,g:bgPick.g,b:bgPick.b}:null), bg:bgRemove.checked, flipH:flipH, wand:wandSeeds.slice() }
         });
         sync2D(rec, pp.point, nz.side, rot, size, imgTexture);
         await saveTattoo(rec);
@@ -9763,10 +9946,14 @@ async function verwijderVoorbeelden() {
         const FW=Math.max(1,Math.round(im.naturalWidth*scl));
         const FH=Math.max(1,Math.round(im.naturalHeight*scl));
         const full=document.createElement("canvas"); full.width=FW; full.height=FH;
-        const fx=full.getContext("2d",{willReadFrequently:true}); fx.drawImage(im,0,0,FW,FH);
+        const fx=full.getContext("2d",{willReadFrequently:true});
+        if(k.flipH){ fx.translate(FW,0); fx.scale(-1,1); }
+        fx.drawImage(im,0,0,FW,FH);
+        fx.setTransform(1,0,0,1,0,0);
         if(k.bg!==false){
           floodFillBg(fx, FW, FH, (k.thresh!=null?+k.thresh:200), (k.spread!=null?+k.spread:55), (k.bgColor||null));
         }
+        if(k.wand && k.wand.length) applyWand(fx, FW, FH, k.wand);
         const lasso=k.lasso||[]; let shown=full;
         if(lasso.length>=3){
           const sc=document.createElement("canvas"); sc.width=full.width; sc.height=full.height;
@@ -9907,7 +10094,7 @@ async function verwijderVoorbeelden() {
   }
 
   /* ---- view-omschakeling 3D <-> 2D ---- */
-  const HOST_VIEWS=["view-home","view-detail","view-form","view-collectie","view-stats"];
+  const HOST_VIEWS=["view-start","view-home","view-detail","view-form","view-collectie","view-stats"];
   function hideHostViews(){ HOST_VIEWS.forEach(id=>{ const e=document.getElementById(id); if(e)e.hidden=true; }); }
   function markeerViewKnop(actief){
     const b3=document.getElementById("btn-3d"), b2=document.getElementById("btn-2d");
@@ -9962,12 +10149,12 @@ async function verwijderVoorbeelden() {
   if(typeof toonView==="function"){
     const _origToonView=toonView;
     toonView=function(naam){
-      if(bootRedirect && naam==="home"){ bootRedirect=false; show3D(); return; }
+      if(bootRedirect && naam==="home"){ bootRedirect=false; _origToonView("start"); return; }
       return _origToonView.apply(this,arguments);
     };
   }
   // Meteen de juiste weergave tonen (voorkomt een flits). Idempotent.
-  function ensureStart(){ try{ bindCutUI(); if(startView==="2d") show2D(); else show3D(); }catch(e){ console.error(e); } }
+  function ensureStart(){ try{ bindCutUI(); if(typeof toonView==="function") toonView("start"); }catch(e){ console.error(e); } }
   if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",ensureStart);
   else ensureStart();
   window.addEventListener("load",ensureStart);
