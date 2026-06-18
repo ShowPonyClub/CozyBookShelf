@@ -418,6 +418,24 @@ main > section{animation:opkomen .3s ease both}
   width:100%;max-height:300px;object-fit:cover;border-radius:var(--radius);
   border:1px solid var(--rand);margin-bottom:12px;display:block;
 }
+.detail-kunst{
+  display:flex;align-items:center;justify-content:center;
+  background:var(--kaart);border:1px solid var(--rand);border-radius:var(--radius);
+  padding:16px;margin-bottom:14px;
+}
+.detail-kunst img{max-width:100%;max-height:280px;object-fit:contain;display:block}
+/* Pijnscore-sterren */
+.pijn-sterren{white-space:nowrap;letter-spacing:2px;font-size:1rem;line-height:1}
+.pijn-sterren.klein{font-size:.82rem;letter-spacing:1px}
+.pijn-sterren .ster{color:var(--rand)}
+.pijn-sterren .ster.vol{color:var(--accent)}
+/* Detail: lege velden verbergen tot 'extra details' */
+.veldrij.leeg-veld{display:none}
+dl.toon-leeg .veldrij.leeg-veld{display:flex}
+#d-extra{margin:10px 0 2px}
+/* Collectiekaart: datum + pijn */
+.tcard .info .kaart-datum{font-size:.78rem;color:var(--gedempt);margin:2px 0 0}
+.tcard .info .kaart-pijn{margin:3px 0 0}
 
 /* ---- Tabs ---- */
 .tabs{display:flex;gap:2px;margin-bottom:14px;border-bottom:1px solid var(--rand)}
@@ -739,12 +757,13 @@ form label,
   font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;}
 /* Keuzestand (alleen Foto maken/uploaden): compacte pop-up die om de knoppen sluit */
 .cutmodal.cm-compact .cm-card{width:fit-content;min-width:280px;max-width:94vw;}
-.cutmodal .cm-head{display:flex;justify-content:space-between;align-items:center;padding:14px 16px;border-bottom:1px solid var(--rand);font-weight:600;font-size:15px;}
-.cutmodal .cm-x{background:transparent;border:0;color:var(--gedempt);font-size:22px;line-height:1;cursor:pointer;}
+.cutmodal.cm-compact .cm-foot{display:none;}
+.cutmodal .cm-head{display:flex;justify-content:flex-end;align-items:center;padding:14px 16px;border-bottom:1px solid var(--rand);font-weight:600;font-size:15px;}
+.cutmodal .cm-x{background:transparent;border:0;color:var(--gedempt);font-size:22px;line-height:1;cursor:pointer;grid-column:3;justify-self:end;}
 .cutmodal .cm-body{padding:14px 16px;display:flex;flex-direction:column;gap:8px;overflow-y:auto;flex:1;}
 .cutmodal .cm-body>.btn{flex:0 0 auto;padding:10px;}
-.cutmodal .cm-toprow{display:flex;align-items:center;justify-content:center;gap:8px 12px;flex-wrap:wrap;}
-.cutmodal .cm-choose{flex:0 0 auto;padding:8px 12px;font-size:13px;}
+.cutmodal .cm-toprow{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:8px 12px;}
+.cutmodal .cm-choose{grid-column:2;justify-self:center;padding:8px 12px;font-size:13px;}
 .cutmodal .cm-toprow .chk{margin-top:0;}
 .cutmodal .chk input{width:16px;height:16px;flex:0 0 auto;}
 .cutmodal .cm-prev{flex:1;min-height:280px;border:1px solid var(--rand);border-radius:10px;display:flex;align-items:center;justify-content:center;
@@ -753,7 +772,7 @@ form label,
     linear-gradient(45deg,transparent 75%,rgba(120,120,120,.16) 75%),linear-gradient(-45deg,transparent 75%,rgba(120,120,120,.16) 75%);
   background-size:18px 18px;background-position:0 0,0 9px,9px -9px,-9px 0;background-color:var(--veldbg);}
 .cutmodal .cutcv,.cutmodal .lassocv{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;}
-.cutmodal .cm-foot{display:flex;gap:10px;padding:12px 16px;border-top:1px solid var(--rand);}
+.cutmodal .cm-foot{display:flex;gap:10px;padding:12px 16px;}
 .cutmodal .btn{background:transparent;border:1px solid var(--rand);color:var(--tekst);padding:12px;border-radius:8px;
   font-size:14px;cursor:pointer;font-family:inherit;}
 .cutmodal .cm-foot .btn{flex:1;}
@@ -789,7 +808,9 @@ form label,
   padding:8px 14px;border-radius:999px;text-align:center;box-shadow:0 2px 10px rgba(0,0,0,.18);pointer-events:none;}
 .lege-hint[hidden]{display:none;}
 .cutmodal .cm-veld{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--gedempt);margin:8px 0 0;}
-.cutmodal .cm-veld input{padding:9px 10px;border:1px solid var(--rand);border-radius:8px;background:var(--veldbg);color:var(--tekst);font-size:14px;font-family:inherit;}
+.cutmodal .cm-veld input,.cutmodal .cm-veld select{padding:9px 10px;border:1px solid var(--rand);border-radius:8px;background:var(--veldbg);color:var(--tekst);font-size:14px;font-family:inherit;}
+.cutmodal .verplicht{color:var(--accent);font-weight:700;}
+.cutmodal .cm-veld input[aria-invalid="true"]{border-color:#D14343;box-shadow:0 0 0 2px rgba(209,67,67,.18);}
 #cmMeerBtn{margin-top:10px;display:inline-block;}
 #cmMeer{margin-top:2px;}
 
@@ -871,9 +892,9 @@ form label{text-transform:none;letter-spacing:.005em;font-size:.8rem;color:var(-
   <div class="kop-knoppen">
     <button class="icoonknop" id="btn-3d" aria-label="3D-weergave" title="3D-weergave" style="font-weight:700;font-size:13px">3D</button>
     <button class="icoonknop" id="btn-2d" aria-label="2D-kaart" title="2D-kaart" style="font-weight:700;font-size:13px">2D</button>
-    <button class="icoonknop" id="btn-instellingen" data-i18n-aria="aria.instellingen" aria-label="Instellingen"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"/></svg></button>
-    <button class="icoonknop" id="btn-collectie" data-i18n-aria="aria.collectie" aria-label="Collectie en wishlist"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/><circle cx="2.5" cy="6" r="0.6" fill="currentColor" stroke="none"/><circle cx="2.5" cy="12" r="0.6" fill="currentColor" stroke="none"/><circle cx="2.5" cy="18" r="0.6" fill="currentColor" stroke="none"/></svg></button>
-    <button class="icoonknop" id="btn-stats" data-i18n-aria="aria.stats" aria-label="Statistieken"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 20V11M12 20V4M19 20v-7"/></svg></button>
+    <button class="icoonknop" id="btn-instellingen" data-i18n-aria="aria.instellingen" data-i18n-title="aria.instellingen" aria-label="Instellingen" title="Instellingen"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"/></svg></button>
+    <button class="icoonknop" id="btn-collectie" data-i18n-aria="aria.collectie" data-i18n-title="aria.collectie" aria-label="Collectie en wishlist" title="Collectie en wishlist"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/><circle cx="2.5" cy="6" r="0.6" fill="currentColor" stroke="none"/><circle cx="2.5" cy="12" r="0.6" fill="currentColor" stroke="none"/><circle cx="2.5" cy="18" r="0.6" fill="currentColor" stroke="none"/></svg></button>
+    <button class="icoonknop" id="btn-stats" data-i18n-aria="aria.stats" data-i18n-title="aria.stats" aria-label="Statistieken" title="Statistieken"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 20V11M12 20V4M19 20v-7"/></svg></button>
   </div>
 </header>
 
@@ -1031,21 +1052,35 @@ form label{text-transform:none;letter-spacing:.005em;font-size:.8rem;color:var(-
     <!-- volledig uitsnede-scherm -->
     <div id="cutModal" class="cutmodal" role="dialog" aria-modal="true" aria-labelledby="cmTitle">
       <div class="cm-card">
-        <div class="cm-head">
-          <span id="cmTitle" data-i18n="ui.tattoo_toevoegen">Tattoo toevoegen</span>
-          <button id="cmCancel" class="cm-x" data-i18n-title="form.annuleren" data-i18n-aria="form.annuleren" title="Annuleer" aria-label="Annuleer">&times;</button>
-        </div>
         <div class="cm-body">
+          <span id="cmTitle" class="visueel-verborgen" data-i18n="ui.tattoo_toevoegen">Tattoo toevoegen</span>
           <div class="cm-toprow">
-            <button class="btn cm-choose" id="cmCamera">&#128247; <span data-i18n="ui.foto_maken">Foto maken</span></button>
-            <button class="btn cm-choose" id="cmChoose">&#128193; <span data-i18n="ui.foto_uploaden">Foto uploaden</span></button>
+            <button class="btn cm-choose" id="cmChoose">&#128247; <span data-i18n="ui.foto_toevoegen">Foto/tattoo toevoegen</span></button>
+            <button id="cmCancel" class="cm-x" data-i18n-title="form.annuleren" data-i18n-aria="form.annuleren" title="Annuleer" aria-label="Annuleer">&times;</button>
           </div>
           <input type="file" id="imgInput" accept="image/*" style="display:none">
           <input type="file" id="imgInputCamera" accept="image/*" capture="environment" style="display:none">
+          <div id="cmInfo" hidden>
+            <label class="cm-veld"><span class="cm-lbl"><span data-i18n="ui.naam">Naam</span> <span class="verplicht">*</span></span>
+              <input id="cmNaam" type="text" maxlength="80" autocomplete="off"></label>
+            <button type="button" id="cmMeerBtn" class="linkbtn" data-i18n="ui.meer_details">Meer details</button>
+            <div id="cmMeer" hidden>
+              <label class="cm-veld">Artiest<input id="cmArtiest" type="text"></label>
+              <label class="cm-veld">Studio<input id="cmStudio" type="text"></label>
+              <label class="cm-veld">Stijl<input id="cmStijl" type="text"></label>
+              <label class="cm-veld">Kosten (&euro;)<input id="cmKosten" type="number" min="0" step="0.01" inputmode="decimal"></label>
+              <label class="cm-veld"><span data-i18n="form.pijn">Pijnscore (1&ndash;5)</span>
+                <select id="cmPijn">
+                  <option value="0" data-i18n="form.geenpijn">Geen / onbekend</option>
+                  <option value="1">1/5</option><option value="2">2/5</option><option value="3">3/5</option><option value="4">4/5</option><option value="5">5/5</option>
+                </select></label>
+              <label class="cm-veld">Datum<input id="cmDatum" type="date"></label>
+            </div>
+          </div>
           <div id="cmSettings" hidden>
-            <label class="chk" style="display:inline-flex;margin:2px 0 8px"><input type="checkbox" id="bgRemove"> <span data-i18n="ui.achtergrond_weghalen">Achtergrond weghalen</span></label>
             <span class="hintline" style="display:block;margin:0 0 6px" data-i18n="ui.cut_hint">Teken met je vinger of muis een lijn rond de tattoo om hem uit te knippen.</span>
             <div class="cm-prev" id="cutPrev"><canvas id="cutCanvas" class="cutcv"></canvas><canvas id="lassoCanvas" class="lassocv"></canvas></div>
+            <label class="chk" style="display:inline-flex;margin:8px 0"><input type="checkbox" id="bgRemove"> <span data-i18n="ui.achtergrond_weghalen">Achtergrond weghalen</span></label>
             <div class="cutrow" style="justify-content:flex-end">
               <button id="cropReset" class="linkbtn" data-i18n="ui.reset_uitsnede">Reset uitsnede</button>
             </div>
@@ -1059,21 +1094,8 @@ form label{text-transform:none;letter-spacing:.005em;font-size:.8rem;color:var(-
               <button id="bgPickReset" class="linkbtn" data-i18n="ui.auto">Auto</button>
             </div>
           </div>
-          <div id="cmInfo" hidden>
-            <label class="cm-veld"><span data-i18n="ui.naam">Naam</span> *
-              <input id="cmNaam" type="text" maxlength="80" autocomplete="off"></label>
-            <button type="button" id="cmMeerBtn" class="linkbtn" data-i18n="ui.meer_details">Meer details</button>
-            <div id="cmMeer" hidden>
-              <label class="cm-veld">Artiest<input id="cmArtiest" type="text"></label>
-              <label class="cm-veld">Studio<input id="cmStudio" type="text"></label>
-              <label class="cm-veld">Stijl<input id="cmStijl" type="text"></label>
-              <label class="cm-veld">Kosten (&euro;)<input id="cmKosten" type="number" min="0" step="0.01" inputmode="decimal"></label>
-              <label class="cm-veld">Datum<input id="cmDatum" type="date"></label>
-            </div>
-          </div>
         </div>
         <div class="cm-foot">
-          <button id="cmCancel2" class="btn" data-i18n="form.annuleren">Annuleren</button>
           <button id="cmPlace" class="btn cm-place" data-i18n="ui.plaatsen">Plaatsen</button>
         </div>
       </div>
@@ -6019,7 +6041,7 @@ const I18N = {
     'sub.collectie':'Al je gezette tattoos en je wishlist op één plek — zoek en sorteer ze hier.',
     'sub.stats':'Een overzicht van je collectie in cijfers — aantallen, kosten, stijlen en meer.',
     'feedback':'show me your tatties · stuur mij alle eerlijke feedback',
-    'ui.foto_maken':'Foto maken','ui.foto_uploaden':'Foto uploaden','ui.plaatsen':'Plaatsen',
+    'ui.foto_maken':'Foto maken','ui.foto_uploaden':'Foto uploaden','ui.foto_toevoegen':'Foto/tattoo toevoegen','ui.andere_foto':'Andere foto','ui.plaatsen':'Plaatsen',
     'ui.reset_uitsnede':'Reset uitsnede','ui.achtergrond_weghalen':'Achtergrond weghalen',
     'ui.cut_hint':'Teken met je vinger of muis een lijn rond de tattoo om hem uit te knippen.',
     'ui.gevoeligheid':'Gevoeligheid — sleep tot de achtergrond weg is','ui.zachte_randen':'Zachte randen meenemen',
@@ -6052,7 +6074,7 @@ const I18N = {
     'inst.titel':'Instellingen','inst.geslacht':'Man / Vrouw','inst.man':'Man','inst.vrouw':'Vrouw','inst.huid':'Huidskleur','inst.taal':'Taal',
     'inst.thema':'Weergave','inst.thema.auto':'Systeem','inst.thema.licht':'Licht','inst.thema.donker':'Donker',
     'stats.titel':'Statistieken','stats.collectie':'Collectie','stats.aantal':'Aantal tattoos','stats.uitgegeven':'Totaal uitgegeven',
-    'stats.zituren':'Totale zituren','stats.geheeld':'Geheeld','stats.perstijl':'Per stijl','stats.perartiest':'Per artiest',
+    'stats.zituren':'Totale zituren','stats.gempijn':'Gemiddelde pijn','stats.geheeld':'Geheeld','stats.perstijl':'Per stijl','stats.perartiest':'Per artiest',
     'stats.perdeel':'Per lichaamsdeel','stats.tijdlijn':'Tijdlijn (per jaar)','stats.wishlist':'Wishlist',
     'stats.aantalwensen':'Aantal wensen','stats.budget':'Gepland budget','stats.geendata':'Nog geen data.',
     'woord.onbekend':'Onbekend','woord.van':'van','woord.gepland':'gepland','woord.budget':'budget',
@@ -6064,7 +6086,7 @@ const I18N = {
     'lijst.legecollectie':'Nog geen tattoos — voeg je eerste toe.',
     'badge.wishlist':'Wishlist','badge.geheeld':'Geheeld','badge.herstellende':'Herstellende',
     'detail.lichaamsdeel':'Lichaamsdeel','detail.zijde':'Zijde','detail.datum':'Datum','detail.artiest':'Artiest',
-    'detail.studio':'Studio','detail.stijl':'Stijl','detail.kosten':'Kosten','detail.zituren':'Zituren',
+    'detail.studio':'Studio','detail.stijl':'Stijl','detail.kosten':'Kosten','detail.zituren':'Zituren','detail.pijn':'Pijnscore','detail.extra_tonen':'Extra details tonen','detail.extra_verbergen':'Minder tonen',
     'detail.status':'Status','detail.accentkleur':'Accentkleur','detail.notities':'Notities','detail.stapel':'Stapelvolgorde','stapel.voren':'Naar voren','stapel.achteren':'Naar achteren','toast.stapelbij':'Stapelvolgorde bijgewerkt',
     'detail.fotovan':'Foto van {naam}','detail.galerijhint':"◂ veeg voor alle {n} foto's ▸",
     'tab.info':'Info','tab.sessies':'Sessies','tab.nazorg':'Nazorg',
@@ -6083,7 +6105,7 @@ const I18N = {
     'form.type':'Type','form.gezet':'Gezet','form.wishlist':'Wishlist','form.naam':'Naam','form.datum':'Datum',
     'form.geplandedatum':'Geplande datum','form.lichaamsdeel':'Lichaamsdeel','form.kies':'Kies…',
     'form.fout':'Vul de verplichte velden in.','form.artiest':'Artiest','form.studio':'Studio','form.stijl':'Stijl',
-    'form.geenstijl':'Geen / onbekend','form.kosten':'Kosten (€)','form.budget':'Budget (€)','form.zituren':'Zituren',
+    'form.geenstijl':'Geen / onbekend','form.kosten':'Kosten (€)','form.budget':'Budget (€)','form.zituren':'Zituren','form.pijn':'Pijnscore (1–5)','form.geenpijn':'Geen / onbekend',
     'form.nazorg':'Nazorg','form.notities':'Notities','form.statusprefix':'Status:','form.accentkleur':'Accentkleur van markering','form.accentuitleg':'Gebruikt als je geen tattoo-afbeelding toevoegt',
     'form.plekuitleg':'Plek op het lichaam — kies de kant en tik om te markeren; het lichaamsdeel wordt automatisch gekozen',
     'form.helelichaam':'Hele lichaam','form.inzoomen':'Inzoomen op plek','form.wismarkering':'Markering wissen',
@@ -6156,7 +6178,7 @@ const I18N = {
     'sub.collectie':'All your done tattoos and your wishlist in one place — search and sort them here.',
     'sub.stats':'An overview of your collection in numbers — counts, costs, styles and more.',
     'feedback':'show me your tatties · send me all your honest feedback',
-    'ui.foto_maken':'Take photo','ui.foto_uploaden':'Upload photo','ui.plaatsen':'Place',
+    'ui.foto_maken':'Take photo','ui.foto_uploaden':'Upload photo','ui.foto_toevoegen':'Add photo/tattoo','ui.andere_foto':'Other photo','ui.plaatsen':'Place',
     'ui.reset_uitsnede':'Reset cut-out','ui.achtergrond_weghalen':'Remove background',
     'ui.cut_hint':'Draw a line around the tattoo with your finger or mouse to cut it out.',
     'ui.gevoeligheid':'Sensitivity — drag until the background is gone','ui.zachte_randen':'Include soft edges',
@@ -6189,7 +6211,7 @@ const I18N = {
     'inst.titel':'Settings','inst.geslacht':'Male / Female','inst.man':'Male','inst.vrouw':'Female','inst.huid':'Skin tone','inst.taal':'Language',
     'inst.thema':'Appearance','inst.thema.auto':'System','inst.thema.licht':'Light','inst.thema.donker':'Dark',
     'stats.titel':'Statistics','stats.collectie':'Collection','stats.aantal':'Number of tattoos','stats.uitgegeven':'Total spent',
-    'stats.zituren':'Total sitting hours','stats.geheeld':'Healed','stats.perstijl':'By style','stats.perartiest':'By artist',
+    'stats.zituren':'Total sitting hours','stats.gempijn':'Average pain','stats.geheeld':'Healed','stats.perstijl':'By style','stats.perartiest':'By artist',
     'stats.perdeel':'By body part','stats.tijdlijn':'Timeline (by year)','stats.wishlist':'Wishlist',
     'stats.aantalwensen':'Number of wishes','stats.budget':'Planned budget','stats.geendata':'No data yet.',
     'woord.onbekend':'Unknown','woord.van':'of','woord.gepland':'planned','woord.budget':'budget',
@@ -6201,7 +6223,7 @@ const I18N = {
     'lijst.legecollectie':'No tattoos yet — add your first.',
     'badge.wishlist':'Wishlist','badge.geheeld':'Healed','badge.herstellende':'Healing',
     'detail.lichaamsdeel':'Body part','detail.zijde':'Side','detail.datum':'Date','detail.artiest':'Artist',
-    'detail.studio':'Studio','detail.stijl':'Style','detail.kosten':'Cost','detail.zituren':'Sitting hours',
+    'detail.studio':'Studio','detail.stijl':'Style','detail.kosten':'Cost','detail.zituren':'Sitting hours','detail.pijn':'Pain score','detail.extra_tonen':'Show more fields','detail.extra_verbergen':'Show fewer',
     'detail.status':'Status','detail.accentkleur':'Accent colour','detail.notities':'Notes','detail.stapel':'Stack order','stapel.voren':'Bring forward','stapel.achteren':'Send backward','toast.stapelbij':'Stack order updated',
     'detail.fotovan':'Photo of {naam}','detail.galerijhint':'◂ swipe for all {n} photos ▸',
     'tab.info':'Info','tab.sessies':'Sessions','tab.nazorg':'Aftercare',
@@ -6220,7 +6242,7 @@ const I18N = {
     'form.type':'Type','form.gezet':'Done','form.wishlist':'Wishlist','form.naam':'Name','form.datum':'Date',
     'form.geplandedatum':'Planned date','form.lichaamsdeel':'Body part','form.kies':'Choose…',
     'form.fout':'Please fill in the required fields.','form.artiest':'Artist','form.studio':'Studio','form.stijl':'Style',
-    'form.geenstijl':'None / unknown','form.kosten':'Cost (€)','form.budget':'Budget (€)','form.zituren':'Sitting hours',
+    'form.geenstijl':'None / unknown','form.kosten':'Cost (€)','form.budget':'Budget (€)','form.zituren':'Sitting hours','form.pijn':'Pain score (1–5)','form.geenpijn':'None / unknown',
     'form.nazorg':'Aftercare','form.notities':'Notes','form.statusprefix':'Status:','form.accentkleur':'Marker accent colour','form.accentuitleg':'Used when you don’t add a tattoo image',
     'form.plekuitleg':'Spot on the body — pick the side and tap to mark; the body part is chosen automatically',
     'form.helelichaam':'Whole body','form.inzoomen':'Zoom in on spot','form.wismarkering':'Clear marker',
@@ -6364,6 +6386,7 @@ function createTattoo(overrides = {}) {
     stijl: '',
     kosten: 0,
     zituren: 0,
+    pijn: 0,                 // pijnscore 1–5 (0 = niet ingevuld)
     sessies: [],
     touchUps: [],
     nazorg: '',
@@ -6560,6 +6583,7 @@ let tattoos = [];
 let filterZone = null;
 let detailId = null;
 let detailTab = 'info';
+let detailToonExtra = false;   // detailpagina: lege velden tonen via 'extra details'
 let bewerkId = null;     // null = nieuw record
 let lijstModus = 'gezet';     // 'gezet' (collectie) of 'wens' (wishlist)
 let zoekTekst = '';
@@ -6599,6 +6623,14 @@ function esc(s) {
   return String(s ?? '').replace(/[&<>"']/g, c => (
     { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]
   ));
+}
+/* Pijnscore als 5 sterren (n gevuld). Lege score → lege string. */
+function pijnSterren(n, klein) {
+  n = Math.max(0, Math.min(5, Number(n) || 0));
+  if (!n) return '';
+  let s = '';
+  for (let i = 1; i <= 5; i++) s += `<span class="ster${i <= n ? ' vol' : ''}">★</span>`;
+  return `<span class="pijn-sterren${klein ? ' klein' : ''}" role="img" aria-label="${tr('detail.pijn')}: ${n}/5">${s}</span>`;
 }
 function zoneLabel(id) {
   const z = BODY_PARTS.find(b => b.id === id);
@@ -6673,6 +6705,7 @@ async function herlaad() {
   const teMigreren = [];
   for (const t of tattoos) {
     let gewijzigd = false;
+    if (typeof t.naam !== 'string') { t.naam = String(t.naam ?? ''); gewijzigd = true; }
     if (t.lichaamsdeel === 'buik-rug') { t.lichaamsdeel = 'buik'; gewijzigd = true; }
     if (!t.zijde) { t.zijde = t.lichaamsdeel === 'rug' ? 'achter' : 'voor'; gewijzigd = true; }
     if (!t.status) { t.status = 'gezet'; gewijzigd = true; }
@@ -7399,6 +7432,9 @@ function openStats() {
   for (const t of gezet) { const a = (t.artiest || '').trim(); if (a) artiestTel[a] = (artiestTel[a] || 0) + 1; }
   const lievelingArr = Object.entries(artiestTel).sort((a, b) => b[1] - a[1]);
   const lieveling = lievelingArr.length ? lievelingArr[0] : null;
+  // Gemiddelde pijnscore (alleen tattoos met een ingevulde score 1–5)
+  const metPijn = gezet.filter(t => (Number(t.pijn) || 0) > 0);
+  const gemPijn = metPijn.length ? metPijn.reduce((s, t) => s + Number(t.pijn), 0) / metPijn.length : 0;
 
   $('#view-stats').innerHTML = `
     <div class="detail-top">
@@ -7420,6 +7456,7 @@ function openStats() {
       rij(tr('stats.aantal'), gezet.length) +
       rij(tr('stats.uitgegeven'), euro.format(som(gezet, t => t.kosten))) +
       rij(tr('stats.zituren'), totUren + ' ' + tr('eenheid.uur')) +
+      (gemPijn ? rij(tr('stats.gempijn'), pijnSterren(Math.round(gemPijn), true) + ' ' + gemPijn.toFixed(1).replace('.', ',') + '/5') : '') +
       rij(tr('stats.geheeld'), gezet.filter(t => t.geheeld).length + ' ' + tr('woord.van') + ' ' + gezet.length))}
     ${blok('Hoogtepunten',
       rij('Goedkoopste tattoo', goedkoopste ? esc(goedkoopste.naam || '\u2014') + ' \u00b7 ' + euro.format(goedkoopste.kosten) : '\u2014') +
@@ -7498,11 +7535,13 @@ function renderLijst() {
       : `<span class="badge ${t.geheeld ? 'geheeld' : 'herstellende'}">${t.geheeld ? tr('badge.geheeld') : tr('badge.herstellende')}</span>`;
     return `
     <button class="tcard" data-id="${esc(t.id)}" style="--acc:${esc(t.accentkleur || '#8E71F0')}">
-      <span class="thumb${kunstFoto ? ' thumb-kunst' : ''}">${foto ? `<img src="${esc(foto)}" alt="">` : esc((t.naam || '?').charAt(0).toUpperCase())}</span>
+      <span class="thumb${kunstFoto ? ' thumb-kunst' : ''}">${foto ? `<img src="${esc(foto)}" alt="">` : esc((String(t.naam ?? '') || '?').charAt(0).toUpperCase())}</span>
       <span class="info">
         <h3>${esc(t.naam)}</h3>
         <p>${esc(zoneLabel(t.lichaamsdeel))}${t.artiest ? ' · ' + esc(t.artiest) : ''}</p>
+        ${t.datum ? `<p class="kaart-datum">${fmtDatum(t.datum)}</p>` : ''}
         <p class="kosten">${t.kosten ? euro.format(t.kosten) : ''}</p>
+        ${t.pijn ? `<p class="kaart-pijn">${pijnSterren(t.pijn, true)}</p>` : ''}
       </span>
       ${badge}
     </button>`;
@@ -7516,6 +7555,7 @@ function renderLijst() {
 function openDetail(id, tab = 'info') {
   detailId = id;
   detailTab = tab;
+  detailToonExtra = false;
   renderDetail();
   toonView('detail');
 }
@@ -7542,24 +7582,26 @@ function renderDetail() {
 
   let paneel = '';
   if (detailTab === 'info') {
+    const zituU = Math.max(Number(t.zituren) || 0, totaalSessieUren);
+    const rijen = [
+      { l: tr('detail.lichaamsdeel'), v: esc(zoneLabel(t.lichaamsdeel)), leeg: !t.lichaamsdeel },
+      { l: tr('detail.zijde'), v: zijdeVan(t) === 'achter' ? tr('zijde.achter') : tr('zijde.voor'), leeg: false },
+      { l: tr('detail.datum'), v: fmtDatum(t.datum) + (isWens && t.datum ? ' (' + tr('woord.gepland') + ')' : ''), leeg: !t.datum },
+      { l: tr('detail.artiest'), v: esc(t.artiest), leeg: !t.artiest },
+      { l: tr('detail.studio'), v: esc(t.studio), leeg: !t.studio },
+      { l: tr('detail.stijl'), v: esc(tStyle(t.stijl)), leeg: !t.stijl },
+      { l: tr('detail.kosten'), v: t.kosten ? euro.format(t.kosten) + (isWens ? ' (' + tr('woord.budget') + ')' : '') : '', leeg: !t.kosten },
+      { l: tr('detail.zituren'), v: zituU ? zituU + ' ' + tr('eenheid.uur') : '', leeg: !zituU },
+      { l: tr('detail.pijn'), v: pijnSterren(t.pijn), leeg: !t.pijn },
+      { l: tr('detail.status'), v: isWens ? tr('badge.wishlist') : (t.geheeld ? tr('badge.geheeld') : tr('badge.herstellende')), leeg: false },
+      { l: tr('detail.accentkleur'), v: `<span style="display:inline-block;width:18px;height:18px;border-radius:5px;background:${esc(t.accentkleur)};vertical-align:middle"></span>`, leeg: false },
+    ];
+    const rijenHtml = rijen.map(r => `<div class="veldrij${r.leeg ? ' leeg-veld' : ''}"><dt>${r.l}</dt><dd>${r.leeg ? '—' : r.v}</dd></div>`).join('');
+    const notitieHtml = t.notities ? `<div class="veldrij"><dt>${tr('detail.notities')}</dt><dd>${esc(t.notities).replace(/\n/g, '<br>')}</dd></div>` : '';
+    const heeftLege = rijen.some(r => r.leeg);
     paneel = `
-      <dl>
-        <div class="veldrij"><dt>${tr('detail.lichaamsdeel')}</dt><dd>${esc(zoneLabel(t.lichaamsdeel))}</dd></div>
-        <div class="veldrij"><dt>${tr('detail.zijde')}</dt><dd>${zijdeVan(t) === 'achter' ? tr('zijde.achter') : tr('zijde.voor')}</dd></div>
-        <div class="veldrij"><dt>${tr('detail.datum')}</dt><dd>${fmtDatum(t.datum)}${isWens && t.datum ? ' (' + tr('woord.gepland') + ')' : ''}</dd></div>
-        <div class="veldrij"><dt>${tr('detail.artiest')}</dt><dd>${esc(t.artiest) || '—'}</dd></div>
-        <div class="veldrij"><dt>${tr('detail.studio')}</dt><dd>${esc(t.studio) || '—'}</dd></div>
-        <div class="veldrij"><dt>${tr('detail.stijl')}</dt><dd>${esc(tStyle(t.stijl)) || '—'}</dd></div>
-        <div class="veldrij"><dt>${tr('detail.kosten')}</dt><dd>${t.kosten ? euro.format(t.kosten) + (isWens ? ' (' + tr('woord.budget') + ')' : '') : '—'}</dd></div>
-        <div class="veldrij"><dt>${tr('detail.zituren')}</dt><dd>${(() => { const u = Math.max(Number(t.zituren) || 0, totaalSessieUren); return u ? u + ' ' + tr('eenheid.uur') : '—'; })()}</dd></div>
-        <div class="veldrij"><dt>${tr('detail.status')}</dt><dd>${isWens ? tr('badge.wishlist') : (t.geheeld ? tr('badge.geheeld') : tr('badge.herstellende'))}</dd></div>
-        <div class="veldrij"><dt>${tr('detail.accentkleur')}</dt><dd><span style="display:inline-block;width:18px;height:18px;border-radius:5px;background:${esc(t.accentkleur)};vertical-align:middle"></span></dd></div>
-        ${t.notities ? `<div class="veldrij"><dt>${tr('detail.notities')}</dt><dd>${esc(t.notities)}</dd></div>` : ''}
-        <div class="veldrij"><dt>${tr('detail.stapel')}</dt><dd style="display:flex;gap:8px;flex-wrap:wrap">
-          <button class="knop-sec" id="d-voren">${tr('stapel.voren')}</button>
-          <button class="knop-sec" id="d-achteren">${tr('stapel.achteren')}</button>
-        </dd></div>
-      </dl>`;
+      <dl${detailToonExtra ? ' class="toon-leeg"' : ''}>${rijenHtml}${notitieHtml}</dl>
+      ${heeftLege ? `<button type="button" class="linkbtn" id="d-extra">${detailToonExtra ? tr('detail.extra_verbergen') : tr('detail.extra_tonen')}</button>` : ''}`;
   } else if (detailTab === 'sessies') {
     const sessieItems = (t.sessies || []).map((s, i) => `
       <div class="sessie-item">
@@ -7643,9 +7685,10 @@ function renderDetail() {
       <button class="icoonknop" id="d-terug" aria-label="${tr('aria.terug')}">←</button>
       <h2>${esc(t.naam)}</h2>
       <button class="icoonknop${t.vergrendeld ? ' actief' : ''}" id="d-slot" aria-label="${t.vergrendeld ? tr('slot.ontgrendelen') : tr('slot.vergrendelen')}" title="${t.vergrendeld ? tr('slot.ontgrendelen') : tr('slot.vastzetten')}">${t.vergrendeld ? ICONEN.slot : ICONEN.slotOpen}</button>
-      <button class="icoonknop" id="d-bewerk" aria-label="${tr('aria.bewerken')}">${ICONEN.potlood}</button>
-      <button class="icoonknop knop-gevaar" id="d-verwijder" aria-label="${tr('aria.verwijderen')}">${ICONEN.prullenbak}</button>
+      <button class="icoonknop" id="d-bewerk" aria-label="${tr('aria.bewerken')}" title="${tr('aria.bewerken')}">${ICONEN.potlood}</button>
+      <button class="icoonknop knop-gevaar" id="d-verwijder" aria-label="${tr('aria.verwijderen')}" title="${tr('aria.verwijderen')}">${ICONEN.prullenbak}</button>
     </div>
+    ${(t.kunst && t.kunst.src) ? `<div class="detail-kunst"><img src="${esc(t.kunst.src)}" alt="${tr('detail.fotovan').replace('{naam}', esc(t.naam))}"></div>` : ''}
     ${fotos.length ? `<div class="galerij">${fotos.map(f => `<img src="${esc(f)}" alt="${tr('detail.fotovan').replace('{naam}', esc(t.naam))}">`).join('')}</div>` : ''}
     ${fotos.length > 1 ? `<p class="galerij-hint">${tr('detail.galerijhint').replace('{n}', fotos.length)}</p>` : ''}
     <div class="tabs" role="tablist">
@@ -7682,16 +7725,8 @@ function renderDetail() {
   );
 
   if (detailTab === 'info') {
-    const stapelWijzig = async (naarVoren) => {
-      const grens = tattoos.reduce((acc, x) => naarVoren ? Math.max(acc, x.stapel || 0) : Math.min(acc, x.stapel || 0), 0);
-      t.stapel = naarVoren ? grens + 1 : grens - 1;
-      await saveTattoo(t);
-      renderMarkers();
-      toast(tr('toast.stapelbij'));
-    };
-    const bv = $('#d-voren'), ba = $('#d-achteren');
-    if (bv) bv.addEventListener('click', () => stapelWijzig(true));
-    if (ba) ba.addEventListener('click', () => stapelWijzig(false));
+    const ex = $('#d-extra');
+    if (ex) ex.addEventListener('click', () => { detailToonExtra = !detailToonExtra; renderDetail(); });
   }
 
   if (detailTab === 'sessies' && !isWens) {
@@ -7900,6 +7935,13 @@ function openFormulier(id = null) {
           <label for="f-zituren">${tr('form.zituren')}</label>
           <input id="f-zituren" type="number" min="0" step="0.5" inputmode="decimal" value="${t.zituren || ''}">
         </div>
+      </div>
+      <div class="veld">
+        <label for="f-pijn">${tr('form.pijn')}</label>
+        <select id="f-pijn">
+          <option value="0" ${!t.pijn ? 'selected' : ''}>${tr('form.geenpijn')}</option>
+          ${[1,2,3,4,5].map(n => `<option value="${n}" ${Number(t.pijn) === n ? 'selected' : ''}>${n}/5</option>`).join('')}
+        </select>
       </div>
       <div class="veld">
         <label for="f-notities">${tr('form.notities')}</label>
@@ -8388,6 +8430,7 @@ function openFormulier(id = null) {
       stijl: $('#f-stijl').value,
       kosten: Math.max(0, parseFloat($('#f-kosten').value) || 0),
       zituren: Math.max(0, parseFloat($('#f-zituren').value) || 0),
+      pijn: Math.min(5, Math.max(0, parseInt($('#f-pijn').value, 10) || 0)),
       sessies: t.sessies || [],
       touchUps: t.touchUps || [],
       nazorg: t.nazorg || '',
@@ -9287,7 +9330,7 @@ async function verwijderVoorbeelden() {
   let pendingNew=null, plaatsModus=false, plaatsData=null, addDoel='3d';   // nieuwe toevoeg-flow (via +); doel = '2d' of '3d'
   function toonInfo(b){ const e=document.getElementById("cmInfo"); if(e) e.hidden=!b; }
   function resetInfo(){
-    ["cmNaam","cmArtiest","cmStudio","cmStijl","cmKosten","cmDatum"].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=""; });
+    ["cmNaam","cmArtiest","cmStudio","cmStijl","cmKosten","cmPijn","cmDatum"].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=(id==="cmPijn"?"0":""); });
     const m=document.getElementById("cmMeer"); if(m) m.hidden=true;
   }
   function toonBanner(txt){ const b=document.getElementById("t3d-banner"); if(b){ b.textContent=txt; b.hidden=false; } }
@@ -9309,6 +9352,8 @@ async function verwijderVoorbeelden() {
     const s=document.getElementById("cmSettings"); if(s) s.hidden=!b;
     if(cmPlaceBtn) cmPlaceBtn.style.display=b?"":"none";
     cutModal.classList.toggle("cm-compact", !b);
+    const kies=document.getElementById("cmChoose"); const kt=kies&&kies.querySelector("span");
+    if(kt) kt.textContent = b ? tr('ui.andere_foto') : tr('ui.foto_toevoegen');
   }
   function openCutModal(point, normal, mesh){
     pendingPlace={point, normal, mesh}; pendingEdit=null; pendingPlace2D=null;
@@ -9530,9 +9575,7 @@ async function verwijderVoorbeelden() {
 
     imgInputCamera=document.getElementById("imgInputCamera");
     document.getElementById("cmChoose").onclick=()=>imgInput.click();
-    document.getElementById("cmCamera").onclick=()=>imgInputCamera.click();
     document.getElementById("cmCancel").onclick=closeCutModal;
-    document.getElementById("cmCancel2").onclick=closeCutModal;
     document.getElementById("cropReset").onclick=()=>{ lassoPts=[]; drawLasso(); updateCutout(); };
     const addBtn=document.getElementById("t3d-add"); if(addBtn) addBtn.onclick=()=>openCutModalAdd('3d');
     window.__tattiesAdd2D=()=>openCutModalAdd('2d');   // 2D-FAB opent dezelfde toevoeg-flow
@@ -9623,10 +9666,13 @@ async function verwijderVoorbeelden() {
       }
       if(pendingNew){
         const naamEl=document.getElementById("cmNaam"); const naam=((naamEl&&naamEl.value)||"").trim();
-        if(!naam){ toast(tr('ui.naam_verplicht')); if(naamEl) naamEl.focus(); return; }
+        if(!naam){ toast(tr('ui.naam_verplicht'));
+          if(naamEl){ naamEl.setAttribute('aria-invalid','true'); naamEl.focus();
+            naamEl.addEventListener('input',()=>naamEl.removeAttribute('aria-invalid'),{once:true}); }
+          return; }
         const v=id=>{ const el=document.getElementById(id); return el?el.value:""; };
         const info={ artiest:v("cmArtiest").trim(), studio:v("cmStudio").trim(), stijl:v("cmStijl").trim(),
-                 kosten:Math.max(0,parseFloat(v("cmKosten"))||0), datum:v("cmDatum") };
+                 kosten:Math.max(0,parseFloat(v("cmKosten"))||0), pijn:Math.min(5,Math.max(0,parseInt(v("cmPijn"),10)||0)), datum:v("cmDatum") };
         const kunst3d={ srcUrl:(origImg?origImg.src:null), lasso:lassoPts.slice(), thresh:+cutThresh.value,
                  spread:(cutSpread?+cutSpread.value:55), bgColor:(bgPick?{r:bgPick.r,g:bgPick.g,b:bgPick.b}:null), bg:bgRemove.checked };
         if(addDoel==='2d'){
@@ -9786,7 +9832,7 @@ async function verwijderVoorbeelden() {
       }
     }
     if(typeof renderMarkers==="function"){ try{renderMarkers();}catch(_){} }
-    if(n) toast(tr('ui.hersteld').replace('{n}',n).replace('{s}',n>1?'s':''));
+    // Herstel-melding ('N tattoos hersteld') bewust uitgezet — zie 'later'-lijst (hele herstel-feature evalueren).
   }
 
   /* ---- render-lus ---- */
