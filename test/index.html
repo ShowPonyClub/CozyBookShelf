@@ -255,7 +255,7 @@ main > section{animation:opkomen .3s ease both}
 .inst-duo{display:flex;gap:14px;align-items:flex-start}
 .inst-duo-kol{flex:1;min-width:0}
 .silhouet-keuze.compact{width:100%}
-.silhouet-keuze.compact button{flex:1;min-height:32px;padding:5px 6px;font-size:.76rem}
+.silhouet-keuze.compact button{flex:1;min-height:40px;padding:8px 6px;font-size:.78rem}
 /* Naam-veld met de compacte type-keuze (Gezet / Wishlist) ernaast */
 .naam-rij{display:flex;align-items:stretch;gap:8px}
 .naam-rij input{flex:1;min-width:0}
@@ -920,8 +920,8 @@ form label{text-transform:none;letter-spacing:.005em;font-size:.8rem;color:var(-
     <p class="onderkop">show me your tatties</p>
   </div>
   <div class="kop-knoppen">
-    <button class="icoonknop" id="btn-3d" aria-label="3D-weergave" title="3D-weergave" style="font-weight:700;font-size:13px">3D</button>
-    <button class="icoonknop" id="btn-2d" aria-label="2D-kaart" title="2D-kaart" style="font-weight:700;font-size:13px">2D</button>
+    <button class="icoonknop" id="btn-3d" data-i18n-aria="aria.3dview" data-i18n-title="aria.3dview" aria-label="3D-weergave" title="3D-weergave" style="font-weight:700;font-size:13px">3D</button>
+    <button class="icoonknop" id="btn-2d" data-i18n-aria="aria.2dmap" data-i18n-title="aria.2dmap" aria-label="2D-kaart" title="2D-kaart" style="font-weight:700;font-size:13px">2D</button>
     <button class="icoonknop" id="btn-collectie" data-i18n-aria="aria.collectie" data-i18n-title="aria.collectie" aria-label="Collectie en wishlist" title="Collectie en wishlist"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/><circle cx="2.5" cy="6" r="0.6" fill="currentColor" stroke="none"/><circle cx="2.5" cy="12" r="0.6" fill="currentColor" stroke="none"/><circle cx="2.5" cy="18" r="0.6" fill="currentColor" stroke="none"/></svg></button>
     <button class="icoonknop" id="btn-stats" data-i18n-aria="aria.stats" data-i18n-title="aria.stats" aria-label="Statistieken" title="Statistieken"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 20V11M12 20V4M19 20v-7"/></svg></button>
     <button class="icoonknop" id="btn-instellingen" data-i18n-aria="aria.instellingen" data-i18n-title="aria.instellingen" aria-label="Instellingen" title="Instellingen"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"/></svg></button>
@@ -6064,6 +6064,7 @@ const I18N = {
   nl: {
     'aria.instellingen':'Instellingen','aria.collectie':'Collectie en wishlist','aria.stats':'Statistieken',
     'aria.sluiten':'Sluiten','aria.terug':'Terug','aria.bewerken':'Bewerken','aria.verwijderen':'Verwijderen',
+    'aria.3dview':'3D-weergave','aria.2dmap':'2D-kaart',
     'aria.filterwis':'Filter wissen','aria.bannersluit':'Banner sluiten','aria.annuleren':'Annuleren',
     'aria.bodymap':'Lichaamskaart — tik op een lichaamsdeel om in te zoomen','aria.zoeken':'Zoeken','aria.sorteren':'Sorteren',
     'aria.kiessilhouet':'Kies silhouet','aria.kieszijde':'Kies zijde','aria.colofwens':'Collectie of wishlist',
@@ -6206,6 +6207,7 @@ const I18N = {
   en: {
     'aria.instellingen':'Settings','aria.collectie':'Collection and wishlist','aria.stats':'Statistics',
     'aria.sluiten':'Close','aria.terug':'Back','aria.bewerken':'Edit','aria.verwijderen':'Delete',
+    'aria.3dview':'3D view','aria.2dmap':'2D map',
     'aria.filterwis':'Clear filter','aria.bannersluit':'Close banner','aria.annuleren':'Cancel',
     'aria.bodymap':'Body map — tap a body part to zoom in','aria.zoeken':'Search','aria.sorteren':'Sort',
     'aria.kiessilhouet':'Choose silhouette','aria.kieszijde':'Choose side','aria.colofwens':'Collection or wishlist',
@@ -6366,6 +6368,7 @@ function pasTaal(lang){
   euro = new Intl.NumberFormat(taal === 'en' ? 'en-IE' : 'nl-NL', { style: 'currency', currency: 'EUR' });
   vertaalStatisch();
   document.querySelectorAll('#taal-keuze button[data-taal]').forEach(b => b.classList.toggle('actief', b.dataset.taal === taal));
+  if (typeof tekenTinten === 'function') tekenTinten();   // huidskleur-aria's mee in de nieuwe taal
   if (huidigeView === 'collectie') renderLijst();
   else if (huidigeView === 'stats') openStats();
   else if (huidigeView === 'detail') renderDetail();
@@ -6698,7 +6701,7 @@ function pijnSterren(n, klein) {
 }
 function zoneLabel(id) {
   const z = BODY_PARTS.find(b => b.id === id);
-  if (!z) return id;
+  if (!z) return taal === 'en' ? 'Unknown' : 'Onbekend';   // onbekende/ontbrekende id netjes tonen
   return taal === 'en' ? (ZONE_EN[id] || z.label) : z.label;
 }
 function fmtDatum(iso) {
@@ -6932,8 +6935,8 @@ function kiesTint(kleur) {
 }
 function tekenHuidkiezer(container) {
   if (!container) return;
-  const swatches = HUIDTINTEN.map(c =>
-    `<button type="button" class="tint-swatch" data-tint="${c}" style="background:${c}" aria-label="Huidskleur"></button>`).join('');
+  const swatches = HUIDTINTEN.map((c, i) =>
+    `<button type="button" class="tint-swatch" data-tint="${c}" style="background:${c}" aria-label="${esc(tr('inst.huid'))} ${i + 1}/${HUIDTINTEN.length}"></button>`).join('');
   container.innerHTML = `<div class="tint-swatches">${swatches}</div>`;
   const markActief = () => container.querySelectorAll('.tint-swatch').forEach(b =>
     b.classList.toggle('actief', b.dataset.tint.toLowerCase() === huidtint.toLowerCase()));
@@ -7677,6 +7680,7 @@ function renderDetail() {
 
   const fotos = (t.fotos && t.fotos.length) ? t.fotos : (t.foto ? [t.foto] : []);
   const isWens = t.status === 'wens';
+  if (isWens && detailTab !== 'info') detailTab = 'info';   // wishlist: alleen Info (geen sessies/nazorg)
   const totaalSessieUren = (t.sessies || []).reduce((som, s) => som + (Number(s.duurUren) || 0), 0);
 
   let paneel = '';
@@ -7792,8 +7796,8 @@ function renderDetail() {
     ${fotos.length > 1 ? `<p class="galerij-hint">${tr('detail.galerijhint').replace('{n}', fotos.length)}</p>` : ''}
     <div class="tabs" role="tablist">
       <button role="tab" id="tab-info" aria-controls="tabpaneel" aria-selected="${detailTab === 'info'}" data-tab="info" class="${detailTab === 'info' ? 'actief' : ''}">${tr('tab.info')}</button>
-      <button role="tab" id="tab-sessies" aria-controls="tabpaneel" aria-selected="${detailTab === 'sessies'}" data-tab="sessies" class="${detailTab === 'sessies' ? 'actief' : ''}">${tr('tab.sessies')}</button>
-      <button role="tab" id="tab-nazorg" aria-controls="tabpaneel" aria-selected="${detailTab === 'nazorg'}" data-tab="nazorg" class="${detailTab === 'nazorg' ? 'actief' : ''}">${tr('tab.nazorg')}</button>
+      ${isWens ? '' : `<button role="tab" id="tab-sessies" aria-controls="tabpaneel" aria-selected="${detailTab === 'sessies'}" data-tab="sessies" class="${detailTab === 'sessies' ? 'actief' : ''}">${tr('tab.sessies')}</button>`}
+      ${isWens ? '' : `<button role="tab" id="tab-nazorg" aria-controls="tabpaneel" aria-selected="${detailTab === 'nazorg'}" data-tab="nazorg" class="${detailTab === 'nazorg' ? 'actief' : ''}">${tr('tab.nazorg')}</button>`}
     </div>
     <div class="paneel" id="tabpaneel" role="tabpanel" aria-labelledby="tab-${detailTab}">${paneel}</div>
   `;
@@ -9177,6 +9181,27 @@ async function verwijderVoorbeelden() {
   }
 
   /* ---- afbeelding als decal (buigt mee met het oppervlak) ---- */
+  // Verwijder decal-driehoeken die naar de ANDERE kant van het lichaam wijzen
+  // (DecalGeometry projecteert door dunne delen heen -> tattoo verschijnt anders
+  //  ook op buik/rug tegelijk). Normalen staan in wereldruimte (zie DecalGeometry).
+  function filterDecalDoorzicht(geo, fwd){
+    const pos=geo.attributes.position, nor=geo.attributes.normal, uv=geo.attributes.uv;
+    if(!pos || !nor) return;
+    const cnt=pos.count, np=[], nn=[], nu=[];
+    for(let i=0;i<cnt;i+=3){
+      let ax=0,ay=0,az=0;
+      for(let j=0;j<3;j++){ ax+=nor.getX(i+j); ay+=nor.getY(i+j); az+=nor.getZ(i+j); }
+      if(ax*fwd.x+ay*fwd.y+az*fwd.z <= -0.3) continue;   // wijst weg van de plaatsingskant
+      for(let j=0;j<3;j++){
+        np.push(pos.getX(i+j),pos.getY(i+j),pos.getZ(i+j));
+        nn.push(nor.getX(i+j),nor.getY(i+j),nor.getZ(i+j));
+        if(uv) nu.push(uv.getX(i+j),uv.getY(i+j));
+      }
+    }
+    geo.setAttribute('position', new THREE.Float32BufferAttribute(np,3));
+    geo.setAttribute('normal', new THREE.Float32BufferAttribute(nn,3));
+    if(uv) geo.setAttribute('uv', new THREE.Float32BufferAttribute(nu,2));
+  }
   function makeImage(point, normal, rotDeg, sizeM, tex, mesh){
     const aspect=(tex&&tex.image&&tex.image.width) ? (tex.image.height/tex.image.width) : 1;
     if(THREE.DecalGeometry && mesh){
@@ -9185,8 +9210,9 @@ async function verwijderVoorbeelden() {
         helper.position.copy(point); helper.lookAt(point.clone().add(normal));
         helper.rotateZ(rotDeg*Math.PI/180); helper.updateMatrixWorld();
         mesh.updateWorldMatrix(true,false);
-        const size=new THREE.Vector3(sizeM, sizeM*aspect, Math.max(0.05, sizeM*1.2));
+        const size=new THREE.Vector3(sizeM, sizeM*aspect, Math.max(0.04, sizeM*0.8));
         const geo=new THREE.DecalGeometry(mesh, point, helper.rotation, size);
+        filterDecalDoorzicht(geo, normal);   // doorgetrokken (andere kant) driehoeken weghalen
         if(geo.attributes.position && geo.attributes.position.count>0){
           const mat=new THREE.MeshBasicMaterial({map:tex, transparent:true, alphaTest:0.5, side:THREE.DoubleSide,
             depthTest:true, depthWrite:false, polygonOffset:true, polygonOffsetFactor:-6});
