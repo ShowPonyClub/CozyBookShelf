@@ -1160,11 +1160,21 @@ form label{text-transform:none;letter-spacing:.005em;font-size:.8rem;color:var(-
             </div>
             <span class="hintline" id="cmHint" style="display:block;margin:0 0 6px">Teken met je vinger een lijn rond de tattoo.</span>
             <div class="cm-prev" id="cutPrev"><canvas id="cutCanvas" class="cutcv"></canvas><canvas id="lassoCanvas" class="lassocv"></canvas></div>
-            <div class="cutrow bg-controls">
-              <label class="chk" style="display:inline-flex;margin:0"><input type="checkbox" id="bgRemove"> <span data-i18n="ui.achtergrond_weghalen">Achtergrond weghalen</span></label>
-              <button id="bgPickBtn" class="linkbtn">&#128167; <span data-i18n="ui.achtergrondkleur">Achtergrondkleur kiezen</span></button>
-              <span id="bgSwatch" class="bgswatch" title="gekozen achtergrondkleur"></span>
-              <button id="bgPickReset" class="linkbtn" data-i18n="ui.auto">Auto</button>
+            <label class="chk" style="display:inline-flex;margin:6px 0 2px"><input type="checkbox" id="bgRemove"> <span data-i18n="ui.huid_weghalen">Huid weghalen</span></label>
+            <div id="cmHuidOpties" hidden>
+              <div class="silhouet-keuze compact cm-modus" id="cmHuidMethode" role="group" data-i18n-aria="ui.huid_methode" aria-label="Methode">
+                <button type="button" data-hmethode="kleur" data-i18n="ui.huid_kleur">Kleur</button>
+                <button type="button" data-hmethode="helder" data-i18n="ui.huid_helder">Helderheid</button>
+              </div>
+              <div class="cutrow bg-controls" id="cmKleurRij">
+                <button id="bgPickBtn" class="linkbtn">&#128167; <span data-i18n="ui.huidskleur_prikken">Huidskleur prikken</span></button>
+                <span id="bgSwatch" class="bgswatch" title="gekozen huidskleur"></span>
+                <button id="bgPickReset" class="linkbtn" data-i18n="ui.auto">Auto</button>
+              </div>
+              <div class="label" id="cmGevLabel" data-i18n="ui.gevoeligheid">Gevoeligheid &mdash; sleep tot de huid weg is</div>
+              <input id="cutThresh" type="range" min="60" max="252" value="170" class="slider" data-i18n-aria="ui.gevoeligheid" aria-label="Gevoeligheid">
+              <div class="label" data-i18n="ui.zachte_randen">Zachte randen meenemen</div>
+              <input id="cutSpread" type="range" min="0" max="160" value="55" class="slider" data-i18n-aria="ui.zachte_randen" aria-label="Zachte randen meenemen">
             </div>
             <div class="cutrow cut-tools">
               <button id="spiegelBtn" class="linkbtn">&#8644; <span data-i18n="ui.spiegelen">Spiegelen</span></button>
@@ -1172,10 +1182,6 @@ form label{text-transform:none;letter-spacing:.005em;font-size:.8rem;color:var(-
               <button id="lassoUndo" class="linkbtn">&#8617; <span data-i18n="ui.ongedaan">Ongedaan</span></button>
               <button id="cropReset" class="linkbtn" data-i18n="ui.reset_uitsnede">Reset uitsnede</button>
             </div>
-            <div class="label" data-i18n="ui.gevoeligheid">Gevoeligheid &mdash; sleep tot de achtergrond weg is</div>
-            <input id="cutThresh" type="range" min="60" max="252" value="200" class="slider" data-i18n-aria="ui.gevoeligheid" aria-label="Gevoeligheid">
-            <div class="label" data-i18n="ui.zachte_randen">Zachte randen meenemen</div>
-            <input id="cutSpread" type="range" min="0" max="160" value="55" class="slider" data-i18n-aria="ui.zachte_randen" aria-label="Zachte randen meenemen">
           </div>
         </div>
         <div class="cm-foot">
@@ -6166,7 +6172,9 @@ const I18N = {
     'ui.snijmethode':'Snijmethode','ui.snij_vrij':'Vrij tekenen','ui.snij_punten':'Punten',
     'ui.cut_hint_vrij':'Teken met je vinger een doorlopende lijn rond de tattoo.',
     'ui.cut_hint_punten':'Tik rondom de tattoo om punten te zetten; sleep een punt om bij te stellen.',
-    'ui.gevoeligheid':'Gevoeligheid — sleep tot de achtergrond weg is','ui.zachte_randen':'Zachte randen meenemen',
+    'ui.gevoeligheid':'Gevoeligheid — sleep tot de huid weg is','ui.zachte_randen':'Zachte randen meenemen',
+    'ui.huid_weghalen':'Huid weghalen','ui.huid_methode':'Methode','ui.huid_kleur':'Kleur','ui.huid_helder':'Helderheid',
+    'ui.huidskleur_prikken':'Huidskleur prikken','ui.drempel':'Drempel — sleep tot de huid weg is','ui.tik_huid':'Tik op de huid in de foto',
     'ui.achtergrondkleur':'Achtergrondkleur kiezen','ui.auto':'Auto',
     'ui.tattoo_toevoegen':'Tattoo toevoegen','ui.tattoo_aanpassen':'Tattoo aanpassen',
     'ui.beginstand':'Beginstand','ui.laden':'Laden…','ui.vergrendelen':'Vergrendelen','ui.verwijderen':'Verwijderen',
@@ -6318,7 +6326,9 @@ const I18N = {
     'ui.snijmethode':'Cut method','ui.snij_vrij':'Freehand','ui.snij_punten':'Points',
     'ui.cut_hint_vrij':'Draw a continuous line around the tattoo with your finger.',
     'ui.cut_hint_punten':'Tap around the tattoo to place points; drag a point to adjust.',
-    'ui.gevoeligheid':'Sensitivity — drag until the background is gone','ui.zachte_randen':'Include soft edges',
+    'ui.gevoeligheid':'Sensitivity — drag until the skin is gone','ui.zachte_randen':'Include soft edges',
+    'ui.huid_weghalen':'Remove skin','ui.huid_methode':'Method','ui.huid_kleur':'Colour','ui.huid_helder':'Brightness',
+    'ui.huidskleur_prikken':'Pick skin colour','ui.drempel':'Threshold — drag until the skin is gone','ui.tik_huid':'Tap the skin in the photo',
     'ui.achtergrondkleur':'Pick background colour','ui.auto':'Auto',
     'ui.tattoo_toevoegen':'Add tattoo','ui.tattoo_aanpassen':'Edit tattoo',
     'ui.beginstand':'Reset view','ui.laden':'Loading…','ui.vergrendelen':'Lock','ui.verwijderen':'Delete',
@@ -9646,6 +9656,14 @@ async function verwijderVoorbeelden() {
     document.querySelectorAll('#cmModus button[data-modus]').forEach(b=>b.classList.toggle('actief', b.dataset.modus===cutModus));
     const h=document.getElementById('cmHint'); if(h) h.textContent=tr(cutModus==='vrij'?'ui.cut_hint_vrij':'ui.cut_hint_punten');
   }
+  let huidMethode='kleur';   // 'kleur' = huidskleur prikken, 'helder' = helderheidsdrempel
+  function zetHuidUI(){
+    const aan = bgRemove && bgRemove.checked;
+    const opt=document.getElementById('cmHuidOpties'); if(opt) opt.hidden=!aan;
+    document.querySelectorAll('#cmHuidMethode button[data-hmethode]').forEach(b=>b.classList.toggle('actief', b.dataset.hmethode===huidMethode));
+    const kr=document.getElementById('cmKleurRij'); if(kr) kr.hidden=(huidMethode!=='kleur');
+    const gl=document.getElementById('cmGevLabel'); if(gl) gl.textContent=tr(huidMethode==='helder'?'ui.drempel':'ui.gevoeligheid');
+  }
   let wandMode=false;        // toverstaf actief: volgende tik knipt een aaneengesloten gebied weg
   let wandSeeds=[];          // {nx,ny} klikpunten voor de toverstaf
   const WAND_TOL2=7500;      // kleurtolerantie^2 (≈50/kanaal) voor de toverstaf
@@ -9694,7 +9712,7 @@ async function verwijderVoorbeelden() {
     addDoel = doel || '3d';
     pendingNew=true; pendingPlace=null; pendingEdit=null; pendingPlace2D=null;
     origImg=null; lassoPts=[]; imgTexture=null; baseCanvas=null; flipH=false; zetSpiegelUI();
-    wandSeeds=[]; wandMode=false; zetWandUI(); lassoDragIdx=-1; cutModus='vrij'; drawingFree=false; zetSnijModusUI(); resetZoom();
+    wandSeeds=[]; wandMode=false; zetWandUI(); lassoDragIdx=-1; cutModus='vrij'; drawingFree=false; zetSnijModusUI(); resetZoom(); huidMethode='kleur'; if(bgRemove) bgRemove.checked=false;
     bgPickMode=false; setBgPick(null); if(bgPickBtn)bgPickBtn.classList.remove("on");
     if(cutSpread) cutSpread.value=55;
     cmTitle.textContent=tr('ui.tattoo_toevoegen'); cmPlaceBtn.textContent=tr('ui.toevoegen');
@@ -9710,11 +9728,12 @@ async function verwijderVoorbeelden() {
     cutModal.classList.toggle("cm-compact", !b);
     const kies=document.getElementById("cmChoose"); const kt=kies&&kies.querySelector("span");
     if(kt) kt.textContent = b ? tr('ui.andere_foto') : tr('ui.foto_toevoegen');
+    zetHuidUI();
   }
   function openCutModal(point, normal, mesh){
     pendingPlace={point, normal, mesh}; pendingEdit=null; pendingPlace2D=null;
     origImg=null; lassoPts=[]; imgTexture=null; baseCanvas=null; flipH=false; zetSpiegelUI();
-    wandSeeds=[]; wandMode=false; zetWandUI(); lassoDragIdx=-1; cutModus='vrij'; drawingFree=false; zetSnijModusUI(); resetZoom();
+    wandSeeds=[]; wandMode=false; zetWandUI(); lassoDragIdx=-1; cutModus='vrij'; drawingFree=false; zetSnijModusUI(); resetZoom(); huidMethode='kleur'; if(bgRemove) bgRemove.checked=false;
     bgPickMode=false; setBgPick(null); if(bgPickBtn)bgPickBtn.classList.remove("on");
     if(cutSpread) cutSpread.value=55;
     cmTitle.textContent=tr('ui.tattoo_toevoegen'); cmPlaceBtn.textContent=tr('ui.tattoo_toevoegen');
@@ -9727,7 +9746,7 @@ async function verwijderVoorbeelden() {
     if(!k || !k.srcUrl){ toast(tr('ui.geen_foto_bewaard')); return; }
     pendingPlace=null; pendingEdit=m; pendingPlace2D=null;
     origImg=null; imgTexture=null; baseCanvas=null; lassoPts=[]; flipH=!!k.flipH; zetSpiegelUI();
-    wandSeeds=(k.wand||[]).slice(); wandMode=false; zetWandUI(); lassoDragIdx=-1; cutModus='vrij'; drawingFree=false; zetSnijModusUI(); resetZoom();
+    wandSeeds=(k.wand||[]).slice(); wandMode=false; zetWandUI(); lassoDragIdx=-1; cutModus='vrij'; drawingFree=false; zetSnijModusUI(); resetZoom(); huidMethode=k.huidMethode||'kleur';
     cmTitle.textContent=tr('ui.tattoo_aanpassen'); cmPlaceBtn.textContent=tr('form.opslaan');
     bgRemove.checked = (k.bg!==false);
     if(k.thresh!=null) cutThresh.value=k.thresh;
@@ -9748,7 +9767,7 @@ async function verwijderVoorbeelden() {
     if(!k || !k.srcUrl){ toast(tr('ui.geen_foto_bewaard')); return; }
     pendingPlace=null; pendingEdit=null; pendingPlace2D=null; pendingNew=null; pendingEdit2D=rec;
     origImg=null; imgTexture=null; baseCanvas=null; lassoPts=[]; flipH=!!k.flipH; zetSpiegelUI();
-    wandSeeds=(k.wand||[]).slice(); wandMode=false; zetWandUI(); lassoDragIdx=-1; cutModus='vrij'; drawingFree=false; zetSnijModusUI(); resetZoom();
+    wandSeeds=(k.wand||[]).slice(); wandMode=false; zetWandUI(); lassoDragIdx=-1; cutModus='vrij'; drawingFree=false; zetSnijModusUI(); resetZoom(); huidMethode=k.huidMethode||'kleur';
     cmTitle.textContent=tr('ui.tattoo_aanpassen'); cmPlaceBtn.textContent=tr('form.opslaan');
     bgRemove.checked=(k.bg!==false);
     if(k.thresh!=null) cutThresh.value=k.thresh;
@@ -9764,12 +9783,13 @@ async function verwijderVoorbeelden() {
   }
   function closeCutModal(){ cutModal.classList.remove("on"); pendingPlace=null; pendingEdit=null; pendingPlace2D=null; pendingNew=null; pendingEdit2D=null; toonCutInstellingen(false); toonInfo(false);
     if(imgTexture && imgTexture.dispose){ imgTexture.dispose(); } imgTexture=null;   // niet-geplaatste textuur vrijgeven (geen lek)
+    cutPointers.clear(); pinch=null; drawingFree=false; lassoDragIdx=-1; clearTimeout(wheelEind);
   }
   // 2D: open dezelfde uitsnede-modal voor een dubbeltik op de 2D-kaart
   function openCutModal2D(x,y,zone,side){
     pendingPlace2D={x,y,zone,side}; pendingPlace=null; pendingEdit=null;
     origImg=null; lassoPts=[]; imgTexture=null; baseCanvas=null; flipH=false; zetSpiegelUI();
-    wandSeeds=[]; wandMode=false; zetWandUI(); lassoDragIdx=-1; cutModus='vrij'; drawingFree=false; zetSnijModusUI(); resetZoom();
+    wandSeeds=[]; wandMode=false; zetWandUI(); lassoDragIdx=-1; cutModus='vrij'; drawingFree=false; zetSnijModusUI(); resetZoom(); huidMethode='kleur'; if(bgRemove) bgRemove.checked=false;
     bgPickMode=false; setBgPick(null); if(bgPickBtn)bgPickBtn.classList.remove("on");
     if(cutSpread) cutSpread.value=55;
     cmTitle.textContent=tr('ui.tattoo_toevoegen'); cmPlaceBtn.textContent=tr('ui.tattoo_toevoegen');
@@ -9849,6 +9869,38 @@ async function verwijderVoorbeelden() {
     x.putImageData(d,0,0);
   }
 
+  // Huid weghalen — KLEUR: verwijder overal pixels die qua kleur dicht bij de (geprikte
+  // of automatisch geschatte) huidskleur liggen. Globaal (geen rand-connectie), met zachte rand.
+  function removeSkinColor(x, W, H, skin, threshVal, spreadVal){
+    const d=x.getImageData(0,0,W,H), p=d.data, N=W*H;
+    let sr,sg,sb;
+    if(skin){ sr=skin.r; sg=skin.g; sb=skin.b; }
+    else { sr=sg=sb=0; let n=0; const samp=(xx,yy)=>{const i=(yy*W+xx)*4; sr+=p[i];sg+=p[i+1];sb+=p[i+2];n++;};
+      for(let xx=0;xx<W;xx++){samp(xx,0);samp(xx,H-1);} for(let yy=0;yy<H;yy++){samp(0,yy);samp(W-1,yy);} sr/=n;sg/=n;sb/=n; }
+    const norm=(clamp(+threshVal,60,252)-60)/192;          // 0..1
+    const tol=(40+norm*130)*1.732;                          // euclidische RGB-afstand (~40..170/kanaal)
+    const spread=((spreadVal!=null && !isNaN(+spreadVal)) ? +spreadVal : 55)*1.732;
+    const cap=tol+spread;
+    for(let idx=0;idx<N;idx++){ const i=idx*4; if(p[i+3]===0) continue;
+      const dr=p[i]-sr,dg=p[i+1]-sg,db=p[i+2]-sb, dist=Math.sqrt(dr*dr+dg*dg+db*db);
+      if(dist<=tol) p[i+3]=0;
+      else if(dist<cap){ const t=(dist-tol)/((cap-tol)||1); p[i+3]=Math.round(p[i+3]*Math.max(0,Math.min(1,t))); } }
+    x.putImageData(d,0,0);
+  }
+  // Huid weghalen — HELDERHEID: lichte pixels (huid) weg, donkere (inkt) blijven, met zachte overgang.
+  function removeSkinLuma(x, W, H, threshVal, spreadVal){
+    const d=x.getImageData(0,0,W,H), p=d.data, N=W*H;
+    const norm=(clamp(+threshVal,60,252)-60)/192;          // 0..1
+    const hi=90+norm*150;                                   // drempel 90..240 (lichter dan dit = huid)
+    const spread=(spreadVal!=null && !isNaN(+spreadVal)) ? +spreadVal : 55;
+    const lo=Math.max(0, hi-spread-1);
+    for(let idx=0;idx<N;idx++){ const i=idx*4; if(p[i+3]===0) continue;
+      const L=0.299*p[i]+0.587*p[i+1]+0.114*p[i+2];
+      let f=(hi-L)/((hi-lo)||1); f=Math.max(0,Math.min(1,f));   // 1=houden (donker), 0=weg (licht)
+      p[i+3]=Math.round(p[i+3]*f); }
+    x.putImageData(d,0,0);
+  }
+
   function buildFullCanvas(){
     // Schaal naar werkbare grootte: flood-fill is per-pixel, dus cap op ~800px
     // houdt het snel en zuinig op mobiel. Lasso werkt op genormaliseerde
@@ -9862,7 +9914,10 @@ async function verwijderVoorbeelden() {
     if(flipH){ x.translate(W,0); x.scale(-1,1); }
     x.drawImage(origImg,0,0,W,H);
     x.setTransform(1,0,0,1,0,0);
-    if(bgRemove.checked) floodFillBg(x, W, H, +cutThresh.value, (cutSpread?+cutSpread.value:55), bgPick);
+    if(bgRemove.checked){
+      if(huidMethode==='helder') removeSkinLuma(x, W, H, +cutThresh.value, (cutSpread?+cutSpread.value:55));
+      else removeSkinColor(x, W, H, bgPick, +cutThresh.value, (cutSpread?+cutSpread.value:55));
+    }
     if(wandSeeds.length) applyWand(x, W, H, wandSeeds);
     return c;
   }
@@ -9963,20 +10018,21 @@ async function verwijderVoorbeelden() {
     const laadFotoBestand=(input)=>{
       const f=input.files[0]; if(!f)return;
       const rd=new FileReader();
-      rd.onload=ev=>{ const im=new Image(); im.onload=()=>{ origImg=im; lassoPts=[]; toonCutInstellingen(true); rebuildBase(); updateCutout();
+      rd.onload=ev=>{ const im=new Image(); im.onload=()=>{ origImg=im; lassoPts=[]; lassoDragIdx=-1; drawingFree=false; cutPointers.clear(); pinch=null; resetZoom(); toonCutInstellingen(true); rebuildBase(); updateCutout();
         if(pendingNew) toonInfo(true);
         toast(tr('ui.teken_lijn')); }; im.src=ev.target.result; };
       rd.readAsDataURL(f); input.value="";
     };
     imgInput.onchange=()=>laadFotoBestand(imgInput);
     imgInputCamera.onchange=()=>laadFotoBestand(imgInputCamera);
-    const onCutChange=()=>{ rebuildBase(); updateCutout(); };
+    const onCutChange=()=>{ zetHuidUI(); rebuildBase(); updateCutout(); };
     // checkbox: 'input' vuurt niet betrouwbaar op mobiel (iOS) -> ook 'change'
     bgRemove.addEventListener("change", onCutChange);
     bgRemove.addEventListener("input", onCutChange);
     cutThresh.addEventListener("input", onCutChange);
     cutThresh.addEventListener("change", onCutChange);
     if(cutSpread){ cutSpread.addEventListener("input", onCutChange); cutSpread.addEventListener("change", onCutChange); }
+    document.querySelectorAll('#cmHuidMethode button[data-hmethode]').forEach(b=>b.onclick=()=>{ huidMethode=b.dataset.hmethode; zetHuidUI(); onCutChange(); });
 
     function updateSwatch(){
       if(!bgSwatch) return;
@@ -9987,7 +10043,7 @@ async function verwijderVoorbeelden() {
     if(bgPickBtn) bgPickBtn.onclick=()=>{
       bgPickMode=!bgPickMode;
       bgPickBtn.classList.toggle("on", bgPickMode);
-      toast(bgPickMode ? tr('ui.tik_achtergrond') : tr('ui.pipet_uit'));
+      toast(bgPickMode ? tr('ui.tik_huid') : tr('ui.pipet_uit'));
     };
     if(bgPickReset) bgPickReset.onclick=()=>{ bgPick=null; bgPickMode=false; if(bgPickBtn)bgPickBtn.classList.remove("on"); updateSwatch(); onCutChange(); };
     updateSwatch();
@@ -9998,7 +10054,8 @@ async function verwijderVoorbeelden() {
       e.preventDefault();
       if(bgPickMode){                       // pipet: kleur kiezen i.p.v. lasso tekenen
         const pt=ptFrom(e);
-        const sx=Math.min(origImg.naturalWidth-1, Math.max(0, Math.round(pt.nx*origImg.naturalWidth)));
+        const nx = flipH ? (1-pt.nx) : pt.nx;             // weergave is gespiegeld bij flipH -> bron-x omdraaien
+        const sx=Math.min(origImg.naturalWidth-1, Math.max(0, Math.round(nx*origImg.naturalWidth)));
         const sy=Math.min(origImg.naturalHeight-1, Math.max(0, Math.round(pt.ny*origImg.naturalHeight)));
         const sc=document.createElement("canvas"); sc.width=1; sc.height=1;
         const sx2=sc.getContext("2d",{willReadFrequently:true});
@@ -10097,7 +10154,7 @@ async function verwijderVoorbeelden() {
         if(imgTexture && imgTexture.dispose) imgTexture.dispose(); imgTexture=null;
         rec.kunst=rec.kunst||{}; rec.kunst.src=src; rec.kunst.aspect=aspect;
         rec.kunst3d={ srcUrl:(origImg?origImg.src:null), lasso:lassoPts.slice(), thresh:+cutThresh.value,
-                 spread:(cutSpread?+cutSpread.value:55), bgColor:(bgPick?{r:bgPick.r,g:bgPick.g,b:bgPick.b}:null), bg:bgRemove.checked, flipH:flipH, wand:wandSeeds.slice() };
+                 spread:(cutSpread?+cutSpread.value:55), bgColor:(bgPick?{r:bgPick.r,g:bgPick.g,b:bgPick.b}:null), bg:bgRemove.checked, flipH:flipH, wand:wandSeeds.slice(), huidMethode:huidMethode };
         try{ await saveTattoo(rec); }catch(e){ console.error(e); toast(tr('toast.opslaanmislukt')+(e&&e.message?e.message:tr('ui.fout'))); }
         if(typeof renderMarkers==="function"){ try{renderMarkers();}catch(_){} }
         toast(tr('ui.tattoo_bijgewerkt'));
@@ -10113,7 +10170,7 @@ async function verwijderVoorbeelden() {
         const info={ artiest:v("cmArtiest").trim(), studio:v("cmStudio").trim(), stijl:v("cmStijl").trim(),
                  kosten:Math.max(0,parseFloat(v("cmKosten"))||0), pijn:Math.min(5,Math.max(0,parseInt(v("cmPijn"),10)||0)), datum:v("cmDatum") };
         const kunst3d={ srcUrl:(origImg?origImg.src:null), lasso:lassoPts.slice(), thresh:+cutThresh.value,
-                 spread:(cutSpread?+cutSpread.value:55), bgColor:(bgPick?{r:bgPick.r,g:bgPick.g,b:bgPick.b}:null), bg:bgRemove.checked, flipH:flipH, wand:wandSeeds.slice() };
+                 spread:(cutSpread?+cutSpread.value:55), bgColor:(bgPick?{r:bgPick.r,g:bgPick.g,b:bgPick.b}:null), bg:bgRemove.checked, flipH:flipH, wand:wandSeeds.slice(), huidMethode:huidMethode };
         if(addDoel==='2d'){
           const cv=imgTexture.image; const src=canvasToPNG(cv,700);
           const aspect=(cv&&cv.width)?(cv.height/cv.width):1;
@@ -10138,7 +10195,7 @@ async function verwijderVoorbeelden() {
             naam:"Tattoo", status:"gezet", zijde:pp.side, lichaamsdeel:pp.zone,
             positie:{x:pp.x,y:pp.y},
             kunst:{ src, schaal:24, aspect, rotatie:0 },
-            kunst3d:{ srcUrl:(origImg?origImg.src:null), lasso:lassoPts.slice(), thresh:+cutThresh.value, spread:(cutSpread?+cutSpread.value:55), bgColor:(bgPick?{r:bgPick.r,g:bgPick.g,b:bgPick.b}:null), bg:bgRemove.checked, flipH:flipH, wand:wandSeeds.slice() }
+            kunst3d:{ srcUrl:(origImg?origImg.src:null), lasso:lassoPts.slice(), thresh:+cutThresh.value, spread:(cutSpread?+cutSpread.value:55), bgColor:(bgPick?{r:bgPick.r,g:bgPick.g,b:bgPick.b}:null), bg:bgRemove.checked, flipH:flipH, wand:wandSeeds.slice(), huidMethode:huidMethode }
           });
           await saveTattoo(rec);
           if(typeof tattoos!=="undefined" && Array.isArray(tattoos)) tattoos.push(rec);
@@ -10154,7 +10211,7 @@ async function verwijderVoorbeelden() {
         if(m.tex && m.tex!==imgTexture && m.tex.dispose) m.tex.dispose();   // oude textuur vrijgeven
         m.tex=imgTexture; rebuildMarker(m);
         if(m.rec){
-          m.rec.kunst3d={ srcUrl:(origImg?origImg.src:null), lasso:lassoPts.slice(), thresh:+cutThresh.value, spread:(cutSpread?+cutSpread.value:55), bgColor:(bgPick?{r:bgPick.r,g:bgPick.g,b:bgPick.b}:null), bg:bgRemove.checked, flipH:flipH, wand:wandSeeds.slice() };
+          m.rec.kunst3d={ srcUrl:(origImg?origImg.src:null), lasso:lassoPts.slice(), thresh:+cutThresh.value, spread:(cutSpread?+cutSpread.value:55), bgColor:(bgPick?{r:bgPick.r,g:bgPick.g,b:bgPick.b}:null), bg:bgRemove.checked, flipH:flipH, wand:wandSeeds.slice(), huidMethode:huidMethode };
           try{ await saveTattoo(m.rec); toast(tr('ui.tattoo_bijgewerkt')); }
           catch(err){ console.error(err); toast(tr('toast.opslaanmislukt')+(err&&err.message?err.message:tr('ui.fout'))); }
         }
@@ -10173,7 +10230,7 @@ async function verwijderVoorbeelden() {
           naam:"Tattoo", status:"gezet", zijde:nz.side, lichaamsdeel:nz.zone,
           positie3d:{ point:[pp.point.x,pp.point.y,pp.point.z], normal:[pp.normal.x,pp.normal.y,pp.normal.z],
             rot, size, gender:currentGender, zone:nz.zone, side:nz.side },
-          kunst3d:{ srcUrl:(origImg?origImg.src:null), lasso:lassoPts.slice(), thresh:+cutThresh.value, spread:(cutSpread?+cutSpread.value:55), bgColor:(bgPick?{r:bgPick.r,g:bgPick.g,b:bgPick.b}:null), bg:bgRemove.checked, flipH:flipH, wand:wandSeeds.slice() }
+          kunst3d:{ srcUrl:(origImg?origImg.src:null), lasso:lassoPts.slice(), thresh:+cutThresh.value, spread:(cutSpread?+cutSpread.value:55), bgColor:(bgPick?{r:bgPick.r,g:bgPick.g,b:bgPick.b}:null), bg:bgRemove.checked, flipH:flipH, wand:wandSeeds.slice(), huidMethode:huidMethode }
         });
         sync2D(rec, pp.point, nz.side, rot, size, imgTexture);
         await saveTattoo(rec);
@@ -10207,7 +10264,8 @@ async function verwijderVoorbeelden() {
         fx.drawImage(im,0,0,FW,FH);
         fx.setTransform(1,0,0,1,0,0);
         if(k.bg!==false){
-          floodFillBg(fx, FW, FH, (k.thresh!=null?+k.thresh:200), (k.spread!=null?+k.spread:55), (k.bgColor||null));
+          if((k.huidMethode||'kleur')==='helder') removeSkinLuma(fx, FW, FH, (k.thresh!=null?+k.thresh:170), (k.spread!=null?+k.spread:55));
+          else removeSkinColor(fx, FW, FH, (k.bgColor||null), (k.thresh!=null?+k.thresh:170), (k.spread!=null?+k.spread:55));
         }
         if(k.wand && k.wand.length) applyWand(fx, FW, FH, k.wand);
         const lasso=k.lasso||[]; let shown=full;
