@@ -770,18 +770,20 @@ form label,
 .t3d-tools{display:flex;align-items:center;gap:10px;padding:2px 2px 6px;}
 .t3d-tools .t3d-label{font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:#8b95a3;white-space:nowrap;}
 .t3d-tools input[type=range]{flex:1;accent-color:#e0533d;height:22px;cursor:pointer;}
-.t3d-editbar{position:absolute;right:12px;bottom:16px;display:none;flex-direction:column;align-items:stretch;gap:8px;
-  background:var(--kaart);border:1px solid var(--rand);border-radius:12px;padding:12px;z-index:5;min-width:160px;max-width:60%;box-shadow:0 6px 20px rgba(0,0,0,.25);}
+/* Compacte horizontale bewerkbalk onderaan het model/de kaart */
+.t3d-editbar{position:absolute;left:8px;right:8px;bottom:8px;display:none;flex-direction:row;flex-wrap:wrap;align-items:center;gap:8px 10px;
+  background:var(--kaart);border:1px solid var(--rand);border-radius:14px;padding:8px 10px;z-index:7;box-shadow:0 6px 20px rgba(0,0,0,.28);}
 .t3d-editbar.on{display:flex;}
-.t3d-editbar .eb-title{font-size:12px;font-weight:600;color:var(--tekst);text-align:center;}
-.t3d-editbar .eb-btns{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;}
-.t3d-editbar .eb-btns button{flex:1;min-width:0;height:auto;padding:9px 12px;background:var(--veldbg);border:1px solid var(--rand);color:var(--tekst);border-radius:8px;font-size:16px;cursor:pointer;font-family:inherit;text-align:center;}
-.t3d-editbar .eb-btns .eb-done{flex-basis:100%;font-size:13px;}
+.t3d-editbar .eb-title,.t3d-editbar .eb-hint{display:none;}   /* slim: titel + hint verbergen */
+.t3d-editbar .eb-btns{display:flex;flex-wrap:wrap;gap:6px;}
+.t3d-editbar .eb-btns button{min-width:0;height:auto;padding:9px 12px;background:var(--veldbg);border:1px solid var(--rand);color:var(--tekst);border-radius:8px;font-size:16px;line-height:1;cursor:pointer;font-family:inherit;text-align:center;}
 .t3d-editbar .eb-btns button:hover{border-color:var(--accent);}
 .t3d-editbar .eb-btns button.on{border-color:var(--accent);background:rgba(142,113,240,.14);color:var(--accent);}
-.t3d-editbar .eb-done{color:#fff!important;background:#e0533d!important;border-color:#e0533d!important;font-weight:600;}
 .t3d-editbar .eb-af{color:#fff!important;background:#2e9e4f!important;border-color:#2e9e4f!important;font-weight:700;font-size:18px;}
-.t3d-editbar .eb-hint{font-size:10px;color:var(--gedempt);text-align:center;}
+.t3d-editbar .eb-opacity{display:flex;align-items:center;gap:8px;flex:1;min-width:130px;}
+.t3d-editbar .eb-opacity .eb-op-label{font-size:10px;color:var(--gedempt);text-transform:uppercase;letter-spacing:.05em;white-space:nowrap;}
+.t3d-editbar .eb-opacity input[type=range]{flex:1;min-width:0;}
+@media (pointer:coarse){ .t3d-editbar .eb-scarot{display:none;} }   /* schaal/draai: alleen op desktop (touch gebruikt pinch) */
 #t3d-reset{position:absolute;top:14px;right:14px;z-index:6;width:48px;height:48px;border-radius:50%;flex:none;
   background:var(--kaart);border:1px solid var(--rand);color:var(--tekst);font-size:18px;line-height:1;cursor:pointer;
   display:flex;align-items:center;justify-content:center;font-family:inherit;box-shadow:0 4px 14px rgba(0,0,0,.22);}
@@ -839,6 +841,7 @@ form label,
 .cutmodal .bgrow{justify-content:flex-start;margin-top:6px;}
 .cutmodal .bg-controls{justify-content:flex-start;flex-wrap:wrap;gap:8px 16px;margin:8px 0;}
 .cutmodal .cut-tools{justify-content:flex-start;flex-wrap:wrap;gap:8px 16px;}
+.cutmodal .cut-tip{font-size:11px;color:var(--gedempt);margin:8px 0 0;line-height:1.35;}
 .cutmodal .linkbtn.on{color:var(--accent);font-weight:600;}
 .cutmodal .bgswatch{width:18px;height:18px;border-radius:4px;border:1px solid var(--rand);visibility:hidden;flex:0 0 auto;}
 .cutmodal .chk{display:flex;align-items:center;gap:7px;font-size:12px;color:var(--gedempt);margin-top:8px;cursor:pointer;}
@@ -1004,14 +1007,14 @@ form label{text-transform:none;letter-spacing:.005em;font-size:.8rem;color:var(-
           <div class="eb-btns">
             <button type="button" data-act="info" data-i18n-title="ui.details" data-i18n-aria="ui.details" title="Details" aria-label="Details">&#9432;</button>
             <button type="button" data-act="lock" data-i18n-title="ui.vergrendelen" data-i18n-aria="ui.vergrendelen" title="Vergrendelen" aria-label="Vergrendelen">&#128274;</button>
-            <button type="button" data-act="del" data-i18n-title="ui.verwijderen" data-i18n-aria="ui.verwijderen" title="Verwijderen" aria-label="Verwijderen">&#128465;</button>
             <button type="button" data-act="recrop" data-i18n-title="ui.aanpassen_bijknippen" data-i18n-aria="ui.aanpassen_bijknippen" title="Aanpassen (bijknippen)" aria-label="Aanpassen">&#128295;</button>
-            <button type="button" data-act="size-" data-i18n-title="ui.kleiner" data-i18n-aria="ui.kleiner" title="Kleiner" aria-label="Kleiner">&#8722;</button>
-            <button type="button" data-act="size+" data-i18n-title="ui.groter" data-i18n-aria="ui.groter" title="Groter" aria-label="Groter">+</button>
-            <button type="button" data-act="rot-" data-i18n-title="ui.links_draaien" data-i18n-aria="ui.links_draaien" title="Linksom draaien" aria-label="Linksom draaien">&#8634;</button>
-            <button type="button" data-act="rot+" data-i18n-title="ui.rechts_draaien" data-i18n-aria="ui.rechts_draaien" title="Rechtsom draaien" aria-label="Rechtsom draaien">&#8635;</button>
+            <button type="button" class="eb-scarot" data-act="size-" data-i18n-title="ui.kleiner" data-i18n-aria="ui.kleiner" title="Kleiner" aria-label="Kleiner">&#8722;</button>
+            <button type="button" class="eb-scarot" data-act="size+" data-i18n-title="ui.groter" data-i18n-aria="ui.groter" title="Groter" aria-label="Groter">+</button>
+            <button type="button" class="eb-scarot" data-act="rot-" data-i18n-title="ui.links_draaien" data-i18n-aria="ui.links_draaien" title="Linksom draaien" aria-label="Linksom draaien">&#8634;</button>
+            <button type="button" class="eb-scarot" data-act="rot+" data-i18n-title="ui.rechts_draaien" data-i18n-aria="ui.rechts_draaien" title="Rechtsom draaien" aria-label="Rechtsom draaien">&#8635;</button>
             <button type="button" data-act="done" class="eb-af" data-i18n-title="ui.klaar" data-i18n-aria="ui.klaar" title="Klaar" aria-label="Klaar">&#10003;</button>
           </div>
+          <div class="eb-opacity"><span class="eb-op-label" data-i18n="ui.opaciteit">Opaciteit</span><input id="eb2d-opacity" type="range" min="20" max="100" value="100" class="slider" data-i18n-aria="ui.opaciteit" aria-label="Opaciteit"></div>
           <div class="eb-hint" data-i18n="ui.eb_hint">Sleep = verplaatsen &middot; knijp = schalen &middot; knijp-draai = roteren</div>
         </div>
       </div>
@@ -1096,14 +1099,14 @@ form label{text-transform:none;letter-spacing:.005em;font-size:.8rem;color:var(-
         <div class="eb-btns">
           <button type="button" data-act="info" data-i18n-title="ui.details" data-i18n-aria="ui.details" title="Details" aria-label="Details">&#9432;</button>
           <button type="button" data-act="lock" data-i18n-title="ui.vergrendelen" data-i18n-aria="ui.vergrendelen" title="Vergrendelen" aria-label="Vergrendelen">&#128274;</button>
-          <button type="button" data-act="del" data-i18n-title="ui.verwijderen" data-i18n-aria="ui.verwijderen" title="Verwijderen" aria-label="Verwijderen">&#128465;</button>
           <button type="button" data-act="recrop" data-i18n-title="ui.aanpassen_bijknippen" data-i18n-aria="ui.aanpassen_bijknippen" title="Aanpassen (bijknippen)" aria-label="Aanpassen">&#128295;</button>
-          <button type="button" data-act="size-" data-i18n-title="ui.kleiner" data-i18n-aria="ui.kleiner" title="Kleiner" aria-label="Kleiner">&#8722;</button>
-          <button type="button" data-act="size+" data-i18n-title="ui.groter" data-i18n-aria="ui.groter" title="Groter" aria-label="Groter">+</button>
-          <button type="button" data-act="rot-" data-i18n-title="ui.links_draaien" data-i18n-aria="ui.links_draaien" title="Linksom draaien" aria-label="Linksom draaien">&#8634;</button>
-          <button type="button" data-act="rot+" data-i18n-title="ui.rechts_draaien" data-i18n-aria="ui.rechts_draaien" title="Rechtsom draaien" aria-label="Rechtsom draaien">&#8635;</button>
+          <button type="button" class="eb-scarot" data-act="size-" data-i18n-title="ui.kleiner" data-i18n-aria="ui.kleiner" title="Kleiner" aria-label="Kleiner">&#8722;</button>
+          <button type="button" class="eb-scarot" data-act="size+" data-i18n-title="ui.groter" data-i18n-aria="ui.groter" title="Groter" aria-label="Groter">+</button>
+          <button type="button" class="eb-scarot" data-act="rot-" data-i18n-title="ui.links_draaien" data-i18n-aria="ui.links_draaien" title="Linksom draaien" aria-label="Linksom draaien">&#8634;</button>
+          <button type="button" class="eb-scarot" data-act="rot+" data-i18n-title="ui.rechts_draaien" data-i18n-aria="ui.rechts_draaien" title="Rechtsom draaien" aria-label="Rechtsom draaien">&#8635;</button>
           <button type="button" data-act="done" class="eb-af" data-i18n-title="ui.klaar" data-i18n-aria="ui.klaar" title="Klaar" aria-label="Klaar">&#10003;</button>
         </div>
+        <div class="eb-opacity"><span class="eb-op-label" data-i18n="ui.opaciteit">Opaciteit</span><input id="eb3d-opacity" type="range" min="20" max="100" value="100" class="slider" data-i18n-aria="ui.opaciteit" aria-label="Opaciteit"></div>
         <div class="eb-hint" data-i18n="ui.eb_hint">Sleep = verplaatsen &middot; knijp = schalen &middot; knijp-draai = roteren</div>
       </div>
     </div>
@@ -1180,10 +1183,12 @@ form label{text-transform:none;letter-spacing:.005em;font-size:.8rem;color:var(-
             </div>
             <div class="cutrow cut-tools">
               <button id="spiegelBtn" class="linkbtn">&#8644; <span data-i18n="ui.spiegelen">Spiegelen</span></button>
+              <button id="rotate90Btn" class="linkbtn">&#10227; <span data-i18n="ui.draaien90">90&deg; draaien</span></button>
               <button id="wandBtn" class="linkbtn">&#129668; <span data-i18n="ui.toverstaf">Toverstaf</span></button>
               <button id="lassoUndo" class="linkbtn">&#8617; <span data-i18n="ui.ongedaan">Ongedaan</span></button>
               <button id="cropReset" class="linkbtn" data-i18n="ui.reset_uitsnede">Reset uitsnede</button>
             </div>
+            <p class="cut-tip" data-i18n="ui.cut_tip">Tip: knip rond de tattoo en stel daarna de opaciteit in bij het plaatsen.</p>
           </div>
         </div>
         <div class="cm-foot">
@@ -6172,6 +6177,7 @@ const I18N = {
     'ui.tik_uitknippen':'Tik op het deel dat je wilt weghalen','ui.toverstaf_uit':'Toverstaf uit',
     'ui.cut_hint':'Tik rondom de tattoo om punten te plaatsen; sleep een punt om bij te stellen.',
     'ui.snijmethode':'Snijmethode','ui.snij_vrij':'Vrij tekenen','ui.snij_punten':'Punten',
+    'ui.opaciteit':'Opaciteit','ui.draaien90':'90° draaien','ui.cut_tip':'Tip: knip rond de tattoo en stel daarna de opaciteit in bij het plaatsen — voor nu het makkelijkst.',
     'ui.cut_hint_vrij':'Teken met je vinger een doorlopende lijn rond de tattoo.',
     'ui.cut_hint_punten':'Tik rondom de tattoo om punten te zetten; sleep een punt om bij te stellen.',
     'ui.gevoeligheid':'Gevoeligheid — sleep tot de huid weg is','ui.zachte_randen':'Zachte randen meenemen',
@@ -6326,6 +6332,7 @@ const I18N = {
     'ui.tik_uitknippen':'Tap the part you want to remove','ui.toverstaf_uit':'Magic wand off',
     'ui.cut_hint':'Tap around the tattoo to place points; drag a point to adjust.',
     'ui.snijmethode':'Cut method','ui.snij_vrij':'Freehand','ui.snij_punten':'Points',
+    'ui.opaciteit':'Opacity','ui.draaien90':'Rotate 90°','ui.cut_tip':'Tip: cut around the tattoo, then set its opacity when placing — easiest for now.',
     'ui.cut_hint_vrij':'Draw a continuous line around the tattoo with your finger.',
     'ui.cut_hint_punten':'Tap around the tattoo to place points; drag a point to adjust.',
     'ui.gevoeligheid':'Sensitivity — drag until the skin is gone','ui.zachte_randen':'Include soft edges',
@@ -6538,6 +6545,7 @@ function createTattoo(overrides = {}) {
     kosten: 0,
     zituren: 0,
     pijn: 0,                 // pijnscore 1–5 (0 = niet ingevuld)
+    opacity: 1,              // doorzichtigheid 0.2–1 (1 = vol); toegepast bij weergave (2D+3D)
     sessies: [],
     touchUps: [],
     nazorg: '',
@@ -6735,6 +6743,7 @@ let filterZone = null;
 let detailId = null;
 let detailTab = 'info';
 let detailToonExtra = false;   // detailpagina: lege velden tonen via 'extra details'
+let detailRetour = 'home';     // waar de terug-knop van de detailpagina naartoe gaat (2D/3D/collectie/stats/start)
 let bewerkId = null;     // null = nieuw record
 let lijstModus = 'gezet';     // 'gezet' (collectie) of 'wens' (wishlist)
 let zoekTekst = '';
@@ -6836,6 +6845,9 @@ function toonView(naam) {
   $('#view-stats').hidden = naam !== 'stats';
   $('#view-collectie').hidden = naam !== 'collectie';
   $('#fab').hidden = naam !== 'home';
+  { const _fab = $('#fab'); if (_fab) _fab.style.display = ''; }   // eventueel 'stuck' verbergen opheffen
+  { const _zb = $('.zijde-balk'); if (_zb) _zb.style.display = ''; }
+  if (naam !== 'home' && editMarker2D) { const _e2 = $('#editbar2d'); if (_e2) _e2.classList.remove('on'); editMarker2D = null; }
   if (naam === 'start' && typeof renderStart === 'function') renderStart();
   // De 3D-stage wordt los van toonView beheerd; verberg hem bij elke host-view
   const _v3d = document.getElementById('view-3d');
@@ -7237,6 +7249,8 @@ function enterEdit2D(id){
   // Inzoomen op het lichaamsdeel zodat slepen/knijpen meteen werkt (slepen vereist ingezoomd).
   if(t.lichaamsdeel && filterZone !== t.lichaamsdeel) zetFilter(t.lichaamsdeel);
   const eb = $('#editbar2d'); if(eb) eb.classList.add('on');
+  { const zb = $('.zijde-balk'); if(zb) zb.style.display = 'none'; }   // voor/achter-knoppen + (+) weg tijdens bewerken (geen overlap met de balk)
+  { const op2 = $('#eb2d-opacity'); if(op2) op2.value = Math.round((t.opacity != null ? t.opacity : 1) * 100); }
   setLockUI2D();
   renderMarkers();                  // tekent meteen de ring (via updateSelRing2D)
   toast(tr('ui.aanpas_hint'));
@@ -7244,6 +7258,7 @@ function enterEdit2D(id){
 async function exitEdit2D(){
   const id = editMarker2D; editMarker2D = null;
   const eb = $('#editbar2d'); if(eb) eb.classList.remove('on');
+  { const zb = $('.zijde-balk'); if(zb) zb.style.display = ''; }   // voor/achter-balk terug
   updateSelRing2D();
   const t = id ? vindTattoo2D(id) : null;
   if(t){ try{ await saveTattoo(t); }catch(e){ console.error(e); } }
@@ -7293,6 +7308,7 @@ function renderMarkers() {
     const kleur = esc(t.accentkleur || '#8E71F0');
     const wens = t.status === 'wens';
     const foto = hoofdFoto(t);
+    const grpOp = (t.opacity != null ? +t.opacity : 1) * (wens ? 0.5 : 1);   // ingestelde opaciteit (× wens-dimming)
     // Klein slotje op vergrendelde tattoos (alleen ingezoomd, om het overzicht rustig te houden)
     const slot = (cx, cy) => (t.vergrendeld && ingezoomd)
       ? `<g transform="translate(${cx.toFixed(1)} ${cy.toFixed(1)})" pointer-events="none">
@@ -7304,7 +7320,7 @@ function renderMarkers() {
       const b = Number(t.kunst.schaal) || 24;
       const h = b * (t.kunst.aspect || 1);
       const blend = tintIsDonker ? '' : 'style="mix-blend-mode:multiply"';
-      return `<g class="marker" data-id="${esc(t.id)}" role="button" aria-label="${wens ? 'Wens' : 'Tattoo'}: ${esc(t.naam)}"${wens ? ' opacity=".5"' : ''}>
+      return `<g class="marker" data-id="${esc(t.id)}" role="button" aria-label="${wens ? 'Wens' : 'Tattoo'}: ${esc(t.naam)}" opacity="${grpOp}">
         <g clip-path="url(#lichaam-clip)">
           <image href="${esc(t.kunst.src)}" xlink:href="${esc(t.kunst.src)}" x="${x - b / 2}" y="${y - h / 2}" width="${b}" height="${h}"
                  transform="rotate(${Number(t.kunst.rotatie) || 0} ${x} ${y})" preserveAspectRatio="xMidYMid meet" ${blend}/>
@@ -7316,7 +7332,7 @@ function renderMarkers() {
     }
     if (ingezoomd && foto && !wens) {
       const r = 9;
-      return `<g class="marker" data-id="${esc(t.id)}" role="button" aria-label="Tattoo: ${esc(t.naam)}">
+      return `<g class="marker" data-id="${esc(t.id)}" role="button" aria-label="Tattoo: ${esc(t.naam)}" opacity="${grpOp}">
         <clipPath id="clip-${esc(t.id)}"><circle cx="${x}" cy="${y}" r="${r}"/></clipPath>
         <image href="${esc(foto)}" xlink:href="${esc(foto)}" x="${x - r}" y="${y - r}" width="${r * 2}" height="${r * 2}"
                preserveAspectRatio="xMidYMid slice" clip-path="url(#clip-${esc(t.id)})"/>
@@ -7325,7 +7341,7 @@ function renderMarkers() {
       </g>`;
     }
     const r = ingezoomd ? 6.5 : 5;
-    return `<g class="marker" data-id="${esc(t.id)}" role="button" aria-label="${wens ? 'Wens' : 'Tattoo'}: ${esc(t.naam)}">
+    return `<g class="marker" data-id="${esc(t.id)}" role="button" aria-label="${wens ? 'Wens' : 'Tattoo'}: ${esc(t.naam)}" opacity="${grpOp}">
       <circle cx="${x}" cy="${y}" r="${r}" fill="${kleur}" ${wens ? 'fill-opacity=".35" stroke-dasharray="3 2"' : ''} stroke="${wens ? kleur : rand}" stroke-width="1.4"/>
       ${slot(x + r + 1, y - r - 1)}
     </g>`;
@@ -7745,7 +7761,9 @@ function renderLijst() {
   );
 }
 
-function openDetail(id, tab = 'info') {
+function openDetail(id, tab = 'info', retour) {
+  // onthoud waar we vandaan kwamen, zodat 'terug' naar de juiste weergave gaat (3D/2D/collectie/stats/start)
+  detailRetour = retour || (['collectie', 'stats', 'start', 'home'].includes(huidigeView) ? huidigeView : 'home');
   detailId = id;
   detailTab = tab;
   detailToonExtra = false;
@@ -7893,7 +7911,10 @@ function renderDetail() {
     <div class="paneel" id="tabpaneel" role="tabpanel" aria-labelledby="tab-${detailTab}">${paneel}</div>
   `;
 
-  $('#d-terug').addEventListener('click', () => toonView('home'));
+  $('#d-terug').addEventListener('click', () => {
+    if (detailRetour === '3d') { const b = $('#btn-3d'); if (b) b.click(); else toonView('home'); }
+    else toonView(detailRetour || 'home');
+  });
   $('#d-slot').addEventListener('click', async () => {
     t.vergrendeld = !t.vergrendeld;
     await saveTattoo(t);
@@ -9109,6 +9130,11 @@ async function verwijderVoorbeelden() {
   });
   { const eb2 = document.getElementById('editbar2d');
     if (eb2) eb2.querySelectorAll('button').forEach(b => b.onclick = () => edit2DActie(b.dataset.act)); }
+  { const op2 = document.getElementById('eb2d-opacity'); if (op2) op2.addEventListener('input', () => {
+      const t = editMarker2D ? vindTattoo2D(editMarker2D) : null; if (!t) return;
+      t.opacity = Math.max(0.2, Math.min(1, (+op2.value || 100) / 100));
+      renderMarkers(); clearTimeout(op2._sv); op2._sv = setTimeout(() => { saveTattoo(t).catch(e => console.error(e)); }, 250);
+    }); }
   // Focus-trap op de modals (cutModal staat op body-niveau; instellingen + onboarding in de host)
   bewaakModalFocus(document.getElementById('cutModal'), el => el.classList.contains('on'));
   bewaakModalFocus(document.getElementById('inst-paneel'), el => el.classList.contains('open'));
@@ -9243,7 +9269,9 @@ async function verwijderVoorbeelden() {
   const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
   function imgRectInBox(bw,bh,iw,ih){ const s=Math.min(bw/iw,bh/ih), w=iw*s, h=ih*s; return {left:(bw-w)/2, top:(bh-h)/2, w, h}; }
   // Zoom/pan in het uitsnijvak: viewRect = fit-rechthoek × zoom, verschoven met pan.
-  let zoom=1, panX=0, panY=0;
+  let zoom=1, panX=0, panY=0, rot90=0;   // rot90: 0..3 = 0/90/180/270° (van het bron-beeld)
+  // Getoonde beeld-afmetingen (na flip+rotatie); valt terug op origImg vóór de eerste build.
+  function beeldDims(){ return baseCanvas ? {w:baseCanvas.width,h:baseCanvas.height} : {w:origImg.naturalWidth,h:origImg.naturalHeight}; }
   function viewRect(bw,bh,iw,ih){
     const fit=imgRectInBox(bw,bh,iw,ih);
     const w=fit.w*zoom, h=fit.h*zoom;
@@ -9251,8 +9279,8 @@ async function verwijderVoorbeelden() {
   }
   function clampPan(){
     if(!origImg||!cutPrev) return;
-    const b=cutPrev.getBoundingClientRect();
-    const fit=imgRectInBox(b.width,b.height,origImg.naturalWidth,origImg.naturalHeight);
+    const b=cutPrev.getBoundingClientRect(), bd=beeldDims();
+    const fit=imgRectInBox(b.width,b.height,bd.w,bd.h);
     const w=fit.w*zoom, h=fit.h*zoom;
     const mx=Math.max(0,(w-b.width)/2), my=Math.max(0,(h-b.height)/2);
     panX=Math.min(mx,Math.max(-mx,panX)); panY=Math.min(my,Math.max(-my,panY));
@@ -9389,6 +9417,12 @@ async function verwijderVoorbeelden() {
     g.lookAt(point.clone().add(normal)); g.rotateZ(rotDeg*Math.PI/180);
     body.add(g); return g;
   }
+  // Doorzichtigheid van een geplaatst decal (alphaTest meeschalen, anders verdwijnt het bij lage opaciteit)
+  function zetDecalOpacity(obj, op){
+    if(!obj || !obj.material) return;
+    op=Math.max(0.05, Math.min(1, +op||1));
+    obj.material.opacity=op; obj.material.alphaTest=0.5*op; obj.material.transparent=true; obj.material.needsUpdate=true;
+  }
 
   /* ---- raycast naar het oppervlak ---- */
   const ray=new THREE.Raycaster(), nd=new THREE.Vector2();
@@ -9434,6 +9468,7 @@ async function verwijderVoorbeelden() {
     try{ await saveTattoo(rec); }catch(e){ console.error(e); toast(tr('toast.opslaanmislukt')+(e&&e.message?e.message:tr('ui.fout'))); }
     if(typeof tattoos!=="undefined" && Array.isArray(tattoos)) tattoos.push(rec);
     const m={ id:rec.id, rec, obj, point:s.point.clone(), normal:s.normal.clone(), mesh:s.mesh, rot, size, tex:d.tex };
+    zetDecalOpacity(obj, rec.opacity);
     markers.push(m); plaatsData=null; plaatsModus=false; verbergBanner();
     if(typeof renderMarkers==="function"){ try{renderMarkers();}catch(_){} }
     toast(tr('ui.tattoo_geplaatst')); enterEditDecal(m);
@@ -9446,10 +9481,13 @@ async function verwijderVoorbeelden() {
       if(m.obj.material&&m.obj.material.dispose)m.obj.material.dispose(); }
     m.obj=makeImage(m.point,m.normal,m.rot||0,m.size||0.09,m.tex,m.mesh||pickMeshes[0]);
     if(m.obj) m.obj.renderOrder=(m.rec&&m.rec.stapel)||0;   // stapelvolgorde bij overlap
+    zetDecalOpacity(m.obj, m.rec && m.rec.opacity);
   }
   function enterEditDecal(m){
     editDecal=m;
     const eb=document.getElementById("editbar"); if(eb)eb.classList.add("on");
+    { const a=document.getElementById("t3d-add"); if(a) a.style.display="none"; }   // + knop weg tijdens bewerken
+    const op3=document.getElementById("eb3d-opacity"); if(op3) op3.value=Math.round(((m.rec&&m.rec.opacity!=null)?m.rec.opacity:1)*100);
     const h=document.getElementById("hint"); if(h)h.style.display="none";
     setLockUI(); showSel(true);
     toast(tr('ui.aanpas_hint'));
@@ -9457,6 +9495,7 @@ async function verwijderVoorbeelden() {
   function exitEditDecal(){
     const m=editDecal; editDecal=null; showSel(false);
     const eb=document.getElementById("editbar"); if(eb)eb.classList.remove("on");
+    { const a=document.getElementById("t3d-add"); if(a) a.style.display=""; }   // + knop terug
     const h=document.getElementById("hint"); if(h)h.style.display="";
     if(m) persistEdit(m);
   }
@@ -9515,9 +9554,9 @@ async function verwijderVoorbeelden() {
       const p=document.createElement("div"); p.textContent=msg;
       p.style.cssText="font-size:14px;line-height:1.45;margin-bottom:16px;";
       const row=document.createElement("div"); row.style.cssText="display:flex;gap:8px;";
-      const no=document.createElement("button"); no.textContent="Annuleren";
+      const no=document.createElement("button"); no.textContent=tr('form.annuleren');
       no.style.cssText="flex:1;padding:10px;border-radius:8px;border:1px solid #262d38;background:#1a212b;color:#e8eaed;font-family:inherit;font-size:13px;cursor:pointer;";
-      const yes=document.createElement("button"); yes.textContent=jaLabel||"Verwijderen";
+      const yes=document.createElement("button"); yes.textContent=jaLabel||tr('aria.verwijderen');
       yes.style.cssText="flex:1;padding:10px;border-radius:8px;border:1px solid #e0533d;background:#e0533d;color:#fff;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;";
       function close(v){ ov.remove(); res(v); }
       no.onclick=()=>close(false); yes.onclick=()=>close(true);
@@ -9557,7 +9596,7 @@ async function verwijderVoorbeelden() {
     const eb=document.getElementById("editbar"); if(!eb) return;
     eb.querySelectorAll("button").forEach(b=>{ b.onclick=()=>{
       const a=b.dataset.act;
-      if(a==="info"){ const rec=editDecal&&editDecal.rec; exitEditDecal(); if(rec&&typeof openDetail==="function") openDetail(rec.id); return; }
+      if(a==="info"){ const rec=editDecal&&editDecal.rec; exitEditDecal(); if(rec&&typeof openDetail==="function") openDetail(rec.id, 'info', '3d'); return; }
       if(a==="done"){ exitEditDecal(); return; }
       if(a==="recrop"){ if(editDecal) openCutModalForEdit(editDecal); return; }
       if(a==="del"){ removeEditDecal(); return; }
@@ -9568,6 +9607,13 @@ async function verwijderVoorbeelden() {
       if(a==="rot-"){ if(editDecal&&!editDecal.locked){ rotateDecal(-15); persistEdit(editDecal); } return; }
       if(a==="rot+"){ if(editDecal&&!editDecal.locked){ rotateDecal(15); persistEdit(editDecal); } return; }
     };});
+    { const op3=document.getElementById("eb3d-opacity"); if(op3) op3.addEventListener("input",()=>{
+        if(!editDecal) return;
+        const v=Math.max(0.2, Math.min(1,(+op3.value||100)/100));
+        zetDecalOpacity(editDecal.obj, v);
+        if(editDecal.rec) editDecal.rec.opacity=v;
+        clearTimeout(op3._sv); op3._sv=setTimeout(()=>{ persistEdit(editDecal); },250);
+      }); }
   }
 
   /* ---- besturing (orbit + dubbeltik) ---- */
@@ -9673,7 +9719,7 @@ async function verwijderVoorbeelden() {
   // dichtstbijzijnde lasso-punt bij een pointer-event (in schermpixels), of -1
   function lassoPuntBij(e){
     if(!origImg||!lassoPts.length) return -1;
-    const b=cutPrev.getBoundingClientRect(), r=viewRect(b.width,b.height,origImg.naturalWidth,origImg.naturalHeight);
+    const b=cutPrev.getBoundingClientRect(), r=viewRect(b.width,b.height,beeldDims().w,beeldDims().h);
     const mx=e.clientX-b.left, my=e.clientY-b.top; let best=-1, bd=18*18;
     for(let i=0;i<lassoPts.length;i++){ const X=r.left+lassoPts[i].nx*r.w, Y=r.top+lassoPts[i].ny*r.h; const dx=X-mx,dy=Y-my,dd=dx*dx+dy*dy; if(dd<bd){bd=dd;best=i;} }
     return best;
@@ -9714,7 +9760,7 @@ async function verwijderVoorbeelden() {
     addDoel = doel || '3d';
     pendingNew=true; pendingPlace=null; pendingEdit=null; pendingPlace2D=null;
     origImg=null; lassoPts=[]; imgTexture=null; baseCanvas=null; flipH=false; zetSpiegelUI();
-    wandSeeds=[]; wandMode=false; zetWandUI(); lassoDragIdx=-1; cutModus='vrij'; drawingFree=false; zetSnijModusUI(); resetZoom(); huidMethode='kleur'; if(bgRemove) bgRemove.checked=false;
+    wandSeeds=[]; wandMode=false; zetWandUI(); lassoDragIdx=-1; cutModus='vrij'; drawingFree=false; zetSnijModusUI(); resetZoom(); rot90=0; huidMethode='kleur'; if(bgRemove) bgRemove.checked=false;
     bgPickMode=false; setBgPick(null); if(bgPickBtn)bgPickBtn.classList.remove("on");
     if(cutSpread) cutSpread.value=55;
     cmTitle.textContent=tr('ui.tattoo_toevoegen'); cmPlaceBtn.textContent=tr('ui.toevoegen');
@@ -9735,7 +9781,7 @@ async function verwijderVoorbeelden() {
   function openCutModal(point, normal, mesh){
     pendingPlace={point, normal, mesh}; pendingEdit=null; pendingPlace2D=null;
     origImg=null; lassoPts=[]; imgTexture=null; baseCanvas=null; flipH=false; zetSpiegelUI();
-    wandSeeds=[]; wandMode=false; zetWandUI(); lassoDragIdx=-1; cutModus='vrij'; drawingFree=false; zetSnijModusUI(); resetZoom(); huidMethode='kleur'; if(bgRemove) bgRemove.checked=false;
+    wandSeeds=[]; wandMode=false; zetWandUI(); lassoDragIdx=-1; cutModus='vrij'; drawingFree=false; zetSnijModusUI(); resetZoom(); rot90=0; huidMethode='kleur'; if(bgRemove) bgRemove.checked=false;
     bgPickMode=false; setBgPick(null); if(bgPickBtn)bgPickBtn.classList.remove("on");
     if(cutSpread) cutSpread.value=55;
     cmTitle.textContent=tr('ui.tattoo_toevoegen'); cmPlaceBtn.textContent=tr('ui.tattoo_toevoegen');
@@ -9748,7 +9794,7 @@ async function verwijderVoorbeelden() {
     if(!k || !k.srcUrl){ toast(tr('ui.geen_foto_bewaard')); return; }
     pendingPlace=null; pendingEdit=m; pendingPlace2D=null;
     origImg=null; imgTexture=null; baseCanvas=null; lassoPts=[]; flipH=!!k.flipH; zetSpiegelUI();
-    wandSeeds=(k.wand||[]).slice(); wandMode=false; zetWandUI(); lassoDragIdx=-1; cutModus='vrij'; drawingFree=false; zetSnijModusUI(); resetZoom(); huidMethode=k.huidMethode||'kleur';
+    wandSeeds=(k.wand||[]).slice(); wandMode=false; zetWandUI(); lassoDragIdx=-1; cutModus='vrij'; drawingFree=false; zetSnijModusUI(); resetZoom(); rot90=k.rot90||0; huidMethode=k.huidMethode||'kleur';
     cmTitle.textContent=tr('ui.tattoo_aanpassen'); cmPlaceBtn.textContent=tr('form.opslaan');
     bgRemove.checked = (k.bg!==false);
     if(k.thresh!=null) cutThresh.value=k.thresh;
@@ -9769,7 +9815,7 @@ async function verwijderVoorbeelden() {
     if(!k || !k.srcUrl){ toast(tr('ui.geen_foto_bewaard')); return; }
     pendingPlace=null; pendingEdit=null; pendingPlace2D=null; pendingNew=null; pendingEdit2D=rec;
     origImg=null; imgTexture=null; baseCanvas=null; lassoPts=[]; flipH=!!k.flipH; zetSpiegelUI();
-    wandSeeds=(k.wand||[]).slice(); wandMode=false; zetWandUI(); lassoDragIdx=-1; cutModus='vrij'; drawingFree=false; zetSnijModusUI(); resetZoom(); huidMethode=k.huidMethode||'kleur';
+    wandSeeds=(k.wand||[]).slice(); wandMode=false; zetWandUI(); lassoDragIdx=-1; cutModus='vrij'; drawingFree=false; zetSnijModusUI(); resetZoom(); rot90=k.rot90||0; huidMethode=k.huidMethode||'kleur';
     cmTitle.textContent=tr('ui.tattoo_aanpassen'); cmPlaceBtn.textContent=tr('form.opslaan');
     bgRemove.checked=(k.bg!==false);
     if(k.thresh!=null) cutThresh.value=k.thresh;
@@ -9791,7 +9837,7 @@ async function verwijderVoorbeelden() {
   function openCutModal2D(x,y,zone,side){
     pendingPlace2D={x,y,zone,side}; pendingPlace=null; pendingEdit=null;
     origImg=null; lassoPts=[]; imgTexture=null; baseCanvas=null; flipH=false; zetSpiegelUI();
-    wandSeeds=[]; wandMode=false; zetWandUI(); lassoDragIdx=-1; cutModus='vrij'; drawingFree=false; zetSnijModusUI(); resetZoom(); huidMethode='kleur'; if(bgRemove) bgRemove.checked=false;
+    wandSeeds=[]; wandMode=false; zetWandUI(); lassoDragIdx=-1; cutModus='vrij'; drawingFree=false; zetSnijModusUI(); resetZoom(); rot90=0; huidMethode='kleur'; if(bgRemove) bgRemove.checked=false;
     bgPickMode=false; setBgPick(null); if(bgPickBtn)bgPickBtn.classList.remove("on");
     if(cutSpread) cutSpread.value=55;
     cmTitle.textContent=tr('ui.tattoo_toevoegen'); cmPlaceBtn.textContent=tr('ui.tattoo_toevoegen');
@@ -9911,16 +9957,20 @@ async function verwijderVoorbeelden() {
     const sc=Math.min(1, maxAfm/Math.max(origImg.naturalWidth, origImg.naturalHeight));
     const W=Math.max(1,Math.round(origImg.naturalWidth*sc));
     const H=Math.max(1,Math.round(origImg.naturalHeight*sc));
-    const c=document.createElement("canvas"); c.width=W; c.height=H;
+    const odd=(rot90&1)===1;
+    const OW=odd?H:W, OH=odd?W:H;                          // canvas-afmetingen wisselen bij 90/270°
+    const c=document.createElement("canvas"); c.width=OW; c.height=OH;
     const x=c.getContext("2d",{willReadFrequently:true});
-    if(flipH){ x.translate(W,0); x.scale(-1,1); }
-    x.drawImage(origImg,0,0,W,H);
+    x.translate(OW/2, OH/2);
+    x.rotate(rot90*Math.PI/2);                             // 90° CW per stap
+    if(flipH) x.scale(-1,1);
+    x.drawImage(origImg,-W/2,-H/2,W,H);
     x.setTransform(1,0,0,1,0,0);
     if(bgRemove.checked){
-      if(huidMethode==='helder') removeSkinLuma(x, W, H, +cutThresh.value, (cutSpread?+cutSpread.value:55));
-      else removeSkinColor(x, W, H, bgPick, +cutThresh.value, (cutSpread?+cutSpread.value:55));
+      if(huidMethode==='helder') removeSkinLuma(x, OW, OH, +cutThresh.value, (cutSpread?+cutSpread.value:55));
+      else removeSkinColor(x, OW, OH, bgPick, +cutThresh.value, (cutSpread?+cutSpread.value:55));
     }
-    if(wandSeeds.length) applyWand(x, W, H, wandSeeds);
+    if(wandSeeds.length) applyWand(x, OW, OH, wandSeeds);
     return c;
   }
   function rebuildBase(){ baseCanvas = origImg ? buildFullCanvas() : null; }
@@ -9948,7 +9998,18 @@ async function verwijderVoorbeelden() {
     if(!origImg) return;
     if(!baseCanvas) rebuildBase();
     const shown=clippedCanvas(); if(!shown) return;
-    drawPreview(shown);
+    // preview: rest van de foto gedimd (35%) i.p.v. verborgen, zodat je context houdt tijdens het uitsnijden
+    {
+      const cv=cutCanvas; cv.width=cutPrev.clientWidth; cv.height=cutPrev.clientHeight;
+      const ctx=cv.getContext("2d"); ctx.clearRect(0,0,cv.width,cv.height);
+      const r=viewRect(cv.width,cv.height,baseCanvas.width,baseCanvas.height);
+      if(lassoPts.length>=3){
+        ctx.globalAlpha=0.35; ctx.drawImage(baseCanvas, r.left,r.top,r.w,r.h); ctx.globalAlpha=1;
+        ctx.drawImage(shown, r.left,r.top,r.w,r.h);
+      } else {
+        ctx.drawImage(baseCanvas, r.left,r.top,r.w,r.h);
+      }
+    }
     let texCanvas=shown;
     if(lassoPts.length>=3){
       let mnx=1,mny=1,mxx=0,mxy=0;
@@ -9966,7 +10027,7 @@ async function verwijderVoorbeelden() {
     const cv=lassoCanvas; cv.width=cutPrev.clientWidth; cv.height=cutPrev.clientHeight;
     const ctx=cv.getContext("2d"); ctx.clearRect(0,0,cv.width,cv.height);
     if(!origImg || lassoPts.length<1) return;
-    const r=viewRect(cv.width,cv.height,origImg.naturalWidth,origImg.naturalHeight);
+    const r=viewRect(cv.width,cv.height,beeldDims().w,beeldDims().h);
     ctx.beginPath();
     lassoPts.forEach((p,i)=>{ const X=r.left+p.nx*r.w, Y=r.top+p.ny*r.h; i?ctx.lineTo(X,Y):ctx.moveTo(X,Y); });
     if(lassoPts.length>=3){ ctx.closePath(); ctx.fillStyle="rgba(142,113,240,.14)"; ctx.fill(); }
@@ -9977,7 +10038,7 @@ async function verwijderVoorbeelden() {
       ctx.fillStyle="#8e71f0"; ctx.fill(); ctx.lineWidth=2; ctx.strokeStyle="#fff"; ctx.stroke(); });
   }
   function ptFrom(e){
-    const b=cutPrev.getBoundingClientRect(), r=viewRect(b.width,b.height,origImg.naturalWidth,origImg.naturalHeight);
+    const b=cutPrev.getBoundingClientRect(), r=viewRect(b.width,b.height,beeldDims().w,beeldDims().h);
     return { nx:clamp((e.clientX-b.left-r.left)/r.w,0,1), ny:clamp((e.clientY-b.top-r.top)/r.h,0,1) };
   }
 
@@ -10011,6 +10072,13 @@ async function verwijderVoorbeelden() {
         zetSpiegelUI();
         if(origImg){ rebuildBase(); updateCutout(); drawLasso(); }
       }; }
+    { const rb=document.getElementById("rotate90Btn"); if(rb) rb.onclick=()=>{
+        if(!origImg) return;
+        rot90=(rot90+1)%4;
+        lassoPts=lassoPts.map(p=>({nx:1-p.ny, ny:p.nx}));   // lasso 90° CW meedraaien
+        resetZoom();
+        rebuildBase(); updateCutout(); drawLasso();
+      }; }
     const addBtn=document.getElementById("t3d-add"); if(addBtn) addBtn.onclick=()=>openCutModalAdd('3d');
     window.__tattiesAdd2D=()=>openCutModalAdd('2d');   // 2D-FAB opent dezelfde toevoeg-flow
     window.__tattiesRecrop2D=(rec)=>openCutModalForEdit2D(rec);   // sleutel-knop 2D: opnieuw uitsnijden
@@ -10020,7 +10088,7 @@ async function verwijderVoorbeelden() {
     const laadFotoBestand=(input)=>{
       const f=input.files[0]; if(!f)return;
       const rd=new FileReader();
-      rd.onload=ev=>{ const im=new Image(); im.onload=()=>{ origImg=im; lassoPts=[]; lassoDragIdx=-1; drawingFree=false; cutPointers.clear(); pinch=null; resetZoom(); toonCutInstellingen(true); rebuildBase(); updateCutout();
+      rd.onload=ev=>{ const im=new Image(); im.onload=()=>{ origImg=im; lassoPts=[]; lassoDragIdx=-1; drawingFree=false; cutPointers.clear(); pinch=null; resetZoom(); rot90=0; toonCutInstellingen(true); rebuildBase(); updateCutout();
         if(pendingNew) toonInfo(true);
         toast(tr('ui.teken_lijn')); }; im.src=ev.target.result; };
       rd.readAsDataURL(f); input.value="";
@@ -10138,7 +10206,7 @@ async function verwijderVoorbeelden() {
       const b=cutPrev.getBoundingClientRect();
       const before=ptFrom(e);                 // genormaliseerde positie onder de cursor (oude zoom)
       zoom=Math.min(6, Math.max(1, zoom*(e.deltaY<0?1.15:1/1.15)));
-      const fit=imgRectInBox(b.width,b.height,origImg.naturalWidth,origImg.naturalHeight);
+      const bd=beeldDims(); const fit=imgRectInBox(b.width,b.height,bd.w,bd.h);
       const w=fit.w*zoom, h=fit.h*zoom;
       panX=(e.clientX-b.left)-(b.width-w)/2-before.nx*w;   // houd het punt onder de cursor vast
       panY=(e.clientY-b.top)-(b.height-h)/2-before.ny*h;
@@ -10156,7 +10224,7 @@ async function verwijderVoorbeelden() {
         if(imgTexture && imgTexture.dispose) imgTexture.dispose(); imgTexture=null;
         rec.kunst=rec.kunst||{}; rec.kunst.src=src; rec.kunst.aspect=aspect;
         rec.kunst3d={ srcUrl:(origImg?origImg.src:null), lasso:lassoPts.slice(), thresh:+cutThresh.value,
-                 spread:(cutSpread?+cutSpread.value:55), bgColor:(bgPick?{r:bgPick.r,g:bgPick.g,b:bgPick.b}:null), bg:bgRemove.checked, flipH:flipH, wand:wandSeeds.slice(), huidMethode:huidMethode };
+                 spread:(cutSpread?+cutSpread.value:55), bgColor:(bgPick?{r:bgPick.r,g:bgPick.g,b:bgPick.b}:null), bg:bgRemove.checked, flipH:flipH, wand:wandSeeds.slice(), huidMethode:huidMethode, rot90:rot90 };
         try{ await saveTattoo(rec); }catch(e){ console.error(e); toast(tr('toast.opslaanmislukt')+(e&&e.message?e.message:tr('ui.fout'))); }
         if(typeof renderMarkers==="function"){ try{renderMarkers();}catch(_){} }
         toast(tr('ui.tattoo_bijgewerkt'));
@@ -10172,7 +10240,7 @@ async function verwijderVoorbeelden() {
         const info={ artiest:v("cmArtiest").trim(), studio:v("cmStudio").trim(), stijl:v("cmStijl").trim(),
                  kosten:Math.max(0,parseFloat(v("cmKosten"))||0), pijn:Math.min(5,Math.max(0,parseInt(v("cmPijn"),10)||0)), datum:v("cmDatum") };
         const kunst3d={ srcUrl:(origImg?origImg.src:null), lasso:lassoPts.slice(), thresh:+cutThresh.value,
-                 spread:(cutSpread?+cutSpread.value:55), bgColor:(bgPick?{r:bgPick.r,g:bgPick.g,b:bgPick.b}:null), bg:bgRemove.checked, flipH:flipH, wand:wandSeeds.slice(), huidMethode:huidMethode };
+                 spread:(cutSpread?+cutSpread.value:55), bgColor:(bgPick?{r:bgPick.r,g:bgPick.g,b:bgPick.b}:null), bg:bgRemove.checked, flipH:flipH, wand:wandSeeds.slice(), huidMethode:huidMethode, rot90:rot90 };
         if(addDoel==='2d'){
           const cv=imgTexture.image; const src=canvasToPNG(cv,700);
           const aspect=(cv&&cv.width)?(cv.height/cv.width):1;
@@ -10197,7 +10265,7 @@ async function verwijderVoorbeelden() {
             naam:"Tattoo", status:"gezet", zijde:pp.side, lichaamsdeel:pp.zone,
             positie:{x:pp.x,y:pp.y},
             kunst:{ src, schaal:24, aspect, rotatie:0 },
-            kunst3d:{ srcUrl:(origImg?origImg.src:null), lasso:lassoPts.slice(), thresh:+cutThresh.value, spread:(cutSpread?+cutSpread.value:55), bgColor:(bgPick?{r:bgPick.r,g:bgPick.g,b:bgPick.b}:null), bg:bgRemove.checked, flipH:flipH, wand:wandSeeds.slice(), huidMethode:huidMethode }
+            kunst3d:{ srcUrl:(origImg?origImg.src:null), lasso:lassoPts.slice(), thresh:+cutThresh.value, spread:(cutSpread?+cutSpread.value:55), bgColor:(bgPick?{r:bgPick.r,g:bgPick.g,b:bgPick.b}:null), bg:bgRemove.checked, flipH:flipH, wand:wandSeeds.slice(), huidMethode:huidMethode, rot90:rot90 }
           });
           await saveTattoo(rec);
           if(typeof tattoos!=="undefined" && Array.isArray(tattoos)) tattoos.push(rec);
@@ -10213,7 +10281,7 @@ async function verwijderVoorbeelden() {
         if(m.tex && m.tex!==imgTexture && m.tex.dispose) m.tex.dispose();   // oude textuur vrijgeven
         m.tex=imgTexture; rebuildMarker(m);
         if(m.rec){
-          m.rec.kunst3d={ srcUrl:(origImg?origImg.src:null), lasso:lassoPts.slice(), thresh:+cutThresh.value, spread:(cutSpread?+cutSpread.value:55), bgColor:(bgPick?{r:bgPick.r,g:bgPick.g,b:bgPick.b}:null), bg:bgRemove.checked, flipH:flipH, wand:wandSeeds.slice(), huidMethode:huidMethode };
+          m.rec.kunst3d={ srcUrl:(origImg?origImg.src:null), lasso:lassoPts.slice(), thresh:+cutThresh.value, spread:(cutSpread?+cutSpread.value:55), bgColor:(bgPick?{r:bgPick.r,g:bgPick.g,b:bgPick.b}:null), bg:bgRemove.checked, flipH:flipH, wand:wandSeeds.slice(), huidMethode:huidMethode, rot90:rot90 };
           try{ await saveTattoo(m.rec); toast(tr('ui.tattoo_bijgewerkt')); }
           catch(err){ console.error(err); toast(tr('toast.opslaanmislukt')+(err&&err.message?err.message:tr('ui.fout'))); }
         }
@@ -10226,13 +10294,14 @@ async function verwijderVoorbeelden() {
       const rot=0, size=0.09;
       const obj=makeImage(pp.point, pp.normal, rot, size, imgTexture, pp.mesh);
       if(!obj){ toast(tr('ui.plaatsen_mislukt')); return; }
+      zetDecalOpacity(obj, 1);
       const nz=nearestZone(pp.point);
       try{
         const rec=createTattoo({
           naam:"Tattoo", status:"gezet", zijde:nz.side, lichaamsdeel:nz.zone,
           positie3d:{ point:[pp.point.x,pp.point.y,pp.point.z], normal:[pp.normal.x,pp.normal.y,pp.normal.z],
             rot, size, gender:currentGender, zone:nz.zone, side:nz.side },
-          kunst3d:{ srcUrl:(origImg?origImg.src:null), lasso:lassoPts.slice(), thresh:+cutThresh.value, spread:(cutSpread?+cutSpread.value:55), bgColor:(bgPick?{r:bgPick.r,g:bgPick.g,b:bgPick.b}:null), bg:bgRemove.checked, flipH:flipH, wand:wandSeeds.slice(), huidMethode:huidMethode }
+          kunst3d:{ srcUrl:(origImg?origImg.src:null), lasso:lassoPts.slice(), thresh:+cutThresh.value, spread:(cutSpread?+cutSpread.value:55), bgColor:(bgPick?{r:bgPick.r,g:bgPick.g,b:bgPick.b}:null), bg:bgRemove.checked, flipH:flipH, wand:wandSeeds.slice(), huidMethode:huidMethode, rot90:rot90 }
         });
         sync2D(rec, pp.point, nz.side, rot, size, imgTexture);
         await saveTattoo(rec);
@@ -10260,16 +10329,18 @@ async function verwijderVoorbeelden() {
         const scl=Math.min(1, maxAfm/Math.max(im.naturalWidth, im.naturalHeight));
         const FW=Math.max(1,Math.round(im.naturalWidth*scl));
         const FH=Math.max(1,Math.round(im.naturalHeight*scl));
-        const full=document.createElement("canvas"); full.width=FW; full.height=FH;
+        const R=((k.rot90||0)%4+4)%4, oddR=(R&1)===1;
+        const OW=oddR?FH:FW, OH=oddR?FW:FH;
+        const full=document.createElement("canvas"); full.width=OW; full.height=OH;
         const fx=full.getContext("2d",{willReadFrequently:true});
-        if(k.flipH){ fx.translate(FW,0); fx.scale(-1,1); }
-        fx.drawImage(im,0,0,FW,FH);
+        fx.translate(OW/2,OH/2); fx.rotate(R*Math.PI/2); if(k.flipH) fx.scale(-1,1);
+        fx.drawImage(im,-FW/2,-FH/2,FW,FH);
         fx.setTransform(1,0,0,1,0,0);
         if(k.bg!==false){
-          if((k.huidMethode||'kleur')==='helder') removeSkinLuma(fx, FW, FH, (k.thresh!=null?+k.thresh:170), (k.spread!=null?+k.spread:55));
-          else removeSkinColor(fx, FW, FH, (k.bgColor||null), (k.thresh!=null?+k.thresh:170), (k.spread!=null?+k.spread:55));
+          if((k.huidMethode||'kleur')==='helder') removeSkinLuma(fx, OW, OH, (k.thresh!=null?+k.thresh:170), (k.spread!=null?+k.spread:55));
+          else removeSkinColor(fx, OW, OH, (k.bgColor||null), (k.thresh!=null?+k.thresh:170), (k.spread!=null?+k.spread:55));
         }
-        if(k.wand && k.wand.length) applyWand(fx, FW, FH, k.wand);
+        if(k.wand && k.wand.length) applyWand(fx, OW, OH, k.wand);
         const lasso=k.lasso||[]; let shown=full;
         if(lasso.length>=3){
           const sc=document.createElement("canvas"); sc.width=full.width; sc.height=full.height;
@@ -10325,7 +10396,7 @@ async function verwijderVoorbeelden() {
       const normal=new THREE.Vector3(P.normal[0],P.normal[1],P.normal[2]);
       const mesh=meshAtPoint(point,normal);
       const obj=makeImage(point,normal,P.rot||0,P.size||0.09,tex,mesh);
-      if(obj){ obj.renderOrder=(t.stapel)||0;
+      if(obj){ obj.renderOrder=(t.stapel)||0; zetDecalOpacity(obj, t.opacity);
         markers.push({ id:t.id, rec:t, obj, point:point.clone(), normal:normal.clone(),
         mesh, rot:P.rot||0, size:P.size||0.09, locked:!!P.locked, tex }); n++;
         if(!t.positie || !t.kunst || !t.kunst.src){      // ouder record: 2D-velden bijvullen
@@ -10419,6 +10490,7 @@ async function verwijderVoorbeelden() {
   }
   function show3D(){
     actief3D=true;
+    { const a=document.getElementById("t3d-add"); if(a) a.style.display=""; }   // + knop weer zichtbaar bij binnenkomst
     markers.forEach(m=>{ if(m.obj) m.obj.renderOrder=(m.rec&&m.rec.stapel)||0; });   // stapelvolgorde uit 2D overnemen
     hideHostViews();
     const v=document.getElementById("view-3d"); if(v)v.classList.remove("verborgen");
@@ -10431,6 +10503,7 @@ async function verwijderVoorbeelden() {
   function show2D(){
     actief3D=false;
     bootRedirect=false;
+    if(editDecal) exitEditDecal();   // 3D-bewerken netjes afsluiten bij wisselen naar 2D
     const v=document.getElementById("view-3d"); if(v)v.classList.add("verborgen");
     markeerViewKnop("2d");
     try{ localStorage.setItem("tatties-view","2d"); }catch(e){}
