@@ -464,6 +464,29 @@ dl.toon-leeg .veldrij.leeg-veld{display:flex}
 .start-recent-item .sri-naam{font-weight:700}
 .start-recent-item .sri-zone{margin-left:auto;color:var(--gedempt);font-size:.85rem}
 .merk{cursor:pointer}
+/* Lege staat: grote CTA + 1 regel uitleg */
+.start-uitleg{margin:-4px 0 2px;text-align:center;color:var(--gedempt);font-size:.95rem}
+.start-uitleg[hidden]{display:none}
+.start-wrap.leeg{gap:10px}
+.start-wrap.leeg .start-hero{margin-top:18px}
+.start-wrap.leeg .start-cta{padding:20px;font-size:1.15rem}
+/* Keuzemenu: 2D/3D plaatsen */
+.add-kies{position:fixed;inset:0;z-index:70;display:flex;align-items:center;justify-content:center;padding:20px;
+  background:rgba(0,0,0,.45);-webkit-backdrop-filter:blur(2px);backdrop-filter:blur(2px)}
+.add-kies[hidden]{display:none}
+.add-kies-kaart{width:min(360px,92vw);background:var(--kaart);border:1px solid var(--rand);border-radius:16px;
+  padding:16px;display:flex;flex-direction:column;gap:10px;box-shadow:0 12px 40px rgba(0,0,0,.3)}
+.add-kies-titel{margin:2px 0 4px;text-align:center;font-weight:700;font-size:1.05rem}
+.add-kies-optie{display:flex;flex-direction:column;gap:2px;text-align:left;padding:14px 16px;border:1px solid var(--rand);
+  border-radius:12px;background:var(--veldbg);color:var(--tekst);cursor:pointer}
+.add-kies-optie:hover{border-color:var(--accent)}
+.add-kies-optie .ak-titel{font-weight:700}
+.add-kies-optie .ak-sub{font-size:.82rem;color:var(--gedempt)}
+.add-kies-annuleer{align-self:center;margin-top:2px}
+/* Onboarding stap 2: +-hint */
+.onb-plus{width:64px;height:64px;margin:4px auto 6px;border-radius:50%;background:var(--accent);color:#fff;
+  font-size:2.2rem;font-weight:700;line-height:64px;text-align:center;box-shadow:0 6px 18px rgba(0,0,0,.22)}
+#onb-terug{margin-top:4px}
 
 /* ---- Tabs ---- */
 .tabs{display:flex;gap:2px;margin-bottom:14px;border-bottom:1px solid var(--rand)}
@@ -800,7 +823,7 @@ form label,
     linear-gradient(45deg,transparent 75%,rgba(120,120,120,.16) 75%),linear-gradient(-45deg,transparent 75%,rgba(120,120,120,.16) 75%);
   background-size:18px 18px;background-position:0 0,0 9px,9px -9px,-9px 0;background-color:var(--veldbg);}
 .cutmodal .cutcv,.cutmodal .lassocv{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;}
-.cutmodal .cm-foot{display:flex;gap:10px;padding:12px 16px;}
+.cutmodal .cm-foot{display:flex;gap:10px;padding:12px 16px;border-top:1px solid var(--rand);box-shadow:0 -6px 14px rgba(0,0,0,.07);background:var(--kaart);}
 .cutmodal .btn{background:transparent;border:1px solid var(--rand);color:var(--tekst);padding:12px;border-radius:8px;
   font-size:14px;cursor:pointer;font-family:inherit;}
 .cutmodal .cm-foot .btn{flex:1;}
@@ -937,8 +960,9 @@ form label{text-transform:none;letter-spacing:.005em;font-size:.8rem;color:var(-
         <p class="start-tagline" data-i18n="start.tagline">show me your tatties</p>
       </div>
       <button type="button" class="start-cta" id="start-nieuw" data-i18n="start.nieuw">+ Nieuwe tattoo</button>
+      <p class="start-uitleg" id="start-uitleg" data-i18n="start.leeg_uitleg" hidden>Plan of bewaar je volgende tattoo.</p>
       <div class="start-stats" id="start-stats"></div>
-      <div class="start-tegels">
+      <div class="start-tegels" id="start-tegels">
         <button type="button" class="start-tegel" data-ga="3d" data-i18n="start.tegel3d">3D-model</button>
         <button type="button" class="start-tegel" data-ga="2d" data-i18n="start.tegel2d">2D-kaart</button>
         <button type="button" class="start-tegel" data-ga="collectie" data-i18n="start.tegelcol">Collectie</button>
@@ -1208,19 +1232,44 @@ form label{text-transform:none;letter-spacing:.005em;font-size:.8rem;color:var(-
   </div>
 </div>
 
+<!-- Keuzemenu: op 3D-model of 2D-kaart plaatsen (vanaf het startscherm) -->
+<div id="add-kies" class="add-kies" hidden role="dialog" aria-modal="true" data-i18n-aria="start.kies_titel" aria-label="Tattoo toevoegen">
+  <div class="add-kies-kaart">
+    <p class="add-kies-titel" data-i18n="start.kies_titel">Tattoo toevoegen</p>
+    <button type="button" class="add-kies-optie" data-kies="3d">
+      <span class="ak-titel" data-i18n="start.kies_3d">Op het 3D-model</span>
+      <span class="ak-sub" data-i18n="start.kies_3d_sub">Plaats op het draaibare lichaam</span>
+    </button>
+    <button type="button" class="add-kies-optie" data-kies="2d">
+      <span class="ak-titel" data-i18n="start.kies_2d">Op de 2D-kaart</span>
+      <span class="ak-sub" data-i18n="start.kies_2d_sub">Plaats op de platte voor/achter-kaart</span>
+    </button>
+    <button type="button" class="linkbtn add-kies-annuleer" id="add-kies-annuleer" data-i18n="form.annuleren">Annuleren</button>
+  </div>
+</div>
+
 <div id="onboarding" class="onboarding" hidden role="dialog" aria-modal="true" aria-label="Welkom">
   <div class="onboarding-kaart">
-    <h1 class="onboarding-titel" data-i18n="onb.titel">Welkom bij Tatties</h1>
-    <p class="onboarding-sub" data-i18n="onb.sub">Kies je lichaam en huidskleur om te beginnen.</p>
-    <p class="onboarding-feedback" data-i18n="feedback">show me your tatties &middot; stuur mij alle eerlijke feedback</p>
-    <p class="inst-label" data-i18n="inst.geslacht">Man / Vrouw</p>
-    <div class="silhouet-keuze" id="onb-geslacht" role="group" data-i18n-aria="aria.kiessilhouet" aria-label="Kies silhouet">
-      <button type="button" data-onb-geslacht="man" data-i18n="inst.man">Man</button>
-      <button type="button" data-onb-geslacht="vrouw" data-i18n="inst.vrouw">Vrouw</button>
+    <div id="onb-stap1">
+      <h1 class="onboarding-titel" data-i18n="onb.titel">Welkom bij Tatties</h1>
+      <p class="onboarding-sub" data-i18n="onb.sub">Kies je lichaam en huidskleur om te beginnen.</p>
+      <p class="onboarding-feedback" data-i18n="feedback">show me your tatties &middot; stuur mij alle eerlijke feedback</p>
+      <p class="inst-label" data-i18n="inst.geslacht">Man / Vrouw</p>
+      <div class="silhouet-keuze" id="onb-geslacht" role="group" data-i18n-aria="aria.kiessilhouet" aria-label="Kies silhouet">
+        <button type="button" data-onb-geslacht="man" data-i18n="inst.man">Man</button>
+        <button type="button" data-onb-geslacht="vrouw" data-i18n="inst.vrouw">Vrouw</button>
+      </div>
+      <p class="inst-label" data-i18n="inst.huid">Huidskleur</p>
+      <div class="tint-rij" id="onb-tint"></div>
+      <button type="button" class="knop onboarding-start" id="onb-next" data-i18n="onb.volgende">Volgende</button>
     </div>
-    <p class="inst-label" data-i18n="inst.huid">Huidskleur</p>
-    <div class="tint-rij" id="onb-tint"></div>
-    <button type="button" class="knop-sec onboarding-start" id="onb-start" data-i18n="onb.start">Aan de slag</button>
+    <div id="onb-stap2" hidden>
+      <div class="onb-plus" aria-hidden="true">+</div>
+      <h1 class="onboarding-titel" data-i18n="onb.stap2_titel">Je eerste tattoo toevoegen</h1>
+      <p class="onboarding-sub" data-i18n="onb.stap2_sub">Tik straks op &lsquo;+ New tattoo&rsquo; om een foto te kiezen, uit te snijden en op het model te plaatsen.</p>
+      <button type="button" class="knop onboarding-start" id="onb-start" data-i18n="onb.start">Aan de slag</button>
+      <button type="button" class="linkbtn" id="onb-terug" data-i18n="onb.terug">Terug</button>
+    </div>
   </div>
 </div>
 
@@ -6080,6 +6129,8 @@ const I18N = {
     'hint.stap3':'<strong>3.</strong> Maak af en toe een backup via <strong>Exporteren</strong>.',
     'hint.begrepen':'Begrepen',
     'onb.titel':'Welkom bij Tatties','onb.sub':'Kies je lichaam en huidskleur om te beginnen.','onb.start':'Aan de slag',
+    'onb.volgende':'Volgende','onb.terug':'Terug','onb.stap2_titel':'Je eerste tattoo toevoegen',
+    'onb.stap2_sub':"Tik straks op '+ New tattoo' om een foto te kiezen, uit te snijden en op het model te plaatsen.",
     'sv.collectie':'Collectie','sv.wishlist':'Wishlist',
     'uitleg.titel3d':'Zo werkt de 3D-weergave',
     'uitleg.3d1':'<strong>Model kiezen:</strong> stel man of vrouw en je huidskleur in via Instellingen (tandwiel rechtsboven).',
@@ -6099,6 +6150,9 @@ const I18N = {
     'start.titel':'Welkom terug','start.tagline':'show me your tatties','start.nieuw':'+ Nieuwe tattoo',
     'start.stat_aantal':'Tattoos','start.leeg':'Nog geen tattoos — voeg je eerste toe.','start.recent':'Recent toegevoegd',
     'start.tegel3d':'3D-model','start.tegel2d':'2D-kaart','start.tegelcol':'Collectie','start.tegelstats':'Statistieken',
+    'start.leeg_uitleg':'Plan of bewaar je volgende tattoo.',
+    'start.kies_titel':'Tattoo toevoegen','start.kies_3d':'Op het 3D-model','start.kies_3d_sub':'Plaats op het draaibare lichaam',
+    'start.kies_2d':'Op de 2D-kaart','start.kies_2d_sub':'Plaats op de platte voor/achter-kaart',
     'ui.foto_maken':'Foto maken','ui.foto_uploaden':'Foto uploaden','ui.foto_toevoegen':'Foto/tattoo toevoegen','ui.andere_foto':'Andere foto','ui.plaatsen':'Plaatsen',
     'ui.reset_uitsnede':'Reset uitsnede','ui.spiegelen':'Spiegelen','ui.achtergrond_weghalen':'Achtergrond weghalen',
     'ui.toverstaf':'Toverstaf','ui.ongedaan':'Ongedaan',
@@ -6131,6 +6185,7 @@ const I18N = {
     'sort.datumnieuw':'Nieuwste eerst','sort.datumoud':'Oudste eerst','sort.naam':'Naam A–Z','sort.kosten':'Kosten hoog–laag','sort.zone':'Lichaamsdeel',
     'btn.export':'Exporteren','btn.import':'Importeren','btn.png':'Kaart als PNG',
     'install.tekst':'Zet Tatties op je beginscherm voor offline gebruik','install.knop':'Installeren',
+    'install.ios':'Zet Tatties op je beginscherm: tik op Deel en kies ‘Zet op beginscherm’.',
     'inst.titel':'Instellingen','inst.geslacht':'Man / Vrouw','inst.man':'Man','inst.vrouw':'Vrouw','inst.huid':'Huidskleur','inst.taal':'Taal',
     'inst.thema':'Weergave','inst.thema.auto':'Systeem','inst.thema.licht':'Licht','inst.thema.donker':'Donker',
     'stats.titel':'Statistieken','stats.collectie':'Collectie','stats.aantal':'Aantal tattoos','stats.uitgegeven':'Totaal uitgegeven',
@@ -6223,6 +6278,8 @@ const I18N = {
     'hint.stap3':'<strong>3.</strong> Make a backup now and then via <strong>Export</strong>.',
     'hint.begrepen':'Got it',
     'onb.titel':'Welcome to Tatties','onb.sub':'Pick your body and skin tone to get started.','onb.start':'Get started',
+    'onb.volgende':'Next','onb.terug':'Back','onb.stap2_titel':'Add your first tattoo',
+    'onb.stap2_sub':"Next, tap '+ New tattoo' to pick a photo, cut it out and place it on the model.",
     'sv.collectie':'Collection','sv.wishlist':'Wishlist',
     'uitleg.titel3d':'How the 3D view works',
     'uitleg.3d1':'<strong>Pick a model:</strong> set male or female and your skin tone via Settings (gear, top right).',
@@ -6242,6 +6299,9 @@ const I18N = {
     'start.titel':'Welcome back','start.tagline':'show me your tatties','start.nieuw':'+ New tattoo',
     'start.stat_aantal':'Tattoos','start.leeg':'No tattoos yet — add your first.','start.recent':'Recently added',
     'start.tegel3d':'3D model','start.tegel2d':'2D map','start.tegelcol':'Collection','start.tegelstats':'Statistics',
+    'start.leeg_uitleg':'Plan or save your next tattoo.',
+    'start.kies_titel':'Add tattoo','start.kies_3d':'On the 3D model','start.kies_3d_sub':'Place on the rotatable body',
+    'start.kies_2d':'On the 2D map','start.kies_2d_sub':'Place on the flat front/back map',
     'ui.foto_maken':'Take photo','ui.foto_uploaden':'Upload photo','ui.foto_toevoegen':'Add photo/tattoo','ui.andere_foto':'Other photo','ui.plaatsen':'Place',
     'ui.reset_uitsnede':'Reset cut-out','ui.spiegelen':'Mirror','ui.achtergrond_weghalen':'Remove background',
     'ui.toverstaf':'Magic wand','ui.ongedaan':'Undo',
@@ -6274,6 +6334,7 @@ const I18N = {
     'sort.datumnieuw':'Newest first','sort.datumoud':'Oldest first','sort.naam':'Name A–Z','sort.kosten':'Cost high–low','sort.zone':'Body part',
     'btn.export':'Export','btn.import':'Import','btn.png':'Map as PNG',
     'install.tekst':'Add Tatties to your home screen for offline use','install.knop':'Install',
+    'install.ios':'Add Tatties to your home screen: tap Share, then ‘Add to Home Screen’.',
     'inst.titel':'Settings','inst.geslacht':'Male / Female','inst.man':'Male','inst.vrouw':'Female','inst.huid':'Skin tone','inst.taal':'Language',
     'inst.thema':'Appearance','inst.thema.auto':'System','inst.thema.licht':'Light','inst.thema.donker':'Dark',
     'stats.titel':'Statistics','stats.collectie':'Collection','stats.aantal':'Number of tattoos','stats.uitgegeven':'Total spent',
@@ -6773,8 +6834,15 @@ function renderStart() {
   const statsEl = $('#start-stats');
   const recentBlok = $('#start-recent-blok');
   if (!statsEl) return;
-  if (!tattoos.length) {
-    statsEl.innerHTML = `<p class="start-leeg">${tr('start.leeg')}</p>`;
+  const wrap = $('#view-start .start-wrap');
+  const tegels = $('#start-tegels');
+  const uitleg = $('#start-uitleg');
+  const leeg = !tattoos.length;
+  if (wrap) wrap.classList.toggle('leeg', leeg);     // lege staat: focus op de grote CTA
+  if (uitleg) uitleg.hidden = !leeg;
+  if (tegels) tegels.hidden = leeg;
+  if (leeg) {
+    statsEl.innerHTML = '';
     if (recentBlok) recentBlok.hidden = true;
     return;
   }
@@ -8775,26 +8843,62 @@ if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
 }
 
 let uitgesteldeInstallPrompt = null;
+
+/* Toont de installatie-banner alleen als de app nog niet geïnstalleerd is, de
+   gebruiker 'm niet eerder heeft weggeklikt en onboarding is afgerond.
+   iOS Safari vuurt geen beforeinstallprompt → daar tonen we een uitleg-variant. */
+function installBannerWeg() {
+  try { return localStorage.getItem('tatties-install-weg') === '1'; } catch { return false; }
+}
+function isStandalone() {
+  return (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) || navigator.standalone === true;
+}
+function toonInstallBanner() {
+  if (installBannerWeg() || isStandalone()) return;
+  const onb = document.getElementById('onboarding');
+  if (onb && !onb.hidden) return; // wacht tot onboarding afgerond is
+  const ua = navigator.userAgent || '';
+  const isIOS = /iphone|ipad|ipod/i.test(ua) || (/macintosh/i.test(ua) && navigator.maxTouchPoints > 1);
+  const span = $('#install-banner span');
+  if (isIOS) {
+    span.setAttribute('data-i18n', 'install.ios');
+    span.textContent = tr('install.ios');
+    $('#install-ja').hidden = true;            // op iOS kan installatie niet programmatisch
+  } else if (uitgesteldeInstallPrompt) {
+    span.setAttribute('data-i18n', 'install.tekst');
+    span.textContent = tr('install.tekst');
+    $('#install-ja').hidden = false;
+  } else {
+    return;                                     // geen installatiepad in deze browser
+  }
+  $('#install-banner').hidden = false;
+}
+function verbergInstallBanner(onthoud) {
+  $('#install-banner').hidden = true;
+  if (onthoud) { try { localStorage.setItem('tatties-install-weg', '1'); } catch { /* geen vlag */ } }
+}
+
 window.addEventListener('beforeinstallprompt', (e) => {
   e.preventDefault();
   uitgesteldeInstallPrompt = e;
-  // Install-banner tijdelijk uitgeschakeld: testers gebruiken de app online.
-  // Zet 'm terug aan met: $('#install-banner').hidden = false;
+  toonInstallBanner();
 });
 $('#install-ja').addEventListener('click', async () => {
-  $('#install-banner').hidden = true;
+  verbergInstallBanner(true);
   if (!uitgesteldeInstallPrompt) return;
   uitgesteldeInstallPrompt.prompt();
   await uitgesteldeInstallPrompt.userChoice;
   uitgesteldeInstallPrompt = null;
 });
 $('#install-sluit').addEventListener('click', () => {
-  $('#install-banner').hidden = true;
+  verbergInstallBanner(true);
 });
 window.addEventListener('appinstalled', () => {
-  $('#install-banner').hidden = true;
+  verbergInstallBanner(true);
   toast(tr('toast.opbeginscherm'));
 });
+/* iOS kent geen beforeinstallprompt; probeer de banner kort na laden. */
+setTimeout(toonInstallBanner, 4000);
 
 /* ============================================================
    INITIALISATIE
@@ -8809,12 +8913,15 @@ function toonOnboarding() {
   document.querySelectorAll('#onb-geslacht button[data-onb-geslacht]').forEach(b =>
     b.classList.toggle('actief', b.dataset.onbGeslacht === silhouetKeuze));
   tekenHuidkiezer(document.getElementById('onb-tint'));
+  const s1 = document.getElementById('onb-stap1'), s2 = document.getElementById('onb-stap2');
+  if (s1) s1.hidden = false; if (s2) s2.hidden = true;   // altijd op stap 1 beginnen
   ov.hidden = false;
 }
 function rondOnboardingAf() {
   try { localStorage.setItem('tatties-onboarding-gedaan', '1'); } catch { /* geen vlag */ }
   const ov = document.getElementById('onboarding');
   if (ov) ov.hidden = true;
+  setTimeout(toonInstallBanner, 800); // installatie-hint zodra onboarding klaar is
 }
 
 /* ---- Instellingen-paneel ---- */
@@ -9000,11 +9107,20 @@ async function verwijderVoorbeelden() {
       else if (ga === 'collectie') toonView('collectie');
       else if (ga === 'stats') openStats();
     }));
-  { const cta = $('#start-nieuw'); if (cta) cta.addEventListener('click', () => {
-      let lv = '3d'; try { lv = localStorage.getItem('tatties-view') || '3d'; } catch (e) {}
-      if (lv === '2d') { $('#btn-2d').click(); setTimeout(() => { if (typeof window.__tattiesAdd2D === 'function') window.__tattiesAdd2D(); }, 60); }
-      else { $('#btn-3d').click(); setTimeout(() => { const a = $('#t3d-add'); if (a && a.onclick) a.onclick(); }, 60); }
-    }); }
+  // '+ New tattoo' op het startscherm: keuzemenu 3D/2D
+  function startToevoegen(doel) {
+    if (doel === '2d') { $('#btn-2d').click(); setTimeout(() => { if (typeof window.__tattiesAdd2D === 'function') window.__tattiesAdd2D(); }, 60); }
+    else { $('#btn-3d').click(); setTimeout(() => { const a = $('#t3d-add'); if (a && a.onclick) a.onclick(); }, 60); }
+  }
+  const addKies = $('#add-kies');
+  const sluitKies = () => { if (addKies) addKies.hidden = true; };
+  { const cta = $('#start-nieuw'); if (cta) cta.addEventListener('click', () => { if (addKies) addKies.hidden = false; }); }
+  if (addKies) {
+    addKies.querySelectorAll('.add-kies-optie').forEach((b) =>
+      b.addEventListener('click', () => { const d = b.dataset.kies; sluitKies(); startToevoegen(d); }));
+    const ann = $('#add-kies-annuleer'); if (ann) ann.addEventListener('click', sluitKies);
+    addKies.addEventListener('click', (e) => { if (e.target === addKies) sluitKies(); });   // klik op achtergrond sluit
+  }
   { const rec = $('#start-recent'); if (rec) rec.addEventListener('click', (e) => {
       const b = e.target.closest('.start-recent-item'); if (b) openDetail(b.dataset.id);
     }); }
@@ -9019,6 +9135,8 @@ async function verwijderVoorbeelden() {
         x.classList.toggle('actief', x === b));
     }));
   $('#onb-start').addEventListener('click', rondOnboardingAf);
+  { const next = $('#onb-next'); if (next) next.addEventListener('click', () => { const s1 = $('#onb-stap1'), s2 = $('#onb-stap2'); if (s1) s1.hidden = true; if (s2) s2.hidden = false; }); }
+  { const terug = $('#onb-terug'); if (terug) terug.addEventListener('click', () => { const s1 = $('#onb-stap1'), s2 = $('#onb-stap2'); if (s1) s1.hidden = false; if (s2) s2.hidden = true; }); }
   $('#kaart-reset').addEventListener('click', () => { zetFilter(null); setTimeout(renderMarkers, 320); });
   document.querySelectorAll('#taal-keuze button[data-taal]').forEach((b) =>
     b.addEventListener('click', () => pasTaal(b.dataset.taal)));
