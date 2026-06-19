@@ -1160,7 +1160,9 @@ form label{text-transform:none;letter-spacing:.005em;font-size:.8rem;color:var(-
             </div>
             <span class="hintline" id="cmHint" style="display:block;margin:0 0 6px">Teken met je vinger een lijn rond de tattoo.</span>
             <div class="cm-prev" id="cutPrev"><canvas id="cutCanvas" class="cutcv"></canvas><canvas id="lassoCanvas" class="lassocv"></canvas></div>
-            <label class="chk" style="display:inline-flex;margin:6px 0 2px"><input type="checkbox" id="bgRemove"> <span data-i18n="ui.huid_weghalen">Huid weghalen</span></label>
+            <!-- 'Huid weghalen' verborgen: simpele kleur/helderheid-isolatie wordt op echte huidfoto's te vlekkerig.
+                 Code blijft staan; AI-isolatie volgt later (Fase 3). Standaard = nette uitsnede mét huid. -->
+            <label class="chk" id="cmHuidWegRij" style="display:none"><input type="checkbox" id="bgRemove"> <span data-i18n="ui.huid_weghalen">Huid weghalen</span></label>
             <div id="cmHuidOpties" hidden>
               <div class="silhouet-keuze compact cm-modus" id="cmHuidMethode" role="group" data-i18n-aria="ui.huid_methode" aria-label="Methode">
                 <button type="button" data-hmethode="kleur" data-i18n="ui.huid_kleur">Kleur</button>
