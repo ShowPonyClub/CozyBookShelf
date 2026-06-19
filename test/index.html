@@ -817,7 +817,8 @@ form label,
 .cutmodal .cm-choose{grid-column:2;justify-self:center;padding:8px 12px;font-size:13px;}
 .cutmodal .cm-toprow .chk{margin-top:0;}
 .cutmodal .chk input{width:16px;height:16px;flex:0 0 auto;}
-.cutmodal .cm-prev{flex:1;min-height:280px;border:1px solid var(--rand);border-radius:10px;display:flex;align-items:center;justify-content:center;
+.cutmodal .cm-modus{margin:2px 0 8px;}
+.cutmodal .cm-prev{flex:1;min-height:340px;border:1px solid var(--rand);border-radius:10px;display:flex;align-items:center;justify-content:center;
   position:relative;overflow:hidden;touch-action:none;cursor:crosshair;
   background:linear-gradient(45deg,rgba(120,120,120,.16) 25%,transparent 25%),linear-gradient(-45deg,rgba(120,120,120,.16) 25%,transparent 25%),
     linear-gradient(45deg,transparent 75%,rgba(120,120,120,.16) 75%),linear-gradient(-45deg,transparent 75%,rgba(120,120,120,.16) 75%);
@@ -1153,7 +1154,11 @@ form label{text-transform:none;letter-spacing:.005em;font-size:.8rem;color:var(-
             </div>
           </div>
           <div id="cmSettings" hidden>
-            <span class="hintline" style="display:block;margin:0 0 6px" data-i18n="ui.cut_hint">Teken met je vinger of muis een lijn rond de tattoo om hem uit te knippen.</span>
+            <div class="silhouet-keuze compact cm-modus" id="cmModus" role="group" data-i18n-aria="ui.snijmethode" aria-label="Snijmethode">
+              <button type="button" data-modus="vrij" data-i18n="ui.snij_vrij">Vrij tekenen</button>
+              <button type="button" data-modus="punten" data-i18n="ui.snij_punten">Punten</button>
+            </div>
+            <span class="hintline" id="cmHint" style="display:block;margin:0 0 6px">Teken met je vinger een lijn rond de tattoo.</span>
             <div class="cm-prev" id="cutPrev"><canvas id="cutCanvas" class="cutcv"></canvas><canvas id="lassoCanvas" class="lassocv"></canvas></div>
             <div class="cutrow bg-controls">
               <label class="chk" style="display:inline-flex;margin:0"><input type="checkbox" id="bgRemove"> <span data-i18n="ui.achtergrond_weghalen">Achtergrond weghalen</span></label>
@@ -6158,6 +6163,9 @@ const I18N = {
     'ui.toverstaf':'Toverstaf','ui.ongedaan':'Ongedaan',
     'ui.tik_uitknippen':'Tik op het deel dat je wilt weghalen','ui.toverstaf_uit':'Toverstaf uit',
     'ui.cut_hint':'Tik rondom de tattoo om punten te plaatsen; sleep een punt om bij te stellen.',
+    'ui.snijmethode':'Snijmethode','ui.snij_vrij':'Vrij tekenen','ui.snij_punten':'Punten',
+    'ui.cut_hint_vrij':'Teken met je vinger een doorlopende lijn rond de tattoo.',
+    'ui.cut_hint_punten':'Tik rondom de tattoo om punten te zetten; sleep een punt om bij te stellen.',
     'ui.gevoeligheid':'Gevoeligheid — sleep tot de achtergrond weg is','ui.zachte_randen':'Zachte randen meenemen',
     'ui.achtergrondkleur':'Achtergrondkleur kiezen','ui.auto':'Auto',
     'ui.tattoo_toevoegen':'Tattoo toevoegen','ui.tattoo_aanpassen':'Tattoo aanpassen',
@@ -6307,6 +6315,9 @@ const I18N = {
     'ui.toverstaf':'Magic wand','ui.ongedaan':'Undo',
     'ui.tik_uitknippen':'Tap the part you want to remove','ui.toverstaf_uit':'Magic wand off',
     'ui.cut_hint':'Tap around the tattoo to place points; drag a point to adjust.',
+    'ui.snijmethode':'Cut method','ui.snij_vrij':'Freehand','ui.snij_punten':'Points',
+    'ui.cut_hint_vrij':'Draw a continuous line around the tattoo with your finger.',
+    'ui.cut_hint_punten':'Tap around the tattoo to place points; drag a point to adjust.',
     'ui.gevoeligheid':'Sensitivity — drag until the background is gone','ui.zachte_randen':'Include soft edges',
     'ui.achtergrondkleur':'Pick background colour','ui.auto':'Auto',
     'ui.tattoo_toevoegen':'Add tattoo','ui.tattoo_aanpassen':'Edit tattoo',
@@ -9219,6 +9230,27 @@ async function verwijderVoorbeelden() {
 
   const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
   function imgRectInBox(bw,bh,iw,ih){ const s=Math.min(bw/iw,bh/ih), w=iw*s, h=ih*s; return {left:(bw-w)/2, top:(bh-h)/2, w, h}; }
+  // Zoom/pan in het uitsnijvak: viewRect = fit-rechthoek × zoom, verschoven met pan.
+  let zoom=1, panX=0, panY=0;
+  function viewRect(bw,bh,iw,ih){
+    const fit=imgRectInBox(bw,bh,iw,ih);
+    const w=fit.w*zoom, h=fit.h*zoom;
+    return { left:(bw-w)/2+panX, top:(bh-h)/2+panY, w, h };
+  }
+  function clampPan(){
+    if(!origImg||!cutPrev) return;
+    const b=cutPrev.getBoundingClientRect();
+    const fit=imgRectInBox(b.width,b.height,origImg.naturalWidth,origImg.naturalHeight);
+    const w=fit.w*zoom, h=fit.h*zoom;
+    const mx=Math.max(0,(w-b.width)/2), my=Math.max(0,(h-b.height)/2);
+    panX=Math.min(mx,Math.max(-mx,panX)); panY=Math.min(my,Math.max(-my,panY));
+  }
+  function resetZoom(){ zoom=1; panX=0; panY=0; }
+  const cutPointers=new Map();   // actieve pointers in het uitsnijvak (voor pinch)
+  let pinch=null;                // {dist, cx, cy, zoom0, panX0, panY0}
+  let lassoBackup=null;          // lasso vóór een vrije stroke (terugzetten bij pinch)
+  let puntToegevoegd=false;      // of de laatste punten-tik een nieuw punt toevoegde
+  let wheelEind=null;            // debounce voor wheel-zoom (preview pas bijwerken na scrollen)
 
   /* ---- camera-baan ---- */
   function applyCam(){
@@ -9590,6 +9622,30 @@ async function verwijderVoorbeelden() {
   let flipH=false;          // horizontaal spiegelen van de uitsnede
   function zetSpiegelUI(){ const b=document.getElementById('spiegelBtn'); if(b) b.classList.toggle('on', flipH); }
   let lassoDragIdx=-1;       // index van het lasso-punt dat versleept wordt (-1 = geen)
+  let drawingFree=false;     // bezig met vrij tekenen (vinger/muis sleept)
+  let cutModus='vrij';       // 'vrij' = met de vinger tekenen, 'punten' = punten klikken
+  // Effen een vrij-getekende lijn: Ramer–Douglas–Peucker (verwijdert jitter, houdt de vorm)
+  function vereenvoudigLasso(pts, eps){
+    if(pts.length<4) return pts;
+    const afst=(p,a,b)=>{ const dx=b.nx-a.nx, dy=b.ny-a.ny, len=Math.hypot(dx,dy)||1e-9;
+      return Math.abs((p.nx-a.nx)*dy-(p.ny-a.ny)*dx)/len; };
+    const rdp=(arr)=>{ if(arr.length<3) return arr;
+      const keep=new Array(arr.length).fill(false); keep[0]=keep[arr.length-1]=true;
+      const st=[[0,arr.length-1]];
+      while(st.length){ const seg=st.pop(), s=seg[0], e2=seg[1]; let maxD=0, idx=-1;
+        for(let i=s+1;i<e2;i++){ const d=afst(arr[i],arr[s],arr[e2]); if(d>maxD){maxD=d;idx=i;} }
+        if(maxD>eps && idx>0){ keep[idx]=true; st.push([s,idx]); st.push([idx,e2]); } }
+      return arr.filter((_,i)=>keep[i]); };
+    // splits bij het punt het verst van het begin, zodat een (bijna) gesloten lus niet degenereert
+    let far=0, fd=-1;
+    for(let i=1;i<pts.length;i++){ const dx=pts[i].nx-pts[0].nx, dy=pts[i].ny-pts[0].ny, d=dx*dx+dy*dy; if(d>fd){fd=d;far=i;} }
+    const a=rdp(pts.slice(0,far+1)), b=rdp(pts.slice(far));
+    return a.concat(b.slice(1));
+  }
+  function zetSnijModusUI(){
+    document.querySelectorAll('#cmModus button[data-modus]').forEach(b=>b.classList.toggle('actief', b.dataset.modus===cutModus));
+    const h=document.getElementById('cmHint'); if(h) h.textContent=tr(cutModus==='vrij'?'ui.cut_hint_vrij':'ui.cut_hint_punten');
+  }
   let wandMode=false;        // toverstaf actief: volgende tik knipt een aaneengesloten gebied weg
   let wandSeeds=[];          // {nx,ny} klikpunten voor de toverstaf
   const WAND_TOL2=7500;      // kleurtolerantie^2 (≈50/kanaal) voor de toverstaf
@@ -9597,7 +9653,7 @@ async function verwijderVoorbeelden() {
   // dichtstbijzijnde lasso-punt bij een pointer-event (in schermpixels), of -1
   function lassoPuntBij(e){
     if(!origImg||!lassoPts.length) return -1;
-    const b=cutPrev.getBoundingClientRect(), r=imgRectInBox(b.width,b.height,origImg.naturalWidth,origImg.naturalHeight);
+    const b=cutPrev.getBoundingClientRect(), r=viewRect(b.width,b.height,origImg.naturalWidth,origImg.naturalHeight);
     const mx=e.clientX-b.left, my=e.clientY-b.top; let best=-1, bd=18*18;
     for(let i=0;i<lassoPts.length;i++){ const X=r.left+lassoPts[i].nx*r.w, Y=r.top+lassoPts[i].ny*r.h; const dx=X-mx,dy=Y-my,dd=dx*dx+dy*dy; if(dd<bd){bd=dd;best=i;} }
     return best;
@@ -9638,7 +9694,7 @@ async function verwijderVoorbeelden() {
     addDoel = doel || '3d';
     pendingNew=true; pendingPlace=null; pendingEdit=null; pendingPlace2D=null;
     origImg=null; lassoPts=[]; imgTexture=null; baseCanvas=null; flipH=false; zetSpiegelUI();
-    wandSeeds=[]; wandMode=false; zetWandUI(); lassoDragIdx=-1;
+    wandSeeds=[]; wandMode=false; zetWandUI(); lassoDragIdx=-1; cutModus='vrij'; drawingFree=false; zetSnijModusUI(); resetZoom();
     bgPickMode=false; setBgPick(null); if(bgPickBtn)bgPickBtn.classList.remove("on");
     if(cutSpread) cutSpread.value=55;
     cmTitle.textContent=tr('ui.tattoo_toevoegen'); cmPlaceBtn.textContent=tr('ui.toevoegen');
@@ -9658,7 +9714,7 @@ async function verwijderVoorbeelden() {
   function openCutModal(point, normal, mesh){
     pendingPlace={point, normal, mesh}; pendingEdit=null; pendingPlace2D=null;
     origImg=null; lassoPts=[]; imgTexture=null; baseCanvas=null; flipH=false; zetSpiegelUI();
-    wandSeeds=[]; wandMode=false; zetWandUI(); lassoDragIdx=-1;
+    wandSeeds=[]; wandMode=false; zetWandUI(); lassoDragIdx=-1; cutModus='vrij'; drawingFree=false; zetSnijModusUI(); resetZoom();
     bgPickMode=false; setBgPick(null); if(bgPickBtn)bgPickBtn.classList.remove("on");
     if(cutSpread) cutSpread.value=55;
     cmTitle.textContent=tr('ui.tattoo_toevoegen'); cmPlaceBtn.textContent=tr('ui.tattoo_toevoegen');
@@ -9671,7 +9727,7 @@ async function verwijderVoorbeelden() {
     if(!k || !k.srcUrl){ toast(tr('ui.geen_foto_bewaard')); return; }
     pendingPlace=null; pendingEdit=m; pendingPlace2D=null;
     origImg=null; imgTexture=null; baseCanvas=null; lassoPts=[]; flipH=!!k.flipH; zetSpiegelUI();
-    wandSeeds=(k.wand||[]).slice(); wandMode=false; zetWandUI(); lassoDragIdx=-1;
+    wandSeeds=(k.wand||[]).slice(); wandMode=false; zetWandUI(); lassoDragIdx=-1; cutModus='vrij'; drawingFree=false; zetSnijModusUI(); resetZoom();
     cmTitle.textContent=tr('ui.tattoo_aanpassen'); cmPlaceBtn.textContent=tr('form.opslaan');
     bgRemove.checked = (k.bg!==false);
     if(k.thresh!=null) cutThresh.value=k.thresh;
@@ -9692,7 +9748,7 @@ async function verwijderVoorbeelden() {
     if(!k || !k.srcUrl){ toast(tr('ui.geen_foto_bewaard')); return; }
     pendingPlace=null; pendingEdit=null; pendingPlace2D=null; pendingNew=null; pendingEdit2D=rec;
     origImg=null; imgTexture=null; baseCanvas=null; lassoPts=[]; flipH=!!k.flipH; zetSpiegelUI();
-    wandSeeds=(k.wand||[]).slice(); wandMode=false; zetWandUI(); lassoDragIdx=-1;
+    wandSeeds=(k.wand||[]).slice(); wandMode=false; zetWandUI(); lassoDragIdx=-1; cutModus='vrij'; drawingFree=false; zetSnijModusUI(); resetZoom();
     cmTitle.textContent=tr('ui.tattoo_aanpassen'); cmPlaceBtn.textContent=tr('form.opslaan');
     bgRemove.checked=(k.bg!==false);
     if(k.thresh!=null) cutThresh.value=k.thresh;
@@ -9713,7 +9769,7 @@ async function verwijderVoorbeelden() {
   function openCutModal2D(x,y,zone,side){
     pendingPlace2D={x,y,zone,side}; pendingPlace=null; pendingEdit=null;
     origImg=null; lassoPts=[]; imgTexture=null; baseCanvas=null; flipH=false; zetSpiegelUI();
-    wandSeeds=[]; wandMode=false; zetWandUI(); lassoDragIdx=-1;
+    wandSeeds=[]; wandMode=false; zetWandUI(); lassoDragIdx=-1; cutModus='vrij'; drawingFree=false; zetSnijModusUI(); resetZoom();
     bgPickMode=false; setBgPick(null); if(bgPickBtn)bgPickBtn.classList.remove("on");
     if(cutSpread) cutSpread.value=55;
     cmTitle.textContent=tr('ui.tattoo_toevoegen'); cmPlaceBtn.textContent=tr('ui.tattoo_toevoegen');
@@ -9828,7 +9884,7 @@ async function verwijderVoorbeelden() {
     const cv=cutCanvas; cv.width=cutPrev.clientWidth; cv.height=cutPrev.clientHeight;
     const ctx=cv.getContext("2d"); ctx.clearRect(0,0,cv.width,cv.height);
     if(!shown) return;
-    const r=imgRectInBox(cv.width,cv.height,shown.width,shown.height);
+    const r=viewRect(cv.width,cv.height,shown.width,shown.height);
     ctx.drawImage(shown, r.left, r.top, r.w, r.h);
   }
   function updateCutout(){
@@ -9853,7 +9909,7 @@ async function verwijderVoorbeelden() {
     const cv=lassoCanvas; cv.width=cutPrev.clientWidth; cv.height=cutPrev.clientHeight;
     const ctx=cv.getContext("2d"); ctx.clearRect(0,0,cv.width,cv.height);
     if(!origImg || lassoPts.length<1) return;
-    const r=imgRectInBox(cv.width,cv.height,origImg.naturalWidth,origImg.naturalHeight);
+    const r=viewRect(cv.width,cv.height,origImg.naturalWidth,origImg.naturalHeight);
     ctx.beginPath();
     lassoPts.forEach((p,i)=>{ const X=r.left+p.nx*r.w, Y=r.top+p.ny*r.h; i?ctx.lineTo(X,Y):ctx.moveTo(X,Y); });
     if(lassoPts.length>=3){ ctx.closePath(); ctx.fillStyle="rgba(142,113,240,.14)"; ctx.fill(); }
@@ -9864,7 +9920,7 @@ async function verwijderVoorbeelden() {
       ctx.fillStyle="#8e71f0"; ctx.fill(); ctx.lineWidth=2; ctx.strokeStyle="#fff"; ctx.stroke(); });
   }
   function ptFrom(e){
-    const b=cutPrev.getBoundingClientRect(), r=imgRectInBox(b.width,b.height,origImg.naturalWidth,origImg.naturalHeight);
+    const b=cutPrev.getBoundingClientRect(), r=viewRect(b.width,b.height,origImg.naturalWidth,origImg.naturalHeight);
     return { nx:clamp((e.clientX-b.left-r.left)/r.w,0,1), ny:clamp((e.clientY-b.top-r.top)/r.h,0,1) };
   }
 
@@ -9889,6 +9945,7 @@ async function verwijderVoorbeelden() {
     document.getElementById("cmChoose").onclick=()=>imgInput.click();
     document.getElementById("cmCancel").onclick=closeCutModal;
     document.getElementById("cropReset").onclick=()=>{ lassoPts=[]; wandSeeds=[]; lassoDragIdx=-1; rebuildBase(); drawLasso(); updateCutout(); };
+    document.querySelectorAll('#cmModus button[data-modus]').forEach(b=>b.onclick=()=>{ cutModus=b.dataset.modus; drawingFree=false; lassoDragIdx=-1; zetSnijModusUI(); drawLasso(); });
     { const ub=document.getElementById("lassoUndo"); if(ub) ub.onclick=()=>{ lassoPts.pop(); lassoDragIdx=-1; drawLasso(); updateCutout(); }; }
     { const wb=document.getElementById("wandBtn"); if(wb) wb.onclick=()=>{ wandMode=!wandMode; if(wandMode){ bgPickMode=false; if(bgPickBtn)bgPickBtn.classList.remove("on"); } zetWandUI(); toast(wandMode?tr('ui.tik_uitknippen'):tr('ui.toverstaf_uit')); }; }
     { const sp=document.getElementById("spiegelBtn"); if(sp) sp.onclick=()=>{
@@ -9959,22 +10016,77 @@ async function verwijderVoorbeelden() {
         return;
       }
       if(!baseCanvas) rebuildBase();
-      const idx=lassoPuntBij(e);            // dichtbij bestaand punt? dat verslepen, anders nieuw punt
-      if(idx>=0){ lassoDragIdx=idx; }
-      else { lassoPts.push(ptFrom(e)); lassoDragIdx=lassoPts.length-1; }
+      cutPointers.set(e.pointerId,{x:e.clientX,y:e.clientY});
+      if(cutPointers.size>=2){              // tweede vinger -> pinch-zoom/pan; lopende tekening afbreken
+        if(drawingFree){ drawingFree=false; if(lassoBackup) lassoPts=lassoBackup; }
+        else if(lassoDragIdx>=0){ if(puntToegevoegd) lassoPts.pop(); lassoDragIdx=-1; }
+        startPinch(); drawPreview(baseCanvas); drawLasso();
+        return;
+      }
       try{ cutPrev.setPointerCapture(e.pointerId); }catch(_){}
+      if(cutModus==='vrij'){                // vrij tekenen: nieuwe lijn met de vinger/muis
+        lassoBackup=lassoPts.slice(); drawingFree=true; lassoPts=[ptFrom(e)];
+        drawPreview(baseCanvas); drawLasso();
+        return;
+      }
+      const idx=lassoPuntBij(e);            // punten-modus: dichtbij punt = verslepen, anders nieuw punt
+      if(idx>=0){ lassoDragIdx=idx; puntToegevoegd=false; }
+      else { lassoPts.push(ptFrom(e)); lassoDragIdx=lassoPts.length-1; puntToegevoegd=true; }
       drawPreview(baseCanvas); drawLasso();
     });
     cutPrev.addEventListener("pointermove",e=>{
+      if(cutPointers.has(e.pointerId)) cutPointers.set(e.pointerId,{x:e.clientX,y:e.clientY});
+      if(pinch && cutPointers.size>=2){     // pinch: zoom + pan
+        const pts=[...cutPointers.values()];
+        const dx=pts[0].x-pts[1].x, dy=pts[0].y-pts[1].y, dist=Math.hypot(dx,dy)||1;
+        const ncx=(pts[0].x+pts[1].x)/2, ncy=(pts[0].y+pts[1].y)/2;
+        zoom=Math.min(6, Math.max(1, pinch.zoom0*(dist/pinch.dist)));
+        panX=pinch.panX0+(ncx-pinch.cx); panY=pinch.panY0+(ncy-pinch.cy);
+        clampPan(); drawPreview(baseCanvas); drawLasso(); return;
+      }
+      if(drawingFree){
+        const p=ptFrom(e), last=lassoPts[lassoPts.length-1];
+        if(!last || Math.hypot(p.nx-last.nx,p.ny-last.ny)>0.006) lassoPts.push(p);
+        drawLasso(); return;
+      }
       if(lassoDragIdx<0)return;
       lassoPts[lassoDragIdx]=ptFrom(e);
       drawLasso();
     });
-    cutPrev.addEventListener("pointerup",e=>{
+    function eindigPointer(e){
+      cutPointers.delete(e.pointerId);
+      if(pinch){ if(cutPointers.size<2){ pinch=null; updateCutout(); drawLasso(); } return; }
+      if(drawingFree){
+        drawingFree=false;
+        if(lassoPts.length<3) lassoPts=[];
+        else lassoPts=vereenvoudigLasso(lassoPts, 0.006);   // effenen / jitter weg
+        drawLasso(); updateCutout(); return;
+      }
       if(lassoDragIdx<0)return;
       lassoDragIdx=-1;
       drawLasso(); updateCutout();
-    });
+    }
+    cutPrev.addEventListener("pointerup", eindigPointer);
+    cutPrev.addEventListener("pointercancel", eindigPointer);
+    function startPinch(){
+      const pts=[...cutPointers.values()];
+      const dx=pts[0].x-pts[1].x, dy=pts[0].y-pts[1].y;
+      pinch={ dist:Math.hypot(dx,dy)||1, cx:(pts[0].x+pts[1].x)/2, cy:(pts[0].y+pts[1].y)/2, zoom0:zoom, panX0:panX, panY0:panY };
+    }
+    // Wheel-zoom (desktop), gericht op de cursor
+    cutPrev.addEventListener("wheel",e=>{
+      if(!origImg) return; e.preventDefault();
+      const b=cutPrev.getBoundingClientRect();
+      const before=ptFrom(e);                 // genormaliseerde positie onder de cursor (oude zoom)
+      zoom=Math.min(6, Math.max(1, zoom*(e.deltaY<0?1.15:1/1.15)));
+      const fit=imgRectInBox(b.width,b.height,origImg.naturalWidth,origImg.naturalHeight);
+      const w=fit.w*zoom, h=fit.h*zoom;
+      panX=(e.clientX-b.left)-(b.width-w)/2-before.nx*w;   // houd het punt onder de cursor vast
+      panY=(e.clientY-b.top)-(b.height-h)/2-before.ny*h;
+      clampPan();
+      drawPreview(baseCanvas); drawLasso();
+      clearTimeout(wheelEind); wheelEind=setTimeout(()=>{ updateCutout(); drawLasso(); },120);
+    },{passive:false});
 
     cmPlaceBtn.onclick=async ()=>{
       if(!imgTexture){ toast(tr('ui.kies_eerst_foto')); return; }
