@@ -847,8 +847,17 @@ form label,
 .cutmodal .linkbtn:hover{color:var(--accent);}
 .cutmodal .bgrow{justify-content:flex-start;margin-top:6px;}
 .cutmodal .bg-controls{justify-content:flex-start;flex-wrap:wrap;gap:8px 16px;margin:8px 0;}
-.cutmodal .cut-tools{justify-content:flex-start;flex-wrap:wrap;gap:8px 16px;}
-.cutmodal .cut-tip{font-size:11px;color:var(--gedempt);margin:8px 0 0;line-height:1.35;}
+.cutmodal .cut-tools{justify-content:flex-start;flex-wrap:wrap;align-items:center;gap:8px;}
+/* Uitsnede-tools als chips: duidelijk tapbaar i.p.v. tekstlinkjes. Reset blijft een aparte gedempte link rechts. */
+.cutmodal .cut-tools .linkbtn{display:inline-flex;align-items:center;gap:5px;background:var(--veldbg);
+  border:1px solid var(--rand);border-radius:999px;color:var(--tekst);text-decoration:none;font-size:12px;font-weight:600;
+  padding:9px 13px;min-height:44px;}
+.cutmodal .cut-tools .linkbtn:hover{border-color:var(--accent);color:var(--accent);}
+.cutmodal .cut-tools .linkbtn.on{background:var(--accent);border-color:var(--accent);color:#F0EDE8;}
+.cutmodal .cut-tools #cropReset{margin-left:auto;background:transparent;border-color:transparent;border-radius:0;
+  color:var(--gedempt);text-decoration:underline;padding:9px 4px;min-height:44px;}
+.cutmodal .cut-tools #cropReset:hover{color:#A8341A;border-color:transparent;}
+.cutmodal .cut-tip{font-size:11px;color:var(--gedempt);margin:2px 0 8px;line-height:1.35;}
 .cutmodal .linkbtn.on{color:var(--accent);font-weight:600;}
 .cutmodal .bgswatch{width:18px;height:18px;border-radius:4px;border:1px solid var(--rand);visibility:hidden;flex:0 0 auto;}
 .cutmodal .chk{display:flex;align-items:center;gap:7px;font-size:12px;color:var(--gedempt);margin-top:8px;cursor:pointer;}
@@ -1169,6 +1178,7 @@ form label{text-transform:none;letter-spacing:.005em;font-size:.8rem;color:var(-
               <button type="button" data-modus="punten" data-i18n="ui.snij_punten">Punten</button>
             </div>
             <span class="hintline" id="cmHint" style="display:block;margin:0 0 6px">Teken met je vinger een lijn rond de tattoo.</span>
+            <p class="cut-tip" data-i18n="ui.cut_tip">Tip: knip rond de tattoo en stel daarna de opaciteit in bij het plaatsen.</p>
             <div class="cm-prev" id="cutPrev"><canvas id="cutCanvas" class="cutcv"></canvas><canvas id="lassoCanvas" class="lassocv"></canvas></div>
             <!-- 'Huid weghalen' verborgen: simpele kleur/helderheid-isolatie wordt op echte huidfoto's te vlekkerig.
                  Code blijft staan; AI-isolatie volgt later (Fase 3). Standaard = nette uitsnede mét huid. -->
@@ -1195,7 +1205,6 @@ form label{text-transform:none;letter-spacing:.005em;font-size:.8rem;color:var(-
               <button id="lassoUndo" class="linkbtn">&#8617; <span data-i18n="ui.ongedaan">Ongedaan</span></button>
               <button id="cropReset" class="linkbtn" data-i18n="ui.reset_uitsnede">Reset uitsnede</button>
             </div>
-            <p class="cut-tip" data-i18n="ui.cut_tip">Tip: knip rond de tattoo en stel daarna de opaciteit in bij het plaatsen.</p>
           </div>
         </div>
         <div class="cm-foot">
@@ -9741,6 +9750,7 @@ async function verwijderVoorbeelden() {
   }
   let wandMode=false;        // toverstaf actief: volgende tik knipt een aaneengesloten gebied weg
   let wandSeeds=[];          // {nx,ny} klikpunten voor de toverstaf
+  let laatsteActie=null;     // 'wand' | 'lasso' — laatste uitsnede-actie, voor gedeelde Ongedaan
   const WAND_TOL2=7500;      // kleurtolerantie^2 (≈50/kanaal) voor de toverstaf
   function zetWandUI(){ const b=document.getElementById('wandBtn'); if(b) b.classList.toggle('on', wandMode); }
   // dichtstbijzijnde lasso-punt bij een pointer-event (in schermpixels), of -1
@@ -10091,7 +10101,16 @@ async function verwijderVoorbeelden() {
     document.getElementById("cmCancel").onclick=closeCutModal;
     document.getElementById("cropReset").onclick=()=>{ lassoPts=[]; wandSeeds=[]; lassoDragIdx=-1; rebuildBase(); drawLasso(); updateCutout(); };
     document.querySelectorAll('#cmModus button[data-modus]').forEach(b=>b.onclick=()=>{ cutModus=b.dataset.modus; drawingFree=false; lassoDragIdx=-1; zetSnijModusUI(); drawLasso(); });
-    { const ub=document.getElementById("lassoUndo"); if(ub) ub.onclick=()=>{ lassoPts.pop(); lassoDragIdx=-1; drawLasso(); updateCutout(); }; }
+    { const ub=document.getElementById("lassoUndo"); if(ub) ub.onclick=()=>{
+        // Ongedaan: verwijder de laatste actie — toverstaf-tik óf lasso-punt. Loopt nooit vast zolang er iets is.
+        if(laatsteActie==='wand' && wandSeeds.length){ wandSeeds.pop(); }
+        else if(lassoPts.length){ lassoPts.pop(); }
+        else if(wandSeeds.length){ wandSeeds.pop(); }
+        if(!wandSeeds.length && !lassoPts.length) laatsteActie=null;
+        else if(laatsteActie==='wand' && !wandSeeds.length) laatsteActie='lasso';
+        else if(laatsteActie==='lasso' && !lassoPts.length) laatsteActie='wand';
+        lassoDragIdx=-1; rebuildBase(); drawLasso(); updateCutout();
+      }; }
     { const wb=document.getElementById("wandBtn"); if(wb) wb.onclick=()=>{ wandMode=!wandMode; if(wandMode){ bgPickMode=false; if(bgPickBtn)bgPickBtn.classList.remove("on"); } zetWandUI(); toast(wandMode?tr('ui.tik_uitknippen'):tr('ui.toverstaf_uit')); }; }
     { const sp=document.getElementById("spiegelBtn"); if(sp) sp.onclick=()=>{
         flipH=!flipH;
@@ -10165,7 +10184,7 @@ async function verwijderVoorbeelden() {
         return;
       }
       if(wandMode){                         // toverstaf: tik knipt een aaneengesloten gebied weg
-        const pt=ptFrom(e); wandSeeds.push({nx:pt.nx, ny:pt.ny});
+        const pt=ptFrom(e); wandSeeds.push({nx:pt.nx, ny:pt.ny}); laatsteActie='wand';
         rebuildBase(); updateCutout();
         return;
       }
@@ -10185,7 +10204,7 @@ async function verwijderVoorbeelden() {
       }
       const idx=lassoPuntBij(e);            // punten-modus: dichtbij punt = verslepen, anders nieuw punt
       if(idx>=0){ lassoDragIdx=idx; puntToegevoegd=false; }
-      else { lassoPts.push(ptFrom(e)); lassoDragIdx=lassoPts.length-1; puntToegevoegd=true; }
+      else { lassoPts.push(ptFrom(e)); lassoDragIdx=lassoPts.length-1; puntToegevoegd=true; laatsteActie='lasso'; }
       drawPreview(baseCanvas); drawLasso();
     });
     cutPrev.addEventListener("pointermove",e=>{
@@ -10200,7 +10219,7 @@ async function verwijderVoorbeelden() {
       }
       if(drawingFree){
         const p=ptFrom(e), last=lassoPts[lassoPts.length-1];
-        if(!last || Math.hypot(p.nx-last.nx,p.ny-last.ny)>0.006) lassoPts.push(p);
+        if(!last || Math.hypot(p.nx-last.nx,p.ny-last.ny)>0.006){ lassoPts.push(p); laatsteActie='lasso'; }
         drawLasso(); return;
       }
       if(lassoDragIdx<0)return;
