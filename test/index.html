@@ -663,6 +663,8 @@ input[type=range]:focus{box-shadow:none;border:none}
 .inst-sectie{padding:12px 16px 8px;border-top:1px solid var(--rand)}
 .inst-sectie:first-of-type{border-top:none}
 .inst-label{font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--gedempt);font-weight:600;margin-bottom:8px}
+.inst-feedback-sub{font-size:.85rem;color:var(--gedempt);margin:0 0 10px;line-height:1.4}
+.inst-feedback-knop{text-decoration:none}
 /* ============================================================
    Typografische hiërarchie
    Recoleta (serif) blijft de "stem": titels, koppen, namen, lopende
@@ -1264,6 +1266,12 @@ form label{text-transform:none;letter-spacing:.005em;font-size:.8rem;color:var(-
       <button type="button" data-thema="licht" data-i18n="inst.thema.licht">Licht</button>
       <button type="button" data-thema="donker" data-i18n="inst.thema.donker">Donker</button>
     </div>
+  </div>
+
+  <div class="inst-sectie" style="padding-bottom:28px">
+    <p class="inst-label" data-i18n="inst.feedback">Feedback</p>
+    <p class="inst-feedback-sub" data-i18n="inst.feedback_sub">Iets kapot of een idee? Ik hoor het graag.</p>
+    <a class="knop-sec inst-feedback-knop" id="inst-feedback" href="mailto:hello@tatties.app?subject=Tatties%20feedback" data-i18n="inst.feedback_knop">Stuur feedback</a>
   </div>
 </div>
 
@@ -6230,6 +6238,7 @@ const I18N = {
     'install.ios':'Zet Tatties op je beginscherm: tik op Deel en kies ‘Zet op beginscherm’.',
     'inst.titel':'Instellingen','inst.geslacht':'Man / Vrouw','inst.man':'Man','inst.vrouw':'Vrouw','inst.huid':'Huidskleur','inst.taal':'Taal',
     'inst.thema':'Weergave','inst.thema.auto':'Systeem','inst.thema.licht':'Licht','inst.thema.donker':'Donker',
+    'inst.feedback':'Feedback','inst.feedback_sub':'Iets kapot of een idee? Ik hoor het graag.','inst.feedback_knop':'Stuur feedback',
     'stats.titel':'Statistieken','stats.collectie':'Collectie','stats.aantal':'Aantal tattoos','stats.uitgegeven':'Totaal uitgegeven',
     'stats.zituren':'Totale zituren','stats.gempijn':'Gemiddelde pijn','stats.geheeld':'Geheeld','stats.perstijl':'Per stijl','stats.perartiest':'Per artiest',
     'stats.perdeel':'Per lichaamsdeel','stats.tijdlijn':'Tijdlijn (per jaar)','stats.wishlist':'Wishlist',
@@ -6386,6 +6395,7 @@ const I18N = {
     'install.ios':'Add Tatties to your home screen: tap Share, then ‘Add to Home Screen’.',
     'inst.titel':'Settings','inst.geslacht':'Male / Female','inst.man':'Male','inst.vrouw':'Female','inst.huid':'Skin tone','inst.taal':'Language',
     'inst.thema':'Appearance','inst.thema.auto':'System','inst.thema.licht':'Light','inst.thema.donker':'Dark',
+    'inst.feedback':'Feedback','inst.feedback_sub':'Something broken, or an idea? Let me know.','inst.feedback_knop':'Send feedback',
     'stats.titel':'Statistics','stats.collectie':'Collection','stats.aantal':'Number of tattoos','stats.uitgegeven':'Total spent',
     'stats.zituren':'Total sitting hours','stats.gempijn':'Average pain','stats.geheeld':'Healed','stats.perstijl':'By style','stats.perartiest':'By artist',
     'stats.perdeel':'By body part','stats.tijdlijn':'Timeline (by year)','stats.wishlist':'Wishlist',
@@ -9066,7 +9076,10 @@ document.addEventListener('keydown', (e) => {
   const cm = document.getElementById('cutModal');
   if (cm && cm.classList.contains('on')) { const x = document.getElementById('cmCancel'); if (x) x.click(); return; }
   const inst = document.getElementById('inst-paneel');
-  if (inst && inst.classList.contains('open')) { sluitInstellingen(); }
+  if (inst && inst.classList.contains('open')) { sluitInstellingen(); return; }
+  // Formulier (eigen view, geen overlay): Esc = Annuleren, spiegelt de bestaande knop.
+  const form = document.getElementById('view-form');
+  if (form && !form.hidden) { const a = document.getElementById('f-annuleer'); if (a) a.click(); }
 });
 
 $('#fab').addEventListener('click', () => {
@@ -9589,14 +9602,14 @@ async function verwijderVoorbeelden() {
       const ov=document.createElement("div");
       ov.style.cssText="position:fixed;inset:0;z-index:99999;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.55);padding:16px;";
       const box=document.createElement("div");
-      box.style.cssText="background:#0e1116;border:1px solid #262d38;border-radius:14px;padding:18px;max-width:300px;width:100%;color:#e8eaed;font-family:inherit;text-align:center;box-shadow:0 12px 40px rgba(0,0,0,.5);";
+      box.style.cssText="background:var(--kaart);border:1px solid var(--rand);border-radius:14px;padding:18px;max-width:300px;width:100%;color:var(--tekst);font-family:inherit;text-align:center;box-shadow:0 12px 40px rgba(0,0,0,.35);";
       const p=document.createElement("div"); p.textContent=msg;
       p.style.cssText="font-size:14px;line-height:1.45;margin-bottom:16px;";
       const row=document.createElement("div"); row.style.cssText="display:flex;gap:8px;";
       const no=document.createElement("button"); no.textContent=tr('form.annuleren');
-      no.style.cssText="flex:1;padding:10px;border-radius:8px;border:1px solid #262d38;background:#1a212b;color:#e8eaed;font-family:inherit;font-size:13px;cursor:pointer;";
+      no.style.cssText="flex:1;padding:10px;border-radius:8px;border:1px solid var(--rand);background:var(--veldbg);color:var(--tekst);font-family:inherit;font-size:13px;cursor:pointer;";
       const yes=document.createElement("button"); yes.textContent=jaLabel||tr('aria.verwijderen');
-      yes.style.cssText="flex:1;padding:10px;border-radius:8px;border:1px solid #e0533d;background:#e0533d;color:#fff;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;";
+      yes.style.cssText="flex:1;padding:10px;border-radius:8px;border:1px solid #A8341A;background:#A8341A;color:#fff;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;";
       function close(v){ ov.remove(); res(v); }
       no.onclick=()=>close(false); yes.onclick=()=>close(true);
       ov.addEventListener("click",e=>{ if(e.target===ov) close(false); });
