@@ -843,6 +843,7 @@ form label,
 .cutmodal .label{font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--gedempt);margin:6px 0 2px;}
 .cutmodal .cutrow{display:flex;justify-content:space-between;align-items:center;gap:8px;}
 .cutmodal .hintline{font-size:11px;color:var(--gedempt);line-height:1.4;}
+.cutmodal #cmHint.wand-aan{color:var(--accent);font-weight:600;}   /* vaste, opvallende hint zolang de toverstaf aan staat */
 .cutmodal .linkbtn{background:transparent;border:0;color:var(--gedempt);font-size:11px;text-decoration:underline;cursor:pointer;font-family:inherit;white-space:nowrap;}
 .cutmodal .linkbtn:hover{color:var(--accent);}
 .cutmodal .bgrow{justify-content:flex-start;margin-top:6px;}
@@ -6191,6 +6192,7 @@ const I18N = {
     'ui.reset_uitsnede':'Reset uitsnede','ui.spiegelen':'Spiegelen','ui.achtergrond_weghalen':'Achtergrond weghalen',
     'ui.toverstaf':'Toverstaf','ui.ongedaan':'Ongedaan',
     'ui.tik_uitknippen':'Tik op het deel dat je wilt weghalen','ui.toverstaf_uit':'Toverstaf uit',
+    'ui.wand_hint':'Toverstaf aan — tik op een vlak om het weg te knippen. Tik vaker voor meer; Ongedaan draait terug.',
     'ui.cut_hint':'Tik rondom de tattoo om punten te plaatsen; sleep een punt om bij te stellen.',
     'ui.snijmethode':'Snijmethode','ui.snij_vrij':'Vrij tekenen','ui.snij_punten':'Punten',
     'ui.opaciteit':'Opaciteit','ui.draaien90':'90° draaien','ui.cut_tip':'Tip: knip rond de tattoo en stel daarna de opaciteit in bij het plaatsen — voor nu het makkelijkst.',
@@ -6346,6 +6348,7 @@ const I18N = {
     'ui.reset_uitsnede':'Reset cut-out','ui.spiegelen':'Mirror','ui.achtergrond_weghalen':'Remove background',
     'ui.toverstaf':'Magic wand','ui.ongedaan':'Undo',
     'ui.tik_uitknippen':'Tap the part you want to remove','ui.toverstaf_uit':'Magic wand off',
+    'ui.wand_hint':'Magic wand on — tap an area to erase it. Tap again for more; Undo reverts.',
     'ui.cut_hint':'Tap around the tattoo to place points; drag a point to adjust.',
     'ui.snijmethode':'Cut method','ui.snij_vrij':'Freehand','ui.snij_punten':'Points',
     'ui.opaciteit':'Opacity','ui.draaien90':'Rotate 90°','ui.cut_tip':'Tip: cut around the tattoo, then set its opacity when placing — easiest for now.',
@@ -9752,7 +9755,14 @@ async function verwijderVoorbeelden() {
   let wandSeeds=[];          // {nx,ny} klikpunten voor de toverstaf
   let laatsteActie=null;     // 'wand' | 'lasso' — laatste uitsnede-actie, voor gedeelde Ongedaan
   const WAND_TOL2=7500;      // kleurtolerantie^2 (≈50/kanaal) voor de toverstaf
-  function zetWandUI(){ const b=document.getElementById('wandBtn'); if(b) b.classList.toggle('on', wandMode); }
+  function zetWandUI(){
+    const b=document.getElementById('wandBtn'); if(b) b.classList.toggle('on', wandMode);
+    const h=document.getElementById('cmHint');
+    if(h){
+      if(wandMode){ h.textContent=tr('ui.wand_hint'); h.classList.add('wand-aan'); }
+      else { h.classList.remove('wand-aan'); zetSnijModusUI(); }   // herstel de normale snij-hint
+    }
+  }
   // dichtstbijzijnde lasso-punt bij een pointer-event (in schermpixels), of -1
   function lassoPuntBij(e){
     if(!origImg||!lassoPts.length) return -1;
