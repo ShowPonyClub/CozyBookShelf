@@ -224,6 +224,11 @@ main > section{animation:opkomen .3s ease both}
 .zijde-balk .silhouet-keuze{width:auto}
 .zijde-balk .silhouet-keuze button{padding:6px 12px;font-size:.82rem}
 .zijde-balk #fab{padding:9px 14px;font-size:.86rem}
+.gepland-toggle{display:inline-flex;align-items:center;gap:6px;background:var(--veldbg);border:1px solid var(--rand);border-radius:999px;
+  color:var(--gedempt);font-size:.76rem;font-weight:600;padding:6px 12px;cursor:pointer;font-family:inherit;white-space:nowrap}
+.gepland-toggle.actief{background:var(--accent);border-color:var(--accent);color:#F0EDE8}
+.gepland-toggle .ik{stroke:currentColor;fill:none}
+#toon-gepland-3d{position:absolute;left:14px;top:14px;z-index:6}
 .kaart-layout{
   display:flex;align-items:stretch;gap:10px;margin-bottom:10px;
 }
@@ -1024,6 +1029,10 @@ form label{text-transform:none;letter-spacing:.005em;font-size:.8rem;color:var(-
             <button type="button" data-zijde="voor" data-i18n="zijde.voor">Voorkant</button>
             <button type="button" data-zijde="achter" data-i18n="zijde.achter">Achterkant</button>
           </div>
+          <button type="button" id="toon-gepland" class="gepland-toggle" aria-pressed="false" data-i18n-aria="ui.toon_gepland" aria-label="Geplande tattoos tonen">
+            <svg viewBox="0 0 24 24" class="ik" aria-hidden="true" style="width:15px;height:15px"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>
+            <span data-i18n="ui.gepland">Gepland</span>
+          </button>
         </div>
         <button id="fab" data-i18n-aria="fab.nieuw" aria-label="Nieuwe tattoo" title="Nieuwe tattoo">+</button>
         <div id="t2d-banner" hidden></div>
@@ -1119,6 +1128,10 @@ form label{text-transform:none;letter-spacing:.005em;font-size:.8rem;color:var(-
       <div id="lege-hint-3d" class="lege-hint" data-i18n="ui.lege_cta" hidden>Nog geen tattoos - tik op + om er een toe te voegen</div>
       <button id="t3d-add" data-i18n-aria="fab.nieuw" aria-label="Nieuwe tattoo" title="Nieuwe tattoo">+</button>
       <button type="button" id="t3d-reset" data-i18n-title="ui.beginstand" data-i18n-aria="ui.beginstand" title="Beginstand" aria-label="Beginstand"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12a8 8 0 1 0 2.3-5.6"/><path d="M3 4v4h4"/></svg></button>
+      <button type="button" id="toon-gepland-3d" class="gepland-toggle" aria-pressed="false" data-i18n-aria="ui.toon_gepland" aria-label="Geplande tattoos tonen">
+        <svg viewBox="0 0 24 24" class="ik" aria-hidden="true" style="width:15px;height:15px"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>
+        <span data-i18n="ui.gepland">Gepland</span>
+      </button>
       <div id="t3d-loading"><div class="t3d-spin"></div><span data-i18n="ui.laden">Laden&#8230;</span></div>
       <div id="editbar" class="t3d-editbar">
         <div class="eb-title">Tattoo</div>
@@ -6236,6 +6249,7 @@ const I18N = {
     'ui.eb_hint':'Sleep = verplaatsen · knijp = schalen · knijp-draai = roteren',
     'ui.draai_hint':'Sleep om te draaien · tik op + om een tattoo toe te voegen',
     'ui.plaats_hint':'Tik om te plaatsen',
+    'ui.gepland':'Gepland','ui.toon_gepland':'Geplande tattoos tonen',
     'ui.geen_model':'Geen 3D-model gevonden','ui.man_laden':'Manmodel laden…','ui.vrouw_laden':'Vrouwmodel laden…',
     'ui.klaar_dubbeltik':'Klaar - dubbeltik op de huid','ui.model_mislukt':'Model laden mislukt',
     'ui.aanpas_hint':'Aanpassen: sleep om te verplaatsen · scroll/knijp om te schalen',
@@ -6396,6 +6410,7 @@ const I18N = {
     'ui.eb_hint':'Drag = move · pinch = scale · pinch-twist = rotate',
     'ui.draai_hint':'Drag to rotate · tap + to add a tattoo',
     'ui.plaats_hint':'Tap to place',
+    'ui.gepland':'Planned','ui.toon_gepland':'Show planned tattoos',
     'ui.geen_model':'No 3D model found','ui.man_laden':'Loading male model…','ui.vrouw_laden':'Loading female model…',
     'ui.klaar_dubbeltik':'Ready - double-tap the skin','ui.model_mislukt':'Loading the model failed',
     'ui.aanpas_hint':'Editing: drag to move · scroll/pinch to scale',
@@ -6798,6 +6813,8 @@ let detailToonExtra = false;   // detailpagina: lege velden tonen via 'extra det
 let detailRetour = 'home';     // waar de terug-knop van de detailpagina naartoe gaat (2D/3D/collectie/stats/start)
 let bewerkId = null;     // null = nieuw record
 let lijstModus = 'gezet';     // 'gezet' (collectie) of 'wens' (wishlist)
+let toonGepland = false;      // op de kaart/het model ook geplande (wens) tattoos tonen, naast de gezette
+try { toonGepland = localStorage.getItem('tatties-toon-gepland') === '1'; } catch { /* geen voorkeur */ }
 let zoekTekst = '';
 let sorteer = 'datum-nieuw';
 let tintIsDonker = false;
@@ -6807,6 +6824,20 @@ function hoofdFoto(t) {
 }
 function bijModus(t) {
   return (t.status === 'wens') === (lijstModus === 'wens');
+}
+// Schakelaar 'geplande tattoos tonen' (wens) op de kaart/het model, naast de gezette
+function zetGeplandUI() {
+  ['#toon-gepland', '#toon-gepland-3d'].forEach(sel => {
+    const b = document.querySelector(sel);
+    if (b) { b.classList.toggle('actief', toonGepland); b.setAttribute('aria-pressed', toonGepland ? 'true' : 'false'); }
+  });
+}
+function toggleGepland() {
+  toonGepland = !toonGepland;
+  try { localStorage.setItem('tatties-toon-gepland', toonGepland ? '1' : '0'); } catch { /* geen voorkeur-opslag */ }
+  zetGeplandUI();
+  if (typeof renderMarkers === 'function') renderMarkers();
+  if (typeof window.__tatties3DGepland === 'function') window.__tatties3DGepland();
 }
 const ICONEN = {
   stats: '<svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 20V11M12 20V4M19 20v-7"/></svg>',
@@ -7361,7 +7392,7 @@ function renderMarkers() {
   const rand = tintIsDonker ? '#F0EDE8' : '#0A0A0A';
   const zichtbaar = tattoos.filter(t =>
     (t.positie || (t.positie3d && t.positie3d.point) || (t.kunst && t.kunst.src && ZONE_POS[t.lichaamsdeel])) &&
-    zijdeVan(t) === huidigeZijde && bijModus(t) &&
+    zijdeVan(t) === huidigeZijde && (bijModus(t) || (toonGepland && t.status === 'wens')) &&
     (!filterZone || t.lichaamsdeel === filterZone))
     .sort((a, b) => (a.stapel || 0) - (b.stapel || 0));   // hoger = later getekend = bovenop
 
@@ -9226,6 +9257,8 @@ async function verwijderVoorbeelden() {
   $('#btn-collectie').addEventListener('click', () => toonView('collectie'));
   $('#c-terug').addEventListener('click', () => toonView('home'));
   $('#btn-instellingen').addEventListener('click', openInstellingen);
+  document.querySelectorAll('#toon-gepland, #toon-gepland-3d').forEach(b => b.addEventListener('click', toggleGepland));
+  zetGeplandUI();   // begin-staat (uit, of opgeslagen voorkeur) op beide toggles tonen
   // Startscherm: logo → terug naar start; tegels, CTA en recent-items
   { const merk = document.querySelector('.merk'); if (merk) merk.addEventListener('click', () => toonView('start')); }
   document.querySelectorAll('#view-start .start-tegel').forEach((b) =>
@@ -10506,7 +10539,10 @@ async function verwijderVoorbeelden() {
       const normal=new THREE.Vector3(P.normal[0],P.normal[1],P.normal[2]);
       const mesh=meshAtPoint(point,normal);
       const obj=makeImage(point,normal,P.rot||0,P.size||0.09,tex,mesh);
-      if(obj){ obj.renderOrder=(t.stapel)||0; zetDecalOpacity(obj, t.opacity);
+      if(obj){ obj.renderOrder=(t.stapel)||0;
+        const _wens=(t.status==='wens');
+        obj.visible = !_wens || toonGepland;                                   // geplande alleen tonen als de toggle aanstaat
+        zetDecalOpacity(obj, (isFinite(+t.opacity)?Math.max(0.2,Math.min(1,+t.opacity)):1)*(_wens?0.5:1));   // geplande gedimd (50%)
         markers.push({ id:t.id, rec:t, obj, point:point.clone(), normal:normal.clone(),
         mesh, rot:P.rot||0, size:P.size||0.09, locked:!!P.locked, tex }); n++;
         if(!t.positie || !t.kunst || !t.kunst.src){      // ouder record: 2D-velden bijvullen
@@ -10518,6 +10554,12 @@ async function verwijderVoorbeelden() {
     if(typeof renderMarkers==="function"){ try{renderMarkers();}catch(_){} }
     // Herstel-melding ('N tattoos hersteld') bewust uitgezet - zie 'later'-lijst (hele herstel-feature evalueren).
   }
+  // Live aan/uit zetten van geplande (wens) decals zonder rebuild (de render-lus tekent elk frame)
+  window.__tatties3DGepland = function(){
+    markers.forEach(m=>{ if(!m.obj||!m.rec) return; const w=(m.rec.status==='wens');
+      m.obj.visible = !w || toonGepland;
+      zetDecalOpacity(m.obj, (isFinite(+m.rec.opacity)?Math.max(0.2,Math.min(1,+m.rec.opacity)):1)*(w?0.5:1)); });
+  };
 
   /* ---- render-lus ---- */
   function loop(){
