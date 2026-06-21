@@ -876,6 +876,13 @@ form label,
   background:var(--accent);color:#fff;font-size:13px;font-weight:600;padding:8px 14px;border-radius:999px;
   box-shadow:0 2px 10px rgba(0,0,0,.3);text-align:center;}
 #t3d-banner[hidden],#t2d-banner[hidden]{display:none;}
+/* Plaats-hint: pulserende tik-indicator midden op het model/de kaart tijdens plaatsen */
+#plaats-hint{position:fixed;left:50%;top:46%;transform:translate(-50%,-50%);z-index:40;pointer-events:none;display:flex;flex-direction:column;align-items:center;gap:14px}
+#plaats-hint[hidden]{display:none}
+.ph-ring{width:30px;height:30px;border-radius:50%;background:var(--accent);animation:phpuls 1.5s ease-out infinite}
+.ph-tekst{background:rgba(20,16,10,.74);color:#fff;font-size:13px;font-weight:600;padding:7px 14px;border-radius:999px;white-space:nowrap;box-shadow:0 2px 10px rgba(0,0,0,.3)}
+@keyframes phpuls{0%{box-shadow:0 0 0 0 rgba(142,113,240,.55)}70%{box-shadow:0 0 0 26px rgba(142,113,240,0)}100%{box-shadow:0 0 0 0 rgba(142,113,240,0)}}
+@media (prefers-reduced-motion:reduce){.ph-ring{animation:none}}
 /* 2D selectie-omlijning rond de geselecteerde tattoo (zoals de ring in 3D) */
 .sel-ring-2d{stroke:var(--accent);stroke-width:1.8;stroke-dasharray:5 4;opacity:.9;}
 /* Lege-staat call-to-action (verwijst naar de + knop) */
@@ -1277,6 +1284,12 @@ form label{text-transform:none;letter-spacing:.005em;font-size:.8rem;color:var(-
     <p class="inst-feedback-sub" data-i18n="inst.feedback_sub">Iets kapot of een idee? Ik hoor het graag.</p>
     <a class="knop-sec inst-feedback-knop" id="inst-feedback" href="mailto:hello@tatties.app?subject=Tatties%20feedback" data-i18n="inst.feedback_knop">Stuur feedback</a>
   </div>
+</div>
+
+<!-- Plaats-hint: verschijnt op het model/de kaart tijdens het plaatsen van een nieuwe tattoo -->
+<div id="plaats-hint" hidden aria-hidden="true">
+  <span class="ph-ring"></span>
+  <span class="ph-tekst" data-i18n="ui.plaats_hint">Tik om te plaatsen</span>
 </div>
 
 <!-- Keuzemenu: op 3D-model of 2D-kaart plaatsen (vanaf het startscherm) -->
@@ -6221,7 +6234,8 @@ const I18N = {
     'ui.aanpassen_bijknippen':'Aanpassen','ui.klaar':'Klaar','ui.kleiner':'Kleiner','ui.groter':'Groter',
     'ui.links_draaien':'Linksom draaien','ui.rechts_draaien':'Rechtsom draaien',
     'ui.eb_hint':'Sleep = verplaatsen · knijp = schalen · knijp-draai = roteren',
-    'ui.draai_hint':'Sleep om te draaien · dubbeltik op de huid om een tattoo te plaatsen',
+    'ui.draai_hint':'Sleep om te draaien · tik op + om een tattoo toe te voegen',
+    'ui.plaats_hint':'Tik om te plaatsen',
     'ui.geen_model':'Geen 3D-model gevonden','ui.man_laden':'Manmodel laden…','ui.vrouw_laden':'Vrouwmodel laden…',
     'ui.klaar_dubbeltik':'Klaar - dubbeltik op de huid','ui.model_mislukt':'Model laden mislukt',
     'ui.aanpas_hint':'Aanpassen: sleep om te verplaatsen · scroll/knijp om te schalen',
@@ -6380,7 +6394,8 @@ const I18N = {
     'ui.aanpassen_bijknippen':'Edit','ui.klaar':'Done','ui.kleiner':'Smaller','ui.groter':'Bigger',
     'ui.links_draaien':'Rotate left','ui.rechts_draaien':'Rotate right',
     'ui.eb_hint':'Drag = move · pinch = scale · pinch-twist = rotate',
-    'ui.draai_hint':'Drag to rotate · double-tap the skin to place a tattoo',
+    'ui.draai_hint':'Drag to rotate · tap + to add a tattoo',
+    'ui.plaats_hint':'Tap to place',
     'ui.geen_model':'No 3D model found','ui.man_laden':'Loading male model…','ui.vrouw_laden':'Loading female model…',
     'ui.klaar_dubbeltik':'Ready - double-tap the skin','ui.model_mislukt':'Loading the model failed',
     'ui.aanpas_hint':'Editing: drag to move · scroll/pinch to scale',
@@ -6896,8 +6911,15 @@ function toonView(naam) {
   const _v3d = document.getElementById('view-3d');
   if (_v3d) _v3d.classList.add('verborgen');
   if (typeof window.__tatties3DPauze === 'function') window.__tatties3DPauze();
+  { const _ph = document.getElementById('plaats-hint'); if (_ph) _ph.hidden = true; }   // plaats-hint weg bij view-wissel (annuleren)
   window.scrollTo(0, 0);
 }
+// Plaats-hint: scroll het model/de kaart in beeld + toon de pulserende tik-indicator (tijdens plaatsen van een nieuwe tattoo)
+window.__plaatsHintAan = function () {
+  window.scrollTo(0, 0);   // model/kaart + 'klik om te plaatsen'-banner in beeld brengen
+  const h = document.getElementById('plaats-hint'); if (h) h.hidden = false;
+};
+window.__plaatsHintUit = function () { const h = document.getElementById('plaats-hint'); if (h) h.hidden = true; };
 
 /* Korte samenvatting (aantallen) op het startscherm */
 function renderSamenvatting() {
@@ -9141,14 +9163,16 @@ async function verwijderVoorbeelden() {
   let plaats2DData = null;
   window.__tattiesStartPlaats2D = (payload) => {
     plaats2DData = payload;
-    toonView('home');                                  // plaatsen gebeurt op de 2D-kaart
+    toonView('home');                                  // plaatsen gebeurt op de 2D-kaart (scrollt al naar boven)
     const b = $('#t2d-banner'); if (b) { b.textContent = tr('ui.klik_plaatsen'); b.hidden = false; }
+    if (window.__plaatsHintAan) window.__plaatsHintAan();   // toon de tik-indicator (na toonView, die de hint zou verbergen)
   };
   async function plaatsNieuwe2D(clientX, clientY) {
     const p = kaartPunt(clientX, clientY);
     const d = plaats2DData;
     plaats2DData = null;
     const b = $('#t2d-banner'); if (b) b.hidden = true;
+    if (window.__plaatsHintUit) window.__plaatsHintUit();
     if (!p || !d) return;
     const zone = p.zone || 'borst';
     const rec = createTattoo(Object.assign({
@@ -9510,7 +9534,7 @@ async function verwijderVoorbeelden() {
     // lege huid: niets; toevoegen gaat via de + knop
   }
   async function plaatsNieuwe(x,y){
-    if(!plaatsData){ plaatsModus=false; verbergBanner(); return; }
+    if(!plaatsData){ plaatsModus=false; verbergBanner(); if(window.__plaatsHintUit) window.__plaatsHintUit(); return; }
     const s=surfaceAt(x,y); if(!s){ toast(tr('ui.klik_plaatsen')); return; }
     const d=plaatsData; const rot=0, size=0.09;
     const obj=makeImage(s.point,s.normal,rot,size,d.tex,s.mesh);
@@ -9525,7 +9549,7 @@ async function verwijderVoorbeelden() {
     if(typeof tattoos!=="undefined" && Array.isArray(tattoos)) tattoos.push(rec);
     const m={ id:rec.id, rec, obj, point:s.point.clone(), normal:s.normal.clone(), mesh:s.mesh, rot, size, tex:d.tex };
     zetDecalOpacity(obj, rec.opacity);
-    markers.push(m); plaatsData=null; plaatsModus=false; verbergBanner();
+    markers.push(m); plaatsData=null; plaatsModus=false; verbergBanner(); if(window.__plaatsHintUit) window.__plaatsHintUit();
     if(typeof renderMarkers==="function"){ try{renderMarkers();}catch(_){} }
     toast(tr('ui.tattoo_geplaatst')); enterEditDecal(m);
   }
@@ -10338,7 +10362,7 @@ async function verwijderVoorbeelden() {
         plaatsData={ tex:imgTexture, naam, info, kunst3d };
         imgTexture=null;   // eigendom gaat naar plaatsData; geen dispose
         cutModal.classList.remove("on"); pendingNew=null; toonCutInstellingen(false); toonInfo(false);
-        plaatsModus=true; toonBanner(tr('ui.klik_plaatsen'));
+        plaatsModus=true; toonBanner(tr('ui.klik_plaatsen')); if(window.__plaatsHintAan) window.__plaatsHintAan();
         return;
       }
       if(pendingPlace2D){
