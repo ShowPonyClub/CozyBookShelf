@@ -107,7 +107,7 @@
   --kaart:#F8F2E7;
   --veldbg:#FBF7EE;
   --rand:#D9CCB6;
-  --gedempt:#6F6453;       /* donkerder voor leesbaarheid op de warme achtergronden (WCAG AA) */
+  --gedempt:#5A503F;       /* WCAG AA ook op de warme --bg (#D8C4A4): ~4.65:1; was #6F6453 = 3.41:1 (zakte onder AA) */
   --raster:#D8CBB2;
   --radius:12px;
   --app-font:'Recoleta', ui-serif, Georgia, 'Times New Roman', serif;
@@ -8149,12 +8149,12 @@ function openFormulier(id = null) {
       </div>
       <div class="rij2">
         <div class="veld">
-          <label for="f-datum" id="f-datum-label">${tr('form.datum')} <span class="verplicht">*</span></label>
+          <label for="f-datum" id="f-datum-label">${tr('form.datum')}</label>
           <input id="f-datum" type="date" value="${esc(t.datum)}">
         </div>
         <div class="veld">
-          <label for="f-lichaamsdeel">${tr('form.lichaamsdeel')} <span class="verplicht">*</span></label>
-          <select id="f-lichaamsdeel" required>
+          <label for="f-lichaamsdeel">${tr('form.lichaamsdeel')}</label>
+          <select id="f-lichaamsdeel">
             <option value="" ${!t.lichaamsdeel ? 'selected' : ''} disabled>${tr('form.kies')}</option>
             ${zoneOpties}
           </select>
@@ -8235,7 +8235,7 @@ function openFormulier(id = null) {
       b.classList.toggle('actief', b.dataset.fstatus === tempStatus));
     $('#f-datum-label').innerHTML = tempStatus === 'wens'
       ? tr('form.geplandedatum')
-      : tr('form.datum') + ' <span class="verplicht">*</span>';
+      : tr('form.datum');
     $('#f-kosten-label').textContent = tempStatus === 'wens' ? tr('form.budget') : tr('form.kosten');
   }
   document.querySelectorAll('button[data-fstatus]').forEach((b) =>
@@ -8658,19 +8658,15 @@ function openFormulier(id = null) {
     const naam = $('#f-naam').value.trim();
     const datum = $('#f-datum').value;
     const lichaamsdeel = $('#f-lichaamsdeel').value;
-    const geldig = naam && lichaamsdeel && (tempStatus === 'wens' || datum);
-    if (!geldig) {
-      const melding = tempStatus === 'wens' ? tr('form.foutwens') : tr('form.foutgezet');
+    if (!naam) {                                 // alleen naam is verplicht; datum/lichaamsdeel mogen later (lagere drempel)
+      const melding = tr('ui.naam_verplicht');
       $('#f-fout').textContent = melding;
       $('#f-fout').classList.add('zichtbaar');
       toast(melding);
-      // Markeer + focus het eerste ontbrekende verplichte veld (a11y)
-      const naamEl = $('#f-naam'), deelEl = $('#f-lichaamsdeel'), datumEl = $('#f-datum');
-      [naamEl, deelEl, datumEl].forEach(el => el && el.removeAttribute('aria-invalid'));
-      let eerste = null;
-      [[!naam, naamEl], [!lichaamsdeel, deelEl], [tempStatus !== 'wens' && !datum, datumEl]]
-        .forEach(([fout, el]) => { if (fout && el) { el.setAttribute('aria-invalid', 'true'); if (!eerste) eerste = el; } });
-      if (eerste) eerste.focus();
+      const naamEl = $('#f-naam');
+      naamEl.setAttribute('aria-invalid', 'true');
+      naamEl.addEventListener('input', () => naamEl.removeAttribute('aria-invalid'), { once: true });
+      naamEl.focus();
       return;
     }
     if (tempKunst && !tempPositie) tempPositie = standaardPositie();
