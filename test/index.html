@@ -8023,6 +8023,10 @@ function renderDetail() {
   $('#d-bewerk').addEventListener('click', () => openFormulier(t.id));
   $('#d-verwijder').addEventListener('click', async (e) => {
     const btn = e.currentTarget; if (btn.disabled) return; btn.disabled = true;   // dubbelklik-race voorkomen
+    const ok = (typeof window.__tattiesConfirm === 'function')
+      ? await window.__tattiesConfirm(tr('ui.verwijder_bevestig'))
+      : window.confirm(tr('ui.verwijder_bevestig'));
+    if (!ok) { btn.disabled = false; return; }   // geannuleerd: knop weer vrijgeven, niets verwijderen
     const kopie = JSON.parse(JSON.stringify(t));
     await deleteTattoo(t.id);
     await herlaad();
