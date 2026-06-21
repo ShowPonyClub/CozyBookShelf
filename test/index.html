@@ -10133,7 +10133,13 @@ async function verwijderVoorbeelden() {
     { const wb=document.getElementById("wandBtn"); if(wb) wb.onclick=()=>{ wandMode=!wandMode; if(wandMode){ bgPickMode=false; if(bgPickBtn)bgPickBtn.classList.remove("on"); } zetWandUI(); toast(wandMode?tr('ui.tik_uitknippen'):tr('ui.toverstaf_uit')); }; }
     { const sp=document.getElementById("spiegelBtn"); if(sp) sp.onclick=()=>{
         flipH=!flipH;
-        lassoPts=lassoPts.map(p=>({nx:1-p.nx, ny:p.ny}));   // bestaande lasso meespiegelen
+        // Lasso + wand meespiegelen. flipH wordt in buildFullCanvas VOOR de rotatie toegepast,
+        // dus in de weergave spiegelt het beeld horizontaal bij rechte stand (rot90 even) en
+        // verticaal na 90/270 (rot90 oneven). De punten moeten op dezelfde as mee.
+        const horiz = (rot90 & 1) === 0;
+        const spiegel = p => horiz ? { nx: 1 - p.nx, ny: p.ny } : { nx: p.nx, ny: 1 - p.ny };
+        lassoPts = lassoPts.map(spiegel);
+        wandSeeds = wandSeeds.map(spiegel);
         zetSpiegelUI();
         if(origImg){ rebuildBase(); updateCutout(); drawLasso(); }
       }; }
