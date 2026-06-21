@@ -228,7 +228,7 @@ main > section{animation:opkomen .3s ease both}
   color:var(--gedempt);font-size:.76rem;font-weight:600;padding:6px 12px;cursor:pointer;font-family:inherit;white-space:nowrap}
 .gepland-toggle.actief{background:var(--accent);border-color:var(--accent);color:#F0EDE8}
 .gepland-toggle .ik{stroke:currentColor;fill:none}
-#toon-gepland-3d{position:absolute;left:14px;top:14px;z-index:6}
+#toon-gepland,#toon-gepland-3d{position:absolute;left:14px;top:14px;z-index:6}
 .kaart-layout{
   display:flex;align-items:stretch;gap:10px;margin-bottom:10px;
 }
@@ -1024,15 +1024,15 @@ form label{text-transform:none;letter-spacing:.005em;font-size:.8rem;color:var(-
           <circle id="sel-ring-2d" class="sel-ring-2d" fill="none" pointer-events="none" visibility="hidden"/>
         </svg>
         <button type="button" id="kaart-reset" class="kaart-slotbtn kaart-reset" title="Volledig overzicht" aria-label="Volledig overzicht"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12a8 8 0 1 0 2.3-5.6"/><path d="M3 4v4h4"/></svg></button>
+        <button type="button" id="toon-gepland" class="gepland-toggle" aria-pressed="false" data-i18n-aria="ui.toon_gepland" aria-label="Geplande tattoos tonen">
+          <svg viewBox="0 0 24 24" class="ik" aria-hidden="true" style="width:15px;height:15px"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>
+          <span data-i18n="ui.gepland">Gepland</span>
+        </button>
         <div class="zijde-balk">
           <div class="silhouet-keuze" role="group" data-i18n-aria="aria.kieszijde" aria-label="Kies zijde">
             <button type="button" data-zijde="voor" data-i18n="zijde.voor">Voorkant</button>
             <button type="button" data-zijde="achter" data-i18n="zijde.achter">Achterkant</button>
           </div>
-          <button type="button" id="toon-gepland" class="gepland-toggle" aria-pressed="false" data-i18n-aria="ui.toon_gepland" aria-label="Geplande tattoos tonen">
-            <svg viewBox="0 0 24 24" class="ik" aria-hidden="true" style="width:15px;height:15px"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>
-            <span data-i18n="ui.gepland">Gepland</span>
-          </button>
         </div>
         <button id="fab" data-i18n-aria="fab.nieuw" aria-label="Nieuwe tattoo" title="Nieuwe tattoo">+</button>
         <div id="t2d-banner" hidden></div>
@@ -9486,6 +9486,23 @@ async function verwijderVoorbeelden() {
     for(const z of ZONES){ const d=p.distanceToSquared(z.v); if(d<bd){bd=d;best=z;} }
     return {zone:best?best.name:"onbekend", side:p.z>=0?"voor":"achter"};
   }
+  // Leid een 3D-plek af uit het lichaamsdeel (voor geïmporteerde/2D-tattoos zonder positie3d):
+  // raycast op het model bij het zone-punt -> echt oppervlaktepunt + normaal.
+  function afleid3DUitZone(t){
+    const znaam = t && t.lichaamsdeel;
+    const z = znaam && ZONES.find(zz=>zz.name===znaam);
+    if(!z || !pickMeshes.length) return null;
+    const front = (znaam!=='rug') && ((t&&t.zijde||'voor')!=='achter');
+    const orig=new THREE.Vector3(z.v.x, z.v.y, front?2:-2);
+    const dir=new THREE.Vector3(0,0,front?-1:1);
+    const rc=new THREE.Raycaster(orig,dir);
+    const hits=rc.intersectObjects(pickMeshes,true);
+    if(!hits.length) return null;
+    const h=hits[0], pt=h.point;
+    let nrm = h.face ? h.face.normal.clone().transformDirection(h.object.matrixWorld) : dir.clone().multiplyScalar(-1);
+    nrm.normalize();
+    return { point:[pt.x,pt.y,pt.z], normal:[nrm.x,nrm.y,nrm.z], rot:0, size:0.09, gender:currentGender, zone:znaam, side:front?'voor':'achter' };
+  }
 
   /* ---- afbeelding als decal (buigt mee met het oppervlak) ---- */
   // Verwijder decal-driehoeken die naar de ANDERE kant van het lichaam wijzen
@@ -10533,10 +10550,14 @@ async function verwijderVoorbeelden() {
     if(token!==undefined && token!==loadToken) return;
     let n=0;
     for(const t of list){
-      const P=t&&t.positie3d; if(!P||!P.point) continue;
+      let P=t&&t.positie3d;
+      if(!P||!P.point) P=afleid3DUitZone(t);             // 2D/geïmporteerde tattoo zonder 3D-plek: afleiden uit de zone
+      if(!P||!P.point) continue;
       if((P.gender||"man")!==currentGender) continue;    // alleen tattoos van dit model
+      const k3 = (t.kunst3d && t.kunst3d.srcUrl) ? t.kunst3d
+               : (t.kunst && t.kunst.src ? { srcUrl:t.kunst.src, bg:false, lasso:[], wand:[] } : null);   // fallback: 2D-uitsnede als 3D-textuur
       let tex=null;
-      try{ tex=await rebuildTextureFromKunst(t.kunst3d); }catch(e){ console.error("herstel-textuur mislukt",e); }
+      try{ tex=await rebuildTextureFromKunst(k3); }catch(e){ console.error("herstel-textuur mislukt",e); }
       if(token!==undefined && token!==loadToken) return;
       if(!tex) continue;
       const point=new THREE.Vector3(P.point[0],P.point[1],P.point[2]);
