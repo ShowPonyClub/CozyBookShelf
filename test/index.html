@@ -9486,14 +9486,26 @@ async function verwijderVoorbeelden() {
     for(const z of ZONES){ const d=p.distanceToSquared(z.v); if(d<bd){bd=d;best=z;} }
     return {zone:best?best.name:"onbekend", side:p.z>=0?"voor":"achter"};
   }
-  // Leid een 3D-plek af uit het lichaamsdeel (voor geïmporteerde/2D-tattoos zonder positie3d):
-  // raycast op het model bij het zone-punt -> echt oppervlaktepunt + normaal.
+  // Leid een 3D-plek af voor geïmporteerde/2D-tattoos zonder positie3d.
+  // Voorkeur: de 2D-positie terugrekenen naar het model (inverse van plek3DNaar2D) zodat
+  // elke tattoo op zijn eigen plek landt (geen overlap bij meerdere in één zone). Anders het zonecentrum.
+  // Daarna raycast op het model -> echt oppervlaktepunt + normaal.
   function afleid3DUitZone(t){
-    const znaam = t && t.lichaamsdeel;
-    const z = znaam && ZONES.find(zz=>zz.name===znaam);
-    if(!z || !pickMeshes.length) return null;
-    const front = (znaam!=='rug') && ((t&&t.zijde||'voor')!=='achter');
-    const orig=new THREE.Vector3(z.v.x, z.v.y, front?2:-2);
+    if(!pickMeshes.length) return null;
+    let p0, p1, front;
+    if(t && t.positie && isFinite(t.positie.x) && isFinite(t.positie.y)){
+      const side = t.zijde || (t.lichaamsdeel==='rug' ? 'achter' : 'voor');
+      front = side !== 'achter';
+      let mx = t.positie.x; if(!front) mx = 200 - mx;   // achterkant: x terugspiegelen (zoals plek3DNaar2D)
+      p0 = (mx - 100) / 170;
+      p1 = (389 - t.positie.y) / 226;
+    } else {
+      const z = t && t.lichaamsdeel && ZONES.find(zz=>zz.name===t.lichaamsdeel);
+      if(!z) return null;
+      front = (t.lichaamsdeel!=='rug') && ((t&&t.zijde||'voor')!=='achter');
+      p0 = z.v.x; p1 = z.v.y;
+    }
+    const orig=new THREE.Vector3(p0, p1, front?2:-2);
     const dir=new THREE.Vector3(0,0,front?-1:1);
     const rc=new THREE.Raycaster(orig,dir);
     const hits=rc.intersectObjects(pickMeshes,true);
@@ -9501,7 +9513,7 @@ async function verwijderVoorbeelden() {
     const h=hits[0], pt=h.point;
     let nrm = h.face ? h.face.normal.clone().transformDirection(h.object.matrixWorld) : dir.clone().multiplyScalar(-1);
     nrm.normalize();
-    return { point:[pt.x,pt.y,pt.z], normal:[nrm.x,nrm.y,nrm.z], rot:0, size:0.09, gender:currentGender, zone:znaam, side:front?'voor':'achter' };
+    return { point:[pt.x,pt.y,pt.z], normal:[nrm.x,nrm.y,nrm.z], rot:0, size:0.09, gender:currentGender, zone:t&&t.lichaamsdeel, side:front?'voor':'achter' };
   }
 
   /* ---- afbeelding als decal (buigt mee met het oppervlak) ---- */
