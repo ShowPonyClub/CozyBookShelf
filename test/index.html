@@ -261,6 +261,9 @@ main > section{animation:opkomen .3s ease both}
   color:var(--gedempt);font-weight:600;font-size:.86rem;letter-spacing:.02em;
 }
 .silhouet-keuze button.actief{background:var(--accent);color:#F0EDE8}
+.silhouet-keuze button:disabled{opacity:.4;cursor:not-allowed}
+.inst-soon{display:inline-block;margin-left:8px;padding:1px 8px;border-radius:999px;background:var(--veldbg);border:1px solid var(--rand);color:var(--gedempt);font-size:.66rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase;vertical-align:middle}
+.bouw-melding{margin:0 auto 10px;max-width:520px;padding:8px 14px;border-radius:12px;background:rgba(224,83,61,.12);border:1px solid rgba(224,83,61,.4);color:var(--tekst);font-size:.82rem;font-weight:600;text-align:center}
 /* Twee compacte keuze-kolommen naast elkaar (man/vrouw + taal) */
 .inst-duo{display:flex;gap:14px;align-items:flex-start}
 .inst-duo-kol{flex:1;min-width:0}
@@ -786,7 +789,8 @@ form label,
 .t3d-editbar{position:absolute;left:8px;right:8px;bottom:8px;display:none;flex-direction:row;flex-wrap:wrap;align-items:center;gap:8px 10px;
   background:var(--kaart);border:1px solid var(--rand);border-radius:14px;padding:8px 10px;z-index:7;box-shadow:0 6px 20px rgba(0,0,0,.28);}
 .t3d-editbar.on{display:flex;}
-.t3d-editbar .eb-title,.t3d-editbar .eb-hint{display:none;}   /* slim: titel + hint verbergen */
+.t3d-editbar .eb-title,.t3d-editbar .eb-hint{display:none;}   /* slim: titel + hint verbergen (desktop heeft tooltips) */
+@media (pointer:coarse){ .t3d-editbar .eb-hint{display:block;flex-basis:100%;width:100%;margin:2px 0 0;font-size:.66rem;line-height:1.3;color:var(--gedempt);text-align:center;} }   /* touch: geen tooltips -> gebaren-uitleg tonen */
 .t3d-editbar .eb-btns{display:flex;flex-wrap:wrap;gap:6px;}
 .t3d-editbar .eb-btns button{min-width:0;height:auto;padding:9px 12px;background:var(--veldbg);border:1px solid var(--rand);color:var(--tekst);border-radius:8px;font-size:16px;line-height:1;cursor:pointer;font-family:inherit;text-align:center;}
 .t3d-editbar .eb-btns button:hover{border-color:var(--accent);}
@@ -855,16 +859,29 @@ form label,
 .cutmodal .linkbtn:hover{color:var(--accent);}
 .cutmodal .bgrow{justify-content:flex-start;margin-top:6px;}
 .cutmodal .bg-controls{justify-content:flex-start;flex-wrap:wrap;gap:8px 16px;margin:8px 0;}
-.cutmodal .cut-tools{justify-content:flex-start;flex-wrap:wrap;align-items:center;gap:8px;}
+.cutmodal .cut-tools{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:10px;position:relative;}
+.cutmodal .cut-tools .ct-left{flex:1 1 0;display:flex;justify-content:flex-start;min-width:0;}
+.cutmodal .cut-tools .ct-mid{flex:0 1 auto;display:flex;justify-content:center;align-items:center;gap:8px;flex-wrap:wrap;}
+.cutmodal .cut-tools .ct-right{flex:1 1 0;display:flex;justify-content:flex-end;min-width:0;}
 /* Uitsnede-tools als chips: duidelijk tapbaar i.p.v. tekstlinkjes. Reset blijft een aparte gedempte link rechts. */
 .cutmodal .cut-tools .linkbtn{display:inline-flex;align-items:center;gap:5px;background:var(--veldbg);
   border:1px solid var(--rand);border-radius:999px;color:var(--tekst);text-decoration:none;font-size:12px;font-weight:600;
   padding:9px 13px;min-height:44px;}
 .cutmodal .cut-tools .linkbtn:hover{border-color:var(--accent);color:var(--accent);}
+.cutmodal .cut-tools .t-lbl{display:none;}                              /* icon-only; uitleg via de Info-pop-up */
+.cutmodal .cut-tools .cm-toolinfo.on{border-color:var(--accent);color:var(--accent);}
+.cutmodal .cm-legend{position:absolute;bottom:100%;left:0;margin-bottom:10px;z-index:9;
+  background:var(--kaart);border:1px solid var(--rand);border-radius:12px;box-shadow:0 8px 22px rgba(0,0,0,.22);
+  padding:6px;min-width:170px;max-width:min(280px,90%);display:flex;flex-direction:column;}
+.cutmodal .cm-legend[hidden]{display:none;}
+.cutmodal .cm-legend .lg-row{display:flex;align-items:center;gap:11px;padding:8px 10px;border-radius:8px;
+  font-size:13px;font-weight:600;color:var(--tekst);white-space:nowrap;}
+.cutmodal .cm-legend .lg-row .ik{flex:none;}
+.cutmodal .cm-legend .lg-row.lg-reset{color:#A8341A;}
 .cutmodal .cut-tools .linkbtn.on{background:var(--accent);border-color:var(--accent);color:#F0EDE8;}
-.cutmodal .cut-tools #cropReset{margin-left:auto;background:transparent;border-color:transparent;border-radius:0;
-  color:var(--gedempt);text-decoration:underline;padding:9px 4px;min-height:44px;}
-.cutmodal .cut-tools #cropReset:hover{color:#A8341A;border-color:transparent;}
+.cutmodal .cut-tools #cropReset{background:transparent;border:1px solid rgba(168,52,26,.45);
+  color:#A8341A;text-decoration:none;padding:9px 13px;min-height:44px;}
+.cutmodal .cut-tools #cropReset:hover{color:#A8341A;border-color:#A8341A;background:rgba(168,52,26,.08);}
 .cutmodal .cut-tip{font-size:11px;color:var(--gedempt);margin:2px 0 8px;line-height:1.35;}
 .cutmodal .linkbtn.on{color:var(--accent);font-weight:600;}
 .cutmodal .bgswatch{width:18px;height:18px;border-radius:4px;border:1px solid var(--rand);visibility:hidden;flex:0 0 auto;}
@@ -1011,6 +1028,7 @@ form label{text-transform:none;letter-spacing:.005em;font-size:.8rem;color:var(-
   </section>
   <!-- ===================== 2D-KAART ===================== -->
   <section id="view-home">
+    <div class="bouw-melding" role="status" data-i18n="ui.bouw2d">2D-kaart nog in aanbouw - test vooral het 3D-model.</div>
     <div class="kaart-layout">
       <div id="bodymap-wrap">
         <div class="grond-schaduw" aria-hidden="true"></div>
@@ -1023,7 +1041,7 @@ form label{text-transform:none;letter-spacing:.005em;font-size:.8rem;color:var(-
           <g id="markers"></g>
           <circle id="sel-ring-2d" class="sel-ring-2d" fill="none" pointer-events="none" visibility="hidden"/>
         </svg>
-        <button type="button" id="kaart-reset" class="kaart-slotbtn kaart-reset" title="Volledig overzicht" aria-label="Volledig overzicht"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12a8 8 0 1 0 2.3-5.6"/><path d="M3 4v4h4"/></svg></button>
+        <button type="button" id="kaart-reset" class="kaart-slotbtn kaart-reset" data-i18n-title="aria.volledigoverzicht" data-i18n-aria="aria.volledigoverzicht" title="Volledig overzicht" aria-label="Volledig overzicht"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12a8 8 0 1 0 2.3-5.6"/><path d="M3 4v4h4"/></svg></button>
         <button type="button" id="toon-gepland" class="gepland-toggle" aria-pressed="false" data-i18n-aria="ui.toon_gepland" aria-label="Geplande tattoos tonen">
           <svg viewBox="0 0 24 24" class="ik" aria-hidden="true" style="width:15px;height:15px"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>
           <span data-i18n="ui.gepland">Gepland</span>
@@ -1226,11 +1244,19 @@ form label{text-transform:none;letter-spacing:.005em;font-size:.8rem;color:var(-
               <input id="cutSpread" type="range" min="0" max="160" value="55" class="slider" data-i18n-aria="ui.zachte_randen" aria-label="Zachte randen meenemen">
             </div>
             <div class="cutrow cut-tools">
-              <button id="spiegelBtn" class="linkbtn">&#8644; <span data-i18n="ui.spiegelen">Spiegelen</span></button>
-              <button id="rotate90Btn" class="linkbtn">&#10227; <span data-i18n="ui.draaien90">90&deg; draaien</span></button>
-              <button id="wandBtn" class="linkbtn">&#129668; <span data-i18n="ui.toverstaf">Toverstaf</span></button>
-              <button id="lassoUndo" class="linkbtn">&#8617; <span data-i18n="ui.ongedaan">Ongedaan</span></button>
-              <button id="cropReset" class="linkbtn" data-i18n="ui.reset_uitsnede">Reset uitsnede</button>
+              <div id="cmToolLegend" class="cm-legend" hidden role="group" data-i18n-aria="ui.knop_uitleg" aria-label="Wat doen de knoppen?"></div>
+              <div class="ct-left">
+                <button id="cmToolInfo" class="linkbtn cm-toolinfo" aria-pressed="false" data-i18n-title="ui.knop_uitleg" data-i18n-aria="ui.knop_uitleg" title="Wat doen de knoppen?" aria-label="Wat doen de knoppen?"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5"/><path d="M12 7.6h.01"/></svg><span data-i18n="ui.info">Info</span></button>
+              </div>
+              <div class="ct-mid">
+                <button id="rotate90Btn" class="linkbtn" data-i18n-title="ui.draaien90" data-i18n-aria="ui.draaien90" title="90&deg; draaien" aria-label="90&deg; draaien"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.3-5.6"/><path d="M21 4v4h-4"/></svg><span class="t-lbl" data-i18n="ui.draaien90">90&deg; draaien</span></button>
+                <button id="spiegelBtn" class="linkbtn" data-i18n-title="ui.spiegelen" data-i18n-aria="ui.spiegelen" title="Spiegelen" aria-label="Spiegelen"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v18" stroke-dasharray="2 3"/><path d="M4 6L4 18L10 12Z"/><path d="M20 6L20 18L14 12Z"/></svg><span class="t-lbl" data-i18n="ui.spiegelen">Spiegelen</span></button>
+                <button id="wandBtn" class="linkbtn" data-i18n-title="ui.toverstaf" data-i18n-aria="ui.toverstaf" title="Toverstaf" aria-label="Toverstaf"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 19L14 10"/><path d="M17 3l1 3 3 1-3 1-1 3-1-3-3-1 3-1z"/><path d="M6 5v2M5 6h2"/></svg><span class="t-lbl" data-i18n="ui.toverstaf">Toverstaf</span></button>
+                <button id="lassoUndo" class="linkbtn" data-i18n-title="ui.ongedaan" data-i18n-aria="ui.ongedaan" title="Ongedaan" aria-label="Ongedaan"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 14L4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 5 5v3"/></svg><span class="t-lbl" data-i18n="ui.ongedaan">Ongedaan</span></button>
+              </div>
+              <div class="ct-right">
+                <button id="cropReset" class="linkbtn" data-i18n-title="ui.reset_uitsnede" data-i18n-aria="ui.reset_uitsnede" title="Reset uitsnede" aria-label="Reset uitsnede"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 9A8 8 0 0 1 18 7"/><path d="M19.5 15A8 8 0 0 1 6 17"/><path d="M18 3v4h-4"/><path d="M6 21v-4h4"/></svg><span data-i18n="ui.reset">Reset</span></button>
+              </div>
             </div>
           </div>
         </div>
@@ -1278,6 +1304,19 @@ form label{text-transform:none;letter-spacing:.005em;font-size:.8rem;color:var(-
     </div>
   </div>
 
+  <div class="inst-sectie">
+    <p class="inst-label">
+      <span data-i18n="inst.vorm">Lichaamsvorm</span>
+      <span class="inst-soon" data-i18n="inst.vorm.binnenkort">Binnenkort</span>
+    </p>
+    <div class="silhouet-keuze compact" id="vorm-keuze" role="group" data-i18n-aria="inst.vorm" aria-label="Lichaamsvorm">
+      <button type="button" data-shape="slank" data-i18n="inst.vorm.slank" disabled>Slank</button>
+      <button type="button" data-shape="gemiddeld" data-i18n="inst.vorm.gemiddeld" disabled>Gemiddeld</button>
+      <button type="button" data-shape="atletisch" data-i18n="inst.vorm.atletisch" disabled>Atletisch</button>
+      <button type="button" data-shape="zwaar" data-i18n="inst.vorm.zwaar" disabled>Zwaar</button>
+    </div>
+  </div>
+
   <div class="inst-sectie" style="padding-bottom:24px">
     <p class="inst-label" data-i18n="inst.huid">Huidskleur</p>
     <div class="tint-rij" id="tint-rij"></div>
@@ -1321,7 +1360,7 @@ form label{text-transform:none;letter-spacing:.005em;font-size:.8rem;color:var(-
   </div>
 </div>
 
-<div id="onboarding" class="onboarding" hidden role="dialog" aria-modal="true" aria-label="Welkom">
+<div id="onboarding" class="onboarding" hidden role="dialog" aria-modal="true" data-i18n-aria="aria.welkom" aria-label="Welkom">
   <div class="onboarding-kaart">
     <div id="onb-stap1">
       <h1 class="onboarding-titel" data-i18n="onb.titel">Welkom bij Tatties</h1>
@@ -6249,18 +6288,22 @@ const I18N = {
     'ui.eb_hint':'Sleep = verplaatsen · knijp = schalen · knijp-draai = roteren',
     'ui.draai_hint':'Sleep om te draaien · tik op + om een tattoo toe te voegen',
     'ui.plaats_hint':'Tik om te plaatsen',
-    'ui.gepland':'Gepland','ui.toon_gepland':'Geplande tattoos tonen',
+    'ui.gepland':'Wishlist','ui.toon_gepland':'Wishlist op het lichaam tonen',
     'ui.geen_model':'Geen 3D-model gevonden','ui.man_laden':'Manmodel laden…','ui.vrouw_laden':'Vrouwmodel laden…',
     'ui.klaar_dubbeltik':'Klaar - dubbeltik op de huid','ui.model_mislukt':'Model laden mislukt',
     'ui.aanpas_hint':'Aanpassen: sleep om te verplaatsen · scroll/knijp om te schalen',
     'ui.tattoo_verwijderd':'Tattoo verwijderd','ui.vergrendeld':'Tattoo vergrendeld','ui.ontgrendeld':'Tattoo ontgrendeld',
     'ui.geen_foto_bewaard':'Geen originele foto bewaard voor deze tattoo','ui.pas_aan_sla_op':'Pas de uitsnede aan en sla op',
     'ui.foto_niet_geladen':'Kon de foto niet laden','ui.teken_lijn':'Teken een lijn rond de tattoo en stel de grenswaarde in',
+    'ui.geen_afbeelding':'Kies een afbeelding (geen ander bestandstype)','ui.foto_te_groot':'Foto te groot (max 30 MB)','ui.foto_mislukt':'Kon de foto niet verwerken',
+    'ui.reset':'Reset','ui.knop_uitleg':'Wat doen de knoppen?','ui.info':'Info',
+    'inst.vorm.binnenkort':'Binnenkort','ui.bouw2d':'2D-kaart nog in aanbouw - test vooral het 3D-model.',
+    'aria.volledigoverzicht':'Volledig overzicht','aria.welkom':'Welkom',
     'ui.tik_achtergrond':'Tik op de achtergrond in de foto','ui.pipet_uit':'Pipet uit',
     'ui.kies_eerst_foto':'Kies eerst een foto en knip de tattoo uit','ui.tattoo_geplaatst':'Tattoo geplaatst ✓',
     'ui.tattoo_bijgewerkt':'Tattoo bijgewerkt ✓','ui.plaatsen_mislukt':'Plaatsen mislukt','ui.fout':'fout',
     'ui.hersteld':'{n} tattoo{s} hersteld','ui.verwijder_bevestig':'Weet je zeker dat je deze tattoo wilt verwijderen?',
-    'ui.toevoegen':'Toevoegen','ui.klik_plaatsen':'Klik op het model waar je de tattoo wilt','ui.naam_verplicht':'Geef de tattoo eerst een naam','ui.meer_details':'Meer details','ui.naam':'Naam',
+    'ui.toevoegen':'Toevoegen','ui.klik_plaatsen':'Klik op het model waar je de tattoo wilt','ui.naam_verplicht':'Geef de tattoo eerst een naam','ui.meer_details':'Meer details','ui.naam':'Naam tattoo',
     'ui.stage_aria':'3D-lichaamsmodel; gebruik de 2D-knop bovenaan voor de toegankelijke platte kaart',
     'ui.lege_cta':'Nog geen tattoos - tik op + om er een toe te voegen',
     'ui.details':'Details',
@@ -6271,6 +6314,7 @@ const I18N = {
     'install.tekst':'Zet Tatties op je beginscherm voor offline gebruik','install.knop':'Installeren',
     'install.ios':'Zet Tatties op je beginscherm: tik op Deel en kies ‘Zet op beginscherm’.',
     'inst.titel':'Instellingen','inst.geslacht':'Man / Vrouw','inst.man':'Man','inst.vrouw':'Vrouw','inst.huid':'Huidskleur','inst.taal':'Taal',
+    'inst.vorm':'Lichaamsvorm','inst.vorm.slank':'Slank','inst.vorm.gemiddeld':'Gemiddeld','inst.vorm.atletisch':'Atletisch','inst.vorm.zwaar':'Zwaar',
     'inst.thema':'Weergave','inst.thema.auto':'Systeem','inst.thema.licht':'Licht','inst.thema.donker':'Donker',
     'inst.feedback':'Feedback','inst.feedback_sub':'Iets kapot of een idee? Ik hoor het graag.','inst.feedback_knop':'Stuur feedback',
     'stats.titel':'Statistieken','stats.collectie':'Collectie','stats.aantal':'Aantal tattoos','stats.uitgegeven':'Totaal uitgegeven',
@@ -6410,18 +6454,22 @@ const I18N = {
     'ui.eb_hint':'Drag = move · pinch = scale · pinch-twist = rotate',
     'ui.draai_hint':'Drag to rotate · tap + to add a tattoo',
     'ui.plaats_hint':'Tap to place',
-    'ui.gepland':'Planned','ui.toon_gepland':'Show planned tattoos',
+    'ui.gepland':'Wishlist','ui.toon_gepland':'Show wishlist on the body',
     'ui.geen_model':'No 3D model found','ui.man_laden':'Loading male model…','ui.vrouw_laden':'Loading female model…',
     'ui.klaar_dubbeltik':'Ready - double-tap the skin','ui.model_mislukt':'Loading the model failed',
     'ui.aanpas_hint':'Editing: drag to move · scroll/pinch to scale',
     'ui.tattoo_verwijderd':'Tattoo deleted','ui.vergrendeld':'Tattoo locked','ui.ontgrendeld':'Tattoo unlocked',
     'ui.geen_foto_bewaard':'No original photo saved for this tattoo','ui.pas_aan_sla_op':'Adjust the cut-out and save',
     'ui.foto_niet_geladen':'Could not load the photo','ui.teken_lijn':'Draw a line around the tattoo and set the threshold',
+    'ui.geen_afbeelding':'Please choose an image (not another file type)','ui.foto_te_groot':'Photo too large (max 30 MB)','ui.foto_mislukt':'Could not process the photo',
+    'ui.reset':'Reset','ui.knop_uitleg':'What do the buttons do?','ui.info':'Info',
+    'inst.vorm.binnenkort':'Coming soon','ui.bouw2d':'2D map still under construction - please test the 3D model.',
+    'aria.volledigoverzicht':'Full overview','aria.welkom':'Welcome',
     'ui.tik_achtergrond':'Tap the background in the photo','ui.pipet_uit':'Eyedropper off',
     'ui.kies_eerst_foto':'Pick a photo first and cut out the tattoo','ui.tattoo_geplaatst':'Tattoo placed ✓',
     'ui.tattoo_bijgewerkt':'Tattoo updated ✓','ui.plaatsen_mislukt':'Placing failed','ui.fout':'error',
     'ui.hersteld':'{n} tattoo{s} restored','ui.verwijder_bevestig':'Are you sure you want to delete this tattoo?',
-    'ui.toevoegen':'Add','ui.klik_plaatsen':'Click on the model where you want the tattoo','ui.naam_verplicht':'Give the tattoo a name first','ui.meer_details':'More details','ui.naam':'Name',
+    'ui.toevoegen':'Add','ui.klik_plaatsen':'Click on the model where you want the tattoo','ui.naam_verplicht':'Give the tattoo a name first','ui.meer_details':'More details','ui.naam':'Tattoo name',
     'ui.stage_aria':'3D body model; use the 2D button at the top for the accessible flat map',
     'ui.lege_cta':'No tattoos yet - tap + to add one',
     'ui.details':'Details',
@@ -6432,6 +6480,7 @@ const I18N = {
     'install.tekst':'Add Tatties to your home screen for offline use','install.knop':'Install',
     'install.ios':'Add Tatties to your home screen: tap Share, then ‘Add to Home Screen’.',
     'inst.titel':'Settings','inst.geslacht':'Male / Female','inst.man':'Male','inst.vrouw':'Female','inst.huid':'Skin tone','inst.taal':'Language',
+    'inst.vorm':'Body shape','inst.vorm.slank':'Slim','inst.vorm.gemiddeld':'Average','inst.vorm.atletisch':'Athletic','inst.vorm.zwaar':'Heavy',
     'inst.thema':'Appearance','inst.thema.auto':'System','inst.thema.licht':'Light','inst.thema.donker':'Dark',
     'inst.feedback':'Feedback','inst.feedback_sub':'Something broken, or an idea? Let me know.','inst.feedback_knop':'Send feedback',
     'stats.titel':'Statistics','stats.collectie':'Collection','stats.aantal':'Number of tattoos','stats.uitgegeven':'Total spent',
@@ -6943,6 +6992,7 @@ function toonView(naam) {
   if (_v3d) _v3d.classList.add('verborgen');
   if (typeof window.__tatties3DPauze === 'function') window.__tatties3DPauze();
   { const _ph = document.getElementById('plaats-hint'); if (_ph) _ph.hidden = true; }   // plaats-hint weg bij view-wissel (annuleren)
+  if (typeof window.__tattiesCancelPlaats === 'function') window.__tattiesCancelPlaats();   // plaats-modus (2D/3D) niet laten doorlopen na navigatie
   window.scrollTo(0, 0);
 }
 // Plaats-hint: scroll het model/de kaart in beeld + toon de pulserende tik-indicator (tijdens plaatsen van een nieuwe tattoo)
@@ -7167,14 +7217,45 @@ function vulLichaamClip(clipId, bronSelector) {
 }
 
 function tekenSilhouet() {
-  $('#silhouet').innerHTML = huidigSilhouet();
-  vulLichaamClip('lichaam-clip', '#silhouet');
+  const O = orthoData2D();
+  if (O) {
+    // Ortho-modus: silhouet = render van het 3D-model. SLICE 3: hand-getekende line-art als die er is.
+    const art = ORTHO_LINEART && O.art;
+    const src = (huidigeZijde === 'achter') ? (art ? O.art.achter : O.achter) : (art ? O.art.voor : O.voor);
+    $('#silhouet').innerHTML = `<image href="${src}" xlink:href="${src}" x="0" y="0" width="200" height="398" preserveAspectRatio="xMidYMid meet"/>`;
+    // SLICE 4: vorm-clip uit het silhouet-masker (scanline-rechthoeken) -> tattoos klippen op de lichaamsrand.
+    const clip = document.getElementById('lichaam-clip');
+    if (clip) clip.innerHTML = maskNaarClipRects(O.mask, huidigeZijde) || '<rect x="0" y="0" width="200" height="398"/>';
+  } else {
+    $('#silhouet').innerHTML = huidigSilhouet();
+    vulLichaamClip('lichaam-clip', '#silhouet');
+  }
   document.querySelectorAll('.silhouet-keuze button[data-geslacht]').forEach((b) =>
     b.classList.toggle('actief', b.dataset.geslacht === silhouetKeuze));
   document.querySelectorAll('.silhouet-keuze button[data-zijde]').forEach((b) =>
     b.classList.toggle('actief', b.dataset.zijde === huidigeZijde));
 }
+/* 2D->3D: een 2D-bewerking (grootte/rotatie) doorzetten naar de 3D-plek (positie3d),
+   zodat het 3D-decal meeschaalt/-draait. size = schaal / gedeelde schaal s. */
+function syncKunstNaar3D(t) {
+  if (!t || !t.positie3d || !t.kunst) return;
+  const O = orthoData2D(); if (!O) return;
+  const s = O.cal.s;
+  if (+t.kunst.schaal) t.positie3d.size = Math.max(0.03, Math.min(0.40, (+t.kunst.schaal) / s));
+  if (t.kunst.rotatie != null) t.positie3d.rot = (+t.kunst.rotatie) || 0;
+}
+/* Door de 3D-IIFE gebruikt om een 2D-only tattoo op 3D te herstellen op EXACT dezelfde plek
+   als de 2D-kaart toont: de IIFE inverteert deze 2D-positie (ortho2DInverse) naar een 3D-punt. */
+window.__tatties2Dpos = function (t) {
+  try { const b = basisPos2D(t); return b ? { x: b.x, y: b.y, side: zijdeVan(t) } : null; }
+  catch (e) { return null; }
+};
+/* Aangeroepen door de 3D-IIFE zodra een model-render klaarstaat: 2D-kaart verversen. */
+window.__orthoRefresh2D = function () {
+  try { tekenSilhouet(); if (typeof renderBodyMap === 'function') renderBodyMap(); } catch (e) { console.error(e); }
+};
 function kiesSilhouet(keuze) {
+  if (editMarker2D) { try { exitEdit2D(); } catch (e) {} }   // geslacht-wissel niet midden in 2D-bewerken laten hangen
   silhouetKeuze = keuze;
   try { localStorage.setItem('tatties-silhouet', keuze); } catch { /* geen voorkeur-opslag */ }
   tekenSilhouet();
@@ -7216,19 +7297,129 @@ const ZONE_POS = {
 /* Zonepositie, gespiegeld op de achterkant: van achteren gezien zit
    iemands linkerkant wél links in beeld. */
 function zonePos(zoneId, zijde) {
-  const [x, y] = ZONE_POS[zoneId];
+  // Ortho-modus: zone-ankers uit de gedeelde projectie (op de render); anders de oude vaste posities.
+  const Z = (typeof orthoActief2D === 'function' && orthoActief2D() && window.Ortho2D && window.Ortho2D.zones) || null;
+  const bron = (Z && Z[zoneId]) ? Z[zoneId] : ZONE_POS[zoneId];
+  if (!bron) return [100, 199];
+  const [x, y] = bron;
   return zijde === 'achter' ? [200 - x, y] : [x, y];
 }
 
-/* 3D-positie (uit de 3D-weergave) omrekenen naar een plek op de 2D-kaart */
+/* ---- SLICE 2: 2D-kaart op de ORTHO-render van het 3D-model (geflagd, parallel) ----
+   Bron: window.Ortho2D, gevuld door de 3D-IIFE na het laden van een model
+   ({ perGender:{ man:{cal:{s,cx,cy,...}, voor, achter}, vrouw:{...} } }).
+   orthoData2D() = data voor het NU getoonde 2D-silhouet (silhouetKeuze) of null. */
+let GEBRUIK_ORTHO_2D = true;
+let ORTHO_LINEART = true;   // SLICE 3: hand-getekende line-art i.p.v. de rauwe render als 2D-silhouet
+function orthoData2D() {
+  const O = window.Ortho2D;
+  return (GEBRUIK_ORTHO_2D && O && O.perGender && O.perGender[silhouetKeuze]) || null;
+}
+function orthoActief2D() { return !!orthoData2D(); }
+
+/* 3D-positie (uit de 3D-weergave) omrekenen naar een plek op de 2D-kaart.
+   In ortho-modus deelt dit exact de projectie van de render (cal s/cx/cy);
+   anders de oude hand-getunede constanten (lijn-art-silhouet). */
 function plek3DNaar2D(P3, zijde) {
   if (!P3 || !P3.point) return null;
   const p = P3.point;
-  let x = 100 + 170 * p[0];
-  let y = 389 - 226 * p[1];
   const side = zijde || P3.side || (p[2] < 0 ? 'achter' : 'voor');
+  const O = orthoData2D();
+  let x, y;
+  if (O) { const c = O.cal; x = 100 + c.s * (p[0] - c.cx); y = 199 - c.s * (p[1] - c.cy); }
+  else { x = 100 + 170 * p[0]; y = 389 - 226 * p[1]; }
   if (side === 'achter') x = 200 - x;
   return { x: +Math.max(6, Math.min(194, x)).toFixed(1), y: +Math.max(6, Math.min(392, y)).toFixed(1) };
+}
+
+/* Legacy 2D-coord (geplaatst onder de oude, niet-uniforme constanten 170/226/100/389)
+   omrekenen naar de huidige ortho-projectie. Beide zijn orthografische projecties van
+   hetzelfde model langs z, dus dit is een EXACTE lineaire remap van hetzelfde 3D-punt:
+     X = (px-100)/170,  Y = (389-py)/226   (legacy, cx=0)
+     px' = 100 + s*X,   py' = (199 + s*cy) - s*Y   (ortho)
+   Spiegelen rond 100 commuteert met de schaal, dus dit klopt voor voor- én achterkant. */
+function remapLegacy2D(pos, cal) {
+  const s = cal.s, cy = cal.cy;
+  const x = 100 + (s / 170) * (pos.x - 100);
+  const y = (199 + s * cy) - (s / 226) * (389 - pos.y);
+  return { x: +Math.max(6, Math.min(194, x)).toFixed(1), y: +Math.max(6, Math.min(392, y)).toFixed(1) };
+}
+
+/* Trek een 2D-plek die buiten het silhouet valt naar het dichtstbijzijnde lichaamspunt.
+   Lost het houdingsverschil op tussen de oude lijn-art en de render (armen/handen);
+   3D-geplaatste tattoos vallen al binnen het silhouet en blijven dus exact staan. */
+function snapNaarLichaam(pos, side) {
+  const O = orthoData2D(); if (!O || !O.mask) return pos;
+  const mask = (side === 'achter') ? O.mask.achter : O.mask.voor;
+  if (!mask) return pos;
+  const W = O.mask.w || 200, H = O.mask.h || 398;
+  const inMask = (xx, yy) => xx >= 0 && xx < W && yy >= 0 && yy < H && mask[yy * W + xx];
+  let x = Math.max(0, Math.min(W - 1, Math.round(pos.x)));
+  let y = Math.max(0, Math.min(H - 1, Math.round(pos.y)));
+  // 1) buiten het lichaam -> dichtstbijzijnde lichaamspixel
+  if (!inMask(x, y)) {
+    let best = null, bd = 1e9; const R = 90;
+    for (let dy = -R; dy <= R; dy++) { const yy = y + dy; if (yy < 0 || yy >= H) continue;
+      for (let dx = -R; dx <= R; dx++) { const xx = x + dx; if (xx < 0 || xx >= W) continue;
+        if (mask[yy * W + xx]) { const d = dx * dx + dy * dy; if (d < bd) { bd = d; best = [xx, yy]; } } } }
+    if (best) { x = best[0]; y = best[1]; } else return pos;
+  }
+  // 2) al ruim binnen het lichaam (icoon past) -> laten staan
+  const m = 8;
+  if (inMask(x - m, y) && inMask(x + m, y) && inMask(x, y - m) && inMask(x, y + m)) return { x, y };
+  // 3) anders: mean-shift naar het lokale lichaams-zwaartepunt (centreert het icoon op de ledemaat)
+  const r = 11;
+  for (let it = 0; it < 2; it++) {
+    let sx = 0, sy = 0, n = 0;
+    for (let dy = -r; dy <= r; dy++) { const yy = y + dy; if (yy < 0 || yy >= H) continue;
+      for (let dx = -r; dx <= r; dx++) { const xx = x + dx; if (xx < 0 || xx >= W) continue;
+        if (mask[yy * W + xx]) { sx += xx; sy += yy; n++; } } }
+    if (!n) break;
+    const nx = Math.round(sx / n), ny = Math.round(sy / n);
+    if (nx === x && ny === y) break;
+    x = nx; y = ny;
+  }
+  return { x, y };
+}
+
+/* Silhouet-masker -> clipPath-inhoud (scanline-rechthoeken, 1px hoog per run).
+   Geeft de lichaamsvorm als clip zodat tattoo-markers op de rand worden afgeknipt. */
+function maskNaarClipRects(maskObj, side) {
+  if (!maskObj) return '';
+  const mask = (side === 'achter') ? maskObj.achter : maskObj.voor;
+  if (!mask) return '';
+  const W = maskObj.w || 200, H = maskObj.h || 398;
+  let rects = '';
+  for (let y = 0; y < H; y++) {
+    let x = 0;
+    while (x < W) {
+      if (mask[y * W + x]) { const x0 = x; while (x < W && mask[y * W + x]) x++; rects += `<rect x="${x0}" y="${y}" width="${x - x0}" height="1"/>`; }
+      else x++;
+    }
+  }
+  return rects;
+}
+
+/* Beste 2D-plek voor een tattoo-marker. In ortho-modus:
+   - 3D-geplaatste tattoos (positie3d) -> LIVE herprojectie via de gedeelde cal;
+   - 2D-only tattoos (alleen legacy positie) -> lineaire remap naar de ortho-projectie;
+   - daarna snap naar het silhouet (houdingsverschil oude lijn-art vs render). */
+function basisPos2D(t) {
+  const O = orthoData2D();
+  if (O && t.positie3d && t.positie3d.point) {
+    const p = plek3DNaar2D(t.positie3d, zijdeVan(t));   // 3D-geplaatst = al exact op het lichaam, niet snappen
+    if (p) return p;
+  }
+  if (O && t.positie && isFinite(t.positie.x) && isFinite(t.positie.y)) {
+    // posV>=2: al ortho-space (in de plek-editor geplaatst) -> alleen snappen; anders legacy -> remap+snap.
+    const p = (t.posV >= 2) ? t.positie : remapLegacy2D(t.positie, O.cal);
+    return snapNaarLichaam(p, zijdeVan(t));
+  }
+  return t.positie ||
+    (t.positie3d ? plek3DNaar2D(t.positie3d, zijdeVan(t)) : null) ||
+    (ZONE_POS[t.lichaamsdeel]
+      ? { x: zonePos(t.lichaamsdeel, huidigeZijde)[0], y: zonePos(t.lichaamsdeel, huidigeZijde)[1] }
+      : null);
 }
 
 /* ---- In- en uitzoomen via de SVG-viewBox ---- */
@@ -7305,10 +7496,7 @@ function zetKunstAfbeelding(imgEl, pos, schaal, aspect, rotatie) {
   imgEl.setAttribute('transform', `rotate(${rotatie || 0} ${pos.x} ${pos.y})`);
 }
 function kunstBasisPos(t) {
-  return t.positie ||
-    (ZONE_POS[t.lichaamsdeel]
-      ? { x: zonePos(t.lichaamsdeel, huidigeZijde)[0], y: zonePos(t.lichaamsdeel, huidigeZijde)[1] }
-      : null);
+  return basisPos2D(t);
 }
 
 /* ---- 2D bewerkmodus: selectie-ring + editbar (gelijk aan 3D) ---- */
@@ -7318,9 +7506,7 @@ function updateSelRing2D(){
   const ring = document.getElementById('sel-ring-2d'); if(!ring) return;
   const t = editMarker2D ? vindTattoo2D(editMarker2D) : null;
   if(!t || zijdeVan(t) !== huidigeZijde){ ring.setAttribute('visibility','hidden'); return; }
-  const basis = t.positie ||
-    (t.positie3d ? plek3DNaar2D(t.positie3d, zijdeVan(t)) : null) ||
-    { x: zonePos(t.lichaamsdeel, huidigeZijde)[0], y: zonePos(t.lichaamsdeel, huidigeZijde)[1] };
+  const basis = basisPos2D(t);
   if(!basis){ ring.setAttribute('visibility','hidden'); return; }
   const b = Number(t.kunst && t.kunst.schaal) || 14;
   const h = b * ((t.kunst && t.kunst.aspect) || 1);
@@ -7382,6 +7568,7 @@ async function edit2DActie(a){
   else if(a === 'rot-'){ t.kunst.rotatie = (((Number(t.kunst.rotatie)||0) - 15) % 360 + 360) % 360; }
   else if(a === 'rot+'){ t.kunst.rotatie = (((Number(t.kunst.rotatie)||0) + 15) % 360 + 360) % 360; }
   else return;
+  syncKunstNaar3D(t);
   renderMarkers();
   try{ await saveTattoo(t); }catch(e){ console.error(e); }
 }
@@ -7397,8 +7584,7 @@ function renderMarkers() {
     .sort((a, b) => (a.stapel || 0) - (b.stapel || 0));   // hoger = later getekend = bovenop
 
   g.innerHTML = zichtbaar.map(t => {
-    const basisPos = t.positie ||
-      (t.positie3d ? plek3DNaar2D(t.positie3d, zijdeVan(t)) : null) ||
+    const basisPos = basisPos2D(t) ||
       { x: zonePos(t.lichaamsdeel, huidigeZijde)[0], y: zonePos(t.lichaamsdeel, huidigeZijde)[1] };
     const { x, y } = basisPos;
     const kleur = esc(t.accentkleur || '#8E71F0');
@@ -7558,6 +7744,7 @@ function initKaartGebaren() {
       const t = kunstTransform.t;
       kunstTransform = null;
       kaartInteractie.blokkeerKlikTot = Date.now() + 400;
+      syncKunstNaar3D(t);
       await saveTattoo(t);
       renderMarkers();
       toast(tr('toast.grootterot'));
@@ -7578,11 +7765,7 @@ function initKaartGebaren() {
     if (!m) return;
     const t = tattoos.find(x => x.id === m.dataset.id);
     if (!t) return;
-    const basis = t.positie ||
-      (t.positie3d ? plek3DNaar2D(t.positie3d, zijdeVan(t)) : null) ||
-      (ZONE_POS[t.lichaamsdeel]
-        ? { x: zonePos(t.lichaamsdeel, huidigeZijde)[0], y: zonePos(t.lichaamsdeel, huidigeZijde)[1] }
-        : null);
+    const basis = basisPos2D(t);
     if (!basis) return;
     const kunstImg = (t.kunst && t.kunst.src) ? m.querySelector('image') : null;
     markerSleep = {
@@ -7633,6 +7816,16 @@ function initKaartGebaren() {
       const t = tattoos.find(x => x.id === sleep.id);
       if (t) {
         t.positie = sleep.nieuw;
+        // Ortho-modus: nieuwe plek is ortho-space (posV=2); 3D-plek mee verschuiven (inverse).
+        if (orthoActief2D()) {
+          t.posV = 2;
+          if (t.positie3d && t.positie3d.point && typeof window.__ortho2DInverse === 'function') {
+            try {
+              const inv = window.__ortho2DInverse(sleep.nieuw.x, sleep.nieuw.y, zijdeVan(t));
+              if (inv && inv.point) { t.positie3d.point = inv.point; t.positie3d.normal = inv.normal; t.positie3d.side = inv.side; }
+            } catch (e) { /* off-body -> 3D-plek ongewijzigd */ }
+          }
+        }
         await saveTattoo(t);
         renderMarkers();
         toast(tr('toast.plekbij'));
@@ -8138,6 +8331,12 @@ function openFormulier(id = null) {
   }
   let fotosTijdelijk = (t.fotos && t.fotos.length) ? [...t.fotos] : (t.foto ? [t.foto] : []);
   let tempPositie = t.positie ? { ...t.positie } : null;
+  // Ortho-modus: de plek-editor werkt in ORTHO-space (zelfde body als de kaart). Bestaande
+  // posities omrekenen zodat ze op de juiste plek staan: 3D-tattoo -> projectie; legacy -> remap.
+  if (orthoActief2D()) {
+    if (t.positie3d && t.positie3d.point) { const p = plek3DNaar2D(t.positie3d, zijdeVan(t)); if (p) tempPositie = p; }
+    else if (tempPositie && !(t.posV >= 2)) tempPositie = remapLegacy2D(tempPositie, orthoData2D().cal);
+  }
   let tempStatus = t.status === 'wens' ? 'wens' : 'gezet';
   let tempKunst = t.kunst ? { ...t.kunst } : null;
   let tempVergrendeld = !!t.vergrendeld;
@@ -8205,7 +8404,7 @@ function openFormulier(id = null) {
       <div class="veld">
         <label for="f-naam">${tr('form.naam')} <span class="verplicht">*</span></label>
         <div class="naam-rij">
-          <input id="f-naam" type="text" value="${esc(t.naam)}" required>
+          <input id="f-naam" type="text" value="${esc(t.naam)}" maxlength="80" required>
           <div class="silhouet-keuze type-keuze" role="group" aria-label="${tr('form.type')}">
             <button type="button" data-fstatus="gezet">${tr('form.gezet')}</button>
             <button type="button" data-fstatus="wens">${tr('form.wishlist')}</button>
@@ -8229,11 +8428,11 @@ function openFormulier(id = null) {
       <div class="rij2">
         <div class="veld">
           <label for="f-artiest">${tr('form.artiest')}</label>
-          <input id="f-artiest" type="text" value="${esc(t.artiest)}">
+          <input id="f-artiest" type="text" value="${esc(t.artiest)}" maxlength="120">
         </div>
         <div class="veld">
           <label for="f-studio">${tr('form.studio')}</label>
-          <input id="f-studio" type="text" value="${esc(t.studio)}">
+          <input id="f-studio" type="text" value="${esc(t.studio)}" maxlength="120">
         </div>
       </div>
       <div class="veld">
@@ -8262,7 +8461,7 @@ function openFormulier(id = null) {
       </div>
       <div class="veld">
         <label for="f-notities">${tr('form.notities')}</label>
-        <textarea id="f-notities">${esc(t.notities)}</textarea>
+        <textarea id="f-notities" maxlength="2000">${esc(t.notities)}</textarea>
       </div>
       <div class="veld" style="margin-top:14px">
         <label for="f-accent">${tr('form.accentkleur')}</label>
@@ -8417,8 +8616,17 @@ function openFormulier(id = null) {
   });
   zetKunstStaat(tempKunst ? 'actief' : 'start');
   function tekenPlekZijde() {
-    $('#plek-silhouet').innerHTML = silhouetVoor(tempZijde);
-    vulLichaamClip('plek-lichaam-clip', '#plek-silhouet');
+    const O = orthoData2D();
+    if (O) {
+      const art = ORTHO_LINEART && O.art;
+      const src = (tempZijde === 'achter') ? (art ? O.art.achter : O.achter) : (art ? O.art.voor : O.voor);
+      $('#plek-silhouet').innerHTML = `<image href="${src}" xlink:href="${src}" x="0" y="0" width="200" height="398" preserveAspectRatio="xMidYMid meet"/>`;
+      const clip = document.getElementById('plek-lichaam-clip');
+      if (clip) clip.innerHTML = maskNaarClipRects(O.mask, tempZijde) || '<rect x="0" y="0" width="200" height="398"/>';
+    } else {
+      $('#plek-silhouet').innerHTML = silhouetVoor(tempZijde);
+      vulLichaamClip('plek-lichaam-clip', '#plek-silhouet');
+    }
     document.querySelectorAll('button[data-fzijde]').forEach((b) =>
       b.classList.toggle('actief', b.dataset.fzijde === tempZijde));
     tekenPlekMarker();
@@ -8741,8 +8949,8 @@ function openFormulier(id = null) {
       artiest: $('#f-artiest').value.trim(),
       studio: $('#f-studio').value.trim(),
       stijl: $('#f-stijl').value,
-      kosten: Math.max(0, parseFloat($('#f-kosten').value) || 0),
-      zituren: Math.max(0, parseFloat($('#f-zituren').value) || 0),
+      kosten: Math.min(1000000, Math.max(0, parseFloat($('#f-kosten').value) || 0)),
+      zituren: Math.min(100000, Math.max(0, parseFloat($('#f-zituren').value) || 0)),
       pijn: Math.min(5, Math.max(0, parseInt($('#f-pijn').value, 10) || 0)),
       sessies: t.sessies || [],
       touchUps: t.touchUps || [],
@@ -8759,6 +8967,27 @@ function openFormulier(id = null) {
       nazorgTaken: t.nazorgTaken || [],
       kunst: tempKunst
     });
+    // Ortho-modus: tempPositie staat in ortho-space. Tag dat (posV=2) en leid een 3D-plek af
+    // (inverse), zodat de tattoo op exact dezelfde plek in 2D en 3D verschijnt.
+    if (orthoActief2D() && record.positie && isFinite(record.positie.x) && isFinite(record.positie.y)) {
+      record.posV = 2;
+      if (typeof window.__ortho2DInverse === 'function') {
+        try {
+          const inv = window.__ortho2DInverse(record.positie.x, record.positie.y, record.zijde);
+          if (inv && inv.point) {
+            const s = orthoData2D().cal.s;
+            record.positie3d = {
+              point: inv.point, normal: inv.normal,
+              rot: (record.kunst && +record.kunst.rotatie) || 0,
+              size: (record.kunst && +record.kunst.schaal) ? Math.max(0.03, Math.min(0.40, (+record.kunst.schaal) / s)) : 0.1,
+              gender: (window.Ortho2D && window.Ortho2D.gender) || silhouetKeuze,
+              preset: (window.Ortho2D && window.Ortho2D.preset) || null,
+              zone: record.lichaamsdeel, side: inv.side, locked: !!record.vergrendeld
+            };
+          }
+        } catch (e) { /* zonder model geen 3D-plek; posV=2 volstaat voor 2D */ }
+      }
+    }
     bezigMetOpslaan = true;
     try {
       await saveTattoo(record);
@@ -9197,10 +9426,15 @@ async function verwijderVoorbeelden() {
   // ---- Nieuwe uniforme toevoeg-flow op de 2D-kaart (aangestuurd vanuit de uitsnede-modal) ----
   let plaats2DData = null;
   window.__tattiesStartPlaats2D = (payload) => {
-    plaats2DData = payload;
-    toonView('home');                                  // plaatsen gebeurt op de 2D-kaart (scrollt al naar boven)
+    toonView('home');                                  // eerst navigeren (annuleert oude plaats-modus), dan deze starten
+    plaats2DData = payload;                             // plaatsen gebeurt op de 2D-kaart
     const b = $('#t2d-banner'); if (b) { b.textContent = tr('ui.klik_plaatsen'); b.hidden = false; }
     if (window.__plaatsHintAan) window.__plaatsHintAan();   // toon de tik-indicator (na toonView, die de hint zou verbergen)
+  };
+  // 2D-plaatsstand annuleren (host-scope; aangeroepen door de IIFE-cancel bij navigatie)
+  window.__tattiesCancelPlaats2D = () => {
+    plaats2DData = null;
+    const b = $('#t2d-banner'); if (b) b.hidden = true;
   };
   async function plaatsNieuwe2D(clientX, clientY) {
     const p = kaartPunt(clientX, clientY);
@@ -9350,10 +9584,19 @@ async function verwijderVoorbeelden() {
   let inited=false, el=null, stage=null;
   let actief3D=true;            // false als de 3D-view verborgen is -> renderlus slaat het tekenen over
   let currentGender="man", loadToken=0;
+  // Lichaamsvorm-presets (geslacht x vorm). Nu: alle vormen -> het huidige GLB van dat geslacht
+  // (placeholder). Echte modellen later: vul SHAPE_NODES[`${gender}-${shape}`] met een eigen <script>-node-id.
+  const BODY_SHAPES=["slank","gemiddeld","atletisch","zwaar"];
+  let currentShape="gemiddeld";
+  try{ const s=localStorage.getItem("tatties-vorm"); if(s && BODY_SHAPES.includes(s)) currentShape=s; }catch(e){}
+  const SHAPE_NODES={};   // bv. "man-atletisch":"model-male-athletic"; leeg = val terug op het geslacht-model
+  function modelNodeId(gender){ const key=gender+"-"+currentShape; return SHAPE_NODES[key] || (gender==="vrouw"?"model-female":"model-male"); }
+  function presetId(){ return currentGender+"-"+currentShape; }
   let editDecal=null, persistT=null;
   let pendingSkin=null;
   let scene,camera,renderer,target,key,rim,ground,body,modelRoot,loader,skinMat,activeSkin;
   let pickMeshes=[];
+  let orthoCal=null, orthoRT=null;   // SLICE 1: ortho-projectie-kalibratie + offscreen render-target (parallel aan de bestaande 2D-kaart)
   const markers=[];                 // {id, obj} - geplaatste decals (runtime)
   let radius=3.2, theta=0, phi=1.35;
   const CAM0={radius:3.2, theta:0, phi:1.35, tx:0, ty:0.95, tz:0};
@@ -9436,6 +9679,7 @@ async function verwijderVoorbeelden() {
       editDecal=null; clearTimeout(persistT); showSel(false);
       const eb=document.getElementById("editbar"); if(eb)eb.classList.remove("on");
       const h=document.getElementById("hint"); if(h)h.style.display="";
+      const a=document.getElementById("t3d-add"); if(a) a.style.display="";   // +-knop herstellen (was verborgen tijdens bewerken)
     }
     markers.slice().forEach(disposeMarker); markers.length=0;
   }
@@ -9450,12 +9694,13 @@ async function verwijderVoorbeelden() {
     pickMeshes=[];
     root.traverse(o=>{ if(o.isMesh){ if(!o.geometry.attributes.normal) o.geometry.computeVertexNormals();
       o.material=activeSkin; pickMeshes.push(o); }});
+    orthoCal=null; computeOrthoCal();   // SLICE 1: ortho-kalibratie verversen voor dit model
     radius=3.2; theta=0; phi=1.35; target.set(0,0.95,0); applyCam();
   }
   function loadEmbedded(gender){
     currentGender = (gender==="vrouw") ? "vrouw" : "man";
     const token = ++loadToken;
-    const node=document.getElementById(currentGender==="vrouw" ? "model-female" : "model-male");
+    const node=document.getElementById(modelNodeId(currentGender));
     const b64=node ? node.textContent.trim() : "";
     if(!b64){ toast(tr('ui.geen_model')); return; }
     toast(currentGender==="vrouw" ? tr('ui.vrouw_laden') : tr('ui.man_laden'));
@@ -9465,7 +9710,10 @@ async function verwijderVoorbeelden() {
         if(token!==loadToken) return;            // verouderd: er is intussen iets anders gekozen
         setModel(gltf.scene||gltf.scenes[0]);
         toast(tr('ui.klaar_dubbeltik'));
-        Promise.resolve(restore3D(token)).finally(()=>{ if(token===loadToken) showLoading(false); });
+        // Ortho-data (cal/masker/zones) VÓÓR het herstel publiceren: 2D-only tattoos leiden hun
+        // 3D-plek af via de host-2D-positie (basisPos2D), die window.Ortho2D nodig heeft.
+        try{ publishOrtho2D(); }catch(e){ console.error(e); }
+        Promise.resolve(restore3D(token)).finally(()=>{ if(token===loadToken){ showLoading(false); } });
       }, err=>{ console.error(err); toast(tr('ui.model_mislukt')); showLoading(false); });
     }catch(e){ console.error(e); toast(tr('ui.model_mislukt')); showLoading(false); }
   }
@@ -9492,6 +9740,19 @@ async function verwijderVoorbeelden() {
   // Daarna raycast op het model -> echt oppervlaktepunt + normaal.
   function afleid3DUitZone(t){
     if(!pickMeshes.length) return null;
+    // SLICE 2/4: 3D-plek = de INVERSE van wat de 2D-kaart toont (basisPos2D via host), zodat 2D en 3D
+    // exact samenvallen voor elke 2D-only tattoo (legacy remap+snap, ortho-space, etc. - allemaal afgedekt).
+    if(typeof GEBRUIK_ORTHO_2D!=='undefined' && GEBRUIK_ORTHO_2D && (orthoCal||computeOrthoCal()) && t
+       && typeof window.__tatties2Dpos==='function'){
+      const b = window.__tatties2Dpos(t);
+      if(b){
+        const r = ortho2DInverse(b.x, b.y, b.side);
+        if(r){
+          const size = (t.kunst && +t.kunst.schaal) ? Math.max(0.03, Math.min(0.40, (+t.kunst.schaal)/orthoCal.s)) : 0.09;
+          return { point:r.point, normal:r.normal, rot:(t.kunst&&+t.kunst.rotatie)||0, size, gender:currentGender, zone:t&&t.lichaamsdeel, side:r.side };
+        }
+      }
+    }
     let p0, p1, front;
     if(t && t.positie && isFinite(t.positie.x) && isFinite(t.positie.y)){
       const side = t.zijde || (t.lichaamsdeel==='rug' ? 'achter' : 'voor');
@@ -9608,7 +9869,7 @@ async function verwijderVoorbeelden() {
     const nz=nearestZone(s.point);
     const rec=createTattoo(Object.assign({ naam:d.naam, status:"gezet", zijde:nz.side, lichaamsdeel:nz.zone,
       positie3d:{ point:[s.point.x,s.point.y,s.point.z], normal:[s.normal.x,s.normal.y,s.normal.z],
-                  rot, size, gender:currentGender, zone:nz.zone, side:nz.side },
+                  rot, size, gender:currentGender, preset:presetId(), zone:nz.zone, side:nz.side },
       kunst3d:d.kunst3d }, d.info));
     sync2D(rec, s.point, nz.side, rot, size, d.tex);
     try{ await saveTattoo(rec); }catch(e){ console.error(e); toast(tr('toast.opslaanmislukt')+(e&&e.message?e.message:tr('ui.fout'))); }
@@ -9656,11 +9917,228 @@ async function verwijderVoorbeelden() {
   function rotateDecal(deg){ if(!editDecal||editDecal.locked)return; editDecal.rot=(((editDecal.rot||0)+deg)%360+360)%360; rebuildMarker(editDecal); }
   /* 3D-positie omzetten naar een plek op de 2D-lichaamskaart (viewBox 0..200 x 0..398) */
   function project3DTo2D(p, side){
+    // SLICE 2: in ortho-modus exact dezelfde projectie als de render + plek3DNaar2D.
+    if(typeof GEBRUIK_ORTHO_2D!=='undefined' && GEBRUIK_ORTHO_2D && (orthoCal||computeOrthoCal())){
+      const r=ortho2D(p, side); if(r) return r;
+    }
     let x = 100 + 170*p.x;            // links/rechts
     let y = 389 - 226*p.y;            // hoog/laag
     if(side==="achter") x = 200 - x;  // achterkant spiegelt, net als de 2D-zones
     return { x:+clamp(x,6,194).toFixed(1), y:+clamp(y,6,392).toFixed(1) };
   }
+  /* ============================================================
+     SLICE 1 - ORTHO-FUNDAMENT (parallel; raakt de bestaande 2D-kaart NIET)
+     De bestaande plek3DNaar2D/project3DTo2D/afleid3DUitZone gebruiken
+     hand-getunede constanten (170/226/100/389). Die zijn in feite al een
+     orthografische projectie. Hier leiden we diezelfde transform af uit de
+     ECHTE model-bounding-box, zodat een offscreen ortho-render en de
+     2D<->3D-mapping gegarandeerd dezelfde projectie delen.
+       Forward:  px = 100 + s*(x - cx)        py = 199 - s*(y - cy)
+       (achter spiegelt px = 200 - px, net als de bestaande zones)
+       s = uniforme schaal die het model in de viewBox (200 x 398) past.
+     ============================================================ */
+  const ORTHO_MARGE = 10;   // viewBox-px speling boven/onder/links/rechts
+  function computeOrthoCal(){
+    if(!modelRoot){ orthoCal=null; return null; }
+    const box=new THREE.Box3().setFromObject(modelRoot);
+    const cx=(box.min.x+box.max.x)/2, cy=(box.min.y+box.max.y)/2;
+    const modelW=Math.max(1e-6, box.max.x-box.min.x), modelH=Math.max(1e-6, box.max.y-box.min.y);
+    // uniforme schaal: passend op zowel hoogte als breedte (silhouet blijft onvervormd)
+    const s=Math.min((398-2*ORTHO_MARGE)/modelH, (200-2*ORTHO_MARGE)/modelW);
+    orthoCal={ s, cx, cy,
+      minX:box.min.x, maxX:box.max.x, minY:box.min.y, maxY:box.max.y, minZ:box.min.z, maxZ:box.max.z,
+      modelW, modelH };
+    return orthoCal;
+  }
+  // Forward: 3D-wereldpunt -> 2D viewBox-coord. raw=true geeft ongeclampte waarden (voor verificatie).
+  function ortho2D(p, side, raw){
+    if(!orthoCal) computeOrthoCal();
+    const c=orthoCal; if(!c||!p) return null;
+    const X=Array.isArray(p)?p[0]:p.x, Y=Array.isArray(p)?p[1]:p.y;
+    let px=100 + c.s*(X - c.cx);
+    let py=199 - c.s*(Y - c.cy);
+    if(side==='achter') px=200-px;
+    if(raw) return { x:px, y:py };
+    return { x:+clamp(px,6,194).toFixed(1), y:+clamp(py,6,392).toFixed(1) };
+  }
+  // Inverse: 2D viewBox-coord -> echt oppervlaktepunt via parallelle (ortho) raycast langs z.
+  function ortho2DInverse(px, py, side){
+    if(!pickMeshes.length) return null;
+    if(!orthoCal) computeOrthoCal();
+    const c=orthoCal; if(!c) return null;
+    const front = side!=='achter';
+    let mx=px; if(!front) mx=200-mx;
+    const wx=c.cx + (mx-100)/c.s;
+    const wy=c.cy + (199-py)/c.s;
+    const z0 = front ? c.maxZ+1 : c.minZ-1;
+    const dir=new THREE.Vector3(0,0, front?-1:1);
+    const rc=new THREE.Raycaster(new THREE.Vector3(wx,wy,z0), dir);
+    const hits=rc.intersectObjects(pickMeshes,true);
+    if(!hits.length) return null;
+    const h=hits[0], pt=h.point;
+    let nrm=h.face? h.face.normal.clone().transformDirection(h.object.matrixWorld) : dir.clone().multiplyScalar(-1);
+    nrm.normalize();
+    return { point:[pt.x,pt.y,pt.z], normal:[nrm.x,nrm.y,nrm.z], side:front?'voor':'achter', wx, wy };
+  }
+  // Offscreen ortho-render (proof-of-concept). Deelt s/cx/cy met ortho2D, dus pixels en math lopen gelijk.
+  // Geeft coverage + 2D-bbox (in viewBox-coords) terug; dataURL optioneel (kost een extra 2D-canvas).
+  function renderOrtho2D(side, k, wantDataURL, wantMask, wantLineArt){
+    if(!renderer||!modelRoot) return null;
+    if(!orthoCal) computeOrthoCal(); const c=orthoCal; if(!c) return null;
+    k=k||2; const W=Math.round(200*k), H=Math.round(398*k);
+    if(!orthoRT || orthoRT.width!==W || orthoRT.height!==H){ if(orthoRT) orthoRT.dispose(); orthoRT=new THREE.WebGLRenderTarget(W,H); }
+    const cam=new THREE.OrthographicCamera(-100/c.s, 100/c.s, 199/c.s, -199/c.s, 0.01, 100);
+    const front = side!=='achter';
+    cam.position.set(c.cx, c.cy, front ? c.maxZ+5 : c.minZ-5);
+    cam.up.set(0,1,0); cam.lookAt(c.cx, c.cy, front ? c.minZ-1 : c.maxZ+1);
+    cam.updateProjectionMatrix();
+    // isoleer het lichaam: vloer/ring/decals + achtergrond tijdelijk uit
+    const gv=ground?ground.visible:false, sv=selRing?selRing.visible:false;
+    const mv=markers.map(m=>m.obj?m.obj.visible:false);
+    if(ground) ground.visible=false; if(selRing) selRing.visible=false; markers.forEach(m=>{ if(m.obj) m.obj.visible=false; });
+    const prevBg=scene.background, prevRT=renderer.getRenderTarget();
+    scene.background=null;
+    renderer.setRenderTarget(orthoRT); renderer.setClearColor(0x000000,0); renderer.clear(); renderer.render(scene,cam);
+    const buf=new Uint8Array(W*H*4); renderer.readRenderTargetPixels(orthoRT,0,0,W,H,buf);
+    renderer.setRenderTarget(prevRT||null);
+    // herstel
+    if(ground) ground.visible=gv; if(selRing) selRing.visible=sv; markers.forEach((m,i)=>{ if(m.obj) m.obj.visible=mv[i]; });
+    scene.background=prevBg;
+    // coverage + 2D-bbox (readpixels is bottom-up; viewBox is top-down)
+    let minx=1e9,maxx=-1e9,miny=1e9,maxy=-1e9,cov=0;
+    for(let yy=0; yy<H; yy++) for(let xx=0; xx<W; xx++){ if(buf[(yy*W+xx)*4+3]>10){ cov++;
+      if(xx<minx)minx=xx; if(xx>maxx)maxx=xx; if(yy<miny)miny=yy; if(yy>maxy)maxy=yy; } }
+    const bbox2D = cov ? { x0:+(minx/k).toFixed(1), x1:+(maxx/k).toFixed(1), y0:+((H-1-maxy)/k).toFixed(1), y1:+((H-1-miny)/k).toFixed(1) } : null;
+    const res={ W, H, side:front?'voor':'achter', coverage:cov, coveragePct:+(100*cov/(W*H)).toFixed(2), bbox2D };
+    if(wantMask){
+      // Silhouet-masker op viewBox-resolutie (200x398): 1 = lichaam. Voor snap-naar-lichaam in de 2D-kaart.
+      const MW=200, MH=398, mask=new Uint8Array(MW*MH);
+      for(let vy=0; vy<MH; vy++){ const cyv=Math.min(H-1, Math.round(vy*k)); const sy=H-1-cyv;
+        for(let vx=0; vx<MW; vx++){ const cxv=Math.min(W-1, Math.round(vx*k));
+          if(buf[(sy*W+cxv)*4+3]>10) mask[vy*MW+vx]=1; } }
+      res.mask=mask; res.maskW=MW; res.maskH=MH;
+    }
+    if(wantDataURL){
+      const cv=document.createElement('canvas'); cv.width=W; cv.height=H;
+      const ctx=cv.getContext('2d'), img=ctx.createImageData(W,H);
+      for(let yy=0; yy<H; yy++){ const sy=H-1-yy; for(let xx=0; xx<W; xx++){ const si=(sy*W+xx)*4, di=(yy*W+xx)*4;
+        img.data[di]=buf[si]; img.data[di+1]=buf[si+1]; img.data[di+2]=buf[si+2]; img.data[di+3]=buf[si+3]; } }
+      ctx.putImageData(img,0,0); res.dataURL=cv.toDataURL('image/png');
+    }
+    if(wantLineArt){ res.lineArt = lineArtFromBuffer(buf,W,H); }
+    return res;
+  }
+  /* ---- SLICE 3: hand-getekende line-art uit de render-buffer (post-process, geen extra GL-render) ----
+     Sobel-randdetectie op de helderheid -> inktlijnen (spier-/contourdefinitie) + harde
+     silhouet-contour (alpha-rand), op een lichte huid-wash. Resultaat = PNG-dataURL. */
+  const LA = { paper:[249,247,242], edge:0.125, headFrac:0.135, footFrac:0.075, contour:[34,24,16], lijn:[66,50,36] };
+  function lineArtFromBuffer(buf, W, H){
+    const lum=(i)=> buf[i]*0.299+buf[i+1]*0.587+buf[i+2]*0.114;
+    const al=(x,y)=> buf[((y*W+x)<<2)+3];
+    // Kopregio bepalen (buf is bottom-up: hoge y = boven = hoofd). Boven 'headCut' tekenen we
+    // GEEN interieurlijnen -> schone kop zonder realistische gelaatstrekken (alleen contour).
+    let yTop=-1, yBot=-1;
+    for(let y=H-1;y>=0;y--){ let any=false; for(let x=0;x<W;x++){ if(buf[((y*W+x)<<2)+3]>14){ any=true; break; } }
+      if(any){ if(yTop<0) yTop=y; yBot=y; } }
+    const headCut = (yTop>=0) ? (yTop - LA.headFrac*(yTop-yBot)) : -1;
+    const footCut = (yTop>=0) ? (yBot + LA.footFrac*(yTop-yBot)) : -1;   // onder = voeten/tenen -> alleen contour
+    const cv=document.createElement('canvas'); cv.width=W; cv.height=H;
+    const ctx=cv.getContext('2d'), out=ctx.createImageData(W,H);
+    for(let y=0;y<H;y++){
+      const ym=y>0?y-1:0, yp=y<H-1?y+1:H-1;
+      const geenInterieur = (headCut>=0 && y>headCut) || (footCut>=0 && y<footCut);   // hoofd + voeten: alleen contour
+      for(let x=0;x<W;x++){
+        const si=((y*W+x)<<2);
+        const di=(((H-1-y)*W+x)<<2);   // bottom-up buffer -> top-down output
+        const a=buf[si+3];
+        if(a<=14){ out.data[di+3]=0; continue; }   // buiten het lichaam = transparant
+        const xm=x>0?x-1:0, xp=x<W-1?x+1:W-1;
+        const xm2=x>1?x-2:0, xp2=x<W-2?x+2:W-1, ym2=y>1?y-2:0, yp2=y<H-2?y+2:H-1;
+        // harde contour als een buur (tot 2px) buiten het lichaam valt -> bollere lijn
+        const rand = (al(xm,y)<=14||al(xp,y)<=14||al(x,ym)<=14||al(x,yp)<=14||
+                      al(xm2,y)<=14||al(xp2,y)<=14||al(x,ym2)<=14||al(x,yp2)<=14);
+        let inkAmt=0, inkCol=LA.lijn;
+        if(rand){ inkAmt=1; inkCol=LA.contour; }
+        else if(!geenInterieur){
+          // Sobel -> BINAIRE drempel = strakke, gestileerde spierlijnen (geen fuzzy gradient)
+          const tl=lum(((ym*W+xm)<<2)), tc=lum(((ym*W+x)<<2)), tr=lum(((ym*W+xp)<<2));
+          const ml=lum(((y*W+xm)<<2)),                         mr=lum(((y*W+xp)<<2));
+          const bl=lum(((yp*W+xm)<<2)), bc=lum(((yp*W+x)<<2)), br=lum(((yp*W+xp)<<2));
+          const gx=(tr+2*mr+br)-(tl+2*ml+bl), gy=(bl+2*bc+br)-(tl+2*tc+tr);
+          const g=Math.sqrt(gx*gx+gy*gy)/1020;   // 0..~1
+          inkAmt = (g>=LA.edge) ? 1 : 0;
+        }
+        // vulling = vlak flash-sheet-papier; alleen (harde) inktlijnen erop
+        let R=LA.paper[0], G=LA.paper[1], B=LA.paper[2];
+        if(inkAmt){ R=inkCol[0]; G=inkCol[1]; B=inkCol[2]; }
+        out.data[di]=R; out.data[di+1]=G; out.data[di+2]=B; out.data[di+3]=255;
+      }
+    }
+    ctx.putImageData(out,0,0); return cv.toDataURL('image/png');
+  }
+  // Verificatie: voor elke ZONE -> raycast naar oppervlak -> forward ortho2D -> inverse -> 3D, en meet de rondreisfout.
+  function orthoZonesCheck(){
+    if(!orthoCal) computeOrthoCal();
+    if(!pickMeshes.length || !orthoCal) return { error:'geen model/kalibratie geladen' };
+    const out=[];
+    for(const z of ZONES){
+      const front = z.v.z>=0;
+      const side = front?'voor':'achter';
+      const orig=new THREE.Vector3(z.v.x, z.v.y, front?orthoCal.maxZ+1:orthoCal.minZ-1);
+      const dir=new THREE.Vector3(0,0, front?-1:1);
+      const rc=new THREE.Raycaster(orig,dir); const hits=rc.intersectObjects(pickMeshes,true);
+      if(!hits.length){ out.push({ zone:z.name, side, miss:true }); continue; }
+      const p=hits[0].point;
+      const twoD=ortho2D({x:p.x,y:p.y,z:p.z}, side);
+      const back=ortho2DInverse(twoD.x, twoD.y, side);
+      let err=null;
+      if(back){ const b=back.point; err=Math.hypot(b[0]-p.x, b[1]-p.y, b[2]-p.z); }
+      const oud=plek3DNaar2D({point:[p.x,p.y,p.z], side}, side);
+      out.push({ zone:z.name, side,
+        p3:[+p.x.toFixed(3),+p.y.toFixed(3),+p.z.toFixed(3)],
+        ortho2D:twoD, roundtripErr:(err!=null?+err.toFixed(4):null),
+        oud2D:oud, dPx:(oud&&twoD)?+(twoD.x-oud.x).toFixed(1):null, dPy:(oud&&twoD)?+(twoD.y-oud.y).toFixed(1):null });
+    }
+    return { cal:{ s:+orthoCal.s.toFixed(2), cx:+orthoCal.cx.toFixed(4), cy:+orthoCal.cy.toFixed(4),
+      modelW:+orthoCal.modelW.toFixed(4), modelH:+orthoCal.modelH.toFixed(4), zRange:[+orthoCal.minZ.toFixed(3),+orthoCal.maxZ.toFixed(3)] }, zones:out };
+  }
+  // SLICE 2: render + kalibratie publiceren naar de host-2D-kaart (per geslacht gecachet).
+  // De host (tekenSilhouet/plek3DNaar2D) pakt dit op als window.Ortho2D.perGender[geslacht] bestaat.
+  function publishOrtho2D(){
+    if(!orthoCal) computeOrthoCal();
+    if(!orthoCal || !pickMeshes.length) return;
+    let voor, achter;
+    try{ voor=renderOrtho2D('voor',2,true,true,true); achter=renderOrtho2D('achter',2,true,true,true); }
+    catch(e){ console.error('ortho-2D render mislukt',e); return; }
+    if(!voor||!achter||!voor.dataURL||!achter.dataURL) return;
+    window.Ortho2D=window.Ortho2D||{perGender:{}};
+    window.Ortho2D.perPreset=window.Ortho2D.perPreset||{};
+    window.Ortho2D.preset=presetId(); window.Ortho2D.shape=currentShape;
+    window.Ortho2D.perGender[currentGender]={
+      cal:{ s:orthoCal.s, cx:orthoCal.cx, cy:orthoCal.cy, minZ:orthoCal.minZ, maxZ:orthoCal.maxZ },
+      voor:voor.dataURL, achter:achter.dataURL,
+      art:{ voor:voor.lineArt, achter:achter.lineArt },
+      bbox:{ voor:voor.bbox2D, achter:achter.bbox2D },
+      mask:{ voor:voor.mask, achter:achter.mask, w:voor.maskW||200, h:voor.maskH||398 }
+    };
+    window.Ortho2D.perPreset[presetId()]=window.Ortho2D.perGender[currentGender];   // preset-cache (alias; render identiek per vorm tot er echte modellen zijn)
+    // SLICE 4: ortho-zone-ankers (2D-projectie van de 3D-zonepunten) voor tap-to-zoom + plek-editor.
+    const zones={};
+    for(const z of ZONES){ const d=ortho2D({x:z.v.x,y:z.v.y,z:z.v.z}, 'voor'); if(d) zones[z.name]=[d.x,d.y]; }
+    window.Ortho2D.zones=zones;
+    window.Ortho2D.ready=true; window.Ortho2D.gender=currentGender;
+    if(typeof window.__orthoRefresh2D==='function'){ try{ window.__orthoRefresh2D(); }catch(_){} }
+  }
+  // Verificatie-haakjes op window (alleen voor SLICE 1; niet bedraad in de UI).
+  window.__orthoCal=()=>orthoCal||computeOrthoCal();
+  window.__publishOrtho2D=publishOrtho2D;
+  window.__markers3D=()=>markers.map(m=>({id:m.id, status:m.rec&&m.rec.status, size:+(m.size||0).toFixed(3),
+    pt:[+m.point.x.toFixed(2),+m.point.y.toFixed(2),+m.point.z.toFixed(2)], zichtbaar:!!(m.obj&&m.obj.visible)}));
+  window.__ortho2D=ortho2D;
+  window.__ortho2DInverse=ortho2DInverse;
+  window.__renderOrtho2D=renderOrtho2D;
+  window.__orthoZonesCheck=orthoZonesCheck;
+
   function canvasToPNG(cv, maxDim){
     try{
       const w=cv.width,h=cv.height,s=Math.min(1,(maxDim||360)/Math.max(w,h));
@@ -9677,7 +10155,12 @@ async function verwijderVoorbeelden() {
     const cv = (tex && tex.image && tex.image.toDataURL) ? tex.image : null;
     const aspect = cv ? (cv.height/cv.width) : ((rec.kunst&&rec.kunst.aspect)||1);
     const src = cv ? canvasToPNG(cv,360) : ((rec.kunst&&rec.kunst.src)||null);
-    rec.kunst = { src, schaal: clamp(Math.round(24*((size||0.09)/0.09)),10,70), aspect, rotatie: rot||0 };
+    // SLICE 4: 2D-grootte = echte 3D-decalgrootte * gedeelde schaal s (px per model-unit);
+    // anders de oude heuristiek (24px bij size 0.09).
+    const schaalPx = (typeof GEBRUIK_ORTHO_2D!=='undefined' && GEBRUIK_ORTHO_2D && (orthoCal||computeOrthoCal()))
+      ? clamp(Math.round((size||0.09)*orthoCal.s), 10, 70)
+      : clamp(Math.round(24*((size||0.09)/0.09)), 10, 70);
+    rec.kunst = { src, schaal: schaalPx, aspect, rotatie: rot||0 };
   }
   function persistEdit(m){
     if(!m||!m.rec) return;
@@ -9685,7 +10168,7 @@ async function verwijderVoorbeelden() {
     const P=m.rec.positie3d||(m.rec.positie3d={});
     P.point=[m.point.x,m.point.y,m.point.z];
     P.normal=[m.normal.x,m.normal.y,m.normal.z];
-    P.rot=m.rot||0; P.size=m.size||0.09; P.locked=!!m.locked; P.gender=currentGender; P.zone=nz.zone; P.side=nz.side;
+    P.rot=m.rot||0; P.size=m.size||0.09; P.locked=!!m.locked; P.gender=currentGender; P.preset=presetId(); P.zone=nz.zone; P.side=nz.side;
     m.rec.zijde=nz.side; m.rec.lichaamsdeel=nz.zone;
     sync2D(m.rec, m.point, nz.side, m.rot, m.size, m.tex);
     clearTimeout(persistT);
@@ -9916,6 +10399,13 @@ async function verwijderVoorbeelden() {
   }
   function toonBanner(txt){ const b=document.getElementById("t3d-banner"); if(b){ b.textContent=txt; b.hidden=false; } }
   function verbergBanner(){ const b=document.getElementById("t3d-banner"); if(b) b.hidden=true; }
+  // Plaats-modus (3D + 2D) volledig annuleren -> geen 'vastgelopen' plaatsstand na wegnavigeren.
+  function cancelPlaatsModus(){
+    plaatsModus=false; plaatsData=null; verbergBanner();   // 3D-plaatsstand (IIFE-lokaal)
+    if(typeof window.__tattiesCancelPlaats2D==='function') window.__tattiesCancelPlaats2D();   // 2D-plaatsstand (host-scope)
+    if(window.__plaatsHintUit) window.__plaatsHintUit();
+  }
+  window.__tattiesCancelPlaats=cancelPlaatsModus;
   function openCutModalAdd(doel){
     addDoel = doel || '3d';
     pendingNew=true; pendingPlace=null; pendingEdit=null; pendingPlace2D=null;
@@ -9937,6 +10427,21 @@ async function verwijderVoorbeelden() {
     const kies=document.getElementById("cmChoose"); const kt=kies&&kies.querySelector("span");
     if(kt) kt.textContent = b ? tr('ui.andere_foto') : tr('ui.foto_toevoegen');
     zetHuidUI();
+    fitCutModalVV();
+  }
+  // De cut-modal (position:fixed) volgt de VISUAL viewport. Zonder dit valt de vaste footer
+  // (de 'Plaatsen/Add'-knop) buiten beeld zodra de pagina is ingezoomd (pinch-zoom) -> knop
+  // 'verdwijnt' tot je weer uitzoomt. iOS Safari negeert user-scalable=no, vandaar deze aanpak.
+  function fitCutModalVV(){
+    if(!cutModal) return;
+    const vv=window.visualViewport, card=cutModal.querySelector(".cm-card");
+    if(!cutModal.classList.contains("on") || !vv){
+      cutModal.style.left=cutModal.style.top=cutModal.style.width=cutModal.style.height="";
+      if(card) card.style.maxHeight=""; return;
+    }
+    cutModal.style.left=vv.offsetLeft+"px"; cutModal.style.top=vv.offsetTop+"px";
+    cutModal.style.width=vv.width+"px"; cutModal.style.height=vv.height+"px";
+    if(card) card.style.maxHeight=Math.round(vv.height*0.94)+"px";
   }
   function openCutModal(point, normal, mesh){
     pendingPlace={point, normal, mesh}; pendingEdit=null; pendingPlace2D=null;
@@ -10255,19 +10760,46 @@ async function verwijderVoorbeelden() {
         resetZoom();
         rebuildBase(); updateCutout(); drawLasso();
       }; }
+    { const ti=document.getElementById("cmToolInfo"), leg=document.getElementById("cmToolLegend");
+      const ids=["rotate90Btn","spiegelBtn","wandBtn","lassoUndo","cropReset"];
+      function bouwLegenda(){ leg.innerHTML = ids.map(id=>{ const b=document.getElementById(id); if(!b) return "";
+          const svg=b.querySelector("svg"); const naam=esc(b.getAttribute("aria-label")||"");
+          return `<div class="lg-row${id==="cropReset"?" lg-reset":""}">${svg?svg.outerHTML:""}<span>${naam}</span></div>`; }).join(""); }
+      function sluitLeg(e){ if(e && (leg.contains(e.target) || (ti&&ti.contains(e.target)))) return;
+        leg.hidden=true; if(ti){ ti.classList.remove("on"); ti.setAttribute("aria-pressed","false"); }
+        document.removeEventListener("pointerdown", sluitLeg, true); }
+      if(ti) ti.onclick=()=>{ if(leg.hidden){ bouwLegenda(); leg.hidden=false; ti.classList.add("on"); ti.setAttribute("aria-pressed","true");
+          setTimeout(()=>document.addEventListener("pointerdown", sluitLeg, true), 0); }
+        else { sluitLeg(); } };
+    }
     const addBtn=document.getElementById("t3d-add"); if(addBtn) addBtn.onclick=()=>openCutModalAdd('3d');
     window.__tattiesAdd2D=()=>openCutModalAdd('2d');   // 2D-FAB opent dezelfde toevoeg-flow
     window.__tattiesRecrop2D=(rec)=>openCutModalForEdit2D(rec);   // sleutel-knop 2D: opnieuw uitsnijden
     window.__tattiesConfirm=askConfirm;                // gedeelde bevestig-dialoog (2D-verwijderen)
     const meerBtn=document.getElementById("cmMeerBtn"); if(meerBtn) meerBtn.onclick=()=>{ const m=document.getElementById("cmMeer"); if(m) m.hidden=!m.hidden; };
 
+    const FOTO_MAX_DIM=1600, FOTO_MAX_BYTES=30*1024*1024;   // bron verkleinen -> zuinige opslag (srcUrl); + harde grens
     const laadFotoBestand=(input)=>{
-      const f=input.files[0]; if(!f)return;
+      const f=input.files[0]; input.value=""; if(!f)return;
+      if(!/^image\//.test(f.type||"")){ toast(tr('ui.geen_afbeelding')); return; }
+      if(f.size>FOTO_MAX_BYTES){ toast(tr('ui.foto_te_groot')); return; }
+      const klaar=(image)=>{ origImg=image; lassoPts=[]; lassoDragIdx=-1; drawingFree=false; cutPointers.clear(); pinch=null; resetZoom(); rot90=0; toonCutInstellingen(true); rebuildBase(); updateCutout();
+        if(pendingNew) toonInfo(true); toast(tr('ui.teken_lijn')); };
       const rd=new FileReader();
-      rd.onload=ev=>{ const im=new Image(); im.onload=()=>{ origImg=im; lassoPts=[]; lassoDragIdx=-1; drawingFree=false; cutPointers.clear(); pinch=null; resetZoom(); rot90=0; toonCutInstellingen(true); rebuildBase(); updateCutout();
-        if(pendingNew) toonInfo(true);
-        toast(tr('ui.teken_lijn')); }; im.src=ev.target.result; };
-      rd.readAsDataURL(f); input.value="";
+      rd.onerror=()=>toast(tr('ui.foto_mislukt'));
+      rd.onload=ev=>{ const im=new Image(); im.onerror=()=>toast(tr('ui.foto_mislukt'));
+        im.onload=()=>{
+          const mx=Math.max(im.naturalWidth, im.naturalHeight);
+          if(mx<=FOTO_MAX_DIM){ klaar(im); return; }            // al klein genoeg -> origineel houden
+          const sc=FOTO_MAX_DIM/mx, cw=Math.round(im.naturalWidth*sc), ch=Math.round(im.naturalHeight*sc);
+          let src;
+          try{ const c=document.createElement("canvas"); c.width=cw; c.height=ch; c.getContext("2d").drawImage(im,0,0,cw,ch);
+            src=c.toDataURL(f.type==="image/png"?"image/png":"image/jpeg", 0.85); }
+          catch(e){ klaar(im); return; }                        // verkleinen mislukt -> val terug op origineel
+          const im2=new Image(); im2.onerror=()=>klaar(im); im2.onload=()=>klaar(im2); im2.src=src;
+        };
+        im.src=ev.target.result; };
+      rd.readAsDataURL(f);
     };
     imgInput.onchange=()=>laadFotoBestand(imgInput);
     imgInputCamera.onchange=()=>laadFotoBestand(imgInputCamera);
@@ -10414,7 +10946,7 @@ async function verwijderVoorbeelden() {
           return; }
         const v=id=>{ const el=document.getElementById(id); return el?el.value:""; };
         const info={ artiest:v("cmArtiest").trim(), studio:v("cmStudio").trim(), stijl:v("cmStijl").trim(),
-                 kosten:Math.max(0,parseFloat(v("cmKosten"))||0), pijn:Math.min(5,Math.max(0,parseInt(v("cmPijn"),10)||0)), datum:v("cmDatum") };
+                 kosten:Math.min(1000000,Math.max(0,parseFloat(v("cmKosten"))||0)), pijn:Math.min(5,Math.max(0,parseInt(v("cmPijn"),10)||0)), datum:v("cmDatum") };
         const kunst3d={ srcUrl:(origImg?origImg.src:null), lasso:lassoPts.slice(), thresh:+cutThresh.value,
                  spread:(cutSpread?+cutSpread.value:55), bgColor:(bgPick?{r:bgPick.r,g:bgPick.g,b:bgPick.b}:null), bg:bgRemove.checked, flipH:flipH, wand:wandSeeds.slice(), wandKeep:wandKeep, huidMethode:huidMethode, rot90:rot90 };
         if(addDoel==='2d'){
@@ -10563,7 +11095,10 @@ async function verwijderVoorbeelden() {
     let n=0;
     for(const t of list){
       let P=t&&t.positie3d;
-      if(!P||!P.point) P=afleid3DUitZone(t);             // 2D/geïmporteerde tattoo zonder 3D-plek: afleiden uit de zone
+      // Andere preset (lichaamsvorm) dan waarvoor het 3D-punt is opgeslagen -> herleiden uit de 2D-referentie,
+      // zodat de tattoo op zijn relatieve plek op DEZE vorm landt (model-onafhankelijke verankering).
+      if(P&&P.point&&P.preset&&P.preset!==presetId()) P=null;
+      if(!P||!P.point){ P=afleid3DUitZone(t); if(P) P.preset=presetId(); }
       if(!P||!P.point) continue;
       if((P.gender||"man")!==currentGender) continue;    // alleen tattoos van dit model
       const k3 = (t.kunst3d && t.kunst3d.srcUrl) ? t.kunst3d
@@ -10621,6 +11156,12 @@ async function verwijderVoorbeelden() {
   function setSkin3D(hex){ if(hex){ pendingSkin=hex; applySkin3D(hex); } }
   function setGender3D(g){ g=(g==="vrouw")?"vrouw":"man"; if(inited){ if(g!==currentGender) loadEmbedded(g); } else { currentGender=g; } }
   window.__tattiesSetGender3D = setGender3D;   // gebruikt door het opstartscherm
+  // Lichaamsvorm wisselen: model herladen (placeholder = zelfde GLB) -> herpubliceren + decals herleiden.
+  function setShape3D(s){ if(!BODY_SHAPES.includes(s)) return; if(s===currentShape) return;
+    currentShape=s; try{ localStorage.setItem("tatties-vorm",s); }catch(e){}
+    if(inited) loadEmbedded(currentGender); }
+  window.__tattiesSetShape3D = setShape3D;
+  window.__tattiesGetShape3D = ()=>currentShape;
   window.__tattiesSetSkin3D = setSkin3D;
   window.__tatties3DPauze = function(){ actief3D=false; };   // renderlus pauzeren als een host-view wordt getoond
 
@@ -10657,6 +11198,7 @@ async function verwijderVoorbeelden() {
     bindCutUI();
     bindEditUI();
     window.addEventListener("resize",resize); resize();
+    if(window.visualViewport){ window.visualViewport.addEventListener("resize",fitCutModalVV); window.visualViewport.addEventListener("scroll",fitCutModalVV); }
     // begin-instellingen overnemen uit het instellingen-paneel van de host
     try{
       const tint=(getComputedStyle(document.documentElement).getPropertyValue("--tint")||"").trim();
@@ -10679,6 +11221,7 @@ async function verwijderVoorbeelden() {
   }
   function show3D(){
     actief3D=true;
+    cancelPlaatsModus();   // een lopende (2D-)plaatsstand annuleren bij binnenkomst in 3D
     { const a=document.getElementById("t3d-add"); if(a) a.style.display=""; }   // + knop weer zichtbaar bij binnenkomst
     markers.forEach(m=>{ if(m.obj) m.obj.renderOrder=(m.rec&&m.rec.stapel)||0; });   // stapelvolgorde uit 2D overnemen
     hideHostViews();
@@ -10698,6 +11241,12 @@ async function verwijderVoorbeelden() {
     try{ localStorage.setItem("tatties-view","2d"); }catch(e){}
     if(typeof toonView==="function") toonView("home");
     if(typeof renderMarkers==="function"){ try{renderMarkers();}catch(_){} }
+    // SLICE 2: als de ortho-render nog niet klaarstaat (app landde direct op 2D),
+    // start de 3D-engine headless zodat het silhouet alsnog verschijnt (loopt via publishOrtho2D).
+    try{
+      const k=(typeof silhouetKeuze!=="undefined")?silhouetKeuze:"man";
+      if(typeof GEBRUIK_ORTHO_2D!=="undefined" && GEBRUIK_ORTHO_2D && !(window.Ortho2D&&window.Ortho2D.perGender&&window.Ortho2D.perGender[k])) initEngine();
+    }catch(e){ console.error(e); }
   }
   const b3=document.getElementById("btn-3d"); if(b3) b3.onclick=show3D;
   const b2=document.getElementById("btn-2d"); if(b2) b2.onclick=show2D;
@@ -10709,7 +11258,12 @@ async function verwijderVoorbeelden() {
     if(!e.target||!e.target.closest) return;
     const g=e.target.closest("#inst-paneel button[data-geslacht]");
     if(g){ setGender3D(g.dataset.geslacht); return; }
+    const sh=e.target.closest("#vorm-keuze button[data-shape]");
+    if(sh){ setShape3D(sh.dataset.shape); markVormKnop(); return; }
   });
+  function markVormKnop(){ document.querySelectorAll("#vorm-keuze button[data-shape]").forEach(b=>
+    b.classList.toggle("actief", b.dataset.shape===currentShape)); }
+  markVormKnop();
   document.addEventListener("input",(e)=>{
     if(!e.target||!e.target.closest) return;
     const s=e.target.closest("#tint-rij input[type=range]");
