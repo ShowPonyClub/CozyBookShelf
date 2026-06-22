@@ -1307,6 +1307,7 @@ form label{text-transform:none;letter-spacing:.005em;font-size:.8rem;color:var(-
           </div>
         </div>
         <div class="cm-foot">
+          <button id="cmPlaceMeer" class="btn" data-i18n="ui.nog_een" style="display:none">+ Nog een</button>
           <button id="cmPlace" class="btn cm-place" data-i18n="ui.plaatsen">Plaatsen</button>
         </div>
       </div>
@@ -6320,7 +6321,7 @@ const I18N = {
     'start.leeg_uitleg':'Plan of bewaar je volgende tattoo.',
     'start.kies_titel':'Tattoo toevoegen','start.kies_3d':'Op het 3D-model','start.kies_3d_sub':'Plaats op het draaibare lichaam',
     'start.kies_2d':'Op de 2D-kaart','start.kies_2d_sub':'Plaats op de platte voor/achter-kaart',
-    'ui.foto_maken':'Foto maken','ui.foto_uploaden':'Foto uploaden','ui.foto_toevoegen':'Tattoo toevoegen','ui.andere_foto':'Andere foto','ui.plaatsen':'Plaatsen',
+    'ui.foto_maken':'Foto maken','ui.foto_uploaden':'Foto uploaden','ui.foto_toevoegen':'Tattoo toevoegen','ui.andere_foto':'Andere foto','ui.plaatsen':'Plaatsen','ui.nog_een':'+ Nog een',
     'ui.reset_uitsnede':'Reset uitsnede','ui.spiegelen':'Spiegelen','ui.achtergrond_weghalen':'Achtergrond weghalen',
     'ui.toverstaf':'Toverstaf','ui.ongedaan':'Ongedaan',
     'ui.tik_uitknippen':'Tik op het deel dat je wilt weghalen','ui.toverstaf_uit':'Toverstaf uit',
@@ -6487,7 +6488,7 @@ const I18N = {
     'start.leeg_uitleg':'Plan or save your next tattoo.',
     'start.kies_titel':'Add tattoo','start.kies_3d':'On the 3D model','start.kies_3d_sub':'Place on the rotatable body',
     'start.kies_2d':'On the 2D map','start.kies_2d_sub':'Place on the flat front/back map',
-    'ui.foto_maken':'Take photo','ui.foto_uploaden':'Upload photo','ui.foto_toevoegen':'Add tattoo','ui.andere_foto':'Other photo','ui.plaatsen':'Place',
+    'ui.foto_maken':'Take photo','ui.foto_uploaden':'Upload photo','ui.foto_toevoegen':'Add tattoo','ui.andere_foto':'Other photo','ui.plaatsen':'Place','ui.nog_een':'+ Another',
     'ui.reset_uitsnede':'Reset cut-out','ui.spiegelen':'Mirror','ui.achtergrond_weghalen':'Remove background',
     'ui.toverstaf':'Magic wand','ui.ongedaan':'Undo',
     'ui.tik_uitknippen':'Tap the part you want to remove','ui.toverstaf_uit':'Magic wand off',
@@ -9603,6 +9604,7 @@ async function verwijderVoorbeelden() {
     toast(tr('ui.tattoo_geplaatst'));
     setTimeout(() => enterEdit2D(rec.id), 340);        // ring + editbar tonen, net als 3D
     if (rec.status === 'wens') naPlaatsStatus('wens');  // wens: 'geplande tonen' aan + dimmen
+    if (d.herhaal && rec.kunst3d && rec.kunst3d.srcUrl && typeof window.__tattiesNogEenUitFoto === 'function') setTimeout(() => window.__tattiesNogEenUitFoto(rec.kunst3d.srcUrl), 380);   // D6(a): nog een uit dezelfde foto
   }
   let tapTimer2D = null;
   $('#bodymap').addEventListener('click', (e) => {
@@ -10040,6 +10042,7 @@ async function verwijderVoorbeelden() {
     if(typeof renderMarkers==="function"){ try{renderMarkers();}catch(_){} }
     toast(tr('ui.tattoo_geplaatst')); enterEditDecal(m);
     if(rec.status==='wens' && typeof window.__tattiesNaStatus==='function') window.__tattiesNaStatus('wens');   // wens: 'geplande tonen' aan + dimmen
+    if(d.herhaal && rec.kunst3d && rec.kunst3d.srcUrl) openCutModalAddMetFoto(rec.kunst3d.srcUrl, '3d');   // D6(a): nog een uit dezelfde foto
   }
 
   /* ---- aanpas-modus voor een geplaatste tattoo ---- */
@@ -10560,6 +10563,7 @@ async function verwijderVoorbeelden() {
   }
   let pendingPlace=null, pendingEdit=null, pendingPlace2D=null, pendingEdit2D=null;
   let pendingNew=null, plaatsModus=false, plaatsData=null, addDoel='3d';   // nieuwe toevoeg-flow (via +); doel = '2d' of '3d'
+  let plaatsHerhaal=false;   // 'Nog een uit deze foto': na plaatsen de cut-modal heropenen met dezelfde foto
   function toonInfo(b){ const e=document.getElementById("cmInfo"); if(e) e.hidden=!b; }
   function zetPijnDruppels(val){
     const c=document.getElementById("cmPijn"); if(!c) return;
@@ -10609,6 +10613,22 @@ async function verwijderVoorbeelden() {
     if(window.__plaatsHintUit) window.__plaatsHintUit();
   }
   window.__tattiesCancelPlaats=cancelPlaatsModus;
+  // Een (al geladen) afbeelding in de cut-UI zetten: lasso wissen, preview opbouwen, details tonen.
+  function zetCutFoto(image){
+    origImg=image; lassoPts=[]; lassoDragIdx=-1; drawingFree=false; cutPointers.clear(); pinch=null;
+    resetZoom(); rot90=0; toonCutInstellingen(true); rebuildBase(); updateCutout();
+    if(pendingNew) toonInfo(true);
+  }
+  // D6(a): de cut-modal als nieuwe toevoeging openen met een al bestaande bronfoto (srcUrl) -> nog een uitsnede.
+  function openCutModalAddMetFoto(srcUrl, doel){
+    openCutModalAdd(doel);
+    if(!srcUrl) return;
+    const im=new Image();
+    im.onload=()=>{ zetCutFoto(im); toast(tr('ui.teken_lijn')); };
+    im.onerror=()=>toast(tr('ui.foto_niet_geladen'));
+    im.src=srcUrl;
+  }
+  window.__tattiesNogEenUitFoto=(src)=>openCutModalAddMetFoto(src,'2d');   // host (2D-plaatsen) roept dit aan
   function openCutModalAdd(doel){
     addDoel = doel || '3d';
     pendingNew=true; pendingPlace=null; pendingEdit=null; pendingPlace2D=null;
@@ -10626,6 +10646,7 @@ async function verwijderVoorbeelden() {
   function toonCutInstellingen(b){
     const s=document.getElementById("cmSettings"); if(s) s.hidden=!b;
     if(cmPlaceBtn) cmPlaceBtn.style.display=b?"":"none";
+    { const meer=document.getElementById("cmPlaceMeer"); if(meer) meer.style.display=(b&&pendingNew)?"":"none"; }   // 'nog een uit deze foto' alleen bij toevoegen
     cutModal.classList.toggle("cm-compact", !b);
     const kies=document.getElementById("cmChoose"); const kt=kies&&kies.querySelector("span");
     if(kt) kt.textContent = b ? tr('ui.andere_foto') : tr('ui.foto_toevoegen');
@@ -10934,6 +10955,7 @@ async function verwijderVoorbeelden() {
     imgInputCamera=document.getElementById("imgInputCamera");
     document.getElementById("cmChoose").onclick=()=>imgInput.click();
     document.getElementById("cmCancel").onclick=closeCutModal;
+    { const meerBtn=document.getElementById("cmPlaceMeer"); if(meerBtn) meerBtn.onclick=()=>{ plaatsHerhaal=true; if(cmPlaceBtn) cmPlaceBtn.onclick(); }; }   // plaats deze + heropen cut met dezelfde foto
     document.getElementById("cropReset").onclick=()=>{ lassoPts=[]; wandSeeds=[]; lassoDragIdx=-1; rebuildBase(); drawLasso(); updateCutout(); };
     document.querySelectorAll('#cmModus button[data-modus]').forEach(b=>b.onclick=()=>{ cutModus=b.dataset.modus; drawingFree=false; lassoDragIdx=-1; zetSnijModusUI(); drawLasso(); });
     { const ub=document.getElementById("lassoUndo"); if(ub) ub.onclick=()=>{
@@ -10992,8 +11014,7 @@ async function verwijderVoorbeelden() {
       const f=input.files[0]; input.value=""; if(!f)return;
       if(!/^image\//.test(f.type||"")){ toast(tr('ui.geen_afbeelding')); return; }
       if(f.size>FOTO_MAX_BYTES){ toast(tr('ui.foto_te_groot')); return; }
-      const klaar=(image)=>{ origImg=image; lassoPts=[]; lassoDragIdx=-1; drawingFree=false; cutPointers.clear(); pinch=null; resetZoom(); rot90=0; toonCutInstellingen(true); rebuildBase(); updateCutout();
-        if(pendingNew) toonInfo(true); toast(tr('ui.teken_lijn')); };
+      const klaar=(image)=>{ zetCutFoto(image); toast(tr('ui.teken_lijn')); };
       const rd=new FileReader();
       rd.onerror=()=>toast(tr('ui.foto_mislukt'));
       rd.onload=ev=>{ const im=new Image(); im.onerror=()=>toast(tr('ui.foto_mislukt'));
@@ -11162,6 +11183,7 @@ async function verwijderVoorbeelden() {
           if(naamEl){ naamEl.setAttribute('aria-invalid','true'); naamEl.focus();
             naamEl.addEventListener('input',()=>naamEl.removeAttribute('aria-invalid'),{once:true}); }
           return; }
+        const herhaal=plaatsHerhaal; plaatsHerhaal=false;   // D6(a): na plaatsen cut heropenen met dezelfde foto?
         const kunst3d={ srcUrl:(origImg?origImg.src:null), lasso:lassoPts.slice(), thresh:+cutThresh.value,
                  spread:(cutSpread?+cutSpread.value:55), bgColor:(bgPick?{r:bgPick.r,g:bgPick.g,b:bgPick.b}:null), bg:bgRemove.checked, flipH:flipH, wand:wandSeeds.slice(), wandKeep:wandKeep, huidMethode:huidMethode, rot90:rot90 };
         if(addDoel==='2d'){
@@ -11169,10 +11191,10 @@ async function verwijderVoorbeelden() {
           const aspect=(cv&&cv.width)?(cv.height/cv.width):1;
           if(imgTexture && imgTexture.dispose) imgTexture.dispose(); imgTexture=null;
           cutModal.classList.remove("on"); pendingNew=null; toonCutInstellingen(false); toonInfo(false);
-          if(typeof window.__tattiesStartPlaats2D==='function') window.__tattiesStartPlaats2D({ naam, info, kunst3d, src, aspect, status });
+          if(typeof window.__tattiesStartPlaats2D==='function') window.__tattiesStartPlaats2D({ naam, info, kunst3d, src, aspect, status, herhaal });
           return;
         }
-        plaatsData={ tex:imgTexture, naam, info, kunst3d, status };
+        plaatsData={ tex:imgTexture, naam, info, kunst3d, status, herhaal };
         imgTexture=null;   // eigendom gaat naar plaatsData; geen dispose
         cutModal.classList.remove("on"); pendingNew=null; toonCutInstellingen(false); toonInfo(false);
         plaatsModus=true; toonBanner(tr('ui.klik_plaatsen')); if(window.__plaatsHintAan) window.__plaatsHintAan();
