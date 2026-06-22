@@ -795,7 +795,7 @@ form label,
 .t3d-editbar.on{display:flex;}
 .t3d-editbar .eb-title,.t3d-editbar .eb-hint{display:none;}   /* slim: titel + hint verbergen (desktop heeft tooltips) */
 @media (pointer:coarse){ .t3d-editbar .eb-hint{display:block;flex-basis:100%;width:100%;margin:2px 0 0;font-size:.66rem;line-height:1.3;color:var(--gedempt);text-align:center;} }   /* touch: geen tooltips -> gebaren-uitleg tonen */
-.t3d-editbar .eb-btns{display:flex;flex-wrap:wrap;gap:6px;}
+.t3d-editbar .eb-btns{display:flex;flex-wrap:wrap;gap:6px;flex:1 1 100%;justify-content:center;}
 .t3d-editbar .eb-btns button{min-width:0;height:auto;padding:9px 12px;background:var(--veldbg);border:1px solid var(--rand);color:var(--tekst);border-radius:8px;font-size:16px;line-height:1;cursor:pointer;font-family:inherit;text-align:center;}
 .t3d-editbar .eb-btns button:hover{border-color:var(--accent);}
 .t3d-editbar .eb-btns button.on{border-color:var(--accent);background:rgba(142,113,240,.14);color:var(--accent);}
@@ -1062,14 +1062,14 @@ form label{text-transform:none;letter-spacing:.005em;font-size:.8rem;color:var(-
         <div id="editbar2d" class="t3d-editbar">
           <div class="eb-title">Tattoo</div>
           <div class="eb-btns">
-            <button type="button" data-act="info" data-i18n-title="ui.details" data-i18n-aria="ui.details" title="Details" aria-label="Details">&#9432;</button>
-            <button type="button" data-act="lock" data-i18n-title="ui.vergrendelen" data-i18n-aria="ui.vergrendelen" title="Vergrendelen" aria-label="Vergrendelen">&#128274;</button>
-            <button type="button" data-act="recrop" data-i18n-title="ui.aanpassen_bijknippen" data-i18n-aria="ui.aanpassen_bijknippen" title="Aanpassen (bijknippen)" aria-label="Aanpassen">&#128295;</button>
-            <button type="button" class="eb-scarot" data-act="size-" data-i18n-title="ui.kleiner" data-i18n-aria="ui.kleiner" title="Kleiner" aria-label="Kleiner">&#8722;</button>
-            <button type="button" class="eb-scarot" data-act="size+" data-i18n-title="ui.groter" data-i18n-aria="ui.groter" title="Groter" aria-label="Groter">+</button>
-            <button type="button" class="eb-scarot" data-act="rot-" data-i18n-title="ui.links_draaien" data-i18n-aria="ui.links_draaien" title="Linksom draaien" aria-label="Linksom draaien">&#8634;</button>
-            <button type="button" class="eb-scarot" data-act="rot+" data-i18n-title="ui.rechts_draaien" data-i18n-aria="ui.rechts_draaien" title="Rechtsom draaien" aria-label="Rechtsom draaien">&#8635;</button>
-            <button type="button" data-act="done" class="eb-af" data-i18n-title="ui.klaar" data-i18n-aria="ui.klaar" title="Klaar" aria-label="Klaar">&#10003;</button>
+            <button type="button" data-act="info" data-i18n-title="ui.details" data-i18n-aria="ui.details" title="Details" aria-label="Details"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5"/><path d="M12 7.6h.01"/></svg></button>
+            <button type="button" data-act="lock" data-i18n-title="ui.vergrendelen" data-i18n-aria="ui.vergrendelen" title="Vergrendelen" aria-label="Vergrendelen"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg></button>
+            <button type="button" data-act="recrop" data-i18n-title="ui.aanpassen_bijknippen" data-i18n-aria="ui.aanpassen_bijknippen" title="Aanpassen (bijknippen)" aria-label="Aanpassen"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 2v14a2 2 0 0 0 2 2h14"/><path d="M2 6h14a2 2 0 0 1 2 2v14"/></svg></button>
+            <button type="button" class="eb-scarot" data-act="size-" data-i18n-title="ui.kleiner" data-i18n-aria="ui.kleiner" title="Kleiner" aria-label="Kleiner"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14"/></svg></button>
+            <button type="button" class="eb-scarot" data-act="size+" data-i18n-title="ui.groter" data-i18n-aria="ui.groter" title="Groter" aria-label="Groter"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>
+            <button type="button" class="eb-scarot" data-act="rot-" data-i18n-title="ui.links_draaien" data-i18n-aria="ui.links_draaien" title="Linksom draaien" aria-label="Linksom draaien"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12a8 8 0 1 0 2.3-5.6"/><path d="M3 4v4h4"/></svg></button>
+            <button type="button" class="eb-scarot" data-act="rot+" data-i18n-title="ui.rechts_draaien" data-i18n-aria="ui.rechts_draaien" title="Rechtsom draaien" aria-label="Rechtsom draaien"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.3-5.6"/><path d="M21 4v4h-4"/></svg></button>
+            <button type="button" data-act="done" class="eb-af" data-i18n-title="ui.klaar" data-i18n-aria="ui.klaar" title="Klaar" aria-label="Klaar"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12l5 5L20 6"/></svg></button>
           </div>
           <div class="eb-opacity"><span class="eb-op-label" data-i18n="ui.opaciteit">Opaciteit</span><input id="eb2d-opacity" type="range" min="20" max="100" value="100" class="slider" data-i18n-aria="ui.opaciteit" aria-label="Opaciteit"></div>
           <div class="eb-hint" data-i18n="ui.eb_hint">Sleep = verplaatsen &middot; knijp = schalen &middot; knijp-draai = roteren</div>
@@ -1158,14 +1158,14 @@ form label{text-transform:none;letter-spacing:.005em;font-size:.8rem;color:var(-
       <div id="editbar" class="t3d-editbar">
         <div class="eb-title">Tattoo</div>
         <div class="eb-btns">
-          <button type="button" data-act="info" data-i18n-title="ui.details" data-i18n-aria="ui.details" title="Details" aria-label="Details">&#9432;</button>
-          <button type="button" data-act="lock" data-i18n-title="ui.vergrendelen" data-i18n-aria="ui.vergrendelen" title="Vergrendelen" aria-label="Vergrendelen">&#128274;</button>
-          <button type="button" data-act="recrop" data-i18n-title="ui.aanpassen_bijknippen" data-i18n-aria="ui.aanpassen_bijknippen" title="Aanpassen (bijknippen)" aria-label="Aanpassen">&#128295;</button>
-          <button type="button" class="eb-scarot" data-act="size-" data-i18n-title="ui.kleiner" data-i18n-aria="ui.kleiner" title="Kleiner" aria-label="Kleiner">&#8722;</button>
-          <button type="button" class="eb-scarot" data-act="size+" data-i18n-title="ui.groter" data-i18n-aria="ui.groter" title="Groter" aria-label="Groter">+</button>
-          <button type="button" class="eb-scarot" data-act="rot-" data-i18n-title="ui.links_draaien" data-i18n-aria="ui.links_draaien" title="Linksom draaien" aria-label="Linksom draaien">&#8634;</button>
-          <button type="button" class="eb-scarot" data-act="rot+" data-i18n-title="ui.rechts_draaien" data-i18n-aria="ui.rechts_draaien" title="Rechtsom draaien" aria-label="Rechtsom draaien">&#8635;</button>
-          <button type="button" data-act="done" class="eb-af" data-i18n-title="ui.klaar" data-i18n-aria="ui.klaar" title="Klaar" aria-label="Klaar">&#10003;</button>
+          <button type="button" data-act="info" data-i18n-title="ui.details" data-i18n-aria="ui.details" title="Details" aria-label="Details"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5"/><path d="M12 7.6h.01"/></svg></button>
+          <button type="button" data-act="lock" data-i18n-title="ui.vergrendelen" data-i18n-aria="ui.vergrendelen" title="Vergrendelen" aria-label="Vergrendelen"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg></button>
+          <button type="button" data-act="recrop" data-i18n-title="ui.aanpassen_bijknippen" data-i18n-aria="ui.aanpassen_bijknippen" title="Aanpassen (bijknippen)" aria-label="Aanpassen"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 2v14a2 2 0 0 0 2 2h14"/><path d="M2 6h14a2 2 0 0 1 2 2v14"/></svg></button>
+          <button type="button" class="eb-scarot" data-act="size-" data-i18n-title="ui.kleiner" data-i18n-aria="ui.kleiner" title="Kleiner" aria-label="Kleiner"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14"/></svg></button>
+          <button type="button" class="eb-scarot" data-act="size+" data-i18n-title="ui.groter" data-i18n-aria="ui.groter" title="Groter" aria-label="Groter"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>
+          <button type="button" class="eb-scarot" data-act="rot-" data-i18n-title="ui.links_draaien" data-i18n-aria="ui.links_draaien" title="Linksom draaien" aria-label="Linksom draaien"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12a8 8 0 1 0 2.3-5.6"/><path d="M3 4v4h4"/></svg></button>
+          <button type="button" class="eb-scarot" data-act="rot+" data-i18n-title="ui.rechts_draaien" data-i18n-aria="ui.rechts_draaien" title="Rechtsom draaien" aria-label="Rechtsom draaien"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.3-5.6"/><path d="M21 4v4h-4"/></svg></button>
+          <button type="button" data-act="done" class="eb-af" data-i18n-title="ui.klaar" data-i18n-aria="ui.klaar" title="Klaar" aria-label="Klaar"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12l5 5L20 6"/></svg></button>
         </div>
         <div class="eb-opacity"><span class="eb-op-label" data-i18n="ui.opaciteit">Opaciteit</span><input id="eb3d-opacity" type="range" min="20" max="100" value="100" class="slider" data-i18n-aria="ui.opaciteit" aria-label="Opaciteit"></div>
         <div class="eb-hint" data-i18n="ui.eb_hint">Sleep = verplaatsen &middot; knijp = schalen &middot; knijp-draai = roteren</div>
@@ -1195,7 +1195,7 @@ form label{text-transform:none;letter-spacing:.005em;font-size:.8rem;color:var(-
         <div class="cm-body">
           <span id="cmTitle" class="visueel-verborgen" data-i18n="ui.tattoo_toevoegen">Tattoo toevoegen</span>
           <div class="cm-toprow">
-            <button class="btn cm-choose" id="cmChoose">&#128247; <span data-i18n="ui.foto_toevoegen">Tattoo toevoegen</span></button>
+            <button class="btn cm-choose" id="cmChoose"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h3l1.5-2h7L17 8h3v11H4z"/><circle cx="12" cy="13" r="3.2"/></svg> <span data-i18n="ui.foto_toevoegen">Tattoo toevoegen</span></button>
             <button id="cmCancel" class="cm-x" data-i18n-title="form.annuleren" data-i18n-aria="form.annuleren" title="Annuleer" aria-label="Annuleer">&times;</button>
           </div>
           <input type="file" id="imgInput" accept="image/*" style="display:none">
@@ -1238,7 +1238,7 @@ form label{text-transform:none;letter-spacing:.005em;font-size:.8rem;color:var(-
                 <button type="button" data-hmethode="helder" data-i18n="ui.huid_helder">Helderheid</button>
               </div>
               <div class="cutrow bg-controls" id="cmKleurRij">
-                <button id="bgPickBtn" class="linkbtn">&#128167; <span data-i18n="ui.huidskleur_prikken">Huidskleur prikken</span></button>
+                <button id="bgPickBtn" class="linkbtn"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3s6 6.4 6 11a6 6 0 0 1-12 0c0-4.6 6-11 6-11z"/></svg> <span data-i18n="ui.huidskleur_prikken">Huidskleur prikken</span></button>
                 <span id="bgSwatch" class="bgswatch" title="gekozen huidskleur"></span>
                 <button id="bgPickReset" class="linkbtn" data-i18n="ui.auto">Auto</button>
               </div>
@@ -6354,8 +6354,8 @@ const I18N = {
     'sessie.toevoegen':'＋ Sessie toevoegen','sessie.touchups':'Touch-ups','sessie.geentouchups':'Nog geen touch-ups vastgelegd.',
     'sessie.touchuptoevoegen':'＋ Touch-up toevoegen',
     'nazorg.wens':'Deze tattoo staat nog op je wishlist - nazorg wordt relevant zodra hij gezet is.',
-    'nazorg.resterend':'🩹 Nog ±{n} {dag} herstel (richtlijn {richtlijn} dagen)',
-    'nazorg.voorbij':'🩹 De richtlijn van {richtlijn} dagen is voorbij - ziet alles er goed uit? Markeer als geheeld.',
+    'nazorg.resterend':'Nog ±{n} {dag} herstel (richtlijn {richtlijn} dagen)',
+    'nazorg.voorbij':'De richtlijn van {richtlijn} dagen is voorbij - ziet alles er goed uit? Markeer als geheeld.',
     'nazorg.markeer':'Markeer als geheeld','nazorg.checklist':'Nazorg-checklist','nazorg.geentaken':'Nog geen taken op de checklist.',
     'nazorg.taakph':'Nieuwe taak…','nazorg.taak':'＋ Taak','nazorg.standaard':'Standaardlijst',
     'nazorg.instructies':'Instructies van de artiest','nazorg.geeninstr':'Geen nazorgnotities. Voeg ze toe via Bewerken.',
@@ -6377,29 +6377,29 @@ const I18N = {
     'form.annuleren':'Annuleren','form.opslaan':'Opslaan','form.toevoegen':'Toevoegen',
     'form.foutwens':'Vul de verplichte velden in: naam en lichaamsdeel.',
     'form.foutgezet':'Vul de verplichte velden in: naam, datum en lichaamsdeel.',
-    'toast.beperkt':'⚠️ Beperkte opslag in deze weergave - open het bestand in je browser voor blijvende opslag',
+    'toast.beperkt':'Beperkte opslag in deze weergave - open het bestand in je browser voor blijvende opslag',
     'toast.grootterot':'Grootte en rotatie bijgewerkt','toast.plekbij':'Plek bijgewerkt',
     'toast.geplaatst':'Geplaatst op het gekozen lichaamsdeel - tik op de kaart om te verschuiven','toast.kieslichaamsdeel':'Kies eerst een lichaamsdeel, of tik op de kaart om te plaatsen',
     'toast.afbmislukt':'Afbeelding maken lukte niet in deze omgeving','toast.kaartopgeslagen':'Kaart opgeslagen als afbeelding',
-    'toast.vastgezet':'Tattoo vastgezet 🔒','toast.ontgrendeld':'Tattoo ontgrendeld',
+    'toast.vastgezet':'Tattoo vastgezet','toast.ontgrendeld':'Tattoo ontgrendeld',
     'toast.wensverwijderd':'Wens verwijderd','toast.tattooverwijderd':'Tattoo verwijderd','toast.ongedaan':'Ongedaan maken',
     'toast.teruggezet':'"{naam}" teruggezet','confirm.verwijder':'"{naam}" verwijderen?',
     'toast.kiessessiedatum':'Kies eerst een sessiedatum','toast.sessietoegevoegd':'Sessie toegevoegd',
     'toast.kiestouchupdatum':'Kies eerst een touch-up datum','toast.touchuptoegevoegd':'Touch-up toegevoegd',
-    'toast.gemarkeerdgeheeld':'Gemarkeerd als geheeld 🎉','toast.typtaak':'Typ eerst een taak',
+    'toast.gemarkeerdgeheeld':'Gemarkeerd als geheeld','toast.typtaak':'Typ eerst een taak',
     'toast.standaardtoegevoegd':'Standaardlijst toegevoegd','toast.uitsnedemislukt':'Uitsnede maken lukte niet',
     'toast.fotoleesfout':'Foto kon niet worden gelezen','toast.geenuitsnede':'Nog geen bruikbare uitsnede - pas de drempel aan',
     'toast.rotatierecht':'Rotatie teruggezet op recht','toast.eenfotoleesfout':'Een foto kon niet worden gelezen',
     'toast.tipschaar':'Tip: tik op het schaartje bij een foto om hem uit te knippen voor op de pop',
     'toast.wijzigingenopgeslagen':'Wijzigingen opgeslagen',
-    'toast.toegevoegdtip':'Toegevoegd! Tip: {n} nieuwe sinds je laatste backup - exporteer even 💾',
+    'toast.toegevoegdtip':'Toegevoegd! Tip: {n} nieuwe sinds je laatste backup - exporteer even',
     'toast.wenstoegevoegd':'Wens toegevoegd aan je wishlist','toast.tattootoegevoegd':'Tattoo toegevoegd',
     'toast.opslaanmislukt':'Opslaan mislukt: ',
     'toast.nietsexport':'Niets te exporteren - nog geen tattoos','toast.geexporteerd':'{n} tattoo{s} geëxporteerd',
     'toast.importgeslaagd':'Import geslaagd: {n} tattoo{s} hersteld','toast.geengeldige':'Bestand gelezen, maar geen geldige tattoos gevonden',
     'toast.importmislukt':'Import mislukt: dit is geen geldig Tatties-backupbestand',
-    'toast.persist':'Let op: de browser garandeert je opslag niet - maak regelmatig een backup 💾',
-    'toast.opbeginscherm':'Tatties staat op je beginscherm 🎉','toast.ladenmislukt':'Laden van gegevens mislukt: ',
+    'toast.persist':'Let op: de browser garandeert je opslag niet - maak regelmatig een backup',
+    'toast.opbeginscherm':'Tatties staat op je beginscherm','toast.ladenmislukt':'Laden van gegevens mislukt: ',
     'opslag.gebruik':'Opslag: {mb} MB in gebruik','opslag.van':'van ±{mb} MB','opslag.bijnavol':'· bijna vol - exporteer een backup!'
   },
   en: {
@@ -6521,8 +6521,8 @@ const I18N = {
     'sessie.toevoegen':'＋ Add session','sessie.touchups':'Touch-ups','sessie.geentouchups':'No touch-ups logged yet.',
     'sessie.touchuptoevoegen':'＋ Add touch-up',
     'nazorg.wens':"This tattoo is still on your wishlist - aftercare becomes relevant once it's done.",
-    'nazorg.resterend':'🩹 ~{n} {dag} of healing left (guideline {richtlijn} days)',
-    'nazorg.voorbij':'🩹 The {richtlijn}-day guideline has passed - does everything look good? Mark as healed.',
+    'nazorg.resterend':'~{n} {dag} of healing left (guideline {richtlijn} days)',
+    'nazorg.voorbij':'The {richtlijn}-day guideline has passed - does everything look good? Mark as healed.',
     'nazorg.markeer':'Mark as healed','nazorg.checklist':'Aftercare checklist','nazorg.geentaken':'No tasks on the checklist yet.',
     'nazorg.taakph':'New task…','nazorg.taak':'＋ Task','nazorg.standaard':'Default list',
     'nazorg.instructies':"Artist's instructions",'nazorg.geeninstr':'No aftercare notes. Add them via Edit.',
@@ -6544,29 +6544,29 @@ const I18N = {
     'form.annuleren':'Cancel','form.opslaan':'Save','form.toevoegen':'Add',
     'form.foutwens':'Please fill in the required fields: name and body part.',
     'form.foutgezet':'Please fill in the required fields: name, date and body part.',
-    'toast.beperkt':'⚠️ Limited storage in this view - open the file in your browser for persistent storage',
+    'toast.beperkt':'Limited storage in this view - open the file in your browser for persistent storage',
     'toast.grootterot':'Size and rotation updated','toast.plekbij':'Spot updated',
     'toast.geplaatst':'Placed on the chosen body part - tap the map to move it','toast.kieslichaamsdeel':'Pick a body part first, or tap the map to place it',
     'toast.afbmislukt':"Couldn't create the image in this environment",'toast.kaartopgeslagen':'Map saved as image',
-    'toast.vastgezet':'Tattoo pinned 🔒','toast.ontgrendeld':'Tattoo unlocked',
+    'toast.vastgezet':'Tattoo pinned','toast.ontgrendeld':'Tattoo unlocked',
     'toast.wensverwijderd':'Wish deleted','toast.tattooverwijderd':'Tattoo deleted','toast.ongedaan':'Undo',
     'toast.teruggezet':'"{naam}" restored','confirm.verwijder':'Delete "{naam}"?',
     'toast.kiessessiedatum':'Pick a session date first','toast.sessietoegevoegd':'Session added',
     'toast.kiestouchupdatum':'Pick a touch-up date first','toast.touchuptoegevoegd':'Touch-up added',
-    'toast.gemarkeerdgeheeld':'Marked as healed 🎉','toast.typtaak':'Type a task first',
+    'toast.gemarkeerdgeheeld':'Marked as healed','toast.typtaak':'Type a task first',
     'toast.standaardtoegevoegd':'Default list added','toast.uitsnedemislukt':"Couldn't create the cut-out",
     'toast.fotoleesfout':"Couldn't read the photo",'toast.geenuitsnede':'No usable cut-out yet - adjust the threshold',
     'toast.rotatierecht':'Rotation reset to straight','toast.eenfotoleesfout':"One photo couldn't be read",
     'toast.tipschaar':'Tip: tap the scissors on a photo to cut it out for the figure',
     'toast.wijzigingenopgeslagen':'Changes saved',
-    'toast.toegevoegdtip':'Added! Tip: {n} new since your last backup - export soon 💾',
+    'toast.toegevoegdtip':'Added! Tip: {n} new since your last backup - export soon',
     'toast.wenstoegevoegd':'Wish added to your wishlist','toast.tattootoegevoegd':'Tattoo added',
     'toast.opslaanmislukt':'Saving failed: ',
     'toast.nietsexport':'Nothing to export - no tattoos yet','toast.geexporteerd':'{n} tattoo{s} exported',
     'toast.importgeslaagd':'Import successful: {n} tattoo{s} restored','toast.geengeldige':'File read, but no valid tattoos found',
     'toast.importmislukt':"Import failed: this isn't a valid Tatties backup file",
-    'toast.persist':"Note: the browser doesn't guarantee your storage - back up regularly 💾",
-    'toast.opbeginscherm':'Tatties is on your home screen 🎉','toast.ladenmislukt':'Loading data failed: ',
+    'toast.persist':"Note: the browser doesn't guarantee your storage - back up regularly",
+    'toast.opbeginscherm':'Tatties is on your home screen','toast.ladenmislukt':'Loading data failed: ',
     'opslag.gebruik':'Storage: {mb} MB in use','opslag.van':'of ~{mb} MB','opslag.bijnavol':'· almost full - export a backup!'
   }
 };
@@ -8203,7 +8203,7 @@ function renderDetail() {
       const HERSTEL_DAGEN = 28;
       let statusBlok;
       if (t.geheeld) {
-        statusBlok = '<p>✅ ' + tr('badge.geheeld') + '</p>';
+        statusBlok = '<p>' + tr('badge.geheeld') + '</p>';
       } else if (t.datum) {
         const doel = new Date(t.datum + 'T00:00:00');   // lokale middernacht (voorkomt off-by-one t.o.v. UTC)
         doel.setDate(doel.getDate() + HERSTEL_DAGEN);
@@ -8212,7 +8212,7 @@ function renderDetail() {
           ? `<span class="aftel">${tr('nazorg.resterend').replace('{n}', rest).replace('{dag}', rest === 1 ? tr('woord.dag') : tr('woord.dagen')).replace('{richtlijn}', HERSTEL_DAGEN)}</span>`
           : `<p>${tr('nazorg.voorbij').replace('{richtlijn}', HERSTEL_DAGEN)}</p>`;
       } else {
-        statusBlok = '<p>🩹 ' + tr('badge.herstellende') + '</p>';
+        statusBlok = '<p>' + tr('badge.herstellende') + '</p>';
       }
       const taken = (t.nazorgTaken || []).map((taak, i) => `
         <div class="taak">
