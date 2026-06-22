@@ -35,14 +35,20 @@
 <link rel="apple-touch-icon" sizes="180x180" href="icon-180.png">
 <script>
 (function () {
-  // App-icoon: SVG met emoji als fallback (geen externe bestanden nodig)
-  // App-icoon: inktdruppel met stencil-kruisjes (geen emoji - rendert overal)
+  // App-icoon: grote paarse tattoo-machine op crème (inline SVG, geen externe bestanden, maskable-veilig)
   const ICOON_SVG =
     "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'>" +
-    "<rect width='100' height='100' rx='22' fill='%230A0A0A'/>" +
-    "<rect x='5' y='5' width='90' height='90' rx='18' fill='none' stroke='%238E71F0' stroke-width='3'/>" +
-    "<path d='M50,18 C50,18 28,50 28,64 a22,22 0 0 0 44,0 C72,50 50,18 50,18 Z' fill='%23F0EDE8'/>" +
-    "<circle cx='42' cy='62' r='5' fill='%238E71F0'/>" +
+    "<rect width='100' height='100' rx='22' fill='%23F1E8D8'/>" +
+    "<g transform='translate(-5 16) rotate(-35 50 50) translate(50 50) scale(1.4) translate(-50 -50)' fill='%238E71F0'>" +
+    "<path d='M27 50 L36 47 L36 53 Z'/>" +                       // naaldpunt
+    "<rect x='35' y='45' width='15' height='10' rx='5'/>" +      // tube / greep
+    "<rect x='50' y='40' width='8' height='20' rx='4'/>" +       // spoel 1
+    "<rect x='60' y='40' width='8' height='20' rx='4'/>" +       // spoel 2
+    "<rect x='50' y='33' width='22' height='6' rx='3'/>" +       // frame boven
+    "<rect x='50' y='61' width='22' height='6' rx='3'/>" +       // frame onder
+    "<rect x='68' y='33' width='6' height='34' rx='3'/>" +       // frame achter
+    "<circle cx='72' cy='29' r='4'/>" +                          // contactschroef
+    "</g>" +
     "</svg>";
   const icoonURL = 'data:image/svg+xml,' + ICOON_SVG.replace(/</g, '%3C').replace(/>/g, '%3E').replace(/"/g, "'");
 
@@ -56,9 +62,7 @@
     background_color: '#F1E8D8',
     theme_color: '#8E71F0',
     icons: [
-      { src: 'icon-192.png', sizes: '192x192', type: 'image/png', purpose: 'any' },
-      { src: 'icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'any maskable' },
-      { src: icoonURL, sizes: 'any', type: 'image/svg+xml', purpose: 'any' }
+      { src: icoonURL, sizes: 'any', type: 'image/svg+xml', purpose: 'any maskable' }
     ]
   };
 
@@ -276,6 +280,11 @@ main > section{animation:opkomen .3s ease both}
 /* Naam-veld met de compacte type-keuze (Gezet / Wishlist) ernaast */
 .naam-rij{display:flex;align-items:stretch;gap:8px}
 .naam-rij input{flex:1;min-width:0}
+/* Cut-modal: naam-veld + kleinere gezet/wishlist-toggle op één regel */
+.cutmodal .cm-naam-rij{display:flex;align-items:center;gap:8px}
+.cutmodal .cm-naam-rij input{flex:1;min-width:0}
+.cutmodal .cm-status{width:auto;flex:none}
+.cutmodal .cm-status button{flex:none;min-height:38px;padding:6px 11px;font-size:.74rem}
 .naam-rij .type-keuze{flex:none}
 .naam-rij .type-keuze button{min-height:0;padding:0 12px;font-size:.78rem;display:flex;align-items:center}
 
@@ -1217,8 +1226,14 @@ form label{text-transform:none;letter-spacing:.005em;font-size:.8rem;color:var(-
           <input type="file" id="imgInput" accept="image/*" style="display:none">
           <input type="file" id="imgInputCamera" accept="image/*" capture="environment" style="display:none">
           <div id="cmInfo" hidden>
-            <label class="cm-veld"><span class="cm-lbl"><span data-i18n="ui.naam">Naam</span> <span class="verplicht">*</span></span>
-              <input id="cmNaam" type="text" maxlength="80" autocomplete="off"></label>
+            <div class="cm-veld"><span class="cm-lbl"><span data-i18n="ui.naam">Naam</span> <span class="verplicht">*</span></span>
+              <div class="cm-naam-rij">
+                <input id="cmNaam" type="text" maxlength="80" autocomplete="off">
+                <div class="silhouet-keuze compact cm-status" id="cmStatus" role="group" data-i18n-aria="form.type" aria-label="Status">
+                  <button type="button" data-status="gezet" class="actief" data-i18n="form.gezet">Gezet</button>
+                  <button type="button" data-status="wens" data-i18n="form.wishlist">Wishlist</button>
+                </div>
+              </div></div>
             <button type="button" id="cmMeerBtn" class="linkbtn" aria-expanded="false"><span data-i18n="ui.meer_details">Meer details</span><svg class="cm-chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
             <div id="cmMeer" hidden>
               <label class="cm-veld"><span data-i18n="form.artiest">Artiest</span><input id="cmArtiest" type="text" maxlength="120"></label>
@@ -6946,6 +6961,18 @@ function toggleGepland() {
   if (typeof renderMarkers === 'function') renderMarkers();
   if (typeof window.__tatties3DGepland === 'function') window.__tatties3DGepland();
 }
+// Na plaatsen/bewerken met een status: een wens vereist dat 'geplande tonen' aanstaat (anders onzichtbaar),
+// daarna 2D opnieuw tekenen + 3D-decals her-syncen (dim/zichtbaarheid volgt de status).
+function naPlaatsStatus(status) {
+  if (status === 'wens' && !toonGepland) {
+    toonGepland = true;
+    try { localStorage.setItem('tatties-toon-gepland', '1'); } catch { /* geen voorkeur */ }
+    zetGeplandUI();
+  }
+  if (typeof renderMarkers === 'function') renderMarkers();
+  if (typeof window.__tatties3DGepland === 'function') window.__tatties3DGepland();
+}
+window.__tattiesNaStatus = naPlaatsStatus;
 const ICONEN = {
   stats: '<svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 20V11M12 20V4M19 20v-7"/></svg>',
   potlood: '<svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20l1.2-4.2L16 5l3 3L8.2 18.8 4 20z"/><path d="M13.5 7.5l3 3"/></svg>',
@@ -7042,8 +7069,21 @@ function toastMetActie(tekst, label, fn) {
   toastTimer = setTimeout(() => el.classList.remove('zichtbaar', 'met-actie'), 12000);
 }
 
+/* Precies één nav-knop (3D/2D/collectie/stats/instellingen) als actief (paars) markeren; de rest uit. */
+let navActiefKey = null, navVoorInst = null;
+function zetNavActief(welke) {
+  navActiefKey = welke || null;
+  [['btn-3d', '3d'], ['btn-2d', '2d'], ['btn-collectie', 'collectie'], ['btn-stats', 'stats'], ['btn-instellingen', 'instellingen']].forEach(([id, key]) => {
+    const b = document.getElementById(id);
+    if (b) { const on = key === navActiefKey; b.classList.toggle('actief', on); b.setAttribute('aria-pressed', on ? 'true' : 'false'); }
+  });
+}
 function toonView(naam) {
   huidigeView = naam;
+  if (naam === 'collectie' || naam === 'stats') zetNavActief(naam);      // highlight volgt de bestemming
+  else if (naam === 'home') zetNavActief('2d');                          // 'home' = de 2D-kaart
+  else if (naam === 'start') zetNavActief(null);                         // startscherm: geen nav actief
+  // 'detail'/'form' laten de bestaande highlight staan (sub-pagina's)
   $('#view-start').hidden = naam !== 'start';
   $('#view-home').hidden = naam !== 'home';
   $('#view-detail').hidden = naam !== 'detail';
@@ -7600,7 +7640,8 @@ function updateSelRing2D(){
 function setLockUI2D(){
   const t = editMarker2D ? vindTattoo2D(editMarker2D) : null;
   const b = document.querySelector('#editbar2d [data-act="lock"]');
-  if(b) b.classList.toggle('on', !!(t && t.vergrendeld));
+  if(b){ const locked = !!(t && t.vergrendeld); b.classList.toggle('on', locked);
+    b.title = locked ? tr('slot.ontgrendelen') : tr('slot.vergrendelen'); b.setAttribute('aria-label', b.title); }
 }
 function updateLegeHint(){
   const leeg = !(typeof tattoos !== 'undefined' && tattoos && tattoos.length);
@@ -8439,7 +8480,7 @@ function openFormulier(id = null) {
   let tempVergrendeld = !!t.vergrendeld;
 
   const zoneOpties = BODY_PARTS.map(z =>
-    `<option value="${z.id}" ${t.lichaamsdeel === z.id ? 'selected' : ''}>${z.label}</option>`).join('');
+    `<option value="${z.id}" ${t.lichaamsdeel === z.id ? 'selected' : ''}>${zoneLabel(z.id)}</option>`).join('');
   const stijlOpties = TATTOO_STYLES.map(s =>
     `<option value="${esc(s)}" ${t.stijl === s ? 'selected' : ''}>${esc(tStyle(s))}</option>`).join('');
 
@@ -8597,7 +8638,7 @@ function openFormulier(id = null) {
     $('#f-datum-label').innerHTML = tempStatus === 'wens'
       ? tr('form.geplandedatum')
       : tr('form.datum');
-    $('#f-kosten-label').textContent = tempStatus === 'wens' ? tr('form.budget') : tr('form.kosten');
+    $('#f-kosten-label').textContent = (tempStatus === 'wens' ? tr('form.budget') : tr('form.kosten')) + ' (' + valutaSymbool() + ')';
   }
   document.querySelectorAll('button[data-fstatus]').forEach((b) =>
     b.addEventListener('click', () => { tempStatus = b.dataset.fstatus; tekenStatus(); }));
@@ -9411,6 +9452,8 @@ function rondOnboardingAf() {
 
 /* ---- Instellingen-paneel ---- */
 function openInstellingen() {
+  navVoorInst = navActiefKey;                 // onthoud waar we waren
+  zetNavActief('instellingen');               // tandwiel paars terwijl het paneel open is
   $('#inst-paneel').classList.add('open');
   $('#inst-overlay').classList.add('open');
   document.body.style.overflow = 'hidden';
@@ -9419,6 +9462,7 @@ function sluitInstellingen() {
   $('#inst-paneel').classList.remove('open');
   $('#inst-overlay').classList.remove('open');
   document.body.style.overflow = '';
+  zetNavActief(navVoorInst);                   // herstel de highlight van de onderliggende weergave
 }
 
 /* ---- Focus-trap voor modals: focus bij openen naar de modal, Tab blijft binnen,
@@ -9547,7 +9591,7 @@ async function verwijderVoorbeelden() {
     if (!p || !d) return;
     const zone = p.zone || 'borst';
     const rec = createTattoo(Object.assign({
-      naam: d.naam, status: 'gezet',
+      naam: d.naam, status: (d.status || 'gezet'),
       lichaamsdeel: zone, zijde: ZONE_ZIJDE[zone] || huidigeZijde,
       positie: { x: +p.x.toFixed(1), y: +p.y.toFixed(1) },
       kunst: { src: d.src, schaal: 24, aspect: d.aspect, rotatie: 0 },
@@ -9558,6 +9602,7 @@ async function verwijderVoorbeelden() {
     zetFilter(zone);                                   // inzoomen → meteen bewerken mogelijk
     toast(tr('ui.tattoo_geplaatst'));
     setTimeout(() => enterEdit2D(rec.id), 340);        // ring + editbar tonen, net als 3D
+    if (rec.status === 'wens') naPlaatsStatus('wens');  // wens: 'geplande tonen' aan + dimmen
   }
   let tapTimer2D = null;
   $('#bodymap').addEventListener('click', (e) => {
@@ -9982,7 +10027,7 @@ async function verwijderVoorbeelden() {
     const obj=makeImage(s.point,s.normal,rot,size,d.tex,s.mesh);
     if(!obj){ toast(tr('ui.plaatsen_mislukt')); return; }
     const nz=nearestZone(s.point);
-    const rec=createTattoo(Object.assign({ naam:d.naam, status:"gezet", zijde:nz.side, lichaamsdeel:nz.zone,
+    const rec=createTattoo(Object.assign({ naam:d.naam, status:(d.status||"gezet"), zijde:nz.side, lichaamsdeel:nz.zone,
       positie3d:{ point:[s.point.x,s.point.y,s.point.z], normal:[s.normal.x,s.normal.y,s.normal.z],
                   rot, size, gender:currentGender, preset:presetId(), zone:nz.zone, side:nz.side },
       kunst3d:d.kunst3d }, d.info));
@@ -9994,6 +10039,7 @@ async function verwijderVoorbeelden() {
     markers.push(m); plaatsData=null; plaatsModus=false; verbergBanner(); if(window.__plaatsHintUit) window.__plaatsHintUit();
     if(typeof renderMarkers==="function"){ try{renderMarkers();}catch(_){} }
     toast(tr('ui.tattoo_geplaatst')); enterEditDecal(m);
+    if(rec.status==='wens' && typeof window.__tattiesNaStatus==='function') window.__tattiesNaStatus('wens');   // wens: 'geplande tonen' aan + dimmen
   }
 
   /* ---- aanpas-modus voor een geplaatste tattoo ---- */
@@ -10334,7 +10380,7 @@ async function verwijderVoorbeelden() {
     const eb=document.getElementById("editbar"); if(!eb) return;
     const lb=eb.querySelector('[data-act="lock"]');
     const locked=!!(editDecal&&editDecal.locked);
-    if(lb){ lb.innerHTML=locked?"\uD83D\uDD13":"\uD83D\uDD12"; lb.title=locked?"Ontgrendelen":"Vergrendelen"; lb.setAttribute("aria-label",lb.title); lb.classList.toggle("on",locked); }
+    if(lb){ lb.innerHTML=locked?"\uD83D\uDD13":"\uD83D\uDD12"; lb.title=locked?tr('slot.ontgrendelen'):tr('slot.vergrendelen'); lb.setAttribute("aria-label",lb.title); lb.classList.toggle("on",locked); }
   }
   function bindEditUI(){
     const eb=document.getElementById("editbar"); if(!eb) return;
@@ -10352,8 +10398,8 @@ async function verwijderVoorbeelden() {
         toast(editDecal.locked?tr('ui.vergrendeld'):tr('ui.ontgrendeld')); persistEdit(editDecal); } return; }
       if(a==="size-"){ if(editDecal&&!editDecal.locked){ scaleDecal(0.85); persistEdit(editDecal); } return; }
       if(a==="size+"){ if(editDecal&&!editDecal.locked){ scaleDecal(1.18); persistEdit(editDecal); } return; }
-      if(a==="rot-"){ if(editDecal&&!editDecal.locked){ rotateDecal(-15); persistEdit(editDecal); } return; }
-      if(a==="rot+"){ if(editDecal&&!editDecal.locked){ rotateDecal(15); persistEdit(editDecal); } return; }
+      if(a==="rot-"){ if(editDecal&&!editDecal.locked){ rotateDecal(15); persistEdit(editDecal); } return; }    // linksom-icoon = tegen de klok in
+      if(a==="rot+"){ if(editDecal&&!editDecal.locked){ rotateDecal(-15); persistEdit(editDecal); } return; }   // rechtsom-icoon = met de klok mee
     };});
     { const op3=document.getElementById("eb3d-opacity"); if(op3) op3.addEventListener("input",()=>{
         if(!editDecal) return;
@@ -10522,9 +10568,11 @@ async function verwijderVoorbeelden() {
   }
   function leesPijnDruppels(){ const c=document.getElementById("cmPijn"); return c?Math.max(0,Math.min(5,+c.dataset.waarde||0)):0; }
   function zetKostenSymbool(){ const s=document.getElementById("cmKostenSym"); if(s) s.textContent=valutaSymbool(); }
+  function zetStatusToggle(status){ const wens=status==='wens'; document.querySelectorAll('#cmStatus button[data-status]').forEach(b=>b.classList.toggle('actief',(b.dataset.status==='wens')===wens)); }
+  function leesStatusToggle(){ const a=document.querySelector('#cmStatus button.actief'); return (a&&a.dataset.status==='wens')?'wens':'gezet'; }
   function resetInfo(){
     ["cmNaam","cmArtiest","cmStudio","cmStijl","cmKosten","cmDatum","cmZituren","cmNotities"].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=""; });
-    zetPijnDruppels(0); zetKostenSymbool();
+    zetPijnDruppels(0); zetKostenSymbool(); zetStatusToggle('gezet');
     const acc=document.getElementById("cmAccent"); if(acc) acc.value="#8E71F0";
     const m=document.getElementById("cmMeer"); if(m) m.hidden=true;
     const mb=document.getElementById("cmMeerBtn"); if(mb) mb.setAttribute("aria-expanded","false");
@@ -10536,7 +10584,7 @@ async function verwijderVoorbeelden() {
     set("cmNaam",rec.naam||""); set("cmArtiest",rec.artiest||""); set("cmStudio",rec.studio||"");
     set("cmStijl",rec.stijl||""); set("cmKosten",rec.kosten?rec.kosten:"");
     set("cmDatum",rec.datum||""); set("cmZituren",rec.zituren?rec.zituren:""); set("cmNotities",rec.notities||"");
-    zetPijnDruppels(rec.pijn||0); zetKostenSymbool();
+    zetPijnDruppels(rec.pijn||0); zetKostenSymbool(); zetStatusToggle(rec.status==='wens'?'wens':'gezet');
     const acc=document.getElementById("cmAccent"); if(acc) acc.value=rec.accentkleur||"#8E71F0";
     const m=document.getElementById("cmMeer"); if(m) m.hidden=true;                                  // standaard dichtgeklapt (uitklap via 'Meer details')
     const mb=document.getElementById("cmMeerBtn"); if(mb) mb.setAttribute("aria-expanded","false");
@@ -10550,7 +10598,7 @@ async function verwijderVoorbeelden() {
       pijn:leesPijnDruppels(), datum:v("cmDatum"),
       zituren:Math.min(100000,Math.max(0,parseFloat(v("cmZituren"))||0)),
       accentkleur:(document.getElementById("cmAccent")?document.getElementById("cmAccent").value:"#8E71F0"),
-      notities:v("cmNotities").trim() } };
+      notities:v("cmNotities").trim() }, status:leesStatusToggle() };
   }
   function toonBanner(txt){ const b=document.getElementById("t3d-banner"); if(b){ b.textContent=txt; b.hidden=false; } }
   function verbergBanner(){ const b=document.getElementById("t3d-banner"); if(b) b.hidden=true; }
@@ -10937,6 +10985,7 @@ async function verwijderVoorbeelden() {
     window.__tattiesConfirm=askConfirm;                // gedeelde bevestig-dialoog (2D-verwijderen)
     const meerBtn=document.getElementById("cmMeerBtn"); if(meerBtn) meerBtn.onclick=()=>{ const m=document.getElementById("cmMeer"); if(m){ m.hidden=!m.hidden; meerBtn.setAttribute("aria-expanded", String(!m.hidden)); } };
     { const pc=document.getElementById("cmPijn"); if(pc) pc.querySelectorAll(".druppel").forEach(btn=>{ btn.onclick=()=>{ const w=+btn.dataset.waarde, cur=+pc.dataset.waarde||0; zetPijnDruppels(w===cur?0:w); }; }); }
+    document.querySelectorAll('#cmStatus button[data-status]').forEach(btn=>{ btn.onclick=()=>zetStatusToggle(btn.dataset.status); });
 
     const FOTO_MAX_DIM=1600, FOTO_MAX_BYTES=30*1024*1024;   // bron verkleinen -> zuinige opslag (srcUrl); + harde grens
     const laadFotoBestand=(input)=>{
@@ -11087,7 +11136,7 @@ async function verwijderVoorbeelden() {
       if(!imgTexture){ toast(tr('ui.kies_eerst_foto')); return; }
       if(pendingEdit2D){
         const rec=pendingEdit2D;
-        const {naam,info}=leesModalDetails();
+        const {naam,info,status}=leesModalDetails();
         if(!naam){ const naamEl=document.getElementById("cmNaam"); toast(tr('ui.naam_verplicht'));
           if(naamEl){ naamEl.setAttribute('aria-invalid','true'); naamEl.focus(); naamEl.addEventListener('input',()=>naamEl.removeAttribute('aria-invalid'),{once:true}); }
           return; }
@@ -11095,19 +11144,20 @@ async function verwijderVoorbeelden() {
         const cv=imgTexture.image; const src=canvasToPNG(cv,700);
         const aspect=(cv&&cv.width)?(cv.height/cv.width):1;
         if(imgTexture && imgTexture.dispose) imgTexture.dispose(); imgTexture=null;
-        Object.assign(rec,{ naam, artiest:info.artiest, studio:info.studio, stijl:info.stijl, kosten:info.kosten, pijn:info.pijn, datum:info.datum, zituren:info.zituren, accentkleur:info.accentkleur, notities:info.notities });
+        Object.assign(rec,{ naam, artiest:info.artiest, studio:info.studio, stijl:info.stijl, kosten:info.kosten, pijn:info.pijn, datum:info.datum, zituren:info.zituren, accentkleur:info.accentkleur, notities:info.notities, status });
         rec.kunst=rec.kunst||{}; rec.kunst.src=src; rec.kunst.aspect=aspect;
         rec.kunst3d={ srcUrl:(origImg?origImg.src:null), lasso:lassoPts.slice(), thresh:+cutThresh.value,
                  spread:(cutSpread?+cutSpread.value:55), bgColor:(bgPick?{r:bgPick.r,g:bgPick.g,b:bgPick.b}:null), bg:bgRemove.checked, flipH:flipH, wand:wandSeeds.slice(), wandKeep:wandKeep, huidMethode:huidMethode, rot90:rot90 };
         try{ await saveTattoo(rec); }catch(e){ console.error(e); toast(tr('toast.opslaanmislukt')+(e&&e.message?e.message:tr('ui.fout'))); }
         if(typeof tattoos!=="undefined"&&Array.isArray(tattoos)){ const j=tattoos.findIndex(x=>x.id===rec.id); if(j>=0)tattoos[j]=rec; }
         if(typeof renderMarkers==="function"){ try{renderMarkers();}catch(_){} }
+        if(typeof window.__tattiesNaStatus==="function") window.__tattiesNaStatus(rec.status);   // wens<->gezet: zichtbaarheid/dim bijwerken
         if(typeof window.__tattiesNaBewerk==="function") window.__tattiesNaBewerk(rec.id);   // detailpagina verversen indien open
         toast(tr('ui.tattoo_bijgewerkt'));
         return;
       }
       if(pendingNew){
-        const {naam,info}=leesModalDetails();
+        const {naam,info,status}=leesModalDetails();
         if(!naam){ const naamEl=document.getElementById("cmNaam"); toast(tr('ui.naam_verplicht'));
           if(naamEl){ naamEl.setAttribute('aria-invalid','true'); naamEl.focus();
             naamEl.addEventListener('input',()=>naamEl.removeAttribute('aria-invalid'),{once:true}); }
@@ -11119,10 +11169,10 @@ async function verwijderVoorbeelden() {
           const aspect=(cv&&cv.width)?(cv.height/cv.width):1;
           if(imgTexture && imgTexture.dispose) imgTexture.dispose(); imgTexture=null;
           cutModal.classList.remove("on"); pendingNew=null; toonCutInstellingen(false); toonInfo(false);
-          if(typeof window.__tattiesStartPlaats2D==='function') window.__tattiesStartPlaats2D({ naam, info, kunst3d, src, aspect });
+          if(typeof window.__tattiesStartPlaats2D==='function') window.__tattiesStartPlaats2D({ naam, info, kunst3d, src, aspect, status });
           return;
         }
-        plaatsData={ tex:imgTexture, naam, info, kunst3d };
+        plaatsData={ tex:imgTexture, naam, info, kunst3d, status };
         imgTexture=null;   // eigendom gaat naar plaatsData; geen dispose
         cutModal.classList.remove("on"); pendingNew=null; toonCutInstellingen(false); toonInfo(false);
         plaatsModus=true; toonBanner(tr('ui.klik_plaatsen')); if(window.__plaatsHintAan) window.__plaatsHintAan();
@@ -11151,7 +11201,7 @@ async function verwijderVoorbeelden() {
       }
       if(pendingEdit){
         const m=pendingEdit;
-        const {naam,info}=leesModalDetails();
+        const {naam,info,status}=leesModalDetails();
         if(!naam){ const naamEl=document.getElementById("cmNaam"); toast(tr('ui.naam_verplicht'));
           if(naamEl){ naamEl.setAttribute('aria-invalid','true'); naamEl.focus(); naamEl.addEventListener('input',()=>naamEl.removeAttribute('aria-invalid'),{once:true}); }
           return; }
@@ -11159,12 +11209,13 @@ async function verwijderVoorbeelden() {
         if(m.tex && m.tex!==imgTexture && m.tex.dispose) m.tex.dispose();   // oude textuur vrijgeven
         m.tex=imgTexture; rebuildMarker(m);
         if(m.rec){
-          Object.assign(m.rec,{ naam, artiest:info.artiest, studio:info.studio, stijl:info.stijl, kosten:info.kosten, pijn:info.pijn, datum:info.datum, zituren:info.zituren, accentkleur:info.accentkleur, notities:info.notities });
+          Object.assign(m.rec,{ naam, artiest:info.artiest, studio:info.studio, stijl:info.stijl, kosten:info.kosten, pijn:info.pijn, datum:info.datum, zituren:info.zituren, accentkleur:info.accentkleur, notities:info.notities, status });
           m.rec.kunst3d={ srcUrl:(origImg?origImg.src:null), lasso:lassoPts.slice(), thresh:+cutThresh.value, spread:(cutSpread?+cutSpread.value:55), bgColor:(bgPick?{r:bgPick.r,g:bgPick.g,b:bgPick.b}:null), bg:bgRemove.checked, flipH:flipH, wand:wandSeeds.slice(), wandKeep:wandKeep, huidMethode:huidMethode, rot90:rot90 };
           try{ await saveTattoo(m.rec); toast(tr('ui.tattoo_bijgewerkt')); }
           catch(err){ console.error(err); toast(tr('toast.opslaanmislukt')+(err&&err.message?err.message:tr('ui.fout'))); }
         }
         if(typeof renderMarkers==="function"){ try{renderMarkers();}catch(_){} }
+        if(m.rec && typeof window.__tattiesNaStatus==="function") window.__tattiesNaStatus(m.rec.status);   // wens<->gezet: zichtbaarheid/dim bijwerken
         if(typeof window.__tattiesNaBewerk==="function") window.__tattiesNaBewerk(m.rec&&m.rec.id);
         imgTexture=null;   // marker bezit de textuur nu
         return;
@@ -11412,9 +11463,7 @@ async function verwijderVoorbeelden() {
   const HOST_VIEWS=["view-start","view-home","view-detail","view-form","view-collectie","view-stats"];
   function hideHostViews(){ HOST_VIEWS.forEach(id=>{ const e=document.getElementById(id); if(e)e.hidden=true; }); }
   function markeerViewKnop(actief){
-    const b3=document.getElementById("btn-3d"), b2=document.getElementById("btn-2d");
-    if(b3){ b3.classList.toggle("actief", actief==="3d"); b3.setAttribute("aria-pressed", actief==="3d"); }
-    if(b2){ b2.classList.toggle("actief", actief==="2d"); b2.setAttribute("aria-pressed", actief==="2d"); }
+    if(typeof zetNavActief==="function") zetNavActief(actief);   // host: precies één van de 5 nav-knoppen paars
   }
   function show3D(){
     actief3D=true;
