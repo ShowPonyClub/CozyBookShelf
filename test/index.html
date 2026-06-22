@@ -472,6 +472,7 @@ dl.toon-leeg .veldrij.leeg-veld{display:flex}
 .start-hero{text-align:center;margin-top:6px}
 .start-titel{margin:0;font-size:1.55rem;font-weight:800}
 .start-tagline{margin:4px 0 0;color:var(--gedempt);font-family:var(--serif);letter-spacing:.03em}
+.start-versie{margin:8px 0 0;text-align:center;color:var(--gedempt);opacity:.55;font-size:.72rem;letter-spacing:.04em}
 .start-cta{width:100%;padding:16px;font-size:1.05rem;font-weight:700;border:0;border-radius:var(--radius);
   background:var(--accent);color:#fff;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.18)}
 .start-cta:hover{filter:brightness(1.05)}
@@ -1044,6 +1045,7 @@ form label{text-transform:none;letter-spacing:.005em;font-size:.8rem;color:var(-
         <p class="sectiekop" data-i18n="start.recent">Recent toegevoegd</p>
         <div class="start-recent" id="start-recent"></div>
       </div>
+      <p class="start-versie" id="start-versie" aria-hidden="true"></p>
     </div>
   </section>
   <!-- ===================== 2D-KAART ===================== -->
@@ -6740,6 +6742,9 @@ function createTattoo(overrides = {}) {
    STAP 2 - INDEXEDDB-LAAG
    Asynchrone wrapper: getAllTattoos / saveTattoo / deleteTattoo
    ============================================================ */
+// App-versie (semver, handmatig ophogen bij een release). Bij een bump ook de
+// CACHE-naam in sw.js meebumpen, zodat clients de nieuwe build ophalen.
+const APP_VERSIE = '0.1.0';
 const DB_NAAM = 'tatties';
 const OUD_DB_NAAM = 'tattoostics';   // vorige naam - eenmalig overgezet
 const DB_VERSIE = 1;
@@ -9592,6 +9597,7 @@ async function verwijderVoorbeelden() {
   $('#btn-collectie').addEventListener('click', () => toonView('collectie'));
   $('#c-terug').addEventListener('click', () => toonView('home'));
   $('#btn-instellingen').addEventListener('click', openInstellingen);
+  { const ve = $('#start-versie'); if (ve) ve.textContent = 'v' + APP_VERSIE; }
   document.querySelectorAll('#toon-gepland, #toon-gepland-3d').forEach(b => b.addEventListener('click', toggleGepland));
   zetGeplandUI();   // begin-staat (uit, of opgeslagen voorkeur) op beide toggles tonen
   // Startscherm: logo → terug naar start; tegels, CTA en recent-items
