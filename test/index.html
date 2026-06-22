@@ -441,11 +441,24 @@ main > section{animation:opkomen .3s ease both}
   padding:16px;margin-bottom:14px;
 }
 .detail-kunst img{max-width:100%;max-height:280px;object-fit:contain;display:block}
-/* Pijnscore-sterren */
-.pijn-sterren{white-space:nowrap;letter-spacing:2px;font-size:1rem;line-height:1}
-.pijn-sterren.klein{font-size:.82rem;letter-spacing:1px}
-.pijn-sterren .ster{color:var(--rand)}
-.pijn-sterren .ster.vol{color:var(--accent)}
+/* Pijnscore-druppels */
+.pijn-sterren{display:inline-flex;align-items:center;gap:2px;white-space:nowrap;line-height:1;vertical-align:middle;font-size:1rem}
+.pijn-sterren.klein{font-size:.82rem}
+.druppel-ic{width:1.05em;height:1.05em;flex:none}
+.pijn-sterren.klein .druppel-ic{width:.95em;height:.95em}
+.druppel-ic path{fill:none;stroke:var(--rand);stroke-width:1.6}
+.druppel-ic.vol path{fill:#D14343;stroke:#D14343}
+/* Interactieve pijn-druppels (invoer) + valuta-prefix bij kosten */
+.druppel-kies{display:inline-flex;gap:6px;align-items:center;padding:4px 0}
+.druppel-kies .druppel{background:none;border:0;padding:0;cursor:pointer;line-height:0;color:inherit}
+.druppel-kies .druppel svg{width:26px;height:26px;display:block}
+.druppel-kies .druppel svg path{fill:none;stroke:var(--rand);stroke-width:1.6;transition:fill .1s ease}
+.druppel-kies .druppel.vol svg path{fill:#D14343;stroke:#D14343}
+.cutmodal .cm-rij2{display:flex;gap:10px}
+.cutmodal .cm-rij2 .cm-veld{flex:1;min-width:0}
+.cutmodal .kosten-veld{position:relative;display:block}
+.cutmodal .kosten-veld .valuta-prefix{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--gedempt);font-size:14px;pointer-events:none}
+.cutmodal .kosten-veld input{padding-left:24px;width:100%}
 /* Detail: lege velden verbergen tot 'extra details' */
 .veldrij.leeg-veld{display:none}
 dl.toon-leeg .veldrij.leeg-veld{display:flex}
@@ -1209,15 +1222,23 @@ form label{text-transform:none;letter-spacing:.005em;font-size:.8rem;color:var(-
               <label class="cm-veld"><span data-i18n="form.artiest">Artiest</span><input id="cmArtiest" type="text"></label>
               <label class="cm-veld"><span data-i18n="form.studio">Studio</span><input id="cmStudio" type="text"></label>
               <label class="cm-veld"><span data-i18n="form.stijl">Stijl</span><input id="cmStijl" type="text"></label>
-              <label class="cm-veld"><span data-i18n="form.kosten">Kosten (&euro;)</span><input id="cmKosten" type="number" min="0" step="0.01" inputmode="decimal"></label>
-              <label class="cm-veld"><span data-i18n="form.pijn">Pijnscore (1&ndash;5)</span>
-                <select id="cmPijn">
-                  <option value="0" data-i18n="form.geenpijn">Geen / onbekend</option>
-                  <option value="1">1/5</option><option value="2">2/5</option><option value="3">3/5</option><option value="4">4/5</option><option value="5">5/5</option>
-                </select></label>
-              <label class="cm-veld"><span data-i18n="form.datum">Datum</span><input id="cmDatum" type="date"></label>
-              <label class="cm-veld"><span data-i18n="form.zituren">Zituren</span><input id="cmZituren" type="number" min="0" step="0.5" inputmode="decimal"></label>
-              <label class="cm-veld"><span data-i18n="form.notities">Notities</span><textarea id="cmNotities" maxlength="2000" rows="3"></textarea></label>
+              <div class="cm-rij2">
+                <label class="cm-veld"><span data-i18n="form.kosten">Kosten</span><span class="kosten-veld"><span class="valuta-prefix" id="cmKostenSym">&euro;</span><input id="cmKosten" type="number" min="0" step="0.01" inputmode="decimal"></span></label>
+                <label class="cm-veld"><span data-i18n="form.datum">Datum</span><input id="cmDatum" type="date"></label>
+              </div>
+              <div class="cm-rij2">
+                <div class="cm-veld"><span data-i18n="form.pijn">Pijnscore (1&ndash;5)</span>
+                  <div id="cmPijn" class="druppel-kies" data-waarde="0" role="group" data-i18n-aria="form.pijn" aria-label="Pijnscore">
+                    <button type="button" class="druppel" data-waarde="1" aria-label="1/5"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3s-6 7-6 11a6 6 0 0 0 12 0c0-4-6-11-6-11z"/></svg></button>
+                    <button type="button" class="druppel" data-waarde="2" aria-label="2/5"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3s-6 7-6 11a6 6 0 0 0 12 0c0-4-6-11-6-11z"/></svg></button>
+                    <button type="button" class="druppel" data-waarde="3" aria-label="3/5"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3s-6 7-6 11a6 6 0 0 0 12 0c0-4-6-11-6-11z"/></svg></button>
+                    <button type="button" class="druppel" data-waarde="4" aria-label="4/5"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3s-6 7-6 11a6 6 0 0 0 12 0c0-4-6-11-6-11z"/></svg></button>
+                    <button type="button" class="druppel" data-waarde="5" aria-label="5/5"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3s-6 7-6 11a6 6 0 0 0 12 0c0-4-6-11-6-11z"/></svg></button>
+                  </div>
+                </div>
+                <label class="cm-veld"><span data-i18n="form.zituren">Zituren</span><input id="cmZituren" type="number" min="0" step="0.5" inputmode="decimal"></label>
+              </div>
+              <label class="cm-veld"><span data-i18n="form.notities">Notities</span><textarea id="cmNotities" maxlength="2000" rows="2"></textarea></label>
               <label class="cm-veld"><span data-i18n="form.accentkleur">Accentkleur van markering</span><small class="veld-hint" data-i18n="form.accentuitleg">Gebruikt als je geen tattoo-afbeelding toevoegt</small><input id="cmAccent" type="color" value="#8E71F0" style="width:64px;height:40px;padding:4px;border-radius:10px;cursor:pointer"></label>
             </div>
           </div>
@@ -6954,12 +6975,16 @@ function esc(s) {
 function veiligeBeeldSrc(src) {
   return (typeof src === 'string' && /^data:image\//i.test(src)) ? src : null;
 }
-/* Pijnscore als 5 sterren (n gevuld). Lege score → lege string. */
+/* Eén pijn-druppel (SVG). vol = gevuld rood, anders leeg met rand. */
+function druppelIcoon(vol) {
+  return `<svg class="druppel-ic${vol ? ' vol' : ''}" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3s-6 7-6 11a6 6 0 0 0 12 0c0-4-6-11-6-11z"/></svg>`;
+}
+/* Pijnscore als 5 rode druppels (n gevuld). Lege score → lege string. */
 function pijnSterren(n, klein) {
   n = Math.max(0, Math.min(5, Number(n) || 0));
   if (!n) return '';
   let s = '';
-  for (let i = 1; i <= 5; i++) s += `<span class="ster${i <= n ? ' vol' : ''}">★</span>`;
+  for (let i = 1; i <= 5; i++) s += druppelIcoon(i <= n);
   return `<span class="pijn-sterren${klein ? ' klein' : ''}" role="img" aria-label="${tr('detail.pijn')}: ${n}/5">${s}</span>`;
 }
 function zoneLabel(id) {
@@ -6980,6 +7005,7 @@ function fmtDatum(iso) {
 let valuta = 'EUR';
 try { const _v = localStorage.getItem('tatties-valuta'); if (_v === 'EUR' || _v === 'USD' || _v === 'GBP') valuta = _v; } catch { /* geen voorkeur */ }
 function valutaLocale() { return valuta === 'USD' ? 'en-US' : valuta === 'GBP' ? 'en-GB' : (taal === 'en' ? 'en-IE' : 'nl-NL'); }
+function valutaSymbool() { return valuta === 'USD' ? '$' : valuta === 'GBP' ? '£' : '€'; }
 let euro;
 function bouwEuro() { euro = new Intl.NumberFormat(valutaLocale(), { style: 'currency', currency: valuta }); }
 bouwEuro();
@@ -10483,8 +10509,16 @@ async function verwijderVoorbeelden() {
   let pendingPlace=null, pendingEdit=null, pendingPlace2D=null, pendingEdit2D=null;
   let pendingNew=null, plaatsModus=false, plaatsData=null, addDoel='3d';   // nieuwe toevoeg-flow (via +); doel = '2d' of '3d'
   function toonInfo(b){ const e=document.getElementById("cmInfo"); if(e) e.hidden=!b; }
+  function zetPijnDruppels(val){
+    const c=document.getElementById("cmPijn"); if(!c) return;
+    val=Math.max(0,Math.min(5,Math.round(+val||0))); c.dataset.waarde=val; c.setAttribute("aria-valuenow",val);
+    c.querySelectorAll(".druppel").forEach(b=>{ b.classList.toggle("vol", val>0 && (+b.dataset.waarde)<=val); });
+  }
+  function leesPijnDruppels(){ const c=document.getElementById("cmPijn"); return c?Math.max(0,Math.min(5,+c.dataset.waarde||0)):0; }
+  function zetKostenSymbool(){ const s=document.getElementById("cmKostenSym"); if(s) s.textContent=valutaSymbool(); }
   function resetInfo(){
-    ["cmNaam","cmArtiest","cmStudio","cmStijl","cmKosten","cmPijn","cmDatum","cmZituren","cmNotities"].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=(id==="cmPijn"?"0":""); });
+    ["cmNaam","cmArtiest","cmStudio","cmStijl","cmKosten","cmDatum","cmZituren","cmNotities"].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=""; });
+    zetPijnDruppels(0); zetKostenSymbool();
     const acc=document.getElementById("cmAccent"); if(acc) acc.value="#8E71F0";
     const m=document.getElementById("cmMeer"); if(m) m.hidden=true;
     const mb=document.getElementById("cmMeerBtn"); if(mb) mb.setAttribute("aria-expanded","false");
@@ -10494,8 +10528,9 @@ async function verwijderVoorbeelden() {
     if(!rec) return;
     const set=(id,val)=>{ const el=document.getElementById(id); if(el) el.value=(val==null?"":val); };
     set("cmNaam",rec.naam||""); set("cmArtiest",rec.artiest||""); set("cmStudio",rec.studio||"");
-    set("cmStijl",rec.stijl||""); set("cmKosten",rec.kosten?rec.kosten:""); set("cmPijn",rec.pijn||0);
+    set("cmStijl",rec.stijl||""); set("cmKosten",rec.kosten?rec.kosten:"");
     set("cmDatum",rec.datum||""); set("cmZituren",rec.zituren?rec.zituren:""); set("cmNotities",rec.notities||"");
+    zetPijnDruppels(rec.pijn||0); zetKostenSymbool();
     const acc=document.getElementById("cmAccent"); if(acc) acc.value=rec.accentkleur||"#8E71F0";
     const m=document.getElementById("cmMeer"); if(m) m.hidden=true;                                  // standaard dichtgeklapt (uitklap via 'Meer details')
     const mb=document.getElementById("cmMeerBtn"); if(mb) mb.setAttribute("aria-expanded","false");
@@ -10506,7 +10541,7 @@ async function verwijderVoorbeelden() {
     return { naam:(v("cmNaam")||"").trim(), info:{
       artiest:v("cmArtiest").trim(), studio:v("cmStudio").trim(), stijl:v("cmStijl").trim(),
       kosten:Math.min(1000000,Math.max(0,parseFloat(v("cmKosten"))||0)),
-      pijn:Math.min(5,Math.max(0,parseInt(v("cmPijn"),10)||0)), datum:v("cmDatum"),
+      pijn:leesPijnDruppels(), datum:v("cmDatum"),
       zituren:Math.min(100000,Math.max(0,parseFloat(v("cmZituren"))||0)),
       accentkleur:(document.getElementById("cmAccent")?document.getElementById("cmAccent").value:"#8E71F0"),
       notities:v("cmNotities").trim() } };
@@ -10895,6 +10930,7 @@ async function verwijderVoorbeelden() {
     window.__tattiesRecrop2D=(rec)=>openCutModalForEdit2D(rec);   // sleutel-knop 2D: opnieuw uitsnijden
     window.__tattiesConfirm=askConfirm;                // gedeelde bevestig-dialoog (2D-verwijderen)
     const meerBtn=document.getElementById("cmMeerBtn"); if(meerBtn) meerBtn.onclick=()=>{ const m=document.getElementById("cmMeer"); if(m){ m.hidden=!m.hidden; meerBtn.setAttribute("aria-expanded", String(!m.hidden)); } };
+    { const pc=document.getElementById("cmPijn"); if(pc) pc.querySelectorAll(".druppel").forEach(btn=>{ btn.onclick=()=>{ const w=+btn.dataset.waarde, cur=+pc.dataset.waarde||0; zetPijnDruppels(w===cur?0:w); }; }); }
 
     const FOTO_MAX_DIM=1600, FOTO_MAX_BYTES=30*1024*1024;   // bron verkleinen -> zuinige opslag (srcUrl); + harde grens
     const laadFotoBestand=(input)=>{
