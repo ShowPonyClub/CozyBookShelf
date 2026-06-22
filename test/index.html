@@ -7603,6 +7603,7 @@ async function edit2DActie(a){
     const id = t.id; editMarker2D = null;
     const eb = $('#editbar2d'); if(eb) eb.classList.remove('on'); updateSelRing2D();
     try{ await deleteTattoo(id); }catch(e){ console.error(e); }
+    if (typeof window.__tatties3DVerwijder === 'function') window.__tatties3DVerwijder(id);   // 3D-decal ook weghalen
     tattoos = tattoos.filter(x => x.id !== id);
     renderMarkers(); if(typeof renderSamenvatting === 'function') renderSamenvatting();
     toast(tr('ui.tattoo_verwijderd')); return;
@@ -8272,11 +8273,13 @@ function renderDetail() {
     if (!ok) { btn.disabled = false; return; }   // geannuleerd: knop weer vrijgeven, niets verwijderen
     const kopie = JSON.parse(JSON.stringify(t));
     await deleteTattoo(t.id);
+    if (typeof window.__tatties3DVerwijder === 'function') window.__tatties3DVerwijder(t.id);   // 3D-decal ook weghalen
     await herlaad();
     detailTerug();
     toastMetActie(isWens ? tr('toast.wensverwijderd') : tr('toast.tattooverwijderd'), tr('toast.ongedaan'), async () => {
       await saveTattoo(kopie);
       await herlaad();
+      if (typeof window.__tatties3DHerstel === 'function') window.__tatties3DHerstel(kopie.id);   // 3D-decal terugzetten bij ongedaan maken
       toast(tr('toast.teruggezet').replace('{naam}', kopie.naam));
     });
   });
@@ -11137,49 +11140,74 @@ async function verwijderVoorbeelden() {
     }catch(e){ /* val terug */ }
     return pickMeshes[0];
   }
+  // Eén tattoo als 3D-decal (her)plaatsen. Dedup-guard: bestaat er al een marker met dit id, dan niets doen
+  // (zo is restore3D/herstel idempotent en krijg je geen dubbele decals).
+  async function herstelEen(t, token){
+    if(!t || markers.some(m=>m.id===t.id)) return false;
+    let P=t&&t.positie3d;
+    // Andere preset (lichaamsvorm) dan waarvoor het 3D-punt is opgeslagen -> herleiden uit de 2D-referentie.
+    if(P&&P.point&&P.preset&&P.preset!==presetId()) P=null;
+    if(!P||!P.point){ P=afleid3DUitZone(t); if(P) P.preset=presetId(); }
+    if(!P||!P.point) return false;
+    if((P.gender||"man")!==currentGender) return false;    // alleen tattoos van dit model
+    const k3 = (t.kunst3d && t.kunst3d.srcUrl) ? t.kunst3d
+             : (t.kunst && t.kunst.src ? { srcUrl:t.kunst.src, bg:false, lasso:[], wand:[] } : null);   // fallback: 2D-uitsnede als 3D-textuur
+    let tex=null;
+    try{ tex=await rebuildTextureFromKunst(k3); }catch(e){ console.error("herstel-textuur mislukt",e); }
+    if(token!==undefined && token!==loadToken) return false;
+    if(!tex) return false;
+    const point=new THREE.Vector3(P.point[0],P.point[1],P.point[2]);
+    const normal=new THREE.Vector3(P.normal[0],P.normal[1],P.normal[2]);
+    const mesh=meshAtPoint(point,normal);
+    const obj=makeImage(point,normal,P.rot||0,P.size||0.09,tex,mesh);
+    if(!obj) return false;
+    obj.renderOrder=(t.stapel)||0;
+    const _wens=(t.status==='wens');
+    obj.visible = !_wens || toonGepland;                                   // geplande alleen tonen als de toggle aanstaat
+    zetDecalOpacity(obj, (isFinite(+t.opacity)?Math.max(0.2,Math.min(1,+t.opacity)):1)*(_wens?0.5:1));   // geplande gedimd (50%)
+    markers.push({ id:t.id, rec:t, obj, point:point.clone(), normal:normal.clone(),
+      mesh, rot:P.rot||0, size:P.size||0.09, locked:!!P.locked, tex });
+    if(!t.positie || !t.kunst || !t.kunst.src){      // ouder record: 2D-velden bijvullen
+      sync2D(t, point, P.side||"voor", P.rot||0, P.size||0.09, tex);
+      try{ await saveTattoo(t); }catch(e){ console.error(e); }
+    }
+    return true;
+  }
   async function restore3D(token){
     if(token!==undefined && token!==loadToken) return;
     if(!pickMeshes.length) return;
-    if(token!==undefined && token!==loadToken) return;   // ander model intussen geladen
     let list=[];
     try{ list = (typeof getAllTattoos==="function") ? await getAllTattoos()
                  : (typeof tattoos!=="undefined" ? tattoos : []); }
     catch(e){ console.error(e); list = (typeof tattoos!=="undefined"?tattoos:[]); }
     if(token!==undefined && token!==loadToken) return;
-    let n=0;
     for(const t of list){
-      let P=t&&t.positie3d;
-      // Andere preset (lichaamsvorm) dan waarvoor het 3D-punt is opgeslagen -> herleiden uit de 2D-referentie,
-      // zodat de tattoo op zijn relatieve plek op DEZE vorm landt (model-onafhankelijke verankering).
-      if(P&&P.point&&P.preset&&P.preset!==presetId()) P=null;
-      if(!P||!P.point){ P=afleid3DUitZone(t); if(P) P.preset=presetId(); }
-      if(!P||!P.point) continue;
-      if((P.gender||"man")!==currentGender) continue;    // alleen tattoos van dit model
-      const k3 = (t.kunst3d && t.kunst3d.srcUrl) ? t.kunst3d
-               : (t.kunst && t.kunst.src ? { srcUrl:t.kunst.src, bg:false, lasso:[], wand:[] } : null);   // fallback: 2D-uitsnede als 3D-textuur
-      let tex=null;
-      try{ tex=await rebuildTextureFromKunst(k3); }catch(e){ console.error("herstel-textuur mislukt",e); }
-      if(token!==undefined && token!==loadToken) return;
-      if(!tex) continue;
-      const point=new THREE.Vector3(P.point[0],P.point[1],P.point[2]);
-      const normal=new THREE.Vector3(P.normal[0],P.normal[1],P.normal[2]);
-      const mesh=meshAtPoint(point,normal);
-      const obj=makeImage(point,normal,P.rot||0,P.size||0.09,tex,mesh);
-      if(obj){ obj.renderOrder=(t.stapel)||0;
-        const _wens=(t.status==='wens');
-        obj.visible = !_wens || toonGepland;                                   // geplande alleen tonen als de toggle aanstaat
-        zetDecalOpacity(obj, (isFinite(+t.opacity)?Math.max(0.2,Math.min(1,+t.opacity)):1)*(_wens?0.5:1));   // geplande gedimd (50%)
-        markers.push({ id:t.id, rec:t, obj, point:point.clone(), normal:normal.clone(),
-        mesh, rot:P.rot||0, size:P.size||0.09, locked:!!P.locked, tex }); n++;
-        if(!t.positie || !t.kunst || !t.kunst.src){      // ouder record: 2D-velden bijvullen
-          sync2D(t, point, P.side||"voor", P.rot||0, P.size||0.09, tex);
-          try{ await saveTattoo(t); }catch(e){ console.error(e); }
-        }
-      }
+      if(token!==undefined && token!==loadToken) return;   // ander model intussen geladen
+      try{ await herstelEen(t, token); }catch(e){ console.error(e); }
     }
     if(typeof renderMarkers==="function"){ try{renderMarkers();}catch(_){} }
     // Herstel-melding ('N tattoos hersteld') bewust uitgezet - zie 'later'-lijst (hele herstel-feature evalueren).
   }
+  // Eén 3D-decal verwijderen (na verwijderen van een tattoo via detail/2D); host roept dit aan.
+  window.__tatties3DVerwijder = function(id){
+    const m = markers.find(x=>x.id===id); if(!m) return false;
+    if(editDecal===m){ editDecal=null; clearTimeout(persistT); showSel(false);
+      const eb=document.getElementById("editbar"); if(eb)eb.classList.remove("on");
+      const h=document.getElementById("hint"); if(h)h.style.display=""; }
+    disposeMarker(m); const i=markers.indexOf(m); if(i>=0) markers.splice(i,1);
+    if(typeof renderMarkers==="function"){ try{renderMarkers();}catch(_){} }
+    return true;
+  };
+  // Eén 3D-decal (opnieuw) plaatsen (bv. na 'ongedaan maken' van een verwijdering).
+  window.__tatties3DHerstel = async function(id){
+    if(!inited || !pickMeshes.length) return false;
+    let t=null;
+    try{ const list=(typeof tattoos!=="undefined")?tattoos:await getAllTattoos(); t=list.find(x=>x.id===id); }catch(e){}
+    if(!t) return false;
+    const ok=await herstelEen(t);
+    if(ok && typeof renderMarkers==="function"){ try{renderMarkers();}catch(_){} }
+    return ok;
+  };
   // Live aan/uit zetten van geplande (wens) decals zonder rebuild (de render-lus tekent elk frame)
   window.__tatties3DGepland = function(){
     markers.forEach(m=>{ if(!m.obj||!m.rec) return; const w=(m.rec.status==='wens');
