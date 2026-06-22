@@ -203,7 +203,7 @@
         if(!res.ok)throw new Error('failed');
       }else{var list=JSON.parse(localStorage.getItem('tatties_waitlist')||'[]');
         if(list.indexOf(v)===-1){list.push(v);localStorage.setItem('tatties_waitlist',JSON.stringify(list));}}
-      show("You're on the list. We'll be in touch. 🖤",'ok');form.reset();
+      show("You're on the list - we'll email you when tatties goes live. Don't see it? Check your spam folder. 🖤",'ok');form.reset();
     }catch(err){show('Something went wrong. Please try again.','err');}
     finally{btn.disabled=false;btn.textContent=old;}
   });
