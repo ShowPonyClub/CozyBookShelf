@@ -920,7 +920,10 @@ form label,
 .cutmodal .cm-veld input,.cutmodal .cm-veld select{padding:9px 10px;border:1px solid var(--rand);border-radius:8px;background:var(--veldbg);color:var(--tekst);font-size:14px;font-family:inherit;}
 .cutmodal .verplicht{color:var(--accent);font-weight:700;}
 .cutmodal .cm-veld input[aria-invalid="true"]{border-color:#D14343;box-shadow:0 0 0 2px rgba(209,67,67,.18);}
-#cmMeerBtn{margin-top:10px;display:inline-block;}
+#cmMeerBtn{margin-top:10px;display:inline-flex;align-items:center;gap:4px;}
+.cm-chev{width:14px;height:14px;flex:none;transition:transform .15s ease;}
+.cm-chev path{fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round;}
+#cmMeerBtn[aria-expanded="true"] .cm-chev{transform:rotate(180deg);}
 #cmMeer{margin-top:2px;}
 
 
@@ -1064,9 +1067,7 @@ form label{text-transform:none;letter-spacing:.005em;font-size:.8rem;color:var(-
           <div class="eb-btns">
             <button type="button" data-act="info" data-i18n-title="ui.details" data-i18n-aria="ui.details" title="Details" aria-label="Details"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5"/><path d="M12 7.6h.01"/></svg></button>
             <button type="button" data-act="edit" data-i18n-title="aria.bewerken" data-i18n-aria="aria.bewerken" title="Bewerken" aria-label="Bewerken"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M14.5 5.5l4 4"/><path d="M4 20l1-4L16 5a2 2 0 0 1 3 3L8 19l-4 1z"/></svg></button>
-            <button type="button" data-act="lock" data-i18n-title="ui.vergrendelen" data-i18n-aria="ui.vergrendelen" title="Vergrendelen" aria-label="Vergrendelen"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg></button>
-            <button type="button" data-act="recrop" data-i18n-title="ui.aanpassen_bijknippen" data-i18n-aria="ui.aanpassen_bijknippen" title="Aanpassen (bijknippen)" aria-label="Aanpassen"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 2v14a2 2 0 0 0 2 2h14"/><path d="M2 6h14a2 2 0 0 1 2 2v14"/></svg></button>
-            <button type="button" class="eb-scarot" data-act="size-" data-i18n-title="ui.kleiner" data-i18n-aria="ui.kleiner" title="Kleiner" aria-label="Kleiner"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14"/></svg></button>
+            <button type="button" data-act="lock" data-i18n-title="ui.vergrendelen" data-i18n-aria="ui.vergrendelen" title="Vergrendelen" aria-label="Vergrendelen"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg></button>            <button type="button" class="eb-scarot" data-act="size-" data-i18n-title="ui.kleiner" data-i18n-aria="ui.kleiner" title="Kleiner" aria-label="Kleiner"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14"/></svg></button>
             <button type="button" class="eb-scarot" data-act="size+" data-i18n-title="ui.groter" data-i18n-aria="ui.groter" title="Groter" aria-label="Groter"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>
             <button type="button" class="eb-scarot" data-act="rot-" data-i18n-title="ui.links_draaien" data-i18n-aria="ui.links_draaien" title="Linksom draaien" aria-label="Linksom draaien"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12a8 8 0 1 0 2.3-5.6"/><path d="M3 4v4h4"/></svg></button>
             <button type="button" class="eb-scarot" data-act="rot+" data-i18n-title="ui.rechts_draaien" data-i18n-aria="ui.rechts_draaien" title="Rechtsom draaien" aria-label="Rechtsom draaien"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.3-5.6"/><path d="M21 4v4h-4"/></svg></button>
@@ -1161,9 +1162,7 @@ form label{text-transform:none;letter-spacing:.005em;font-size:.8rem;color:var(-
         <div class="eb-btns">
           <button type="button" data-act="info" data-i18n-title="ui.details" data-i18n-aria="ui.details" title="Details" aria-label="Details"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5"/><path d="M12 7.6h.01"/></svg></button>
           <button type="button" data-act="edit" data-i18n-title="aria.bewerken" data-i18n-aria="aria.bewerken" title="Bewerken" aria-label="Bewerken"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M14.5 5.5l4 4"/><path d="M4 20l1-4L16 5a2 2 0 0 1 3 3L8 19l-4 1z"/></svg></button>
-          <button type="button" data-act="lock" data-i18n-title="ui.vergrendelen" data-i18n-aria="ui.vergrendelen" title="Vergrendelen" aria-label="Vergrendelen"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg></button>
-          <button type="button" data-act="recrop" data-i18n-title="ui.aanpassen_bijknippen" data-i18n-aria="ui.aanpassen_bijknippen" title="Aanpassen (bijknippen)" aria-label="Aanpassen"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 2v14a2 2 0 0 0 2 2h14"/><path d="M2 6h14a2 2 0 0 1 2 2v14"/></svg></button>
-          <button type="button" class="eb-scarot" data-act="size-" data-i18n-title="ui.kleiner" data-i18n-aria="ui.kleiner" title="Kleiner" aria-label="Kleiner"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14"/></svg></button>
+          <button type="button" data-act="lock" data-i18n-title="ui.vergrendelen" data-i18n-aria="ui.vergrendelen" title="Vergrendelen" aria-label="Vergrendelen"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg></button>          <button type="button" class="eb-scarot" data-act="size-" data-i18n-title="ui.kleiner" data-i18n-aria="ui.kleiner" title="Kleiner" aria-label="Kleiner"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14"/></svg></button>
           <button type="button" class="eb-scarot" data-act="size+" data-i18n-title="ui.groter" data-i18n-aria="ui.groter" title="Groter" aria-label="Groter"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>
           <button type="button" class="eb-scarot" data-act="rot-" data-i18n-title="ui.links_draaien" data-i18n-aria="ui.links_draaien" title="Linksom draaien" aria-label="Linksom draaien"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12a8 8 0 1 0 2.3-5.6"/><path d="M3 4v4h4"/></svg></button>
           <button type="button" class="eb-scarot" data-act="rot+" data-i18n-title="ui.rechts_draaien" data-i18n-aria="ui.rechts_draaien" title="Rechtsom draaien" aria-label="Rechtsom draaien"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.3-5.6"/><path d="M21 4v4h-4"/></svg></button>
@@ -1205,7 +1204,7 @@ form label{text-transform:none;letter-spacing:.005em;font-size:.8rem;color:var(-
           <div id="cmInfo" hidden>
             <label class="cm-veld"><span class="cm-lbl"><span data-i18n="ui.naam">Naam</span> <span class="verplicht">*</span></span>
               <input id="cmNaam" type="text" maxlength="80" autocomplete="off"></label>
-            <button type="button" id="cmMeerBtn" class="linkbtn" data-i18n="ui.meer_details">Meer details</button>
+            <button type="button" id="cmMeerBtn" class="linkbtn" aria-expanded="false"><span data-i18n="ui.meer_details">Meer details</span><svg class="cm-chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
             <div id="cmMeer" hidden>
               <label class="cm-veld"><span data-i18n="form.artiest">Artiest</span><input id="cmArtiest" type="text"></label>
               <label class="cm-veld"><span data-i18n="form.studio">Studio</span><input id="cmStudio" type="text"></label>
@@ -1217,6 +1216,9 @@ form label{text-transform:none;letter-spacing:.005em;font-size:.8rem;color:var(-
                   <option value="1">1/5</option><option value="2">2/5</option><option value="3">3/5</option><option value="4">4/5</option><option value="5">5/5</option>
                 </select></label>
               <label class="cm-veld"><span data-i18n="form.datum">Datum</span><input id="cmDatum" type="date"></label>
+              <label class="cm-veld"><span data-i18n="form.zituren">Zituren</span><input id="cmZituren" type="number" min="0" step="0.5" inputmode="decimal"></label>
+              <label class="cm-veld"><span data-i18n="form.notities">Notities</span><textarea id="cmNotities" maxlength="2000" rows="3"></textarea></label>
+              <label class="cm-veld"><span data-i18n="form.accentkleur">Accentkleur van markering</span><small class="veld-hint" data-i18n="form.accentuitleg">Gebruikt als je geen tattoo-afbeelding toevoegt</small><input id="cmAccent" type="color" value="#8E71F0" style="width:64px;height:40px;padding:4px;border-radius:10px;cursor:pointer"></label>
             </div>
           </div>
           <div id="cmSettings" hidden>
@@ -7598,7 +7600,10 @@ async function exitEdit2D(){
 async function edit2DActie(a){
   const t = editMarker2D ? vindTattoo2D(editMarker2D) : null; if(!t) return;
   if(a === 'info'){ const id = editMarker2D; await exitEdit2D(); openDetail(id); return; }
-  if(a === 'edit'){ const id = editMarker2D; await exitEdit2D(); openFormulier(id); return; }
+  if(a === 'edit'){ const id = editMarker2D;
+    if(((t.kunst3d&&t.kunst3d.srcUrl)||(t.kunst&&t.kunst.src)) && typeof window.__tattiesRecrop2D === 'function'){ window.__tattiesRecrop2D(t); }   // zelfde overzicht als toevoegen
+    else { await exitEdit2D(); openFormulier(id); }                                                                      // terugval: geen bewaarde foto
+    return; }
   if(a === 'done'){ exitEdit2D(); return; }
   if(a === 'recrop'){ if(typeof window.__tattiesRecrop2D === 'function') window.__tattiesRecrop2D(t); return; }
   if(a === 'del'){
@@ -8267,7 +8272,10 @@ function renderDetail() {
     renderDetail();
     toast(t.vergrendeld ? tr('toast.vastgezet') : tr('toast.ontgrendeld'));
   });
-  $('#d-bewerk').addEventListener('click', () => openFormulier(t.id));
+  $('#d-bewerk').addEventListener('click', () => {
+    if (((t.kunst3d&&t.kunst3d.srcUrl)||(t.kunst&&t.kunst.src)) && typeof window.__tattiesRecrop2D === 'function') window.__tattiesRecrop2D(t);   // zelfde overzicht als toevoegen
+    else openFormulier(t.id);                                                                                            // terugval: geen bewaarde foto
+  });
   $('#d-verwijder').addEventListener('click', async (e) => {
     const btn = e.currentTarget; if (btn.disabled) return; btn.disabled = true;   // dubbelklik-race voorkomen
     const ok = (typeof window.__tattiesConfirm === 'function')
@@ -8371,6 +8379,8 @@ function renderDetail() {
 /* ============================================================
    STAP 5 - TOEVOEGEN & BEWERKEN  +  STAP 6 - FOTO-UPLOAD
    ============================================================ */
+// Na bewerken via de uitsnede-modal: ververs de detailpagina als die open staat (anders blijft 'ie verouderd).
+window.__tattiesNaBewerk = (id) => { try { if (huidigeView === 'detail' && id) openDetail(id); } catch (e) { /* geen detail open */ } };
 function openFormulier(id = null) {
   bewerkId = id;
   const t = id ? tattoos.find(x => x.id === id) : createTattoo({ status: lijstModus === 'wens' ? 'wens' : 'gezet' });
@@ -10299,7 +10309,10 @@ async function verwijderVoorbeelden() {
     eb.querySelectorAll("button").forEach(b=>{ b.onclick=()=>{
       const a=b.dataset.act;
       if(a==="info"){ const rec=editDecal&&editDecal.rec; exitEditDecal(); if(rec&&typeof openDetail==="function") openDetail(rec.id, 'info', '3d'); return; }
-      if(a==="edit"){ const rec=editDecal&&editDecal.rec; exitEditDecal(); if(rec&&typeof openFormulier==="function") openFormulier(rec.id); return; }
+      if(a==="edit"){ const rec=editDecal&&editDecal.rec;
+        if(editDecal && rec && ((rec.kunst3d&&rec.kunst3d.srcUrl)||(rec.kunst&&rec.kunst.src))){ openCutModalForEdit(editDecal); }   // zelfde overzicht als toevoegen
+        else { exitEditDecal(); if(rec&&typeof openFormulier==="function") openFormulier(rec.id); }     // terugval: geen bewaarde foto
+        return; }
       if(a==="done"){ exitEditDecal(); return; }
       if(a==="recrop"){ if(editDecal) openCutModalForEdit(editDecal); return; }
       if(a==="del"){ removeEditDecal(); return; }
@@ -10471,8 +10484,32 @@ async function verwijderVoorbeelden() {
   let pendingNew=null, plaatsModus=false, plaatsData=null, addDoel='3d';   // nieuwe toevoeg-flow (via +); doel = '2d' of '3d'
   function toonInfo(b){ const e=document.getElementById("cmInfo"); if(e) e.hidden=!b; }
   function resetInfo(){
-    ["cmNaam","cmArtiest","cmStudio","cmStijl","cmKosten","cmPijn","cmDatum"].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=(id==="cmPijn"?"0":""); });
+    ["cmNaam","cmArtiest","cmStudio","cmStijl","cmKosten","cmPijn","cmDatum","cmZituren","cmNotities"].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=(id==="cmPijn"?"0":""); });
+    const acc=document.getElementById("cmAccent"); if(acc) acc.value="#8E71F0";
     const m=document.getElementById("cmMeer"); if(m) m.hidden=true;
+    const mb=document.getElementById("cmMeerBtn"); if(mb) mb.setAttribute("aria-expanded","false");
+  }
+  // Vul naam + 'Meer details' voor bij het bewerken van een bestaande tattoo (details zichtbaar).
+  function vulModalDetails(rec){
+    if(!rec) return;
+    const set=(id,val)=>{ const el=document.getElementById(id); if(el) el.value=(val==null?"":val); };
+    set("cmNaam",rec.naam||""); set("cmArtiest",rec.artiest||""); set("cmStudio",rec.studio||"");
+    set("cmStijl",rec.stijl||""); set("cmKosten",rec.kosten?rec.kosten:""); set("cmPijn",rec.pijn||0);
+    set("cmDatum",rec.datum||""); set("cmZituren",rec.zituren?rec.zituren:""); set("cmNotities",rec.notities||"");
+    const acc=document.getElementById("cmAccent"); if(acc) acc.value=rec.accentkleur||"#8E71F0";
+    const m=document.getElementById("cmMeer"); if(m) m.hidden=true;                                  // standaard dichtgeklapt (uitklap via 'Meer details')
+    const mb=document.getElementById("cmMeerBtn"); if(mb) mb.setAttribute("aria-expanded","false");
+  }
+  // Lees naam + 'Meer details' uit de modal (gedeeld door toevoegen en bewerken).
+  function leesModalDetails(){
+    const v=id=>{ const el=document.getElementById(id); return el?el.value:""; };
+    return { naam:(v("cmNaam")||"").trim(), info:{
+      artiest:v("cmArtiest").trim(), studio:v("cmStudio").trim(), stijl:v("cmStijl").trim(),
+      kosten:Math.min(1000000,Math.max(0,parseFloat(v("cmKosten"))||0)),
+      pijn:Math.min(5,Math.max(0,parseInt(v("cmPijn"),10)||0)), datum:v("cmDatum"),
+      zituren:Math.min(100000,Math.max(0,parseFloat(v("cmZituren"))||0)),
+      accentkleur:(document.getElementById("cmAccent")?document.getElementById("cmAccent").value:"#8E71F0"),
+      notities:v("cmNotities").trim() } };
   }
   function toonBanner(txt){ const b=document.getElementById("t3d-banner"); if(b){ b.textContent=txt; b.hidden=false; } }
   function verbergBanner(){ const b=document.getElementById("t3d-banner"); if(b) b.hidden=true; }
@@ -10532,12 +10569,14 @@ async function verwijderVoorbeelden() {
   }
   // Heropen het uitsnede-scherm voor een bestaande tattoo (bijknippen + achtergrond)
   function openCutModalForEdit(m){
-    const k = m && m.rec && m.rec.kunst3d;
+    const rec = m && m.rec; let k = rec && rec.kunst3d;
+    if(!k || !k.srcUrl){ k = (rec && rec.kunst && rec.kunst.src) ? { srcUrl:rec.kunst.src, bg:false, lasso:[], wand:[] } : null; }   // terugval: 2D-uitsnede als bron
     if(!k || !k.srcUrl){ toast(tr('ui.geen_foto_bewaard')); return; }
-    pendingPlace=null; pendingEdit=m; pendingPlace2D=null;
+    pendingPlace=null; pendingEdit=m; pendingPlace2D=null; pendingNew=null; pendingEdit2D=null;
     origImg=null; imgTexture=null; baseCanvas=null; lassoPts=[]; flipH=!!k.flipH; zetSpiegelUI();
     wandSeeds=(k.wand||[]).slice(); wandKeep=!!k.wandKeep; wandMode=false; zetWandUI(); lassoDragIdx=-1; cutModus='vrij'; drawingFree=false; zetSnijModusUI(); resetZoom(); rot90=k.rot90||0; huidMethode=k.huidMethode||'kleur';
     cmTitle.textContent=tr('ui.tattoo_aanpassen'); cmPlaceBtn.textContent=tr('form.opslaan');
+    vulModalDetails(m.rec);
     bgRemove.checked = (k.bg!==false);
     if(k.thresh!=null) cutThresh.value=k.thresh;
     if(cutSpread) cutSpread.value=(k.spread!=null?k.spread:55);
@@ -10546,19 +10585,21 @@ async function verwijderVoorbeelden() {
     cutModal.classList.add("on"); toonCutInstellingen(false);
     drawPreview(null); drawLasso();
     const im=new Image();
-    im.onload=()=>{ origImg=im; lassoPts=(k.lasso||[]).slice(); toonCutInstellingen(true); rebuildBase(); updateCutout(); drawLasso();
+    im.onload=()=>{ origImg=im; lassoPts=(k.lasso||[]).slice(); toonCutInstellingen(true); toonInfo(true); rebuildBase(); updateCutout(); drawLasso();
       toast(tr('ui.pas_aan_sla_op')); };
     im.onerror=()=>toast(tr('ui.foto_niet_geladen'));
     im.src=k.srcUrl;
   }
   // 2D: opnieuw uitsnijden voor een bestaande 2D-tattoo (sleutel-knop in de 2D-editbar)
   function openCutModalForEdit2D(rec){
-    const k = rec && rec.kunst3d;
+    let k = rec && rec.kunst3d;
+    if(!k || !k.srcUrl){ k = (rec && rec.kunst && rec.kunst.src) ? { srcUrl:rec.kunst.src, bg:false, lasso:[], wand:[] } : null; }   // terugval: 2D-uitsnede als bron
     if(!k || !k.srcUrl){ toast(tr('ui.geen_foto_bewaard')); return; }
     pendingPlace=null; pendingEdit=null; pendingPlace2D=null; pendingNew=null; pendingEdit2D=rec;
     origImg=null; imgTexture=null; baseCanvas=null; lassoPts=[]; flipH=!!k.flipH; zetSpiegelUI();
     wandSeeds=(k.wand||[]).slice(); wandKeep=!!k.wandKeep; wandMode=false; zetWandUI(); lassoDragIdx=-1; cutModus='vrij'; drawingFree=false; zetSnijModusUI(); resetZoom(); rot90=k.rot90||0; huidMethode=k.huidMethode||'kleur';
     cmTitle.textContent=tr('ui.tattoo_aanpassen'); cmPlaceBtn.textContent=tr('form.opslaan');
+    vulModalDetails(rec);
     bgRemove.checked=(k.bg!==false);
     if(k.thresh!=null) cutThresh.value=k.thresh;
     if(cutSpread) cutSpread.value=(k.spread!=null?k.spread:55);
@@ -10567,7 +10608,7 @@ async function verwijderVoorbeelden() {
     cutModal.classList.add("on"); toonCutInstellingen(false); toonInfo(false);
     drawPreview(null); drawLasso();
     const im=new Image();
-    im.onload=()=>{ origImg=im; lassoPts=(k.lasso||[]).slice(); toonCutInstellingen(true); rebuildBase(); updateCutout(); drawLasso(); toast(tr('ui.pas_aan_sla_op')); };
+    im.onload=()=>{ origImg=im; lassoPts=(k.lasso||[]).slice(); toonCutInstellingen(true); toonInfo(true); rebuildBase(); updateCutout(); drawLasso(); toast(tr('ui.pas_aan_sla_op')); };
     im.onerror=()=>toast(tr('ui.foto_niet_geladen'));
     im.src=k.srcUrl;
   }
@@ -10853,7 +10894,7 @@ async function verwijderVoorbeelden() {
     window.__tattiesAdd2D=()=>openCutModalAdd('2d');   // 2D-FAB opent dezelfde toevoeg-flow
     window.__tattiesRecrop2D=(rec)=>openCutModalForEdit2D(rec);   // sleutel-knop 2D: opnieuw uitsnijden
     window.__tattiesConfirm=askConfirm;                // gedeelde bevestig-dialoog (2D-verwijderen)
-    const meerBtn=document.getElementById("cmMeerBtn"); if(meerBtn) meerBtn.onclick=()=>{ const m=document.getElementById("cmMeer"); if(m) m.hidden=!m.hidden; };
+    const meerBtn=document.getElementById("cmMeerBtn"); if(meerBtn) meerBtn.onclick=()=>{ const m=document.getElementById("cmMeer"); if(m){ m.hidden=!m.hidden; meerBtn.setAttribute("aria-expanded", String(!m.hidden)); } };
 
     const FOTO_MAX_DIM=1600, FOTO_MAX_BYTES=30*1024*1024;   // bron verkleinen -> zuinige opslag (srcUrl); + harde grens
     const laadFotoBestand=(input)=>{
@@ -11003,27 +11044,32 @@ async function verwijderVoorbeelden() {
     cmPlaceBtn.onclick=async ()=>{
       if(!imgTexture){ toast(tr('ui.kies_eerst_foto')); return; }
       if(pendingEdit2D){
-        const rec=pendingEdit2D; cutModal.classList.remove("on"); pendingEdit2D=null;
+        const rec=pendingEdit2D;
+        const {naam,info}=leesModalDetails();
+        if(!naam){ const naamEl=document.getElementById("cmNaam"); toast(tr('ui.naam_verplicht'));
+          if(naamEl){ naamEl.setAttribute('aria-invalid','true'); naamEl.focus(); naamEl.addEventListener('input',()=>naamEl.removeAttribute('aria-invalid'),{once:true}); }
+          return; }
+        cutModal.classList.remove("on"); pendingEdit2D=null;
         const cv=imgTexture.image; const src=canvasToPNG(cv,700);
         const aspect=(cv&&cv.width)?(cv.height/cv.width):1;
         if(imgTexture && imgTexture.dispose) imgTexture.dispose(); imgTexture=null;
+        Object.assign(rec,{ naam, artiest:info.artiest, studio:info.studio, stijl:info.stijl, kosten:info.kosten, pijn:info.pijn, datum:info.datum, zituren:info.zituren, accentkleur:info.accentkleur, notities:info.notities });
         rec.kunst=rec.kunst||{}; rec.kunst.src=src; rec.kunst.aspect=aspect;
         rec.kunst3d={ srcUrl:(origImg?origImg.src:null), lasso:lassoPts.slice(), thresh:+cutThresh.value,
                  spread:(cutSpread?+cutSpread.value:55), bgColor:(bgPick?{r:bgPick.r,g:bgPick.g,b:bgPick.b}:null), bg:bgRemove.checked, flipH:flipH, wand:wandSeeds.slice(), wandKeep:wandKeep, huidMethode:huidMethode, rot90:rot90 };
         try{ await saveTattoo(rec); }catch(e){ console.error(e); toast(tr('toast.opslaanmislukt')+(e&&e.message?e.message:tr('ui.fout'))); }
+        if(typeof tattoos!=="undefined"&&Array.isArray(tattoos)){ const j=tattoos.findIndex(x=>x.id===rec.id); if(j>=0)tattoos[j]=rec; }
         if(typeof renderMarkers==="function"){ try{renderMarkers();}catch(_){} }
+        if(typeof window.__tattiesNaBewerk==="function") window.__tattiesNaBewerk(rec.id);   // detailpagina verversen indien open
         toast(tr('ui.tattoo_bijgewerkt'));
         return;
       }
       if(pendingNew){
-        const naamEl=document.getElementById("cmNaam"); const naam=((naamEl&&naamEl.value)||"").trim();
-        if(!naam){ toast(tr('ui.naam_verplicht'));
+        const {naam,info}=leesModalDetails();
+        if(!naam){ const naamEl=document.getElementById("cmNaam"); toast(tr('ui.naam_verplicht'));
           if(naamEl){ naamEl.setAttribute('aria-invalid','true'); naamEl.focus();
             naamEl.addEventListener('input',()=>naamEl.removeAttribute('aria-invalid'),{once:true}); }
           return; }
-        const v=id=>{ const el=document.getElementById(id); return el?el.value:""; };
-        const info={ artiest:v("cmArtiest").trim(), studio:v("cmStudio").trim(), stijl:v("cmStijl").trim(),
-                 kosten:Math.min(1000000,Math.max(0,parseFloat(v("cmKosten"))||0)), pijn:Math.min(5,Math.max(0,parseInt(v("cmPijn"),10)||0)), datum:v("cmDatum") };
         const kunst3d={ srcUrl:(origImg?origImg.src:null), lasso:lassoPts.slice(), thresh:+cutThresh.value,
                  spread:(cutSpread?+cutSpread.value:55), bgColor:(bgPick?{r:bgPick.r,g:bgPick.g,b:bgPick.b}:null), bg:bgRemove.checked, flipH:flipH, wand:wandSeeds.slice(), wandKeep:wandKeep, huidMethode:huidMethode, rot90:rot90 };
         if(addDoel==='2d'){
@@ -11062,15 +11108,22 @@ async function verwijderVoorbeelden() {
         return;
       }
       if(pendingEdit){
-        const m=pendingEdit; cutModal.classList.remove("on"); pendingEdit=null;
+        const m=pendingEdit;
+        const {naam,info}=leesModalDetails();
+        if(!naam){ const naamEl=document.getElementById("cmNaam"); toast(tr('ui.naam_verplicht'));
+          if(naamEl){ naamEl.setAttribute('aria-invalid','true'); naamEl.focus(); naamEl.addEventListener('input',()=>naamEl.removeAttribute('aria-invalid'),{once:true}); }
+          return; }
+        cutModal.classList.remove("on"); pendingEdit=null;
         if(m.tex && m.tex!==imgTexture && m.tex.dispose) m.tex.dispose();   // oude textuur vrijgeven
         m.tex=imgTexture; rebuildMarker(m);
         if(m.rec){
+          Object.assign(m.rec,{ naam, artiest:info.artiest, studio:info.studio, stijl:info.stijl, kosten:info.kosten, pijn:info.pijn, datum:info.datum, zituren:info.zituren, accentkleur:info.accentkleur, notities:info.notities });
           m.rec.kunst3d={ srcUrl:(origImg?origImg.src:null), lasso:lassoPts.slice(), thresh:+cutThresh.value, spread:(cutSpread?+cutSpread.value:55), bgColor:(bgPick?{r:bgPick.r,g:bgPick.g,b:bgPick.b}:null), bg:bgRemove.checked, flipH:flipH, wand:wandSeeds.slice(), wandKeep:wandKeep, huidMethode:huidMethode, rot90:rot90 };
           try{ await saveTattoo(m.rec); toast(tr('ui.tattoo_bijgewerkt')); }
           catch(err){ console.error(err); toast(tr('toast.opslaanmislukt')+(err&&err.message?err.message:tr('ui.fout'))); }
         }
         if(typeof renderMarkers==="function"){ try{renderMarkers();}catch(_){} }
+        if(typeof window.__tattiesNaBewerk==="function") window.__tattiesNaBewerk(m.rec&&m.rec.id);
         imgTexture=null;   // marker bezit de textuur nu
         return;
       }
