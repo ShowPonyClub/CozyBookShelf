@@ -1250,7 +1250,7 @@ form label{text-transform:none;letter-spacing:.005em;font-size:.8rem;color:var(-
             <div class="cutrow cut-tools">
               <div id="cmToolLegend" class="cm-legend" hidden role="group" data-i18n-aria="ui.knop_uitleg" aria-label="Wat doen de knoppen?"></div>
               <div class="ct-left">
-                <button id="cmToolInfo" class="linkbtn cm-toolinfo" aria-pressed="false" data-i18n-title="ui.knop_uitleg" data-i18n-aria="ui.knop_uitleg" title="Wat doen de knoppen?" aria-label="Wat doen de knoppen?"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5"/><path d="M12 7.6h.01"/></svg><span data-i18n="ui.info">Info</span></button>
+                <button id="cmToolInfo" class="linkbtn cm-toolinfo" aria-pressed="false" data-i18n-title="ui.knop_uitleg" data-i18n-aria="ui.knop_uitleg" title="Wat doen de knoppen?" aria-label="Wat doen de knoppen?"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5"/><path d="M12 7.6h.01"/></svg><span class="t-lbl" data-i18n="ui.info">Info</span></button>
               </div>
               <div class="ct-mid">
                 <button id="rotate90Btn" class="linkbtn" data-i18n-title="ui.draaien90" data-i18n-aria="ui.draaien90" title="90&deg; draaien" aria-label="90&deg; draaien"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.3-5.6"/><path d="M21 4v4h-4"/></svg><span class="t-lbl" data-i18n="ui.draaien90">90&deg; draaien</span></button>
@@ -1259,7 +1259,7 @@ form label{text-transform:none;letter-spacing:.005em;font-size:.8rem;color:var(-
                 <button id="lassoUndo" class="linkbtn" data-i18n-title="ui.ongedaan" data-i18n-aria="ui.ongedaan" title="Ongedaan" aria-label="Ongedaan"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 14L4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 5 5v3"/></svg><span class="t-lbl" data-i18n="ui.ongedaan">Ongedaan</span></button>
               </div>
               <div class="ct-right">
-                <button id="cropReset" class="linkbtn" data-i18n-title="ui.reset_uitsnede" data-i18n-aria="ui.reset_uitsnede" title="Reset uitsnede" aria-label="Reset uitsnede"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 9A8 8 0 0 1 18 7"/><path d="M19.5 15A8 8 0 0 1 6 17"/><path d="M18 3v4h-4"/><path d="M6 21v-4h4"/></svg><span data-i18n="ui.reset">Reset</span></button>
+                <button id="cropReset" class="linkbtn" data-i18n-title="ui.reset_uitsnede" data-i18n-aria="ui.reset_uitsnede" title="Reset uitsnede" aria-label="Reset uitsnede"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 9A8 8 0 0 1 18 7"/><path d="M19.5 15A8 8 0 0 1 6 17"/><path d="M18 3v4h-4"/><path d="M6 21v-4h4"/></svg><span class="t-lbl" data-i18n="ui.reset">Reset</span></button>
               </div>
             </div>
           </div>
@@ -9290,6 +9290,7 @@ function isStandalone() {
   return (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) || navigator.standalone === true;
 }
 function toonInstallBanner() {
+  return;   // Tijdelijk uit: homescreen-installatie werkt nog niet in de webtest; banner verbergen voor testers.
   if (installBannerWeg() || isStandalone()) return;
   const onb = document.getElementById('onboarding');
   if (onb && !onb.hidden) return; // wacht tot onboarding afgerond is
@@ -9911,6 +9912,14 @@ async function verwijderVoorbeelden() {
     if(!hits.length) return null;
     return markers.find(m=>m.obj===hits[0].object) || null;
   }
+  /* Raakt het scherm-punt de tattoo die nu bewerkt wordt? (zo niet -> gebaar stuurt de camera) */
+  function onEditDecal(x,y){
+    if(!editDecal||!editDecal.obj) return false;
+    const r=el.getBoundingClientRect();
+    nd.x=((x-r.left)/r.width)*2-1; nd.y=-((y-r.top)/r.height)*2+1;
+    ray.setFromCamera(nd,camera);
+    return ray.intersectObject(editDecal.obj,false).length>0;
+  }
   function dblAt(x,y){
     if(plaatsModus){ plaatsNieuwe(x,y); return; }
     const m=pickDecal(x,y);
@@ -10303,21 +10312,23 @@ async function verwijderVoorbeelden() {
   }
 
   /* ---- besturing (orbit + dubbeltik) ---- */
-  let drag=false,moved=false,lastX=0,lastY=0,downX=0,downY=0,t0=0,pinchD=0,pinchA=null,pinchModel=false,lastTapT=0,pinchMid=null,tapTimer=null;
+  let drag=false,moved=false,lastX=0,lastY=0,downX=0,downY=0,t0=0,pinchD=0,pinchA=null,pinchModel=false,lastTapT=0,pinchMid=null,tapTimer=null,decalDrag=false;
   const TAP_PX=6,TAP_MS=300;
   function dist2(e){const a=e.touches[0],b=e.touches[1];return Math.hypot(a.clientX-b.clientX,a.clientY-b.clientY);}
   function angle2(e){const a=e.touches[0],b=e.touches[1];return Math.atan2(b.clientY-a.clientY,b.clientX-a.clientX);}
   function mid2(e){const a=e.touches[0],b=e.touches[1];return {x:(a.clientX+b.clientX)/2,y:(a.clientY+b.clientY)/2};}
   function bindControls(){
     el.addEventListener("pointerdown",e=>{ if(e.pointerType==="touch")return;
-      drag=true;moved=false;t0=performance.now();lastX=downX=e.clientX;lastY=downY=e.clientY;el.setPointerCapture(e.pointerId);});
+      drag=true;moved=false;t0=performance.now();lastX=downX=e.clientX;lastY=downY=e.clientY;
+      decalDrag = (editDecal && !editDecal.locked) ? onEditDecal(e.clientX,e.clientY) : false;   // op de (ontgrendelde) tattoo gestart? -> verslepen, anders camera
+      el.setPointerCapture(e.pointerId);});
     el.addEventListener("pointermove",e=>{ if(!drag||e.pointerType==="touch")return;
       const dx=e.clientX-lastX,dy=e.clientY-lastY;lastX=e.clientX;lastY=e.clientY;
       if(Math.hypot(e.clientX-downX,e.clientY-downY)>TAP_PX)moved=true;
-      if(editDecal){ moveDecalTo(e.clientX,e.clientY); return; }
+      if(editDecal && decalDrag){ moveDecalTo(e.clientX,e.clientY); return; }   // alleen verslepen als je op de tattoo begon
       theta-=dx*0.008;phi=Math.max(0.15,Math.min(3.0,phi-dy*0.008));applyCam();});
     el.addEventListener("pointerup",e=>{ if(e.pointerType==="touch")return;
-      if(editDecal){ const did=moved; drag=false; if(did) persistEdit(editDecal); return; }
+      if(editDecal){ const did=moved&&decalDrag; drag=false; if(did) persistEdit(editDecal); return; }   // alleen opslaan als de tattoo zelf verplaatst is, niet na orbit/zoom
       const wasTap=!moved && performance.now()-t0<TAP_MS; drag=false;
       if(wasTap){
         if(plaatsModus){ clearTimeout(tapTimer); plaatsNieuwe(e.clientX,e.clientY); return; }
@@ -10325,18 +10336,19 @@ async function verwijderVoorbeelden() {
       }});
     el.addEventListener("dblclick",e=>{ clearTimeout(tapTimer); dblAt(e.clientX,e.clientY); });
     el.addEventListener("wheel",e=>{ e.preventDefault();
-      if(editDecal && surfaceAt(e.clientX,e.clientY)){ scaleDecal(1-e.deltaY*0.001); persistEdit(editDecal); return; }
+      if(editDecal && !editDecal.locked && onEditDecal(e.clientX,e.clientY)){ scaleDecal(1-e.deltaY*0.001); persistEdit(editDecal); return; }
       radius=Math.max(0.6,Math.min(7,radius*(1+e.deltaY*0.0012)));applyCam(); },{passive:false});
     el.addEventListener("touchstart",e=>{
       if(e.touches.length===1){drag=true;moved=false;t0=performance.now();
-        lastX=downX=e.touches[0].clientX;lastY=downY=e.touches[0].clientY;}
+        lastX=downX=e.touches[0].clientX;lastY=downY=e.touches[0].clientY;
+        decalDrag = (editDecal && !editDecal.locked) ? onEditDecal(e.touches[0].clientX,e.touches[0].clientY) : false;}   // op de (ontgrendelde) tattoo? -> verslepen, anders model draaien
       else if(e.touches.length===2){drag=false;pinchD=dist2(e);pinchA=angle2(e);pinchMid=mid2(e);
-        const m=mid2(e); pinchModel = editDecal ? !!surfaceAt(m.x,m.y) : false;}},{passive:false});
+        const m=mid2(e); pinchModel = (editDecal && !editDecal.locked) ? onEditDecal(m.x,m.y) : false;}},{passive:false});   // knijpen op de (ontgrendelde) tattoo? -> schalen, anders lichaam zoomen
     el.addEventListener("touchmove",e=>{ e.preventDefault();
       if(e.touches.length===1&&drag){const x=e.touches[0].clientX,y=e.touches[0].clientY;
         const dx=x-lastX,dy=y-lastY;lastX=x;lastY=y;
         if(Math.hypot(x-downX,y-downY)>TAP_PX)moved=true;
-        if(editDecal){ moveDecalTo(x,y); return; }
+        if(editDecal && decalDrag){ moveDecalTo(x,y); return; }   // alleen verslepen als je op de tattoo begon
         theta-=dx*0.008;phi=Math.max(0.15,Math.min(3.0,phi-dy*0.008));applyCam();}
       else if(e.touches.length===2){const d=dist2(e),a=angle2(e),m2=mid2(e);
         if(editDecal && pinchModel){ if(pinchD) scaleDecal(d/pinchD); if(pinchA!=null) rotateDecal(-(a-pinchA)*180/Math.PI); pinchD=d; pinchA=a; pinchMid=m2; return; }
@@ -10345,7 +10357,7 @@ async function verwijderVoorbeelden() {
         pinchD=d; pinchMid=m2; applyCam();}},{passive:false});
     el.addEventListener("touchend",e=>{
       const ct=e.changedTouches[0], wasTap=drag&&!moved&&performance.now()-t0<TAP_MS;
-      if(editDecal){ const did=moved; drag=false;pinchD=0;pinchA=null;pinchMid=null;pinchModel=false; if(did||!wasTap) persistEdit(editDecal); return; }
+      if(editDecal){ const did=(moved&&decalDrag)||pinchModel; drag=false;pinchD=0;pinchA=null;pinchMid=null;pinchModel=false; if(did) persistEdit(editDecal); return; }   // opslaan alleen na tattoo verplaatsen/schalen, niet na orbit/zoom/pan
       if(wasTap&&ct){
         if(plaatsModus){ clearTimeout(tapTimer); plaatsNieuwe(ct.clientX,ct.clientY); lastTapT=0; drag=false;pinchD=0;pinchMid=null; return; }
         const now=performance.now();
