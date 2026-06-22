@@ -1135,7 +1135,7 @@ form label{text-transform:none;letter-spacing:.005em;font-size:.8rem;color:var(-
         <button type="button" data-modus="wens" data-i18n="col.wishlist">Wishlist</button>
       </div>
       <div class="zoek-rij">
-        <input type="search" id="zoek" data-i18n-ph="zoek.ph" placeholder="Zoek op naam, artiest of stijl" data-i18n-aria="aria.zoeken" aria-label="Zoeken">
+        <input type="search" id="zoek" maxlength="100" data-i18n-ph="zoek.ph" placeholder="Zoek op naam, artiest of stijl" data-i18n-aria="aria.zoeken" aria-label="Zoeken">
         <select id="sorteer" data-i18n-aria="aria.sorteren" aria-label="Sorteren">
           <option value="datum-nieuw" data-i18n="sort.datumnieuw">Nieuwste eerst</option>
           <option value="datum-oud" data-i18n="sort.datumoud">Oudste eerst</option>
@@ -1221,11 +1221,11 @@ form label{text-transform:none;letter-spacing:.005em;font-size:.8rem;color:var(-
               <input id="cmNaam" type="text" maxlength="80" autocomplete="off"></label>
             <button type="button" id="cmMeerBtn" class="linkbtn" aria-expanded="false"><span data-i18n="ui.meer_details">Meer details</span><svg class="cm-chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
             <div id="cmMeer" hidden>
-              <label class="cm-veld"><span data-i18n="form.artiest">Artiest</span><input id="cmArtiest" type="text"></label>
-              <label class="cm-veld"><span data-i18n="form.studio">Studio</span><input id="cmStudio" type="text"></label>
-              <label class="cm-veld"><span data-i18n="form.stijl">Stijl</span><input id="cmStijl" type="text"></label>
+              <label class="cm-veld"><span data-i18n="form.artiest">Artiest</span><input id="cmArtiest" type="text" maxlength="120"></label>
+              <label class="cm-veld"><span data-i18n="form.studio">Studio</span><input id="cmStudio" type="text" maxlength="120"></label>
+              <label class="cm-veld"><span data-i18n="form.stijl">Stijl</span><input id="cmStijl" type="text" maxlength="120"></label>
               <div class="cm-rij2">
-                <label class="cm-veld"><span data-i18n="form.kosten">Kosten</span><span class="kosten-veld"><span class="valuta-prefix" id="cmKostenSym">&euro;</span><input id="cmKosten" type="number" min="0" step="0.01" inputmode="decimal"></span></label>
+                <label class="cm-veld"><span data-i18n="form.kosten">Kosten</span><span class="kosten-veld"><span class="valuta-prefix" id="cmKostenSym">&euro;</span><input id="cmKosten" type="number" min="0" max="1000000" step="0.01" inputmode="decimal"></span></label>
                 <label class="cm-veld"><span data-i18n="form.datum">Datum</span><input id="cmDatum" type="date"></label>
               </div>
               <div class="cm-rij2">
@@ -1238,7 +1238,7 @@ form label{text-transform:none;letter-spacing:.005em;font-size:.8rem;color:var(-
                     <button type="button" class="druppel" data-waarde="5" aria-label="5/5"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3s-6 7-6 11a6 6 0 0 0 12 0c0-4-6-11-6-11z"/></svg></button>
                   </div>
                 </div>
-                <label class="cm-veld"><span data-i18n="form.zituren">Zituren</span><input id="cmZituren" type="number" min="0" step="0.5" inputmode="decimal"></label>
+                <label class="cm-veld"><span data-i18n="form.zituren">Zituren</span><input id="cmZituren" type="number" min="0" max="100000" step="0.5" inputmode="decimal"></label>
               </div>
               <label class="cm-veld"><span data-i18n="form.notities">Notities</span><textarea id="cmNotities" maxlength="2000" rows="2"></textarea></label>
               <label class="cm-veld"><span data-i18n="form.accentkleur">Accentkleur van markering</span><small class="veld-hint" data-i18n="form.accentuitleg">Gebruikt als je geen tattoo-afbeelding toevoegt</small><input id="cmAccent" type="color" value="#8E71F0" style="width:64px;height:40px;padding:4px;border-radius:10px;cursor:pointer"></label>
@@ -8224,8 +8224,8 @@ function renderDetail() {
       ${sessieItems || '<p class="gedempt">' + tr('sessie.geen') + '</p>'}
       <div class="inline-form">
         <input type="date" id="ns-datum" aria-label="${tr('aria.sessiedatum')}">
-        <input type="number" id="ns-duur" min="0" step="0.5" placeholder="${tr('sessie.duurph')}" aria-label="${tr('aria.duururen')}">
-        <input type="text" id="ns-notities" class="breed" placeholder="${tr('woord.notitiesopt')}">
+        <input type="number" id="ns-duur" min="0" max="100000" step="0.5" placeholder="${tr('sessie.duurph')}" aria-label="${tr('aria.duururen')}">
+        <input type="text" id="ns-notities" class="breed" maxlength="500" placeholder="${tr('woord.notitiesopt')}">
         <button class="knop-sec breed" id="ns-toevoegen">${tr('sessie.toevoegen')}</button>
       </div>
 
@@ -8233,7 +8233,7 @@ function renderDetail() {
       ${touchUpItems || '<p class="gedempt">' + tr('sessie.geentouchups') + '</p>'}
       <div class="inline-form">
         <input type="date" id="nt-datum" class="breed" aria-label="${tr('aria.touchupdatum')}">
-        <input type="text" id="nt-notities" class="breed" placeholder="${tr('woord.notitiesopt')}">
+        <input type="text" id="nt-notities" class="breed" maxlength="500" placeholder="${tr('woord.notitiesopt')}">
         <button class="knop-sec breed" id="nt-toevoegen">${tr('sessie.touchuptoevoegen')}</button>
       </div>`;
   } else {
@@ -8267,7 +8267,7 @@ function renderDetail() {
         <p class="sectiekop">${tr('nazorg.checklist')}</p>
         ${taken || '<p class="gedempt">' + tr('nazorg.geentaken') + '</p>'}
         <div class="inline-form">
-          <input type="text" id="taak-tekst" class="breed" placeholder="${tr('nazorg.taakph')}">
+          <input type="text" id="taak-tekst" class="breed" maxlength="200" placeholder="${tr('nazorg.taakph')}">
           <button class="knop-sec" id="taak-toevoegen">${tr('nazorg.taak')}</button>
           <button class="knop-sec" id="taak-standaard">${tr('nazorg.standaard')}</button>
         </div>
@@ -8337,10 +8337,10 @@ function renderDetail() {
   if (detailTab === 'sessies' && !isWens) {
     $('#ns-toevoegen').addEventListener('click', async () => {
       const datum = $('#ns-datum').value;
-      const duur = parseFloat($('#ns-duur').value);
+      const duur = Math.max(0, Math.min(100000, parseFloat($('#ns-duur').value) || 0));   // clamp: geen negatieve/absurde uren
       if (!datum) { toast(tr('toast.kiessessiedatum')); return; }
       t.sessies = t.sessies || [];
-      t.sessies.push(createSessie(datum, isNaN(duur) ? 0 : duur, $('#ns-notities').value.trim()));
+      t.sessies.push(createSessie(datum, duur, $('#ns-notities').value.trim()));
       await bewaarEnVerversDetail(t);
       toast(tr('toast.sessietoegevoegd'));
     });
@@ -8542,11 +8542,11 @@ function openFormulier(id = null) {
       <div class="rij2">
         <div class="veld">
           <label for="f-kosten" id="f-kosten-label">${tr('form.kosten')}</label>
-          <input id="f-kosten" type="number" min="0" step="0.01" inputmode="decimal" value="${t.kosten || ''}">
+          <input id="f-kosten" type="number" min="0" max="1000000" step="0.01" inputmode="decimal" value="${t.kosten || ''}">
         </div>
         <div class="veld">
           <label for="f-zituren">${tr('form.zituren')}</label>
-          <input id="f-zituren" type="number" min="0" step="0.5" inputmode="decimal" value="${t.zituren || ''}">
+          <input id="f-zituren" type="number" min="0" max="100000" step="0.5" inputmode="decimal" value="${t.zituren || ''}">
         </div>
       </div>
       <div class="veld">
