@@ -264,6 +264,10 @@ main > section{animation:opkomen .3s ease both}
 .silhouet-keuze button:disabled{opacity:.4;cursor:not-allowed}
 .inst-soon{display:inline-block;margin-left:8px;padding:1px 8px;border-radius:999px;background:var(--veldbg);border:1px solid var(--rand);color:var(--gedempt);font-size:.66rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase;vertical-align:middle}
 .bouw-melding{margin:0 auto 10px;max-width:520px;padding:8px 14px;border-radius:12px;background:rgba(224,83,61,.12);border:1px solid rgba(224,83,61,.4);color:var(--tekst);font-size:.82rem;font-weight:600;text-align:center}
+.stat-toggle{background:none;border:0;padding:0;font:inherit;color:inherit;cursor:pointer;border-bottom:1px dotted var(--gedempt);line-height:1.1;}
+.stat-toggle:hover{color:var(--accent);border-bottom-color:var(--accent);}
+.start-stat-getal.klikbaar{cursor:pointer;display:inline-block;border-bottom:2px dotted currentColor;line-height:1.05;}
+.start-stat-getal.klikbaar:hover{opacity:.78;}
 /* Twee compacte keuze-kolommen naast elkaar (man/vrouw + taal) */
 .inst-duo{display:flex;gap:14px;align-items:flex-start}
 .inst-duo-kol{flex:1;min-width:0}
@@ -1191,7 +1195,7 @@ form label{text-transform:none;letter-spacing:.005em;font-size:.8rem;color:var(-
         <div class="cm-body">
           <span id="cmTitle" class="visueel-verborgen" data-i18n="ui.tattoo_toevoegen">Tattoo toevoegen</span>
           <div class="cm-toprow">
-            <button class="btn cm-choose" id="cmChoose">&#128247; <span data-i18n="ui.foto_toevoegen">Foto/tattoo toevoegen</span></button>
+            <button class="btn cm-choose" id="cmChoose">&#128247; <span data-i18n="ui.foto_toevoegen">Tattoo toevoegen</span></button>
             <button id="cmCancel" class="cm-x" data-i18n-title="form.annuleren" data-i18n-aria="form.annuleren" title="Annuleer" aria-label="Annuleer">&times;</button>
           </div>
           <input type="file" id="imgInput" accept="image/*" style="display:none">
@@ -1314,6 +1318,15 @@ form label{text-transform:none;letter-spacing:.005em;font-size:.8rem;color:var(-
       <button type="button" data-shape="gemiddeld" data-i18n="inst.vorm.gemiddeld" disabled>Gemiddeld</button>
       <button type="button" data-shape="atletisch" data-i18n="inst.vorm.atletisch" disabled>Atletisch</button>
       <button type="button" data-shape="zwaar" data-i18n="inst.vorm.zwaar" disabled>Zwaar</button>
+    </div>
+  </div>
+
+  <div class="inst-sectie">
+    <p class="inst-label" data-i18n="inst.valuta">Valuta</p>
+    <div class="silhouet-keuze compact" id="valuta-keuze" role="group" data-i18n-aria="inst.valuta" aria-label="Valuta">
+      <button type="button" data-valuta="EUR">&euro; EUR</button>
+      <button type="button" data-valuta="USD">$ USD</button>
+      <button type="button" data-valuta="GBP">&pound; GBP</button>
     </div>
   </div>
 
@@ -6265,7 +6278,7 @@ const I18N = {
     'start.leeg_uitleg':'Plan of bewaar je volgende tattoo.',
     'start.kies_titel':'Tattoo toevoegen','start.kies_3d':'Op het 3D-model','start.kies_3d_sub':'Plaats op het draaibare lichaam',
     'start.kies_2d':'Op de 2D-kaart','start.kies_2d_sub':'Plaats op de platte voor/achter-kaart',
-    'ui.foto_maken':'Foto maken','ui.foto_uploaden':'Foto uploaden','ui.foto_toevoegen':'Foto/tattoo toevoegen','ui.andere_foto':'Andere foto','ui.plaatsen':'Plaatsen',
+    'ui.foto_maken':'Foto maken','ui.foto_uploaden':'Foto uploaden','ui.foto_toevoegen':'Tattoo toevoegen','ui.andere_foto':'Andere foto','ui.plaatsen':'Plaatsen',
     'ui.reset_uitsnede':'Reset uitsnede','ui.spiegelen':'Spiegelen','ui.achtergrond_weghalen':'Achtergrond weghalen',
     'ui.toverstaf':'Toverstaf','ui.ongedaan':'Ongedaan',
     'ui.tik_uitknippen':'Tik op het deel dat je wilt weghalen','ui.toverstaf_uit':'Toverstaf uit',
@@ -6323,7 +6336,8 @@ const I18N = {
     'stats.aantalwensen':'Aantal wensen','stats.budget':'Gepland budget','stats.geendata':'Nog geen data.',
     'woord.onbekend':'Onbekend','woord.van':'van','woord.gepland':'gepland','woord.budget':'budget',
     'woord.wensen':'wensen','woord.tattoos':'tattoos','woord.dag':'dag','woord.dagen':'dagen',
-    'woord.notitiesopt':'Notities (optioneel)','woord.onbekendefout':'onbekende fout','eenheid.uur':'u',
+    'woord.notitiesopt':'Notities (optioneel)','woord.onbekendefout':'onbekende fout','eenheid.uur':'u','eenheid.min':'min',
+    'stats.wissel_eenheid':'Klik om te wisselen tussen uren en minuten','inst.valuta':'Valuta',
     'lijst.geenresultaten':'Geen resultaten voor je zoekopdracht.',
     'lijst.geenopzone':'Geen {soort} op {zone}.',
     'lijst.legewishlist':'Je wishlist is nog leeg - voeg je eerste droomtattoo toe.',
@@ -6349,7 +6363,7 @@ const I18N = {
     'form.type':'Type','form.gezet':'Gezet','form.wishlist':'Wishlist','form.naam':'Naam','form.datum':'Datum',
     'form.geplandedatum':'Geplande datum','form.lichaamsdeel':'Lichaamsdeel','form.kies':'Kies…',
     'form.fout':'Vul de verplichte velden in.','form.artiest':'Artiest','form.studio':'Studio','form.stijl':'Stijl',
-    'form.geenstijl':'Geen / onbekend','form.kosten':'Kosten (€)','form.budget':'Budget (€)','form.zituren':'Zituren','form.pijn':'Pijnscore (1–5)','form.geenpijn':'Geen / onbekend',
+    'form.geenstijl':'Geen / onbekend','form.kosten':'Kosten','form.budget':'Budget','form.zituren':'Zituren','form.pijn':'Pijnscore (1–5)','form.geenpijn':'Geen / onbekend',
     'form.nazorg':'Nazorg','form.notities':'Notities','form.statusprefix':'Status:','form.accentkleur':'Accentkleur van markering','form.accentuitleg':'Gebruikt als je geen tattoo-afbeelding toevoegt',
     'form.plekuitleg':'Plek op het lichaam - kies de kant en tik om te markeren; het lichaamsdeel wordt automatisch gekozen',
     'form.helelichaam':'Hele lichaam','form.inzoomen':'Inzoomen op plek','form.wismarkering':'Markering wissen',
@@ -6431,7 +6445,7 @@ const I18N = {
     'start.leeg_uitleg':'Plan or save your next tattoo.',
     'start.kies_titel':'Add tattoo','start.kies_3d':'On the 3D model','start.kies_3d_sub':'Place on the rotatable body',
     'start.kies_2d':'On the 2D map','start.kies_2d_sub':'Place on the flat front/back map',
-    'ui.foto_maken':'Take photo','ui.foto_uploaden':'Upload photo','ui.foto_toevoegen':'Add photo/tattoo','ui.andere_foto':'Other photo','ui.plaatsen':'Place',
+    'ui.foto_maken':'Take photo','ui.foto_uploaden':'Upload photo','ui.foto_toevoegen':'Add tattoo','ui.andere_foto':'Other photo','ui.plaatsen':'Place',
     'ui.reset_uitsnede':'Reset cut-out','ui.spiegelen':'Mirror','ui.achtergrond_weghalen':'Remove background',
     'ui.toverstaf':'Magic wand','ui.ongedaan':'Undo',
     'ui.tik_uitknippen':'Tap the part you want to remove','ui.toverstaf_uit':'Magic wand off',
@@ -6489,7 +6503,8 @@ const I18N = {
     'stats.aantalwensen':'Number of wishes','stats.budget':'Planned budget','stats.geendata':'No data yet.',
     'woord.onbekend':'Unknown','woord.van':'of','woord.gepland':'planned','woord.budget':'budget',
     'woord.wensen':'wishes','woord.tattoos':'tattoos','woord.dag':'day','woord.dagen':'days',
-    'woord.notitiesopt':'Notes (optional)','woord.onbekendefout':'unknown error','eenheid.uur':'h',
+    'woord.notitiesopt':'Notes (optional)','woord.onbekendefout':'unknown error','eenheid.uur':'h','eenheid.min':'min',
+    'stats.wissel_eenheid':'Click to switch between hours and minutes','inst.valuta':'Currency',
     'lijst.geenresultaten':'No results for your search.',
     'lijst.geenopzone':'No {soort} on {zone}.',
     'lijst.legewishlist':'Your wishlist is empty - add your first dream tattoo.',
@@ -6515,7 +6530,7 @@ const I18N = {
     'form.type':'Type','form.gezet':'Done','form.wishlist':'Wishlist','form.naam':'Name','form.datum':'Date',
     'form.geplandedatum':'Planned date','form.lichaamsdeel':'Body part','form.kies':'Choose…',
     'form.fout':'Please fill in the required fields.','form.artiest':'Artist','form.studio':'Studio','form.stijl':'Style',
-    'form.geenstijl':'None / unknown','form.kosten':'Cost (€)','form.budget':'Budget (€)','form.zituren':'Sitting hours','form.pijn':'Pain score (1–5)','form.geenpijn':'None / unknown',
+    'form.geenstijl':'None / unknown','form.kosten':'Cost','form.budget':'Budget','form.zituren':'Sitting hours','form.pijn':'Pain score (1–5)','form.geenpijn':'None / unknown',
     'form.nazorg':'Aftercare','form.notities':'Notes','form.statusprefix':'Status:','form.accentkleur':'Marker accent colour','form.accentuitleg':'Used when you don’t add a tattoo image',
     'form.plekuitleg':'Spot on the body - pick the side and tap to mark; the body part is chosen automatically',
     'form.helelichaam':'Whole body','form.inzoomen':'Zoom in on spot','form.wismarkering':'Clear marker',
@@ -6572,7 +6587,7 @@ function pasTaal(lang){
   taal = (lang === 'en') ? 'en' : 'nl';
   try { localStorage.setItem('tatties-taal', taal); } catch { /* geen voorkeur */ }
   document.documentElement.lang = taal;
-  euro = new Intl.NumberFormat(taal === 'en' ? 'en-IE' : 'nl-NL', { style: 'currency', currency: 'EUR' });
+  bouwEuro();
   vertaalStatisch();
   document.querySelectorAll('#taal-keuze button[data-taal]').forEach(b => b.classList.toggle('actief', b.dataset.taal === taal));
   if (typeof tekenTinten === 'function') tekenTinten();   // huidskleur-aria's mee in de nieuwe taal
@@ -6582,6 +6597,19 @@ function pasTaal(lang){
   else if (huidigeView === 'form') openFormulier(bewerkId);   // formulier (template-strings) opnieuw in de nieuwe taal
   if (typeof renderSamenvatting === 'function') renderSamenvatting();
   if (typeof toonOpslagInfo === 'function') toonOpslagInfo();
+}
+
+/* Valuta wisselen (instellingen): formatter herbouwen + bedragen in de actieve view verversen. */
+function zetValuta(code) {
+  if (code !== 'EUR' && code !== 'USD' && code !== 'GBP') return;
+  valuta = code;
+  try { localStorage.setItem('tatties-valuta', code); } catch { /* geen voorkeur */ }
+  bouwEuro();
+  document.querySelectorAll('#valuta-keuze button[data-valuta]').forEach(b => b.classList.toggle('actief', b.dataset.valuta === valuta));
+  if (huidigeView === 'collectie') renderLijst();
+  else if (huidigeView === 'stats') openStats();
+  else if (huidigeView === 'detail') renderDetail();
+  if (typeof renderSamenvatting === 'function') renderSamenvatting();
 }
 
 /* ---- Weergave / thema (auto · licht · donker) ----
@@ -6945,7 +6973,12 @@ function fmtDatum(iso) {
   }
   return `${d}-${m}-${j}`;
 }
-let euro = new Intl.NumberFormat(taal === 'en' ? 'en-IE' : 'nl-NL', { style: 'currency', currency: 'EUR' });
+let valuta = 'EUR';
+try { const _v = localStorage.getItem('tatties-valuta'); if (_v === 'EUR' || _v === 'USD' || _v === 'GBP') valuta = _v; } catch { /* geen voorkeur */ }
+function valutaLocale() { return valuta === 'USD' ? 'en-US' : valuta === 'GBP' ? 'en-GB' : (taal === 'en' ? 'en-IE' : 'nl-NL'); }
+let euro;
+function bouwEuro() { euro = new Intl.NumberFormat(valutaLocale(), { style: 'currency', currency: valuta }); }
+bouwEuro();
 
 let toastTimer = null;
 function toast(tekst) {
@@ -7002,6 +7035,14 @@ window.__plaatsHintAan = function () {
 };
 window.__plaatsHintUit = function () { const h = document.getElementById('plaats-hint'); if (h) h.hidden = true; };
 
+/* 'Totale zituren' kan tussen uren en minuten wisselen (klik) - gedeeld door startscherm + stats. */
+let statZiturenMin = false;
+function ziturenLabel(uren) {
+  return statZiturenMin
+    ? (Math.round(uren * 60) + ' ' + tr('eenheid.min'))
+    : ((Math.round(uren * 10) / 10).toString().replace('.', ',') + ' ' + tr('eenheid.uur'));
+}
+
 /* Korte samenvatting (aantallen) op het startscherm */
 function renderSamenvatting() {
   const gezet = tattoos.filter(t => t.status !== 'wens').length;
@@ -7033,11 +7074,18 @@ function renderStart() {
   const totKosten = gezet.reduce((s, t) => s + (Number(t.kosten) || 0), 0);
   const cellen = [
     { g: tattoos.length, l: tr('start.stat_aantal') },
-    { g: totUren + ' ' + tr('eenheid.uur'), l: tr('stats.zituren') },
+    { g: ziturenLabel(totUren), l: tr('stats.zituren'), id: 'home-zituren', titel: tr('stats.wissel_eenheid') },
     { g: euro.format(totKosten), l: tr('stats.uitgegeven') },
   ];
-  statsEl.innerHTML = cellen.map(s =>
-    `<div class="start-stat"><span class="start-stat-getal">${esc(String(s.g))}</span><span class="start-stat-label">${esc(s.l)}</span></div>`).join('');
+  statsEl.innerHTML = cellen.map(s => {
+    const getal = s.id
+      ? `<span class="start-stat-getal klikbaar" id="${s.id}" role="button" tabindex="0" title="${esc(s.titel || '')}" aria-label="${esc(s.titel || '')}">${esc(String(s.g))}</span>`
+      : `<span class="start-stat-getal">${esc(String(s.g))}</span>`;
+    return `<div class="start-stat">${getal}<span class="start-stat-label">${esc(s.l)}</span></div>`;
+  }).join('');
+  { const hz = $('#home-zituren'); if (hz) { const tog = () => { statZiturenMin = !statZiturenMin; hz.textContent = ziturenLabel(totUren); };
+      hz.addEventListener('click', tog);
+      hz.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); tog(); } }); } }
   const rec = $('#start-recent');
   if (rec) {
     rec.innerHTML = tattoos.slice(0, 3).map(t => {
@@ -7914,6 +7962,7 @@ function openStats() {
   const som = (lijst, f) => lijst.reduce((s, t) => s + (Number(f(t)) || 0), 0);
   const sessieUren = (t) => (t.sessies || []).reduce((s, x) => s + (Number(x.duurUren) || 0), 0);
   const totUren = gezet.reduce((s, t) => s + Math.max(Number(t.zituren) || 0, sessieUren(t)), 0);
+  const ziturenStr = () => ziturenLabel(totUren);
   const groepeer = (lijst, f) => {
     const m = {};
     for (const t of lijst) { const k = f(t) || tr('woord.onbekend'); m[k] = (m[k] || 0) + 1; }
@@ -7953,7 +8002,7 @@ function openStats() {
     ${blok(tr('stats.collectie'),
       rij(tr('stats.aantal'), gezet.length) +
       rij(tr('stats.uitgegeven'), euro.format(som(gezet, t => t.kosten))) +
-      rij(tr('stats.zituren'), totUren + ' ' + tr('eenheid.uur')) +
+      rij(tr('stats.zituren'), `<button type="button" class="stat-toggle" id="stat-zituren" title="${esc(tr('stats.wissel_eenheid'))}" aria-label="${esc(tr('stats.wissel_eenheid'))}">${ziturenStr()}</button>`) +
       (gemPijn ? rij(tr('stats.gempijn'), pijnSterren(Math.round(gemPijn), true) + ' ' + gemPijn.toFixed(1).replace('.', ',') + '/5') : '') +
       rij(tr('stats.geheeld'), gezet.filter(t => t.geheeld).length + ' ' + tr('woord.van') + ' ' + gezet.length))}
     ${blok('Hoogtepunten',
@@ -7968,6 +8017,7 @@ function openStats() {
       rij(tr('stats.budget'), euro.format(som(wens, t => t.kosten))))}
   `;
   $('#s-terug').addEventListener('click', () => toonView('home'));
+  { const zt = $('#stat-zituren'); if (zt) zt.addEventListener('click', () => { statZiturenMin = !statZiturenMin; zt.textContent = ziturenStr(); }); }
   document.querySelectorAll('#stats-samenvatting .samenvat-kaart').forEach((b) =>
     b.addEventListener('click', () => {
       lijstModus = b.dataset.modus;
@@ -9541,6 +9591,10 @@ async function verwijderVoorbeelden() {
   document.querySelectorAll('#taal-keuze button[data-taal]').forEach((b) =>
     b.addEventListener('click', () => pasTaal(b.dataset.taal)));
   pasTaal(taal);
+  document.querySelectorAll('#valuta-keuze button[data-valuta]').forEach((b) => {
+    b.classList.toggle('actief', b.dataset.valuta === valuta);
+    b.addEventListener('click', () => zetValuta(b.dataset.valuta));
+  });
   document.querySelectorAll('#thema-keuze button[data-thema]').forEach((b) =>
     b.addEventListener('click', () => pasThema(b.dataset.thema)));
   pasThema(themaVoorkeur);
