@@ -683,6 +683,7 @@ input[type=range]:focus{box-shadow:none;border:none}
 #inst-paneel{
   position:fixed;bottom:0;left:0;right:0;z-index:41;
   max-width:560px;margin:0 auto;
+  max-height:92vh;overflow-y:auto;-webkit-overflow-scrolling:touch;   /* langer dan het scherm? -> scrollen i.p.v. de kop buiten beeld duwen */
   background:var(--kaart);border-radius:20px 20px 0 0;
   border-top:1px solid var(--rand);
   padding:0 0 env(safe-area-inset-bottom,16px);
