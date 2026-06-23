@@ -341,9 +341,9 @@ main > section{animation:opkomen .3s ease both}
 /* ---- Lijst-tools ---- */
 .lijst-tools{display:flex;flex-direction:column;gap:10px;margin-bottom:12px}
 .lijst-tools .silhouet-keuze{align-self:center}
-.zoek-rij{display:flex;gap:8px}
-.zoek-rij input{flex:1.4}
-.zoek-rij select{flex:1;min-width:0}
+.zoek-rij{display:flex;flex-direction:column;gap:8px}
+.zoek-rij input{width:100%}
+.zoek-rij select{width:100%;min-width:0}
 
 /* ---- Tattoo-kaarten ---- */
 #tattoo-list{display:flex;flex-direction:column;gap:10px}
@@ -1141,7 +1141,7 @@ form label{text-transform:none;letter-spacing:.005em;font-size:.8rem;color:var(-
       <button class="icoonknop" id="c-terug" data-i18n-aria="aria.terug" aria-label="Terug">←</button>
       <h2 data-i18n="col.titel">Collectie &amp; Wishlist</h2>
     </div>
-    <p class="pagina-sub" data-i18n="sub.collectie">Al je gezette tattoos en je wishlist op één plek - zoek en sorteer ze hier.</p>
+    <p class="pagina-sub" data-i18n="sub.collectie">Al je tattoos en je wishlist op één plek - zoek en sorteer ze hier.</p>
     <div class="lijst-tools">
       <div class="silhouet-keuze" role="group" data-i18n-aria="aria.colofwens" aria-label="Collectie of wishlist">
         <button type="button" data-modus="gezet" class="actief" data-i18n="col.collectie">Collectie</button>
@@ -6318,7 +6318,7 @@ const I18N = {
     'uitleg.2d3':'<strong>Bewerken:</strong> dubbelklik op een tattoo voor het bewerkmenu (ook opnieuw uitsnijden of verwijderen); één tik opent de details.',
     'uitleg.2d4':'<strong>Inzoomen:</strong> tik op een lichaamsdeel om in te zoomen (cirkelknop linksboven = terug) en wissel voor/achter met de knoppen onder de kaart.',
     'uitleg.2d5':'<strong>Wisselen:</strong> gebruik de 2D/3D-knop bovenaan voor het 3D-model.',
-    'sub.collectie':'Al je gezette tattoos en je wishlist op één plek - zoek en sorteer ze hier.',
+    'sub.collectie':'Al je tattoos en je wishlist op één plek - zoek en sorteer ze hier.',
     'sub.stats':'Een overzicht van je collectie in cijfers - aantallen, kosten, stijlen en meer.',
     'feedback':'show me your tatties · stuur mij alle eerlijke feedback',
     'start.titel':'Welkom terug','start.tagline':'show me your tatties','start.nieuw':'+ Nieuwe tattoo',
@@ -6485,7 +6485,7 @@ const I18N = {
     'uitleg.2d3':'<strong>Edit:</strong> double-tap a tattoo for the edit menu (recrop or delete too); a single tap opens the details.',
     'uitleg.2d4':'<strong>Zoom in:</strong> tap a body part to zoom in (circle button top-left = back) and switch front/back with the buttons under the map.',
     'uitleg.2d5':'<strong>Switch:</strong> use the 2D/3D button at the top for the 3D model.',
-    'sub.collectie':'All your done tattoos and your wishlist in one place - search and sort them here.',
+    'sub.collectie':'All your tattoos and your wishlist in one place - search and sort them here.',
     'sub.stats':'An overview of your collection in numbers - counts, costs, styles and more.',
     'feedback':'show me your tatties · send me all your honest feedback',
     'start.titel':'Welcome back','start.tagline':'show me your tatties','start.nieuw':'+ New tattoo',
