@@ -1384,8 +1384,8 @@ form label{text-transform:none;letter-spacing:.005em;font-size:.8rem;color:var(-
     </div>
   </div>
 
-  <div class="inst-sectie">
-    <p class="inst-label" data-i18n="inst.onderbroek">Onderbroek (man)</p>
+  <div class="inst-sectie" id="inst-onderbroek-sectie">
+    <p class="inst-label" data-i18n="inst.onderbroek">Onderbroek</p>
     <div class="silhouet-keuze compact" id="onderbroek-keuze" role="group" data-i18n-aria="inst.onderbroek" aria-label="Onderbroek">
       <button type="button" data-onderbroek="geen" data-i18n="onderbroek.geen">Geen</button>
       <button type="button" data-onderbroek="boxer" data-i18n="onderbroek.boxer">Boxer &#9829;</button>
@@ -6411,7 +6411,7 @@ const I18N = {
     'woord.wensen':'wensen','woord.tattoos':'tattoos','woord.dag':'dag','woord.dagen':'dagen',
     'woord.notitiesopt':'Notities (optioneel)','woord.onbekendefout':'onbekende fout','eenheid.uur':'u','eenheid.min':'min',
     'stats.wissel_eenheid':'Klik om te wisselen tussen uren en minuten','inst.valuta':'Valuta',
-    'inst.onderbroek':'Onderbroek (man)','onderbroek.geen':'Geen','onderbroek.boxer':'Boxer ♥','onderbroek.brief':'Strak',
+    'inst.onderbroek':'Onderbroek','onderbroek.geen':'Geen','onderbroek.boxer':'Boxer ♥','onderbroek.brief':'Strak',
     'lijst.geenresultaten':'Geen resultaten voor je zoekopdracht.',
     'lijst.geenopzone':'Geen {soort} op {zone}.',
     'lijst.legewishlist':'Je wishlist is nog leeg - voeg je eerste droomtattoo toe.',
@@ -6579,7 +6579,7 @@ const I18N = {
     'woord.wensen':'wishes','woord.tattoos':'tattoos','woord.dag':'day','woord.dagen':'days',
     'woord.notitiesopt':'Notes (optional)','woord.onbekendefout':'unknown error','eenheid.uur':'h','eenheid.min':'min',
     'stats.wissel_eenheid':'Click to switch between hours and minutes','inst.valuta':'Currency',
-    'inst.onderbroek':'Underwear (male)','onderbroek.geen':'None','onderbroek.boxer':'Boxer ♥','onderbroek.brief':'Brief',
+    'inst.onderbroek':'Underwear','onderbroek.geen':'None','onderbroek.boxer':'Boxer ♥','onderbroek.brief':'Brief',
     'lijst.geenresultaten':'No results for your search.',
     'lijst.geenopzone':'No {soort} on {zone}.',
     'lijst.legewishlist':'Your wishlist is empty - add your first dream tattoo.',
@@ -11638,7 +11638,9 @@ async function verwijderVoorbeelden() {
   /* ---- 3D gekoppeld aan de host-instellingen (man/vrouw + huidskleur) ---- */
   function applySkin3D(hex){ if(hex && skinMat){ skinMat.color.set(hex); skinMat.color.convertSRGBToLinear(); } }
   function setSkin3D(hex){ if(hex){ pendingSkin=hex; applySkin3D(hex); } }
-  function setGender3D(g){ g=(g==="vrouw")?"vrouw":"man"; if(inited){ if(g!==currentGender) loadEmbedded(g); } else { currentGender=g; } }
+  function setGender3D(g){ g=(g==="vrouw")?"vrouw":"man"; if(inited){ if(g!==currentGender) loadEmbedded(g); } else { currentGender=g; } markOnderbroekZichtbaar(); }
+  // Onderbroek-sectie alleen tonen bij het mannenmodel (voorlopig alleen man ondersteund)
+  function markOnderbroekZichtbaar(){ const s=document.getElementById("inst-onderbroek-sectie"); if(s) s.style.display=(currentGender==="man")?"":"none"; }
   window.__tattiesSetGender3D = setGender3D;   // gebruikt door het opstartscherm
   // Lichaamsvorm wisselen: model herladen (placeholder = zelfde GLB) -> herpubliceren + decals herleiden.
   function setShape3D(s){ if(!BODY_SHAPES.includes(s)) return; if(s===currentShape) return;
@@ -11752,7 +11754,7 @@ async function verwijderVoorbeelden() {
   markVormKnop();
   function markOnderbroekKnop(){ document.querySelectorAll("#onderbroek-keuze button[data-onderbroek]").forEach(b=>
     b.classList.toggle("actief", b.dataset.onderbroek===underwear)); }
-  markOnderbroekKnop();
+  markOnderbroekKnop(); markOnderbroekZichtbaar();
   document.addEventListener("input",(e)=>{
     if(!e.target||!e.target.closest) return;
     const s=e.target.closest("#tint-rij input[type=range]");
