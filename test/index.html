@@ -7384,8 +7384,11 @@ function tekenSilhouet() {
     const clip = document.getElementById('lichaam-clip');
     if (clip) clip.innerHTML = maskNaarClipRects(O.mask, huidigeZijde) || '<rect x="0" y="0" width="200" height="398"/>';
   } else {
-    $('#silhouet').innerHTML = huidigSilhouet();
-    vulLichaamClip('lichaam-clip', '#silhouet');
+    // Oude hand-getekende SILHOUETTEN niet meer tonen (op verzoek): alleen de 3D-ortho-render
+    // zodra die gepubliceerd is. Tot die er is: leeg laten + geen lichaam-clip (markers blijven zichtbaar).
+    $('#silhouet').innerHTML = '';
+    const clip = document.getElementById('lichaam-clip');
+    if (clip) clip.innerHTML = '<rect x="0" y="0" width="200" height="398"/>';
   }
   document.querySelectorAll('.silhouet-keuze button[data-geslacht]').forEach((b) =>
     b.classList.toggle('actief', b.dataset.geslacht === silhouetKeuze));
