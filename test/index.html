@@ -230,6 +230,7 @@ main > section{animation:opkomen .3s ease both}
 .canvas-balk{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:0 2px;min-height:44px}
 .canvas-balk #toon-gepland,.canvas-balk #toon-gepland-3d{position:static;left:auto;top:auto;z-index:auto}
 .canvas-balk #t3d-reset,.canvas-balk #kaart-reset{position:static;top:auto;right:auto;width:40px;height:40px;z-index:auto}
+.canvas-balk .zijde-balk{position:static;left:auto;bottom:auto;z-index:auto;flex-direction:row;margin:0}
 .kaart-layout{
   display:flex;align-items:stretch;gap:10px;margin-bottom:10px;
 }
@@ -920,10 +921,14 @@ form label,
 .cutmodal .cm-meer-pill:active{background:var(--rand);}
 /* 'Other photo'/'Add tattoo'-knop (#cmChoose): in de volle bewerkmodus ONDERAAN (onder de bewerk-knoppen,
    zodat die meteen in beeld staan); in de compacte keuzestand bovenaan als grote hoofdknop. */
-.cutmodal .cm-body>.cm-choose{align-self:center;margin-top:6px;padding:7px 14px;font-size:12px;color:var(--gedempt);border-radius:999px;min-height:0;background:transparent;}
-.cutmodal.cm-compact .cm-body>.cm-choose{display:inline-flex;align-items:center;gap:9px;margin-top:0;padding:15px 26px;font-size:16px;font-weight:600;color:#fff;background:var(--accent);border-color:var(--accent);min-height:52px;}
-.cutmodal.cm-compact .cm-body>.cm-choose .ik{width:22px;height:22px;vertical-align:0;}
-.cutmodal.cm-compact .cm-body>.cm-choose:hover{filter:brightness(1.08);border-color:var(--accent);}
+.cm-choose-rij{display:flex;flex-direction:column;align-items:center;gap:10px;}
+.cutmodal.cm-compact .cm-choose-rij{align-items:stretch;}
+.cutmodal:not(.cm-compact) .cm-choose-cam{display:none;}   /* foto maken alleen bij de eerste keuze, niet bij 'andere foto' */
+.is-ios .cm-choose-cam{display:none !important;}            /* iOS biedt 'Take Photo' al via het OS-menu (wint van de compact-knopstijl) */
+.cutmodal .cm-choose{align-self:center;margin-top:6px;padding:7px 14px;font-size:12px;color:var(--gedempt);border-radius:999px;min-height:0;background:transparent;}
+.cutmodal.cm-compact .cm-choose{display:inline-flex;align-items:center;justify-content:center;gap:9px;margin-top:0;padding:15px 26px;font-size:16px;font-weight:600;color:#fff;background:var(--accent);border-color:var(--accent);min-height:52px;}
+.cutmodal.cm-compact .cm-choose .ik{width:22px;height:22px;vertical-align:0;}
+.cutmodal.cm-compact .cm-choose:hover{filter:brightness(1.08);border-color:var(--accent);}
 .cutmodal .cm-toprow .chk{margin-top:0;}
 .cutmodal .chk input{width:16px;height:16px;flex:0 0 auto;}
 .cutmodal .cm-modus{margin:2px 0 8px;}
@@ -1131,6 +1136,12 @@ form label{text-transform:none;letter-spacing:.005em;font-size:.8rem;color:var(-
         <svg viewBox="0 0 24 24" class="ik" aria-hidden="true" style="width:15px;height:15px"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>
         <span data-i18n="ui.gepland">Gepland</span>
       </button>
+      <div class="zijde-balk">
+        <div class="silhouet-keuze" role="group" data-i18n-aria="aria.kieszijde" aria-label="Kies zijde">
+          <button type="button" data-zijde="voor" data-i18n="zijde.voor">Voorkant</button>
+          <button type="button" data-zijde="achter" data-i18n="zijde.achter">Achterkant</button>
+        </div>
+      </div>
       <button type="button" id="kaart-reset" class="kaart-slotbtn kaart-reset" data-i18n-title="aria.volledigoverzicht" data-i18n-aria="aria.volledigoverzicht" title="Volledig overzicht" aria-label="Volledig overzicht"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12a8 8 0 1 0 2.3-5.6"/><path d="M3 4v4h4"/></svg></button>
     </div>
     <div class="kaart-layout">
@@ -1145,12 +1156,6 @@ form label{text-transform:none;letter-spacing:.005em;font-size:.8rem;color:var(-
           <g id="markers"></g>
           <circle id="sel-ring-2d" class="sel-ring-2d" fill="none" pointer-events="none" visibility="hidden"/>
         </svg>
-        <div class="zijde-balk">
-          <div class="silhouet-keuze" role="group" data-i18n-aria="aria.kieszijde" aria-label="Kies zijde">
-            <button type="button" data-zijde="voor" data-i18n="zijde.voor">Voorkant</button>
-            <button type="button" data-zijde="achter" data-i18n="zijde.achter">Achterkant</button>
-          </div>
-        </div>
         <button id="fab" data-i18n-aria="fab.nieuw" aria-label="Nieuwe tattoo" title="Nieuwe tattoo">+</button>
         <div id="t2d-banner" hidden></div>
         <div id="lege-hint" class="lege-hint" data-i18n="ui.lege_cta" hidden>Nog geen tattoos - tik op + om er een toe te voegen</div>
@@ -1178,7 +1183,7 @@ form label{text-transform:none;letter-spacing:.005em;font-size:.8rem;color:var(-
     <div id="t2d-uitleg">
       <p class="t2d-u-titel" data-i18n="uitleg.titel2d">Zo werkt de 2D-kaart</p>
       <ol>
-        <li data-i18n-html="uitleg.2d1"><strong>Tattoo toevoegen:</strong> tik op &#43; (rechtsonder), kies een foto, knip uit en geef een naam → Toevoegen. Tik daarna op de kaart waar hij moet komen.</li>
+        <li data-i18n-html="uitleg.2d1"><strong>Tattoo toevoegen:</strong> tik op &#43; (rechtsonder), kies een foto, knip uit en geef een naam → Toevoegen. Tik daarna op de kaart waar hij moet komen. <strong>Tip:</strong> het makkelijkst is om één tattoo tegelijk toe te voegen, maar je kunt er ook meerdere uit één foto knippen (knop "+ Nog een" na het plaatsen).</li>
         <li data-i18n-html="uitleg.2d2"><strong>Bijstellen:</strong> versleep om te verplaatsen, knijp/draai met twee vingers om te schalen en roteren - of gebruik de knoppen in het bewerkmenu.</li>
         <li data-i18n-html="uitleg.2d3"><strong>Bewerken:</strong> dubbelklik op een tattoo voor het bewerkmenu (ook opnieuw uitsnijden of verwijderen); één tik opent de details.</li>
         <li data-i18n-html="uitleg.2d4"><strong>Inzoomen:</strong> tik op een lichaamsdeel om in te zoomen (cirkelknop linksboven = terug) en wissel voor/achter met de knoppen onder de kaart.</li>
@@ -1283,7 +1288,7 @@ form label{text-transform:none;letter-spacing:.005em;font-size:.8rem;color:var(-
       <ol>
         <li data-i18n-html="uitleg.3d1"><strong>Model kiezen:</strong> stel man of vrouw en je huidskleur in via Instellingen (tandwiel rechtsboven).</li>
         <li data-i18n-html="uitleg.3d2"><strong>Draaien:</strong> sleep met je vinger of muis om het model rond te draaien.</li>
-        <li data-i18n-html="uitleg.3d3"><strong>Tattoo toevoegen:</strong> tik op &#43; (rechtsonder), kies een foto, knip uit en geef een naam → Toevoegen. Klik daarna op het model waar hij moet komen.</li>
+        <li data-i18n-html="uitleg.3d3"><strong>Tattoo toevoegen:</strong> tik op &#43; (rechtsonder), kies een foto, knip uit en geef een naam → Toevoegen. Klik daarna op het model waar hij moet komen. <strong>Tip:</strong> het makkelijkst is om één tattoo tegelijk toe te voegen, maar je kunt er ook meerdere uit één foto knippen (knop "+ Nog een" na het plaatsen).</li>
         <li data-i18n-html="uitleg.3d4"><strong>Bewerken:</strong> dubbeltik op een geplaatste tattoo voor het menu - sleep om te verplaatsen, knijp/scroll om te schalen, draaien, opnieuw uitsnijden of verwijderen.</li>
         <li data-i18n-html="uitleg.3d5"><strong>Wisselen:</strong> gebruik de 2D/3D-knop bovenaan voor de platte lichaamskaart.</li>
       </ol>
@@ -1392,7 +1397,10 @@ form label{text-transform:none;letter-spacing:.005em;font-size:.8rem;color:var(-
               </div>
             </div>
           </div>
-          <button class="btn cm-choose" id="cmChoose"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h3l1.5-2h7L17 8h3v11H4z"/><circle cx="12" cy="13" r="3.2"/></svg> <span data-i18n="ui.foto_toevoegen">Tattoo toevoegen</span></button>
+          <div class="cm-choose-rij">
+            <button class="btn cm-choose cm-choose-cam" id="cmChooseCam"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h3l1.5-2h7L17 8h3v11H4z"/><circle cx="12" cy="13" r="3.2"/></svg> <span data-i18n="ui.foto_maken">Take photo</span></button>
+            <button class="btn cm-choose" id="cmChoose"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="8.5" cy="10" r="1.6"/><path d="M5 18l4.5-4.5 3 3 3.5-3.5L21 17"/></svg> <span data-i18n="ui.foto_uploaden">Upload photo</span></button>
+          </div>
         </div>
         <div class="cm-foot">
           <button id="cmPlaceMeer" class="btn" data-i18n="ui.nog_een" data-i18n-title="ui.nog_een_uitleg" title="Plaats deze en knip daarna nog een tattoo uit dezelfde foto" style="display:none">+ Nog een</button>
@@ -6482,11 +6490,11 @@ const I18N = {
     'uitleg.titel3d':'Zo werkt de 3D-weergave',
     'uitleg.3d1':'<strong>Model kiezen:</strong> stel man of vrouw en je huidskleur in via Instellingen (tandwiel rechtsboven).',
     'uitleg.3d2':'<strong>Draaien:</strong> sleep met je vinger of muis om het model rond te draaien.',
-    'uitleg.3d3':'<strong>Tattoo toevoegen:</strong> tik op + (rechtsonder), kies een foto, knip uit en geef een naam → Toevoegen. Klik daarna op het model waar hij moet komen.',
+    'uitleg.3d3':'<strong>Tattoo toevoegen:</strong> tik op + (rechtsonder), kies een foto, knip uit en geef een naam → Toevoegen. Klik daarna op het model waar hij moet komen. <strong>Tip:</strong> het makkelijkst is om één tattoo tegelijk toe te voegen, maar je kunt er ook meerdere uit één foto knippen (knop "+ Nog een" na het plaatsen).',
     'uitleg.3d4':'<strong>Bewerken:</strong> dubbeltik op een geplaatste tattoo voor het menu - sleep om te verplaatsen, knijp/scroll om te schalen, draaien, opnieuw uitsnijden of verwijderen.',
     'uitleg.3d5':'<strong>Wisselen:</strong> gebruik de 2D/3D-knop bovenaan voor de platte lichaamskaart.',
     'uitleg.titel2d':'Zo werkt de 2D-kaart',
-    'uitleg.2d1':'<strong>Tattoo toevoegen:</strong> tik op + (rechtsonder), kies een foto, knip uit en geef een naam → Toevoegen. Tik daarna op de kaart waar hij moet komen.',
+    'uitleg.2d1':'<strong>Tattoo toevoegen:</strong> tik op + (rechtsonder), kies een foto, knip uit en geef een naam → Toevoegen. Tik daarna op de kaart waar hij moet komen. <strong>Tip:</strong> het makkelijkst is om één tattoo tegelijk toe te voegen, maar je kunt er ook meerdere uit één foto knippen (knop "+ Nog een" na het plaatsen).',
     'uitleg.2d2':'<strong>Bijstellen:</strong> versleep om te verplaatsen, knijp/draai met twee vingers om te schalen en roteren - of gebruik de knoppen in het bewerkmenu.',
     'uitleg.2d3':'<strong>Bewerken:</strong> dubbelklik op een tattoo voor het bewerkmenu (ook opnieuw uitsnijden of verwijderen); één tik opent de details.',
     'uitleg.2d4':'<strong>Inzoomen:</strong> tik op een lichaamsdeel om in te zoomen (cirkelknop linksboven = terug) en wissel voor/achter met de knoppen onder de kaart.',
@@ -6656,11 +6664,11 @@ const I18N = {
     'uitleg.titel3d':'How the 3D view works',
     'uitleg.3d1':'<strong>Pick a model:</strong> set male or female and your skin tone via Settings (gear, top right).',
     'uitleg.3d2':'<strong>Rotate:</strong> drag with your finger or mouse to turn the model.',
-    'uitleg.3d3':'<strong>Add a tattoo:</strong> tap + (bottom right), pick a photo, cut it out and give it a name → Add. Then click the model where it should go.',
+    'uitleg.3d3':'<strong>Add a tattoo:</strong> tap + (bottom right), pick a photo, cut it out and give it a name → Add. Then click the model where it should go. <strong>Tip:</strong> it\'s easiest to add one tattoo at a time, but you can also cut several from one photo (the "+ Another" button after placing).',
     'uitleg.3d4':'<strong>Edit:</strong> double-tap a placed tattoo for the menu - drag to move, pinch/scroll to scale, rotate, recrop or delete.',
     'uitleg.3d5':'<strong>Switch:</strong> use the 2D/3D button at the top for the flat body map.',
     'uitleg.titel2d':'How the 2D map works',
-    'uitleg.2d1':'<strong>Add a tattoo:</strong> tap + (bottom right), pick a photo, cut it out and give it a name → Add. Then tap the map where it should go.',
+    'uitleg.2d1':'<strong>Add a tattoo:</strong> tap + (bottom right), pick a photo, cut it out and give it a name → Add. Then tap the map where it should go. <strong>Tip:</strong> it\'s easiest to add one tattoo at a time, but you can also cut several from one photo (the "+ Another" button after placing).',
     'uitleg.2d2':'<strong>Fine-tune:</strong> drag to move, pinch/twist with two fingers to scale and rotate - or use the buttons in the edit menu.',
     'uitleg.2d3':'<strong>Edit:</strong> double-tap a tattoo for the edit menu (recrop or delete too); a single tap opens the details.',
     'uitleg.2d4':'<strong>Zoom in:</strong> tap a body part to zoom in (circle button top-left = back) and switch front/back with the buttons under the map.',
@@ -7499,6 +7507,10 @@ const STANDAARD_NAZORG = [
 
 const $ = (sel) => document.querySelector(sel);
 
+// iOS biedt bij een gewoon foto-veld al 'Take Photo' via het OS-menu, dus daar is de aparte
+// camera-knop overbodig (zie .is-ios .cm-choose-cam). Android heeft 'm wél nodig.
+const IS_IOS = /iphone|ipad|ipod/i.test(navigator.userAgent || '') || (/macintosh/i.test(navigator.userAgent || '') && navigator.maxTouchPoints > 1);
+try { document.documentElement.classList.toggle('is-ios', IS_IOS); } catch (e) { /* geen document */ }
 function esc(s) {
   return String(s ?? '').replace(/[&<>"']/g, c => (
     { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]
@@ -8592,7 +8604,7 @@ function openStats(retour) {
         <button type="button" class="knop-sec" id="stats-nieuw" style="margin-top:14px">${tr('start.nieuw')}</button>
       </div>`;
     $('#s-terug').addEventListener('click', () => toonView(statsRetour));
-    { const n = $('#stats-nieuw'); if (n) n.addEventListener('click', () => { const ak = document.getElementById('add-kies'); if (ak) ak.hidden = false; }); }
+    { const n = $('#stats-nieuw'); if (n) n.addEventListener('click', () => { if (typeof window.__tattiesNieuweTattoo === 'function') window.__tattiesNieuweTattoo(); else { const ak = document.getElementById('add-kies'); if (ak) ak.hidden = false; } }); }
     toonView('stats');
     return;
   }
@@ -10267,7 +10279,15 @@ async function verwijderVoorbeelden() {
   }
   const addKies = $('#add-kies');
   const sluitKies = () => { if (addKies) addKies.hidden = true; };
-  { const cta = $('#start-nieuw'); if (cta) cta.addEventListener('click', () => { if (addKies) addKies.hidden = false; }); }
+  // '+ New tattoo': sla het keuzemenu over als er maar één werkbare optie is (2D is nu under construction),
+  // anders een dood, grijs item in beeld + een overbodige extra tik. Komt vanzelf terug als 2D weer aanstaat.
+  function nieuweTattooStart() {
+    const actief = addKies ? [...addKies.querySelectorAll('.add-kies-optie')].filter(o => !o.disabled) : [];
+    if (actief.length <= 1) { startToevoegen(actief[0] ? actief[0].dataset.kies : '3d'); return; }
+    if (addKies) addKies.hidden = false;
+  }
+  window.__tattiesNieuweTattoo = nieuweTattooStart;
+  { const cta = $('#start-nieuw'); if (cta) cta.addEventListener('click', nieuweTattooStart); }
   if (addKies) {
     addKies.querySelectorAll('.add-kies-optie').forEach((b) =>
       b.addEventListener('click', () => { const d = b.dataset.kies; sluitKies(); startToevoegen(d); }));
@@ -10869,8 +10889,9 @@ async function verwijderVoorbeelden() {
     if(!posA) return null;
     mesh.updateWorldMatrix(true,false);
     const m=mesh.matrixWorld, idx=g.index, cnt=idx?idx.count:posA.count;
-    const cells=new Map(), faces=[]; let maxR=0;
+    const cells=new Map(), faces=[], vmap=new Map(); let maxR=0;
     const va=new THREE.Vector3(), vb=new THREE.Vector3(), vc=new THREE.Vector3();
+    const VKEY=(p)=>Math.round(p.x*800)+'|'+Math.round(p.y*800)+'|'+Math.round(p.z*800);   // ~1.25mm rooster: weldt naden
     for(let i=0;i+2<cnt;i+=3){
       const a=idx?idx.getX(i):i, b=idx?idx.getX(i+1):i+1, c=idx?idx.getX(i+2):i+2;
       va.fromBufferAttribute(posA,a).applyMatrix4(m);
@@ -10883,11 +10904,14 @@ async function verwijderVoorbeelden() {
                         (vb.x-cx)**2+(vb.y-cy)**2+(vb.z-cz)**2,
                         (vc.x-cx)**2+(vc.y-cy)**2+(vc.z-cz)**2);
       if(r2>maxR) maxR=r2;
-      const fi=faces.length; faces.push({a,b,c,cx,cy,cz});
+      const ka=VKEY(va), kb=VKEY(vb), kc=VKEY(vc);
+      const fi=faces.length; faces.push({a,b,c,cx,cy,cz,vk:[ka,kb,kc]});
       const key=Math.floor(cx/FGRID_CELL)+','+Math.floor(cy/FGRID_CELL)+','+Math.floor(cz/FGRID_CELL);
       let arr=cells.get(key); if(!arr){ arr=[]; cells.set(key,arr); } arr.push(fi);
+      // buur-relatie via gedeelde (afgeronde) vertexpositie -> oppervlak-adjacentie voor de geodetische cull
+      for(const k of [ka,kb,kc]){ let va2=vmap.get(k); if(!va2){ va2=[]; vmap.set(k,va2); } va2.push(fi); }
     }
-    return (mesh.__faceGrid={ cells, faces, maxR:Math.sqrt(maxR) });
+    return (mesh.__faceGrid={ cells, faces, vmap, maxR:Math.sqrt(maxR) });
   }
   // Gereduceerde (lokale) BufferGeometry met alleen driehoeken die de decal-box raken, of null.
   // Broad-phase: voxel-cellen binnen de box-diagonaal-bol. Narrow-phase: centroid in de
@@ -10928,6 +10952,52 @@ async function verwijderVoorbeelden() {
     else rg.computeVertexNormals();
     return rg;
   }
+  // Geodetische cull: vanaf de geraakte driehoek over het OPPERVLAK floodden (gedeelde vertices),
+  // begrensd door de decal-box. Zo blijft de tattoo op het aaneengesloten lichaamsdeel (bv. de arm)
+  // en springt 'ie niet over het okselgat naar de buik/torso, ook al liggen die ruimtelijk in de box.
+  // Geeft null terug bij geen zaadje -> aanroeper valt terug op de gewone box-cull.
+  function connectedDecalGeo(mesh, point, size, orientation){
+    const grid=faceGridFor(mesh); if(!grid || !grid.vmap) return null;
+    const g=mesh.geometry, posA=g.attributes.position, norA=g.attributes.normal;
+    const faces=grid.faces, vmap=grid.vmap;
+    const MG=(grid.maxR||FGRID_CELL);
+    const R=0.5*Math.hypot(size.x,size.y,size.z)+MG;
+    _decInv.makeRotationFromEuler(orientation); _decInv.setPosition(point); _decInv.invert();
+    const hx=size.x/2+MG, hy=size.y/2+MG, hz=size.z/2+MG;
+    const inBox=(f)=>{ _decC.set(f.cx,f.cy,f.cz).applyMatrix4(_decInv); return Math.abs(_decC.x)<=hx && Math.abs(_decC.y)<=hy && Math.abs(_decC.z)<=hz; };
+    // zaadje: dichtste driehoek bij het plaatspunt dat in de box ligt
+    let seed=-1, seedD=Infinity;
+    const c0=Math.floor((point.x-R)/FGRID_CELL),c1=Math.floor((point.x+R)/FGRID_CELL);
+    const d0=Math.floor((point.y-R)/FGRID_CELL),d1=Math.floor((point.y+R)/FGRID_CELL);
+    const e0=Math.floor((point.z-R)/FGRID_CELL),e1=Math.floor((point.z+R)/FGRID_CELL);
+    for(let ci=c0;ci<=c1;ci++)for(let di=d0;di<=d1;di++)for(let ei=e0;ei<=e1;ei++){
+      const arr=grid.cells.get(ci+','+di+','+ei); if(!arr) continue;
+      for(let q=0;q<arr.length;q++){ const fi=arr[q], f=faces[fi];
+        const dd=(f.cx-point.x)**2+(f.cy-point.y)**2+(f.cz-point.z)**2;
+        if(dd<seedD && inBox(f)){ seedD=dd; seed=fi; } }
+    }
+    if(seed<0) return null;
+    // flood-fill over gedeelde vertices, begrensd door de box
+    const visited=new Uint8Array(faces.length), stack=[seed], keep=[];
+    visited[seed]=1;
+    while(stack.length){
+      const fi=stack.pop(); keep.push(fi); const f=faces[fi];
+      for(let k=0;k<3;k++){ const arr=vmap.get(f.vk[k]); if(!arr) continue;
+        for(let q=0;q<arr.length;q++){ const nf=arr[q]; if(visited[nf]) continue;
+          visited[nf]=1; if(inBox(faces[nf])) stack.push(nf); } }
+    }
+    const pos=[], nor=[], v=new THREE.Vector3();
+    for(let i=0;i<keep.length;i++){ const f=faces[keep[i]], tri=[f.a,f.b,f.c];
+      for(let k=0;k<3;k++){ const j=tri[k];
+        v.fromBufferAttribute(posA,j); pos.push(v.x,v.y,v.z);
+        if(norA){ v.fromBufferAttribute(norA,j); nor.push(v.x,v.y,v.z); } }
+    }
+    const rg=new THREE.BufferGeometry();
+    rg.setAttribute('position', new THREE.Float32BufferAttribute(pos,3));
+    if(nor.length) rg.setAttribute('normal', new THREE.Float32BufferAttribute(nor,3));
+    else rg.computeVertexNormals();
+    return rg;
+  }
   let _decalTmp=null;   // herbruikbare tijdelijke mesh voor de gereduceerde geometry
   function makeImage(point, normal, rotDeg, sizeM, tex, mesh){
     const aspect=(tex&&tex.image&&tex.image.width) ? (tex.image.height/tex.image.width) : 1;
@@ -10943,7 +11013,8 @@ async function verwijderVoorbeelden() {
         // sowieso weg, dus diep mag (geen doorbloeden naar de andere kant).
         const size=new THREE.Vector3(sizeM, sizeM*aspect, Math.max(0.22, sizeM*3));
         // Culling: alleen nabije driehoeken projecteren (val terug op de volledige mesh als er niets is)
-        let geo, rg=localDecalGeo(mesh, point, size, helper.rotation);
+        // Geodetische cull (blijft op het aaneengesloten lichaamsdeel); val terug op box-cull, dan volledige mesh.
+        let geo, rg=connectedDecalGeo(mesh, point, size, helper.rotation) || localDecalGeo(mesh, point, size, helper.rotation);
         if(rg){
           if(!_decalTmp){ _decalTmp=new THREE.Mesh(rg); _decalTmp.matrixAutoUpdate=false; }
           else _decalTmp.geometry=rg;
@@ -11708,7 +11779,7 @@ async function verwijderVoorbeelden() {
     { const meer=document.getElementById("cmPlaceMeer"); if(meer) meer.style.display=(b&&pendingNew)?"":"none"; }   // 'nog een uit deze foto' alleen bij toevoegen
     cutModal.classList.toggle("cm-compact", !b);
     const kies=document.getElementById("cmChoose"); const kt=kies&&kies.querySelector("span");
-    if(kt) kt.textContent = b ? tr('ui.andere_foto') : tr('ui.foto_toevoegen');
+    if(kt) kt.textContent = b ? tr('ui.andere_foto') : tr(IS_IOS ? 'ui.foto_toevoegen' : 'ui.foto_uploaden');   // iOS: camera-knop weg -> generiek 'foto toevoegen' (OS-menu biedt camera); Android: 'upload' naast de camera-knop
     zetHuidUI();
     fitCutModalVV();
   }
@@ -12059,6 +12130,7 @@ async function verwijderVoorbeelden() {
 
     imgInputCamera=document.getElementById("imgInputCamera");
     document.getElementById("cmChoose").onclick=()=>imgInput.click();
+    { const cc=document.getElementById("cmChooseCam"); if(cc) cc.onclick=()=>imgInputCamera.click(); }   // 'Foto maken' -> camera (Android krijgt anders geen camera-optie)
     document.getElementById("cmCancel").onclick=closeCutModal;
     { const meerBtn=document.getElementById("cmPlaceMeer"); if(meerBtn) meerBtn.onclick=()=>{ plaatsHerhaal=true; if(cmPlaceBtn) cmPlaceBtn.onclick(); }; }   // plaats deze + heropen cut met dezelfde foto
     document.getElementById("cropReset").onclick=()=>{ lassoPts=[]; wandSeeds=[]; eraseStrokes=[]; gumStroke=null; lassoDragIdx=-1; rebuildBase(); drawLasso(); updateCutout(); };
