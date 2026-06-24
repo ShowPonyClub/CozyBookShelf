@@ -952,6 +952,17 @@ form label,
 .cutmodal .btn{background:transparent;border:1px solid var(--rand);color:var(--tekst);padding:12px;border-radius:8px;
   font-size:14px;cursor:pointer;font-family:inherit;}
 .cutmodal .cm-foot .btn{flex:1;}
+/* '+ Nog een' met een info-knopje + uitleg-wolkje ernaast */
+.cutmodal .cm-meer-wrap{flex:1;position:relative;display:flex;align-items:stretch;gap:6px;}
+.cutmodal .cm-meer-info{flex:none;width:38px;display:inline-flex;align-items:center;justify-content:center;
+  background:var(--veldbg);border:1px solid var(--rand);border-radius:10px;color:var(--gedempt);cursor:pointer;}
+.cutmodal .cm-meer-info .ik{width:18px;height:18px;}
+.cutmodal .cm-meer-info[aria-expanded="true"]{border-color:var(--accent);color:var(--accent);}
+.cutmodal .cm-meer-tip{position:absolute;bottom:100%;left:0;right:0;margin-bottom:10px;z-index:9;
+  background:#2A2118;color:#F0EDE8;padding:10px 12px;border-radius:10px;font-size:.8rem;line-height:1.35;
+  box-shadow:0 10px 28px rgba(34,26,18,.35);}
+.cutmodal .cm-meer-tip[hidden]{display:none;}
+.cutmodal .cm-meer-tip::after{content:"";position:absolute;top:100%;right:18px;border:7px solid transparent;border-top-color:#2A2118;}
 .cutmodal .btn:hover{border-color:var(--accent);}
 .cutmodal .cm-place{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:600;}
 .cutmodal .cm-place:hover{filter:brightness(1.08);}
@@ -964,6 +975,9 @@ form label,
 .cutmodal .bgrow{justify-content:flex-start;margin-top:6px;}
 .cutmodal .bg-controls{justify-content:flex-start;flex-wrap:wrap;gap:8px 16px;margin:8px 0;}
 .cutmodal .cut-tools{display:flex;align-items:center;justify-content:space-between;gap:6px;flex-wrap:wrap;margin-top:10px;position:relative;}
+/* (i)-help links, scheidingslijntje, dan de 5 bewerktools rechts bij elkaar */
+.cutmodal .cut-tools .ct-group{display:flex;align-items:center;gap:6px;}
+.cutmodal .cut-tools .ct-div{width:1px;align-self:stretch;min-height:30px;background:var(--rand);flex:none;margin:0 4px 0 0;}
 /* Uitsnede-tools als chips: duidelijk tapbaar i.p.v. tekstlinkjes. Reset blijft een aparte gedempte link rechts. */
 .cutmodal .cut-tools .linkbtn{display:inline-flex;align-items:center;gap:5px;background:var(--veldbg);
   border:1px solid var(--rand);border-radius:999px;color:var(--tekst);text-decoration:none;font-size:12px;font-weight:600;
@@ -1394,11 +1408,14 @@ form label{text-transform:none;letter-spacing:.005em;font-size:.8rem;color:var(-
             <div class="cutrow cut-tools">
               <div id="cmToolLegend" class="cm-legend" hidden role="group" data-i18n-aria="ui.knop_uitleg" aria-label="Wat doen de knoppen?"></div>
               <button id="cmToolInfo" class="linkbtn cm-toolinfo" aria-pressed="false" data-i18n-title="ui.knop_uitleg" data-i18n-aria="ui.knop_uitleg" title="Wat doen de knoppen?" aria-label="Wat doen de knoppen?"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5"/><path d="M12 7.6h.01"/></svg><span class="t-lbl" data-i18n="ui.info">Info</span></button>
-              <button id="rotate90Btn" class="linkbtn" data-i18n-title="ui.draaien90" data-i18n-aria="ui.draaien90" title="90&deg; draaien" aria-label="90&deg; draaien"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="10" width="11" height="11" rx="2"/><path d="M14 4h3a3 3 0 0 1 3 3v3"/><path d="M16.5 1.5L20 5l-3.5 3.5"/></svg><span class="t-lbl" data-i18n="ui.draaien90">90&deg; draaien</span></button>
-              <button id="spiegelBtn" class="linkbtn" data-i18n-title="ui.spiegelen" data-i18n-aria="ui.spiegelen" title="Spiegelen" aria-label="Spiegelen"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v18" stroke-dasharray="2 3"/><path d="M4 6L4 18L10 12Z"/><path d="M20 6L20 18L14 12Z"/></svg><span class="t-lbl" data-i18n="ui.spiegelen">Spiegelen</span></button>
-              <button id="wandBtn" class="linkbtn" data-i18n-title="ui.toverstaf" data-i18n-aria="ui.toverstaf" title="Toverstaf" aria-label="Toverstaf"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 19L14 10"/><path d="M17 3l1 3 3 1-3 1-1 3-1-3-3-1 3-1z"/><path d="M6 5v2M5 6h2"/></svg><span class="t-lbl" data-i18n="ui.toverstaf">Toverstaf</span></button>
-              <button id="gumBtn" class="linkbtn" data-i18n-title="ui.gum" data-i18n-aria="ui.gum" title="Gum" aria-label="Gum"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M16 3l5 5-9 9H7l-4-4z"/><path d="M9 9l6 6"/><path d="M5 21h14"/></svg><span class="t-lbl" data-i18n="ui.gum">Gum</span></button>
-              <button id="lassoUndo" class="linkbtn" data-i18n-title="ui.ongedaan" data-i18n-aria="ui.ongedaan" title="Ongedaan" aria-label="Ongedaan"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 14L4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 5 5v3"/></svg><span class="t-lbl" data-i18n="ui.ongedaan">Ongedaan</span></button>
+              <div class="ct-group">
+                <span class="ct-div" aria-hidden="true"></span>
+                <button id="rotate90Btn" class="linkbtn" data-i18n-title="ui.draaien90" data-i18n-aria="ui.draaien90" title="90&deg; draaien" aria-label="90&deg; draaien"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="10" width="11" height="11" rx="2"/><path d="M14 4h3a3 3 0 0 1 3 3v3"/><path d="M16.5 1.5L20 5l-3.5 3.5"/></svg><span class="t-lbl" data-i18n="ui.draaien90">90&deg; draaien</span></button>
+                <button id="spiegelBtn" class="linkbtn" data-i18n-title="ui.spiegelen" data-i18n-aria="ui.spiegelen" title="Spiegelen" aria-label="Spiegelen"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v18" stroke-dasharray="2 3"/><path d="M4 6L4 18L10 12Z"/><path d="M20 6L20 18L14 12Z"/></svg><span class="t-lbl" data-i18n="ui.spiegelen">Spiegelen</span></button>
+                <button id="wandBtn" class="linkbtn" data-i18n-title="ui.toverstaf" data-i18n-aria="ui.toverstaf" title="Toverstaf" aria-label="Toverstaf"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 19L14 10"/><path d="M17 3l1 3 3 1-3 1-1 3-1-3-3-1 3-1z"/><path d="M6 5v2M5 6h2"/></svg><span class="t-lbl" data-i18n="ui.toverstaf">Toverstaf</span></button>
+                <button id="gumBtn" class="linkbtn" data-i18n-title="ui.gum" data-i18n-aria="ui.gum" title="Gum" aria-label="Gum"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M16 3l5 5-9 9H7l-4-4z"/><path d="M9 9l6 6"/><path d="M5 21h14"/></svg><span class="t-lbl" data-i18n="ui.gum">Gum</span></button>
+                <button id="lassoUndo" class="linkbtn" data-i18n-title="ui.ongedaan" data-i18n-aria="ui.ongedaan" title="Ongedaan" aria-label="Ongedaan"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 14L4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 5 5v3"/></svg><span class="t-lbl" data-i18n="ui.ongedaan">Ongedaan</span></button>
+              </div>
             </div>
             <div class="cm-resetrij">
               <button id="cropReset" class="cm-resetlink" data-i18n-title="ui.reset_uitsnede" data-i18n-aria="ui.reset_uitsnede" title="Reset uitsnede" aria-label="Reset uitsnede"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 9A8 8 0 0 1 18 7"/><path d="M19.5 15A8 8 0 0 1 6 17"/><path d="M18 3v4h-4"/><path d="M6 21v-4h4"/></svg><span data-i18n="ui.reset_uitsnede">Reset uitsnede</span></button>
@@ -1410,7 +1427,11 @@ form label{text-transform:none;letter-spacing:.005em;font-size:.8rem;color:var(-
           </div>
         </div>
         <div class="cm-foot">
-          <button id="cmPlaceMeer" class="btn" data-i18n="ui.nog_een" data-i18n-title="ui.nog_een_uitleg" title="Plaats deze en knip daarna nog een tattoo uit dezelfde foto" style="display:none">+ Nog een</button>
+          <div class="cm-meer-wrap" style="display:none">
+            <button id="cmPlaceMeer" class="btn" data-i18n="ui.nog_een" data-i18n-title="ui.nog_een_uitleg" title="Plaats deze en knip daarna nog een tattoo uit dezelfde foto">+ Nog een</button>
+            <button type="button" id="cmMeerInfo" class="cm-meer-info" aria-expanded="false" data-i18n-aria="ui.nog_een_uitleg" data-i18n-title="ui.nog_een_uitleg" aria-label="Wat doet '+ Nog een'?"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5"/><path d="M12 7.6h.01"/></svg></button>
+            <div id="cmMeerTip" class="cm-meer-tip" hidden role="status" data-i18n="ui.nog_een_uitleg">Plaats deze en knip daarna nog een tattoo uit dezelfde foto</div>
+          </div>
           <button id="cmPlace" class="btn cm-place" data-i18n="ui.plaatsen">Plaatsen</button>
         </div>
       </div>
@@ -11807,10 +11828,13 @@ async function verwijderVoorbeelden() {
   function toonCutInstellingen(b){
     const s=document.getElementById("cmSettings"); if(s) s.hidden=!b;
     if(cmPlaceBtn) cmPlaceBtn.style.display=b?"":"none";
-    { const meer=document.getElementById("cmPlaceMeer"); if(meer) meer.style.display=(b&&pendingNew)?"":"none"; }   // 'nog een uit deze foto' alleen bij toevoegen
+    { const meerW=document.querySelector(".cm-meer-wrap"); if(meerW) meerW.style.display=(b&&pendingNew)?"":"none"; }   // '+ Nog een' (incl. info-knopje) alleen bij toevoegen
     cutModal.classList.toggle("cm-compact", !b);
     const kies=document.getElementById("cmChoose"); const kt=kies&&kies.querySelector("span");
     if(kt) kt.textContent = b ? tr('ui.andere_foto') : tr(IS_IOS ? 'ui.foto_toevoegen' : 'ui.foto_uploaden');   // iOS: camera-knop weg -> generiek 'foto toevoegen' (OS-menu biedt camera); Android: 'upload' naast de camera-knop
+    // 'Andere foto' (volle modus) alleen bij BEWERKEN tonen; in de toevoeg-flow weg (sluiten + opnieuw volstaat).
+    { const isBewerken=!!(pendingEdit||pendingEdit2D); const rij=document.querySelector('.cm-choose-rij');
+      if(rij) rij.style.display=(b && !isBewerken) ? 'none' : ''; }
     zetHuidUI();
     fitCutModalVV();
   }
@@ -12164,6 +12188,13 @@ async function verwijderVoorbeelden() {
     { const cc=document.getElementById("cmChooseCam"); if(cc) cc.onclick=()=>imgInputCamera.click(); }   // 'Foto maken' -> camera (Android krijgt anders geen camera-optie)
     document.getElementById("cmCancel").onclick=closeCutModal;
     { const meerBtn=document.getElementById("cmPlaceMeer"); if(meerBtn) meerBtn.onclick=()=>{ plaatsHerhaal=true; if(cmPlaceBtn) cmPlaceBtn.onclick(); }; }   // plaats deze + heropen cut met dezelfde foto
+    // Info-wolkje bij '+ Nog een' (tik = uitleg tonen; sluit bij buiten-tik) - zelfde patroon als de tool-legenda
+    { const inf=document.getElementById("cmMeerInfo"), tip=document.getElementById("cmMeerTip");
+      if(inf && tip){
+        const sluit=(e)=>{ if(e && (tip.contains(e.target)||inf.contains(e.target))) return;
+          tip.hidden=true; inf.setAttribute("aria-expanded","false"); document.removeEventListener("pointerdown", sluit, true); };
+        inf.onclick=()=>{ if(tip.hidden){ tip.hidden=false; inf.setAttribute("aria-expanded","true");
+          setTimeout(()=>document.addEventListener("pointerdown", sluit, true), 0); } else sluit(); }; } }
     document.getElementById("cropReset").onclick=()=>{ lassoPts=[]; wandSeeds=[]; eraseStrokes=[]; gumStroke=null; lassoDragIdx=-1; rebuildBase(); drawLasso(); updateCutout(); };
     document.querySelectorAll('#cmModus button[data-modus]').forEach(b=>b.onclick=()=>{ cutModus=b.dataset.modus; drawingFree=false; lassoDragIdx=-1; zetSnijModusUI(); drawLasso(); });
     { const ub=document.getElementById("lassoUndo"); if(ub) ub.onclick=()=>{
