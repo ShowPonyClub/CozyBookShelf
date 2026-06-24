@@ -906,7 +906,12 @@ form label,
 .cutmodal .cm-x:active{background:var(--rand);}
 .cutmodal .cm-body{padding:14px 16px;display:flex;flex-direction:column;gap:8px;overflow-y:auto;flex:1;}
 .cutmodal .cm-body>.btn{flex:0 0 auto;padding:10px;}
-.cutmodal .cm-toprow{display:flex;justify-content:flex-end;align-items:center;}
+.cutmodal .cm-toprow{display:flex;justify-content:space-between;align-items:center;gap:10px;}
+.cutmodal .cm-naam-top{flex:1;min-width:0;padding:9px 11px;border:1px solid var(--rand);border-radius:8px;background:var(--veldbg);color:var(--tekst);font-size:14px;font-family:inherit;}
+.cutmodal .cm-naam-top[aria-invalid="true"]{border-color:#D14343;box-shadow:0 0 0 2px rgba(209,67,67,.18);}
+.cutmodal .cm-onderrij{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:2px;}
+.cutmodal .cm-meer-pill{border:1px solid var(--rand);border-radius:999px;padding:7px 13px;min-height:38px;color:var(--tekst);background:var(--veldbg);font-size:.78rem;}
+.cutmodal .cm-meer-pill:active{background:var(--rand);}
 /* 'Other photo'/'Add tattoo'-knop (#cmChoose): in de volle bewerkmodus ONDERAAN (onder de bewerk-knoppen,
    zodat die meteen in beeld staan); in de compacte keuzestand bovenaan als grote hoofdknop. */
 .cutmodal .cm-body>.cm-choose{align-self:center;margin-top:6px;padding:7px 14px;font-size:12px;color:var(--gedempt);border-radius:999px;min-height:0;background:transparent;}
@@ -994,7 +999,7 @@ form label,
 .cutmodal .cm-veld input,.cutmodal .cm-veld select{padding:9px 10px;border:1px solid var(--rand);border-radius:8px;background:var(--veldbg);color:var(--tekst);font-size:14px;font-family:inherit;}
 .cutmodal .verplicht{color:var(--accent);font-weight:700;}
 .cutmodal .cm-veld input[aria-invalid="true"]{border-color:#D14343;box-shadow:0 0 0 2px rgba(209,67,67,.18);}
-#cmMeerBtn{margin-top:10px;display:inline-flex;align-items:center;gap:4px;}
+#cmMeerBtn{margin:0;display:inline-flex;align-items:center;gap:4px;}
 .cm-chev{width:14px;height:14px;flex:none;transition:transform .15s ease;}
 .cm-chev path{fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round;}
 #cmMeerBtn[aria-expanded="true"] .cm-chev{transform:rotate(180deg);}
@@ -1280,21 +1285,20 @@ form label{text-transform:none;letter-spacing:.005em;font-size:.8rem;color:var(-
         <div class="cm-body">
           <span id="cmTitle" class="visueel-verborgen" data-i18n="ui.tattoo_toevoegen">Tattoo toevoegen</span>
           <div class="cm-toprow">
+            <input id="cmNaam" class="cm-naam-top" type="text" maxlength="80" autocomplete="off" hidden data-i18n-ph="ui.naam_ph" data-i18n-aria="ui.naam" placeholder="Tattoo name *" aria-label="Tattoo name">
             <button id="cmCancel" class="cm-x" data-i18n-title="form.annuleren" data-i18n-aria="form.annuleren" title="Annuleer" aria-label="Annuleer">&times;</button>
           </div>
           <input type="file" id="imgInput" accept="image/*" style="display:none">
           <input type="file" id="imgInputCamera" accept="image/*" capture="environment" style="display:none">
           <div id="cmInfo" hidden>
             <div id="cmHerhaalBadge" class="cm-herhaal-badge" hidden></div>
-            <div class="cm-veld"><span class="cm-lbl"><span data-i18n="ui.naam">Naam</span> <span class="verplicht">*</span></span>
-              <div class="cm-naam-rij">
-                <input id="cmNaam" type="text" maxlength="80" autocomplete="off">
-                <div class="silhouet-keuze compact cm-status" id="cmStatus" role="group" data-i18n-aria="form.type" aria-label="Status">
-                  <button type="button" data-status="gezet" class="actief" data-i18n="form.gezet">Gezet</button>
-                  <button type="button" data-status="wens" data-i18n="form.wishlist">Wishlist</button>
-                </div>
-              </div></div>
-            <button type="button" id="cmMeerBtn" class="linkbtn" aria-expanded="false"><span data-i18n="ui.meer_details">Meer details</span><svg class="cm-chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+            <div class="cm-onderrij">
+              <button type="button" id="cmMeerBtn" class="linkbtn cm-meer-pill" aria-expanded="false"><span data-i18n="ui.meer_details">Meer details</span><svg class="cm-chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+              <div class="silhouet-keuze compact cm-status" id="cmStatus" role="group" data-i18n-aria="form.type" aria-label="Status">
+                <button type="button" data-status="gezet" class="actief" data-i18n="form.gezet">Gezet</button>
+                <button type="button" data-status="wens" data-i18n="form.wishlist">Wishlist</button>
+              </div>
+            </div>
             <div id="cmMeer" hidden>
               <label class="cm-veld"><span data-i18n="form.artiest">Artiest</span><input id="cmArtiest" type="text" maxlength="120"></label>
               <label class="cm-veld"><span data-i18n="form.studio">Studio</span><input id="cmStudio" type="text" maxlength="120"></label>
@@ -1329,6 +1333,14 @@ form label{text-transform:none;letter-spacing:.005em;font-size:.8rem;color:var(-
               <button type="button" data-wandkeep="0" data-i18n="ui.wand_weg">Achtergrond weg</button>
               <button type="button" data-wandkeep="1" data-i18n="ui.wand_houden">Tattoo houden</button>
             </div>
+            <div class="silhouet-keuze compact cm-modus" id="cmGumModus" hidden role="group" data-i18n-aria="ui.gum_wat" aria-label="Gum: wegvegen of terughalen" style="margin:0 0 8px">
+              <button type="button" data-gum="0" data-i18n="ui.gum_weg">Wegvegen</button>
+              <button type="button" data-gum="1" data-i18n="ui.gum_terug">Terughalen</button>
+            </div>
+            <div id="cmGumGrootte" hidden style="margin:0 0 8px">
+              <div class="label" data-i18n="ui.gum_grootte">Kwastgrootte</div>
+              <input id="gumRadius" type="range" min="15" max="150" value="40" class="slider" data-i18n-aria="ui.gum_grootte" aria-label="Kwastgrootte">
+            </div>
             <p class="cut-tip" data-i18n="ui.cut_tip">Tip: knip rond de tattoo en stel daarna de opaciteit in bij het plaatsen.</p>
             <div class="cm-prev" id="cutPrev"><canvas id="cutCanvas" class="cutcv"></canvas><canvas id="lassoCanvas" class="lassocv"></canvas></div>
             <!-- 'Huid weghalen' verborgen: simpele kleur/helderheid-isolatie wordt op echte huidfoto's te vlekkerig.
@@ -1358,6 +1370,7 @@ form label{text-transform:none;letter-spacing:.005em;font-size:.8rem;color:var(-
                 <button id="rotate90Btn" class="linkbtn" data-i18n-title="ui.draaien90" data-i18n-aria="ui.draaien90" title="90&deg; draaien" aria-label="90&deg; draaien"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.3-5.6"/><path d="M21 4v4h-4"/></svg><span class="t-lbl" data-i18n="ui.draaien90">90&deg; draaien</span></button>
                 <button id="spiegelBtn" class="linkbtn" data-i18n-title="ui.spiegelen" data-i18n-aria="ui.spiegelen" title="Spiegelen" aria-label="Spiegelen"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v18" stroke-dasharray="2 3"/><path d="M4 6L4 18L10 12Z"/><path d="M20 6L20 18L14 12Z"/></svg><span class="t-lbl" data-i18n="ui.spiegelen">Spiegelen</span></button>
                 <button id="wandBtn" class="linkbtn" data-i18n-title="ui.toverstaf" data-i18n-aria="ui.toverstaf" title="Toverstaf" aria-label="Toverstaf"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 19L14 10"/><path d="M17 3l1 3 3 1-3 1-1 3-1-3-3-1 3-1z"/><path d="M6 5v2M5 6h2"/></svg><span class="t-lbl" data-i18n="ui.toverstaf">Toverstaf</span></button>
+                <button id="gumBtn" class="linkbtn" data-i18n-title="ui.gum" data-i18n-aria="ui.gum" title="Gum" aria-label="Gum"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M16 3l5 5-9 9H7l-4-4z"/><path d="M9 9l6 6"/><path d="M5 21h14"/></svg><span class="t-lbl" data-i18n="ui.gum">Gum</span></button>
                 <button id="lassoUndo" class="linkbtn" data-i18n-title="ui.ongedaan" data-i18n-aria="ui.ongedaan" title="Ongedaan" aria-label="Ongedaan"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 14L4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 5 5v3"/></svg><span class="t-lbl" data-i18n="ui.ongedaan">Ongedaan</span></button>
               </div>
               <div class="ct-right">
@@ -1521,7 +1534,7 @@ form label{text-transform:none;letter-spacing:.005em;font-size:.8rem;color:var(-
 <!-- Plaats-hint: verschijnt op het model/de kaart tijdens het plaatsen van een nieuwe tattoo -->
 <div id="plaats-hint" hidden aria-hidden="true">
   <span class="ph-ring"></span>
-  <span class="ph-tekst" data-i18n="ui.plaats_hint">Tik om te plaatsen</span>
+  <span class="ph-tekst" data-i18n="ui.plaats_hint">Tap on the body to place the tattoo</span>
 </div>
 
 <!-- Keuzemenu: op 3D-model of 2D-kaart plaatsen (vanaf het startscherm) -->
@@ -6481,6 +6494,10 @@ const I18N = {
     'ui.wand_hint':'Toverstaf: tik op een effen achtergrond om die weg te halen. Werkt het best bij een duidelijke achtergrond, minder goed op een foto van de huid. Tik vaker voor meer; Ongedaan draait terug.',
     'ui.wand_hint_keep':'Tattoo houden: tik op de tattoo om die te bewaren, de rest wordt gewist. Tik vaker voor meerdere delen; Ongedaan draait terug. Werkt het best bij een tattoo met duidelijke kleur.',
     'ui.wand_weg':'Achtergrond weg','ui.wand_houden':'Tattoo houden','ui.wand_wat':'Toverstaf: wat tik je','ui.tik_houden':'Tik op de tattoo om die te houden',
+    'ui.gum':'Gum','ui.gum_uit':'Gum uit','ui.gum_aan':'Gum aan — veeg over de tattoo','ui.gum_wat':'Gum: wegvegen of terughalen',
+    'ui.gum_weg':'Wegvegen','ui.gum_terug':'Terughalen','ui.gum_grootte':'Kwastgrootte',
+    'ui.gum_hint':'Gum: veeg met je vinger stukjes weg. Kwastgrootte stel je hieronder in; Ongedaan draait de laatste streek terug.',
+    'ui.gum_hint_terug':'Terughalen: veeg over weggehaalde stukken om ze terug te zetten. Kwastgrootte stel je hieronder in; Ongedaan draait de laatste streek terug.',
     'ui.cut_hint':'Tik rondom de tattoo om punten te plaatsen; sleep een punt om bij te stellen.',
     'ui.snijmethode':'Snijmethode','ui.snij_vrij':'Vrij tekenen','ui.snij_punten':'Punten',
     'ui.opaciteit':'Opaciteit','ui.draaien90':'90° draaien','ui.cut_tip':'Tip: knijp om in te zoomen, knip rond de tattoo en stel bij het plaatsen de opaciteit in.',
@@ -6496,7 +6513,7 @@ const I18N = {
     'ui.links_draaien':'Linksom draaien','ui.rechts_draaien':'Rechtsom draaien',
     'ui.eb_hint':'Sleep = verplaatsen · knijp = schalen · knijp-draai = roteren',
     'ui.draai_hint':'Sleep om te draaien · tik op + om een tattoo toe te voegen',
-    'ui.plaats_hint':'Tik om te plaatsen',
+    'ui.plaats_hint':'Tik op het lichaam om de tattoo te plaatsen',
     'ui.gepland':'Wishlist','ui.toon_gepland':'Wishlist op het lichaam tonen',
     'ui.geen_model':'Geen 3D-model gevonden','ui.man_laden':'Manmodel laden…','ui.vrouw_laden':'Vrouwmodel laden…',
     'ui.klaar_dubbeltik':'Klaar - dubbeltik op de huid','ui.model_mislukt':'Model laden mislukt',
@@ -6512,7 +6529,7 @@ const I18N = {
     'ui.kies_eerst_foto':'Kies eerst een foto en knip de tattoo uit','ui.tattoo_geplaatst':'Tattoo geplaatst ✓',
     'ui.tattoo_bijgewerkt':'Tattoo bijgewerkt ✓','ui.plaatsen_mislukt':'Plaatsen mislukt','ui.fout':'fout',
     'ui.hersteld':'{n} tattoo{s} hersteld','ui.verwijder_bevestig':'Weet je zeker dat je deze tattoo wilt verwijderen?',
-    'ui.toevoegen':'Toevoegen','ui.klik_plaatsen':'Klik op het model waar je de tattoo wilt','ui.naam_verplicht':'Geef de tattoo eerst een naam','ui.meer_details':'Meer details','ui.naam':'Naam tattoo',
+    'ui.toevoegen':'Toevoegen','ui.klik_plaatsen':'Klik op het model waar je de tattoo wilt','ui.naam_verplicht':'Geef de tattoo eerst een naam','ui.meer_details':'Meer details','ui.naam':'Naam tattoo','ui.naam_ph':'Naam tattoo *',
     'ui.stage_aria':'3D-lichaamsmodel; gebruik de 2D-knop bovenaan voor de toegankelijke platte kaart',
     'ui.lege_cta':'Nog geen tattoos - tik op + om er een toe te voegen',
     'ui.details':'Details',
@@ -6651,6 +6668,10 @@ const I18N = {
     'ui.wand_hint':'Magic wand: tap a plain background to remove it. Works best with a clear background, not yet on skin photos. Tap again for more; Undo reverts.',
     'ui.wand_hint_keep':'Keep tattoo: tap the tattoo to keep it, the rest is erased. Tap again for more parts; Undo reverts. Works best on a tattoo with a clear color.',
     'ui.wand_weg':'Remove background','ui.wand_houden':'Keep tattoo','ui.wand_wat':'Magic wand: what to tap','ui.tik_houden':'Tap the tattoo to keep it',
+    'ui.gum':'Eraser','ui.gum_uit':'Eraser off','ui.gum_aan':'Eraser on — wipe over the tattoo','ui.gum_wat':'Eraser: erase or restore',
+    'ui.gum_weg':'Erase','ui.gum_terug':'Restore','ui.gum_grootte':'Brush size',
+    'ui.gum_hint':'Eraser: wipe bits away with your finger. Set the brush size below; Undo reverts the last stroke.',
+    'ui.gum_hint_terug':'Restore: wipe over erased bits to bring them back. Set the brush size below; Undo reverts the last stroke.',
     'ui.cut_hint':'Tap around the tattoo to place points; drag a point to adjust.',
     'ui.snijmethode':'Cut method','ui.snij_vrij':'Freehand','ui.snij_punten':'Points',
     'ui.opaciteit':'Opacity','ui.draaien90':'Rotate 90°','ui.cut_tip':'Tip: pinch to zoom in, cut around the tattoo, then set its opacity when placing.',
@@ -6666,7 +6687,7 @@ const I18N = {
     'ui.links_draaien':'Rotate left','ui.rechts_draaien':'Rotate right',
     'ui.eb_hint':'Drag = move · pinch = scale · pinch-twist = rotate',
     'ui.draai_hint':'Drag to rotate · tap + to add a tattoo',
-    'ui.plaats_hint':'Tap to place',
+    'ui.plaats_hint':'Tap on the body to place the tattoo',
     'ui.gepland':'Wishlist','ui.toon_gepland':'Show wishlist on the body',
     'ui.geen_model':'No 3D model found','ui.man_laden':'Loading male model…','ui.vrouw_laden':'Loading female model…',
     'ui.klaar_dubbeltik':'Ready - double-tap the skin','ui.model_mislukt':'Loading the model failed',
@@ -6682,7 +6703,7 @@ const I18N = {
     'ui.kies_eerst_foto':'Pick a photo first and cut out the tattoo','ui.tattoo_geplaatst':'Tattoo placed ✓',
     'ui.tattoo_bijgewerkt':'Tattoo updated ✓','ui.plaatsen_mislukt':'Placing failed','ui.fout':'error',
     'ui.hersteld':'{n} tattoo{s} restored','ui.verwijder_bevestig':'Are you sure you want to delete this tattoo?',
-    'ui.toevoegen':'Add','ui.klik_plaatsen':'Click on the model where you want the tattoo','ui.naam_verplicht':'Give the tattoo a name first','ui.meer_details':'More details','ui.naam':'Tattoo name',
+    'ui.toevoegen':'Add','ui.klik_plaatsen':'Click on the model where you want the tattoo','ui.naam_verplicht':'Give the tattoo a name first','ui.meer_details':'More details','ui.naam':'Tattoo name','ui.naam_ph':'Tattoo name *',
     'ui.stage_aria':'3D body model; use the 2D button at the top for the accessible flat map',
     'ui.lege_cta':'No tattoos yet - tap + to add one',
     'ui.details':'Details',
@@ -9866,6 +9887,7 @@ $('#import-file').addEventListener('change', async (e) => {
       if (record.kunst3d) {
         if (!Array.isArray(record.kunst3d.lasso)) record.kunst3d.lasso = [];
         if (!Array.isArray(record.kunst3d.wand)) record.kunst3d.wand = [];
+        if (!Array.isArray(record.kunst3d.erase)) record.kunst3d.erase = [];
       }
       // Per-record afvangen: één slecht record breekt de hele import niet meer af
       try { await saveTattoo(record, true); geimporteerd++; }   // behoudTijd: backup-updatedAt bewaren
@@ -10137,7 +10159,7 @@ async function verwijderVoorbeelden() {
   window.__tattiesStartPlaats2D = (payload) => {
     toonView('home');                                  // eerst navigeren (annuleert oude plaats-modus), dan deze starten
     plaats2DData = payload;                             // plaatsen gebeurt op de 2D-kaart
-    const b = $('#t2d-banner'); if (b) { b.textContent = tr('ui.klik_plaatsen'); b.hidden = false; }
+    const b = $('#t2d-banner'); if (b) b.hidden = true;    // paarse banner weg: de 'tik om te plaatsen'-hint volstaat
     if (window.__plaatsHintAan) window.__plaatsHintAan();   // toon de tik-indicator (na toonView, die de hint zou verbergen)
   };
   // 2D-plaatsstand annuleren (host-scope; aangeroepen door de IIFE-cancel bij navigatie)
@@ -11391,8 +11413,56 @@ async function verwijderVoorbeelden() {
   let wandMode=false;        // toverstaf actief: volgende tik knipt een aaneengesloten gebied weg
   let wandSeeds=[];          // {nx,ny} klikpunten voor de toverstaf
   let wandKeep=false;        // false = aangetikt gebied weghalen (achtergrond), true = aangetikt gebied behouden (tattoo)
-  let laatsteActie=null;     // 'wand' | 'lasso' - laatste uitsnede-actie, voor gedeelde Ongedaan
+  let laatsteActie=null;     // 'wand' | 'lasso' | 'gum' - laatste uitsnede-actie, voor gedeelde Ongedaan
   const WAND_TOL2=7500;      // kleurtolerantie^2 (≈50/kanaal) voor de toverstaf
+  // Gum: handmatig stukjes wegvegen (alpha 0) of terughalen (originele pixels herstellen).
+  // Streken zijn een recept (genormaliseerde punten + straal), net als de toverstaf: ze worden
+  // bij elke rebuild + bij herstel opnieuw toegepast, dus zoom-/grootte-onafhankelijk.
+  let gumMode=false;         // gum actief: vinger/muis veegt i.p.v. lasso tekenen
+  let gumHerstel=false;      // false = wegvegen (wis), true = terughalen (schone pixels terug)
+  let gumRadius=0.04;        // kwaststraal, genormaliseerd op min(W,H)
+  let eraseStrokes=[];       // [{pts:[{nx,ny}], r, mode:'weg'|'terug'}] in tekenvolgorde
+  let gumStroke=null;        // lopende streek tijdens een sleep
+  function zetGumUI(){
+    const b=document.getElementById('gumBtn'); if(b) b.classList.toggle('on', gumMode);
+    const tog=document.getElementById('cmGumModus'); if(tog) tog.hidden=!gumMode;
+    const gr=document.getElementById('cmGumGrootte'); if(gr) gr.hidden=!gumMode;
+    document.querySelectorAll('#cmGumModus button[data-gum]').forEach(x=>x.classList.toggle('actief', (x.dataset.gum==='1')===gumHerstel));
+    const h=document.getElementById('cmHint');
+    if(h){
+      if(gumMode){ h.textContent=tr(gumHerstel?'ui.gum_hint_terug':'ui.gum_hint'); h.classList.add('wand-aan'); }
+      else if(!wandMode){ h.classList.remove('wand-aan'); zetSnijModusUI(); }
+    }
+  }
+  function penStreek(ctx,pts,W,H){ ctx.beginPath(); pts.forEach((p,i)=>{ const X=p.nx*W,Y=p.ny*H; i?ctx.lineTo(X,Y):ctx.moveTo(X,Y); }); }
+  // Pas gum-streken toe op canvas-context x (W×H). 'weg' wist (destination-out), 'terug'
+  // tekent schone pixels (schoonC = origineel mét rotatie/flip, zonder huid/wand-verwijdering)
+  // alleen onder de kwaststreek terug. Volgorde van strokes blijft behouden.
+  function applyErase(x, W, H, strokes, schoonC){
+    if(!strokes||!strokes.length) return;
+    const minWH=Math.min(W,H);
+    for(const st of strokes){
+      if(!st.pts||!st.pts.length) continue;
+      const r=Math.max(1,(st.r||0.04)*minWH);
+      if(st.mode==='terug'){
+        if(!schoonC) continue;
+        const tmp=document.createElement('canvas'); tmp.width=W; tmp.height=H;
+        const tc=tmp.getContext('2d');
+        tc.lineWidth=r*2; tc.lineCap='round'; tc.lineJoin='round'; tc.strokeStyle='#fff';
+        penStreek(tc, st.pts, W, H); tc.stroke();
+        tc.beginPath(); tc.arc(st.pts[0].nx*W, st.pts[0].ny*H, r, 0, Math.PI*2); tc.fillStyle='#fff'; tc.fill();
+        tc.globalCompositeOperation='source-in'; tc.drawImage(schoonC,0,0);   // alleen pixels onder de streek
+        x.drawImage(tmp,0,0);
+      } else {
+        x.save();
+        x.globalCompositeOperation='destination-out';
+        x.lineWidth=r*2; x.lineCap='round'; x.lineJoin='round'; x.strokeStyle='#000';
+        penStreek(x, st.pts, W, H); x.stroke();
+        x.beginPath(); x.arc(st.pts[0].nx*W, st.pts[0].ny*H, r, 0, Math.PI*2); x.fillStyle='#000'; x.fill();
+        x.restore();
+      }
+    }
+  }
   function zetWandUI(){
     const b=document.getElementById('wandBtn'); if(b) b.classList.toggle('on', wandMode);
     const tog=document.getElementById('cmWandModus'); if(tog) tog.hidden=!wandMode;   // weg/houden-toggle alleen bij actieve wand
@@ -11442,7 +11512,7 @@ async function verwijderVoorbeelden() {
   let plaatsHerhaal=false;   // 'Nog een uit deze foto': na plaatsen de cut-modal heropenen met dezelfde foto
   let herhaalTeller=1;       // hoeveelste uitsnede uit dezelfde bronfoto (1 = eerste; badge toont vanaf 2)
   let vorigeLassos=[];       // {pts,rot90,flipH} van eerder geknipte tattoos uit dezelfde foto (vaag tonen)
-  function toonInfo(b){ const e=document.getElementById("cmInfo"); if(e) e.hidden=!b; }
+  function toonInfo(b){ const e=document.getElementById("cmInfo"); if(e) e.hidden=!b; const n=document.getElementById("cmNaam"); if(n) n.hidden=!b; }   // naamveld zit in de bovenbalk (buiten cmInfo) -> mee togglen
   function zetPijnDruppels(val){
     const c=document.getElementById("cmPijn"); if(!c) return;
     val=Math.max(0,Math.min(5,Math.round(+val||0))); c.dataset.waarde=val; c.setAttribute("aria-valuenow",val);
@@ -11516,6 +11586,7 @@ async function verwijderVoorbeelden() {
     pendingNew=true; pendingPlace=null; pendingEdit=null; pendingPlace2D=null; plaatsHerhaal=false; window.__tattiesHerhaalSrc=null;
     origImg=null; lassoPts=[]; imgTexture=null; baseCanvas=null; flipH=false; zetSpiegelUI();
     wandSeeds=[]; wandKeep=false; wandMode=false; zetWandUI(); lassoDragIdx=-1; cutModus='vrij'; drawingFree=false; zetSnijModusUI(); resetZoom(); rot90=0; huidMethode='kleur'; if(bgRemove) bgRemove.checked=false;
+    eraseStrokes=[]; gumStroke=null; gumMode=false; gumHerstel=false; zetGumUI();
     bgPickMode=false; setBgPick(null); if(bgPickBtn)bgPickBtn.classList.remove("on");
     if(cutSpread) cutSpread.value=55;
     cmTitle.textContent=tr('ui.tattoo_toevoegen'); cmPlaceBtn.textContent=tr('ui.toevoegen');
@@ -11553,6 +11624,7 @@ async function verwijderVoorbeelden() {
     pendingPlace={point, normal, mesh}; pendingEdit=null; pendingPlace2D=null;
     origImg=null; lassoPts=[]; imgTexture=null; baseCanvas=null; flipH=false; zetSpiegelUI();
     wandSeeds=[]; wandKeep=false; wandMode=false; zetWandUI(); lassoDragIdx=-1; cutModus='vrij'; drawingFree=false; zetSnijModusUI(); resetZoom(); rot90=0; huidMethode='kleur'; if(bgRemove) bgRemove.checked=false;
+    eraseStrokes=[]; gumStroke=null; gumMode=false; gumHerstel=false; zetGumUI();
     bgPickMode=false; setBgPick(null); if(bgPickBtn)bgPickBtn.classList.remove("on");
     if(cutSpread) cutSpread.value=55;
     cmTitle.textContent=tr('ui.tattoo_toevoegen'); cmPlaceBtn.textContent=tr('ui.tattoo_toevoegen');
@@ -11568,6 +11640,7 @@ async function verwijderVoorbeelden() {
     plaatsHerhaal=false; window.__tattiesHerhaalSrc=null; herhaalTeller=1; vorigeLassos=[];   // bewerken: geen herhaal-state/vage lasso
     origImg=null; imgTexture=null; baseCanvas=null; lassoPts=[]; flipH=!!k.flipH; zetSpiegelUI();
     wandSeeds=(k.wand||[]).slice(); wandKeep=!!k.wandKeep; wandMode=false; zetWandUI(); lassoDragIdx=-1; cutModus='vrij'; drawingFree=false; zetSnijModusUI(); resetZoom(); rot90=k.rot90||0; huidMethode=k.huidMethode||'kleur';
+    eraseStrokes=(k.erase||[]).map(s=>({pts:(s.pts||[]).slice(),r:s.r,mode:s.mode})); gumStroke=null; gumMode=false; gumHerstel=false; zetGumUI();
     cmTitle.textContent=tr('ui.tattoo_aanpassen'); cmPlaceBtn.textContent=tr('form.opslaan');
     vulModalDetails(m.rec);
     bgRemove.checked = (k.bg!==false);
@@ -11592,6 +11665,7 @@ async function verwijderVoorbeelden() {
     plaatsHerhaal=false; window.__tattiesHerhaalSrc=null; herhaalTeller=1; vorigeLassos=[];   // bewerken: geen herhaal-state/vage lasso
     origImg=null; imgTexture=null; baseCanvas=null; lassoPts=[]; flipH=!!k.flipH; zetSpiegelUI();
     wandSeeds=(k.wand||[]).slice(); wandKeep=!!k.wandKeep; wandMode=false; zetWandUI(); lassoDragIdx=-1; cutModus='vrij'; drawingFree=false; zetSnijModusUI(); resetZoom(); rot90=k.rot90||0; huidMethode=k.huidMethode||'kleur';
+    eraseStrokes=(k.erase||[]).map(s=>({pts:(s.pts||[]).slice(),r:s.r,mode:s.mode})); gumStroke=null; gumMode=false; gumHerstel=false; zetGumUI();
     cmTitle.textContent=tr('ui.tattoo_aanpassen'); cmPlaceBtn.textContent=tr('form.opslaan');
     vulModalDetails(rec);
     bgRemove.checked=(k.bg!==false);
@@ -11609,13 +11683,14 @@ async function verwijderVoorbeelden() {
   function closeCutModal(){ cutModal.classList.remove("on"); pendingPlace=null; pendingEdit=null; pendingPlace2D=null; pendingNew=null; pendingEdit2D=null; toonCutInstellingen(false); toonInfo(false);
     plaatsHerhaal=false; window.__tattiesHerhaalSrc=null; herhaalTeller=1; vorigeLassos=[]; addDoel='3d';   // D6(a): herhaal-state opruimen + doel terug naar default (geen stale vlag/lasso/doel)
     if(imgTexture && imgTexture.dispose){ imgTexture.dispose(); } imgTexture=null;   // niet-geplaatste textuur vrijgeven (geen lek)
-    cutPointers.clear(); pinch=null; drawingFree=false; lassoDragIdx=-1; clearTimeout(wheelEind);
+    cutPointers.clear(); pinch=null; drawingFree=false; gumStroke=null; lassoDragIdx=-1; clearTimeout(wheelEind);
   }
   // 2D: open dezelfde uitsnede-modal voor een dubbeltik op de 2D-kaart
   function openCutModal2D(x,y,zone,side){
     pendingPlace2D={x,y,zone,side}; pendingPlace=null; pendingEdit=null;
     origImg=null; lassoPts=[]; imgTexture=null; baseCanvas=null; flipH=false; zetSpiegelUI();
     wandSeeds=[]; wandKeep=false; wandMode=false; zetWandUI(); lassoDragIdx=-1; cutModus='vrij'; drawingFree=false; zetSnijModusUI(); resetZoom(); rot90=0; huidMethode='kleur'; if(bgRemove) bgRemove.checked=false;
+    eraseStrokes=[]; gumStroke=null; gumMode=false; gumHerstel=false; zetGumUI();
     bgPickMode=false; setBgPick(null); if(bgPickBtn)bgPickBtn.classList.remove("on");
     if(cutSpread) cutSpread.value=55;
     cmTitle.textContent=tr('ui.tattoo_toevoegen'); cmPlaceBtn.textContent=tr('ui.tattoo_toevoegen');
@@ -11727,10 +11802,12 @@ async function verwijderVoorbeelden() {
     x.putImageData(d,0,0);
   }
 
-  function buildFullCanvas(){
-    // Schaal naar werkbare grootte: flood-fill is per-pixel, dus cap op ~800px
-    // houdt het snel en zuinig op mobiel. Lasso werkt op genormaliseerde
-    // coordinaten, dus downscalen verandert niets aan de uitsnede.
+  // Schone, getransformeerde bron (rotatie + flip), zonder huid/wand/gum-bewerkingen.
+  // Hergebruikt door buildFullCanvas en als 'terughalen'-bron voor de gum.
+  // Schaal naar werkbare grootte: flood-fill is per-pixel, dus cap op ~800px houdt het
+  // snel en zuinig op mobiel. Lasso/gum werken op genormaliseerde coords -> downscalen
+  // verandert niets aan de uitsnede.
+  function buildCleanCanvas(){
     const maxAfm=800;
     const sc=Math.min(1, maxAfm/Math.max(origImg.naturalWidth, origImg.naturalHeight));
     const W=Math.max(1,Math.round(origImg.naturalWidth*sc));
@@ -11744,14 +11821,30 @@ async function verwijderVoorbeelden() {
     if(flipH) x.scale(-1,1);
     x.drawImage(origImg,-W/2,-H/2,W,H);
     x.setTransform(1,0,0,1,0,0);
+    return c;
+  }
+  function buildFullCanvas(){
+    const c=buildCleanCanvas();
+    const OW=c.width, OH=c.height;
+    const x=c.getContext("2d",{willReadFrequently:true});
     if(bgRemove.checked){
       if(huidMethode==='helder') removeSkinLuma(x, OW, OH, +cutThresh.value, (cutSpread?+cutSpread.value:55));
       else removeSkinColor(x, OW, OH, bgPick, +cutThresh.value, (cutSpread?+cutSpread.value:55));
     }
     if(wandSeeds.length) applyWand(x, OW, OH, wandSeeds, wandKeep);
+    if(eraseStrokes.length) applyErase(x, OW, OH, eraseStrokes, eraseStrokes.some(s=>s.mode==='terug')?buildCleanCanvas():null);
     return c;
   }
   function rebuildBase(){ baseCanvas = origImg ? buildFullCanvas() : null; }
+  // Het uitsnede-recept (srcUrl + lasso/wand/gum/transform) zoals nu in de modal -> kunst3d.
+  // Eén bron voor alle plaats-/bewerk-/opslagpunten, zodat 'erase' nooit ergens vergeten wordt.
+  function bouwKunst3d(){
+    return { srcUrl:(origImg?origImg.src:null), lasso:lassoPts.slice(), thresh:+cutThresh.value,
+      spread:(cutSpread?+cutSpread.value:55), bgColor:(bgPick?{r:bgPick.r,g:bgPick.g,b:bgPick.b}:null),
+      bg:bgRemove.checked, flipH:flipH, wand:wandSeeds.slice(), wandKeep:wandKeep,
+      huidMethode:huidMethode, rot90:rot90,
+      erase:eraseStrokes.map(s=>({pts:(s.pts||[]).slice(), r:s.r, mode:s.mode})) };
+  }
   function clippedCanvas(){
     const full=baseCanvas; if(!full) return null;
     const shown=document.createElement("canvas"); shown.width=full.width; shown.height=full.height;
@@ -11772,22 +11865,27 @@ async function verwijderVoorbeelden() {
     const r=viewRect(cv.width,cv.height,shown.width,shown.height);
     ctx.drawImage(shown, r.left, r.top, r.w, r.h);
   }
+  // Alleen de zichtbare preview (cutCanvas) hertekenen, zonder de THREE-textuur te herbouwen.
+  // Gebruikt tijdens het slepen (lasso/gum) -> vloeiend, geen texture-allocatie per move.
+  function drawCutPreview(){
+    if(!origImg || !baseCanvas) return;
+    const shown=clippedCanvas(); if(!shown) return;
+    // rest van de foto gedimd (35%) i.p.v. verborgen, zodat je context houdt tijdens het uitsnijden
+    const cv=cutCanvas; cv.width=cutPrev.clientWidth; cv.height=cutPrev.clientHeight;
+    const ctx=cv.getContext("2d"); ctx.clearRect(0,0,cv.width,cv.height);
+    const r=viewRect(cv.width,cv.height,baseCanvas.width,baseCanvas.height);
+    if(lassoPts.length>=3){
+      ctx.globalAlpha=0.35; ctx.drawImage(baseCanvas, r.left,r.top,r.w,r.h); ctx.globalAlpha=1;
+      ctx.drawImage(shown, r.left,r.top,r.w,r.h);
+    } else {
+      ctx.drawImage(baseCanvas, r.left,r.top,r.w,r.h);
+    }
+  }
   function updateCutout(){
     if(!origImg) return;
     if(!baseCanvas) rebuildBase();
     const shown=clippedCanvas(); if(!shown) return;
-    // preview: rest van de foto gedimd (35%) i.p.v. verborgen, zodat je context houdt tijdens het uitsnijden
-    {
-      const cv=cutCanvas; cv.width=cutPrev.clientWidth; cv.height=cutPrev.clientHeight;
-      const ctx=cv.getContext("2d"); ctx.clearRect(0,0,cv.width,cv.height);
-      const r=viewRect(cv.width,cv.height,baseCanvas.width,baseCanvas.height);
-      if(lassoPts.length>=3){
-        ctx.globalAlpha=0.35; ctx.drawImage(baseCanvas, r.left,r.top,r.w,r.h); ctx.globalAlpha=1;
-        ctx.drawImage(shown, r.left,r.top,r.w,r.h);
-      } else {
-        ctx.drawImage(baseCanvas, r.left,r.top,r.w,r.h);
-      }
-    }
+    drawCutPreview();
     let texCanvas=shown;
     if(lassoPts.length>=3){
       let mnx=1,mny=1,mxx=0,mxy=0;
@@ -11813,6 +11911,13 @@ async function verwijderVoorbeelden() {
         ctx.beginPath(); v.pts.forEach((p,i)=>{ const X=r.left+p.nx*r.w, Y=r.top+p.ny*r.h; i?ctx.lineTo(X,Y):ctx.moveTo(X,Y); });
         ctx.closePath(); ctx.fillStyle="rgba(142,113,240,.07)"; ctx.fill();
         ctx.save(); ctx.setLineDash([5,4]); ctx.lineWidth=1.5; ctx.strokeStyle="rgba(142,113,240,.5)"; ctx.stroke(); ctx.restore(); });
+    }
+    if(gumMode && gumStroke && gumStroke.pts.length){   // gum: kwastring op het laatste punt (toont de grootte)
+      const lp=gumStroke.pts[gumStroke.pts.length-1];
+      const rad=gumRadius*Math.min(r.w,r.h);
+      ctx.save(); ctx.setLineDash([4,3]); ctx.lineWidth=1.5;
+      ctx.strokeStyle=gumHerstel?"rgba(80,200,140,.9)":"rgba(240,90,110,.9)";
+      ctx.beginPath(); ctx.arc(r.left+lp.nx*r.w, r.top+lp.ny*r.h, rad, 0, Math.PI*2); ctx.stroke(); ctx.restore();
     }
     if(lassoPts.length<1) return;
     ctx.beginPath();
@@ -11850,20 +11955,26 @@ async function verwijderVoorbeelden() {
     document.getElementById("cmChoose").onclick=()=>imgInput.click();
     document.getElementById("cmCancel").onclick=closeCutModal;
     { const meerBtn=document.getElementById("cmPlaceMeer"); if(meerBtn) meerBtn.onclick=()=>{ plaatsHerhaal=true; if(cmPlaceBtn) cmPlaceBtn.onclick(); }; }   // plaats deze + heropen cut met dezelfde foto
-    document.getElementById("cropReset").onclick=()=>{ lassoPts=[]; wandSeeds=[]; lassoDragIdx=-1; rebuildBase(); drawLasso(); updateCutout(); };
+    document.getElementById("cropReset").onclick=()=>{ lassoPts=[]; wandSeeds=[]; eraseStrokes=[]; gumStroke=null; lassoDragIdx=-1; rebuildBase(); drawLasso(); updateCutout(); };
     document.querySelectorAll('#cmModus button[data-modus]').forEach(b=>b.onclick=()=>{ cutModus=b.dataset.modus; drawingFree=false; lassoDragIdx=-1; zetSnijModusUI(); drawLasso(); });
     { const ub=document.getElementById("lassoUndo"); if(ub) ub.onclick=()=>{
-        // Ongedaan: verwijder de laatste actie - toverstaf-tik óf lasso-punt. Loopt nooit vast zolang er iets is.
-        if(laatsteActie==='wand' && wandSeeds.length){ wandSeeds.pop(); }
+        // Ongedaan: verwijder de laatste actie - gum-streek, toverstaf-tik óf lasso-punt. Loopt nooit vast zolang er iets is.
+        if(laatsteActie==='gum' && eraseStrokes.length){ eraseStrokes.pop(); }
+        else if(laatsteActie==='wand' && wandSeeds.length){ wandSeeds.pop(); }
         else if(lassoPts.length){ lassoPts.pop(); }
+        else if(eraseStrokes.length){ eraseStrokes.pop(); }
         else if(wandSeeds.length){ wandSeeds.pop(); }
-        if(!wandSeeds.length && !lassoPts.length) laatsteActie=null;
-        else if(laatsteActie==='wand' && !wandSeeds.length) laatsteActie='lasso';
-        else if(laatsteActie==='lasso' && !lassoPts.length) laatsteActie='wand';
-        lassoDragIdx=-1; rebuildBase(); drawLasso(); updateCutout();
+        if(!wandSeeds.length && !lassoPts.length && !eraseStrokes.length) laatsteActie=null;
+        else if(laatsteActie==='gum' && !eraseStrokes.length) laatsteActie=(lassoPts.length?'lasso':'wand');
+        else if(laatsteActie==='wand' && !wandSeeds.length) laatsteActie=(lassoPts.length?'lasso':'gum');
+        else if(laatsteActie==='lasso' && !lassoPts.length) laatsteActie=(eraseStrokes.length?'gum':'wand');
+        gumStroke=null; lassoDragIdx=-1; rebuildBase(); drawLasso(); updateCutout();
       }; }
-    { const wb=document.getElementById("wandBtn"); if(wb) wb.onclick=()=>{ wandMode=!wandMode; if(wandMode){ bgPickMode=false; if(bgPickBtn)bgPickBtn.classList.remove("on"); } zetWandUI(); toast(wandMode?(wandKeep?tr('ui.tik_houden'):tr('ui.tik_uitknippen')):tr('ui.toverstaf_uit')); }; }
+    { const wb=document.getElementById("wandBtn"); if(wb) wb.onclick=()=>{ wandMode=!wandMode; if(wandMode){ gumMode=false; zetGumUI(); bgPickMode=false; if(bgPickBtn)bgPickBtn.classList.remove("on"); } zetWandUI(); toast(wandMode?(wandKeep?tr('ui.tik_houden'):tr('ui.tik_uitknippen')):tr('ui.toverstaf_uit')); }; }
     document.querySelectorAll('#cmWandModus button[data-wandkeep]').forEach(b=>b.onclick=()=>{ wandKeep=(b.dataset.wandkeep==='1'); zetWandUI(); if(origImg){ rebuildBase(); updateCutout(); } });
+    { const gb=document.getElementById("gumBtn"); if(gb) gb.onclick=()=>{ gumMode=!gumMode; if(gumMode){ wandMode=false; zetWandUI(); bgPickMode=false; if(bgPickBtn)bgPickBtn.classList.remove("on"); } gumStroke=null; zetGumUI(); toast(gumMode?tr('ui.gum_aan'):tr('ui.gum_uit')); }; }
+    document.querySelectorAll('#cmGumModus button[data-gum]').forEach(b=>b.onclick=()=>{ gumHerstel=(b.dataset.gum==='1'); zetGumUI(); });
+    { const gr=document.getElementById("gumRadius"); if(gr) gr.oninput=()=>{ gumRadius=(+gr.value||40)/1000; }; }
     { const sp=document.getElementById("spiegelBtn"); if(sp) sp.onclick=()=>{
         flipH=!flipH;
         // Lasso + wand meespiegelen. flipH wordt in buildFullCanvas VOOR de rotatie toegepast,
@@ -11884,7 +11995,7 @@ async function verwijderVoorbeelden() {
         rebuildBase(); updateCutout(); drawLasso();
       }; }
     { const ti=document.getElementById("cmToolInfo"), leg=document.getElementById("cmToolLegend");
-      const ids=["rotate90Btn","spiegelBtn","wandBtn","lassoUndo","cropReset"];
+      const ids=["rotate90Btn","spiegelBtn","wandBtn","gumBtn","lassoUndo","cropReset"];
       function bouwLegenda(){ leg.innerHTML = ids.map(id=>{ const b=document.getElementById(id); if(!b) return "";
           const svg=b.querySelector("svg"); const naam=esc(b.getAttribute("aria-label")||"");
           return `<div class="lg-row${id==="cropReset"?" lg-reset":""}">${svg?svg.outerHTML:""}<span>${naam}</span></div>`; }).join(""); }
@@ -11977,12 +12088,19 @@ async function verwijderVoorbeelden() {
       if(!baseCanvas) rebuildBase();
       cutPointers.set(e.pointerId,{x:e.clientX,y:e.clientY});
       if(cutPointers.size>=2){              // tweede vinger -> pinch-zoom/pan; lopende tekening afbreken
-        if(drawingFree){ drawingFree=false; if(lassoBackup) lassoPts=lassoBackup; }
+        if(gumStroke){ gumStroke=null; rebuildBase(); }   // lopende gum-streek blijft staan, alleen sleep afbreken
+        else if(drawingFree){ drawingFree=false; if(lassoBackup) lassoPts=lassoBackup; }
         else if(lassoDragIdx>=0){ if(puntToegevoegd) lassoPts.pop(); lassoDragIdx=-1; }
         startPinch(); drawPreview(baseCanvas); drawLasso();
         return;
       }
       try{ cutPrev.setPointerCapture(e.pointerId); }catch(_){}
+      if(gumMode){                          // gum: streek begint -> wis/herstel onder de kwast
+        gumStroke={pts:[ptFrom(e)], r:gumRadius, mode:(gumHerstel?'terug':'weg')};
+        eraseStrokes.push(gumStroke); laatsteActie='gum';
+        rebuildBase(); drawCutPreview(); drawLasso();
+        return;
+      }
       if(cutModus==='vrij'){                // vrij tekenen: nieuwe lijn met de vinger/muis
         lassoBackup=lassoPts.slice(); drawingFree=true; lassoPts=[ptFrom(e)];
         drawPreview(baseCanvas); drawLasso();
@@ -12003,6 +12121,11 @@ async function verwijderVoorbeelden() {
         panX=pinch.panX0+(ncx-pinch.cx); panY=pinch.panY0+(ncy-pinch.cy);
         clampPan(); drawPreview(baseCanvas); drawLasso(); return;
       }
+      if(gumStroke){                        // gum: streek uitbreiden + live preview
+        const p=ptFrom(e), last=gumStroke.pts[gumStroke.pts.length-1];
+        if(!last || Math.hypot(p.nx-last.nx,p.ny-last.ny)>0.004){ gumStroke.pts.push(p); rebuildBase(); drawCutPreview(); }
+        drawLasso(); return;
+      }
       if(drawingFree){
         const p=ptFrom(e), last=lassoPts[lassoPts.length-1];
         if(!last || Math.hypot(p.nx-last.nx,p.ny-last.ny)>0.006){ lassoPts.push(p); laatsteActie='lasso'; }
@@ -12015,6 +12138,7 @@ async function verwijderVoorbeelden() {
     function eindigPointer(e){
       cutPointers.delete(e.pointerId);
       if(pinch){ if(cutPointers.size<2){ pinch=null; updateCutout(); drawLasso(); } return; }
+      if(gumStroke){ gumStroke=null; updateCutout(); drawLasso(); return; }
       if(drawingFree){
         drawingFree=false;
         if(lassoPts.length<3) lassoPts=[];
@@ -12061,8 +12185,7 @@ async function verwijderVoorbeelden() {
         if(imgTexture && imgTexture.dispose) imgTexture.dispose(); imgTexture=null;
         Object.assign(rec,{ naam, artiest:info.artiest, studio:info.studio, stijl:info.stijl, kosten:info.kosten, pijn:info.pijn, datum:info.datum, zituren:info.zituren, accentkleur:info.accentkleur, notities:info.notities, status });
         rec.kunst=rec.kunst||{}; rec.kunst.src=src; rec.kunst.aspect=aspect;
-        rec.kunst3d={ srcUrl:(origImg?origImg.src:null), lasso:lassoPts.slice(), thresh:+cutThresh.value,
-                 spread:(cutSpread?+cutSpread.value:55), bgColor:(bgPick?{r:bgPick.r,g:bgPick.g,b:bgPick.b}:null), bg:bgRemove.checked, flipH:flipH, wand:wandSeeds.slice(), wandKeep:wandKeep, huidMethode:huidMethode, rot90:rot90 };
+        rec.kunst3d=bouwKunst3d();
         try{ await saveTattoo(rec); }catch(e){ console.error(e); toast(tr('toast.opslaanmislukt')+(e&&e.message?e.message:tr('ui.fout'))); }
         if(typeof tattoos!=="undefined"&&Array.isArray(tattoos)){ const j=tattoos.findIndex(x=>x.id===rec.id); if(j>=0)tattoos[j]=rec; }
         if(typeof renderMarkers==="function"){ try{renderMarkers();}catch(_){} }
@@ -12085,8 +12208,7 @@ async function verwijderVoorbeelden() {
           return; }
         const herhaal=plaatsHerhaal; plaatsHerhaal=false;   // D6(a): na plaatsen cut heropenen met dezelfde foto?
         if(herhaal && lassoPts.length>=3) vorigeLassos.push({pts:lassoPts.slice(), rot90, flipH});   // verb.3: vorige uitsnede onthouden
-        const kunst3d={ srcUrl:(origImg?origImg.src:null), lasso:lassoPts.slice(), thresh:+cutThresh.value,
-                 spread:(cutSpread?+cutSpread.value:55), bgColor:(bgPick?{r:bgPick.r,g:bgPick.g,b:bgPick.b}:null), bg:bgRemove.checked, flipH:flipH, wand:wandSeeds.slice(), wandKeep:wandKeep, huidMethode:huidMethode, rot90:rot90 };
+        const kunst3d=bouwKunst3d();
         if(addDoel==='2d'){
           const cv=imgTexture.image; const src=canvasToPNG(cv,700);
           const aspect=(cv&&cv.width)?(cv.height/cv.width):1;
@@ -12098,7 +12220,7 @@ async function verwijderVoorbeelden() {
         plaatsData={ tex:imgTexture, naam, info, kunst3d, status, herhaal };
         imgTexture=null;   // eigendom gaat naar plaatsData; geen dispose
         cutModal.classList.remove("on"); pendingNew=null; toonCutInstellingen(false); toonInfo(false);
-        plaatsModus=true; toonBanner(tr('ui.klik_plaatsen')); if(window.__plaatsHintAan) window.__plaatsHintAan();
+        plaatsModus=true; if(window.__plaatsHintAan) window.__plaatsHintAan();   // paarse banner weg: de 'tik om te plaatsen'-hint op het lichaam volstaat
         return;
       }
       if(pendingPlace2D){
@@ -12111,7 +12233,7 @@ async function verwijderVoorbeelden() {
             naam:"Tattoo", status:"gezet", zijde:pp.side, lichaamsdeel:pp.zone,
             positie:{x:pp.x,y:pp.y},
             kunst:{ src, schaal:24, aspect, rotatie:0 },
-            kunst3d:{ srcUrl:(origImg?origImg.src:null), lasso:lassoPts.slice(), thresh:+cutThresh.value, spread:(cutSpread?+cutSpread.value:55), bgColor:(bgPick?{r:bgPick.r,g:bgPick.g,b:bgPick.b}:null), bg:bgRemove.checked, flipH:flipH, wand:wandSeeds.slice(), wandKeep:wandKeep, huidMethode:huidMethode, rot90:rot90 }
+            kunst3d:bouwKunst3d()
           });
           await saveTattoo(rec);
           if(typeof tattoos!=="undefined" && Array.isArray(tattoos)) tattoos.push(rec);
@@ -12133,7 +12255,7 @@ async function verwijderVoorbeelden() {
         m.tex=imgTexture; rebuildMarker(m);
         if(m.rec){
           Object.assign(m.rec,{ naam, artiest:info.artiest, studio:info.studio, stijl:info.stijl, kosten:info.kosten, pijn:info.pijn, datum:info.datum, zituren:info.zituren, accentkleur:info.accentkleur, notities:info.notities, status });
-          m.rec.kunst3d={ srcUrl:(origImg?origImg.src:null), lasso:lassoPts.slice(), thresh:+cutThresh.value, spread:(cutSpread?+cutSpread.value:55), bgColor:(bgPick?{r:bgPick.r,g:bgPick.g,b:bgPick.b}:null), bg:bgRemove.checked, flipH:flipH, wand:wandSeeds.slice(), wandKeep:wandKeep, huidMethode:huidMethode, rot90:rot90 };
+          m.rec.kunst3d=bouwKunst3d();
           try{ await saveTattoo(m.rec); toast(tr('ui.tattoo_bijgewerkt')); }
           catch(err){ console.error(err); toast(tr('toast.opslaanmislukt')+(err&&err.message?err.message:tr('ui.fout'))); }
         }
@@ -12155,7 +12277,7 @@ async function verwijderVoorbeelden() {
           naam:"Tattoo", status:"gezet", zijde:nz.side, lichaamsdeel:nz.zone,
           positie3d:{ point:[pp.point.x,pp.point.y,pp.point.z], normal:[pp.normal.x,pp.normal.y,pp.normal.z],
             rot, size, gender:currentGender, zone:nz.zone, side:nz.side },
-          kunst3d:{ srcUrl:(origImg?origImg.src:null), lasso:lassoPts.slice(), thresh:+cutThresh.value, spread:(cutSpread?+cutSpread.value:55), bgColor:(bgPick?{r:bgPick.r,g:bgPick.g,b:bgPick.b}:null), bg:bgRemove.checked, flipH:flipH, wand:wandSeeds.slice(), wandKeep:wandKeep, huidMethode:huidMethode, rot90:rot90 }
+          kunst3d:bouwKunst3d()
         });
         sync2D(rec, pp.point, nz.side, rot, size, imgTexture);
         await saveTattoo(rec);
@@ -12190,11 +12312,18 @@ async function verwijderVoorbeelden() {
         fx.translate(OW/2,OH/2); fx.rotate(R*Math.PI/2); if(k.flipH) fx.scale(-1,1);
         fx.drawImage(im,-FW/2,-FH/2,FW,FH);
         fx.setTransform(1,0,0,1,0,0);
+        // Schone, getransformeerde bron bewaren vóór huid/wand-verwijdering (gum 'terughalen')
+        let schoonC=null;
+        if(k.erase && k.erase.length && k.erase.some(s=>s.mode==='terug')){
+          schoonC=document.createElement("canvas"); schoonC.width=OW; schoonC.height=OH;
+          schoonC.getContext("2d").drawImage(full,0,0);
+        }
         if(k.bg!==false){
           if((k.huidMethode||'kleur')==='helder') removeSkinLuma(fx, OW, OH, (k.thresh!=null?+k.thresh:170), (k.spread!=null?+k.spread:55));
           else removeSkinColor(fx, OW, OH, (k.bgColor||null), (k.thresh!=null?+k.thresh:170), (k.spread!=null?+k.spread:55));
         }
         if(k.wand && k.wand.length) applyWand(fx, OW, OH, k.wand, k.wandKeep);
+        if(k.erase && k.erase.length) applyErase(fx, OW, OH, k.erase, schoonC);
         const lasso=k.lasso||[]; let shown=full;
         if(lasso.length>=3){
           const sc=document.createElement("canvas"); sc.width=full.width; sc.height=full.height;
