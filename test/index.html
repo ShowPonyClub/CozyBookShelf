@@ -678,6 +678,16 @@ input[type=range]:focus{box-shadow:none;border:none}
 }
 #toast.zichtbaar{opacity:1;transform:translateX(-50%) translateY(0)}
 #toast.met-actie{pointer-events:auto;display:flex;align-items:center;gap:14px}
+/* Sync-indicator: klein pilletje bovenin (spinner 'Synchroniseren…' -> ✓ 'Bijgewerkt') */
+#sync-ind{position:fixed;left:50%;top:max(64px,calc(env(safe-area-inset-top) + 60px));transform:translateX(-50%);z-index:55;
+  display:inline-flex;align-items:center;gap:8px;background:#2A2118;color:#F0EDE8;border:1px solid var(--rand);
+  padding:7px 13px;border-radius:999px;font-size:.8rem;font-weight:600;box-shadow:0 6px 20px rgba(34,26,18,.3);}
+#sync-ind[hidden]{display:none;}
+#sync-ind .si-spin{width:14px;height:14px;border-radius:50%;border:2px solid rgba(240,237,232,.3);border-top-color:var(--accent);animation:t3dspin .8s linear infinite;}
+#sync-ind .si-vink{display:none;color:#5ec98c;font-weight:800;}
+#sync-ind.klaar .si-spin{display:none;}
+#sync-ind.klaar .si-vink{display:inline;}
+#sync-ind.klaar{border-color:rgba(94,201,140,.5);}
 .toast-knop{
   min-height:0;padding:4px 2px;color:#F2A285;font-weight:800;
   font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;white-space:nowrap;
@@ -953,10 +963,7 @@ form label,
 .cutmodal .linkbtn:hover{color:var(--accent);}
 .cutmodal .bgrow{justify-content:flex-start;margin-top:6px;}
 .cutmodal .bg-controls{justify-content:flex-start;flex-wrap:wrap;gap:8px 16px;margin:8px 0;}
-.cutmodal .cut-tools{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:10px;position:relative;}
-.cutmodal .cut-tools .ct-left{flex:1 1 0;display:flex;justify-content:flex-start;min-width:0;}
-.cutmodal .cut-tools .ct-mid{flex:0 1 auto;display:flex;justify-content:center;align-items:center;gap:8px;flex-wrap:wrap;}
-.cutmodal .cut-tools .ct-right{flex:1 1 0;display:flex;justify-content:flex-end;min-width:0;}
+.cutmodal .cut-tools{display:flex;align-items:center;justify-content:space-between;gap:6px;flex-wrap:wrap;margin-top:10px;position:relative;}
 /* Uitsnede-tools als chips: duidelijk tapbaar i.p.v. tekstlinkjes. Reset blijft een aparte gedempte link rechts. */
 .cutmodal .cut-tools .linkbtn{display:inline-flex;align-items:center;gap:5px;background:var(--veldbg);
   border:1px solid var(--rand);border-radius:999px;color:var(--tekst);text-decoration:none;font-size:12px;font-weight:600;
@@ -973,9 +980,13 @@ form label,
 .cutmodal .cm-legend .lg-row .ik{flex:none;}
 .cutmodal .cm-legend .lg-row.lg-reset{color:#A8341A;}
 .cutmodal .cut-tools .linkbtn.on{background:var(--accent);border-color:var(--accent);color:#F0EDE8;}
-.cutmodal .cut-tools #cropReset{background:transparent;border:1px solid rgba(168,52,26,.45);
-  color:#A8341A;text-decoration:none;padding:9px 13px;min-height:44px;}
-.cutmodal .cut-tools #cropReset:hover{color:#A8341A;border-color:#A8341A;background:rgba(168,52,26,.08);}
+/* Reset uitsnede: destructief + zeldzaam -> als subtiele tekstlink ONDER de balk (geen mis-tap naast de tools) */
+.cutmodal .cm-resetrij{display:flex;justify-content:center;margin-top:8px;}
+.cutmodal .cm-resetlink{display:inline-flex;align-items:center;gap:6px;background:transparent;border:0;cursor:pointer;
+  color:#A8341A;font-size:.8rem;font-weight:600;font-family:inherit;padding:6px 12px;border-radius:8px;}
+.cutmodal .cm-resetlink .ik{width:15px;height:15px;stroke:currentColor;fill:none;}
+.cutmodal .cm-resetlink:hover{background:rgba(168,52,26,.08);}
+.cutmodal .cm-resetlink:active{transform:scale(.97);}
 .cutmodal .cut-tip{font-size:11px;color:var(--gedempt);margin:2px 0 8px;line-height:1.35;}
 .cutmodal .linkbtn.on{color:var(--accent);font-weight:600;}
 .cutmodal .bgswatch{width:18px;height:18px;border-radius:4px;border:1px solid var(--rand);visibility:hidden;flex:0 0 auto;}
@@ -1382,19 +1393,15 @@ form label{text-transform:none;letter-spacing:.005em;font-size:.8rem;color:var(-
             </div>
             <div class="cutrow cut-tools">
               <div id="cmToolLegend" class="cm-legend" hidden role="group" data-i18n-aria="ui.knop_uitleg" aria-label="Wat doen de knoppen?"></div>
-              <div class="ct-left">
-                <button id="cmToolInfo" class="linkbtn cm-toolinfo" aria-pressed="false" data-i18n-title="ui.knop_uitleg" data-i18n-aria="ui.knop_uitleg" title="Wat doen de knoppen?" aria-label="Wat doen de knoppen?"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5"/><path d="M12 7.6h.01"/></svg><span class="t-lbl" data-i18n="ui.info">Info</span></button>
-              </div>
-              <div class="ct-mid">
-                <button id="rotate90Btn" class="linkbtn" data-i18n-title="ui.draaien90" data-i18n-aria="ui.draaien90" title="90&deg; draaien" aria-label="90&deg; draaien"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.3-5.6"/><path d="M21 4v4h-4"/></svg><span class="t-lbl" data-i18n="ui.draaien90">90&deg; draaien</span></button>
-                <button id="spiegelBtn" class="linkbtn" data-i18n-title="ui.spiegelen" data-i18n-aria="ui.spiegelen" title="Spiegelen" aria-label="Spiegelen"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v18" stroke-dasharray="2 3"/><path d="M4 6L4 18L10 12Z"/><path d="M20 6L20 18L14 12Z"/></svg><span class="t-lbl" data-i18n="ui.spiegelen">Spiegelen</span></button>
-                <button id="wandBtn" class="linkbtn" data-i18n-title="ui.toverstaf" data-i18n-aria="ui.toverstaf" title="Toverstaf" aria-label="Toverstaf"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 19L14 10"/><path d="M17 3l1 3 3 1-3 1-1 3-1-3-3-1 3-1z"/><path d="M6 5v2M5 6h2"/></svg><span class="t-lbl" data-i18n="ui.toverstaf">Toverstaf</span></button>
-                <button id="gumBtn" class="linkbtn" data-i18n-title="ui.gum" data-i18n-aria="ui.gum" title="Gum" aria-label="Gum"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M16 3l5 5-9 9H7l-4-4z"/><path d="M9 9l6 6"/><path d="M5 21h14"/></svg><span class="t-lbl" data-i18n="ui.gum">Gum</span></button>
-                <button id="lassoUndo" class="linkbtn" data-i18n-title="ui.ongedaan" data-i18n-aria="ui.ongedaan" title="Ongedaan" aria-label="Ongedaan"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 14L4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 5 5v3"/></svg><span class="t-lbl" data-i18n="ui.ongedaan">Ongedaan</span></button>
-              </div>
-              <div class="ct-right">
-                <button id="cropReset" class="linkbtn" data-i18n-title="ui.reset_uitsnede" data-i18n-aria="ui.reset_uitsnede" title="Reset uitsnede" aria-label="Reset uitsnede"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 9A8 8 0 0 1 18 7"/><path d="M19.5 15A8 8 0 0 1 6 17"/><path d="M18 3v4h-4"/><path d="M6 21v-4h4"/></svg><span class="t-lbl" data-i18n="ui.reset">Reset</span></button>
-              </div>
+              <button id="cmToolInfo" class="linkbtn cm-toolinfo" aria-pressed="false" data-i18n-title="ui.knop_uitleg" data-i18n-aria="ui.knop_uitleg" title="Wat doen de knoppen?" aria-label="Wat doen de knoppen?"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5"/><path d="M12 7.6h.01"/></svg><span class="t-lbl" data-i18n="ui.info">Info</span></button>
+              <button id="rotate90Btn" class="linkbtn" data-i18n-title="ui.draaien90" data-i18n-aria="ui.draaien90" title="90&deg; draaien" aria-label="90&deg; draaien"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="10" width="11" height="11" rx="2"/><path d="M14 4h3a3 3 0 0 1 3 3v3"/><path d="M16.5 1.5L20 5l-3.5 3.5"/></svg><span class="t-lbl" data-i18n="ui.draaien90">90&deg; draaien</span></button>
+              <button id="spiegelBtn" class="linkbtn" data-i18n-title="ui.spiegelen" data-i18n-aria="ui.spiegelen" title="Spiegelen" aria-label="Spiegelen"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v18" stroke-dasharray="2 3"/><path d="M4 6L4 18L10 12Z"/><path d="M20 6L20 18L14 12Z"/></svg><span class="t-lbl" data-i18n="ui.spiegelen">Spiegelen</span></button>
+              <button id="wandBtn" class="linkbtn" data-i18n-title="ui.toverstaf" data-i18n-aria="ui.toverstaf" title="Toverstaf" aria-label="Toverstaf"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 19L14 10"/><path d="M17 3l1 3 3 1-3 1-1 3-1-3-3-1 3-1z"/><path d="M6 5v2M5 6h2"/></svg><span class="t-lbl" data-i18n="ui.toverstaf">Toverstaf</span></button>
+              <button id="gumBtn" class="linkbtn" data-i18n-title="ui.gum" data-i18n-aria="ui.gum" title="Gum" aria-label="Gum"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M16 3l5 5-9 9H7l-4-4z"/><path d="M9 9l6 6"/><path d="M5 21h14"/></svg><span class="t-lbl" data-i18n="ui.gum">Gum</span></button>
+              <button id="lassoUndo" class="linkbtn" data-i18n-title="ui.ongedaan" data-i18n-aria="ui.ongedaan" title="Ongedaan" aria-label="Ongedaan"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 14L4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 5 5v3"/></svg><span class="t-lbl" data-i18n="ui.ongedaan">Ongedaan</span></button>
+            </div>
+            <div class="cm-resetrij">
+              <button id="cropReset" class="cm-resetlink" data-i18n-title="ui.reset_uitsnede" data-i18n-aria="ui.reset_uitsnede" title="Reset uitsnede" aria-label="Reset uitsnede"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 9A8 8 0 0 1 18 7"/><path d="M19.5 15A8 8 0 0 1 6 17"/><path d="M18 3v4h-4"/><path d="M6 21v-4h4"/></svg><span data-i18n="ui.reset_uitsnede">Reset uitsnede</span></button>
             </div>
           </div>
           <div class="cm-choose-rij">
@@ -1416,6 +1423,7 @@ form label{text-transform:none;letter-spacing:.005em;font-size:.8rem;color:var(-
   <button class="icoonknop" id="install-sluit" data-i18n-aria="aria.bannersluit" aria-label="Banner sluiten">✕</button>
 </div>
 <div id="toast" role="status"></div>
+<div id="sync-ind" hidden role="status" aria-live="polite"><span class="si-spin" aria-hidden="true"></span><span class="si-vink" aria-hidden="true">✓</span><span id="si-tekst"></span></div>
 
 <!-- ===================== INSTELLINGEN-PANEEL ===================== -->
 <div id="inst-overlay" role="presentation"></div>
@@ -6565,7 +6573,7 @@ const I18N = {
     'inst.vorm':'Lichaamsvorm','inst.vorm.slank':'Slank','inst.vorm.gemiddeld':'Gemiddeld','inst.vorm.atletisch':'Atletisch','inst.vorm.zwaar':'Zwaar',
     'inst.thema':'Weergave','inst.thema.auto':'Systeem','inst.thema.licht':'Licht','inst.thema.donker':'Donker',
     'inst.feedback':'Feedback','inst.feedback_sub':'Iets kapot of een idee? Ik hoor het graag.','inst.feedback_knop':'Stuur feedback','inst.privacy':'Privacybeleid',
-    'inst.account':'Account & cloud-sync','account.uitleg':'Optioneel. Log in om je collectie later tussen apparaten te synchroniseren. Zonder inloggen blijft alles lokaal op dit toestel.','account.email_ph':'E-mailadres','account.ww_ph':'Wachtwoord','account.inloggen':'Inloggen','account.aanmaken':'Account aanmaken','account.uitloggen':'Uitloggen','account.ingelogd_als':'Ingelogd als','account.bezig':'Bezig…','account.check_mail':'Bijna klaar! Check je mail ({email}) en klik op de bevestigingslink om je account te activeren.','account.ingelogd':'Ingelogd. Welkom terug!','account.uitgelogd':'Uitgelogd.','account.fout_velden':'Vul een e-mailadres en wachtwoord in.','account.fout_nietbevestigd':'Bevestig eerst je e-mailadres via de link in je mail.','account.fout_inloggegevens':'E-mailadres of wachtwoord klopt niet.','account.fout_generiek':'Er ging iets mis. Probeer het later opnieuw.','account.offline':'Cloud-sync is nu niet beschikbaar (geen verbinding).','account.backup_uitleg':'Zet je gegevens veilig in de cloud (foto\'s volgen later).','account.backup_knop':'Nu back-uppen','account.backup_bezig':'Bezig met back-uppen…','account.backup_klaar':'{n} item(s) geback-upt naar de cloud.','account.backup_fout':'Back-up mislukt. Probeer het later opnieuw.','account.pull_knop':'Ophalen uit cloud','account.pull_bezig':'Bezig met ophalen…','account.pull_klaar':'{n} item(s) opgehaald uit de cloud (nog zonder foto\'s).','account.pull_niks':'Niets nieuws om op te halen.','account.pull_fout':'Ophalen mislukt. Probeer het later opnieuw.','account.sync_uitleg':'Synchroniseer je collectie (inclusief foto\'s) met de cloud.','account.sync_knop':'Nu synchroniseren','account.sync_bezig':'Bezig met synchroniseren…','account.sync_klaar':'Gesynchroniseerd: {omhoog} verstuurd, {omlaag} opgehaald.','account.sync_niks':'Alles is al up-to-date.','account.sync_fout':'Synchroniseren mislukt. Probeer het later opnieuw.','account.verwijder_knop':'Account verwijderen','account.verwijder_bevestig':'Weet je het zeker? Dit verwijdert je account en alle gegevens en foto\'s in de cloud. Je lokale collectie op dit toestel blijft staan. Dit kan niet ongedaan worden gemaakt.','account.verwijder_bezig':'Account verwijderen…','account.verwijder_klaar':'Je account en cloud-gegevens zijn verwijderd.','account.verwijder_fout':'Verwijderen mislukt. Probeer het later opnieuw.','account.fout_login':'E-mail of wachtwoord klopt niet - of je e-mailadres is nog niet bevestigd (check je mail).','account.reset_knop':'Wachtwoord vergeten?','account.reset_geen_email':'Vul je e-mailadres in.','account.reset_klaar':'Als dit e-mailadres bij ons bekend is, hebben we een resetlink gestuurd. Check je mail.','account.herstel_titel':'Stel een nieuw wachtwoord in.','account.herstel_ph':'Nieuw wachtwoord','account.herstel_knop':'Wachtwoord opslaan','account.herstel_kort':'Kies een wachtwoord van minstens 8 tekens.','account.herstel_klaar':'Je wachtwoord is bijgewerkt. Je bent ingelogd.','account.herstel_fout':'Opslaan mislukt. Vraag eventueel een nieuwe resetlink aan.',
+    'inst.account':'Account & cloud-sync','account.uitleg':'Optioneel. Log in om je collectie later tussen apparaten te synchroniseren. Zonder inloggen blijft alles lokaal op dit toestel.','account.email_ph':'E-mailadres','account.ww_ph':'Wachtwoord','account.inloggen':'Inloggen','account.aanmaken':'Account aanmaken','account.uitloggen':'Uitloggen','account.ingelogd_als':'Ingelogd als','account.bezig':'Bezig…','account.check_mail':'Bijna klaar! Check je mail ({email}) en klik op de bevestigingslink om je account te activeren.','account.ingelogd':'Ingelogd. Welkom terug!','account.uitgelogd':'Uitgelogd.','sync.bezig':'Synchroniseren…','sync.klaar':'Bijgewerkt','account.fout_velden':'Vul een e-mailadres en wachtwoord in.','account.fout_nietbevestigd':'Bevestig eerst je e-mailadres via de link in je mail.','account.fout_inloggegevens':'E-mailadres of wachtwoord klopt niet.','account.fout_generiek':'Er ging iets mis. Probeer het later opnieuw.','account.offline':'Cloud-sync is nu niet beschikbaar (geen verbinding).','account.backup_uitleg':'Zet je gegevens veilig in de cloud (foto\'s volgen later).','account.backup_knop':'Nu back-uppen','account.backup_bezig':'Bezig met back-uppen…','account.backup_klaar':'{n} item(s) geback-upt naar de cloud.','account.backup_fout':'Back-up mislukt. Probeer het later opnieuw.','account.pull_knop':'Ophalen uit cloud','account.pull_bezig':'Bezig met ophalen…','account.pull_klaar':'{n} item(s) opgehaald uit de cloud (nog zonder foto\'s).','account.pull_niks':'Niets nieuws om op te halen.','account.pull_fout':'Ophalen mislukt. Probeer het later opnieuw.','account.sync_uitleg':'Synchroniseer je collectie (inclusief foto\'s) met de cloud.','account.sync_knop':'Nu synchroniseren','account.sync_bezig':'Bezig met synchroniseren…','account.sync_klaar':'Gesynchroniseerd: {omhoog} verstuurd, {omlaag} opgehaald.','account.sync_niks':'Alles is al up-to-date.','account.sync_fout':'Synchroniseren mislukt. Probeer het later opnieuw.','account.verwijder_knop':'Account verwijderen','account.verwijder_bevestig':'Weet je het zeker? Dit verwijdert je account en alle gegevens en foto\'s in de cloud. Je lokale collectie op dit toestel blijft staan. Dit kan niet ongedaan worden gemaakt.','account.verwijder_bezig':'Account verwijderen…','account.verwijder_klaar':'Je account en cloud-gegevens zijn verwijderd.','account.verwijder_fout':'Verwijderen mislukt. Probeer het later opnieuw.','account.fout_login':'E-mail of wachtwoord klopt niet - of je e-mailadres is nog niet bevestigd (check je mail).','account.reset_knop':'Wachtwoord vergeten?','account.reset_geen_email':'Vul je e-mailadres in.','account.reset_klaar':'Als dit e-mailadres bij ons bekend is, hebben we een resetlink gestuurd. Check je mail.','account.herstel_titel':'Stel een nieuw wachtwoord in.','account.herstel_ph':'Nieuw wachtwoord','account.herstel_knop':'Wachtwoord opslaan','account.herstel_kort':'Kies een wachtwoord van minstens 8 tekens.','account.herstel_klaar':'Je wachtwoord is bijgewerkt. Je bent ingelogd.','account.herstel_fout':'Opslaan mislukt. Vraag eventueel een nieuwe resetlink aan.',
     'stats.titel':'Statistieken','stats.collectie':'Collectie','stats.aantal':'Aantal tattoos','stats.uitgegeven':'Totaal uitgegeven',
     'stats.zituren':'Totale zituren','stats.gempijn':'Gemiddelde pijn','stats.geheeld':'Geheeld','stats.perstijl':'Per stijl','stats.perartiest':'Per artiest',
     'stats.perdeel':'Per lichaamsdeel','stats.tijdlijn':'Tijdlijn (per jaar)','stats.wishlist':'Wishlist','stats.hoogtepunten':'Hoogtepunten','stats.goedkoopste':'Goedkoopste tattoo','stats.lievelingsartiest':'Lievelingsartiest',
@@ -6739,7 +6747,7 @@ const I18N = {
     'inst.vorm':'Body shape','inst.vorm.slank':'Slim','inst.vorm.gemiddeld':'Average','inst.vorm.atletisch':'Athletic','inst.vorm.zwaar':'Heavy',
     'inst.thema':'Appearance','inst.thema.auto':'System','inst.thema.licht':'Light','inst.thema.donker':'Dark',
     'inst.feedback':'Feedback','inst.feedback_sub':'Something broken, or an idea? Let me know.','inst.feedback_knop':'Send feedback','inst.privacy':'Privacy policy',
-    'inst.account':'Account & cloud sync','account.uitleg':'Optional. Sign in to sync your collection across devices later. Without signing in, everything stays local on this device.','account.email_ph':'Email address','account.ww_ph':'Password','account.inloggen':'Sign in','account.aanmaken':'Create account','account.uitloggen':'Sign out','account.ingelogd_als':'Signed in as','account.bezig':'Working…','account.check_mail':'Almost there! Check your email ({email}) and click the confirmation link to activate your account.','account.ingelogd':'Signed in. Welcome back!','account.uitgelogd':'Signed out.','account.fout_velden':'Enter an email address and password.','account.fout_nietbevestigd':'Please confirm your email address via the link we sent first.','account.fout_inloggegevens':'Email address or password is incorrect.','account.fout_generiek':'Something went wrong. Please try again later.','account.offline':'Cloud sync is unavailable right now (no connection).','account.backup_uitleg':'Save your data safely to the cloud (photos come later).','account.backup_knop':'Back up now','account.backup_bezig':'Backing up…','account.backup_klaar':'Backed up {n} item(s) to the cloud.','account.backup_fout':'Backup failed. Please try again later.','account.pull_knop':'Pull from cloud','account.pull_bezig':'Pulling…','account.pull_klaar':'Pulled {n} item(s) from the cloud (photos come later).','account.pull_niks':'Nothing new to pull.','account.pull_fout':'Pull failed. Please try again later.','account.sync_uitleg':'Sync your collection (including photos) with the cloud.','account.sync_knop':'Sync now','account.sync_bezig':'Syncing…','account.sync_klaar':'Synced: {omhoog} uploaded, {omlaag} downloaded.','account.sync_niks':'Everything is already up to date.','account.sync_fout':'Sync failed. Please try again later.','account.verwijder_knop':'Delete account','account.verwijder_bevestig':'Are you sure? This deletes your account and all data and photos in the cloud. Your local collection on this device stays. This cannot be undone.','account.verwijder_bezig':'Deleting account…','account.verwijder_klaar':'Your account and cloud data have been deleted.','account.verwijder_fout':'Deletion failed. Please try again later.','account.fout_login':'Email or password is incorrect - or your email isn\'t confirmed yet (check your inbox).','account.reset_knop':'Forgot password?','account.reset_geen_email':'Enter your email address.','account.reset_klaar':'If this email is on file, we\'ve sent a reset link. Check your inbox.','account.herstel_titel':'Set a new password.','account.herstel_ph':'New password','account.herstel_knop':'Save password','account.herstel_kort':'Choose a password of at least 8 characters.','account.herstel_klaar':'Your password has been updated. You\'re signed in.','account.herstel_fout':'Saving failed. You may want to request a new reset link.',
+    'inst.account':'Account & cloud sync','account.uitleg':'Optional. Sign in to sync your collection across devices later. Without signing in, everything stays local on this device.','account.email_ph':'Email address','account.ww_ph':'Password','account.inloggen':'Sign in','account.aanmaken':'Create account','account.uitloggen':'Sign out','account.ingelogd_als':'Signed in as','account.bezig':'Working…','account.check_mail':'Almost there! Check your email ({email}) and click the confirmation link to activate your account.','account.ingelogd':'Signed in. Welcome back!','account.uitgelogd':'Signed out.','sync.bezig':'Syncing…','sync.klaar':'Updated','account.fout_velden':'Enter an email address and password.','account.fout_nietbevestigd':'Please confirm your email address via the link we sent first.','account.fout_inloggegevens':'Email address or password is incorrect.','account.fout_generiek':'Something went wrong. Please try again later.','account.offline':'Cloud sync is unavailable right now (no connection).','account.backup_uitleg':'Save your data safely to the cloud (photos come later).','account.backup_knop':'Back up now','account.backup_bezig':'Backing up…','account.backup_klaar':'Backed up {n} item(s) to the cloud.','account.backup_fout':'Backup failed. Please try again later.','account.pull_knop':'Pull from cloud','account.pull_bezig':'Pulling…','account.pull_klaar':'Pulled {n} item(s) from the cloud (photos come later).','account.pull_niks':'Nothing new to pull.','account.pull_fout':'Pull failed. Please try again later.','account.sync_uitleg':'Sync your collection (including photos) with the cloud.','account.sync_knop':'Sync now','account.sync_bezig':'Syncing…','account.sync_klaar':'Synced: {omhoog} uploaded, {omlaag} downloaded.','account.sync_niks':'Everything is already up to date.','account.sync_fout':'Sync failed. Please try again later.','account.verwijder_knop':'Delete account','account.verwijder_bevestig':'Are you sure? This deletes your account and all data and photos in the cloud. Your local collection on this device stays. This cannot be undone.','account.verwijder_bezig':'Deleting account…','account.verwijder_klaar':'Your account and cloud data have been deleted.','account.verwijder_fout':'Deletion failed. Please try again later.','account.fout_login':'Email or password is incorrect - or your email isn\'t confirmed yet (check your inbox).','account.reset_knop':'Forgot password?','account.reset_geen_email':'Enter your email address.','account.reset_klaar':'If this email is on file, we\'ve sent a reset link. Check your inbox.','account.herstel_titel':'Set a new password.','account.herstel_ph':'New password','account.herstel_knop':'Save password','account.herstel_kort':'Choose a password of at least 8 characters.','account.herstel_klaar':'Your password has been updated. You\'re signed in.','account.herstel_fout':'Saving failed. You may want to request a new reset link.',
     'stats.titel':'Statistics','stats.collectie':'Collection','stats.aantal':'Number of tattoos','stats.uitgegeven':'Total spent',
     'stats.zituren':'Total sitting hours','stats.gempijn':'Average pain','stats.geheeld':'Healed','stats.perstijl':'By style','stats.perartiest':'By artist',
     'stats.perdeel':'By body part','stats.tijdlijn':'Timeline (by year)','stats.wishlist':'Wishlist','stats.hoogtepunten':'Highlights','stats.goedkoopste':'Cheapest tattoo','stats.lievelingsartiest':'Favourite artist',
@@ -7136,12 +7144,33 @@ function cloudNaarLokaal(c, l) {
    Verwijderingen reizen mee via de deleted-vlag. Foto-fouten zijn niet fataal:
    de metadata synct alsnog, beelden worden bij een volgende sync opnieuw geprobeerd. */
 let syncLoopt = false;   // voorkomt overlappende syncs (handmatig + auto + interne saves)
+// Kleine sync-indicator: 'bezig' (spinner + Synchroniseren…) of 'klaar' (✓ Bijgewerkt, dooft vanzelf).
+let _syncIndT = null;
+function zetSyncIndicator(staat) {
+  const el = document.getElementById('sync-ind'); if (!el) return;
+  clearTimeout(_syncIndT);
+  if (staat === 'uit') { el.hidden = true; el.classList.remove('klaar'); return; }
+  const tekst = el.querySelector('#si-tekst');
+  if (staat === 'bezig') {
+    el.classList.remove('klaar'); if (tekst) tekst.textContent = tr('sync.bezig'); el.hidden = false;
+  } else if (staat === 'klaar') {
+    el.classList.add('klaar'); if (tekst) tekst.textContent = tr('sync.klaar'); el.hidden = false;
+    _syncIndT = setTimeout(() => { el.hidden = true; el.classList.remove('klaar'); }, 1800);
+  }
+}
 async function syncMetCloud() {
   if (!sb) return { ok: false, reden: 'geen-client' };
   if (syncLoopt) return { ok: false, reden: 'bezig' };
   syncLoopt = true;
-  try { return await _syncMetCloudKern(); }
-  finally { syncLoopt = false; }
+  // Indicator pas tonen als het even duurt (>400ms) -> geen geflikker bij snelle no-op-syncs.
+  const tShow = setTimeout(() => zetSyncIndicator('bezig'), 400);
+  try {
+    const r = await _syncMetCloudKern();
+    if (r && r.ok && (r.omlaag || r.omhoog)) zetSyncIndicator('klaar');   // er is iets gesynct -> 'Bijgewerkt ✓'
+    else zetSyncIndicator('uit');
+    return r;
+  } catch (e) { zetSyncIndicator('uit'); throw e; }
+  finally { clearTimeout(tShow); syncLoopt = false; }
 }
 async function _syncMetCloudKern() {
   const { data: s } = await sb.auth.getSession();
@@ -7720,6 +7749,8 @@ async function herlaad() {
   renderSamenvatting();
   renderStart();
   toonOpslagInfo();
+  // 3D-decals ook bijwerken (anders pas zichtbaar na een page-refresh, bv. na cloud-sync na inloggen)
+  if (typeof window.__tatties3DHerlaad === 'function') window.__tatties3DHerlaad();
 }
 
 /* Opslaggebruik tonen en waarschuwen als het vol raakt */
@@ -12173,7 +12204,7 @@ async function verwijderVoorbeelden() {
         rebuildBase(); updateCutout(); drawLasso();
       }; }
     { const ti=document.getElementById("cmToolInfo"), leg=document.getElementById("cmToolLegend");
-      const ids=["rotate90Btn","spiegelBtn","wandBtn","gumBtn","lassoUndo","cropReset"];
+      const ids=["rotate90Btn","spiegelBtn","wandBtn","gumBtn","lassoUndo"];   // cropReset is nu een gelabelde tekstlink onder de balk
       function bouwLegenda(){ leg.innerHTML = ids.map(id=>{ const b=document.getElementById(id); if(!b) return "";
           const svg=b.querySelector("svg"); const naam=esc(b.getAttribute("aria-label")||"");
           return `<div class="lg-row${id==="cropReset"?" lg-reset":""}">${svg?svg.outerHTML:""}<span>${naam}</span></div>`; }).join(""); }
@@ -12614,6 +12645,21 @@ async function verwijderVoorbeelden() {
     const ok=await herstelEen(t);
     if(ok && typeof renderMarkers==="function"){ try{renderMarkers();}catch(_){} }
     return ok;
+  };
+  // 3D-decals her-synchroniseren met de huidige data (na cloud-sync/import): verwijderde eruit,
+  // nieuwe erbij via restore3D (dedup-guard) - ZONDER het model opnieuw te parsen. No-op als al gelijk.
+  let _herlaad3DBezig=false;
+  window.__tatties3DHerlaad = async function(){
+    if(!inited || !pickMeshes.length || _herlaad3DBezig) return false;   // engine niet klaar of al bezig: overslaan
+    _herlaad3DBezig=true;
+    try{
+      const lijst=(typeof tattoos!=="undefined" && Array.isArray(tattoos)) ? tattoos : [];
+      const levend=new Set(lijst.filter(t=>t && !t.deleted).map(t=>t.id));
+      for(const m of markers.slice()){ if(!levend.has(m.id)) window.__tatties3DVerwijder(m.id); }   // weg/gewist -> decal verwijderen
+      await restore3D(loadToken);                                                                   // nieuwe toevoegen (bestaande overgeslagen)
+    }catch(e){ console.error("3D-herlaad",e); }
+    finally{ _herlaad3DBezig=false; }
+    return true;
   };
   // Live aan/uit zetten van geplande (wens) decals zonder rebuild (de render-lus tekent elk frame)
   window.__tatties3DGepland = function(){
