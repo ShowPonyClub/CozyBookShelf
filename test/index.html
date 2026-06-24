@@ -515,6 +515,7 @@ dl.toon-leeg .veldrij.leeg-veld{display:flex}
 .start-uitleg{margin:-4px 0 2px;text-align:center;color:var(--gedempt);font-size:.95rem}
 .start-uitleg[hidden]{display:none}
 .start-wrap.leeg{gap:10px;border:none;padding:6px 0 28px;font-family:inherit;color:inherit}
+.start-wrap.leeg::before{content:none}   /* geen decoratief sterretje op het startscherm */
 .start-wrap.leeg .start-hero{margin-top:18px}
 .start-wrap.leeg .start-cta{padding:20px;font-size:1.15rem}
 /* Keuzemenu: 2D/3D plaatsen */
@@ -527,8 +528,11 @@ dl.toon-leeg .veldrij.leeg-veld{display:flex}
 .add-kies-optie{display:flex;flex-direction:column;gap:2px;text-align:left;padding:14px 16px;border:1px solid var(--rand);
   border-radius:12px;background:var(--veldbg);color:var(--tekst);cursor:pointer}
 .add-kies-optie:hover{border-color:var(--accent)}
+.add-kies-optie:disabled{opacity:.5;cursor:not-allowed}
+.add-kies-optie:disabled:hover{border-color:var(--rand)}
 .add-kies-optie .ak-titel{font-weight:700}
 .add-kies-optie .ak-sub{font-size:.82rem;color:var(--gedempt)}
+.add-kies-optie .ak-wip{margin-top:5px;font-size:.68rem;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--accent-diep)}
 .add-kies-annuleer{align-self:center;margin-top:2px}
 /* Onboarding stap 2: +-hint */
 .onb-plus{width:64px;height:64px;margin:4px auto 6px;border-radius:50%;background:var(--accent);color:#fff;
@@ -891,8 +895,11 @@ form label,
    gecentreerde knop op de gedimde achtergrond; de x blijft als sluit-affordance. */
 .cutmodal.cm-compact .cm-card{width:fit-content;min-width:0;max-width:94vw;background:transparent;border:none;box-shadow:none;overflow:visible;}
 .cutmodal.cm-compact .cm-foot{display:none;}
-.cutmodal.cm-compact .cm-head{border-bottom:none;padding:0 0 8px;}
-.cutmodal.cm-compact .cm-body{padding:0;align-items:center;}
+/* Knop + sluit-x naast elkaar (x rechts), gecentreerd, zonder grijs kaartje. */
+.cutmodal.cm-compact .cm-body{padding:0;flex-direction:row-reverse;align-items:center;justify-content:center;gap:12px;}
+.cutmodal.cm-compact .cm-toprow{flex:0 0 auto;}
+.cutmodal.cm-compact .cm-x{width:52px;height:52px;font-size:30px;color:#fff;background:rgba(255,255,255,.16);border-radius:50%;margin:0;}
+.cutmodal.cm-compact .cm-x:active{background:rgba(255,255,255,.28);}
 .cutmodal .cm-head{display:flex;justify-content:flex-end;align-items:center;padding:14px 16px;border-bottom:1px solid var(--rand);font-weight:600;font-size:15px;}
 .cutmodal .cm-x{background:transparent;border:0;color:var(--gedempt);font-size:24px;line-height:1;cursor:pointer;grid-column:3;justify-self:end;
   display:flex;align-items:center;justify-content:center;width:44px;height:44px;border-radius:10px;margin-right:-8px;}
@@ -1525,9 +1532,10 @@ form label{text-transform:none;letter-spacing:.005em;font-size:.8rem;color:var(-
       <span class="ak-titel" data-i18n="start.kies_3d">Op het 3D-model</span>
       <span class="ak-sub" data-i18n="start.kies_3d_sub">Plaats op het draaibare lichaam</span>
     </button>
-    <button type="button" class="add-kies-optie" data-kies="2d">
+    <button type="button" class="add-kies-optie" data-kies="2d" disabled aria-disabled="true">
       <span class="ak-titel" data-i18n="start.kies_2d">Op de 2D-kaart</span>
       <span class="ak-sub" data-i18n="start.kies_2d_sub">Plaats op de platte voor/achter-kaart</span>
+      <span class="ak-wip" data-i18n="start.kies_2d_wip">Under construction</span>
     </button>
     <button type="button" class="linkbtn add-kies-annuleer" id="add-kies-annuleer" data-i18n="form.annuleren">Annuleren</button>
   </div>
@@ -6459,13 +6467,13 @@ const I18N = {
     'sub.collectie':'Al je tattoos en je wishlist op één plek - zoek en sorteer ze hier.',
     'sub.stats':'Een overzicht van je collectie in cijfers - aantallen, kosten, stijlen en meer.',
     'feedback':'show me your tatties · stuur mij alle eerlijke feedback',
-    'start.titel':'Welkom terug','start.titel_nieuw':'Welkom bij Tatties','start.tagline':'show me your tatties','start.nieuw':'+ Nieuwe tattoo',
+    'start.titel':'Welkom terug','start.titel_nieuw':'Welkom bij Tatties','start.tagline':'show me your tatties','start.nieuw':'+ Tattoo toevoegen',
     'start.stat_aantal':'Tattoos','start.leeg':'Nog geen tattoos - voeg je eerste toe.','start.recent':'Recent toegevoegd',
     'start.tegel3d':'3D-model','start.tegel2d':'2D-kaart','start.tegelcol':'Collectie','start.tegelstats':'Statistieken',
     'start.account_uit':'Inloggen om je collectie overal te zien','start.account_in':'Gesynchroniseerd ✓',
     'start.leeg_uitleg':'Plan of bewaar je volgende tattoo.',
     'start.kies_titel':'Tattoo toevoegen','start.kies_3d':'Op het 3D-model','start.kies_3d_sub':'Plaats op het draaibare lichaam',
-    'start.kies_2d':'Op de 2D-kaart','start.kies_2d_sub':'Plaats op de platte voor/achter-kaart',
+    'start.kies_2d':'Op de 2D-kaart','start.kies_2d_sub':'Plaats op de platte voor/achter-kaart','start.kies_2d_wip':'Under construction',
     'ui.foto_maken':'Foto maken','ui.foto_uploaden':'Foto uploaden','ui.foto_toevoegen':'Tattoo toevoegen','ui.andere_foto':'Andere foto','ui.plaatsen':'Plaatsen','ui.nog_een':'+ Nog een','ui.nog_een_uitleg':'Plaats deze en knip daarna nog een tattoo uit dezelfde foto','ui.herhaal_hint':'Plaats ’m goed en tik op ✓ — daarna knip je de volgende uit deze foto','ui.herhaal_volgende':'Knip de volgende tattoo uit dezelfde foto','ui.volgende_uitsnede':'Volgende uitsnede','ui.uit_deze_foto':'uit deze foto',
     'ui.reset_uitsnede':'Reset uitsnede','ui.spiegelen':'Spiegelen','ui.achtergrond_weghalen':'Achtergrond weghalen',
     'ui.toverstaf':'Toverstaf','ui.ongedaan':'Ongedaan','ui.niets_ongedaan':'Niets om ongedaan te maken','ui.teruggezet':'Teruggezet',
@@ -6629,13 +6637,13 @@ const I18N = {
     'sub.collectie':'All your tattoos and your wishlist in one place - search and sort them here.',
     'sub.stats':'An overview of your collection in numbers - counts, costs, styles and more.',
     'feedback':'show me your tatties · send me all your honest feedback',
-    'start.titel':'Welcome back','start.titel_nieuw':'Welcome to Tatties','start.tagline':'show me your tatties','start.nieuw':'+ New tattoo',
+    'start.titel':'Welcome back','start.titel_nieuw':'Welcome to Tatties','start.tagline':'show me your tatties','start.nieuw':'+ Add tattoo',
     'start.stat_aantal':'Tattoos','start.leeg':'No tattoos yet - add your first.','start.recent':'Recently added',
     'start.tegel3d':'3D model','start.tegel2d':'2D map','start.tegelcol':'Collection','start.tegelstats':'Statistics',
     'start.account_uit':'Sign in to see your collection anywhere','start.account_in':'Synced ✓',
     'start.leeg_uitleg':'Plan or save your next tattoo.',
     'start.kies_titel':'Add tattoo','start.kies_3d':'On the 3D model','start.kies_3d_sub':'Place on the rotatable body',
-    'start.kies_2d':'On the 2D map','start.kies_2d_sub':'Place on the flat front/back map',
+    'start.kies_2d':'On the 2D map','start.kies_2d_sub':'Place on the flat front/back map','start.kies_2d_wip':'Under construction',
     'ui.foto_maken':'Take photo','ui.foto_uploaden':'Upload photo','ui.foto_toevoegen':'Add tattoo','ui.andere_foto':'Other photo','ui.plaatsen':'Place','ui.nog_een':'+ Another','ui.nog_een_uitleg':'Place this one, then cut another tattoo from the same photo','ui.herhaal_hint':'Position it and tap ✓ — then cut the next one from this photo','ui.herhaal_volgende':'Cut the next tattoo from the same photo','ui.volgende_uitsnede':'Next cut-out','ui.uit_deze_foto':'from this photo',
     'ui.reset_uitsnede':'Reset cut-out','ui.spiegelen':'Mirror','ui.achtergrond_weghalen':'Remove background',
     'ui.toverstaf':'Magic wand','ui.ongedaan':'Undo','ui.niets_ongedaan':'Nothing to undo','ui.teruggezet':'Reverted',
