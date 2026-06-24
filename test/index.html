@@ -10567,6 +10567,12 @@ async function verwijderVoorbeelden() {
   }
   function showSel(b){ if(selRing) selRing.visible=!!b; }
   function showLoading(b){ const el2=document.getElementById("t3d-loading"); if(el2) el2.classList.toggle("on",!!b); }
+  // Voortgang tonen tijdens het herstellen van decals: 'Laden… X/N' (of terug naar 'Laden…' bij 0).
+  function zetLaadVoortgang(done,total){
+    const el2=document.getElementById("t3d-loading"); if(!el2) return;
+    const sp=el2.querySelector("span"); if(!sp) return;
+    sp.textContent = (total>0 && done<total) ? (tr('ui.laden')+' '+done+'/'+total) : tr('ui.laden');
+  }
 
   /* ---- toast (eigen, target #t3d-toast; schaduwt host-toast binnen deze IIFE) ---- */
   let toastT=null;
@@ -10833,6 +10839,79 @@ async function verwijderVoorbeelden() {
     geo.setAttribute('normal', new THREE.Float32BufferAttribute(nn,3));
     if(uv) geo.setAttribute('uv', new THREE.Float32BufferAttribute(nu,2));
   }
+  // ---- DecalGeometry-versnelling: lokale driehoeken-culling --------------------------------
+  // THREE.DecalGeometry (r128) alloceert een DecalVertex per vertex van de HELE mesh, ook ver weg.
+  // Bij veel decals (3D-eerste-entry) is dat de bottleneck. Oplossing: een voxel-raster per mesh
+  // (eenmalig) + per decal alleen de nabije driehoeken aan DecalGeometry voeren via een tijdelijke
+  // mesh met dezelfde matrixWorld. De gereduceerde geometry staat in dezelfde lokale ruimte als de
+  // bron, dus DecalGeometry past mesh.matrixWorld correct toe.
+  const FGRID_CELL=0.08;   // celgrootte (m) van het wereld-voxelraster
+  function faceGridFor(mesh){
+    if(mesh.__faceGrid) return mesh.__faceGrid;
+    const g=mesh.geometry, posA=g&&g.attributes&&g.attributes.position;
+    if(!posA) return null;
+    mesh.updateWorldMatrix(true,false);
+    const m=mesh.matrixWorld, idx=g.index, cnt=idx?idx.count:posA.count;
+    const cells=new Map(), faces=[]; let maxR=0;
+    const va=new THREE.Vector3(), vb=new THREE.Vector3(), vc=new THREE.Vector3();
+    for(let i=0;i+2<cnt;i+=3){
+      const a=idx?idx.getX(i):i, b=idx?idx.getX(i+1):i+1, c=idx?idx.getX(i+2):i+2;
+      va.fromBufferAttribute(posA,a).applyMatrix4(m);
+      vb.fromBufferAttribute(posA,b).applyMatrix4(m);
+      vc.fromBufferAttribute(posA,c).applyMatrix4(m);
+      const cx=(va.x+vb.x+vc.x)/3, cy=(va.y+vb.y+vc.y)/3, cz=(va.z+vb.z+vc.z)/3;
+      // max centroid->vertex afstand: bewijsbaar veilige marge (raakt de box een driehoek, dan ligt
+      // zijn centroid binnen box+maxR), zodat de box-cull nooit een benodigde driehoek mist.
+      const r2=Math.max((va.x-cx)**2+(va.y-cy)**2+(va.z-cz)**2,
+                        (vb.x-cx)**2+(vb.y-cy)**2+(vb.z-cz)**2,
+                        (vc.x-cx)**2+(vc.y-cy)**2+(vc.z-cz)**2);
+      if(r2>maxR) maxR=r2;
+      const fi=faces.length; faces.push({a,b,c,cx,cy,cz});
+      const key=Math.floor(cx/FGRID_CELL)+','+Math.floor(cy/FGRID_CELL)+','+Math.floor(cz/FGRID_CELL);
+      let arr=cells.get(key); if(!arr){ arr=[]; cells.set(key,arr); } arr.push(fi);
+    }
+    return (mesh.__faceGrid={ cells, faces, maxR:Math.sqrt(maxR) });
+  }
+  // Gereduceerde (lokale) BufferGeometry met alleen driehoeken die de decal-box raken, of null.
+  // Broad-phase: voxel-cellen binnen de box-diagonaal-bol. Narrow-phase: centroid in de
+  // GEORIËNTEERDE box (dun in x/y, diep in z) + marge >= driehoekgrootte, zodat de DecalGeometry
+  // exact hetzelfde blijft maar veel minder driehoeken hoeft te projecteren.
+  const _decInv=new THREE.Matrix4(), _decC=new THREE.Vector3();
+  function localDecalGeo(mesh, point, size, orientation){
+    const grid=faceGridFor(mesh); if(!grid) return null;
+    const g=mesh.geometry, posA=g.attributes.position, norA=g.attributes.normal;
+    const MG=(grid.maxR||FGRID_CELL);                          // krappe, bewezen veilige marge = max driehoek-straal
+    const R=0.5*Math.hypot(size.x,size.y,size.z)+MG;           // broad-phase-bol
+    const R2=R*R;
+    // wereld -> box-ruimte (zelfde projector als DecalGeometry: rotatie uit orientation + positie)
+    _decInv.makeRotationFromEuler(orientation); _decInv.setPosition(point); _decInv.invert();
+    const hx=size.x/2+MG, hy=size.y/2+MG, hz=size.z/2+MG;
+    const cx0=Math.floor((point.x-R)/FGRID_CELL), cx1=Math.floor((point.x+R)/FGRID_CELL);
+    const cy0=Math.floor((point.y-R)/FGRID_CELL), cy1=Math.floor((point.y+R)/FGRID_CELL);
+    const cz0=Math.floor((point.z-R)/FGRID_CELL), cz1=Math.floor((point.z+R)/FGRID_CELL);
+    const pos=[], nor=[], v=new THREE.Vector3(); let used=0;
+    for(let ci=cx0;ci<=cx1;ci++) for(let di=cy0;di<=cy1;di++) for(let ei=cz0;ei<=cz1;ei++){
+      const arr=grid.cells.get(ci+','+di+','+ei); if(!arr) continue;
+      for(let q=0;q<arr.length;q++){ const f=grid.faces[arr[q]];
+        const dx=f.cx-point.x, dy=f.cy-point.y, dz=f.cz-point.z;
+        if(dx*dx+dy*dy+dz*dz>R2) continue;                     // broad-phase
+        _decC.set(f.cx,f.cy,f.cz).applyMatrix4(_decInv);       // narrow-phase: in box-ruimte
+        if(Math.abs(_decC.x)>hx || Math.abs(_decC.y)>hy || Math.abs(_decC.z)>hz) continue;
+        const tri=[f.a,f.b,f.c];
+        for(let k=0;k<3;k++){ const j=tri[k];
+          v.fromBufferAttribute(posA,j); pos.push(v.x,v.y,v.z);
+          if(norA){ v.fromBufferAttribute(norA,j); nor.push(v.x,v.y,v.z); } }
+        used++;
+      }
+    }
+    if(!used) return null;
+    const rg=new THREE.BufferGeometry();
+    rg.setAttribute('position', new THREE.Float32BufferAttribute(pos,3));
+    if(nor.length) rg.setAttribute('normal', new THREE.Float32BufferAttribute(nor,3));
+    else rg.computeVertexNormals();
+    return rg;
+  }
+  let _decalTmp=null;   // herbruikbare tijdelijke mesh voor de gereduceerde geometry
   function makeImage(point, normal, rotDeg, sizeM, tex, mesh){
     const aspect=(tex&&tex.image&&tex.image.width) ? (tex.image.height/tex.image.width) : 1;
     if(THREE.DecalGeometry && mesh){
@@ -10846,7 +10925,17 @@ async function verwijderVoorbeelden() {
         // wordt langs de box-rand afgesneden. filterDecalDoorzicht haalt achterkant-driehoeken
         // sowieso weg, dus diep mag (geen doorbloeden naar de andere kant).
         const size=new THREE.Vector3(sizeM, sizeM*aspect, Math.max(0.22, sizeM*3));
-        const geo=new THREE.DecalGeometry(mesh, point, helper.rotation, size);
+        // Culling: alleen nabije driehoeken projecteren (val terug op de volledige mesh als er niets is)
+        let geo, rg=localDecalGeo(mesh, point, size, helper.rotation);
+        if(rg){
+          if(!_decalTmp){ _decalTmp=new THREE.Mesh(rg); _decalTmp.matrixAutoUpdate=false; }
+          else _decalTmp.geometry=rg;
+          _decalTmp.matrixWorld.copy(mesh.matrixWorld);   // zelfde wereldtransform als de bron-mesh
+          geo=new THREE.DecalGeometry(_decalTmp, point, helper.rotation, size);
+          rg.dispose();
+        } else {
+          geo=new THREE.DecalGeometry(mesh, point, helper.rotation, size);
+        }
         filterDecalDoorzicht(geo, normal);   // doorgetrokken (andere kant) driehoeken weghalen
         if(geo.attributes.position && geo.attributes.position.count>0){
           const mat=new THREE.MeshBasicMaterial({map:tex, transparent:true, alphaTest:0.5, side:THREE.DoubleSide,
@@ -12402,11 +12491,18 @@ async function verwijderVoorbeelden() {
                  : (typeof tattoos!=="undefined" ? tattoos : []); }
     catch(e){ console.error(e); list = (typeof tattoos!=="undefined"?tattoos:[]); }
     if(token!==undefined && token!==loadToken) return;
+    // Progressief: decals in kleine batches bouwen en tussendoor naar de render-loop yielden,
+    // zodat de UI niet bevriest en de voortgang ('Laden… X/N') zichtbaar is bij veel tattoos.
+    const total=list.reduce((n,t)=>n+((t&&!t.deleted)?1:0),0);
+    let done=0;
     for(const t of list){
-      if(token!==undefined && token!==loadToken) return;   // ander model intussen geladen
+      if(token!==undefined && token!==loadToken){ zetLaadVoortgang(0,0); return; }   // ander model intussen geladen
       if(t && t.deleted) continue;                          // tombstones niet als 3D-decal herstellen
       try{ await herstelEen(t, token); }catch(e){ console.error(e); }
+      done++; zetLaadVoortgang(done,total);
+      if(done % 4 === 0){ await new Promise(r=>requestAnimationFrame(r)); if(token!==undefined && token!==loadToken){ zetLaadVoortgang(0,0); return; } }
     }
+    zetLaadVoortgang(0,0);   // label terug naar 'Laden…'
     if(typeof renderMarkers==="function"){ try{renderMarkers();}catch(_){} }
     // Herstel-melding ('N tattoos hersteld') bewust uitgezet - zie 'later'-lijst (hele herstel-feature evalueren).
   }
