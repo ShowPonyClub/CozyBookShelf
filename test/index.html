@@ -225,6 +225,11 @@ main > section{animation:opkomen .3s ease both}
 .gepland-toggle.actief{background:var(--accent);border-color:var(--accent);color:#F0EDE8}
 .gepland-toggle .ik{stroke:currentColor;fill:none}
 #toon-gepland,#toon-gepland-3d{position:absolute;left:14px;top:14px;z-index:6}
+/* Slanke balk BUITEN het canvas: Wishlist-toggle (links) + reset (rechts); het lichaam/de kaart
+   blijft vrij van knoppen. De + blijft als FAB op het canvas. */
+.canvas-balk{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:0 2px;min-height:44px}
+.canvas-balk #toon-gepland,.canvas-balk #toon-gepland-3d{position:static;left:auto;top:auto;z-index:auto}
+.canvas-balk #t3d-reset,.canvas-balk #kaart-reset{position:static;top:auto;right:auto;width:40px;height:40px;z-index:auto}
 .kaart-layout{
   display:flex;align-items:stretch;gap:10px;margin-bottom:10px;
 }
@@ -333,6 +338,11 @@ main > section{animation:opkomen .3s ease both}
 /* ---- Lijst-tools ---- */
 .lijst-tools{display:flex;flex-direction:column;gap:10px;margin-bottom:12px}
 .lijst-tools .silhouet-keuze{align-self:center}
+/* Rij met de Collectie|Wishlist-toggle + een aparte Statistieken-knop ernaast */
+.col-balk{display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap}
+.col-stats-btn{display:inline-flex;align-items:center;gap:6px;min-height:38px;padding:7px 14px;border:1px solid var(--rand);border-radius:999px;background:var(--veldbg);color:var(--tekst);font-size:.82rem;font-weight:600;font-family:inherit;cursor:pointer}
+.col-stats-btn .ik{width:16px;height:16px;stroke:currentColor;fill:none}
+.col-stats-btn:active{transform:scale(.97)}
 .zoek-rij{display:flex;flex-direction:column;gap:8px}
 .zoek-rij input{width:100%}
 .zoek-rij select{width:100%;min-width:0}
@@ -425,6 +435,12 @@ main > section{animation:opkomen .3s ease both}
   background:var(--kaart);border:1px solid var(--rand);font-size:1.02rem;
 }
 .icoonknop.actief{background:var(--accent);border-color:var(--accent);color:#F0EDE8}
+/* Segmented 3D|2D-toggle in de header (twee weergaven van hetzelfde, één visueel blok) */
+.seg-toggle{display:inline-flex;border:1px solid var(--rand);border-radius:10px;overflow:hidden;background:var(--kaart);flex:none}
+.seg-btn{min-width:46px;min-height:44px;padding:0 14px;border:0;background:transparent;color:var(--tekst);font-weight:700;font-size:13px;font-family:inherit;cursor:pointer;display:inline-flex;align-items:center;justify-content:center}
+.seg-btn+.seg-btn{border-left:1px solid var(--rand)}
+.seg-btn.actief{background:var(--accent);color:#F0EDE8}
+.seg-btn:active{transform:scale(.96)}
 .galerij{
   display:flex;gap:8px;overflow-x:auto;scroll-snap-type:x mandatory;
   margin-bottom:8px;border-radius:var(--radius);
@@ -1070,10 +1086,11 @@ form label{text-transform:none;letter-spacing:.005em;font-size:.8rem;color:var(-
     <span class="beta-badge">beta</span></span>
   </div>
   <div class="kop-knoppen">
-    <button class="icoonknop" id="btn-3d" data-i18n-aria="aria.3dview" data-i18n-title="aria.3dview" aria-label="3D-weergave" title="3D-weergave" style="font-weight:700;font-size:13px">3D</button>
-    <button class="icoonknop" id="btn-2d" data-i18n-aria="aria.2dmap" data-i18n-title="aria.2dmap" aria-label="2D-kaart" title="2D-kaart" style="font-weight:700;font-size:13px">2D</button>
+    <div class="seg-toggle" role="group" data-i18n-aria="aria.weergave" aria-label="Weergave">
+      <button class="seg-btn" id="btn-3d" data-i18n-aria="aria.3dview" data-i18n-title="aria.3dview" aria-label="3D-weergave" title="3D-weergave">3D</button>
+      <button class="seg-btn" id="btn-2d" data-i18n-aria="aria.2dmap" data-i18n-title="aria.2dmap" aria-label="2D-kaart" title="2D-kaart">2D</button>
+    </div>
     <button class="icoonknop" id="btn-collectie" data-i18n-aria="aria.collectie" data-i18n-title="aria.collectie" aria-label="Collectie en wishlist" title="Collectie en wishlist"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/><circle cx="2.5" cy="6" r="0.6" fill="currentColor" stroke="none"/><circle cx="2.5" cy="12" r="0.6" fill="currentColor" stroke="none"/><circle cx="2.5" cy="18" r="0.6" fill="currentColor" stroke="none"/></svg></button>
-    <button class="icoonknop" id="btn-stats" data-i18n-aria="aria.stats" data-i18n-title="aria.stats" aria-label="Statistieken" title="Statistieken"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 20V11M12 20V4M19 20v-7"/></svg></button>
     <button class="icoonknop" id="btn-instellingen" data-i18n-aria="aria.instellingen" data-i18n-title="aria.instellingen" aria-label="Instellingen" title="Instellingen"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"/></svg></button>
   </div>
 </header>
@@ -1109,6 +1126,13 @@ form label{text-transform:none;letter-spacing:.005em;font-size:.8rem;color:var(-
   <!-- ===================== 2D-KAART ===================== -->
   <section id="view-home">
     <div class="bouw-melding" role="status" data-i18n="ui.bouw2d">2D-kaart nog in aanbouw - test vooral het 3D-model.</div>
+    <div class="canvas-balk">
+      <button type="button" id="toon-gepland" class="gepland-toggle" aria-pressed="false" data-i18n-aria="ui.toon_gepland" aria-label="Geplande tattoos tonen">
+        <svg viewBox="0 0 24 24" class="ik" aria-hidden="true" style="width:15px;height:15px"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>
+        <span data-i18n="ui.gepland">Gepland</span>
+      </button>
+      <button type="button" id="kaart-reset" class="kaart-slotbtn kaart-reset" data-i18n-title="aria.volledigoverzicht" data-i18n-aria="aria.volledigoverzicht" title="Volledig overzicht" aria-label="Volledig overzicht"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12a8 8 0 1 0 2.3-5.6"/><path d="M3 4v4h4"/></svg></button>
+    </div>
     <div class="kaart-layout">
       <div id="bodymap-wrap">
         <div class="grond-schaduw" aria-hidden="true"></div>
@@ -1121,11 +1145,6 @@ form label{text-transform:none;letter-spacing:.005em;font-size:.8rem;color:var(-
           <g id="markers"></g>
           <circle id="sel-ring-2d" class="sel-ring-2d" fill="none" pointer-events="none" visibility="hidden"/>
         </svg>
-        <button type="button" id="kaart-reset" class="kaart-slotbtn kaart-reset" data-i18n-title="aria.volledigoverzicht" data-i18n-aria="aria.volledigoverzicht" title="Volledig overzicht" aria-label="Volledig overzicht"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12a8 8 0 1 0 2.3-5.6"/><path d="M3 4v4h4"/></svg></button>
-        <button type="button" id="toon-gepland" class="gepland-toggle" aria-pressed="false" data-i18n-aria="ui.toon_gepland" aria-label="Geplande tattoos tonen">
-          <svg viewBox="0 0 24 24" class="ik" aria-hidden="true" style="width:15px;height:15px"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>
-          <span data-i18n="ui.gepland">Gepland</span>
-        </button>
         <div class="zijde-balk">
           <div class="silhouet-keuze" role="group" data-i18n-aria="aria.kieszijde" aria-label="Kies zijde">
             <button type="button" data-zijde="voor" data-i18n="zijde.voor">Voorkant</button>
@@ -1191,9 +1210,12 @@ form label{text-transform:none;letter-spacing:.005em;font-size:.8rem;color:var(-
     </div>
     <p class="pagina-sub" data-i18n="sub.collectie">Al je tattoos en je wishlist op één plek - zoek en sorteer ze hier.</p>
     <div class="lijst-tools">
-      <div class="silhouet-keuze" role="group" data-i18n-aria="aria.colofwens" aria-label="Collectie of wishlist">
-        <button type="button" data-modus="gezet" class="actief" data-i18n="col.collectie">Collectie</button>
-        <button type="button" data-modus="wens" data-i18n="col.wishlist">Wishlist</button>
+      <div class="col-balk">
+        <div class="silhouet-keuze" role="group" data-i18n-aria="aria.colofwens" aria-label="Collectie of wishlist">
+          <button type="button" data-modus="gezet" class="actief" data-i18n="col.collectie">Collectie</button>
+          <button type="button" data-modus="wens" data-i18n="col.wishlist">Wishlist</button>
+        </div>
+        <button type="button" id="col-stats" class="col-stats-btn" data-i18n-aria="aria.stats" data-i18n-title="aria.stats" aria-label="Statistieken" title="Statistieken"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 20V11M12 20V4M19 20v-7"/></svg><span data-i18n="stats.titel">Statistieken</span></button>
       </div>
       <div class="zoek-rij">
         <input type="search" id="zoek" maxlength="100" data-i18n-ph="zoek.ph" placeholder="Zoek op naam, artiest of stijl" data-i18n-aria="aria.zoeken" aria-label="Zoeken">
@@ -1222,16 +1244,18 @@ form label{text-transform:none;letter-spacing:.005em;font-size:.8rem;color:var(-
   <section id="view-stats" hidden></section>
   <!-- ===================== 3D-WEERGAVE ===================== -->
   <section id="view-3d" class="verborgen">
+    <div class="canvas-balk">
+      <button type="button" id="toon-gepland-3d" class="gepland-toggle" aria-pressed="false" data-i18n-aria="ui.toon_gepland" aria-label="Geplande tattoos tonen">
+        <svg viewBox="0 0 24 24" class="ik" aria-hidden="true" style="width:15px;height:15px"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>
+        <span data-i18n="ui.gepland">Gepland</span>
+      </button>
+      <button type="button" id="t3d-reset" data-i18n-title="ui.beginstand" data-i18n-aria="ui.beginstand" title="Beginstand" aria-label="Beginstand"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12a8 8 0 1 0 2.3-5.6"/><path d="M3 4v4h4"/></svg></button>
+    </div>
     <div id="stage" role="img" data-i18n-aria="ui.stage_aria" aria-label="3D-lichaamsmodel; gebruik de 2D-knop bovenaan voor de toegankelijke platte kaart">
       <div id="t3d-toast"></div>
       <div id="t3d-banner" hidden></div>
       <div id="lege-hint-3d" class="lege-hint" data-i18n="ui.lege_cta" hidden>Nog geen tattoos - tik op + om er een toe te voegen</div>
       <button id="t3d-add" data-i18n-aria="fab.nieuw" aria-label="Nieuwe tattoo" title="Nieuwe tattoo">+</button>
-      <button type="button" id="t3d-reset" data-i18n-title="ui.beginstand" data-i18n-aria="ui.beginstand" title="Beginstand" aria-label="Beginstand"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12a8 8 0 1 0 2.3-5.6"/><path d="M3 4v4h4"/></svg></button>
-      <button type="button" id="toon-gepland-3d" class="gepland-toggle" aria-pressed="false" data-i18n-aria="ui.toon_gepland" aria-label="Geplande tattoos tonen">
-        <svg viewBox="0 0 24 24" class="ik" aria-hidden="true" style="width:15px;height:15px"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>
-        <span data-i18n="ui.gepland">Gepland</span>
-      </button>
       <div id="t3d-loading"><div class="t3d-spin"></div><span data-i18n="ui.laden">Laden&#8230;</span></div>
       <div id="editbar" class="t3d-editbar">
         <div class="eb-title">Tattoo</div>
@@ -6436,7 +6460,7 @@ const I18N = {
   nl: {
     'aria.instellingen':'Instellingen','aria.collectie':'Collectie en wishlist','aria.stats':'Statistieken',
     'aria.sluiten':'Sluiten','aria.terug':'Terug','aria.bewerken':'Bewerken','aria.verwijderen':'Verwijderen','aria.fotoverwijderen':'Foto verwijderen','ui.gekozen_huid':'Gekozen huidskleur',
-    'aria.3dview':'3D-weergave','aria.2dmap':'2D-kaart',
+    'aria.3dview':'3D-weergave','aria.2dmap':'2D-kaart','aria.weergave':'Weergave (3D of 2D)',
     'aria.filterwis':'Filter wissen','aria.bannersluit':'Banner sluiten','aria.annuleren':'Annuleren',
     'aria.bodymap':'Lichaamskaart - tik op een lichaamsdeel om in te zoomen','aria.zoeken':'Zoeken','aria.sorteren':'Sorteren',
     'aria.kiessilhouet':'Kies silhouet','aria.kieszijde':'Kies zijde','aria.colofwens':'Collectie of wishlist',
@@ -6610,7 +6634,7 @@ const I18N = {
   en: {
     'aria.instellingen':'Settings','aria.collectie':'Collection and wishlist','aria.stats':'Statistics',
     'aria.sluiten':'Close','aria.terug':'Back','aria.bewerken':'Edit','aria.verwijderen':'Delete','aria.fotoverwijderen':'Delete photo','ui.gekozen_huid':'Chosen skin tone',
-    'aria.3dview':'3D view','aria.2dmap':'2D map',
+    'aria.3dview':'3D view','aria.2dmap':'2D map','aria.weergave':'View (3D or 2D)',
     'aria.filterwis':'Clear filter','aria.bannersluit':'Close banner','aria.annuleren':'Cancel',
     'aria.bodymap':'Body map - tap a body part to zoom in','aria.zoeken':'Search','aria.sorteren':'Sort',
     'aria.kiessilhouet':'Choose silhouette','aria.kieszijde':'Choose side','aria.colofwens':'Collection or wishlist',
@@ -8554,7 +8578,9 @@ async function exporteerKaartAfbeelding() {
 }
 
 /* Statistiekenscherm */
-function openStats() {
+let statsRetour = 'home';   // waar de terug-knop van de stats-view naartoe gaat (afhankelijk van waar je vandaan kwam)
+function openStats(retour) {
+  if (retour) statsRetour = retour;   // alleen bij een echte navigatie zetten (re-renders roepen openStats() zonder arg)
   if (!tattoos.length) {   // lege staat: geen kale 'geen data'-panelen maar een zetje
     $('#view-stats').innerHTML = `
       <div class="detail-top">
@@ -8565,7 +8591,7 @@ function openStats() {
         <p>${tr('stats.leeg_uitleg')}</p>
         <button type="button" class="knop-sec" id="stats-nieuw" style="margin-top:14px">${tr('start.nieuw')}</button>
       </div>`;
-    $('#s-terug').addEventListener('click', () => toonView('home'));
+    $('#s-terug').addEventListener('click', () => toonView(statsRetour));
     { const n = $('#stats-nieuw'); if (n) n.addEventListener('click', () => { const ak = document.getElementById('add-kies'); if (ak) ak.hidden = false; }); }
     toonView('stats');
     return;
@@ -8629,7 +8655,7 @@ function openStats() {
       rij(tr('stats.aantalwensen'), wens.length) +
       rij(tr('stats.budget'), euro.format(som(wens, t => t.kosten))))}
   `;
-  $('#s-terug').addEventListener('click', () => toonView('home'));
+  $('#s-terug').addEventListener('click', () => toonView(statsRetour));
   { const zt = $('#stat-zituren'); if (zt) zt.addEventListener('click', () => { statZiturenMin = !statZiturenMin; zt.textContent = ziturenStr(); }); }
   document.querySelectorAll('#stats-samenvatting .samenvat-kaart').forEach((b) =>
     b.addEventListener('click', () => {
@@ -10216,8 +10242,9 @@ async function verwijderVoorbeelden() {
   initKaartGebaren();
   pasTintToe();
   tekenTinten();
-  $('#btn-stats').addEventListener('click', openStats);
-  $('#btn-collectie').addEventListener('click', () => toonView('collectie'));
+  // Collectie & Wishlist in de header; Statistieken zit onder de Collectie-pagina (knop naast de toggle).
+  { const bc = $('#btn-collectie'); if (bc) bc.addEventListener('click', () => toonView('collectie')); }
+  { const cs = $('#col-stats'); if (cs) cs.addEventListener('click', () => openStats('collectie')); }   // Statistieken vanaf de Collectie-pagina
   $('#c-terug').addEventListener('click', () => toonView('home'));
   $('#btn-instellingen').addEventListener('click', openInstellingen);
   { const ve = $('#start-versie'); if (ve) ve.textContent = 'v' + APP_VERSIE; }
@@ -10231,7 +10258,7 @@ async function verwijderVoorbeelden() {
       if (ga === '3d') $('#btn-3d').click();
       else if (ga === '2d') $('#btn-2d').click();
       else if (ga === 'collectie') toonView('collectie');
-      else if (ga === 'stats') openStats();
+      else if (ga === 'stats') openStats('start');
     }));
   // '+ New tattoo' op het startscherm: keuzemenu 3D/2D
   function startToevoegen(doel) {
