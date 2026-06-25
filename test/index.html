@@ -7646,6 +7646,7 @@ function toast(tekst) {
   el.classList.remove('met-actie');
   el.textContent = tekst;
   el.classList.add('zichtbaar');
+  tril(12);   // subtiele haptische bevestiging bij elke actie-melding (no-op op desktop)
   clearTimeout(toastTimer);
   toastTimer = setTimeout(() => el.classList.remove('zichtbaar'), 2600);
 }
@@ -7661,6 +7662,7 @@ function toastMetActie(tekst, label, fn) {
     fn();
   });
   el.classList.add('zichtbaar', 'met-actie');
+  tril([14, 36, 14]);   // firmere dubbel-puls voor zwaardere/ongedaan-maakbare acties (bv. verwijderen)
   clearTimeout(toastTimer);
   // Ruimer dan een gewone toast: de actieknop (bv. 'Ongedaan maken') moet bereikbaar
   // blijven, ook voor toetsenbord/screenreader-gebruikers.
@@ -10796,15 +10798,18 @@ async function verwijderVoorbeelden() {
       if(m.obj.material && m.obj.material.dispose) m.obj.material.dispose(); }
     if(m.tex && m.tex.dispose) m.tex.dispose();
   }
+  /* Alleen de UI van de 3D-aanpasmodus sluiten (editbar/hint/+-knop herstellen). Bewust UI-only
+     (geen dispose/save) zodat het ook veilig kan bij de START van een gender-wissel, vóór het async laden. */
+  function exitEditUI(){
+    editDecal=null; showSel(false);   // timers worden per marker geclear'd in disposeMarker
+    const eb=document.getElementById("editbar"); if(eb)eb.classList.remove("on");
+    const h=document.getElementById("hint"); if(h)h.style.display="";
+    const a=document.getElementById("t3d-add"); if(a) a.style.display="";   // +-knop terug (was verborgen tijdens bewerken)
+  }
   function clearMarkers(){
     // Aanpasmodus afsluiten vóór het weggooien van markers, anders blijft de editbar
     // naar een verwijderde marker wijzen (bv. bij man/vrouw-wissel tijdens bewerken).
-    if(editDecal){
-      editDecal=null; showSel(false);   // timers worden per marker geclear'd in disposeMarker (hieronder)
-      const eb=document.getElementById("editbar"); if(eb)eb.classList.remove("on");
-      const h=document.getElementById("hint"); if(h)h.style.display="";
-      const a=document.getElementById("t3d-add"); if(a) a.style.display="";   // +-knop herstellen (was verborgen tijdens bewerken)
-    }
+    if(editDecal) exitEditUI();
     markers.slice().forEach(disposeMarker); markers.length=0;
   }
   function setModel(root){
@@ -10909,6 +10914,7 @@ async function verwijderVoorbeelden() {
     try{ localStorage.setItem("tatties-onderbroek",u); }catch(e){}
     if(inited){ try{ rebuildUnderwear(); }catch(e){ console.error(e); } } }
   function loadEmbedded(gender){
+    if(editDecal) exitEditUI();   // editbar direct sluiten bij gender-/modelwissel (dekt de async laad-gap + faal-paden)
     currentGender = (gender==="vrouw") ? "vrouw" : "man";
     const token = ++loadToken;
     const node=document.getElementById(modelNodeId(currentGender));
