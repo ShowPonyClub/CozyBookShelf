@@ -115,7 +115,24 @@
   --rand:#D9CCB6;
   --gedempt:#5A503F;       /* WCAG AA ook op de warme --bg (#D8C4A4): ~4.65:1; was #6F6453 = 3.41:1 (zakte onder AA) */
   --raster:#D8CBB2;
+  /* Hoekradii: 3 stappen + pill (zie HUISSTIJL.md). --radius blijft als legacy-alias van --r-md. */
+  --r-sm:8px;
+  --r-md:12px;
+  --r-lg:16px;
   --radius:12px;
+  /* Statuskleuren: één tint per betekenis */
+  --op-accent:#F0EDE8;   /* tekst/icoon op een accent-vlak (warm wit, nooit puur #fff) */
+  --gevaar:#A8341A;      /* destructief (reset/verwijderen) */
+  --invalid:#D14343;     /* ongeldige invoer */
+  --succes:#5FBE86;      /* bevestiging/voltooid */
+  /* Lettergrootte-schaal (modulair, rem) - zie HUISSTIJL.md */
+  --fs-xs:.72rem;
+  --fs-sm:.82rem;
+  --fs-base:.92rem;
+  --fs-md:1.02rem;
+  --fs-lg:1.3rem;
+  --fs-xl:1.7rem;
+  --fs-2xl:2.2rem;
   --app-font:'Recoleta', ui-serif, Georgia, 'Times New Roman', serif;
   --serif:'Recoleta', ui-serif, Georgia, 'Times New Roman', serif;
   /* Rustige schreefloze systeemletter voor micro-labels en metadata (geen extra bestand) */
@@ -284,8 +301,8 @@ main > section{animation:opkomen .3s ease both}
 .cutmodal .cm-status{width:auto;flex:none}
 .cutmodal .cm-status button{flex:none;min-height:38px;padding:6px 11px;font-size:.74rem}
 /* Continuatie-badge: 'volgende uitsnede uit deze foto' (D6a verbetering 1/2) */
-.cutmodal .cm-herhaal-badge{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:var(--accent);
-  background:rgba(142,113,240,.12);border:1px solid rgba(142,113,240,.32);border-radius:8px;padding:6px 10px;margin:0 0 8px}
+.cutmodal .cm-herhaal-badge{display:flex;align-items:center;gap:6px;font-size:var(--fs-sm);font-weight:600;color:var(--accent);
+  background:rgba(142,113,240,.12);border:1px solid rgba(142,113,240,.32);border-radius:var(--r-sm);padding:6px 10px;margin:0 0 8px}
 .cutmodal .cm-herhaal-badge[hidden]{display:none}
 .naam-rij .type-keuze{flex:none}
 .naam-rij .type-keuze button{min-height:0;padding:0 12px;font-size:.78rem;display:flex;align-items:center}
@@ -479,7 +496,7 @@ main > section{animation:opkomen .3s ease both}
 .cutmodal .cm-rij2{display:flex;gap:10px}
 .cutmodal .cm-rij2 .cm-veld{flex:1;min-width:0}
 .cutmodal .kosten-veld{position:relative;display:block}
-.cutmodal .kosten-veld .valuta-prefix{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--gedempt);font-size:14px;pointer-events:none}
+.cutmodal .kosten-veld .valuta-prefix{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--gedempt);font-size:var(--fs-base);pointer-events:none}
 .cutmodal .cm-veld .kosten-veld input{padding-left:24px;width:100%}
 /* Detail: lege velden verbergen tot 'extra details' */
 .veldrij.leeg-veld{display:none}
@@ -906,8 +923,8 @@ form label,
   background:rgba(0,0,0,.62);-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px);}
 .cutmodal.on{display:flex;}
 .cutmodal .cm-card{width:min(560px,94vw);max-height:92vh;display:flex;flex-direction:column;
-  background:var(--kaart);border:1px solid var(--rand);border-radius:16px;overflow:hidden;color:var(--tekst);
-  font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;}
+  background:var(--kaart);border:1px solid var(--rand);border-radius:var(--r-lg);overflow:hidden;color:var(--tekst);
+  font-family:var(--app-font);}
 /* Keuzestand (alleen Foto maken/uploaden): geen grijs kaartje meer, alleen de
    gecentreerde knop op de gedimde achtergrond; de x blijft als sluit-affordance. */
 .cutmodal.cm-compact .cm-card{width:fit-content;min-width:0;max-width:94vw;background:transparent;border:none;box-shadow:none;overflow:visible;}
@@ -917,60 +934,65 @@ form label,
 .cutmodal.cm-compact .cm-toprow{flex:0 0 auto;}
 .cutmodal.cm-compact .cm-x{width:52px;height:52px;font-size:30px;color:#fff;background:rgba(255,255,255,.16);border-radius:50%;margin:0;}
 .cutmodal.cm-compact .cm-x:active{background:rgba(255,255,255,.28);}
-.cutmodal .cm-head{display:flex;justify-content:flex-end;align-items:center;padding:14px 16px;border-bottom:1px solid var(--rand);font-weight:600;font-size:15px;}
+.cutmodal .cm-head{display:flex;justify-content:flex-end;align-items:center;padding:14px 16px;border-bottom:1px solid var(--rand);font-weight:600;font-size:var(--fs-base);}
 .cutmodal .cm-x{background:transparent;border:0;color:var(--gedempt);font-size:24px;line-height:1;cursor:pointer;grid-column:3;justify-self:end;
-  display:flex;align-items:center;justify-content:center;width:44px;height:44px;border-radius:10px;margin-right:-8px;}
+  display:flex;align-items:center;justify-content:center;width:44px;height:44px;border-radius:var(--r-md);margin-right:-8px;}
 .cutmodal .cm-x:active{background:var(--rand);}
 .cutmodal .cm-body{padding:14px 16px;display:flex;flex-direction:column;gap:8px;overflow-y:auto;flex:1;}
 .cutmodal .cm-body>.btn{flex:0 0 auto;padding:10px;}
 .cutmodal .cm-toprow{display:flex;justify-content:space-between;align-items:center;gap:10px;}
-.cutmodal .cm-naam-top{flex:1;min-width:0;padding:9px 11px;border:1px solid var(--rand);border-radius:8px;background:var(--veldbg);color:var(--tekst);font-size:14px;font-family:inherit;}
-.cutmodal .cm-naam-top[aria-invalid="true"]{border-color:#D14343;box-shadow:0 0 0 2px rgba(209,67,67,.18);}
+.cutmodal .cm-naam-top{flex:1;min-width:0;padding:9px 11px;border:1px solid var(--rand);border-radius:var(--r-sm);background:var(--veldbg);color:var(--tekst);font-size:var(--fs-base);font-family:inherit;}
+.cutmodal .cm-naam-top[aria-invalid="true"]{border-color:var(--invalid);box-shadow:0 0 0 2px rgba(209,67,67,.18);}
 .cutmodal .cm-onderrij{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:2px;}
-.cutmodal .cm-meer-pill{border:1px solid var(--rand);border-radius:999px;padding:7px 13px;min-height:38px;color:var(--tekst);background:var(--veldbg);font-size:.78rem;}
-.cutmodal .cm-meer-pill:active{background:var(--rand);}
+/* 'Meer details' = pill in dezelfde stijl als de Gezet/Wishlist-toggle: licht (dicht) -> accent-vulling (open) */
+.cutmodal .cm-meer-pill{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--rand);border-radius:999px;
+  padding:6px 16px;min-height:38px;background:var(--veldbg);color:var(--gedempt);font-family:inherit;font-size:.86rem;
+  font-weight:600;letter-spacing:.02em;white-space:nowrap;cursor:pointer;}
+.cutmodal .cm-meer-pill[aria-expanded="true"]{background:var(--accent);border-color:var(--accent);color:var(--op-accent);}
+.cutmodal .cm-meer-pill:active{transform:scale(.97);}
 /* 'Other photo'/'Add tattoo'-knop (#cmChoose): in de volle bewerkmodus ONDERAAN (onder de bewerk-knoppen,
    zodat die meteen in beeld staan); in de compacte keuzestand bovenaan als grote hoofdknop. */
 .cm-choose-rij{display:flex;flex-direction:column;align-items:center;gap:10px;}
 .cutmodal.cm-compact .cm-choose-rij{align-items:stretch;}
 .cutmodal:not(.cm-compact) .cm-choose-cam{display:none;}   /* foto maken alleen bij de eerste keuze, niet bij 'andere foto' */
 .is-ios .cm-choose-cam{display:none !important;}            /* iOS biedt 'Take Photo' al via het OS-menu (wint van de compact-knopstijl) */
-.cutmodal .cm-choose{align-self:center;margin-top:6px;padding:7px 14px;font-size:12px;color:var(--gedempt);border-radius:999px;min-height:0;background:transparent;}
-.cutmodal.cm-compact .cm-choose{display:inline-flex;align-items:center;justify-content:center;gap:9px;margin-top:0;padding:15px 26px;font-size:16px;font-weight:600;color:#fff;background:var(--accent);border-color:var(--accent);min-height:52px;}
+.cutmodal .cm-choose{align-self:center;margin-top:6px;padding:7px 14px;font-size:var(--fs-sm);color:var(--gedempt);border-radius:999px;min-height:0;background:transparent;}
+.cutmodal.cm-compact .cm-choose{display:inline-flex;align-items:center;justify-content:center;gap:9px;margin-top:0;padding:15px 26px;font-size:var(--fs-md);font-weight:600;color:var(--op-accent);background:var(--accent);border-color:var(--accent);min-height:52px;}
 .cutmodal.cm-compact .cm-choose .ik{width:22px;height:22px;vertical-align:0;}
 .cutmodal.cm-compact .cm-choose:hover{filter:brightness(1.08);border-color:var(--accent);}
 .cutmodal .cm-toprow .chk{margin-top:0;}
 .cutmodal .chk input{width:16px;height:16px;flex:0 0 auto;}
 .cutmodal .cm-modus{margin:2px 0 8px;}
-.cutmodal .cm-prev{flex:1;min-height:clamp(220px,42vh,340px);border:1px solid var(--rand);border-radius:10px;display:flex;align-items:center;justify-content:center;
+.cutmodal .cm-prev{flex:1;min-height:clamp(220px,42vh,340px);border:1px solid var(--rand);border-radius:var(--r-md);display:flex;align-items:center;justify-content:center;
   position:relative;overflow:hidden;touch-action:none;cursor:crosshair;
   background:linear-gradient(45deg,rgba(120,120,120,.16) 25%,transparent 25%),linear-gradient(-45deg,rgba(120,120,120,.16) 25%,transparent 25%),
     linear-gradient(45deg,transparent 75%,rgba(120,120,120,.16) 75%),linear-gradient(-45deg,transparent 75%,rgba(120,120,120,.16) 75%);
   background-size:18px 18px;background-position:0 0,0 9px,9px -9px,-9px 0;background-color:var(--veldbg);}
 .cutmodal .cutcv,.cutmodal .lassocv{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;}
 .cutmodal .cm-foot{display:flex;gap:10px;padding:12px 16px;border-top:1px solid var(--rand);box-shadow:0 -6px 14px rgba(0,0,0,.07);background:var(--kaart);}
-.cutmodal .btn{background:transparent;border:1px solid var(--rand);color:var(--tekst);padding:12px;border-radius:8px;
-  font-size:14px;cursor:pointer;font-family:inherit;}
+.cutmodal .btn{background:transparent;border:1px solid var(--rand);color:var(--tekst);padding:12px;border-radius:var(--r-sm);
+  font-size:var(--fs-base);cursor:pointer;font-family:inherit;}
 .cutmodal .cm-foot .btn{flex:1;}
 /* '+ Nog een' met een info-knopje + uitleg-wolkje ernaast */
 .cutmodal .cm-meer-wrap{flex:1;position:relative;display:flex;align-items:stretch;gap:6px;}
-.cutmodal .cm-meer-info{flex:none;width:38px;display:inline-flex;align-items:center;justify-content:center;
-  background:var(--veldbg);border:1px solid var(--rand);border-radius:10px;color:var(--gedempt);cursor:pointer;}
+/* Info-knop: zelfde ronde cirkel + 'open'=accent-vulling als de tool-info-knop (.cut-tools .linkbtn[.on]) */
+.cutmodal .cm-meer-info{flex:none;width:44px;min-height:44px;display:inline-flex;align-items:center;justify-content:center;
+  background:var(--veldbg);border:1px solid var(--rand);border-radius:999px;color:var(--tekst);cursor:pointer;}
 .cutmodal .cm-meer-info .ik{width:18px;height:18px;}
-.cutmodal .cm-meer-info[aria-expanded="true"]{border-color:var(--accent);color:var(--accent);}
+.cutmodal .cm-meer-info[aria-expanded="true"]{background:var(--accent);border-color:var(--accent);color:var(--op-accent);}
+/* Uitleg-wolkje: zelfde lichte popover-stijl als de tool-legenda (.cm-legend), zonder pijltje */
 .cutmodal .cm-meer-tip{position:absolute;bottom:100%;left:0;right:0;margin-bottom:10px;z-index:9;
-  background:#2A2118;color:#F0EDE8;padding:10px 12px;border-radius:10px;font-size:.8rem;line-height:1.35;
-  box-shadow:0 10px 28px rgba(34,26,18,.35);}
+  background:var(--kaart);border:1px solid var(--rand);border-radius:var(--r-md);box-shadow:0 8px 22px rgba(0,0,0,.22);
+  padding:10px 12px;font-size:var(--fs-sm);line-height:1.4;color:var(--tekst);}
 .cutmodal .cm-meer-tip[hidden]{display:none;}
-.cutmodal .cm-meer-tip::after{content:"";position:absolute;top:100%;right:18px;border:7px solid transparent;border-top-color:#2A2118;}
 .cutmodal .btn:hover{border-color:var(--accent);}
-.cutmodal .cm-place{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:600;}
+.cutmodal .cm-place{background:var(--accent);border-color:var(--accent);color:var(--op-accent);font-weight:600;}
 .cutmodal .cm-place:hover{filter:brightness(1.08);}
-.cutmodal .label{font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--gedempt);margin:6px 0 2px;}
+.cutmodal .label{font-size:var(--fs-xs);text-transform:uppercase;letter-spacing:.1em;color:var(--gedempt);margin:6px 0 2px;}
 .cutmodal .cutrow{display:flex;justify-content:space-between;align-items:center;gap:8px;}
-.cutmodal .hintline{font-size:11px;color:var(--gedempt);line-height:1.4;}
+.cutmodal .hintline{font-size:var(--fs-xs);color:var(--gedempt);line-height:1.4;}
 .cutmodal #cmHint.wand-aan{color:var(--accent);font-weight:600;}   /* vaste, opvallende hint zolang de toverstaf aan staat */
-.cutmodal .linkbtn{background:transparent;border:0;color:var(--gedempt);font-size:11px;text-decoration:underline;cursor:pointer;font-family:inherit;white-space:nowrap;}
+.cutmodal .linkbtn{background:transparent;border:0;color:var(--gedempt);font-size:var(--fs-xs);text-decoration:underline;cursor:pointer;font-family:inherit;white-space:nowrap;}
 .cutmodal .linkbtn:hover{color:var(--accent);}
 .cutmodal .bgrow{justify-content:flex-start;margin-top:6px;}
 .cutmodal .bg-controls{justify-content:flex-start;flex-wrap:wrap;gap:8px 16px;margin:8px 0;}
@@ -980,31 +1002,31 @@ form label,
 .cutmodal .cut-tools .ct-div{width:1px;align-self:stretch;min-height:30px;background:var(--rand);flex:none;margin:0 4px 0 0;}
 /* Uitsnede-tools als chips: duidelijk tapbaar i.p.v. tekstlinkjes. Reset blijft een aparte gedempte link rechts. */
 .cutmodal .cut-tools .linkbtn{display:inline-flex;align-items:center;gap:5px;background:var(--veldbg);
-  border:1px solid var(--rand);border-radius:999px;color:var(--tekst);text-decoration:none;font-size:12px;font-weight:600;
+  border:1px solid var(--rand);border-radius:999px;color:var(--tekst);text-decoration:none;font-size:var(--fs-sm);font-weight:600;
   padding:9px 13px;min-height:44px;}
 .cutmodal .cut-tools .linkbtn:hover{border-color:var(--accent);color:var(--accent);}
 .cutmodal .cut-tools .t-lbl{display:none;}                              /* icon-only; uitleg via de Info-pop-up */
 .cutmodal .cut-tools .cm-toolinfo.on{border-color:var(--accent);color:var(--accent);}
 .cutmodal .cm-legend{position:absolute;bottom:100%;left:0;margin-bottom:10px;z-index:9;
-  background:var(--kaart);border:1px solid var(--rand);border-radius:12px;box-shadow:0 8px 22px rgba(0,0,0,.22);
+  background:var(--kaart);border:1px solid var(--rand);border-radius:var(--r-md);box-shadow:0 8px 22px rgba(0,0,0,.22);
   padding:6px;min-width:170px;max-width:min(280px,90%);display:flex;flex-direction:column;}
 .cutmodal .cm-legend[hidden]{display:none;}
-.cutmodal .cm-legend .lg-row{display:flex;align-items:center;gap:11px;padding:8px 10px;border-radius:8px;
-  font-size:13px;font-weight:600;color:var(--tekst);white-space:nowrap;}
+.cutmodal .cm-legend .lg-row{display:flex;align-items:center;gap:11px;padding:8px 10px;border-radius:var(--r-sm);
+  font-size:var(--fs-sm);font-weight:600;color:var(--tekst);white-space:nowrap;}
 .cutmodal .cm-legend .lg-row .ik{flex:none;}
-.cutmodal .cm-legend .lg-row.lg-reset{color:#A8341A;}
-.cutmodal .cut-tools .linkbtn.on{background:var(--accent);border-color:var(--accent);color:#F0EDE8;}
+.cutmodal .cm-legend .lg-row.lg-reset{color:var(--gevaar);}
+.cutmodal .cut-tools .linkbtn.on{background:var(--accent);border-color:var(--accent);color:var(--op-accent);}
 /* Reset uitsnede: destructief + zeldzaam -> als subtiele tekstlink ONDER de balk (geen mis-tap naast de tools) */
 .cutmodal .cm-resetrij{display:flex;justify-content:center;margin-top:8px;}
 .cutmodal .cm-resetlink{display:inline-flex;align-items:center;gap:6px;background:transparent;border:0;cursor:pointer;
-  color:#A8341A;font-size:.8rem;font-weight:600;font-family:inherit;padding:6px 12px;border-radius:8px;}
+  color:var(--gevaar);font-size:var(--fs-sm);font-weight:600;font-family:inherit;padding:6px 12px;border-radius:var(--r-sm);}
 .cutmodal .cm-resetlink .ik{width:15px;height:15px;stroke:currentColor;fill:none;}
 .cutmodal .cm-resetlink:hover{background:rgba(168,52,26,.08);}
 .cutmodal .cm-resetlink:active{transform:scale(.97);}
-.cutmodal .cut-tip{font-size:11px;color:var(--gedempt);margin:2px 0 8px;line-height:1.35;}
+.cutmodal .cut-tip{font-size:var(--fs-xs);color:var(--gedempt);margin:2px 0 8px;line-height:1.35;}
 .cutmodal .linkbtn.on{color:var(--accent);font-weight:600;}
 .cutmodal .bgswatch{width:18px;height:18px;border-radius:4px;border:1px solid var(--rand);visibility:hidden;flex:0 0 auto;}
-.cutmodal .chk{display:flex;align-items:center;gap:7px;font-size:12px;color:var(--gedempt);margin-top:8px;cursor:pointer;}
+.cutmodal .chk{display:flex;align-items:center;gap:7px;font-size:var(--fs-sm);color:var(--gedempt);margin-top:8px;cursor:pointer;}
 .cutmodal .chk input{accent-color:var(--accent);}
 .cutmodal .slider{width:100%;accent-color:var(--accent);height:22px;cursor:pointer;}
 /* 3D toevoeg-flow: + knop, plaats-banner, info-velden in de modal */
@@ -1031,11 +1053,11 @@ form label,
   background:var(--veldbg);border:1px solid var(--rand);color:var(--tekst);font-size:.82rem;font-weight:600;
   padding:8px 14px;border-radius:999px;text-align:center;box-shadow:0 2px 10px rgba(0,0,0,.18);pointer-events:none;}
 .lege-hint[hidden]{display:none;}
-.cutmodal .cm-veld{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--gedempt);margin:8px 0 0;}
-.cutmodal .cm-veld input,.cutmodal .cm-veld select{padding:9px 10px;border:1px solid var(--rand);border-radius:8px;background:var(--veldbg);color:var(--tekst);font-size:14px;font-family:inherit;}
+.cutmodal .cm-veld{display:flex;flex-direction:column;gap:4px;font-size:var(--fs-sm);color:var(--gedempt);margin:8px 0 0;}
+.cutmodal .cm-veld input,.cutmodal .cm-veld select{padding:9px 10px;border:1px solid var(--rand);border-radius:var(--r-sm);background:var(--veldbg);color:var(--tekst);font-size:var(--fs-base);font-family:inherit;}
 .cutmodal .verplicht{color:var(--accent);font-weight:700;}
-.cutmodal .cm-veld input[aria-invalid="true"]{border-color:#D14343;box-shadow:0 0 0 2px rgba(209,67,67,.18);}
-#cmMeerBtn{margin:0;display:inline-flex;align-items:center;gap:4px;}
+.cutmodal .cm-veld input[aria-invalid="true"]{border-color:var(--invalid);box-shadow:0 0 0 2px rgba(209,67,67,.18);}
+#cmMeerBtn{margin:0;}   /* display/gap komen uit .cm-meer-pill */
 .cm-chev{width:14px;height:14px;flex:none;transition:transform .15s ease;}
 .cm-chev path{fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round;}
 #cmMeerBtn[aria-expanded="true"] .cm-chev{transform:rotate(180deg);}
@@ -1337,7 +1359,7 @@ form label{text-transform:none;letter-spacing:.005em;font-size:.8rem;color:var(-
           <div id="cmInfo" hidden>
             <div id="cmHerhaalBadge" class="cm-herhaal-badge" hidden></div>
             <div class="cm-onderrij">
-              <button type="button" id="cmMeerBtn" class="linkbtn cm-meer-pill" aria-expanded="false"><span data-i18n="ui.meer_details">Meer details</span><svg class="cm-chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+              <button type="button" id="cmMeerBtn" class="cm-meer-pill" aria-expanded="false"><span data-i18n="ui.meer_details">Meer details</span><svg class="cm-chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
               <div class="silhouet-keuze compact cm-status" id="cmStatus" role="group" data-i18n-aria="form.type" aria-label="Status">
                 <button type="button" data-status="gezet" class="actief" data-i18n="form.gezet">Gezet</button>
                 <button type="button" data-status="wens" data-i18n="form.wishlist">Wishlist</button>
@@ -8999,18 +9021,24 @@ function renderDetail() {
   }
 
   if (detailTab === 'sessies' && !isWens) {
-    $('#ns-toevoegen').addEventListener('click', async () => {
+    $('#ns-toevoegen').addEventListener('click', async (e) => {
+      const knop = e.currentTarget;
+      if (knop.disabled) return;            // dubbelklik-race voorkomen (geen dubbele sessie)
       const datum = $('#ns-datum').value;
       const duur = Math.max(0, Math.min(100000, parseFloat($('#ns-duur').value) || 0));   // clamp: geen negatieve/absurde uren
       if (!datum) { toast(tr('toast.kiessessiedatum')); return; }
+      knop.disabled = true;                 // disable pas ná validatie; de re-render vervangt de knop
       t.sessies = t.sessies || [];
       t.sessies.push(createSessie(datum, duur, $('#ns-notities').value.trim()));
       await bewaarEnVerversDetail(t);
       toast(tr('toast.sessietoegevoegd'));
     });
-    $('#nt-toevoegen').addEventListener('click', async () => {
+    $('#nt-toevoegen').addEventListener('click', async (e) => {
+      const knop = e.currentTarget;
+      if (knop.disabled) return;            // dubbelklik-race voorkomen (geen dubbele touch-up)
       const datum = $('#nt-datum').value;
       if (!datum) { toast(tr('toast.kiestouchupdatum')); return; }
+      knop.disabled = true;
       t.touchUps = t.touchUps || [];
       t.touchUps.push(createTouchUp(datum, $('#nt-notities').value.trim()));
       await bewaarEnVerversDetail(t);
@@ -9043,10 +9071,13 @@ function renderDetail() {
       t.nazorgTaken.push({ tekst, klaar: false });
       await bewaarEnVerversDetail(t);
     };
-    $('#taak-toevoegen').addEventListener('click', () => {
+    $('#taak-toevoegen').addEventListener('click', async (e) => {
+      const knop = e.currentTarget;
+      if (knop.disabled) return;            // dubbelklik-race voorkomen (geen dubbele taak)
       const tekst = $('#taak-tekst').value.trim();
       if (!tekst) { toast(tr('toast.typtaak')); return; }
-      taakToevoegen(tekst);
+      knop.disabled = true;
+      await taakToevoegen(tekst);
     });
     $('#taak-standaard').addEventListener('click', async () => {
       t.nazorgTaken = t.nazorgTaken || [];
@@ -9056,12 +9087,18 @@ function renderDetail() {
       await bewaarEnVerversDetail(t);
       toast(tr('toast.standaardtoegevoegd'));
     });
-    view.querySelectorAll('input[data-taak]').forEach(c =>
-      c.addEventListener('change', async () => {
-        t.nazorgTaken[Number(c.dataset.taak)].klaar = c.checked;
+    view.querySelectorAll('input[data-taak]').forEach(c => {
+      // iOS Safari vuurt op checkboxes soms alleen 'input', niet 'change' (CLAUDE.md-valkuil) -> bind beide,
+      // met guard zodat de save niet dubbel draait wanneer beide events vuren.
+      const taakToggle = async () => {
+        const i = Number(c.dataset.taak);
+        if (!t.nazorgTaken[i] || t.nazorgTaken[i].klaar === c.checked) return;
+        t.nazorgTaken[i].klaar = c.checked;
         await bewaarEnVerversDetail(t);
-      })
-    );
+      };
+      c.addEventListener('change', taakToggle);
+      c.addEventListener('input', taakToggle);
+    });
     view.querySelectorAll('[data-del-taak]').forEach(b =>
       b.addEventListener('click', async () => {
         t.nazorgTaken.splice(Number(b.dataset.delTaak), 1);
@@ -9780,9 +9817,12 @@ function openFormulier(id = null) {
       bezigMetOpslaan = false;
     }
   }
-  $('#f-opslaan').addEventListener('click', verstuurFormulier);
+  // onclick/onsubmit (overschrijft) i.p.v. addEventListener: openFormulier draait vaker op dezelfde
+  // statische elementen; met addEventListener stapelden de (closure-)handlers en vuurde verstuurFormulier
+  // meerdere keren per klik (dubbele saves/records).
+  $('#f-opslaan').onclick = verstuurFormulier;
   // Enter in een tekstveld blijft werken waar formulieren niet geblokkeerd zijn:
-  $('#tattoo-form').addEventListener('submit', (e) => { e.preventDefault(); verstuurFormulier(); });
+  $('#tattoo-form').onsubmit = (e) => { e.preventDefault(); verstuurFormulier(); };
 
   toonView('form');
 }
@@ -10628,7 +10668,7 @@ async function verwijderVoorbeelden() {
   const SHAPE_NODES={};   // bv. "man-atletisch":"model-male-athletic"; leeg = val terug op het geslacht-model
   function modelNodeId(gender){ const key=gender+"-"+currentShape; return SHAPE_NODES[key] || (gender==="vrouw"?"model-female":"model-male"); }
   function presetId(){ return currentGender+"-"+currentShape; }
-  let editDecal=null, persistT=null;
+  let editDecal=null;   // debounced-save timer is per marker (m._persistT), niet globaal: zo annuleert het bewerken van tattoo B niet de nog-lopende save van tattoo A
   let pendingSkin=null;
   let scene,camera,renderer,target,key,rim,ground,body,modelRoot,loader,skinMat,activeSkin;
   let pickMeshes=[];
@@ -10709,6 +10749,7 @@ async function verwijderVoorbeelden() {
   function b64ToBuffer(b64){ const bin=atob(b64), len=bin.length, bytes=new Uint8Array(len);
     for(let i=0;i<len;i++) bytes[i]=bin.charCodeAt(i); return bytes.buffer; }
   function disposeMarker(m){
+    clearTimeout(m._persistT);   // nog-lopende debounced save afbreken (marker verdwijnt)
     if(m.obj){ body.remove(m.obj);
       if(m.obj.geometry) m.obj.geometry.dispose();
       if(m.obj.material && m.obj.material.dispose) m.obj.material.dispose(); }
@@ -10718,7 +10759,7 @@ async function verwijderVoorbeelden() {
     // Aanpasmodus afsluiten vóór het weggooien van markers, anders blijft de editbar
     // naar een verwijderde marker wijzen (bv. bij man/vrouw-wissel tijdens bewerken).
     if(editDecal){
-      editDecal=null; clearTimeout(persistT); showSel(false);
+      editDecal=null; showSel(false);   // timers worden per marker geclear'd in disposeMarker (hieronder)
       const eb=document.getElementById("editbar"); if(eb)eb.classList.remove("on");
       const h=document.getElementById("hint"); if(h)h.style.display="";
       const a=document.getElementById("t3d-add"); if(a) a.style.display="";   // +-knop herstellen (was verborgen tijdens bewerken)
@@ -11459,8 +11500,8 @@ async function verwijderVoorbeelden() {
     P.rot=m.rot||0; P.size=m.size||0.09; P.locked=!!m.locked; P.gender=currentGender; P.preset=presetId(); P.zone=nz.zone; P.side=nz.side;
     m.rec.zijde=nz.side; m.rec.lichaamsdeel=nz.zone;
     sync2D(m.rec, m.point, nz.side, m.rot, m.size, m.tex);
-    clearTimeout(persistT);
-    persistT=setTimeout(async()=>{ try{ await saveTattoo(m.rec); if(typeof tattoos!=="undefined"&&Array.isArray(tattoos)){ const j=tattoos.findIndex(t=>t.id===m.rec.id); if(j>=0)tattoos[j]=m.rec; } if(typeof renderMarkers==="function"){ try{renderMarkers();}catch(_){} } }catch(e){ console.error(e); } },300);
+    clearTimeout(m._persistT);   // per-marker timer: alleen deze tattoo's eigen save herplannen
+    m._persistT=setTimeout(async()=>{ try{ await saveTattoo(m.rec); if(typeof tattoos!=="undefined"&&Array.isArray(tattoos)){ const j=tattoos.findIndex(t=>t.id===m.rec.id); if(j>=0)tattoos[j]=m.rec; } if(typeof renderMarkers==="function"){ try{renderMarkers();}catch(_){} } }catch(e){ console.error(e); } },300);
   }
   function askConfirm(msg, jaLabel){
     return new Promise(res=>{
@@ -11487,7 +11528,7 @@ async function verwijderVoorbeelden() {
     const m=editDecal; if(!m) return;
     const ok=await askConfirm(tr('ui.verwijder_bevestig'));
     if(!ok || editDecal!==m) return;
-    clearTimeout(persistT);                 // voorkom dat een nog lopende save de tattoo terugzet
+    clearTimeout(m._persistT);               // voorkom dat een nog lopende save de tattoo terugzet
     showSel(false);
     disposeMarker(m);                        // verwijdert mesh én geeft geometry/material/textuur vrij (geen GPU-lek)
     const i=markers.indexOf(m); if(i>=0) markers.splice(i,1);
@@ -12660,7 +12701,7 @@ async function verwijderVoorbeelden() {
   // Eén 3D-decal verwijderen (na verwijderen van een tattoo via detail/2D); host roept dit aan.
   window.__tatties3DVerwijder = function(id){
     const m = markers.find(x=>x.id===id); if(!m) return false;
-    if(editDecal===m){ editDecal=null; clearTimeout(persistT); showSel(false);
+    if(editDecal===m){ editDecal=null; showSel(false);   // m._persistT wordt in disposeMarker geclear'd
       const eb=document.getElementById("editbar"); if(eb)eb.classList.remove("on");
       const h=document.getElementById("hint"); if(h)h.style.display=""; }
     disposeMarker(m); const i=markers.indexOf(m); if(i>=0) markers.splice(i,1);
