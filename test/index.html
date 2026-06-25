@@ -155,7 +155,7 @@ button{font:inherit;color:inherit;background:none;border:none;cursor:pointer;min
 button:active{transform:scale(.97)}
 input,select,textarea{
   font:inherit;color:var(--tekst);
-  background:var(--veldbg);border:1px solid var(--rand);border-radius:10px;
+  background:var(--veldbg);border:1px solid var(--rand);border-radius:var(--r-md);
   padding:11px 12px;width:100%;min-height:44px;
   transition:border-color .12s ease, box-shadow .12s ease;
 }
@@ -191,7 +191,7 @@ h1,h2,h3{font-weight:700;letter-spacing:.01em}
 .merk-logo{
   display:block;height:2.4rem;width:auto;flex:none;
   margin:0;
-  padding:9px 16px;border-radius:14px;
+  padding:9px 16px;border-radius:var(--r-lg);
   background:#faf4e8;                 /* warm-wit vlak achter het logo voor contrast */
   box-shadow:0 1px 4px rgba(0,0,0,.20);
 }
@@ -210,7 +210,7 @@ h1,h2,h3{font-weight:700;letter-spacing:.01em}
 #stats-samenvatting{display:flex;gap:12px;padding:14px}
 .samenvat-kaart{
   flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;
-  background:var(--veldbg);border:1px solid var(--rand);border-radius:14px;
+  background:var(--veldbg);border:1px solid var(--rand);border-radius:var(--r-lg);
   padding:16px 10px;min-height:0;
   transition:transform .06s ease, border-color .12s ease;
 }
@@ -239,7 +239,7 @@ main > section{animation:opkomen .3s ease both}
 .zijde-balk #fab{padding:9px 14px;font-size:.86rem}
 .gepland-toggle{display:inline-flex;align-items:center;gap:6px;background:var(--veldbg);border:1px solid var(--rand);border-radius:999px;
   color:var(--gedempt);font-size:.76rem;font-weight:600;padding:6px 12px;cursor:pointer;font-family:inherit;white-space:nowrap}
-.gepland-toggle.actief{background:var(--accent);border-color:var(--accent);color:#F0EDE8}
+.gepland-toggle.actief{background:var(--accent);border-color:var(--accent);color:var(--op-accent)}
 .gepland-toggle .ik{stroke:currentColor;fill:none}
 #toon-gepland,#toon-gepland-3d{position:absolute;left:14px;top:14px;z-index:6}
 /* Slanke balk BUITEN het canvas: Wishlist-toggle (links) + reset (rechts); het lichaam/de kaart
@@ -279,10 +279,10 @@ main > section{animation:opkomen .3s ease both}
   min-height:38px;padding:6px 16px;border-radius:999px;
   color:var(--gedempt);font-weight:600;font-size:.86rem;letter-spacing:.02em;
 }
-.silhouet-keuze button.actief{background:var(--accent);color:#F0EDE8}
+.silhouet-keuze button.actief{background:var(--accent);color:var(--op-accent)}
 .silhouet-keuze button:disabled{opacity:.4;cursor:not-allowed}
 .inst-soon{display:inline-block;margin-left:8px;padding:1px 8px;border-radius:999px;background:var(--veldbg);border:1px solid var(--rand);color:var(--gedempt);font-size:.66rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase;vertical-align:middle}
-.bouw-melding{margin:0 auto 10px;max-width:520px;padding:8px 14px;border-radius:12px;background:rgba(224,83,61,.12);border:1px solid rgba(224,83,61,.4);color:var(--tekst);font-size:.82rem;font-weight:600;text-align:center}
+.bouw-melding{margin:0 auto 10px;max-width:520px;padding:8px 14px;border-radius:var(--r-md);background:rgba(224,83,61,.12);border:1px solid rgba(224,83,61,.4);color:var(--tekst);font-size:.82rem;font-weight:600;text-align:center}
 .stat-toggle{background:none;border:0;padding:0;font:inherit;color:inherit;cursor:pointer;border-bottom:1px dotted var(--gedempt);line-height:1.1;}
 .stat-toggle:hover{color:var(--accent);border-bottom-color:var(--accent);}
 .start-stat-getal.klikbaar{cursor:pointer;display:inline-block;border-bottom:2px dotted currentColor;line-height:1.05;}
@@ -313,7 +313,7 @@ main > section{animation:opkomen .3s ease both}
   background:transparent;cursor:pointer;outline:none;margin:0;
 }
 .tint-slider::-webkit-slider-runnable-track{
-  height:14px;border-radius:8px;border:1px solid var(--rand);
+  height:14px;border-radius:var(--r-sm);border:1px solid var(--rand);
   background:linear-gradient(to right,#F0EDE8,#EAC9A8,#C68642,#8D5524,#4A372E);
 }
 .tint-slider::-webkit-slider-thumb{
@@ -322,7 +322,7 @@ main > section{animation:opkomen .3s ease both}
   cursor:pointer;margin-top:-6px;
 }
 .tint-slider::-moz-range-track{
-  height:14px;border-radius:8px;border:1px solid var(--rand);
+  height:14px;border-radius:var(--r-sm);border:1px solid var(--rand);
   background:linear-gradient(to right,#F0EDE8,#EAC9A8,#C68642,#8D5524,#4A372E);
 }
 .tint-slider::-moz-range-thumb{
@@ -336,12 +336,12 @@ main > section{animation:opkomen .3s ease both}
 #filter-bar.zichtbaar{display:flex}
 .chip{
   display:inline-flex;align-items:center;gap:8px;
-  background:var(--inktblauw);color:#F0EDE8;border-radius:999px;padding:8px 14px;font-size:.88rem;
+  background:var(--inktblauw);color:var(--op-accent);border-radius:999px;padding:8px 14px;font-size:.88rem;
 }
 .chip button{
   min-width:30px;min-height:30px;margin:-4px -7px -4px 0;padding:0;
   display:inline-flex;align-items:center;justify-content:center;
-  border-radius:999px;font-weight:700;color:#F0EDE8;
+  border-radius:999px;font-weight:700;color:var(--op-accent);
 }
 
 /* ---- Plek-kiezer in het formulier: gebruikt het gedeelde rasterpapier hierboven ---- */
@@ -376,10 +376,10 @@ main > section{animation:opkomen .3s ease both}
 }
 .tcard:active{transform:scale(.985);border-color:#c4b69d}
 .thumb{
-  width:54px;height:54px;border-radius:9px;flex:none;
+  width:54px;height:54px;border-radius:var(--r-md);flex:none;
   background:var(--inktblauw);display:flex;align-items:center;justify-content:center;
   font-family:var(--serif);font-style:normal;
-  font-size:1.45rem;font-weight:700;color:#F0EDE8;overflow:hidden;
+  font-size:1.45rem;font-weight:700;color:var(--op-accent);overflow:hidden;
   border:1px solid var(--rand);
 }
 .thumb img{width:100%;height:100%;object-fit:cover}
@@ -407,7 +407,7 @@ main > section{animation:opkomen .3s ease both}
   text-align:center;color:var(--gedempt);padding:34px 18px;
   border:1px dashed var(--rand);border-radius:var(--radius);
 }
-.leeg::before{content:"✦";display:block;color:var(--accent-diep);font-style:normal;margin-bottom:8px}
+/* (decoratief ✦-sterretje verwijderd uit de lege staten - rustiger beeld) */
 
 /* ---- Back-up & export ---- */
 .backup-row{display:flex;gap:10px;margin-top:18px;flex-wrap:wrap}
@@ -417,19 +417,19 @@ main > section{animation:opkomen .3s ease both}
 .knop{
   display:inline-flex;align-items:center;justify-content:center;gap:8px;
   background:var(--accent);color:#FFF7EE;font-weight:800;letter-spacing:.01em;
-  border-radius:11px;padding:12px 18px;min-height:48px;
+  border-radius:var(--r-md);padding:12px 18px;min-height:48px;
   box-shadow:0 3px 12px rgba(var(--accent-rgb),.3);
 }
 .knop:active{filter:brightness(.94)}
 .knop-sec{
   display:inline-flex;align-items:center;justify-content:center;gap:8px;
-  background:var(--kaart);border:1px solid var(--rand);border-radius:11px;
+  background:var(--kaart);border:1px solid var(--rand);border-radius:var(--r-md);
   padding:12px 16px;font-weight:600;min-height:48px;color:var(--tekst);
 }
 .knop-sec:active{background:#efe5d2}
-.knop-sec.actief{background:var(--accent);border-color:var(--accent);color:#F0EDE8}
-.knop-sec.actief .ik{stroke:#F0EDE8}
-.knop-gevaar{color:#A8341A;border-color:#E0B8A6}
+.knop-sec.actief{background:var(--accent);border-color:var(--accent);color:var(--op-accent)}
+.knop-sec.actief .ik{stroke:var(--op-accent)}
+.knop-gevaar{color:var(--gevaar);border-color:#E0B8A6}
 #fab{
   position:absolute;right:14px;bottom:14px;z-index:6;flex:none;
   width:48px;height:48px;border-radius:50%;
@@ -448,16 +448,16 @@ main > section{animation:opkomen .3s ease both}
   font-family:var(--serif);font-style:normal;font-size:1.45rem;font-weight:700;
 }
 .icoonknop{
-  min-width:44px;min-height:44px;border-radius:10px;
+  min-width:44px;min-height:44px;border-radius:var(--r-md);
   display:inline-flex;align-items:center;justify-content:center;
   background:var(--kaart);border:1px solid var(--rand);font-size:1.02rem;
 }
-.icoonknop.actief{background:var(--accent);border-color:var(--accent);color:#F0EDE8}
+.icoonknop.actief{background:var(--accent);border-color:var(--accent);color:var(--op-accent)}
 /* Segmented 3D|2D-toggle in de header (twee weergaven van hetzelfde, één visueel blok) */
-.seg-toggle{display:inline-flex;border:1px solid var(--rand);border-radius:10px;overflow:hidden;background:var(--kaart);flex:none}
-.seg-btn{min-width:46px;min-height:44px;padding:0 14px;border:0;background:transparent;color:var(--tekst);font-weight:700;font-size:13px;font-family:inherit;cursor:pointer;display:inline-flex;align-items:center;justify-content:center}
+.seg-toggle{display:inline-flex;border:1px solid var(--rand);border-radius:var(--r-md);overflow:hidden;background:var(--kaart);flex:none}
+.seg-btn{min-width:46px;min-height:44px;padding:0 14px;border:0;background:transparent;color:var(--tekst);font-weight:700;font-size:var(--fs-sm);font-family:inherit;cursor:pointer;display:inline-flex;align-items:center;justify-content:center}
 .seg-btn+.seg-btn{border-left:1px solid var(--rand)}
-.seg-btn.actief{background:var(--accent);color:#F0EDE8}
+.seg-btn.actief{background:var(--accent);color:var(--op-accent)}
 .seg-btn:active{transform:scale(.96)}
 .galerij{
   display:flex;gap:8px;overflow-x:auto;scroll-snap-type:x mandatory;
@@ -514,7 +514,7 @@ dl.toon-leeg .veldrij.leeg-veld{display:flex}
 .start-foot-tagline{margin:22px 0 0;text-align:center;color:var(--gedempt);font-family:var(--serif);font-size:.82rem;letter-spacing:.04em;opacity:.7}
 .start-versie{margin:6px 0 0;text-align:center;color:var(--gedempt);opacity:.55;font-size:.72rem;letter-spacing:.04em}
 .start-cta{width:100%;padding:16px;font-size:1.05rem;font-weight:700;border:0;border-radius:var(--radius);
-  background:var(--accent);color:#fff;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.18)}
+  background:var(--accent);color:var(--op-accent);cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.18)}
 .start-cta:hover{filter:brightness(1.05)}
 .start-stats{display:flex;gap:10px}
 .start-stat{flex:1;background:var(--kaart);border:1px solid var(--rand);border-radius:var(--radius);padding:14px 8px;text-align:center}
@@ -529,7 +529,7 @@ dl.toon-leeg .veldrij.leeg-veld{display:flex}
 .start-recent-item{display:flex;align-items:center;gap:12px;width:100%;text-align:left;padding:8px;
   background:var(--kaart);border:1px solid var(--rand);border-radius:var(--radius);color:var(--tekst);cursor:pointer}
 .start-recent-item:hover{border-color:var(--accent)}
-.start-recent-item .sri-thumb{width:44px;height:44px;flex:none;border-radius:10px;background:#f3ece0;
+.start-recent-item .sri-thumb{width:44px;height:44px;flex:none;border-radius:var(--r-md);background:#f3ece0;
   display:flex;align-items:center;justify-content:center;font-weight:800;overflow:hidden;color:#5b5142}
 .start-recent-item .sri-thumb img{width:100%;height:100%;object-fit:cover}
 .start-recent-item .sri-naam{font-weight:700}
@@ -546,11 +546,11 @@ dl.toon-leeg .veldrij.leeg-veld{display:flex}
 .add-kies{position:fixed;inset:0;z-index:70;display:flex;align-items:center;justify-content:center;padding:20px;
   background:rgba(0,0,0,.45);-webkit-backdrop-filter:blur(2px);backdrop-filter:blur(2px)}
 .add-kies[hidden]{display:none}
-.add-kies-kaart{width:min(360px,92vw);background:var(--kaart);border:1px solid var(--rand);border-radius:16px;
+.add-kies-kaart{width:min(360px,92vw);background:var(--kaart);border:1px solid var(--rand);border-radius:var(--r-lg);
   padding:16px;display:flex;flex-direction:column;gap:10px;box-shadow:0 12px 40px rgba(0,0,0,.3)}
 .add-kies-titel{margin:2px 0 4px;text-align:center;font-weight:700;font-size:1.05rem}
 .add-kies-optie{display:flex;flex-direction:column;gap:2px;text-align:left;padding:14px 16px;border:1px solid var(--rand);
-  border-radius:12px;background:var(--veldbg);color:var(--tekst);cursor:pointer}
+  border-radius:var(--r-md);background:var(--veldbg);color:var(--tekst);cursor:pointer}
 .add-kies-optie:hover{border-color:var(--accent)}
 .add-kies-optie:disabled{opacity:.5;cursor:not-allowed}
 .add-kies-optie:disabled:hover{border-color:var(--rand)}
@@ -559,7 +559,7 @@ dl.toon-leeg .veldrij.leeg-veld{display:flex}
 .add-kies-optie .ak-wip{margin-top:5px;font-size:.68rem;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--accent-diep)}
 .add-kies-annuleer{align-self:center;margin-top:2px}
 /* Onboarding stap 2: +-hint */
-.onb-plus{width:64px;height:64px;margin:4px auto 6px;border-radius:50%;background:var(--accent);color:#fff;
+.onb-plus{width:64px;height:64px;margin:4px auto 6px;border-radius:50%;background:var(--accent);color:var(--op-accent);
   font-size:2.2rem;font-weight:700;line-height:64px;text-align:center;box-shadow:0 6px 18px rgba(0,0,0,.22)}
 #onb-terug{margin-top:4px}
 
@@ -586,7 +586,7 @@ dl.toon-leeg .veldrij.leeg-veld{display:flex}
 .sessie-item .si-info{flex:1}
 .sessie-item .si-info strong{font-size:.92rem}
 .sessie-item .si-info p{font-size:.82rem;color:var(--gedempt);margin-top:2px}
-.mini-verwijder{min-width:44px;color:#A8341A;font-size:1rem}
+.mini-verwijder{min-width:44px;color:var(--gevaar);font-size:1rem}
 .inline-form{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
 .inline-form .breed{grid-column:1/-1}
 
@@ -623,7 +623,7 @@ form label .verplicht{color:var(--accent-diep)}
 .rij2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .toggle-rij{
   display:flex;align-items:center;justify-content:space-between;gap:12px;
-  background:var(--veldbg);border:1px solid var(--rand);border-radius:10px;padding:10px 12px;
+  background:var(--veldbg);border:1px solid var(--rand);border-radius:var(--r-md);padding:10px 12px;
 }
 .schakelaar{position:relative;width:52px;height:30px;flex:none}
 .schakelaar input{position:absolute;opacity:0;width:100%;height:100%;margin:0;min-height:0}
@@ -639,27 +639,27 @@ form label .verplicht{color:var(--accent-diep)}
 .foto-veld{display:flex;flex-direction:column;gap:10px}
 .fotos-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
 .fotos-grid:empty{display:none}
-.foto-item{position:relative;border-radius:10px;overflow:hidden;border:1px solid var(--rand)}
+.foto-item{position:relative;border-radius:var(--r-md);overflow:hidden;border:1px solid var(--rand)}
 .foto-item img{width:100%;height:96px;object-fit:cover;display:block}
 .foto-item button{
   position:absolute;top:4px;right:4px;min-height:30px;min-width:30px;
   display:inline-flex;align-items:center;justify-content:center;
-  background:rgba(241,232,216,.9);border-radius:8px;color:#A8341A;font-size:.85rem;
+  background:rgba(241,232,216,.9);border-radius:var(--r-sm);color:var(--gevaar);font-size:.85rem;
 }
 .foto-item button.knip{right:auto;left:4px;color:var(--tekst)}
 .foto-item .knip .ik{width:15px;height:15px}
 .foto-preview{
-  width:100%;max-height:240px;object-fit:cover;border-radius:10px;border:1px solid var(--rand);
+  width:100%;max-height:240px;object-fit:cover;border-radius:var(--r-md);border:1px solid var(--rand);
 }
 .formknoppen{display:flex;gap:10px;margin-top:20px}
 .formknoppen .knop{flex:1}
-.fout{color:#A8341A;font-size:.85rem;margin-top:6px;display:none}
+.fout{color:var(--gevaar);font-size:.85rem;margin-top:6px;display:none}
 .fout.zichtbaar{display:block}
 
 /* ---- Tattoo-uitsnede ---- */
 .uitsnede-preview{
   width:100%;max-height:260px;object-fit:contain;display:block;
-  border:1px solid var(--rand);border-radius:10px;margin-bottom:10px;
+  border:1px solid var(--rand);border-radius:var(--r-md);margin-bottom:10px;
   background:repeating-conic-gradient(#e9dfca 0% 25%, #f4ecdc 0% 50%) 0 0/16px 16px;
 }
 .schuif-label{
@@ -677,19 +677,19 @@ input[type=range]:focus{box-shadow:none;border:none}
   position:fixed;left:12px;right:12px;z-index:40;
   bottom:calc(env(safe-area-inset-bottom) + 84px);
   display:flex;align-items:center;gap:10px;
-  background:var(--inktblauw);color:#F0EDE8;border:1px solid #2c4070;border-radius:14px;
+  background:var(--inktblauw);color:var(--op-accent);border:1px solid #2c4070;border-radius:var(--r-lg);
   padding:12px;font-size:.9rem;box-shadow:0 10px 30px rgba(34,26,18,.3);
 }
 #install-banner span{flex:1}
 #install-banner .knop{min-height:44px;padding:10px 14px}
-#install-banner .icoonknop{background:transparent;border-color:#2c4070;color:#F0EDE8}
+#install-banner .icoonknop{background:transparent;border-color:#2c4070;color:var(--op-accent)}
 
 /* ---- Toast ---- */
 #toast{
   position:fixed;left:50%;transform:translateX(-50%) translateY(20px);
   bottom:max(86px,calc(env(safe-area-inset-bottom) + 70px));z-index:50;
-  background:#2A2118;color:#F0EDE8;border-left:3px solid var(--accent);
-  padding:12px 16px;border-radius:12px;
+  background:#2A2118;color:var(--op-accent);border-left:3px solid var(--accent);
+  padding:12px 16px;border-radius:var(--r-md);
   font-size:.9rem;opacity:0;pointer-events:none;transition:opacity .2s, transform .2s;
   max-width:90vw;text-align:left;box-shadow:0 10px 30px rgba(34,26,18,.35);
 }
@@ -697,11 +697,11 @@ input[type=range]:focus{box-shadow:none;border:none}
 #toast.met-actie{pointer-events:auto;display:flex;align-items:center;gap:14px}
 /* Sync-indicator: klein pilletje bovenin (spinner 'Synchroniseren…' -> ✓ 'Bijgewerkt') */
 #sync-ind{position:fixed;left:50%;top:max(64px,calc(env(safe-area-inset-top) + 60px));transform:translateX(-50%);z-index:55;
-  display:inline-flex;align-items:center;gap:8px;background:#2A2118;color:#F0EDE8;border:1px solid var(--rand);
+  display:inline-flex;align-items:center;gap:8px;background:#2A2118;color:var(--op-accent);border:1px solid var(--rand);
   padding:7px 13px;border-radius:999px;font-size:.8rem;font-weight:600;box-shadow:0 6px 20px rgba(34,26,18,.3);}
 #sync-ind[hidden]{display:none;}
 #sync-ind .si-spin{width:14px;height:14px;border-radius:50%;border:2px solid rgba(240,237,232,.3);border-top-color:var(--accent);animation:t3dspin .8s linear infinite;}
-#sync-ind .si-vink{display:none;color:#5ec98c;font-weight:800;}
+#sync-ind .si-vink{display:none;color:var(--succes);font-weight:800;}
 #sync-ind.klaar .si-spin{display:none;}
 #sync-ind.klaar .si-vink{display:inline;}
 #sync-ind.klaar{border-color:rgba(94,201,140,.5);}
@@ -724,7 +724,7 @@ input[type=range]:focus{box-shadow:none;border:none}
   position:fixed;bottom:0;left:0;right:0;z-index:41;
   max-width:560px;margin:0 auto;
   max-height:92vh;overflow-y:auto;-webkit-overflow-scrolling:touch;   /* langer dan het scherm? -> scrollen i.p.v. de kop buiten beeld duwen */
-  background:var(--kaart);border-radius:20px 20px 0 0;
+  background:var(--kaart);border-radius:var(--r-lg) 20px 0 0;
   border-top:1px solid var(--rand);
   padding:0 0 env(safe-area-inset-bottom,16px);
   box-shadow:0 -4px 24px rgba(34,26,18,.14);
@@ -753,9 +753,9 @@ input[type=range]:focus{box-shadow:none;border:none}
 .account-status{font-size:.9rem;color:var(--tekst);margin:0 0 10px}
 .account-status strong{word-break:break-all}
 .account-bericht{font-size:.85rem;line-height:1.4;margin:10px 0 0;color:var(--gedempt)}
-.account-bericht.fout{color:#C0392B}
+.account-bericht.fout{color:var(--gevaar)}
 .account-bericht.ok{color:var(--accent)}
-.account-verwijder{display:block;margin:16px auto 0;background:none;border:none;color:#C0392B;font-size:.82rem;text-decoration:underline;cursor:pointer;padding:6px;min-height:44px}
+.account-verwijder{display:block;margin:16px auto 0;background:none;border:none;color:var(--gevaar);font-size:.82rem;text-decoration:underline;cursor:pointer;padding:6px;min-height:44px}
 .account-verwijder:disabled{opacity:.5;cursor:not-allowed}
 .account-link{display:inline-block;margin-top:4px;background:none;border:none;color:var(--gedempt);font-size:.82rem;text-decoration:underline;cursor:pointer;padding:6px;min-height:44px}
 .account-link:disabled{opacity:.5;cursor:not-allowed}
@@ -839,7 +839,7 @@ form label,
 }
 
 /* Statusbadges lichter zodat ze leesbaar blijven op donker */
-[data-theme="dark"] .badge.geheeld{color:#5FBE86}
+[data-theme="dark"] .badge.geheeld{color:var(--succes)}
 [data-theme="dark"] .badge.herstellende{color:#E0915A}
 [data-theme="dark"] .badge.wens{color:#83A4E6}
 [data-theme="dark"] .aftel{border-color:#E0915A;color:#E0915A}
@@ -864,41 +864,41 @@ form label,
 #view-3d{display:flex;flex-direction:column;gap:10px;}
 #view-3d.verborgen{display:none;}
 #stage{position:relative;width:100%;height:72vh;min-height:420px;touch-action:none;cursor:grab;
-  background:#0e1116;border-radius:14px;overflow:hidden;}
+  background:#0e1116;border-radius:var(--r-lg);overflow:hidden;}
 #stage:active{cursor:grabbing;}
 #stage canvas{display:block;}
 #view-3d #hint{margin:2px 0 0;background:var(--veldbg);border:1px solid var(--rand);
-  color:var(--gedempt);font-size:12px;padding:8px 12px;border-radius:10px;text-align:center;}
-#t3d-uitleg{background:var(--veldbg);border:1px solid var(--rand);border-radius:12px;padding:12px 14px;color:var(--gedempt);}
-#t3d-uitleg .t3d-u-titel{font-size:13px;font-weight:600;color:var(--tekst);margin:0 0 8px;}
-#t3d-uitleg ol{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px;font-size:12.5px;line-height:1.45;}
+  color:var(--gedempt);font-size:var(--fs-sm);padding:8px 12px;border-radius:var(--r-md);text-align:center;}
+#t3d-uitleg{background:var(--veldbg);border:1px solid var(--rand);border-radius:var(--r-md);padding:12px 14px;color:var(--gedempt);}
+#t3d-uitleg .t3d-u-titel{font-size:var(--fs-sm);font-weight:600;color:var(--tekst);margin:0 0 8px;}
+#t3d-uitleg ol{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px;font-size:var(--fs-sm);line-height:1.45;}
 #t3d-uitleg strong{color:var(--tekst);}
 /* 2D-handleiding onder de plattegrond - zelfde opzet als 3D, maar met thema-kleuren */
-#t2d-uitleg{background:var(--veldbg);border:1px solid var(--rand);border-radius:12px;padding:12px 14px;color:var(--gedempt);margin-top:12px;}
-#t2d-uitleg .t2d-u-titel{font-size:13px;font-weight:600;color:var(--tekst);margin:0 0 8px;}
-#t2d-uitleg ol{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px;font-size:12.5px;line-height:1.45;}
+#t2d-uitleg{background:var(--veldbg);border:1px solid var(--rand);border-radius:var(--r-md);padding:12px 14px;color:var(--gedempt);margin-top:12px;}
+#t2d-uitleg .t2d-u-titel{font-size:var(--fs-sm);font-weight:600;color:var(--tekst);margin:0 0 8px;}
+#t2d-uitleg ol{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px;font-size:var(--fs-sm);line-height:1.45;}
 #t2d-uitleg strong{color:var(--tekst);}
 #t3d-toast{position:absolute;left:50%;top:14px;transform:translateX(-50%);
-  background:rgba(14,17,22,.92);border:1px solid #262d38;color:#e8eaed;font-size:12px;
-  padding:8px 14px;border-radius:8px;opacity:0;transition:opacity .3s;pointer-events:none;max-width:80%;text-align:center;z-index:4;}
+  background:rgba(14,17,22,.92);border:1px solid #262d38;color:#e8eaed;font-size:var(--fs-sm);
+  padding:8px 14px;border-radius:var(--r-sm);opacity:0;transition:opacity .3s;pointer-events:none;max-width:80%;text-align:center;z-index:4;}
 .t3d-tools{display:flex;align-items:center;gap:10px;padding:2px 2px 6px;}
-.t3d-tools .t3d-label{font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:#8b95a3;white-space:nowrap;}
+.t3d-tools .t3d-label{font-size:var(--fs-xs);text-transform:uppercase;letter-spacing:.1em;color:#8b95a3;white-space:nowrap;}
 .t3d-tools input[type=range]{flex:1;accent-color:#e0533d;height:22px;cursor:pointer;}
 /* Compacte horizontale bewerkbalk onderaan het model/de kaart */
 .t3d-editbar{position:absolute;left:8px;right:8px;bottom:8px;display:none;flex-direction:row;flex-wrap:wrap;align-items:center;gap:8px 10px;
-  background:var(--kaart);border:1px solid var(--rand);border-radius:14px;padding:8px 10px;z-index:7;box-shadow:0 6px 20px rgba(0,0,0,.28);}
+  background:var(--kaart);border:1px solid var(--rand);border-radius:var(--r-lg);padding:8px 10px;z-index:7;box-shadow:0 6px 20px rgba(0,0,0,.28);}
 .t3d-editbar.on{display:flex;}
 .t3d-editbar .eb-title,.t3d-editbar .eb-hint{display:none;}   /* slim: titel + hint verbergen (desktop heeft tooltips) */
 @media (pointer:coarse){ .t3d-editbar .eb-hint{display:block;flex-basis:100%;width:100%;margin:2px 0 0;font-size:.66rem;line-height:1.3;color:var(--gedempt);text-align:center;} }   /* touch: geen tooltips -> gebaren-uitleg tonen */
 .t3d-editbar .eb-btns{display:flex;flex-wrap:wrap;gap:6px;flex:1 1 100%;justify-content:center;}
-.t3d-editbar .eb-btns button{min-width:0;height:auto;padding:9px 12px;background:var(--veldbg);border:1px solid var(--rand);color:var(--tekst);border-radius:8px;font-size:16px;line-height:1;cursor:pointer;font-family:inherit;text-align:center;}
+.t3d-editbar .eb-btns button{min-width:0;height:auto;padding:9px 12px;background:var(--veldbg);border:1px solid var(--rand);color:var(--tekst);border-radius:var(--r-sm);font-size:var(--fs-md);line-height:1;cursor:pointer;font-family:inherit;text-align:center;}
 .t3d-editbar .eb-btns button:hover{border-color:var(--accent);}
 .t3d-editbar .eb-btns button.on{border-color:var(--accent);background:rgba(142,113,240,.14);color:var(--accent);}
-.t3d-editbar .eb-btns button.eb-del{color:#A8341A;}   /* prullenbak: gevaar-tint (zoals op de detailpagina) */
-.t3d-editbar .eb-btns button.eb-del:hover{border-color:#A8341A;}
+.t3d-editbar .eb-btns button.eb-del{color:var(--gevaar);}   /* prullenbak: gevaar-tint (zoals op de detailpagina) */
+.t3d-editbar .eb-btns button.eb-del:hover{border-color:var(--gevaar);}
 .t3d-editbar .eb-af{color:#fff!important;background:#2e9e4f!important;border-color:#2e9e4f!important;font-weight:700;font-size:18px;}
 .t3d-editbar .eb-opacity{display:flex;align-items:center;gap:8px;flex:1;min-width:130px;}
-.t3d-editbar .eb-opacity .eb-op-label{font-size:10px;color:var(--gedempt);text-transform:uppercase;letter-spacing:.05em;white-space:nowrap;}
+.t3d-editbar .eb-opacity .eb-op-label{font-size:var(--fs-xs);color:var(--gedempt);text-transform:uppercase;letter-spacing:.05em;white-space:nowrap;}
 .t3d-editbar .eb-opacity input[type=range]{flex:1;min-width:0;}
 @media (pointer:coarse){ .t3d-editbar .eb-scarot{display:none;} }   /* schaal/draai: alleen op desktop (touch gebruikt pinch) */
 #t3d-reset{position:absolute;top:14px;right:14px;z-index:6;width:48px;height:48px;border-radius:50%;flex:none;
@@ -910,10 +910,10 @@ form label,
   color:var(--tekst);font-size:.92rem;font-weight:600;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:inherit;}
 .t3d-slotbtn:hover{border-color:var(--accent);}
 .t3d-slot.gevuld{border-color:var(--accent);color:var(--accent);font-weight:700;}
-.t3d-save.arm{background:var(--accent);color:#F0EDE8;border-color:var(--accent);}
+.t3d-save.arm{background:var(--accent);color:var(--op-accent);border-color:var(--accent);}
 .t3d-slots.arm .t3d-slot{border-color:var(--accent);box-shadow:0 0 0 2px rgba(142,113,240,.28);}
 #t3d-loading{position:absolute;inset:0;z-index:7;display:none;flex-direction:column;align-items:center;justify-content:center;
-  gap:12px;background:rgba(14,17,22,.72);color:#e8eaed;font-size:13px;backdrop-filter:blur(2px);}
+  gap:12px;background:rgba(14,17,22,.72);color:#e8eaed;font-size:var(--fs-sm);backdrop-filter:blur(2px);}
 #t3d-loading.on{display:flex;}
 .t3d-spin{width:34px;height:34px;border-radius:50%;border:3px solid #2a323d;border-top-color:#e0533d;animation:t3dspin .8s linear infinite;}
 @keyframes t3dspin{to{transform:rotate(360deg);}}
@@ -1036,14 +1036,14 @@ form label,
 #t3d-add:active{transform:scale(.97)}
 #t3d-add[hidden]{display:none;}
 #t3d-banner,#t2d-banner{position:absolute;left:50%;top:14px;transform:translateX(-50%);z-index:7;max-width:90%;
-  background:var(--accent);color:#fff;font-size:13px;font-weight:600;padding:8px 14px;border-radius:999px;
+  background:var(--accent);color:var(--op-accent);font-size:var(--fs-sm);font-weight:600;padding:8px 14px;border-radius:999px;
   box-shadow:0 2px 10px rgba(0,0,0,.3);text-align:center;}
 #t3d-banner[hidden],#t2d-banner[hidden]{display:none;}
 /* Plaats-hint: pulserende tik-indicator midden op het model/de kaart tijdens plaatsen */
 #plaats-hint{position:fixed;left:50%;top:46%;transform:translate(-50%,-50%);z-index:40;pointer-events:none;display:flex;flex-direction:column;align-items:center;gap:14px}
 #plaats-hint[hidden]{display:none}
 .ph-ring{width:30px;height:30px;border-radius:50%;background:var(--accent);animation:phpuls 1.5s ease-out infinite}
-.ph-tekst{background:rgba(20,16,10,.74);color:#fff;font-size:13px;font-weight:600;padding:7px 14px;border-radius:999px;white-space:nowrap;box-shadow:0 2px 10px rgba(0,0,0,.3)}
+.ph-tekst{background:rgba(20,16,10,.74);color:#fff;font-size:var(--fs-sm);font-weight:600;padding:7px 14px;border-radius:999px;white-space:nowrap;box-shadow:0 2px 10px rgba(0,0,0,.3)}
 @keyframes phpuls{0%{box-shadow:0 0 0 0 rgba(142,113,240,.55)}70%{box-shadow:0 0 0 26px rgba(142,113,240,0)}100%{box-shadow:0 0 0 0 rgba(142,113,240,0)}}
 @media (prefers-reduced-motion:reduce){.ph-ring{animation:none}}
 /* 2D selectie-omlijning rond de geselecteerde tattoo (zoals de ring in 3D) */
@@ -1087,7 +1087,7 @@ form label,
 .kaart-slotbtn{width:36px;height:36px;border-radius:50%;flex:none;background:var(--kaart);border:1px solid var(--rand);color:var(--tekst);font-size:.92rem;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1}
 .kaart-slotbtn:hover{border-color:var(--accent)}
 .kaart-slot.gevuld{border-color:var(--accent);color:var(--accent);font-weight:700}
-.kaart-save.arm{background:var(--accent);color:#F0EDE8;border-color:var(--accent)}
+.kaart-save.arm{background:var(--accent);color:var(--op-accent);border-color:var(--accent)}
 .kaart-slots.arm .kaart-slot{border-color:var(--accent);box-shadow:0 0 0 2px rgba(142,113,240,.28)}
 
 /* ===== Look & feel-verfijningen ===== */
@@ -1109,7 +1109,7 @@ form label,
 /* Formulierlabels in zinsvorm; veld-hint; accentkleur als klein vakje */
 form label{text-transform:none;letter-spacing:.005em;font-size:.8rem;color:var(--tekst);opacity:.8}
 .veld-hint{display:block;font-size:.82rem;color:var(--tekst);opacity:.8;font-weight:500;margin:-2px 0 6px;font-family:var(--label-font)}
-#f-accent{width:64px;height:40px;padding:4px;border-radius:10px;cursor:pointer}
+#f-accent{width:64px;height:40px;padding:4px;border-radius:var(--r-md);cursor:pointer}
 
 /* 2D-silhouet: afbeelding strak op de lichaamsvorm clippen (geen donkere
    fransjes op het grijs) + lijnen subtiel verduidelijken */
@@ -1120,7 +1120,7 @@ form label{text-transform:none;letter-spacing:.005em;font-size:.8rem;color:var(-
 
 /* ===== BETA-BADGE (tijdelijk) - verwijder dit blok + de wrapper/badge in de header bij de echte release ===== */
 .logo-wrap{position:relative;display:inline-flex;flex:none}
-.beta-badge{position:absolute;left:50%;bottom:-7px;transform:translateX(-50%);background:var(--accent);color:#fff;font-family:var(--label-font);font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;padding:2px 9px;border-radius:999px;box-shadow:0 1px 3px rgba(0,0,0,.3);pointer-events:none;white-space:nowrap}
+.beta-badge{position:absolute;left:50%;bottom:-7px;transform:translateX(-50%);background:var(--accent);color:var(--op-accent);font-family:var(--label-font);font-size:var(--fs-xs);font-weight:700;letter-spacing:.14em;text-transform:uppercase;padding:2px 9px;border-radius:999px;box-shadow:0 1px 3px rgba(0,0,0,.3);pointer-events:none;white-space:nowrap}
 
 /* Grond-schaduw onder de 2D-figuur (breed, achter de figuur, loopt door in het grijs) */
 .grond-schaduw{position:absolute;left:50%;bottom:4%;transform:translateX(-50%);width:88%;height:9%;pointer-events:none;z-index:0;background:radial-gradient(ellipse at center, rgba(0,0,0,.36) 0%, rgba(0,0,0,.15) 46%, rgba(0,0,0,0) 72%)}
@@ -1386,7 +1386,7 @@ form label{text-transform:none;letter-spacing:.005em;font-size:.8rem;color:var(-
                 <label class="cm-veld"><span data-i18n="form.zituren">Zituren</span><input id="cmZituren" type="number" min="0" max="100000" step="0.5" inputmode="decimal"></label>
               </div>
               <label class="cm-veld"><span data-i18n="form.notities">Notities</span><textarea id="cmNotities" maxlength="2000" rows="2"></textarea></label>
-              <label class="cm-veld"><span data-i18n="form.accentkleur">Accentkleur van markering</span><small class="veld-hint" data-i18n="form.accentuitleg">Gebruikt als je geen tattoo-afbeelding toevoegt</small><input id="cmAccent" type="color" value="#8E71F0" style="width:64px;height:40px;padding:4px;border-radius:10px;cursor:pointer"></label>
+              <label class="cm-veld"><span data-i18n="form.accentkleur">Accentkleur van markering</span><small class="veld-hint" data-i18n="form.accentuitleg">Gebruikt als je geen tattoo-afbeelding toevoegt</small><input id="cmAccent" type="color" value="#8E71F0" style="width:64px;height:40px;padding:4px;border-radius:var(--r-md);cursor:pointer"></label>
             </div>
           </div>
           <div id="cmSettings" hidden>
@@ -8675,7 +8675,7 @@ function openStats(retour) {
       </div>
       <div class="leeg">
         <p>${tr('stats.leeg_uitleg')}</p>
-        <button type="button" class="knop-sec" id="stats-nieuw" style="margin-top:14px">${tr('start.nieuw')}</button>
+        <button type="button" class="knop" id="stats-nieuw" style="margin-top:14px">${tr('start.nieuw')}</button>
       </div>`;
     $('#s-terug').addEventListener('click', () => toonView(statsRetour));
     { const n = $('#stats-nieuw'); if (n) n.addEventListener('click', () => { if (typeof window.__tattiesNieuweTattoo === 'function') window.__tattiesNieuweTattoo(); else { const ak = document.getElementById('add-kies'); if (ak) ak.hidden = false; } }); }
@@ -11508,14 +11508,14 @@ async function verwijderVoorbeelden() {
       const ov=document.createElement("div");
       ov.style.cssText="position:fixed;inset:0;z-index:99999;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.55);padding:16px;";
       const box=document.createElement("div");
-      box.style.cssText="background:var(--kaart);border:1px solid var(--rand);border-radius:14px;padding:18px;max-width:300px;width:100%;color:var(--tekst);font-family:inherit;text-align:center;box-shadow:0 12px 40px rgba(0,0,0,.35);";
+      box.style.cssText="background:var(--kaart);border:1px solid var(--rand);border-radius:var(--r-lg);padding:18px;max-width:300px;width:100%;color:var(--tekst);font-family:inherit;text-align:center;box-shadow:0 12px 40px rgba(0,0,0,.35);";
       const p=document.createElement("div"); p.textContent=msg;
-      p.style.cssText="font-size:14px;line-height:1.45;margin-bottom:16px;";
+      p.style.cssText="font-size:var(--fs-base);line-height:1.45;margin-bottom:16px;";
       const row=document.createElement("div"); row.style.cssText="display:flex;gap:8px;";
       const no=document.createElement("button"); no.textContent=tr('form.annuleren');
-      no.style.cssText="flex:1;padding:10px;border-radius:8px;border:1px solid var(--rand);background:var(--veldbg);color:var(--tekst);font-family:inherit;font-size:13px;cursor:pointer;";
+      no.style.cssText="flex:1;padding:10px;border-radius:var(--r-sm);border:1px solid var(--rand);background:var(--veldbg);color:var(--tekst);font-family:inherit;font-size:var(--fs-sm);cursor:pointer;";
       const yes=document.createElement("button"); yes.textContent=jaLabel||tr('aria.verwijderen');
-      yes.style.cssText="flex:1;padding:10px;border-radius:8px;border:1px solid #A8341A;background:#A8341A;color:#fff;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;";
+      yes.style.cssText="flex:1;padding:10px;border-radius:var(--r-sm);border:1px solid var(--gevaar);background:var(--gevaar);color:#fff;font-family:inherit;font-size:var(--fs-sm);font-weight:600;cursor:pointer;";
       function close(v){ ov.remove(); res(v); }
       no.onclick=()=>close(false); yes.onclick=()=>close(true);
       ov.addEventListener("click",e=>{ if(e.target===ov) close(false); });
