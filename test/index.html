@@ -1080,6 +1080,12 @@ form label,
 .onboarding .silhouet-keuze{width:100%}
 .onboarding .silhouet-keuze button{flex:1}
 .onboarding-start{margin-top:10px;min-height:48px;font-size:1.02rem}
+.onb-skip{margin:2px auto 0;color:var(--gedempt);font-size:.85rem}
+.onb-skip:hover{color:var(--accent)}
+/* CTA-highlight: korte puls op de '+ Add tattoo'-knop nadat de onboarding sluit */
+.highlight-puls{animation:ctaPuls 1.1s ease-out 2}
+@keyframes ctaPuls{0%{box-shadow:0 0 0 0 rgba(var(--accent-rgb),.55)}70%{box-shadow:0 0 0 16px rgba(var(--accent-rgb),0)}100%{box-shadow:0 0 0 0 rgba(var(--accent-rgb),0)}}
+@media (prefers-reduced-motion:reduce){.highlight-puls{animation:none}}
 
 /* ---- plaatsing-presets op de 2D-kaart ---- */
 .kaart-slots{position:absolute;top:14px;right:14px;z-index:6;display:flex;flex-direction:column;gap:8px}
@@ -1543,6 +1549,10 @@ form label{text-transform:none;letter-spacing:.005em;font-size:.8rem;color:var(-
     </div>
   </div>
 
+  <div class="inst-sectie" style="padding-bottom:24px">
+    <button type="button" class="knop-sec" id="inst-onboarding" data-i18n="onb.opnieuw" style="width:100%">Introductie opnieuw</button>
+  </div>
+
   <div class="inst-sectie" id="inst-account-rij" style="padding-bottom:24px">
     <button type="button" class="inst-link-rij" id="inst-account-open">
       <span data-i18n="inst.account">Account &amp; cloud-sync</span>
@@ -1641,6 +1651,7 @@ form label{text-transform:none;letter-spacing:.005em;font-size:.8rem;color:var(-
       <p class="inst-label" data-i18n="inst.huid">Huidskleur</p>
       <div class="tint-rij" id="onb-tint"></div>
       <button type="button" class="knop onboarding-start" id="onb-next" data-i18n="onb.volgende">Volgende</button>
+      <button type="button" class="linkbtn onb-skip" id="onb-overslaan" data-i18n="onb.overslaan">Overslaan</button>
     </div>
     <div id="onb-stap2" hidden>
       <div class="onb-plus" aria-hidden="true">+</div>
@@ -6535,7 +6546,7 @@ const I18N = {
     'hint.stap3':'<strong>3.</strong> Maak af en toe een backup via <strong>Exporteren</strong>.',
     'hint.begrepen':'Begrepen',
     'onb.titel':'Welkom bij Tatties','onb.sub':'Kies je lichaam en huidskleur om te beginnen.','onb.start':'Aan de slag',
-    'onb.volgende':'Volgende','onb.terug':'Terug','onb.stap2_titel':'Je eerste tattoo toevoegen',
+    'onb.volgende':'Volgende','onb.terug':'Terug','onb.overslaan':'Overslaan','onb.opnieuw':'Introductie opnieuw','onb.stap2_titel':'Je eerste tattoo toevoegen',
     'onb.stap2_sub':"Tik straks op '+ Tattoo toevoegen' om een foto te kiezen, uit te snijden en op het model te plaatsen.",
     'sv.collectie':'Collectie','sv.wishlist':'Wishlist',
     'uitleg.titel3d':'Zo werkt de 3D-weergave',
@@ -6709,7 +6720,7 @@ const I18N = {
     'hint.stap3':'<strong>3.</strong> Make a backup now and then via <strong>Export</strong>.',
     'hint.begrepen':'Got it',
     'onb.titel':'Welcome to Tatties','onb.sub':'Pick your body and skin tone to get started.','onb.start':'Get started',
-    'onb.volgende':'Next','onb.terug':'Back','onb.stap2_titel':'Add your first tattoo',
+    'onb.volgende':'Next','onb.terug':'Back','onb.overslaan':'Skip','onb.opnieuw':'Replay intro','onb.stap2_titel':'Add your first tattoo',
     'onb.stap2_sub':"Next, tap '+ Add tattoo' to pick a photo, cut it out and place it on the model.",
     'sv.collectie':'Collection','sv.wishlist':'Wishlist',
     'uitleg.titel3d':'How the 3D view works',
@@ -7794,6 +7805,18 @@ async function herlaad() {
   toonOpslagInfo();
   // 3D-decals ook bijwerken (anders pas zichtbaar na een page-refresh, bv. na cloud-sync na inloggen)
   if (typeof window.__tatties3DHerlaad === 'function') window.__tatties3DHerlaad();
+}
+
+/* Soft-delete-tombstones bewaren we voor cloud-sync, maar oude exemplaren stapelen op in
+   IndexedDB. Ruim tombstones ouder dan ~30 dagen op (sync heeft ze dan allang verwerkt;
+   lokaal-only gebruikers hebben er sowieso niets aan). Niet-blokkerend bij opstart. */
+async function purgeTombstones(maxDagen = 30) {
+  try {
+    const grens = Date.now() - maxDagen * 86400000;
+    const oud = (await getAllTattoos()).filter(t => t.deleted && (Number(t.updatedAt) || 0) < grens);
+    for (const t of oud) await hardDeleteTattoo(t.id);
+    if (oud.length) console.info(`Tatties: ${oud.length} oude tombstone(s) opgeruimd`);
+  } catch (e) { console.error('tombstone-purge mislukt', e); }
 }
 
 /* Opslaggebruik tonen en waarschuwen als het vol raakt */
@@ -10133,6 +10156,17 @@ function rondOnboardingAf() {
   try { localStorage.setItem('tatties-onboarding-gedaan', '1'); } catch { /* geen vlag */ }
   const ov = document.getElementById('onboarding');
   if (ov) ov.hidden = true;
+  // De zichtbare '+ tattoo toevoegen'-knop even highlighten zodat de vervolgactie opvalt.
+  // Welke knop zichtbaar is hangt van de view af (kaart = #fab, startscherm = #start-nieuw, 3D = #t3d-add).
+  setTimeout(() => {
+    const cta = ['fab', 'start-nieuw', 't3d-add']
+      .map(id => document.getElementById(id))
+      .find(el => el && el.offsetParent !== null);
+    if (cta) {
+      cta.classList.add('highlight-puls');
+      setTimeout(() => cta.classList.remove('highlight-puls'), 2600);
+    }
+  }, 350);
   setTimeout(toonInstallBanner, 800); // installatie-hint zodra onboarding klaar is
 }
 
@@ -10403,6 +10437,12 @@ async function verwijderVoorbeelden() {
         x.classList.toggle('actief', x === b));
     }));
   $('#onb-start').addEventListener('click', rondOnboardingAf);
+  { const ov = $('#onb-overslaan'); if (ov) ov.addEventListener('click', rondOnboardingAf); }   // Overslaan = afronden + onthouden (zelfde vlag)
+  { const ob = $('#inst-onboarding'); if (ob) ob.addEventListener('click', () => {   // 'Introductie opnieuw' vanuit instellingen
+      try { localStorage.removeItem('tatties-onboarding-gedaan'); } catch { /* geen vlag */ }
+      if (typeof sluitInstellingen === 'function') sluitInstellingen();
+      toonOnboarding();
+    }); }
   { const next = $('#onb-next'); if (next) next.addEventListener('click', () => { const s1 = $('#onb-stap1'), s2 = $('#onb-stap2'); if (s1) s1.hidden = true; if (s2) s2.hidden = false; }); }
   { const terug = $('#onb-terug'); if (terug) terug.addEventListener('click', () => { const s1 = $('#onb-stap1'), s2 = $('#onb-stap2'); if (s1) s1.hidden = false; if (s2) s2.hidden = true; }); }
   $('#kaart-reset').addEventListener('click', () => { zetFilter(null); setTimeout(renderMarkers, 320); });
@@ -10642,6 +10682,7 @@ async function verwijderVoorbeelden() {
   }
   toonView('home');
   toonOnboarding();
+  purgeTombstones();   // oude soft-delete-tombstones opruimen (niet-blokkerend)
 })();
 
 /* ============================================================
