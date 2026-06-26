@@ -1039,7 +1039,7 @@ form label,
 .cutmodal .cm-legend .lg-row.lg-reset{color:var(--gevaar);}
 .cutmodal .cut-tools .linkbtn.on{background:var(--accent);border-color:var(--accent);color:var(--op-accent);}
 /* Info-(i) in de uitsnede-balk gelijkgetrokken met de (i) in het bewerkmenu: rond, paars, kaderloos */
-.cutmodal .cut-tools .cm-toolinfo{background:transparent;border:none;border-radius:50%;color:var(--accent);padding:0;width:44px;min-height:44px;gap:0;}
+.cutmodal .cut-tools .cm-toolinfo{background:transparent;border:none;border-radius:50%;color:var(--accent);padding:0;width:44px;height:44px;min-height:44px;gap:0;align-items:center;justify-content:center;}
 .cutmodal .cut-tools .cm-toolinfo:hover{background:rgba(142,113,240,.16);color:var(--accent);border-color:transparent;}
 .cutmodal .cut-tools .cm-toolinfo.on{background:rgba(142,113,240,.20);color:var(--accent);border-color:transparent;}
 .cutmodal .cut-tools .cm-toolinfo .ik{width:18px;height:18px;}
@@ -12334,7 +12334,7 @@ async function verwijderVoorbeelden() {
   // snel en zuinig op mobiel. Lasso/gum werken op genormaliseerde coords -> downscalen
   // verandert niets aan de uitsnede.
   function buildCleanCanvas(){
-    const maxAfm=1200;
+    const maxAfm=1600;
     const sc=Math.min(1, maxAfm/Math.max(origImg.naturalWidth, origImg.naturalHeight));
     const W=Math.max(1,Math.round(origImg.naturalWidth*sc));
     const H=Math.max(1,Math.round(origImg.naturalHeight*sc));
@@ -12821,6 +12821,7 @@ async function verwijderVoorbeelden() {
           m.rec.kunst3d=bouwKunst3d();
           try{ await saveTattoo(m.rec); toast(tr('ui.tattoo_bijgewerkt')); }
           catch(err){ console.error(err); toast(tr('toast.opslaanmislukt')+(err&&err.message?err.message:tr('ui.fout'))); }
+          pasBlendOpNieuw(m);   // recrop met blend aan: genormaliseerde (witbalans) textuur opnieuw opbouwen (no-op als blend uit)
         }
         if(typeof renderMarkers==="function"){ try{renderMarkers();}catch(_){} }
         if(m.rec && typeof window.__tattiesNaStatus==="function") window.__tattiesNaStatus(m.rec.status);   // wens<->gezet: zichtbaarheid/dim bijwerken
@@ -12865,7 +12866,7 @@ async function verwijderVoorbeelden() {
       const im=new Image();
       im.onload=()=>{ try{
         // Zelfde 800px-cap als de live uitsnede, zodat de flood-fill identiek werkt.
-        const maxAfm=1200;
+        const maxAfm=1600;
         const scl=Math.min(1, maxAfm/Math.max(im.naturalWidth, im.naturalHeight));
         const FW=Math.max(1,Math.round(im.naturalWidth*scl));
         const FH=Math.max(1,Math.round(im.naturalHeight*scl));
