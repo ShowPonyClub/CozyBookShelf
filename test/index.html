@@ -10810,7 +10810,7 @@ async function verwijderVoorbeelden() {
     target.set(CAM0.tx,CAM0.ty,CAM0.tz); applyCam();
   }
   let selRingOn=false;
-  function showSel(b){ selRingOn=!!b; clearTimeout(_ringT); _ringT=null; buildSelRing(); }
+  function showSel(b){ selRingOn=!!b; buildSelRing(); }
   // Ellipse-omlijning met CONSTANTE dikte als textuur. Textuur-aspect = box-aspect (ry/rx),
   // zodat 1px in x en y dezelfde wereldlengte is -> de streep is overal even dik.
   function ringTex(rx, ry){
@@ -10860,12 +10860,6 @@ async function verwijderVoorbeelden() {
       if(m){ m.alphaTest=0.18; m.depthTest=true; m.depthWrite=false; m.polygonOffset=true; m.polygonOffsetFactor=-12; m.needsUpdate=true; }
       selRing=ring; }
   }
-  // Throttle: tijdens schalen/draaien/verslepen wordt rebuildMarker per frame aangeroepen; de ring-decal
-  // herbouwen we hooguit ~10x/sec (trailing) zodat het op mobiel niet hapert. De laatste timer geeft de
-  // definitieve, accurate ring na het gebaar.
-  let _ringT=null;
-  function scheduleSelRing(){ if(_ringT) return;
-    _ringT=setTimeout(()=>{ _ringT=null; if(selRingOn && editDecal) buildSelRing(); }, 100); }
   function showLoading(b){ const el2=document.getElementById("t3d-loading"); if(el2) el2.classList.toggle("on",!!b); }
   // Voortgang tonen tijdens het herstellen van decals: 'Laden… X/N' (of terug naar 'Laden…' bij 0).
   function zetLaadVoortgang(done,total){
@@ -11393,7 +11387,7 @@ async function verwijderVoorbeelden() {
     m.obj=makeImage(m.point,m.normal,m.rot||0,m.size||0.09,m.tex,m.mesh||pickMeshes[0],recMul(m.rec));
     if(m.obj) m.obj.renderOrder=(m.rec&&m.rec.stapel)||0;   // stapelvolgorde bij overlap
     zetDecalOpacity(m.obj, m.rec && m.rec.opacity);
-    if(m===editDecal && selRingOn) scheduleSelRing();   // selectie-ring meeschalen/-draaien/-verplaatsen (gethrottled)
+    if(m===editDecal && selRingOn) buildSelRing();   // selectie-ring soepel meeschalen/-draaien/-verplaatsen (per frame; ring-box is klein -> goedkoop)
   }
   // Net geplaatste tattoo met auto-blend: de live-plaatsing gebruikt de rauwe uitsnede-textuur,
   // dus herbouw de textuur via kunst3d (witbalans) en herteken met multiply zodat het blend-effect
