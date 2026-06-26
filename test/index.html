@@ -1229,7 +1229,7 @@ form label{text-transform:none;letter-spacing:.005em;font-size:.8rem;color:var(-
           <g id="zones"></g>
           <!-- Geplaatste tattoo-markeringen (gevuld door JS) -->
           <g id="markers"></g>
-          <circle id="sel-ring-2d" class="sel-ring-2d" fill="none" pointer-events="none" visibility="hidden"/>
+          <ellipse id="sel-ring-2d" class="sel-ring-2d" fill="none" pointer-events="none" visibility="hidden"/>
         </svg>
         <button id="fab" data-i18n-aria="fab.nieuw" aria-label="Nieuwe tattoo" title="Nieuwe tattoo">+</button>
         <div id="t2d-banner" hidden></div>
@@ -8297,6 +8297,23 @@ async function undo2D(){
   toast(tr('ui.teruggezet'));
 }
 function vindTattoo2D(id){ return tattoos.find(t => t.id === id) || null; }
+const _art2DCache = new Map();   // src -> {cx,cy,hw,hh} (zwaartepunt + halve omvang van de PNG, in [0,1])
+function art2DMetrics(src, cb){
+  if(_art2DCache.has(src)){ cb(_art2DCache.get(src)); return; }
+  const im = new Image();
+  im.onload = () => { try{
+    const W = Math.min(256, im.naturalWidth || 256);
+    const H = Math.max(1, Math.round((im.naturalHeight / (im.naturalWidth || 1)) * W)) || W;
+    const c = document.createElement('canvas'); c.width = W; c.height = H;
+    const g = c.getContext('2d', { willReadFrequently: true }); g.drawImage(im, 0, 0, W, H);
+    const d = g.getImageData(0, 0, W, H).data; let minX = W, minY = H, maxX = -1, maxY = -1;
+    for(let y = 0; y < H; y++){ const row = y * W; for(let x = 0; x < W; x++){ if(d[(row + x) * 4 + 3] > 12){ if(x < minX) minX = x; if(x > maxX) maxX = x; if(y < minY) minY = y; if(y > maxY) maxY = y; } } }
+    const m = maxX >= 0 ? { cx:((minX+maxX)/2)/W, cy:((minY+maxY)/2)/H, hw:((maxX-minX)/2)/W, hh:((maxY-minY)/2)/H } : null;
+    _art2DCache.set(src, m); cb(m);
+  }catch(e){ cb(null); } };
+  im.onerror = () => cb(null);
+  im.src = src;
+}
 function updateSelRing2D(){
   const ring = document.getElementById('sel-ring-2d'); if(!ring) return;
   const t = editMarker2D ? vindTattoo2D(editMarker2D) : null;
@@ -8305,9 +8322,25 @@ function updateSelRing2D(){
   if(!basis){ ring.setAttribute('visibility','hidden'); return; }
   const b = Number(t.kunst && t.kunst.schaal) || 14;
   const h = b * ((t.kunst && t.kunst.aspect) || 1);
-  ring.setAttribute('cx', basis.x); ring.setAttribute('cy', basis.y);
-  ring.setAttribute('r', (Math.max(b, h) * 0.62 + 1.5).toFixed(1));
-  ring.setAttribute('visibility','visible');
+  const rot = Number(t.kunst && t.kunst.rotatie) || 0;
+  const id = t.id;
+  const teken = (m) => {
+    if(editMarker2D !== id) return;   // async: alleen tekenen als deze tattoo nog geselecteerd is
+    let cx = basis.x, cy = basis.y, rx, ry;
+    if(m){
+      const ox = (m.cx - 0.5) * b, oy = (m.cy - 0.5) * h;   // lokale offset binnen de afbeelding (SVG y omlaag = PNG y omlaag)
+      const rad = rot * Math.PI / 180, cs = Math.cos(rad), sn = Math.sin(rad);
+      cx = basis.x + ox * cs - oy * sn;
+      cy = basis.y + ox * sn + oy * cs;
+      rx = Math.max(m.hw * b, 1.5) * 1.18 + 1; ry = Math.max(m.hh * h, 1.5) * 1.18 + 1;
+    } else { rx = ry = Math.max(b, h) * 0.62 + 1.5; }   // terugval: ronde cirkel om het hele kader
+    ring.setAttribute('cx', cx.toFixed(1)); ring.setAttribute('cy', cy.toFixed(1));
+    ring.setAttribute('rx', rx.toFixed(1)); ring.setAttribute('ry', ry.toFixed(1));
+    ring.setAttribute('transform', `rotate(${rot} ${cx.toFixed(1)} ${cy.toFixed(1)})`);
+    ring.setAttribute('visibility', 'visible');
+  };
+  const src = t.kunst && t.kunst.src;
+  if(src) art2DMetrics(src, teken); else teken(null);
 }
 function setLockUI2D(){
   const t = editMarker2D ? vindTattoo2D(editMarker2D) : null;
