@@ -885,7 +885,7 @@ form label,
 .t3d-editbar.on{display:flex;}
 .t3d-editbar .eb-title,.t3d-editbar .eb-hint{display:none;}   /* slim: titel + hint verbergen (desktop heeft tooltips) */
 @media (pointer:coarse){ .t3d-editbar .eb-hint{display:block;flex-basis:100%;width:100%;margin:2px 0 0;font-size:.66rem;line-height:1.3;color:var(--gedempt);text-align:center;} }   /* touch: geen tooltips -> gebaren-uitleg tonen */
-.t3d-editbar .eb-btns{display:flex;flex-wrap:wrap;align-items:center;gap:6px;flex:1 1 100%;justify-content:flex-start;}   /* Optie A: groepen links, Klaar wordt rechts geduwd */
+.t3d-editbar .eb-btns{display:flex;flex-wrap:wrap;align-items:center;gap:6px;flex:1 1 100%;justify-content:center;}   /* gecentreerde knopgroep (in balans); de (i) zit los in de hoek, de gecentreerde groep klaart 'm vanzelf */
 /* Groep-scheiding (navigatie | bewerken | verwijderen) via een lijntje links van de eerste knop
    van een groep — als pseudo-element, dus wrap-veilig (geen los <span> dat aan een regeleinde strandt) */
 .t3d-editbar .eb-btns [data-act="edit"],.t3d-editbar .eb-btns [data-act="del"]{margin-left:15px;position:relative;}
@@ -903,8 +903,7 @@ form label,
 .t3d-editbar .eb-btns button.eb-help:hover{border-color:transparent;background:rgba(142,113,240,.16);}
 .t3d-editbar .eb-btns button.eb-help.on{background:rgba(142,113,240,.20);color:var(--accent);}
 .t3d-editbar .eb-btns button.eb-help .ik{width:17px;height:17px;}
-.t3d-editbar .eb-btns [data-act="info"]{margin-left:36px;}   /* details schuift opzij om de hoek-(i) vrij te houden */
-.t3d-editbar .eb-af{color:#fff!important;background:#2e9e4f!important;border-color:#2e9e4f!important;font-weight:700;font-size:var(--fs-md);display:inline-flex;align-items:center;gap:6px;margin-left:auto;}   /* primaire actie: rechts, met label */
+.t3d-editbar .eb-af{color:#fff!important;background:#2e9e4f!important;border-color:#2e9e4f!important;font-weight:700;font-size:var(--fs-md);display:inline-flex;align-items:center;gap:6px;}   /* groene vink: blijft bij de groep (gecentreerd) */
 .t3d-editbar .eb-opacity{display:flex;align-items:center;gap:8px;flex:1;min-width:130px;}
 .t3d-editbar .eb-opacity .eb-op-label{font-size:var(--fs-xs);color:var(--gedempt);text-transform:uppercase;letter-spacing:.05em;white-space:nowrap;}
 .t3d-editbar .eb-opacity input[type=range]{flex:1;min-width:0;}
