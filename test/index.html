@@ -11821,7 +11821,7 @@ async function verwijderVoorbeelden() {
     el.addEventListener("dblclick",e=>{ clearTimeout(tapTimer); dblAt(e.clientX,e.clientY); });
     el.addEventListener("wheel",e=>{ e.preventDefault();
       if(editDecal && !editDecal.locked && onEditDecal(e.clientX,e.clientY)){ const nu=performance.now(); if(nu-lastWheelSnap>500){ snapEdit(editDecal); lastWheelSnap=nu; } scaleDecal(1-e.deltaY*0.001); persistEdit(editDecal); return; }
-      radius=Math.max(0.6,Math.min(7,radius*(1+e.deltaY*0.0012)));applyCam(); },{passive:false});
+      radius=Math.max(0.3,Math.min(7,radius*(1+e.deltaY*0.0012)));applyCam(); },{passive:false});
     el.addEventListener("touchstart",e=>{
       if(e.touches.length===1){drag=true;moved=false;t0=performance.now();
         lastX=downX=e.touches[0].clientX;lastY=downY=e.touches[0].clientY;
@@ -11836,7 +11836,7 @@ async function verwijderVoorbeelden() {
         theta-=dx*0.008;phi=Math.max(0.15,Math.min(3.0,phi-dy*0.008));applyCam();}
       else if(e.touches.length===2){const d=dist2(e),a=angle2(e),m2=mid2(e);
         if(editDecal && pinchModel){ if(!gSnap){snapEdit(editDecal);gSnap=true;} if(pinchD) scaleDecal(d/pinchD); if(pinchA!=null) rotateDecal(-(a-pinchA)*180/Math.PI); pinchD=d; pinchA=a; pinchMid=m2; return; }
-        if(pinchD) radius=Math.max(0.6,Math.min(7,radius*(pinchD/d)));
+        if(pinchD) radius=Math.max(0.3,Math.min(7,radius*(pinchD/d)));
         if(pinchMid) panTarget(m2.x-pinchMid.x, m2.y-pinchMid.y);
         pinchD=d; pinchMid=m2; applyCam();}},{passive:false});
     el.addEventListener("touchend",e=>{
