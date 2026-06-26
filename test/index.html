@@ -888,15 +888,13 @@ form label,
 .t3d-editbar .eb-btns{display:flex;flex-wrap:wrap;align-items:center;gap:6px;flex:1 1 100%;justify-content:center;}   /* gecentreerde knopgroep (in balans); de (i) zit los in de hoek, de gecentreerde groep klaart 'm vanzelf */
 /* Groep-scheiding (navigatie | bewerken | verwijderen) via een lijntje links van de eerste knop
    van een groep — als pseudo-element, dus wrap-veilig (geen los <span> dat aan een regeleinde strandt) */
-.t3d-editbar .eb-btns [data-act="edit"],.t3d-editbar .eb-btns [data-act="del"]{margin-left:15px;position:relative;}
+.t3d-editbar .eb-btns [data-act="edit"]{margin-left:15px;position:relative;}
 /* alleen een lijntje tussen navigatie | bewerken; delete is al afgescheiden via rode kleur + ruimte
    (geen lijntje, anders strandt het als los streepje vooraan een gewrapte regel) */
 .t3d-editbar .eb-btns [data-act="edit"]::before{content:"";position:absolute;left:-8px;top:50%;transform:translateY(-50%);width:1px;height:58%;background:var(--rand);}
 .t3d-editbar .eb-btns button{min-width:0;height:auto;padding:9px 12px;background:var(--veldbg);border:1px solid var(--rand);color:var(--tekst);border-radius:var(--r-sm);font-size:var(--fs-md);line-height:1;cursor:pointer;font-family:inherit;text-align:center;}
 .t3d-editbar .eb-btns button:hover{border-color:var(--accent);}
 .t3d-editbar .eb-btns button.on{border-color:var(--accent);background:rgba(142,113,240,.14);color:var(--accent);}
-.t3d-editbar .eb-btns button.eb-del{color:var(--gevaar);}   /* prullenbak: gevaar-tint (zoals op de detailpagina) */
-.t3d-editbar .eb-btns button.eb-del:hover{border-color:var(--gevaar);}
 /* (i)-uitlegknop: kaderloos paars icoontje in de linkerbovenhoek (uit de flex-flow -> scheelt een slot).
    min-height:0 nodig: de globale knop-min-hoogte (44px) maakte 'm anders ovaal. Rond highlight pas bij tik/hover. */
 .t3d-editbar .eb-btns button.eb-help{position:absolute;top:7px;left:7px;width:28px;height:28px;min-height:0;padding:0;display:inline-flex;align-items:center;justify-content:center;z-index:2;border:none;border-radius:50%;background:transparent;color:var(--accent);}
@@ -8389,8 +8387,7 @@ window.__tattiesEditLegend = function(ebSel){
     const btns = Array.from(eb.querySelectorAll('button')).filter(b => b !== ti && b.offsetParent !== null);   // help-knop + verborgen (touch) knoppen overslaan
     leg.innerHTML = btns.map(b=>{ const svg=b.querySelector('svg');
       const naam=(b.getAttribute('aria-label')||b.getAttribute('title')||'').trim();
-      const dang=b.classList.contains('eb-del');
-      return `<div class="lg-row${dang?' lg-reset':''}">${svg?svg.outerHTML:''}<span>${esc(naam)}</span></div>`; }).join('');
+      return `<div class="lg-row">${svg?svg.outerHTML:''}<span>${esc(naam)}</span></div>`; }).join('');
   }
   function sluit(e){ if(e && (leg.contains(e.target) || ti.contains(e.target))) return;
     leg.hidden=true; ti.classList.remove('on'); ti.setAttribute('aria-pressed','false');
@@ -8409,19 +8406,6 @@ async function edit2DActie(a){
     else { await exitEdit2D(); openFormulier(id); }                                                                      // terugval: geen bewaarde foto
     return; }
   if(a === 'done'){ const s=window.__tattiesHerhaalSrc; window.__tattiesHerhaalSrc=null; await exitEdit2D(); if(s && typeof window.__tattiesNogEenUitFoto==='function') window.__tattiesNogEenUitFoto(s); return; }   // D6(a): na ✓ volgende uitsnede
-  if(a === 'recrop'){ if(typeof window.__tattiesRecrop2D === 'function') window.__tattiesRecrop2D(t); return; }
-  if(a === 'del'){
-    if(typeof window.__tattiesConfirm === 'function'){ const ok = await window.__tattiesConfirm(tr('ui.verwijder_bevestig')); if(!ok) return; }
-    const id = t.id; editMarker2D = null; editHist2D = [];
-    const eb = $('#editbar2d'); if(eb) eb.classList.remove('on');
-    { const zb = $('.zijde-balk'); if(zb) zb.style.display = ''; }   // voor/achter-balk + 2D-+ terug (ontbrak hier, zelfde bug als 3D)
-    updateSelRing2D();
-    try{ await deleteTattoo(id); }catch(e){ console.error(e); }
-    if (typeof window.__tatties3DVerwijder === 'function') window.__tatties3DVerwijder(id);   // 3D-decal ook weghalen
-    tattoos = tattoos.filter(x => x.id !== id);
-    renderMarkers(); if(typeof renderSamenvatting === 'function') renderSamenvatting();
-    toast(tr('ui.tattoo_verwijderd')); return;
-  }
   if(a === 'lock'){ t.vergrendeld = !t.vergrendeld; setLockUI2D(); renderMarkers();
     try{ await saveTattoo(t); }catch(e){ console.error(e); }
     toast(t.vergrendeld ? tr('ui.vergrendeld') : tr('ui.ontgrendeld')); return; }
@@ -10794,7 +10778,8 @@ async function verwijderVoorbeelden() {
   let radiusGoal=null;           // doel-zoom bij focussen op een lichaamsdeel
   let selRing=null;               // markering rond geselecteerde tattoo
   let _ringHelper=null;           // hergebruikt Object3D om de decal-assen (rechts/boven) te reconstrueren
-  const _rgR=new THREE.Vector3(), _rgU=new THREE.Vector3(), _rgF=new THREE.Vector3(), _rgT=new THREE.Vector3(), _rgMat=new THREE.Matrix4();
+  const _rgR=new THREE.Vector3(), _rgU=new THREE.Vector3(), _rgT=new THREE.Vector3();
+  const _ringRay=new THREE.Raycaster();   // hergebruikt voor de huid-snap van de selectie-ring
   // Zwaartepunt + halve omvang van de zichtbare (uitgeknipte/niet-weggegumde) pixels, in [0,1] van het canvas.
   function artMetrics(canvas){
     try{
@@ -10825,7 +10810,7 @@ async function verwijderVoorbeelden() {
     target.set(CAM0.tx,CAM0.ty,CAM0.tz); applyCam();
   }
   let selRingOn=false;
-  function showSel(b){ selRingOn=!!b; buildSelRing(); }
+  function showSel(b){ selRingOn=!!b; clearTimeout(_ringT); _ringT=null; buildSelRing(); }
   // Ellipse-omlijning met CONSTANTE dikte als textuur. Textuur-aspect = box-aspect (ry/rx),
   // zodat 1px in x en y dezelfde wereldlengte is -> de streep is overal even dik.
   function ringTex(rx, ry){
@@ -10836,7 +10821,7 @@ async function verwijderVoorbeelden() {
     const g=c.getContext("2d");
     const lw=Math.max(4, Math.round(Math.min(W,H)*0.06));
     const cx=W/2, cy=H/2, ex=cx-lw, ey=cy-lw;
-    g.strokeStyle="#e0533d"; g.lineWidth=lw; g.lineCap="round";
+    g.strokeStyle=(getComputedStyle(document.documentElement).getPropertyValue('--accent').trim())||"#8e71f0"; g.lineWidth=lw; g.lineCap="round";   // huisstijl-paars, gelijk aan de 2D-ring
     g.setLineDash([Math.max(6,Math.round(lw*2.4)), Math.max(5,Math.round(lw*1.7))]);
     g.beginPath(); g.ellipse(cx,cy,ex,ey,0,0,Math.PI*2); g.stroke();
     const t=new THREE.CanvasTexture(c); t.encoding=THREE.sRGBEncoding; t.needsUpdate=true; return t;
@@ -10864,9 +10849,9 @@ async function verwijderVoorbeelden() {
     const center=_rgT.copy(editDecal.point).addScaledVector(_rgR,cxo).addScaledVector(_rgU,cyo);
     // op de huid snappen zodat de projectie netjes op het oppervlak ligt
     let cPoint=center.clone(), cNormal=editDecal.normal.clone(), cMesh=editDecal.mesh||pickMeshes[0];
-    try{ const rc=new THREE.Raycaster();
-      rc.set(center.clone().addScaledVector(editDecal.normal,0.06), editDecal.normal.clone().multiplyScalar(-1));
-      const hit=rc.intersectObject(cMesh,false)[0];
+    try{
+      _ringRay.set(center.clone().addScaledVector(editDecal.normal,0.06), editDecal.normal.clone().multiplyScalar(-1));
+      const hit=_ringRay.intersectObject(cMesh,false)[0];
       if(hit){ cPoint=hit.point.clone(); if(hit.face) cNormal=hit.face.normal.clone().transformDirection(hit.object.matrixWorld).normalize(); cMesh=hit.object; }
     }catch(e){}
     const tex=ringTex(rx,ry);
@@ -10875,6 +10860,12 @@ async function verwijderVoorbeelden() {
       if(m){ m.alphaTest=0.18; m.depthTest=true; m.depthWrite=false; m.polygonOffset=true; m.polygonOffsetFactor=-12; m.needsUpdate=true; }
       selRing=ring; }
   }
+  // Throttle: tijdens schalen/draaien/verslepen wordt rebuildMarker per frame aangeroepen; de ring-decal
+  // herbouwen we hooguit ~10x/sec (trailing) zodat het op mobiel niet hapert. De laatste timer geeft de
+  // definitieve, accurate ring na het gebaar.
+  let _ringT=null;
+  function scheduleSelRing(){ if(_ringT) return;
+    _ringT=setTimeout(()=>{ _ringT=null; if(selRingOn && editDecal) buildSelRing(); }, 100); }
   function showLoading(b){ const el2=document.getElementById("t3d-loading"); if(el2) el2.classList.toggle("on",!!b); }
   // Voortgang tonen tijdens het herstellen van decals: 'Laden… X/N' (of terug naar 'Laden…' bij 0).
   function zetLaadVoortgang(done,total){
@@ -11402,7 +11393,7 @@ async function verwijderVoorbeelden() {
     m.obj=makeImage(m.point,m.normal,m.rot||0,m.size||0.09,m.tex,m.mesh||pickMeshes[0],recMul(m.rec));
     if(m.obj) m.obj.renderOrder=(m.rec&&m.rec.stapel)||0;   // stapelvolgorde bij overlap
     zetDecalOpacity(m.obj, m.rec && m.rec.opacity);
-    if(m===editDecal && selRingOn) buildSelRing();   // selectie-ring meeschalen/-draaien/-verplaatsen
+    if(m===editDecal && selRingOn) scheduleSelRing();   // selectie-ring meeschalen/-draaien/-verplaatsen (gethrottled)
   }
   // Net geplaatste tattoo met auto-blend: de live-plaatsing gebruikt de rauwe uitsnede-textuur,
   // dus herbouw de textuur via kunst3d (witbalans) en herteken met multiply zodat het blend-effect
@@ -11731,28 +11722,7 @@ async function verwijderVoorbeelden() {
       document.body.appendChild(ov);
     });
   }
-  async function removeEditDecal(){
-    const m=editDecal; if(!m) return;
-    const ok=await askConfirm(tr('ui.verwijder_bevestig'));
-    if(!ok || editDecal!==m) return;
-    clearTimeout(m._persistT);               // voorkom dat een nog lopende save de tattoo terugzet
-    showSel(false);
-    disposeMarker(m);                        // verwijdert mesh én geeft geometry/material/textuur vrij (geen GPU-lek)
-    const i=markers.indexOf(m); if(i>=0) markers.splice(i,1);
-    editDecal=null; editHist=[];            // bewerksessie + undo-geschiedenis afsluiten
-    const eb=document.getElementById("editbar"); if(eb)eb.classList.remove("on");
-    { const a=document.getElementById("t3d-add"); if(a) a.style.display=""; }   // +-knop terug (was verborgen tijdens bewerken) - ontbrak hier, vandaar de bug
-    const h=document.getElementById("hint"); if(h)h.style.display="";
-    resize();   // render weer op volle hoogte
-    (async()=>{ try{
-      if(m.rec){
-        if(typeof deleteTattoo==="function") await deleteTattoo(m.rec.id);
-        if(typeof tattoos!=="undefined"&&Array.isArray(tattoos)){ const j=tattoos.findIndex(t=>t.id===m.rec.id); if(j>=0)tattoos.splice(j,1); }
-      }
-      if(typeof renderMarkers==="function"){ try{renderMarkers();}catch(_){} }   // 2D-kaart bijwerken
-    }catch(e){ console.error(e); } })();
-    toast(tr('ui.tattoo_verwijderd'));
-  }
+  // (verwijderen uit de bewerkbalk is weggehaald; dat loopt nu via de detailpagina - #d-verwijder)
   function setLockUI(){
     const eb=document.getElementById("editbar"); if(!eb) return;
     const lb=eb.querySelector('[data-act="lock"]');
@@ -11775,8 +11745,6 @@ async function verwijderVoorbeelden() {
         else { exitEditDecal(); if(rec&&typeof openFormulier==="function") openFormulier(rec.id); }     // terugval: geen bewaarde foto
         return; }
       if(a==="done"){ exitEditDecal(); if(window.__tattiesHerhaalSrc){ const s=window.__tattiesHerhaalSrc; window.__tattiesHerhaalSrc=null; openCutModalAddMetFoto(s,'3d'); } return; }   // D6(a): na ✓ volgende uitsnede
-      if(a==="recrop"){ if(editDecal) openCutModalForEdit(editDecal); return; }
-      if(a==="del"){ removeEditDecal(); return; }
       if(a==="undo"){ undoEdit(); return; }
       if(a==="lock"){ if(editDecal){ editDecal.locked=!editDecal.locked; setLockUI();
         toast(editDecal.locked?tr('ui.vergrendeld'):tr('ui.ontgrendeld')); persistEdit(editDecal); } return; }
