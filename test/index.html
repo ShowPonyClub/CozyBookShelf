@@ -1038,6 +1038,11 @@ form label,
 .cutmodal .cm-legend .lg-row .ik{flex:none;}
 .cutmodal .cm-legend .lg-row.lg-reset{color:var(--gevaar);}
 .cutmodal .cut-tools .linkbtn.on{background:var(--accent);border-color:var(--accent);color:var(--op-accent);}
+/* Info-(i) in de uitsnede-balk gelijkgetrokken met de (i) in het bewerkmenu: rond, paars, kaderloos */
+.cutmodal .cut-tools .cm-toolinfo{background:transparent;border:none;border-radius:50%;color:var(--accent);padding:0;width:44px;min-height:44px;gap:0;}
+.cutmodal .cut-tools .cm-toolinfo:hover{background:rgba(142,113,240,.16);color:var(--accent);border-color:transparent;}
+.cutmodal .cut-tools .cm-toolinfo.on{background:rgba(142,113,240,.20);color:var(--accent);border-color:transparent;}
+.cutmodal .cut-tools .cm-toolinfo .ik{width:18px;height:18px;}
 /* Reset uitsnede: destructief + zeldzaam -> als subtiele tekstlink ONDER de balk (geen mis-tap naast de tools) */
 .cutmodal .cm-resetrij{display:flex;justify-content:center;margin-top:8px;}
 .cutmodal .cm-resetlink{display:inline-flex;align-items:center;gap:6px;background:transparent;border:0;cursor:pointer;
@@ -10802,6 +10807,8 @@ async function verwijderVoorbeelden() {
       return { cx:((minX+maxX)/2)/W, cy:((minY+maxY)/2)/H, hw:((maxX-minX)/2)/W, hh:((maxY-minY)/2)/H };
     }catch(e){ return null; }
   }
+  // Max anisotropische filtering van de GPU (scherper onder een hoek / op gewelfde delen, geen geheugenkost)
+  function maxAniso(){ try{ return renderer.capabilities.getMaxAnisotropy(); }catch(e){ return 8; } }
   function focusTo(p){ targetGoal=p.clone(); }
   function focusAt(x,y){ const s=surfaceAt(x,y); if(s){ focusTo(s.point); radiusGoal=Math.min(radius,1.8); } }
   function panTarget(dx,dy){
@@ -12327,7 +12334,7 @@ async function verwijderVoorbeelden() {
   // snel en zuinig op mobiel. Lasso/gum werken op genormaliseerde coords -> downscalen
   // verandert niets aan de uitsnede.
   function buildCleanCanvas(){
-    const maxAfm=800;
+    const maxAfm=1200;
     const sc=Math.min(1, maxAfm/Math.max(origImg.naturalWidth, origImg.naturalHeight));
     const W=Math.max(1,Math.round(origImg.naturalWidth*sc));
     const H=Math.max(1,Math.round(origImg.naturalHeight*sc));
@@ -12445,7 +12452,7 @@ async function verwijderVoorbeelden() {
       texCanvas=cc;
     }
     if(imgTexture && imgTexture.dispose) imgTexture.dispose();   // vorige tussentijdse textuur vrijgeven
-    imgTexture=new THREE.CanvasTexture(texCanvas); imgTexture.encoding=THREE.sRGBEncoding; imgTexture.needsUpdate=true;
+    imgTexture=new THREE.CanvasTexture(texCanvas); imgTexture.encoding=THREE.sRGBEncoding; imgTexture.anisotropy=maxAniso(); imgTexture.needsUpdate=true;
   }
   function drawLasso(){
     const cv=lassoCanvas; cv.width=cutPrev.clientWidth; cv.height=cutPrev.clientHeight;
@@ -12858,7 +12865,7 @@ async function verwijderVoorbeelden() {
       const im=new Image();
       im.onload=()=>{ try{
         // Zelfde 800px-cap als de live uitsnede, zodat de flood-fill identiek werkt.
-        const maxAfm=800;
+        const maxAfm=1200;
         const scl=Math.min(1, maxAfm/Math.max(im.naturalWidth, im.naturalHeight));
         const FW=Math.max(1,Math.round(im.naturalWidth*scl));
         const FH=Math.max(1,Math.round(im.naturalHeight*scl));
@@ -12896,7 +12903,7 @@ async function verwijderVoorbeelden() {
           cc.getContext("2d").drawImage(sc, sx,sy,sw,sh, 0,0,sw,sh); shown=cc;
         }
         if(k.blend==='multiply') normalizeSkinTone(shown);   // slice 2: huid -> wit zodat multiply de huid laat verdwijnen
-        const tex=new THREE.CanvasTexture(shown); tex.encoding=THREE.sRGBEncoding; tex.needsUpdate=true; resolve(tex);
+        const tex=new THREE.CanvasTexture(shown); tex.encoding=THREE.sRGBEncoding; tex.anisotropy=maxAniso(); tex.needsUpdate=true; resolve(tex);
       }catch(e){ reject(e); } };
       im.onerror=()=>reject(new Error("kon afbeelding niet laden"));
       im.src=k.srcUrl;
