@@ -895,6 +895,21 @@ form label,
 .t3d-editbar .eb-opacity{display:flex;align-items:center;gap:8px;flex:1;min-width:130px;}
 .t3d-editbar .eb-opacity .eb-op-label{font-size:var(--fs-xs);color:var(--gedempt);text-transform:uppercase;letter-spacing:.05em;white-space:nowrap;}
 .t3d-editbar .eb-opacity input[type=range]{flex:1;min-width:0;}
+/* Weergave-cluster: blend-toggle hoort visueel bij de opaciteit-slider (beide = "hoe ziet de tattoo eruit") */
+.t3d-editbar .eb-blend{display:inline-flex;align-items:center;gap:6px;padding:8px 11px;background:var(--veldbg);border:1px solid var(--rand);color:var(--tekst);border-radius:var(--r-sm);font-size:var(--fs-xs);line-height:1;cursor:pointer;font-family:inherit;white-space:nowrap;}
+.t3d-editbar .eb-blend:hover{border-color:var(--accent);}
+.t3d-editbar .eb-blend.on{border-color:var(--accent);background:rgba(142,113,240,.14);color:var(--accent);}
+.t3d-editbar .eb-blend .ik{width:16px;height:16px;flex:none;}
+/* Uitleg-popover in de bewerkbalk (zelfde stijl als de tool-legenda in de uitsnede-modal) */
+.t3d-editbar{position:absolute;}   /* containing block voor .eb-legend (was al absolute gepositioneerd) */
+.t3d-editbar .eb-legend{position:absolute;left:8px;right:8px;bottom:100%;margin-bottom:10px;z-index:9;
+  background:var(--kaart);border:1px solid var(--rand);border-radius:var(--r-md);padding:6px;
+  box-shadow:0 10px 30px rgba(0,0,0,.32);display:flex;flex-direction:column;gap:2px;max-height:50vh;overflow:auto;}
+.t3d-editbar .eb-legend[hidden]{display:none;}
+.t3d-editbar .eb-legend .lg-row{display:flex;align-items:center;gap:11px;padding:8px 10px;border-radius:var(--r-sm);
+  font-size:var(--fs-sm);color:var(--tekst);}
+.t3d-editbar .eb-legend .lg-row .ik{flex:none;width:20px;height:20px;}
+.t3d-editbar .eb-legend .lg-row.lg-reset{color:var(--gevaar);}
 @media (pointer:coarse){ .t3d-editbar .eb-scarot{display:none;} }   /* schaal/draai: alleen op desktop (touch gebruikt pinch) */
 #t3d-reset{position:absolute;top:14px;right:14px;z-index:6;width:48px;height:48px;border-radius:50%;flex:none;
   background:var(--kaart);border:1px solid var(--rand);color:var(--tekst);font-size:18px;line-height:1;cursor:pointer;
@@ -1209,8 +1224,10 @@ form label{text-transform:none;letter-spacing:.005em;font-size:.8rem;color:var(-
         <div id="lege-hint" class="lege-hint" data-i18n="ui.lege_cta" hidden>Nog geen tattoos - tik op + om er een toe te voegen</div>
         <div id="editbar2d" class="t3d-editbar">
           <div class="eb-title">Tattoo</div>
+          <div class="eb-legend" hidden role="group" data-i18n-aria="ui.knop_uitleg" aria-label="Wat doen de knoppen?"></div>
           <div class="eb-btns">
-            <button type="button" data-act="info" data-i18n-title="ui.details" data-i18n-aria="ui.details" title="Details" aria-label="Details"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5"/><path d="M12 7.6h.01"/></svg></button>
+            <button type="button" data-act="help" class="eb-help" aria-pressed="false" data-i18n-title="ui.knop_uitleg" data-i18n-aria="ui.knop_uitleg" title="Wat doen de knoppen?" aria-label="Wat doen de knoppen?"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5"/><path d="M12 7.6h.01"/></svg></button>
+            <button type="button" data-act="info" data-i18n-title="ui.details" data-i18n-aria="ui.details" title="Details" aria-label="Details"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 4h6v6"/><path d="M20 4l-8 8"/><path d="M18 13v5a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h5"/></svg></button>
             <button type="button" class="eb-del" data-act="del" data-i18n-title="ui.verwijderen" data-i18n-aria="ui.verwijderen" title="Verwijderen" aria-label="Verwijderen"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M9 7V5h6v2M7 7l1 13h8l1-13"/><path d="M10 11v5M14 11v5"/></svg></button>
             <button type="button" data-act="edit" data-i18n-title="aria.bewerken" data-i18n-aria="aria.bewerken" title="Bewerken" aria-label="Bewerken"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M14.5 5.5l4 4"/><path d="M4 20l1-4L16 5a2 2 0 0 1 3 3L8 19l-4 1z"/></svg></button>
             <button type="button" data-act="lock" data-i18n-title="ui.vergrendelen" data-i18n-aria="ui.vergrendelen" title="Vergrendelen" aria-label="Vergrendelen"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg></button>
@@ -1312,8 +1329,10 @@ form label{text-transform:none;letter-spacing:.005em;font-size:.8rem;color:var(-
       <div id="t3d-loading"><div class="t3d-spin"></div><span data-i18n="ui.laden">Laden&#8230;</span></div>
       <div id="editbar" class="t3d-editbar">
         <div class="eb-title">Tattoo</div>
+        <div class="eb-legend" hidden role="group" data-i18n-aria="ui.knop_uitleg" aria-label="Wat doen de knoppen?"></div>
         <div class="eb-btns">
-          <button type="button" data-act="info" data-i18n-title="ui.details" data-i18n-aria="ui.details" title="Details" aria-label="Details"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5"/><path d="M12 7.6h.01"/></svg></button>
+          <button type="button" data-act="help" class="eb-help" aria-pressed="false" data-i18n-title="ui.knop_uitleg" data-i18n-aria="ui.knop_uitleg" title="Wat doen de knoppen?" aria-label="Wat doen de knoppen?"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5"/><path d="M12 7.6h.01"/></svg></button>
+          <button type="button" data-act="info" data-i18n-title="ui.details" data-i18n-aria="ui.details" title="Details" aria-label="Details"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 4h6v6"/><path d="M20 4l-8 8"/><path d="M18 13v5a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h5"/></svg></button>
           <button type="button" class="eb-del" data-act="del" data-i18n-title="ui.verwijderen" data-i18n-aria="ui.verwijderen" title="Verwijderen" aria-label="Verwijderen"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M9 7V5h6v2M7 7l1 13h8l1-13"/><path d="M10 11v5M14 11v5"/></svg></button>
           <button type="button" data-act="edit" data-i18n-title="aria.bewerken" data-i18n-aria="aria.bewerken" title="Bewerken" aria-label="Bewerken"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M14.5 5.5l4 4"/><path d="M4 20l1-4L16 5a2 2 0 0 1 3 3L8 19l-4 1z"/></svg></button>
           <button type="button" data-act="lock" data-i18n-title="ui.vergrendelen" data-i18n-aria="ui.vergrendelen" title="Vergrendelen" aria-label="Vergrendelen"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg></button>
@@ -1324,6 +1343,7 @@ form label{text-transform:none;letter-spacing:.005em;font-size:.8rem;color:var(-
           <button type="button" class="eb-scarot" data-act="rot+" data-i18n-title="ui.rechts_draaien" data-i18n-aria="ui.rechts_draaien" title="Rechtsom draaien" aria-label="Rechtsom draaien"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.3-5.6"/><path d="M21 4v4h-4"/></svg></button>
           <button type="button" data-act="done" class="eb-af" data-i18n-title="ui.klaar" data-i18n-aria="ui.klaar" title="Klaar" aria-label="Klaar"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12l5 5L20 6"/></svg></button>
         </div>
+        <button type="button" data-act="blend" class="eb-blend" data-i18n-title="ui.huidblend" data-i18n-aria="ui.huidblend" title="In huid blenden" aria-label="In huid blenden"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="12" r="6"/><circle cx="15" cy="12" r="6"/></svg><span data-i18n="ui.huidblend_kort">In huid</span></button>
         <div class="eb-opacity"><span class="eb-op-label" data-i18n="ui.opaciteit">Opaciteit</span><input id="eb3d-opacity" type="range" min="20" max="100" value="100" class="slider" data-i18n-aria="ui.opaciteit" aria-label="Opaciteit"></div>
         <div class="eb-hint" data-i18n="ui.eb_hint">Sleep = verplaatsen &middot; knijp = schalen &middot; knijp-draai = roteren</div>
       </div>
@@ -6594,6 +6614,7 @@ const I18N = {
     'ui.achtergrondkleur':'Achtergrondkleur kiezen','ui.auto':'Auto',
     'ui.tattoo_toevoegen':'Tattoo toevoegen','ui.tattoo_aanpassen':'Tattoo aanpassen',
     'ui.beginstand':'Beginstand','ui.laden':'Laden…','ui.vergrendelen':'Vergrendelen','ui.verwijderen':'Verwijderen',
+    'ui.huidblend':'In huid blenden','ui.huidblend_kort':'In huid','ui.blend_aan':'In huid geblend','ui.blend_uit':'Normale weergave',
     'ui.aanpassen_bijknippen':'Aanpassen','ui.klaar':'Klaar','ui.kleiner':'Kleiner','ui.groter':'Groter',
     'ui.links_draaien':'Linksom draaien','ui.rechts_draaien':'Rechtsom draaien',
     'ui.eb_hint':'Sleep = verplaatsen · knijp = schalen · knijp-draai = roteren',
@@ -6768,6 +6789,7 @@ const I18N = {
     'ui.achtergrondkleur':'Pick background colour','ui.auto':'Auto',
     'ui.tattoo_toevoegen':'Add tattoo','ui.tattoo_aanpassen':'Edit tattoo',
     'ui.beginstand':'Reset view','ui.laden':'Loading…','ui.vergrendelen':'Lock','ui.verwijderen':'Delete',
+    'ui.huidblend':'Blend into skin','ui.huidblend_kort':'In skin','ui.blend_aan':'Blended into skin','ui.blend_uit':'Normal view',
     'ui.aanpassen_bijknippen':'Edit','ui.klaar':'Done','ui.kleiner':'Smaller','ui.groter':'Bigger',
     'ui.links_draaien':'Rotate left','ui.rechts_draaien':'Rotate right',
     'ui.eb_hint':'Drag = move · pinch = scale · pinch-twist = rotate',
@@ -8313,7 +8335,28 @@ async function exitEdit2D(){
   const t = id ? vindTattoo2D(id) : null;
   if(t){ try{ await saveTattoo(t); }catch(e){ console.error(e); } }
 }
+// Uitleg-popover in een bewerkbalk: bouwt een legenda uit de zichtbare knoppen (icoon + label)
+// en togglet 'm. Gedeeld door de 2D- en 3D-bewerkbalk. Klik buiten = sluiten.
+window.__tattiesEditLegend = function(ebSel){
+  const eb = document.querySelector(ebSel); if(!eb) return;
+  const ti = eb.querySelector('[data-act="help"]'), leg = eb.querySelector('.eb-legend');
+  if(!ti || !leg) return;
+  function bouw(){
+    const btns = Array.from(eb.querySelectorAll('button')).filter(b => b !== ti && b.offsetParent !== null);   // help-knop + verborgen (touch) knoppen overslaan
+    leg.innerHTML = btns.map(b=>{ const svg=b.querySelector('svg');
+      const naam=(b.getAttribute('aria-label')||b.getAttribute('title')||'').trim();
+      const dang=b.classList.contains('eb-del');
+      return `<div class="lg-row${dang?' lg-reset':''}">${svg?svg.outerHTML:''}<span>${esc(naam)}</span></div>`; }).join('');
+  }
+  function sluit(e){ if(e && (leg.contains(e.target) || ti.contains(e.target))) return;
+    leg.hidden=true; ti.classList.remove('on'); ti.setAttribute('aria-pressed','false');
+    document.removeEventListener('pointerdown', sluit, true); }
+  if(leg.hidden){ bouw(); leg.hidden=false; ti.classList.add('on'); ti.setAttribute('aria-pressed','true');
+    setTimeout(()=>document.addEventListener('pointerdown', sluit, true), 0); }
+  else { sluit(); }
+};
 async function edit2DActie(a){
+  if(a === 'help'){ if(window.__tattiesEditLegend) window.__tattiesEditLegend('#editbar2d'); return; }
   const t = editMarker2D ? vindTattoo2D(editMarker2D) : null; if(!t) return;
   if(a === 'undo'){ await undo2D(); return; }
   if(a === 'info'){ const id = editMarker2D; await exitEdit2D(); openDetail(id); return; }
@@ -11123,8 +11166,11 @@ async function verwijderVoorbeelden() {
     return rg;
   }
   let _decalTmp=null;   // herbruikbare tijdelijke mesh voor de gereduceerde geometry
-  function makeImage(point, normal, rotDeg, sizeM, tex, mesh){
+  function makeImage(point, normal, rotDeg, sizeM, tex, mesh, mul){
     const aspect=(tex&&tex.image&&tex.image.width) ? (tex.image.height/tex.image.width) : 1;
+    // Multiply-blend: lichte huid in de foto verdwijnt (×onderlaag = ongewijzigd), donkere inkt
+    // zakt in de model-huid. Zo hoeft de huid niet pixel-perfect uitgesneden te worden.
+    const BL = mul ? THREE.MultiplyBlending : THREE.NormalBlending;
     if(THREE.DecalGeometry && mesh){
       try{
         const helper=new THREE.Object3D();
@@ -11151,13 +11197,13 @@ async function verwijderVoorbeelden() {
         filterDecalDoorzicht(geo, normal);   // doorgetrokken (andere kant) driehoeken weghalen
         if(geo.attributes.position && geo.attributes.position.count>0){
           const mat=new THREE.MeshBasicMaterial({map:tex, transparent:true, alphaTest:0.5, side:THREE.DoubleSide,
-            depthTest:true, depthWrite:false, polygonOffset:true, polygonOffsetFactor:-6});
+            blending:BL, depthTest:true, depthWrite:false, polygonOffset:true, polygonOffsetFactor:-6});
           const dm=new THREE.Mesh(geo,mat); body.add(dm); return dm;
         }
       }catch(e){ console.error("decal mislukt, val terug op platte sticker", e); }
     }
     // fallback: platte sticker langs de normaal
-    const mat=new THREE.MeshBasicMaterial({map:tex, transparent:true, alphaTest:0.5, side:THREE.DoubleSide, depthWrite:false, polygonOffset:true, polygonOffsetFactor:-4});
+    const mat=new THREE.MeshBasicMaterial({map:tex, transparent:true, alphaTest:0.5, side:THREE.DoubleSide, blending:BL, depthWrite:false, polygonOffset:true, polygonOffsetFactor:-4});
     const g=new THREE.Mesh(new THREE.PlaneGeometry(sizeM, sizeM*aspect), mat);
     g.position.copy(point).addScaledVector(normal,0.006);
     g.lookAt(point.clone().add(normal)); g.rotateZ(rotDeg*Math.PI/180);
@@ -11225,19 +11271,30 @@ async function verwijderVoorbeelden() {
     zetDecalOpacity(obj, rec.opacity);
     markers.push(m); plaatsData=null; plaatsModus=false; verbergBanner(); if(window.__plaatsHintUit) window.__plaatsHintUit();
     if(typeof renderMarkers==="function"){ try{renderMarkers();}catch(_){} }
-    toast(tr('ui.tattoo_geplaatst')); enterEditDecal(m);
+    toast(tr('ui.tattoo_geplaatst')); enterEditDecal(m); pasBlendOpNieuw(m);   // auto-blend meteen tonen
     if(rec.status==='wens' && typeof window.__tattiesNaStatus==='function') window.__tattiesNaStatus('wens');   // wens: 'geplande tonen' aan + dimmen
     if(d.herhaal && rec.kunst3d && rec.kunst3d.srcUrl){ window.__tattiesHerhaalSrc=rec.kunst3d.srcUrl; toast(tr('ui.herhaal_hint')); }   // D6(a): pas bij ✓ heropenen met dezelfde foto
   }
 
   /* ---- aanpas-modus voor een geplaatste tattoo ---- */
+  // Staat deze tattoo op multiply-blend ("in huid blenden")?
+  function recMul(rec){ return !!(rec && rec.kunst3d && rec.kunst3d.blend==='multiply'); }
   function rebuildMarker(m){
     if(m.obj){ body.remove(m.obj);
       if(m.obj.geometry)m.obj.geometry.dispose();
       if(m.obj.material&&m.obj.material.dispose)m.obj.material.dispose(); }
-    m.obj=makeImage(m.point,m.normal,m.rot||0,m.size||0.09,m.tex,m.mesh||pickMeshes[0]);
+    m.obj=makeImage(m.point,m.normal,m.rot||0,m.size||0.09,m.tex,m.mesh||pickMeshes[0],recMul(m.rec));
     if(m.obj) m.obj.renderOrder=(m.rec&&m.rec.stapel)||0;   // stapelvolgorde bij overlap
     zetDecalOpacity(m.obj, m.rec && m.rec.opacity);
+  }
+  // Net geplaatste tattoo met auto-blend: de live-plaatsing gebruikt de rauwe uitsnede-textuur,
+  // dus herbouw de textuur via kunst3d (witbalans) en herteken met multiply zodat het blend-effect
+  // meteen zichtbaar is (i.p.v. pas na herladen).
+  function pasBlendOpNieuw(m){
+    if(!m || !recMul(m.rec) || !(m.rec.kunst3d && m.rec.kunst3d.srcUrl)) return;
+    rebuildTextureFromKunst(m.rec.kunst3d).then(tex=>{ if(!tex) return;
+      if(m.tex && m.tex!==tex && m.tex.dispose) m.tex.dispose(); m.tex=tex; rebuildMarker(m); setBlendUI();
+    }).catch(()=>{});
   }
   function enterEditDecal(m){
     editDecal=m; editHist=[];                 // verse undo-geschiedenis per bewerksessie
@@ -11245,7 +11302,7 @@ async function verwijderVoorbeelden() {
     { const a=document.getElementById("t3d-add"); if(a) a.style.display="none"; }   // + knop weg tijdens bewerken
     const op3=document.getElementById("eb3d-opacity"); if(op3) op3.value=Math.round(((m.rec&&m.rec.opacity!=null)?m.rec.opacity:1)*100);
     const h=document.getElementById("hint"); if(h)h.style.display="none";
-    setLockUI(); showSel(true);
+    setLockUI(); setBlendUI(); showSel(true);
     toast(tr('ui.aanpas_hint'));
   }
   function exitEditDecal(){
@@ -11582,10 +11639,16 @@ async function verwijderVoorbeelden() {
     const locked=!!(editDecal&&editDecal.locked);
     if(lb){ lb.innerHTML=locked?"\uD83D\uDD13":"\uD83D\uDD12"; lb.title=locked?tr('slot.ontgrendelen'):tr('slot.vergrendelen'); lb.setAttribute("aria-label",lb.title); lb.classList.toggle("on",locked); }
   }
+  function setBlendUI(){
+    const eb=document.getElementById("editbar"); if(!eb) return;
+    const bb=eb.querySelector('[data-act="blend"]'); if(!bb) return;
+    bb.classList.toggle("on", recMul(editDecal&&editDecal.rec));
+  }
   function bindEditUI(){
     const eb=document.getElementById("editbar"); if(!eb) return;
     eb.querySelectorAll("button").forEach(b=>{ b.onclick=()=>{
       const a=b.dataset.act;
+      if(a==="help"){ if(window.__tattiesEditLegend) window.__tattiesEditLegend('#editbar'); return; }
       if(a==="info"){ const rec=editDecal&&editDecal.rec; exitEditDecal(); if(rec&&typeof openDetail==="function") openDetail(rec.id, 'info', '3d'); return; }
       if(a==="edit"){ const rec=editDecal&&editDecal.rec;
         if(editDecal && rec && ((rec.kunst3d&&rec.kunst3d.srcUrl)||(rec.kunst&&rec.kunst.src))){ openCutModalForEdit(editDecal); }   // zelfde overzicht als toevoegen
@@ -11597,6 +11660,13 @@ async function verwijderVoorbeelden() {
       if(a==="undo"){ undoEdit(); return; }
       if(a==="lock"){ if(editDecal){ editDecal.locked=!editDecal.locked; setLockUI();
         toast(editDecal.locked?tr('ui.vergrendeld'):tr('ui.ontgrendeld')); persistEdit(editDecal); } return; }
+      if(a==="blend"){ const m=editDecal; const rec=m&&m.rec; if(rec){ rec.kunst3d=rec.kunst3d||{};
+        rec.kunst3d.blend = (rec.kunst3d.blend==='multiply') ? 'normaal' : 'multiply';
+        // textuur hangt nu van de blend-modus af (witbalans bij multiply) -> opnieuw bouwen
+        const klaar=()=>{ if(m!==editDecal) return; rebuildMarker(m); setBlendUI(); toast(recMul(rec)?tr('ui.blend_aan'):tr('ui.blend_uit')); persistEdit(m); };
+        if(rec.kunst3d.srcUrl){ rebuildTextureFromKunst(rec.kunst3d).then(tex=>{ if(m!==editDecal){ if(tex&&tex.dispose)tex.dispose(); return; } const oud=m.tex; m.tex=tex; klaar(); if(oud&&oud.dispose)oud.dispose(); }).catch(klaar); }
+        else klaar();   // terugval: geen bronfoto -> alleen blend-modus wisselen
+      } return; }
       if(a==="size-"){ if(editDecal&&!editDecal.locked){ snapEdit(editDecal); scaleDecal(0.85); persistEdit(editDecal); } return; }
       if(a==="size+"){ if(editDecal&&!editDecal.locked){ snapEdit(editDecal); scaleDecal(1.18); persistEdit(editDecal); } return; }
       if(a==="rot-"){ if(editDecal&&!editDecal.locked){ snapEdit(editDecal); rotateDecal(15); persistEdit(editDecal); } return; }    // linksom-icoon = tegen de klok in
@@ -12106,6 +12176,38 @@ async function verwijderVoorbeelden() {
     x.putImageData(d,0,0);
   }
 
+  // Witbalans voor multiply-blend (slice 2): schat de huidtint (gemiddelde van de lichtste
+  // pixels in de uitsnede) en deel elk kanaal daardoor, zodat huid ~wit wordt en de inkt zijn
+  // relatieve kleur houdt. Zo verdwijnt de huid bij multiply (×wit = ongewijzigd) en tint de
+  // foto-huid het model niet meer. Werkt op de zichtbare (al uitgesneden) canvas; transparante
+  // pixels tellen niet mee voor de schatting en worden niet aangeraakt.
+  function normalizeSkinTone(canvas){
+    const W=canvas.width, H=canvas.height; if(!W||!H) return;
+    const x=canvas.getContext('2d',{willReadFrequently:true});
+    const d=x.getImageData(0,0,W,H), p=d.data, N=W*H;
+    // 1) luma-histogram van de ondoorzichtige pixels
+    const hist=new Uint32Array(256); let nOpaq=0;
+    for(let idx=0;idx<N;idx++){ const i=idx*4; if(p[i+3]<16) continue;
+      const L=(0.299*p[i]+0.587*p[i+1]+0.114*p[i+2])|0; hist[L]++; nOpaq++; }
+    if(nOpaq<16) return;
+    // 2) drempel = ~55e percentiel (de lichtere helft ~ huid, niet de inkt)
+    let acc=0, lumaDrempel=0; const doel=nOpaq*0.55;
+    for(let L=0;L<256;L++){ acc+=hist[L]; if(acc>=doel){ lumaDrempel=L; break; } }
+    // 3) gemiddelde kleur van de pixels boven de drempel = geschatte huid-witpunt
+    let wr=0,wg=0,wb=0,n=0;
+    for(let idx=0;idx<N;idx++){ const i=idx*4; if(p[i+3]<16) continue;
+      const L=0.299*p[i]+0.587*p[i+1]+0.114*p[i+2]; if(L<lumaDrempel) continue;
+      wr+=p[i]; wg+=p[i+1]; wb+=p[i+2]; n++; }
+    if(!n) return; wr/=n; wg/=n; wb/=n;
+    if(wr<8||wg<8||wb<8) return;   // te donker om betrouwbaar te delen
+    // 4) per kanaal naar ~doelwit schalen (245, net onder puur wit zodat een zweem huid blijft)
+    const DOEL=245, sr=DOEL/wr, sg=DOEL/wg, sb=DOEL/wb;
+    for(let idx=0;idx<N;idx++){ const i=idx*4; if(p[i+3]<16) continue;
+      let r=p[i]*sr, g=p[i+1]*sg, b=p[i+2]*sb;
+      p[i]=r>255?255:r; p[i+1]=g>255?255:g; p[i+2]=b>255?255:b; }
+    x.putImageData(d,0,0);
+  }
+
   // Schone, getransformeerde bron (rotatie + flip), zonder huid/wand/gum-bewerkingen.
   // Hergebruikt door buildFullCanvas en als 'terughalen'-bron voor de gum.
   // Schaal naar werkbare grootte: flood-fill is per-pixel, dus cap op ~800px houdt het
@@ -12147,7 +12249,36 @@ async function verwijderVoorbeelden() {
       spread:(cutSpread?+cutSpread.value:55), bgColor:(bgPick?{r:bgPick.r,g:bgPick.g,b:bgPick.b}:null),
       bg:bgRemove.checked, flipH:flipH, wand:wandSeeds.slice(), wandKeep:wandKeep,
       huidMethode:huidMethode, rot90:rot90,
-      erase:eraseStrokes.map(s=>({pts:(s.pts||[]).slice(), r:s.r, mode:s.mode})) };
+      erase:eraseStrokes.map(s=>({pts:(s.pts||[]).slice(), r:s.r, mode:s.mode})),
+      blend:blendVoorOpslag() };
+  }
+  // Welke blend-modus krijgt deze opslag? Bij BEWERKEN de bestaande keuze behouden (nooit
+  // ongevraagd aan/uit zetten); bij een NIEUWE tattoo de voorzichtige auto-stand.
+  function blendVoorOpslag(){
+    if(pendingEdit2D) return (pendingEdit2D.kunst3d&&pendingEdit2D.kunst3d.blend)||'normaal';
+    if(pendingEdit) return (pendingEdit.rec&&pendingEdit.rec.kunst3d&&pendingEdit.rec.kunst3d.blend)||'normaal';
+    return autoBlendSuggestie() ? 'multiply' : 'normaal';
+  }
+  // Voorzichtige heuristiek: alleen "in huid blenden" voorstellen als de uitsnede er duidelijk
+  // uitziet als zwart/grijze inkt op lichte huid. Veel lichte huid-pixels + genoeg donkere inkt
+  // + die inkt laag verzadigd (geen kleur). Bij twijfel: niet aanzetten (geen verrassingen).
+  function autoBlendSuggestie(){
+    try{
+      const src=clippedCanvas(); if(!src||!src.width) return false;
+      const W=Math.min(160, src.width), H=Math.max(1,Math.round(src.height*(W/src.width)));
+      const c=document.createElement('canvas'); c.width=W; c.height=H;
+      const x=c.getContext('2d',{willReadFrequently:true}); x.drawImage(src,0,0,W,H);
+      const p=x.getImageData(0,0,W,H).data, N=W*H;
+      let opaq=0, licht=0, inkN=0, satSom=0;
+      for(let i=0;i<N;i++){ const o=i*4; if(p[o+3]<16) continue; opaq++;
+        const r=p[o],g=p[o+1],b=p[o+2], L=0.299*r+0.587*g+0.114*b;
+        if(L>180) licht++;
+        if(L<110){ inkN++; const mx=Math.max(r,g,b),mn=Math.min(r,g,b); satSom+=mx>0?(mx-mn)/mx:0; }
+      }
+      if(opaq<50) return false;
+      const lichtFr=licht/opaq, inkFr=inkN/opaq, inkSat=inkN?satSom/inkN:1;
+      return lichtFr>0.50 && inkFr>0.03 && inkSat<0.20;
+    }catch(e){ return false; }
   }
   function clippedCanvas(){
     const full=baseCanvas; if(!full) return null;
@@ -12600,6 +12731,7 @@ async function verwijderVoorbeelden() {
         imgTexture=null;   // marker bezit de textuur nu; voorkom dispose door volgende updateCutout
         if(typeof renderMarkers==="function"){ try{renderMarkers();}catch(_){} }
         enterEditDecal(m);   // direct in aanpasmodus: meteen schalen/verplaatsen/roteren
+        pasBlendOpNieuw(m);   // auto-blend meteen tonen
       }catch(err){ console.error(err); toast(tr('toast.opslaanmislukt')+(err&&err.message?err.message:tr('ui.fout'))); }
     };
   }
@@ -12650,6 +12782,7 @@ async function verwijderVoorbeelden() {
           const cc=document.createElement("canvas"); cc.width=sw; cc.height=sh;
           cc.getContext("2d").drawImage(sc, sx,sy,sw,sh, 0,0,sw,sh); shown=cc;
         }
+        if(k.blend==='multiply') normalizeSkinTone(shown);   // slice 2: huid -> wit zodat multiply de huid laat verdwijnen
         const tex=new THREE.CanvasTexture(shown); tex.encoding=THREE.sRGBEncoding; tex.needsUpdate=true; resolve(tex);
       }catch(e){ reject(e); } };
       im.onerror=()=>reject(new Error("kon afbeelding niet laden"));
@@ -12689,7 +12822,7 @@ async function verwijderVoorbeelden() {
     const point=new THREE.Vector3(P.point[0],P.point[1],P.point[2]);
     const normal=new THREE.Vector3(P.normal[0],P.normal[1],P.normal[2]);
     const mesh=meshAtPoint(point,normal);
-    const obj=makeImage(point,normal,P.rot||0,P.size||0.09,tex,mesh);
+    const obj=makeImage(point,normal,P.rot||0,P.size||0.09,tex,mesh,recMul(t));
     if(!obj) return false;
     obj.renderOrder=(t.stapel)||0;
     const _wens=(t.status==='wens');
