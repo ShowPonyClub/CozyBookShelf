@@ -10755,6 +10755,20 @@ async function verwijderVoorbeelden() {
   let targetGoal=null;            // doel voor soepel focussen
   let radiusGoal=null;           // doel-zoom bij focussen op een lichaamsdeel
   let selRing=null;               // markering rond geselecteerde tattoo
+  let _ringHelper=null;           // hergebruikt Object3D om de decal-assen (rechts/boven) te reconstrueren
+  const _rgR=new THREE.Vector3(), _rgU=new THREE.Vector3(), _rgF=new THREE.Vector3(), _rgT=new THREE.Vector3(), _rgMat=new THREE.Matrix4();
+  // Zwaartepunt + halve omvang van de zichtbare (uitgeknipte/niet-weggegumde) pixels, in [0,1] van het canvas.
+  function artMetrics(canvas){
+    try{
+      const W=canvas&&canvas.width, H=canvas&&canvas.height; if(!W||!H||!canvas.getContext) return null;
+      const x=canvas.getContext('2d',{willReadFrequently:true}); const d=x.getImageData(0,0,W,H).data;
+      const step=Math.max(1, Math.floor(Math.max(W,H)/240));   // grof samplen -> snel, ruim genoeg voor een bbox
+      let minX=W,minY=H,maxX=-1,maxY=-1;
+      for(let y=0;y<H;y+=step){ const row=y*W; for(let xx=0;xx<W;xx+=step){ if(d[(row+xx)*4+3]>12){ if(xx<minX)minX=xx; if(xx>maxX)maxX=xx; if(y<minY)minY=y; if(y>maxY)maxY=y; } } }
+      if(maxX<0) return null;
+      return { cx:((minX+maxX)/2)/W, cy:((minY+maxY)/2)/H, hw:((maxX-minX)/2)/W, hh:((maxY-minY)/2)/H };
+    }catch(e){ return null; }
+  }
   function focusTo(p){ targetGoal=p.clone(); }
   function focusAt(x,y){ const s=surfaceAt(x,y); if(s){ focusTo(s.point); radiusGoal=Math.min(radius,1.8); } }
   function panTarget(dx,dy){
@@ -12929,9 +12943,28 @@ async function verwijderVoorbeelden() {
     }
     if(selRing && selRing.visible && editDecal){
       const sz=editDecal.size||0.09;
-      selRing.position.copy(editDecal.point).addScaledVector(editDecal.normal,0.012);
-      selRing.scale.setScalar(sz*0.8);   // straal ~0.8x de decal-breedte: net om de tattoo
-      selRing.lookAt(camera.position);
+      const img=editDecal.tex&&editDecal.tex.image;
+      const asp=(img&&img.width)?(img.height/img.width):1;
+      // zwaartepunt + omvang van de uitsnede cachen per textuur (getImageData is duur -> niet elke frame)
+      if(editDecal.tex && editDecal._artTex!==editDecal.tex){ editDecal._art=artMetrics(img); editDecal._artTex=editDecal.tex; }
+      const a=editDecal._art;
+      // decal-assen (rechts/boven) reconstrueren zoals makeImage ze opbouwt
+      if(!_ringHelper) _ringHelper=new THREE.Object3D();
+      _ringHelper.position.copy(editDecal.point); _ringHelper.up.set(0,1,0);
+      _ringHelper.lookAt(_rgT.copy(editDecal.point).add(editDecal.normal));
+      _ringHelper.rotateZ((editDecal.rot||0)*Math.PI/180); _ringHelper.updateMatrixWorld();
+      _rgR.setFromMatrixColumn(_ringHelper.matrixWorld,0);   // rechts (U-as)
+      _rgU.setFromMatrixColumn(_ringHelper.matrixWorld,1);   // boven  (V-as)
+      _rgF.setFromMatrixColumn(_ringHelper.matrixWorld,2);
+      // midden = zwaartepunt van de uitsnede (val terug op decal-midden); ovaal = halve omvang + marge
+      const cxo = a ? (a.cx-0.5)*sz       : 0;
+      const cyo = a ? (0.5-a.cy)*sz*asp   : 0;   // canvas-boven = +up (CanvasTexture flipY)
+      const rx  = a ? a.hw*sz*1.18+0.004  : sz*0.55;
+      const ry  = a ? a.hh*sz*asp*1.18+0.004 : sz*0.55;
+      _rgMat.makeBasis(_rgR,_rgU,_rgF);
+      selRing.quaternion.setFromRotationMatrix(_rgMat);
+      selRing.position.copy(editDecal.point).addScaledVector(_rgR,cxo).addScaledVector(_rgU,cyo).addScaledVector(editDecal.normal,0.012);
+      selRing.scale.set(rx, ry, 1);
     }
     if(key){ key.position.copy(camera.position); key.position.y+=1.5; key.position.x+=1.0; }
     renderer.render(scene,camera); requestAnimationFrame(loop);
