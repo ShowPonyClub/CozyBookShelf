@@ -10784,7 +10784,57 @@ async function verwijderVoorbeelden() {
     targetGoal=null; radiusGoal=null; radius=CAM0.radius; theta=CAM0.theta; phi=CAM0.phi;
     target.set(CAM0.tx,CAM0.ty,CAM0.tz); applyCam();
   }
-  function showSel(b){ if(selRing) selRing.visible=!!b; }
+  let selRingOn=false;
+  function showSel(b){ selRingOn=!!b; buildSelRing(); }
+  // Ellipse-omlijning met CONSTANTE dikte als textuur. Textuur-aspect = box-aspect (ry/rx),
+  // zodat 1px in x en y dezelfde wereldlengte is -> de streep is overal even dik.
+  function ringTex(rx, ry){
+    const ar=ry/rx, base=300;
+    let W=ar<=1?base:Math.round(base/ar), H=ar<=1?Math.round(base*ar):base;
+    W=Math.max(16,W); H=Math.max(16,H);
+    const c=document.createElement("canvas"); c.width=W; c.height=H;
+    const g=c.getContext("2d");
+    const lw=Math.max(4, Math.round(Math.min(W,H)*0.06));
+    const cx=W/2, cy=H/2, ex=cx-lw, ey=cy-lw;
+    g.strokeStyle="#e0533d"; g.lineWidth=lw; g.lineCap="round";
+    g.setLineDash([Math.max(6,Math.round(lw*2.4)), Math.max(5,Math.round(lw*1.7))]);
+    g.beginPath(); g.ellipse(cx,cy,ex,ey,0,0,Math.PI*2); g.stroke();
+    const t=new THREE.CanvasTexture(c); t.encoding=THREE.sRGBEncoding; t.needsUpdate=true; return t;
+  }
+  // Selectie-ring als op de huid geprojecteerde decal: midden = zwaartepunt van de uitsnede,
+  // ovaal op de echte omvang, en hij plakt op het model (volgt de welving, geen vliegende schijf).
+  function buildSelRing(){
+    if(selRing){ body.remove(selRing); if(selRing.geometry)selRing.geometry.dispose();
+      if(selRing.material){ if(selRing.material.map)selRing.material.map.dispose(); selRing.material.dispose(); } selRing=null; }
+    if(!selRingOn || !editDecal) return;
+    const sz=editDecal.size||0.09;
+    const img=editDecal.tex&&editDecal.tex.image;
+    const asp=(img&&img.width)?(img.height/img.width):1;
+    if(editDecal.tex && editDecal._artTex!==editDecal.tex){ editDecal._art=artMetrics(img); editDecal._artTex=editDecal.tex; }
+    const a=editDecal._art;
+    if(!_ringHelper) _ringHelper=new THREE.Object3D();
+    _ringHelper.position.copy(editDecal.point); _ringHelper.up.set(0,1,0);
+    _ringHelper.lookAt(_rgT.copy(editDecal.point).add(editDecal.normal));
+    _ringHelper.rotateZ((editDecal.rot||0)*Math.PI/180); _ringHelper.updateMatrixWorld();
+    _rgR.setFromMatrixColumn(_ringHelper.matrixWorld,0);
+    _rgU.setFromMatrixColumn(_ringHelper.matrixWorld,1);
+    const cxo=a?(a.cx-0.5)*sz:0, cyo=a?(0.5-a.cy)*sz*asp:0;   // canvas-boven = +up (CanvasTexture flipY)
+    const rx=Math.max(a?a.hw*sz:sz*0.5, 0.012)*1.18+0.004;
+    const ry=Math.max(a?a.hh*sz*asp:sz*0.5, 0.012)*1.18+0.004;
+    const center=_rgT.copy(editDecal.point).addScaledVector(_rgR,cxo).addScaledVector(_rgU,cyo);
+    // op de huid snappen zodat de projectie netjes op het oppervlak ligt
+    let cPoint=center.clone(), cNormal=editDecal.normal.clone(), cMesh=editDecal.mesh||pickMeshes[0];
+    try{ const rc=new THREE.Raycaster();
+      rc.set(center.clone().addScaledVector(editDecal.normal,0.06), editDecal.normal.clone().multiplyScalar(-1));
+      const hit=rc.intersectObject(cMesh,false)[0];
+      if(hit){ cPoint=hit.point.clone(); if(hit.face) cNormal=hit.face.normal.clone().transformDirection(hit.object.matrixWorld).normalize(); cMesh=hit.object; }
+    }catch(e){}
+    const tex=ringTex(rx,ry);
+    const ring=makeImage(cPoint, cNormal, editDecal.rot||0, rx*2, tex, cMesh, false);
+    if(ring){ ring.renderOrder=1000; const m=ring.material;
+      if(m){ m.alphaTest=0.18; m.depthTest=true; m.depthWrite=false; m.polygonOffset=true; m.polygonOffsetFactor=-12; m.needsUpdate=true; }
+      selRing=ring; }
+  }
   function showLoading(b){ const el2=document.getElementById("t3d-loading"); if(el2) el2.classList.toggle("on",!!b); }
   // Voortgang tonen tijdens het herstellen van decals: 'Laden… X/N' (of terug naar 'Laden…' bij 0).
   function zetLaadVoortgang(done,total){
@@ -11312,6 +11362,7 @@ async function verwijderVoorbeelden() {
     m.obj=makeImage(m.point,m.normal,m.rot||0,m.size||0.09,m.tex,m.mesh||pickMeshes[0],recMul(m.rec));
     if(m.obj) m.obj.renderOrder=(m.rec&&m.rec.stapel)||0;   // stapelvolgorde bij overlap
     zetDecalOpacity(m.obj, m.rec && m.rec.opacity);
+    if(m===editDecal && selRingOn) buildSelRing();   // selectie-ring meeschalen/-draaien/-verplaatsen
   }
   // Net geplaatste tattoo met auto-blend: de live-plaatsing gebruikt de rauwe uitsnede-textuur,
   // dus herbouw de textuur via kunst3d (witbalans) en herteken met multiply zodat het blend-effect
@@ -12941,31 +12992,7 @@ async function verwijderVoorbeelden() {
       if(radiusGoal!=null){ radius += (radiusGoal-radius)*0.18; if(Math.abs(radius-radiusGoal)<0.01){ radius=radiusGoal; radiusGoal=null; } }
       applyCam();
     }
-    if(selRing && selRing.visible && editDecal){
-      const sz=editDecal.size||0.09;
-      const img=editDecal.tex&&editDecal.tex.image;
-      const asp=(img&&img.width)?(img.height/img.width):1;
-      // zwaartepunt + omvang van de uitsnede cachen per textuur (getImageData is duur -> niet elke frame)
-      if(editDecal.tex && editDecal._artTex!==editDecal.tex){ editDecal._art=artMetrics(img); editDecal._artTex=editDecal.tex; }
-      const a=editDecal._art;
-      // decal-assen (rechts/boven) reconstrueren zoals makeImage ze opbouwt
-      if(!_ringHelper) _ringHelper=new THREE.Object3D();
-      _ringHelper.position.copy(editDecal.point); _ringHelper.up.set(0,1,0);
-      _ringHelper.lookAt(_rgT.copy(editDecal.point).add(editDecal.normal));
-      _ringHelper.rotateZ((editDecal.rot||0)*Math.PI/180); _ringHelper.updateMatrixWorld();
-      _rgR.setFromMatrixColumn(_ringHelper.matrixWorld,0);   // rechts (U-as)
-      _rgU.setFromMatrixColumn(_ringHelper.matrixWorld,1);   // boven  (V-as)
-      _rgF.setFromMatrixColumn(_ringHelper.matrixWorld,2);
-      // midden = zwaartepunt van de uitsnede (val terug op decal-midden); ovaal = halve omvang + marge
-      const cxo = a ? (a.cx-0.5)*sz       : 0;
-      const cyo = a ? (0.5-a.cy)*sz*asp   : 0;   // canvas-boven = +up (CanvasTexture flipY)
-      const rx  = a ? a.hw*sz*1.18+0.004  : sz*0.55;
-      const ry  = a ? a.hh*sz*asp*1.18+0.004 : sz*0.55;
-      _rgMat.makeBasis(_rgR,_rgU,_rgF);
-      selRing.quaternion.setFromRotationMatrix(_rgMat);
-      selRing.position.copy(editDecal.point).addScaledVector(_rgR,cxo).addScaledVector(_rgU,cyo).addScaledVector(editDecal.normal,0.012);
-      selRing.scale.set(rx, ry, 1);
-    }
+    // selectie-ring is nu een op de huid geprojecteerde decal (buildSelRing) -> geen per-frame update nodig
     if(key){ key.position.copy(camera.position); key.position.y+=1.5; key.position.x+=1.0; }
     renderer.render(scene,camera); requestAnimationFrame(loop);
   }
@@ -13005,14 +13032,7 @@ async function verwijderVoorbeelden() {
       new THREE.MeshBasicMaterial({color:0x000000, transparent:true, opacity:0.25}));
     ground.rotation.x=-Math.PI/2; scene.add(ground);
     body=new THREE.Group(); scene.add(body);
-    { const midR=1.0, halfW=0.053;         // genormaliseerd; schaal bepaalt diameter
-      const dashes=26, frac=0.58;          // 58% streep, rest gat
-      const step=Math.PI*2/dashes, span=step*frac, arcs=[];
-      for(let i=0;i<dashes;i++){ arcs.push(new THREE.RingGeometry(midR-halfW, midR+halfW, 6, 1, i*step, span)); }
-      const rg=THREE.BufferGeometryUtils.mergeBufferGeometries(arcs, false);
-      const rm=new THREE.MeshBasicMaterial({color:0xe0533d, transparent:true, opacity:0.95, side:THREE.DoubleSide, depthTest:false});
-      selRing=new THREE.Mesh(rg, rm); }
-    selRing.renderOrder=999; selRing.visible=false; scene.add(selRing);
+    // selectie-ring wordt on-demand als huid-decal gebouwd (buildSelRing), niet meer als platte ring vooraf
     const rb=document.getElementById("t3d-reset"); if(rb) rb.onclick=resetView;
     skinMat=new THREE.MeshStandardMaterial({color:0xe2b48f, roughness:0.78, metalness:0.0, side:THREE.DoubleSide});
     activeSkin=skinMat;
