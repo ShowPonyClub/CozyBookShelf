@@ -10814,7 +10814,12 @@ async function verwijderVoorbeelden() {
       target.z+radius*Math.sin(phi)*Math.cos(theta));
     camera.lookAt(target);
   }
-  function resize(){ if(!renderer||!stage)return; const w=stage.clientWidth||320, h=stage.clientHeight||420;
+  function resize(){ if(!renderer||!stage)return;
+    // Bewerkbalk gedockt onder het model: render-hoogte krimpt met de balkhoogte, zodat de
+    // tattoo/het lichaam niet meer onder de balk verdwijnt (alles blijft binnen de 72vh -> geen scroll).
+    const eb=document.getElementById("editbar");
+    const ebH=(eb&&eb.classList.contains("on")) ? eb.offsetHeight+12 : 0;
+    const w=stage.clientWidth||320, h=Math.max(220,(stage.clientHeight||420)-ebH);
     renderer.setSize(w,h); camera.aspect=w/h; camera.updateProjectionMatrix(); }
 
   /* ---- model laden ---- */
@@ -10834,6 +10839,7 @@ async function verwijderVoorbeelden() {
     const eb=document.getElementById("editbar"); if(eb)eb.classList.remove("on");
     const h=document.getElementById("hint"); if(h)h.style.display="";
     const a=document.getElementById("t3d-add"); if(a) a.style.display="";   // +-knop terug (was verborgen tijdens bewerken)
+    resize();   // render weer op volle hoogte
   }
   function clearMarkers(){
     // Aanpasmodus afsluiten vóór het weggooien van markers, anders blijft de editbar
@@ -11305,6 +11311,7 @@ async function verwijderVoorbeelden() {
     const op3=document.getElementById("eb3d-opacity"); if(op3) op3.value=Math.round(((m.rec&&m.rec.opacity!=null)?m.rec.opacity:1)*100);
     const h=document.getElementById("hint"); if(h)h.style.display="none";
     setLockUI(); setBlendUI(); showSel(true);
+    resize();   // render boven de gedockte balk laten passen
     toast(tr('ui.aanpas_hint'));
   }
   function exitEditDecal(){
@@ -11312,6 +11319,7 @@ async function verwijderVoorbeelden() {
     const eb=document.getElementById("editbar"); if(eb)eb.classList.remove("on");
     { const a=document.getElementById("t3d-add"); if(a) a.style.display=""; }   // + knop terug
     const h=document.getElementById("hint"); if(h)h.style.display="";
+    resize();   // render weer op volle hoogte
     if(m) persistEdit(m);
   }
   function moveDecalTo(x,y){
@@ -11626,6 +11634,7 @@ async function verwijderVoorbeelden() {
     const eb=document.getElementById("editbar"); if(eb)eb.classList.remove("on");
     { const a=document.getElementById("t3d-add"); if(a) a.style.display=""; }   // +-knop terug (was verborgen tijdens bewerken) - ontbrak hier, vandaar de bug
     const h=document.getElementById("hint"); if(h)h.style.display="";
+    resize();   // render weer op volle hoogte
     (async()=>{ try{
       if(m.rec){
         if(typeof deleteTattoo==="function") await deleteTattoo(m.rec.id);
