@@ -287,7 +287,7 @@ main > section{animation:opkomen .3s ease both}
 .silhouet-keuze button.actief{background:var(--accent);color:var(--op-accent)}
 .silhouet-keuze button:disabled{opacity:.4;cursor:not-allowed}
 .inst-soon{display:inline-block;margin-left:8px;padding:1px 8px;border-radius:999px;background:var(--veldbg);border:1px solid var(--rand);color:var(--gedempt);font-size:.66rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase;vertical-align:middle}
-.bouw-melding{margin:0 auto 10px;max-width:520px;padding:8px 14px;border-radius:var(--r-md);background:rgba(224,83,61,.12);border:1px solid rgba(224,83,61,.4);color:var(--tekst);font-size:.82rem;font-weight:600;text-align:center}
+.bouw-melding{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);z-index:6;width:84%;max-width:330px;margin:0;padding:14px 18px;border-radius:var(--r-md);background:var(--kaart);border:1px solid rgba(224,83,61,.55);color:var(--tekst);font-size:.9rem;font-weight:600;text-align:center;line-height:1.45;box-shadow:0 8px 22px rgba(0,0,0,.28);pointer-events:none}
 .stat-toggle{background:none;border:0;padding:0;font:inherit;color:inherit;cursor:pointer;border-bottom:1px dotted var(--gedempt);line-height:1.1;}
 .stat-toggle:hover{color:var(--accent);border-bottom-color:var(--accent);}
 .start-stat-getal.klikbaar{cursor:pointer;display:inline-block;border-bottom:2px dotted currentColor;line-height:1.05;}
@@ -1211,7 +1211,6 @@ form label{text-transform:none;letter-spacing:.005em;font-size:.8rem;color:var(-
   </section>
   <!-- ===================== 2D-KAART ===================== -->
   <section id="view-home">
-    <div class="bouw-melding" role="status" data-i18n="ui.bouw2d">2D-kaart nog in aanbouw - test vooral het 3D-model.</div>
     <div class="canvas-balk">
       <button type="button" id="toon-gepland" class="gepland-toggle" aria-pressed="false" data-i18n-aria="ui.toon_gepland" aria-label="Geplande tattoos tonen">
         <svg viewBox="0 0 24 24" class="ik" aria-hidden="true" style="width:15px;height:15px"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>
@@ -1228,6 +1227,7 @@ form label{text-transform:none;letter-spacing:.005em;font-size:.8rem;color:var(-
     <div class="kaart-layout">
       <div id="bodymap-wrap">
         <div class="grond-schaduw" aria-hidden="true"></div>
+        <div class="bouw-melding" role="status" data-i18n="ui.bouw2d">2D-kaart nog in aanbouw - test vooral het 3D-model.</div>
         <svg id="bodymap" viewBox="0 0 200 398" role="img" data-i18n-aria="aria.bodymap" aria-label="Lichaamskaart - tik op een lichaamsdeel om in te zoomen">
           <defs><clipPath id="lichaam-clip"></clipPath></defs>
           <g id="silhouet"></g>
