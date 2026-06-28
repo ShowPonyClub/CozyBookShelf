@@ -561,8 +561,6 @@ dl.toon-leeg .veldrij.leeg-veld{display:flex}
 .add-kies-optie .ak-wip{margin-top:5px;font-size:.68rem;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--accent-diep)}
 .add-kies-annuleer{align-self:center;margin-top:2px}
 /* Onboarding stap 2: +-hint */
-.onb-plus{width:64px;height:64px;margin:4px auto 6px;border-radius:50%;background:var(--accent);color:var(--op-accent);
-  font-size:2.2rem;font-weight:700;line-height:64px;text-align:center;box-shadow:0 6px 18px rgba(0,0,0,.22)}
 #onb-terug{margin-top:4px}
 
 /* ---- Tabs ---- */
@@ -740,6 +738,11 @@ input[type=range]:focus{box-shadow:none;border:none}
 .inst-groepkop + .inst-sectie{border-top:none}
 .inst-label{font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--gedempt);font-weight:600;margin-bottom:8px}
 .inst-feedback-sub{font-size:.85rem;color:var(--gedempt);margin:0 0 10px;line-height:1.4}
+.install-ios{display:flex;gap:11px;align-items:flex-start;margin:10px 0 4px;padding:11px 13px;background:var(--kaart);border:1px solid var(--rand);border-radius:var(--r-md);line-height:1.45}
+.install-ios-ic{width:24px;height:24px;color:var(--accent-diep);margin-top:1px;stroke-width:1.7}
+.install-ios-tekst{display:flex;flex-direction:column;gap:2px;font-size:var(--fs-sm);color:var(--tekst)}
+.install-ios-tekst strong{font-weight:700}
+.install-ios-tekst b{color:var(--accent-diep);font-weight:700}
 .inst-feedback-knop{text-decoration:none}
 .account-input{width:100%;box-sizing:border-box;margin:0 0 8px;padding:11px 12px;font-size:.95rem;border:1px solid var(--rand);border-radius:var(--radius);background:var(--kaart);color:var(--tekst);min-height:44px}
 .account-input:focus{outline:none;border-color:var(--accent)}
@@ -1237,6 +1240,7 @@ form label{text-transform:none;letter-spacing:.005em;font-size:.8rem;color:var(-
         <button id="fab" data-i18n-aria="fab.nieuw" aria-label="Nieuwe tattoo" title="Nieuwe tattoo">+</button>
         <div id="t2d-banner" hidden></div>
         <div id="lege-hint" class="lege-hint" data-i18n="ui.lege_cta" hidden>Nog geen tattoos - tik op + om er een toe te voegen</div>
+        <!-- LET OP: deze balk is bijna identiek aan #editbar (3D, ~regel 1343). Knop wijzigen/toevoegen? Doe het in BEIDE. Verschil: 3D heeft extra .eb-blend. -->
         <div id="editbar2d" class="t3d-editbar">
           <div class="eb-title">Tattoo</div>
           <div class="eb-legend" hidden role="group" data-i18n-aria="ui.knop_uitleg" aria-label="Wat doen de knoppen?"></div>
@@ -1339,6 +1343,7 @@ form label{text-transform:none;letter-spacing:.005em;font-size:.8rem;color:var(-
       <div id="lege-hint-3d" class="lege-hint" data-i18n="ui.lege_cta" hidden>Nog geen tattoos - tik op + om er een toe te voegen</div>
       <button id="t3d-add" data-i18n-aria="fab.nieuw" aria-label="Nieuwe tattoo" title="Nieuwe tattoo">+</button>
       <div id="t3d-loading"><div class="t3d-spin"></div><span data-i18n="ui.laden">Laden&#8230;</span></div>
+      <!-- LET OP: deze balk is bijna identiek aan #editbar2d (2D, ~regel 1241). Knop wijzigen/toevoegen? Doe het in BEIDE. Verschil: alleen 3D heeft .eb-blend. -->
       <div id="editbar" class="t3d-editbar">
         <div class="eb-title">Tattoo</div>
         <div class="eb-legend" hidden role="group" data-i18n-aria="ui.knop_uitleg" aria-label="Wat doen de knoppen?"></div>
@@ -1582,7 +1587,13 @@ form label{text-transform:none;letter-spacing:.005em;font-size:.8rem;color:var(-
 
   <div class="inst-sectie" id="inst-install-sectie" style="padding-bottom:24px">
     <button type="button" class="knop-sec" id="inst-install" data-i18n="install.opbeginscherm" style="width:100%">Op beginscherm zetten</button>
-    <p class="inst-feedback-sub" id="inst-install-uitleg" data-i18n="install.ios" hidden style="margin-top:10px">Zet Tatties op je beginscherm: tik op Deel en kies &lsquo;Zet op beginscherm&rsquo;.</p>
+    <div class="install-ios" id="inst-install-uitleg" hidden>
+      <svg class="ik install-ios-ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 14V4M8.5 7.5 12 4l3.5 3.5"/><path d="M7 10H6.5A1.5 1.5 0 0 0 5 11.5v7A1.5 1.5 0 0 0 6.5 20h11a1.5 1.5 0 0 0 1.5-1.5v-7A1.5 1.5 0 0 0 17.5 10H17"/></svg>
+      <div class="install-ios-tekst">
+        <strong data-i18n="install.ios_kop">On iPhone or iPad</strong>
+        <span data-i18n-html="install.ios">Tap the <b>Share</b> button, then choose <b>Add to Home Screen</b>.</span>
+      </div>
+    </div>
   </div>
 
   <div class="inst-sectie" style="padding-bottom:24px">
@@ -1684,7 +1695,6 @@ form label{text-transform:none;letter-spacing:.005em;font-size:.8rem;color:var(-
       <button type="button" class="linkbtn onb-skip" id="onb-overslaan" data-i18n="onb.overslaan">Overslaan</button>
     </div>
     <div id="onb-stap2" hidden>
-      <div class="onb-plus" aria-hidden="true">+</div>
       <h1 class="onboarding-titel" data-i18n="onb.stap2_titel">Je eerste tattoo toevoegen</h1>
       <p class="onboarding-sub" data-i18n="onb.stap2_sub">Tik straks op &lsquo;+ Tattoo toevoegen&rsquo; om een foto te kiezen, uit te snijden en op het model te plaatsen.</p>
       <button type="button" class="knop onboarding-start" id="onb-start" data-i18n="onb.start">Aan de slag</button>
@@ -6653,7 +6663,7 @@ const I18N = {
     'sort.datumnieuw':'Nieuwste eerst','sort.datumoud':'Oudste eerst','sort.naam':'Naam A–Z','sort.kosten':'Kosten hoog–laag','sort.zone':'Lichaamsdeel',
     'btn.export':'Exporteren','btn.import':'Importeren','btn.png':'Kaart als PNG',
     'install.tekst':'Zet Tatties op je beginscherm voor offline gebruik','install.knop':'Installeren','install.opbeginscherm':'Op beginscherm zetten','install.algeinstalleerd':'Al geïnstalleerd','install.handmatig':'Installeren kan via het menu van je browser.',
-    'install.ios':'Zet Tatties op je beginscherm: tik op Deel en kies ‘Zet op beginscherm’.',
+    'install.ios':'Tik op de <b>Deel</b>-knop en kies <b>Zet op beginscherm</b>.','install.ios_kop':'Op iPhone of iPad',
     'inst.titel':'Instellingen','inst.groep_lichaam':'Je lichaam','inst.groep_voorkeuren':'Voorkeuren','inst.groep_account':'Account','inst.groep_app':'App & info','inst.geslacht':'Man / Vrouw','inst.man':'Man','inst.vrouw':'Vrouw','inst.huid':'Huidskleur','inst.taal':'Taal',
     'inst.vorm':'Lichaamsvorm','inst.vorm.slank':'Slank','inst.vorm.gemiddeld':'Gemiddeld','inst.vorm.atletisch':'Atletisch','inst.vorm.zwaar':'Zwaar',
     'inst.thema':'Weergave','inst.thema.auto':'Systeem','inst.thema.licht':'Licht','inst.thema.donker':'Donker',
@@ -6828,7 +6838,7 @@ const I18N = {
     'sort.datumnieuw':'Newest first','sort.datumoud':'Oldest first','sort.naam':'Name A–Z','sort.kosten':'Cost high–low','sort.zone':'Body part',
     'btn.export':'Export','btn.import':'Import','btn.png':'Map as PNG',
     'install.tekst':'Add Tatties to your home screen for offline use','install.knop':'Install','install.opbeginscherm':'Add to home screen','install.algeinstalleerd':'Already installed','install.handmatig':'Install via your browser menu.',
-    'install.ios':'Add Tatties to your home screen: tap Share, then ‘Add to Home Screen’.',
+    'install.ios':'Tap the <b>Share</b> button, then choose <b>Add to Home Screen</b>.','install.ios_kop':'On iPhone or iPad',
     'inst.titel':'Settings','inst.groep_lichaam':'Your body','inst.groep_voorkeuren':'Preferences','inst.groep_account':'Account','inst.groep_app':'App & info','inst.geslacht':'Male / Female','inst.man':'Male','inst.vrouw':'Female','inst.huid':'Skin tone','inst.taal':'Language',
     'inst.vorm':'Body shape','inst.vorm.slank':'Slim','inst.vorm.gemiddeld':'Average','inst.vorm.atletisch':'Athletic','inst.vorm.zwaar':'Heavy',
     'inst.thema':'Appearance','inst.thema.auto':'System','inst.thema.licht':'Light','inst.thema.donker':'Dark',
@@ -7746,9 +7756,9 @@ window.__plaatsHintUit = function () { const h = document.getElementById('plaats
 /* 'Totale zituren' kan tussen uren en minuten wisselen (klik) - gedeeld door startscherm + stats. */
 let statZiturenMin = false;
 function ziturenLabel(uren) {
-  return statZiturenMin
-    ? (Math.round(uren * 60) + ' ' + tr('eenheid.min'))
-    : ((Math.round(uren * 10) / 10).toString().replace('.', ',') + ' ' + tr('eenheid.uur'));
+  if (statZiturenMin) return Math.round(uren * 60) + ' ' + tr('eenheid.min');
+  const u = (Math.round(uren * 10) / 10).toString();
+  return (taal === 'nl' ? u.replace('.', ',') : u) + ' ' + tr('eenheid.uur');   // decimaalteken taal-afhankelijk (EN = punt)
 }
 
 /* Korte samenvatting (aantallen) op het startscherm */
@@ -7952,12 +7962,6 @@ function zetTint(hex) {
   if (_tintRAF) cancelAnimationFrame(_tintRAF);
   _tintRAF = requestAnimationFrame(() => { _tintRAF = 0; tekenSilhouet(); renderBodyMap(); });
 }
-// Compat: exacte kleur kiezen zet ook de sliderstand goed
-function kiesTint(kleur) {
-  zetTint(kleur);
-  const sl = document.getElementById('tint-slider');
-  if (sl) sl.value = Math.round(fractieNaarSlider(fractieBijTint(kleur)) * 100);
-}
 function tekenHuidkiezer(container) {
   if (!container) return;
   const swatches = HUIDTINTEN.map((c, i) =>
@@ -7975,7 +7979,6 @@ function silhouetVoor(zijde) {
   const set = SILHOUETTEN[silhouetKeuze] || SILHOUETTEN.man;
   return (set[zijde] || set.voor).split('#F0EDE8').join(huidtint);
 }
-function huidigSilhouet() { return silhouetVoor(huidigeZijde); }
 /* Kopieert de silhouetvormen naar een clipPath, zodat uitsnedes
    buiten het lichaam (en in de arm-romp-gaten) worden afgeknipt. */
 function vulLichaamClip(clipId, bronSelector) {
@@ -8825,7 +8828,7 @@ function openStats(retour) {
       rij(tr('stats.aantal'), gezet.length) +
       rij(tr('stats.uitgegeven'), euro.format(som(gezet, t => t.kosten))) +
       rij(tr('stats.zituren'), `<button type="button" class="stat-toggle" id="stat-zituren" title="${esc(tr('stats.wissel_eenheid'))}" aria-label="${esc(tr('stats.wissel_eenheid'))}">${ziturenStr()}</button>`) +
-      (gemPijn ? rij(tr('stats.gempijn'), pijnSterren(Math.round(gemPijn), true) + ' ' + gemPijn.toFixed(1).replace('.', ',') + '/5') : '') +
+      (gemPijn ? rij(tr('stats.gempijn'), pijnSterren(Math.round(gemPijn), true) + ' ' + (taal === 'nl' ? gemPijn.toFixed(1).replace('.', ',') : gemPijn.toFixed(1)) + '/5') : '') +
       rij(tr('stats.geheeld'), gezet.filter(t => t.geheeld).length + ' ' + tr('woord.van') + ' ' + gezet.length))}
     ${blok(tr('stats.hoogtepunten'),
       rij(tr('stats.goedkoopste'), goedkoopste ? esc(goedkoopste.naam || '-') + ' \u00b7 ' + euro.format(goedkoopste.kosten) : '-') +
@@ -12005,7 +12008,6 @@ async function verwijderVoorbeelden() {
       accentkleur:(document.getElementById("cmAccent")?document.getElementById("cmAccent").value:"#8E71F0"),
       notities:v("cmNotities").trim() }, status:leesStatusToggle() };
   }
-  function toonBanner(txt){ const b=document.getElementById("t3d-banner"); if(b){ b.textContent=txt; b.hidden=false; } }
   function verbergBanner(){ const b=document.getElementById("t3d-banner"); if(b) b.hidden=true; }
   // Plaats-modus (3D + 2D) volledig annuleren -> geen 'vastgelopen' plaatsstand na wegnavigeren.
   function cancelPlaatsModus(){
@@ -12075,17 +12077,6 @@ async function verwijderVoorbeelden() {
     cutModal.style.left=vv.offsetLeft+"px"; cutModal.style.top=vv.offsetTop+"px";
     cutModal.style.width=vv.width+"px"; cutModal.style.height=vv.height+"px";
     if(card) card.style.maxHeight=Math.round(vv.height*0.94)+"px";
-  }
-  function openCutModal(point, normal, mesh){
-    pendingPlace={point, normal, mesh}; pendingEdit=null; pendingPlace2D=null;
-    origImg=null; lassoPts=[]; imgTexture=null; baseCanvas=null; flipH=false; zetSpiegelUI();
-    wandSeeds=[]; wandKeep=false; wandMode=false; zetWandUI(); lassoDragIdx=-1; cutModus='vrij'; drawingFree=false; zetSnijModusUI(); resetZoom(); rot90=0; huidMethode='kleur'; if(bgRemove) bgRemove.checked=false;
-    eraseStrokes=[]; gumStroke=null; gumMode=false; gumHerstel=false; zetGumUI();
-    bgPickMode=false; setBgPick(null); if(bgPickBtn)bgPickBtn.classList.remove("on");
-    if(cutSpread) cutSpread.value=55;
-    cmTitle.textContent=tr('ui.tattoo_toevoegen'); cmPlaceBtn.textContent=tr('ui.tattoo_toevoegen');
-    cutModal.classList.add("on"); toonCutInstellingen(false);
-    drawPreview(null); drawLasso();
   }
   // Heropen het uitsnede-scherm voor een bestaande tattoo (bijknippen + achtergrond)
   function openCutModalForEdit(m){
@@ -12158,74 +12149,6 @@ async function verwijderVoorbeelden() {
   // Gedeelde achtergrond-verwijdering: flood-fill vanaf de randen op kleurafstand.
   // Gebruikt door zowel de live uitsnede als de headless restore, zodat beide
   // pixel-voor-pixel hetzelfde resultaat geven. threshVal = slider-waarde (60..252).
-  function floodFillBg(x, W, H, threshVal, spreadVal, bgColor){
-    const d=x.getImageData(0,0,W,H), p=d.data, N=W*H;
-    // Achtergrondkleur: handmatig gekozen (bgColor) of gemiddelde van de randpixels.
-    let br,bg,bb;
-    if(bgColor){ br=bgColor.r; bg=bgColor.g; bb=bgColor.b; }
-    else {
-      br=0;bg=0;bb=0; let n=0;
-      const samp=(xx,yy)=>{const i=(yy*W+xx)*4; br+=p[i];bg+=p[i+1];bb+=p[i+2];n++;};
-      for(let xx=0;xx<W;xx++){samp(xx,0);samp(xx,H-1);}
-      for(let yy=0;yy<H;yy++){samp(0,yy);samp(W-1,yy);}
-      br/=n;bg/=n;bb/=n;
-    }
-    // Slider -> tolerantie. Zelfde richting als label: lager = meer weghalen.
-    const norm=(clamp(+threshVal,60,252)-60)/192;   // 0..1
-    const tol = 95 - norm*80;                        // 95 (los) .. 15 (streng)
-    const tol2 = tol*tol*3;                          // gekwadrateerde RGB-afstand
-    const close=(i)=>{const dr=p[i]-br,dg=p[i+1]-bg,db=p[i+2]-bb; return dr*dr+dg*dg+db*db<=tol2;};
-    // Buitengrens (spreiding): lokaal meegroeien mag alleen zolang de pixel nog
-    // binnen deze ruimere afstand van de achtergrondkleur ligt -> volgt een
-    // verloop, maar springt nooit naar de (andersgekleurde) tattoo.
-    const spread = (spreadVal!=null && !isNaN(+spreadVal)) ? +spreadVal : 55;
-    const cap=tol+spread, cap2=cap*cap*3;
-    const withinCap=(i)=>{const dr=p[i]-br,dg=p[i+1]-bg,db=p[i+2]-bb; return dr*dr+dg*dg+db*db<=cap2;};
-    // Lokale buur-tolerantie: kleine stap t.o.v. een al-verwijderde buur.
-    const locTol2=16*16*3;
-    const near=(a,b)=>{const dr=p[a]-p[b],dg=p[a+1]-p[b+1],db=p[a+2]-p[b+2]; return dr*dr+dg*dg+db*db<=locTol2;};
-    // Flood-fill vanaf alle randpixels: alleen verbonden achtergrond verdwijnt,
-    // huid/kleur binnenin de tattoo blijft staan (niet verbonden met de rand).
-    const visited=new Uint8Array(N);
-    const mask=new Uint8Array(N);            // 1 = achtergrond
-    const stack=new Int32Array(N);
-    let sp=0;
-    const push=(xx,yy)=>{const idx=yy*W+xx; if(!visited[idx]){visited[idx]=1; stack[sp++]=idx;}};
-    for(let xx=0;xx<W;xx++){push(xx,0);push(xx,H-1);}
-    for(let yy=0;yy<H;yy++){push(0,yy);push(W-1,yy);}
-    while(sp>0){
-      const idx=stack[--sp];
-      const i4=idx*4;
-      const xx=idx%W, yy=(idx/W)|0;
-      let isBg=close(i4);
-      if(!isBg && withinCap(i4)){             // niet dicht bij gem. achtergrond, maar wel binnen de cap?
-        // ...dan achtergrond als een al-gemarkeerde buur dichtbij in kleur is
-        if((xx>0    && mask[idx-1] && near(i4,(idx-1)*4)) ||
-           (xx<W-1  && mask[idx+1] && near(i4,(idx+1)*4)) ||
-           (yy>0    && mask[idx-W] && near(i4,(idx-W)*4)) ||
-           (yy<H-1  && mask[idx+W] && near(i4,(idx+W)*4))) isBg=true;
-      }
-      if(!isBg) continue;                     // grenspixel: niet doorgaan
-      mask[idx]=1;
-      if(xx>0)push(xx-1,yy);
-      if(xx<W-1)push(xx+1,yy);
-      if(yy>0)push(xx,yy-1);
-      if(yy<H-1)push(xx,yy+1);
-    }
-    // Achtergrond transparant + 1px zachte rand tegen kartels.
-    for(let idx=0;idx<N;idx++){
-      if(mask[idx]){ p[idx*4+3]=0; continue; }
-      const xx=idx%W, yy=(idx/W)|0;
-      let bgN=0;
-      if(xx>0&&mask[idx-1])bgN++;
-      if(xx<W-1&&mask[idx+1])bgN++;
-      if(yy>0&&mask[idx-W])bgN++;
-      if(yy<H-1&&mask[idx+W])bgN++;
-      if(bgN){ const a=p[idx*4+3]; p[idx*4+3]=Math.min(a, bgN>=3?90:bgN>=2?150:200); }
-    }
-    x.putImageData(d,0,0);
-  }
-
   // Huid weghalen - KLEUR: verwijder overal pixels die qua kleur dicht bij de (geprikte
   // of automatisch geschatte) huidskleur liggen. Globaal (geen rand-connectie), met zachte rand.
   function removeSkinColor(x, W, H, skin, threshVal, spreadVal){
@@ -12237,11 +12160,13 @@ async function verwijderVoorbeelden() {
     const norm=(clamp(+threshVal,60,252)-60)/192;          // 0..1
     const tol=(40+norm*130)*1.732;                          // euclidische RGB-afstand (~40..170/kanaal)
     const spread=((spreadVal!=null && !isNaN(+spreadVal)) ? +spreadVal : 55)*1.732;
-    const cap=tol+spread;
+    const cap=tol+spread, tol2=tol*tol, cap2=cap*cap;
+    // Vergelijk op kwadraat-afstand (geen sqrt per pixel); de sqrt is alleen nodig voor de
+    // smalle overgangsband tussen tol en cap. Identiek resultaat, scheelt N× Math.sqrt.
     for(let idx=0;idx<N;idx++){ const i=idx*4; if(p[i+3]===0) continue;
-      const dr=p[i]-sr,dg=p[i+1]-sg,db=p[i+2]-sb, dist=Math.sqrt(dr*dr+dg*dg+db*db);
-      if(dist<=tol) p[i+3]=0;
-      else if(dist<cap){ const t=(dist-tol)/((cap-tol)||1); p[i+3]=Math.round(p[i+3]*Math.max(0,Math.min(1,t))); } }
+      const dr=p[i]-sr,dg=p[i+1]-sg,db=p[i+2]-sb, d2=dr*dr+dg*dg+db*db;
+      if(d2<=tol2) p[i+3]=0;
+      else if(d2<cap2){ const dist=Math.sqrt(d2), t=(dist-tol)/((cap-tol)||1); p[i+3]=Math.round(p[i+3]*Math.max(0,Math.min(1,t))); } }
     x.putImageData(d,0,0);
   }
   // Huid weghalen - HELDERHEID: lichte pixels (huid) weg, donkere (inkt) blijven, met zachte overgang.
@@ -12696,8 +12621,12 @@ async function verwijderVoorbeelden() {
       clearTimeout(wheelEind); wheelEind=setTimeout(()=>{ updateCutout(); drawLasso(); },120);
     },{passive:false});
 
+    let cutBezig=false;
     cmPlaceBtn.onclick=async ()=>{
+      if(cutBezig) return;                          // re-entrancy-guard: tweede klik tijdens (async) opslaan negeren
       if(!imgTexture){ toast(tr('ui.kies_eerst_foto')); return; }
+      cutBezig=true;
+      try{
       if(pendingEdit2D){
         const rec=pendingEdit2D;
         const {naam,info,status}=leesModalDetails();
@@ -12795,7 +12724,7 @@ async function verwijderVoorbeelden() {
       const pp=pendingPlace; cutModal.classList.remove("on"); pendingPlace=null;
       const rot=0, size=0.09;
       const obj=makeImage(pp.point, pp.normal, rot, size, imgTexture, pp.mesh);
-      if(!obj){ toast(tr('ui.plaatsen_mislukt')); return; }
+      if(!obj){ toast(tr('ui.plaatsen_mislukt')); if(imgTexture&&imgTexture.dispose){imgTexture.dispose();} imgTexture=null; return; }   // textuur niet laten lekken bij faal
       zetDecalOpacity(obj, 1);
       const nz=nearestZone(pp.point);
       try{
@@ -12816,6 +12745,7 @@ async function verwijderVoorbeelden() {
         enterEditDecal(m);   // direct in aanpasmodus: meteen schalen/verplaatsen/roteren
         pasBlendOpNieuw(m);   // auto-blend meteen tonen
       }catch(err){ console.error(err); toast(tr('toast.opslaanmislukt')+(err&&err.message?err.message:tr('ui.fout'))); }
+      } finally { cutBezig=false; }
     };
   }
 
@@ -12933,13 +12863,16 @@ async function verwijderVoorbeelden() {
     // Progressief: decals in kleine batches bouwen en tussendoor naar de render-loop yielden,
     // zodat de UI niet bevriest en de voortgang ('Laden… X/N') zichtbaar is bij veel tattoos.
     const total=list.reduce((n,t)=>n+((t&&!t.deleted)?1:0),0);
-    let done=0;
+    let done=0, _laatsteYield=performance.now();
     for(const t of list){
       if(token!==undefined && token!==loadToken){ zetLaadVoortgang(0,0); return; }   // ander model intussen geladen
       if(t && t.deleted) continue;                          // tombstones niet als 3D-decal herstellen
       try{ await herstelEen(t, token); }catch(e){ console.error(e); }
       done++; zetLaadVoortgang(done,total);
-      if(done % 4 === 0){ await new Promise(r=>requestAnimationFrame(r)); if(token!==undefined && token!==loadToken){ zetLaadVoortgang(0,0); return; } }
+      // Yield op tijdsbudget (~12ms) i.p.v. vast per 4 decals: zo blijft de UI per frame
+      // responsief, ongeacht hoe zwaar een losse decal is (één trage decal blokkeerde voorheen
+      // tot 4 op rij synchroon). Lichte decals lopen door zonder onnodige frame-waits.
+      if(performance.now()-_laatsteYield>12){ await new Promise(r=>requestAnimationFrame(r)); _laatsteYield=performance.now(); if(token!==undefined && token!==loadToken){ zetLaadVoortgang(0,0); return; } }
     }
     zetLaadVoortgang(0,0);   // label terug naar 'Laden…'
     if(typeof renderMarkers==="function"){ try{renderMarkers();}catch(_){} }
