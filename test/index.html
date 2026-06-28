@@ -466,8 +466,9 @@ main > section{animation:opkomen .3s ease both}
 .seg-btn+.seg-btn{border-left:1px solid var(--rand)}
 .seg-btn.actief{background:var(--accent);color:var(--op-accent)}
 #btn-2d{background:repeating-linear-gradient(45deg,#BCB09A 0 7px,#D9CFBC 7px 14px);color:var(--gedempt)}   /* 2D = gedempt grijs met lichte strepen ('in aanbouw') */
-#btn-2d.actief{color:var(--gedempt)}
+#btn-2d.actief{background:repeating-linear-gradient(45deg,var(--accent) 0 7px,#D9CFBC 7px 14px);color:var(--tekst)}   /* geselecteerd: donkere strepen -> paars */
 [data-theme="dark"] #btn-2d{background:repeating-linear-gradient(45deg,#4A4439 0 7px,#5C5547 7px 14px)}
+[data-theme="dark"] #btn-2d.actief{background:repeating-linear-gradient(45deg,var(--accent) 0 7px,#5C5547 7px 14px)}
 .seg-btn:active{transform:scale(.96)}
 .galerij{
   display:flex;gap:8px;overflow-x:auto;scroll-snap-type:x mandatory;
