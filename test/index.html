@@ -287,9 +287,8 @@ main > section{animation:opkomen .3s ease both}
 .silhouet-keuze button.actief{background:var(--accent);color:var(--op-accent)}
 .silhouet-keuze button:disabled{opacity:.4;cursor:not-allowed}
 .inst-soon{display:inline-block;margin-left:8px;padding:1px 8px;border-radius:999px;background:var(--veldbg);border:1px solid var(--rand);color:var(--gedempt);font-size:.66rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase;vertical-align:middle}
-.bouw-melding{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);z-index:6;width:84%;max-width:330px;margin:0;border-radius:var(--r-md);background:var(--kaart);border:1px solid rgba(142,113,240,.35);box-shadow:0 8px 22px rgba(0,0,0,.28);overflow:hidden;pointer-events:none}
-.bouw-tape{height:9px;background:repeating-linear-gradient(135deg,var(--accent) 0 11px,#EFEAFB 11px 22px)}
-.bouw-inner{display:flex;align-items:center;gap:13px;padding:14px 17px;text-align:left}
+.bouw-melding{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);z-index:6;width:84%;max-width:330px;margin:0;padding:6px;border-radius:16px;background:repeating-linear-gradient(45deg,var(--accent) 0 12px,var(--tekst) 12px 24px);box-shadow:0 8px 22px rgba(0,0,0,.28);pointer-events:none}
+.bouw-inner{display:flex;align-items:center;gap:13px;padding:14px 16px;background:var(--kaart);border-radius:10px;text-align:left}
 .bouw-cone{width:30px;height:30px;flex:none;stroke:var(--accent-diep);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 .bouw-txt{display:flex;flex-direction:column;gap:2px}
 .bouw-txt strong{font-size:1rem;font-weight:700;color:var(--tekst);line-height:1.2}
@@ -1234,7 +1233,6 @@ form label{text-transform:none;letter-spacing:.005em;font-size:.8rem;color:var(-
       <div id="bodymap-wrap">
         <div class="grond-schaduw" aria-hidden="true"></div>
         <div class="bouw-melding" role="status">
-          <div class="bouw-tape" aria-hidden="true"></div>
           <div class="bouw-inner">
             <svg class="bouw-cone" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4 L17.5 19 H6.5 Z"/><path d="M10 12 H14"/><path d="M4.5 19 H19.5"/></svg>
             <div class="bouw-txt">
