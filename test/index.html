@@ -287,7 +287,13 @@ main > section{animation:opkomen .3s ease both}
 .silhouet-keuze button.actief{background:var(--accent);color:var(--op-accent)}
 .silhouet-keuze button:disabled{opacity:.4;cursor:not-allowed}
 .inst-soon{display:inline-block;margin-left:8px;padding:1px 8px;border-radius:999px;background:var(--veldbg);border:1px solid var(--rand);color:var(--gedempt);font-size:.66rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase;vertical-align:middle}
-.bouw-melding{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);z-index:6;width:84%;max-width:330px;margin:0;padding:14px 18px;border-radius:var(--r-md);background:var(--kaart);border:1px solid rgba(224,83,61,.55);color:var(--tekst);font-size:.9rem;font-weight:600;text-align:center;line-height:1.45;box-shadow:0 8px 22px rgba(0,0,0,.28);pointer-events:none}
+.bouw-melding{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);z-index:6;width:84%;max-width:330px;margin:0;border-radius:var(--r-md);background:var(--kaart);border:1px solid rgba(142,113,240,.35);box-shadow:0 8px 22px rgba(0,0,0,.28);overflow:hidden;pointer-events:none}
+.bouw-tape{height:9px;background:repeating-linear-gradient(135deg,var(--accent) 0 11px,#EFEAFB 11px 22px)}
+.bouw-inner{display:flex;align-items:center;gap:13px;padding:14px 17px;text-align:left}
+.bouw-cone{width:30px;height:30px;flex:none;stroke:var(--accent-diep);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.bouw-txt{display:flex;flex-direction:column;gap:2px}
+.bouw-txt strong{font-size:1rem;font-weight:700;color:var(--tekst);line-height:1.2}
+.bouw-txt span{font-size:.8rem;font-weight:600;color:var(--gedempt);font-family:var(--label-font)}
 .stat-toggle{background:none;border:0;padding:0;font:inherit;color:inherit;cursor:pointer;border-bottom:1px dotted var(--gedempt);line-height:1.1;}
 .stat-toggle:hover{color:var(--accent);border-bottom-color:var(--accent);}
 .start-stat-getal.klikbaar{cursor:pointer;display:inline-block;border-bottom:2px dotted currentColor;line-height:1.05;}
@@ -1227,7 +1233,16 @@ form label{text-transform:none;letter-spacing:.005em;font-size:.8rem;color:var(-
     <div class="kaart-layout">
       <div id="bodymap-wrap">
         <div class="grond-schaduw" aria-hidden="true"></div>
-        <div class="bouw-melding" role="status" data-i18n="ui.bouw2d">2D-kaart nog in aanbouw - test vooral het 3D-model.</div>
+        <div class="bouw-melding" role="status">
+          <div class="bouw-tape" aria-hidden="true"></div>
+          <div class="bouw-inner">
+            <svg class="bouw-cone" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4 L17.5 19 H6.5 Z"/><path d="M10 12 H14"/><path d="M4.5 19 H19.5"/></svg>
+            <div class="bouw-txt">
+              <strong data-i18n="ui.bouw2d_kop">Nog in aanbouw</strong>
+              <span data-i18n="ui.bouw2d_sub">Test vooral het 3D-model.</span>
+            </div>
+          </div>
+        </div>
         <svg id="bodymap" viewBox="0 0 200 398" role="img" data-i18n-aria="aria.bodymap" aria-label="Lichaamskaart - tik op een lichaamsdeel om in te zoomen">
           <defs><clipPath id="lichaam-clip"></clipPath></defs>
           <g id="silhouet"></g>
@@ -6648,7 +6663,7 @@ const I18N = {
     'ui.foto_niet_geladen':'Kon de foto niet laden','ui.teken_lijn':'Teken een lijn rond de tattoo en stel de grenswaarde in',
     'ui.geen_afbeelding':'Kies een afbeelding (geen ander bestandstype)','ui.foto_te_groot':'Foto te groot (max 30 MB)','ui.foto_mislukt':'Kon de foto niet verwerken',
     'ui.reset':'Reset','ui.knop_uitleg':'Wat doen de knoppen?','ui.info':'Info',
-    'inst.vorm.binnenkort':'Binnenkort','ui.bouw2d':'2D-kaart nog in aanbouw - test vooral het 3D-model.',
+    'inst.vorm.binnenkort':'Binnenkort','ui.bouw2d_kop':'Nog in aanbouw','ui.bouw2d_sub':'Test vooral het 3D-model.',
     'aria.volledigoverzicht':'Volledig overzicht','aria.welkom':'Welkom',
     'ui.tik_achtergrond':'Tik op de achtergrond in de foto','ui.pipet_uit':'Pipet uit',
     'ui.kies_eerst_foto':'Kies eerst een foto en knip de tattoo uit','ui.tattoo_geplaatst':'Tattoo geplaatst ✓',
@@ -6823,7 +6838,7 @@ const I18N = {
     'ui.foto_niet_geladen':'Could not load the photo','ui.teken_lijn':'Draw a line around the tattoo and set the threshold',
     'ui.geen_afbeelding':'Please choose an image (not another file type)','ui.foto_te_groot':'Photo too large (max 30 MB)','ui.foto_mislukt':'Could not process the photo',
     'ui.reset':'Reset','ui.knop_uitleg':'What do the buttons do?','ui.info':'Info',
-    'inst.vorm.binnenkort':'Coming soon','ui.bouw2d':'2D map still under construction - please test the 3D model.',
+    'inst.vorm.binnenkort':'Coming soon','ui.bouw2d_kop':'Under construction','ui.bouw2d_sub':'Please test the 3D model.',
     'aria.volledigoverzicht':'Full overview','aria.welkom':'Welcome',
     'ui.tik_achtergrond':'Tap the background in the photo','ui.pipet_uit':'Eyedropper off',
     'ui.kies_eerst_foto':'Pick a photo first and cut out the tattoo','ui.tattoo_geplaatst':'Tattoo placed ✓',
