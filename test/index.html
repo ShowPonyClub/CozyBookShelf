@@ -249,7 +249,7 @@ main > section{animation:opkomen .3s ease both}
 #toon-gepland,#toon-gepland-3d{position:absolute;left:14px;top:14px;z-index:6}
 /* Slanke balk BUITEN het canvas: Wishlist-toggle (links) + reset (rechts); het lichaam/de kaart
    blijft vrij van knoppen. De + blijft als FAB op het canvas. */
-.canvas-balk{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:0 2px;min-height:44px}
+.canvas-balk{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:0 14px;min-height:44px}
 .canvas-balk #toon-gepland,.canvas-balk #toon-gepland-3d{position:static;left:auto;top:auto;z-index:auto}
 .canvas-balk #t3d-reset,.canvas-balk #kaart-reset{position:static;top:auto;right:auto;width:40px;height:40px;z-index:auto}
 .canvas-balk .zijde-balk{position:static;left:auto;bottom:auto;z-index:auto;flex-direction:row;margin:0}
@@ -315,7 +315,9 @@ main > section{animation:opkomen .3s ease both}
 .naam-rij .type-keuze{flex:none}
 .naam-rij .type-keuze button{min-height:0;padding:0 12px;font-size:.78rem;display:flex;align-items:center}
 
-.tint-rij{display:flex;justify-content:center;align-items:center;margin:0 0 10px;padding:0 4px}
+.tint-rij{display:flex;justify-content:center;align-items:center;margin:0;padding:0 4px;flex-wrap:wrap}
+.inst-rij-huid{align-items:center;flex-wrap:wrap;gap:8px}
+.inst-rij-huid .tint-rij{justify-content:flex-end;flex:1}
 .tint-slider{
   -webkit-appearance:none;appearance:none;width:100%;height:24px;
   background:transparent;cursor:pointer;outline:none;margin:0;
@@ -366,7 +368,7 @@ main > section{animation:opkomen .3s ease both}
 .lijst-tools .silhouet-keuze{align-self:center}
 /* Rij met de Collectie|Wishlist-toggle + een aparte Statistieken-knop ernaast */
 .col-balk{display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap}
-.col-stats-btn{display:inline-flex;align-items:center;gap:6px;min-height:38px;padding:7px 14px;border:1px solid var(--rand);border-radius:999px;background:var(--veldbg);color:var(--tekst);font-size:.82rem;font-weight:600;font-family:inherit;cursor:pointer}
+.col-stats-btn{display:inline-flex;align-items:center;gap:6px;min-height:44px;padding:0 14px;border:1px solid var(--rand);border-radius:999px;background:var(--veldbg);color:var(--tekst);font-size:var(--fs-sm);font-weight:700;font-family:inherit;cursor:pointer}
 .col-stats-btn .ik{width:16px;height:16px;stroke:currentColor;fill:none}
 .col-stats-btn:active{transform:scale(.97)}
 .zoek-rij{display:flex;flex-direction:column;gap:8px}
@@ -743,13 +745,30 @@ input[type=range]:focus{box-shadow:none;border:none}
 .inst-sectie{padding:12px 16px 8px;border-top:1px solid var(--rand)}
 .inst-sectie:first-of-type{border-top:none}
 /* Groepkop boven een set instellingen-secties (Je lichaam / Voorkeuren / Account / App & info) */
-.inst-groepkop{margin:0;padding:20px 16px 6px;font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.09em;color:var(--gedempt)}
-.inst-groepkop:first-of-type{padding-top:10px}
+/* Instellingen kaart-layout */
+.inst-kaart{margin:0 16px 14px;padding:0;overflow:hidden}
+.inst-kaart-rij{padding:12px 14px;border-bottom:1px solid var(--rand)}
+.inst-kaart-rij-last,.inst-kaart-rij:last-child{border-bottom:none}
+.inst-kaart .inst-rij{margin:0}
+.inst-kaart-app .inst-app-rij{display:block;width:100%;padding:13px 14px;text-align:left;background:none;border:none;border-bottom:1px solid var(--rand);color:var(--tekst);font-size:.93rem;font-weight:500;font-family:inherit;cursor:pointer;text-decoration:none}
+.inst-kaart-app .inst-app-rij:last-child,.inst-kaart-app .inst-app-rij-last{border-bottom:none}
+.inst-kaart-app .inst-app-rij:active{background:var(--rand)}
+/* Compactere segmented controls in instellingen */
+.inst-kaart .silhouet-keuze{width:auto;flex-shrink:0}
+.inst-kaart .silhouet-keuze button{min-height:34px;padding:5px 14px;font-size:.82rem}
+.inst-tabs{display:flex;gap:0;padding:12px 16px 0;border-bottom:1px solid var(--rand)}
+.inst-tab{flex:1;padding:8px 12px;font-size:var(--fs-md);font-weight:700;font-family:inherit;border:none;background:none;color:var(--gedempt);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:color .15s,border-color .15s}
+.inst-tab.actief{color:var(--accent);border-bottom-color:var(--accent)}
+.inst-tab:focus-visible{outline:none}
+.inst-groepkop{display:flex;align-items:center;gap:12px;margin:18px 16px 0;padding:0;font-size:.7rem;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:var(--gedempt)}
+.inst-groepkop::before,.inst-groepkop::after{content:"";flex:1;height:1px;background:var(--rand)}
+.inst-groepkop:first-of-type{margin-top:10px}
+#inst-sluit:focus-visible{outline:none}
 .inst-rij{display:flex;align-items:center;justify-content:space-between;gap:12px}
 .inst-rij .inst-label{margin:0;white-space:nowrap}
 .inst-rij .silhouet-keuze{flex-shrink:0}
 .geslacht-keuze button{display:flex;align-items:center;justify-content:center;gap:7px}
-.geslacht-ic{width:18px;height:18px;flex-shrink:0}
+.geslacht-ic{width:20px;height:20px;flex-shrink:0}
 .inst-groepkop + .inst-sectie{border-top:none}
 .inst-label{font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--gedempt);font-weight:600;margin-bottom:8px}
 .inst-feedback-sub{font-size:.85rem;color:var(--gedempt);margin:0 0 10px;line-height:1.4}
@@ -1537,27 +1556,39 @@ form label{text-transform:none;letter-spacing:.005em;font-size:.8rem;color:var(-
     </button>
   </div>
 
-  <p class="inst-groepkop" data-i18n="inst.groep_lichaam">Je lichaam</p>
-
-  <div class="inst-sectie">
-    <div class="inst-rij">
-    <p class="inst-label" data-i18n="inst.geslacht">Geslacht</p>
-    <div class="silhouet-keuze compact geslacht-keuze" role="group" data-i18n-aria="aria.kiessilhouet" aria-label="Kies silhouet">
-      <button type="button" data-geslacht="man" data-i18n-aria="inst.man" aria-label="Man">
-        <svg class="geslacht-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="10.5" cy="13.5" r="5.5"/><path d="M19 5l-5 5M19 5h-4.5M19 5v4.5"/></svg>
-        <span data-i18n="inst.man">Man</span>
-      </button>
-      <button type="button" data-geslacht="vrouw" data-i18n-aria="inst.vrouw" aria-label="Vrouw">
-        <svg class="geslacht-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="10" r="6"/><path d="M12 16v6M9 19h6"/></svg>
-        <span data-i18n="inst.vrouw">Vrouw</span>
-      </button>
-    </div>
-    </div>
+  <div class="inst-tabs" role="tablist">
+    <button class="inst-tab actief" id="inst-tab-lichaam" role="tab" aria-selected="true" aria-controls="inst-pane-lichaam" data-i18n="inst.tab_lichaam">Lichaam</button>
+    <button class="inst-tab" id="inst-tab-app" role="tab" aria-selected="false" aria-controls="inst-pane-app" data-i18n="inst.tab_app">App</button>
   </div>
 
+  <div id="inst-pane-lichaam" role="tabpanel" aria-labelledby="inst-tab-lichaam">
+  <p class="inst-groepkop" data-i18n="inst.groep_lichaam">Je lichaam</p>
+  <div class="paneel inst-kaart">
+    <div class="inst-rij inst-kaart-rij">
+      <p class="inst-label" data-i18n="inst.geslacht">Geslacht</p>
+      <div class="silhouet-keuze geslacht-keuze" role="group" data-i18n-aria="aria.kiessilhouet" aria-label="Kies silhouet">
+        <button type="button" data-geslacht="man" data-i18n-aria="inst.man" aria-label="Man">
+          <svg class="geslacht-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="10.5" cy="13.5" r="5.5"/><path d="M19 5l-5 5M19 5h-4.5M19 5v4.5"/></svg>
+        </button>
+        <button type="button" data-geslacht="vrouw" data-i18n-aria="inst.vrouw" aria-label="Vrouw">
+          <svg class="geslacht-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="10" r="6"/><path d="M12 16v6M9 19h6"/></svg>
+        </button>
+      </div>
+    </div>
+    <div class="inst-rij inst-rij-huid inst-kaart-rij">
+      <p class="inst-label" data-i18n="inst.huid">Huidskleur</p>
+      <div class="tint-rij" id="tint-rij"></div>
+    </div>
+    <div class="inst-rij inst-kaart-rij inst-kaart-rij-last" id="inst-onderbroek-sectie">
+      <p class="inst-label" data-i18n="inst.onderbroek">Onderbroek</p>
+      <div class="silhouet-keuze" id="onderbroek-keuze" role="group" data-i18n-aria="inst.onderbroek" aria-label="Onderbroek">
+        <button type="button" data-onderbroek="geen" data-i18n="onderbroek.geen">Geen</button>
+        <button type="button" data-onderbroek="boxer" data-i18n="onderbroek.boxer">Boxer &#9829;</button>
+        <button type="button" data-onderbroek="brief" data-i18n="onderbroek.brief">Strak</button>
+      </div>
+    </div>
+  </div>
   <div class="inst-sectie" hidden>
-
-    <p class="inst-label"><span data-i18n="inst.vorm">Lichaamsvorm</span></p>
     <div class="silhouet-keuze compact" id="vorm-keuze" role="group" data-i18n-aria="inst.vorm" aria-label="Lichaamsvorm">
       <button type="button" data-shape="slank" data-i18n="inst.vorm.slank" disabled>Slank</button>
       <button type="button" data-shape="gemiddeld" data-i18n="inst.vorm.gemiddeld" disabled>Gemiddeld</button>
@@ -1565,50 +1596,29 @@ form label{text-transform:none;letter-spacing:.005em;font-size:.8rem;color:var(-
       <button type="button" data-shape="zwaar" data-i18n="inst.vorm.zwaar" disabled>Zwaar</button>
     </div>
   </div>
+  </div><!-- /inst-pane-lichaam -->
 
-  <div class="inst-sectie">
-    <p class="inst-label" data-i18n="inst.huid">Huidskleur</p>
-    <div class="tint-rij" id="tint-rij"></div>
-  </div>
-
-  <div class="inst-sectie" id="inst-onderbroek-sectie" style="padding-bottom:24px">
-    <div class="inst-rij">
-      <p class="inst-label" data-i18n="inst.onderbroek">Onderbroek</p>
-      <div class="silhouet-keuze compact" id="onderbroek-keuze" role="group" data-i18n-aria="inst.onderbroek" aria-label="Onderbroek">
-        <button type="button" data-onderbroek="geen" data-i18n="onderbroek.geen">Geen</button>
-        <button type="button" data-onderbroek="boxer" data-i18n="onderbroek.boxer">Boxer &#9829;</button>
-        <button type="button" data-onderbroek="brief" data-i18n="onderbroek.brief">Strak</button>
-      </div>
-    </div>
-  </div>
-
+  <div id="inst-pane-app" role="tabpanel" aria-labelledby="inst-tab-app" hidden>
   <p class="inst-groepkop" data-i18n="inst.groep_voorkeuren">Voorkeuren</p>
-
-  <div class="inst-sectie">
-    <div class="inst-rij">
+  <div class="paneel inst-kaart">
+    <div class="inst-rij inst-kaart-rij">
       <p class="inst-label" data-i18n="inst.taal">Taal</p>
-      <div class="silhouet-keuze compact" id="taal-keuze" role="group" data-i18n-aria="inst.taal" aria-label="Taal">
+      <div class="silhouet-keuze" id="taal-keuze" role="group" data-i18n-aria="inst.taal" aria-label="Taal">
         <button type="button" data-taal="nl">NL</button>
         <button type="button" data-taal="en">EN</button>
       </div>
     </div>
-  </div>
-
-  <div class="inst-sectie">
-    <div class="inst-rij">
+    <div class="inst-rij inst-kaart-rij">
       <p class="inst-label" data-i18n="inst.valuta">Valuta</p>
-      <div class="silhouet-keuze compact" id="valuta-keuze" role="group" data-i18n-aria="inst.valuta" aria-label="Valuta">
+      <div class="silhouet-keuze" id="valuta-keuze" role="group" data-i18n-aria="inst.valuta" aria-label="Valuta">
         <button type="button" data-valuta="EUR">&euro; EUR</button>
         <button type="button" data-valuta="USD">$ USD</button>
         <button type="button" data-valuta="GBP">&pound; GBP</button>
       </div>
     </div>
-  </div>
-
-  <div class="inst-sectie" style="padding-bottom:24px">
-    <div class="inst-rij">
+    <div class="inst-rij inst-kaart-rij inst-kaart-rij-last">
       <p class="inst-label" data-i18n="inst.thema">Thema</p>
-      <div class="silhouet-keuze compact" id="thema-keuze" role="group" data-i18n-aria="inst.thema" aria-label="Thema">
+      <div class="silhouet-keuze" id="thema-keuze" role="group" data-i18n-aria="inst.thema" aria-label="Thema">
         <button type="button" data-thema="auto" data-i18n="inst.thema.auto">Systeem</button>
         <button type="button" data-thema="licht" data-i18n="inst.thema.licht">Licht</button>
         <button type="button" data-thema="donker" data-i18n="inst.thema.donker">Donker</button>
@@ -1617,8 +1627,7 @@ form label{text-transform:none;letter-spacing:.005em;font-size:.8rem;color:var(-
   </div>
 
   <p class="inst-groepkop" data-i18n="inst.groep_account">Account</p>
-
-  <div class="inst-sectie" id="inst-account-rij" style="padding-bottom:24px">
+  <div class="paneel inst-kaart" id="inst-account-rij">
     <button type="button" class="inst-link-rij" id="inst-account-open">
       <span data-i18n="inst.account">Account &amp; cloud-sync</span>
       <span class="inst-link-pijl" aria-hidden="true">&rsaquo;</span>
@@ -1626,9 +1635,8 @@ form label{text-transform:none;letter-spacing:.005em;font-size:.8rem;color:var(-
   </div>
 
   <p class="inst-groepkop" data-i18n="inst.groep_app">App &amp; info</p>
-
-  <div class="inst-sectie" id="inst-install-sectie" style="padding-bottom:24px">
-    <button type="button" class="knop-sec" id="inst-install" data-i18n="install.opbeginscherm" style="width:100%">Op beginscherm zetten</button>
+  <div class="paneel inst-kaart inst-kaart-app" id="inst-install-sectie">
+    <button type="button" class="inst-app-rij" id="inst-install" data-i18n="install.opbeginscherm">Op beginscherm zetten</button>
     <div class="install-ios" id="inst-install-uitleg" hidden>
       <svg class="ik install-ios-ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 14V4M8.5 7.5 12 4l3.5 3.5"/><path d="M7 10H6.5A1.5 1.5 0 0 0 5 11.5v7A1.5 1.5 0 0 0 6.5 20h11a1.5 1.5 0 0 0 1.5-1.5v-7A1.5 1.5 0 0 0 17.5 10H17"/></svg>
       <div class="install-ios-tekst">
@@ -1636,18 +1644,11 @@ form label{text-transform:none;letter-spacing:.005em;font-size:.8rem;color:var(-
         <span data-i18n-html="install.ios">Tap the <b>Share</b> button, then choose <b>Add to Home Screen</b>.</span>
       </div>
     </div>
+    <button type="button" class="inst-app-rij" id="inst-onboarding" data-i18n="onb.opnieuw">Introductie opnieuw</button>
+    <a class="inst-app-rij" id="inst-feedback" href="mailto:hello@tatties.app?subject=Tatties%20feedback" data-i18n="inst.feedback_knop">Stuur feedback</a>
+    <a class="inst-app-rij inst-app-rij-last" id="inst-privacy" href="https://tatties.app/privacy.html" target="_blank" rel="noopener" data-i18n="inst.privacy">Privacybeleid</a>
   </div>
-
-  <div class="inst-sectie" style="padding-bottom:24px">
-    <button type="button" class="knop-sec" id="inst-onboarding" data-i18n="onb.opnieuw" style="width:100%">Introductie opnieuw</button>
-  </div>
-
-  <div class="inst-sectie" style="padding-bottom:28px">
-    <p class="inst-label" data-i18n="inst.feedback">Feedback</p>
-    <p class="inst-feedback-sub" data-i18n="inst.feedback_sub">Iets kapot of een idee? Ik hoor het graag.</p>
-    <a class="knop-sec inst-feedback-knop" id="inst-feedback" href="mailto:hello@tatties.app?subject=Tatties%20feedback" data-i18n="inst.feedback_knop">Stuur feedback</a>
-    <p class="inst-feedback-sub" style="margin-top:14px;margin-bottom:0"><a id="inst-privacy" href="https://tatties.app/privacy.html" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline" data-i18n="inst.privacy">Privacybeleid</a></p>
-  </div>
+  </div><!-- /inst-pane-app -->
 </div>
 
 <!-- Account-venster: geopend vanaf de startscherm-rij of de instellingen-link -->
@@ -6711,7 +6712,7 @@ const I18N = {
     'btn.export':'Exporteren','btn.import':'Importeren','btn.png':'Kaart als PNG',
     'install.tekst':'Zet Tatties op je beginscherm voor offline gebruik','install.knop':'Installeren','install.opbeginscherm':'Op beginscherm zetten','install.algeinstalleerd':'Al geïnstalleerd','install.handmatig':'Installeren kan via het menu van je browser.',
     'install.ios':'Tik op de <b>Deel</b>-knop en kies <b>Zet op beginscherm</b>.','install.ios_kop':'Op iPhone of iPad',
-    'inst.titel':'Instellingen','inst.groep_lichaam':'Je lichaam','inst.groep_voorkeuren':'Voorkeuren','inst.groep_account':'Account','inst.groep_app':'App & info','inst.geslacht':'Man / Vrouw','inst.man':'Man','inst.vrouw':'Vrouw','inst.huid':'Huidskleur','inst.taal':'Taal',
+    'inst.titel':'Instellingen','inst.tab_lichaam':'Lichaam','inst.tab_app':'App','inst.groep_lichaam':'Je lichaam','inst.groep_voorkeuren':'Voorkeuren','inst.groep_account':'Account','inst.groep_app':'App & info','inst.geslacht':'Geslacht','inst.man':'Man','inst.vrouw':'Vrouw','inst.huid':'Huidskleur','inst.taal':'Taal',
     'inst.vorm':'Lichaamsvorm','inst.vorm.slank':'Slank','inst.vorm.gemiddeld':'Gemiddeld','inst.vorm.atletisch':'Atletisch','inst.vorm.zwaar':'Zwaar',
     'inst.thema':'Thema','inst.thema.auto':'Systeem','inst.thema.licht':'Licht','inst.thema.donker':'Donker',
     'inst.feedback':'Feedback','inst.feedback_sub':'Iets kapot of een idee? Ik hoor het graag.','inst.feedback_knop':'Stuur feedback','inst.privacy':'Privacybeleid',
@@ -6886,7 +6887,7 @@ const I18N = {
     'btn.export':'Export','btn.import':'Import','btn.png':'Map as PNG',
     'install.tekst':'Add Tatties to your home screen for offline use','install.knop':'Install','install.opbeginscherm':'Add to home screen','install.algeinstalleerd':'Already installed','install.handmatig':'Install via your browser menu.',
     'install.ios':'Tap the <b>Share</b> button, then choose <b>Add to Home Screen</b>.','install.ios_kop':'On iPhone or iPad',
-    'inst.titel':'Settings','inst.groep_lichaam':'Your body','inst.groep_voorkeuren':'Preferences','inst.groep_account':'Account','inst.groep_app':'App & info','inst.geslacht':'Male / Female','inst.man':'Male','inst.vrouw':'Female','inst.huid':'Skin tone','inst.taal':'Language',
+    'inst.titel':'Settings','inst.tab_lichaam':'Body','inst.tab_app':'App','inst.groep_lichaam':'Your body','inst.groep_voorkeuren':'Preferences','inst.groep_account':'Account','inst.groep_app':'App & info','inst.geslacht':'Gender','inst.man':'Male','inst.vrouw':'Female','inst.huid':'Skin tone','inst.taal':'Language',
     'inst.vorm':'Body shape','inst.vorm.slank':'Slim','inst.vorm.gemiddeld':'Average','inst.vorm.atletisch':'Athletic','inst.vorm.zwaar':'Heavy',
     'inst.thema':'Appearance','inst.thema.auto':'System','inst.thema.licht':'Light','inst.thema.donker':'Dark',
     'inst.feedback':'Feedback','inst.feedback_sub':'Something broken, or an idea? Let me know.','inst.feedback_knop':'Send feedback','inst.privacy':'Privacy policy',
@@ -10515,6 +10516,15 @@ async function verwijderVoorbeelden() {
     }); }
   $('#inst-sluit').addEventListener('click', sluitInstellingen);
   $('#inst-overlay').addEventListener('click', sluitInstellingen);
+  { const tabs = document.querySelectorAll('.inst-tab');
+    tabs.forEach(tab => tab.addEventListener('click', () => {
+      tabs.forEach(t => { t.classList.remove('actief'); t.setAttribute('aria-selected','false'); });
+      tab.classList.add('actief'); tab.setAttribute('aria-selected','true');
+      document.querySelectorAll('[role="tabpanel"]').forEach(p => p.hidden = true);
+      const pane = $('#' + tab.getAttribute('aria-controls'));
+      if (pane) pane.hidden = false;
+    }));
+  }
   { const ao = $('#inst-account-open'); if (ao) ao.addEventListener('click', () => { sluitInstellingen(); openAccount(); }); }
   { const as = $('#account-sluit'); if (as) as.addEventListener('click', sluitAccount); }
   { const aov = $('#account-overlay'); if (aov) aov.addEventListener('click', sluitAccount); }
