@@ -13098,8 +13098,7 @@ async function verwijderVoorbeelden() {
   // wat ná onze eerste show3D draait. We onderscheppen die EERSTE "home"-aanroep
   // en tonen 3D. Daarna draait toonView normaal (2D-knop blijft werken).
   // Onthoud de laatst gebruikte weergave: standaard 3D, maar 2D als dat het laatst was.
-  let startView=null; try{ startView=localStorage.getItem("tatties-view"); }catch(e){}
-  let bootRedirect = startView !== "2d";
+  let bootRedirect = true;   // altijd op het startscherm landen, ongeacht de opgeslagen view
   if(typeof toonView==="function"){
     const _origToonView=toonView;
     toonView=function(naam){
