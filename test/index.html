@@ -745,6 +745,8 @@ input[type=range]:focus{box-shadow:none;border:none}
 /* Groepkop boven een set instellingen-secties (Je lichaam / Voorkeuren / Account / App & info) */
 .inst-groepkop{margin:0;padding:20px 16px 6px;font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.09em;color:var(--gedempt)}
 .inst-groepkop:first-of-type{padding-top:10px}
+.geslacht-rij{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.geslacht-rij .inst-label{margin:0;white-space:nowrap}
 .geslacht-keuze button{display:flex;align-items:center;justify-content:center;gap:7px}
 .geslacht-ic{width:18px;height:18px;flex-shrink:0}
 .inst-groepkop + .inst-sectie{border-top:none}
@@ -1537,6 +1539,7 @@ form label{text-transform:none;letter-spacing:.005em;font-size:.8rem;color:var(-
   <p class="inst-groepkop" data-i18n="inst.groep_lichaam">Je lichaam</p>
 
   <div class="inst-sectie">
+    <div class="geslacht-rij">
     <p class="inst-label" data-i18n="inst.geslacht">Silhouet</p>
     <div class="silhouet-keuze compact geslacht-keuze" role="group" data-i18n-aria="aria.kiessilhouet" aria-label="Kies silhouet">
       <button type="button" data-geslacht="man" data-i18n-aria="inst.man" aria-label="Man">
@@ -1547,6 +1550,7 @@ form label{text-transform:none;letter-spacing:.005em;font-size:.8rem;color:var(-
         <svg class="geslacht-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="10" r="6"/><path d="M12 16v6M9 19h6"/></svg>
         <span data-i18n="inst.vrouw">Vrouw</span>
       </button>
+    </div>
     </div>
   </div>
 
