@@ -745,8 +745,9 @@ input[type=range]:focus{box-shadow:none;border:none}
 /* Groepkop boven een set instellingen-secties (Je lichaam / Voorkeuren / Account / App & info) */
 .inst-groepkop{margin:0;padding:20px 16px 6px;font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.09em;color:var(--gedempt)}
 .inst-groepkop:first-of-type{padding-top:10px}
-.geslacht-rij{display:flex;align-items:center;justify-content:space-between;gap:12px}
-.geslacht-rij .inst-label{margin:0;white-space:nowrap}
+.inst-rij{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.inst-rij .inst-label{margin:0;white-space:nowrap}
+.inst-rij .silhouet-keuze{flex-shrink:0}
 .geslacht-keuze button{display:flex;align-items:center;justify-content:center;gap:7px}
 .geslacht-ic{width:18px;height:18px;flex-shrink:0}
 .inst-groepkop + .inst-sectie{border-top:none}
@@ -1539,8 +1540,8 @@ form label{text-transform:none;letter-spacing:.005em;font-size:.8rem;color:var(-
   <p class="inst-groepkop" data-i18n="inst.groep_lichaam">Je lichaam</p>
 
   <div class="inst-sectie">
-    <div class="geslacht-rij">
-    <p class="inst-label" data-i18n="inst.geslacht">Silhouet</p>
+    <div class="inst-rij">
+    <p class="inst-label" data-i18n="inst.geslacht">Geslacht</p>
     <div class="silhouet-keuze compact geslacht-keuze" role="group" data-i18n-aria="aria.kiessilhouet" aria-label="Kies silhouet">
       <button type="button" data-geslacht="man" data-i18n-aria="inst.man" aria-label="Man">
         <svg class="geslacht-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="10.5" cy="13.5" r="5.5"/><path d="M19 5l-5 5M19 5h-4.5M19 5v4.5"/></svg>
@@ -1555,6 +1556,7 @@ form label{text-transform:none;letter-spacing:.005em;font-size:.8rem;color:var(-
   </div>
 
   <div class="inst-sectie" hidden>
+
     <p class="inst-label"><span data-i18n="inst.vorm">Lichaamsvorm</span></p>
     <div class="silhouet-keuze compact" id="vorm-keuze" role="group" data-i18n-aria="inst.vorm" aria-label="Lichaamsvorm">
       <button type="button" data-shape="slank" data-i18n="inst.vorm.slank" disabled>Slank</button>
@@ -1570,39 +1572,47 @@ form label{text-transform:none;letter-spacing:.005em;font-size:.8rem;color:var(-
   </div>
 
   <div class="inst-sectie" id="inst-onderbroek-sectie" style="padding-bottom:24px">
-    <p class="inst-label" data-i18n="inst.onderbroek">Onderbroek</p>
-    <div class="silhouet-keuze compact" id="onderbroek-keuze" role="group" data-i18n-aria="inst.onderbroek" aria-label="Onderbroek">
-      <button type="button" data-onderbroek="geen" data-i18n="onderbroek.geen">Geen</button>
-      <button type="button" data-onderbroek="boxer" data-i18n="onderbroek.boxer">Boxer &#9829;</button>
-      <button type="button" data-onderbroek="brief" data-i18n="onderbroek.brief">Strak</button>
+    <div class="inst-rij">
+      <p class="inst-label" data-i18n="inst.onderbroek">Onderbroek</p>
+      <div class="silhouet-keuze compact" id="onderbroek-keuze" role="group" data-i18n-aria="inst.onderbroek" aria-label="Onderbroek">
+        <button type="button" data-onderbroek="geen" data-i18n="onderbroek.geen">Geen</button>
+        <button type="button" data-onderbroek="boxer" data-i18n="onderbroek.boxer">Boxer &#9829;</button>
+        <button type="button" data-onderbroek="brief" data-i18n="onderbroek.brief">Strak</button>
+      </div>
     </div>
   </div>
 
   <p class="inst-groepkop" data-i18n="inst.groep_voorkeuren">Voorkeuren</p>
 
   <div class="inst-sectie">
-    <p class="inst-label" data-i18n="inst.taal">Taal</p>
-    <div class="silhouet-keuze compact" id="taal-keuze" role="group" data-i18n-aria="inst.taal" aria-label="Taal">
-      <button type="button" data-taal="nl">Nederlands</button>
-      <button type="button" data-taal="en">English</button>
+    <div class="inst-rij">
+      <p class="inst-label" data-i18n="inst.taal">Taal</p>
+      <div class="silhouet-keuze compact" id="taal-keuze" role="group" data-i18n-aria="inst.taal" aria-label="Taal">
+        <button type="button" data-taal="nl">NL</button>
+        <button type="button" data-taal="en">EN</button>
+      </div>
     </div>
   </div>
 
   <div class="inst-sectie">
-    <p class="inst-label" data-i18n="inst.valuta">Valuta</p>
-    <div class="silhouet-keuze compact" id="valuta-keuze" role="group" data-i18n-aria="inst.valuta" aria-label="Valuta">
-      <button type="button" data-valuta="EUR">&euro; EUR</button>
-      <button type="button" data-valuta="USD">$ USD</button>
-      <button type="button" data-valuta="GBP">&pound; GBP</button>
+    <div class="inst-rij">
+      <p class="inst-label" data-i18n="inst.valuta">Valuta</p>
+      <div class="silhouet-keuze compact" id="valuta-keuze" role="group" data-i18n-aria="inst.valuta" aria-label="Valuta">
+        <button type="button" data-valuta="EUR">&euro; EUR</button>
+        <button type="button" data-valuta="USD">$ USD</button>
+        <button type="button" data-valuta="GBP">&pound; GBP</button>
+      </div>
     </div>
   </div>
 
   <div class="inst-sectie" style="padding-bottom:24px">
-    <p class="inst-label" data-i18n="inst.thema">Weergave</p>
-    <div class="silhouet-keuze" id="thema-keuze" role="group" data-i18n-aria="inst.thema" aria-label="Weergave">
-      <button type="button" data-thema="auto" data-i18n="inst.thema.auto">Systeem</button>
-      <button type="button" data-thema="licht" data-i18n="inst.thema.licht">Licht</button>
-      <button type="button" data-thema="donker" data-i18n="inst.thema.donker">Donker</button>
+    <div class="inst-rij">
+      <p class="inst-label" data-i18n="inst.thema">Thema</p>
+      <div class="silhouet-keuze compact" id="thema-keuze" role="group" data-i18n-aria="inst.thema" aria-label="Thema">
+        <button type="button" data-thema="auto" data-i18n="inst.thema.auto">Systeem</button>
+        <button type="button" data-thema="licht" data-i18n="inst.thema.licht">Licht</button>
+        <button type="button" data-thema="donker" data-i18n="inst.thema.donker">Donker</button>
+      </div>
     </div>
   </div>
 
@@ -6703,7 +6713,7 @@ const I18N = {
     'install.ios':'Tik op de <b>Deel</b>-knop en kies <b>Zet op beginscherm</b>.','install.ios_kop':'Op iPhone of iPad',
     'inst.titel':'Instellingen','inst.groep_lichaam':'Je lichaam','inst.groep_voorkeuren':'Voorkeuren','inst.groep_account':'Account','inst.groep_app':'App & info','inst.geslacht':'Man / Vrouw','inst.man':'Man','inst.vrouw':'Vrouw','inst.huid':'Huidskleur','inst.taal':'Taal',
     'inst.vorm':'Lichaamsvorm','inst.vorm.slank':'Slank','inst.vorm.gemiddeld':'Gemiddeld','inst.vorm.atletisch':'Atletisch','inst.vorm.zwaar':'Zwaar',
-    'inst.thema':'Weergave','inst.thema.auto':'Systeem','inst.thema.licht':'Licht','inst.thema.donker':'Donker',
+    'inst.thema':'Thema','inst.thema.auto':'Systeem','inst.thema.licht':'Licht','inst.thema.donker':'Donker',
     'inst.feedback':'Feedback','inst.feedback_sub':'Iets kapot of een idee? Ik hoor het graag.','inst.feedback_knop':'Stuur feedback','inst.privacy':'Privacybeleid',
     'inst.account':'Account & cloud-sync','account.uitleg':'Optioneel. Log in om je collectie later tussen apparaten te synchroniseren. Zonder inloggen blijft alles lokaal op dit toestel.','account.email_ph':'E-mailadres','account.ww_ph':'Wachtwoord','account.inloggen':'Inloggen','account.aanmaken':'Account aanmaken','account.uitloggen':'Uitloggen','account.ingelogd_als':'Ingelogd als','account.bezig':'Bezig…','account.check_mail':'Bijna klaar! Check je mail ({email}) en klik op de bevestigingslink om je account te activeren.','account.ingelogd':'Ingelogd. Welkom terug!','account.uitgelogd':'Uitgelogd.','sync.bezig':'Synchroniseren…','sync.klaar':'Bijgewerkt','account.fout_velden':'Vul een e-mailadres en wachtwoord in.','account.fout_generiek':'Er ging iets mis. Probeer het later opnieuw.','account.offline':'Cloud-sync is nu niet beschikbaar (geen verbinding).','account.backup_uitleg':'Zet je gegevens veilig in de cloud (foto\'s volgen later).','account.backup_knop':'Nu back-uppen','account.backup_bezig':'Bezig met back-uppen…','account.backup_klaar':'{n} item(s) geback-upt naar de cloud.','account.backup_fout':'Back-up mislukt. Probeer het later opnieuw.','account.pull_knop':'Ophalen uit cloud','account.pull_bezig':'Bezig met ophalen…','account.pull_klaar':'{n} item(s) opgehaald uit de cloud (nog zonder foto\'s).','account.pull_niks':'Niets nieuws om op te halen.','account.pull_fout':'Ophalen mislukt. Probeer het later opnieuw.','account.sync_uitleg':'Synchroniseer je collectie (inclusief foto\'s) met de cloud.','account.sync_knop':'Nu synchroniseren','account.sync_bezig':'Bezig met synchroniseren…','account.sync_klaar':'Gesynchroniseerd: {omhoog} verstuurd, {omlaag} opgehaald.','account.sync_niks':'Alles is al up-to-date.','account.sync_fout':'Synchroniseren mislukt. Probeer het later opnieuw.','account.verwijder_knop':'Account verwijderen','account.verwijder_bevestig':'Weet je het zeker? Dit verwijdert je account en alle gegevens en foto\'s in de cloud. Je lokale collectie op dit toestel blijft staan. Dit kan niet ongedaan worden gemaakt.','account.verwijder_bezig':'Account verwijderen…','account.verwijder_klaar':'Je account en cloud-gegevens zijn verwijderd.','account.verwijder_fout':'Verwijderen mislukt. Probeer het later opnieuw.','account.fout_login':'E-mail of wachtwoord klopt niet.','account.fout_onbevestigd':'Je e-mailadres is nog niet bevestigd. Check je inbox (en spam) voor de bevestigingsmail.','account.resend_knop':'Bevestigingsmail opnieuw sturen','account.resend_klaar':'Bevestigingsmail opnieuw verstuurd. Check je inbox.','account.reset_knop':'Wachtwoord vergeten?','account.reset_geen_email':'Vul je e-mailadres in.','account.reset_klaar':'Als dit e-mailadres bij ons bekend is, hebben we een resetlink gestuurd. Check je mail.','account.herstel_titel':'Stel een nieuw wachtwoord in.','account.herstel_ph':'Nieuw wachtwoord','account.herstel_knop':'Wachtwoord opslaan','account.herstel_kort':'Kies een wachtwoord van minstens 8 tekens.','account.herstel_klaar':'Je wachtwoord is bijgewerkt. Je bent ingelogd.','account.herstel_fout':'Opslaan mislukt. Vraag eventueel een nieuwe resetlink aan.','account.google':'Doorgaan met Google','account.of':'of',
     'stats.titel':'Statistieken','stats.collectie':'Collectie','stats.aantal':'Aantal tattoos','stats.uitgegeven':'Totaal uitgegeven',
