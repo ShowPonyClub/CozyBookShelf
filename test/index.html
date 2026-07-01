@@ -1014,7 +1014,11 @@ form label,
 .cutmodal .cm-x:active{background:var(--rand);}
 .cutmodal .cm-body{padding:14px 16px;display:flex;flex-direction:column;gap:8px;overflow-y:auto;flex:1;}
 .cutmodal .cm-body>.btn{flex:0 0 auto;padding:10px;}
-.cutmodal .cm-toprow{display:flex;justify-content:flex-end;align-items:center;gap:10px;}
+.cutmodal .cm-toprow{display:flex;justify-content:space-between;align-items:center;gap:10px;}
+.cutmodal .cm-titel{font-family:var(--serif);font-size:1.02rem;font-weight:700;color:var(--tekst);margin:0;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.cutmodal.cm-compact .cm-titel{display:none;}
+.cutmodal .cut-tools .cm-puntbtn{gap:5px;}
+.cutmodal .cut-tools .cm-puntbtn .tt-lbl{display:inline;font-size:.82rem;font-weight:600;line-height:1;}
 .cutmodal .cm-naam-top{width:100%;box-sizing:border-box;flex:0 0 auto;min-width:0;padding:9px 11px;border:1px solid var(--rand);border-radius:var(--r-sm);background:var(--veldbg);color:var(--tekst);font-size:var(--fs-base);font-family:inherit;}
 .cutmodal .cm-naam-top[aria-invalid="true"]{border-color:var(--invalid);box-shadow:0 0 0 2px rgba(209,67,67,.18);}
 .cutmodal .cm-onderrij{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:2px;}
@@ -1479,17 +1483,13 @@ form label{text-transform:none;letter-spacing:.005em;font-size:.8rem;color:var(-
     <div id="cutModal" class="cutmodal" role="dialog" aria-modal="true" aria-labelledby="cmTitle">
       <div class="cm-card">
         <div class="cm-body">
-          <span id="cmTitle" class="visueel-verborgen" data-i18n="ui.tattoo_toevoegen">Tattoo toevoegen</span>
           <div class="cm-toprow">
+            <span id="cmTitle" class="cm-titel" data-i18n="ui.tattoo_toevoegen">Tattoo toevoegen</span>
             <button id="cmCancel" class="cm-x" data-i18n-title="form.annuleren" data-i18n-aria="form.annuleren" title="Annuleer" aria-label="Annuleer">&times;</button>
           </div>
           <input type="file" id="imgInput" accept="image/*" style="display:none">
           <input type="file" id="imgInputCamera" accept="image/*" capture="environment" style="display:none">
           <div id="cmSettings" hidden>
-            <div class="silhouet-keuze compact cm-modus" id="cmModus" role="group" data-i18n-aria="ui.snijmethode" aria-label="Snijmethode">
-              <button type="button" data-modus="vrij" data-i18n="ui.snij_vrij">Vrij tekenen</button>
-              <button type="button" data-modus="punten" data-i18n="ui.snij_punten">Punten</button>
-            </div>
             <span class="hintline" id="cmHint" style="display:block;margin:0 0 6px">Teken met je vinger een lijn rond de tattoo.</span>
             <div class="silhouet-keuze compact cm-modus" id="cmWandModus" hidden role="group" data-i18n-aria="ui.wand_wat" aria-label="Toverstaf: wat tik je" style="margin:0 0 8px">
               <button type="button" data-wandkeep="0" data-i18n="ui.wand_weg">Achtergrond weg</button>
@@ -1532,6 +1532,7 @@ form label{text-transform:none;letter-spacing:.005em;font-size:.8rem;color:var(-
                 <button id="cmToolsToggle" type="button" class="linkbtn cm-toolstoggle" aria-expanded="false" aria-controls="cmAdvTools" data-i18n-title="ui.gereedschap" data-i18n-aria="ui.gereedschap" title="Gereedschap" aria-label="Gereedschap"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h9"/><path d="M17 7h3"/><circle cx="15" cy="7" r="2.2"/><path d="M4 17h3"/><path d="M11 17h9"/><circle cx="9" cy="17" r="2.2"/></svg><span class="tt-lbl" data-i18n="ui.gereedschap">Gereedschap</span><svg class="ik ik-chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
               </div>
               <div id="cmAdvTools" class="cm-advrow" hidden role="group" data-i18n-aria="ui.gereedschap" aria-label="Gereedschap">
+                <button id="cmPuntBtn" type="button" class="linkbtn cm-puntbtn" aria-pressed="false" data-i18n-title="ui.snij_punten" data-i18n-aria="ui.snij_punten" title="Punten" aria-label="Punten"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 7l12 2-3 9-8-2z" fill="none"/><circle cx="6" cy="7" r="1.8"/><circle cx="18" cy="9" r="1.8"/><circle cx="15" cy="18" r="1.8"/><circle cx="7" cy="16" r="1.8"/></svg><span class="tt-lbl" data-i18n="ui.snij_punten">Punten</span></button>
                 <button id="rotate90Btn" class="linkbtn" data-i18n-title="ui.draaien90" data-i18n-aria="ui.draaien90" title="90&deg; draaien" aria-label="90&deg; draaien"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="10" width="11" height="11" rx="2"/><path d="M14 4h3a3 3 0 0 1 3 3v3"/><path d="M16.5 1.5L20 5l-3.5 3.5"/></svg><span class="t-lbl" data-i18n="ui.draaien90">90&deg; draaien</span></button>
                 <button id="spiegelBtn" class="linkbtn" data-i18n-title="ui.spiegelen" data-i18n-aria="ui.spiegelen" title="Spiegelen" aria-label="Spiegelen"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v18" stroke-dasharray="2 3"/><path d="M4 6L4 18L10 12Z"/><path d="M20 6L20 18L14 12Z"/></svg><span class="t-lbl" data-i18n="ui.spiegelen">Spiegelen</span></button>
                 <button id="wandBtn" class="linkbtn" data-i18n-title="ui.toverstaf" data-i18n-aria="ui.toverstaf" title="Toverstaf" aria-label="Toverstaf"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 19L14 10"/><path d="M17 3l1 3 3 1-3 1-1 3-1-3-3-1 3-1z"/><path d="M6 5v2M5 6h2"/></svg><span class="t-lbl" data-i18n="ui.toverstaf">Toverstaf</span></button>
@@ -11991,7 +11992,8 @@ async function verwijderVoorbeelden() {
     return a.concat(b.slice(1));
   }
   function zetSnijModusUI(){
-    document.querySelectorAll('#cmModus button[data-modus]').forEach(b=>b.classList.toggle('actief', b.dataset.modus===cutModus));
+    const pb=document.getElementById('cmPuntBtn');
+    if(pb){ const aan=cutModus==='punten'; pb.classList.toggle('on',aan); pb.setAttribute('aria-pressed',aan?'true':'false'); }
     const h=document.getElementById('cmHint'); if(h) h.textContent=tr(cutModus==='vrij'?'ui.cut_hint_vrij':'ui.cut_hint_punten');
   }
   let huidMethode='kleur';   // 'kleur' = huidskleur prikken, 'helder' = helderheidsdrempel
@@ -12544,7 +12546,7 @@ async function verwijderVoorbeelden() {
         inf.onclick=()=>{ if(tip.hidden){ tip.hidden=false; inf.setAttribute("aria-expanded","true");
           setTimeout(()=>document.addEventListener("pointerdown", sluit, true), 0); } else sluit(); }; } }
     document.getElementById("cropReset").onclick=()=>{ lassoPts=[]; wandSeeds=[]; eraseStrokes=[]; gumStroke=null; lassoDragIdx=-1; rebuildBase(); drawLasso(); updateCutout(); };
-    document.querySelectorAll('#cmModus button[data-modus]').forEach(b=>b.onclick=()=>{ cutModus=b.dataset.modus; drawingFree=false; lassoDragIdx=-1; zetSnijModusUI(); drawLasso(); });
+    { const pb=document.getElementById('cmPuntBtn'); if(pb) pb.onclick=()=>{ cutModus=(cutModus==='punten'?'vrij':'punten'); drawingFree=false; lassoDragIdx=-1; zetSnijModusUI(); drawLasso(); }; }
     { const ub=document.getElementById("lassoUndo"); if(ub) ub.onclick=()=>{
         // Ongedaan: verwijder de laatste actie - gum-streek, toverstaf-tik óf lasso-punt. Loopt nooit vast zolang er iets is.
         if(laatsteActie==='gum' && eraseStrokes.length){ eraseStrokes.pop(); }
