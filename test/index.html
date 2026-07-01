@@ -7178,7 +7178,7 @@ function createTattoo(overrides = {}) {
    ============================================================ */
 // App-versie (semver, handmatig ophogen bij een release). Bij een bump ook de
 // CACHE-naam in sw.js meebumpen, zodat clients de nieuwe build ophalen.
-const APP_VERSIE = '0.2.0';
+const APP_VERSIE = '0.2.1';
 const DB_NAAM = 'tatties';
 const OUD_DB_NAAM = 'tattoostics';   // vorige naam - eenmalig overgezet
 const DB_VERSIE = 1;
@@ -7260,7 +7260,7 @@ async function pullVanCloud() {
     if (!row || row.deleted) continue;           // tombstones niet als nieuw record ophalen
     if (bestaande.has(row.id)) continue;         // additief: bestaande lokale records met rust laten
     const data = (row.data && typeof row.data === 'object') ? row.data : {};
-    const rec = createTattoo(Object.assign({}, data, { id: row.id, deleted: false }));
+    const rec = hardRecord(createTattoo(Object.assign({}, data, { id: row.id, deleted: false })));
     try { await saveTattoo(rec, true); nieuw++; } // behoudTijd: cloud-updatedAt bewaren
     catch (e) { console.error('Pull: record overgeslagen', e); }
   }
@@ -7317,7 +7317,8 @@ async function downloadBeelden(rec, ref) {
   async function dl(pad) {
     const { data, error } = await sb.storage.from(FOTO_BUCKET).download(pad);
     if (error || !data) return null;
-    try { return await blobNaarDataUrl(data); } catch { return null; }
+    // veiligeBeeldSrc: alleen data:image/ terug; een gemanipuleerde niet-beeld-blob wordt geweigerd
+    try { return veiligeBeeldSrc(await blobNaarDataUrl(data)); } catch { return null; }
   }
   if (Array.isArray(ref.fotos) && ref.fotos.length) {
     const out = [];
@@ -7326,6 +7327,51 @@ async function downloadBeelden(rec, ref) {
   }
   if (ref.kunst) { const u = await dl(ref.kunst); if (u) { rec.kunst = rec.kunst || {}; rec.kunst.src = u; } }
   if (ref.kunst3d) { const u = await dl(ref.kunst3d); if (u) { rec.kunst3d = rec.kunst3d || {}; rec.kunst3d.srcUrl = u; } }
+}
+
+/* Hardt een record uit onvertrouwde bron (backup-import of cloud-download) tegen
+   corrupte/kwaadaardige waarden: alleen ingesloten data:image/-beelden (geen externe
+   links), geclampte getallen, gegarandeerde arrays en geldige 3D-coördinaten.
+   Idempotent → veilig meermaals toe te passen. Eén bron voor import én sync. */
+function hardRecord(record) {
+  if (!record || typeof record !== 'object') return record;
+  // Geneste lijsten hardenen (voorkomt crashes in detail/sessies)
+  if (!Array.isArray(record.sessies)) record.sessies = [];
+  if (!Array.isArray(record.touchUps)) record.touchUps = [];
+  if (!Array.isArray(record.fotos)) record.fotos = [];
+  if (!Array.isArray(record.nazorgTaken)) record.nazorgTaken = [];
+  // Beeldbronnen saneren: alleen ingesloten data:image/-URL's, geen externe links
+  record.fotos = record.fotos.map(veiligeBeeldSrc).filter(Boolean);
+  if (record.foto) record.foto = veiligeBeeldSrc(record.foto);
+  if (record.kunst && record.kunst.src) {
+    const s = veiligeBeeldSrc(record.kunst.src);
+    if (s) record.kunst.src = s; else delete record.kunst.src;
+  }
+  if (record.kunst3d && record.kunst3d.srcUrl) {
+    const s = veiligeBeeldSrc(record.kunst3d.srcUrl);
+    if (s) record.kunst3d.srcUrl = s; else delete record.kunst3d.srcUrl;
+  }
+  // Getalvelden clampen (corrupte/out-of-range waarden afvangen)
+  record.pijn = Math.min(5, Math.max(0, parseInt(record.pijn, 10) || 0));
+  record.kosten = Math.min(1000000, Math.max(0, parseFloat(record.kosten) || 0));
+  record.zituren = Math.min(100000, Math.max(0, parseFloat(record.zituren) || 0));
+  record.opacity = isFinite(+record.opacity) ? Math.max(0.2, Math.min(1, +record.opacity)) : 1;
+  record.stapel = parseInt(record.stapel, 10) || 0;
+  // Sync-velden: tijdstempel behouden, deleted strikt boolean
+  record.updatedAt = Number.isFinite(+record.updatedAt) ? +record.updatedAt : Date.now();
+  record.deleted = record.deleted === true;
+  // Coördinaten/lasso hardenen → voorkomt NaN-decals en crashes bij niet-array waarden
+  if (record.positie3d) {
+    const ok3 = a => Array.isArray(a) && a.length === 3 && a.every(n => isFinite(n));
+    if (!ok3(record.positie3d.point) || !ok3(record.positie3d.normal)) record.positie3d = null;
+  }
+  if (record.positie && !(isFinite(record.positie.x) && isFinite(record.positie.y))) record.positie = null;
+  if (record.kunst3d) {
+    if (!Array.isArray(record.kunst3d.lasso)) record.kunst3d.lasso = [];
+    if (!Array.isArray(record.kunst3d.wand)) record.kunst3d.wand = [];
+    if (!Array.isArray(record.kunst3d.erase)) record.kunst3d.erase = [];
+  }
+  return record;
 }
 
 /* Bouw een lokaal record uit een cloud-rij. De cloud-rij zelf heeft geen beelden
@@ -7339,7 +7385,7 @@ function cloudNaarLokaal(c, l) {
     if (l.kunst && l.kunst.src) { rec.kunst = rec.kunst || {}; rec.kunst.src = l.kunst.src; }
     if (l.kunst3d && l.kunst3d.srcUrl) { rec.kunst3d = rec.kunst3d || {}; rec.kunst3d.srcUrl = l.kunst3d.srcUrl; }
   }
-  return rec;
+  return hardRecord(rec);   // onvertrouwde cloud-data even streng saneren als import
 }
 
 /* Tweerichtings-sync (slice 5 + 6): last-write-wins op updatedAt (epoch-ms),
@@ -10186,42 +10232,7 @@ $('#import-file').addEventListener('change', async (e) => {
         record.fotos = [veiligeFoto];               // backup uit oudere versie
         record.foto = null;
       }
-      // Geneste lijsten hardenen tegen corrupte/oude backups (voorkomt crashes in detail/sessies)
-      if (!Array.isArray(record.sessies)) record.sessies = [];
-      if (!Array.isArray(record.touchUps)) record.touchUps = [];
-      if (!Array.isArray(record.fotos)) record.fotos = [];
-      if (!Array.isArray(record.nazorgTaken)) record.nazorgTaken = [];
-      // Beeldbronnen saneren: alleen ingesloten data:image/-URL's, geen externe links
-      record.fotos = record.fotos.map(veiligeBeeldSrc).filter(Boolean);
-      if (record.foto) record.foto = veiligeBeeldSrc(record.foto);
-      if (record.kunst && record.kunst.src) {
-        const s = veiligeBeeldSrc(record.kunst.src);
-        if (s) record.kunst.src = s; else delete record.kunst.src;
-      }
-      if (record.kunst3d && record.kunst3d.srcUrl) {
-        const s = veiligeBeeldSrc(record.kunst3d.srcUrl);
-        if (s) record.kunst3d.srcUrl = s; else delete record.kunst3d.srcUrl;
-      }
-      // Getalvelden clampen (corrupte/out-of-range import-waarden afvangen, net als de invoerformulieren)
-      record.pijn = Math.min(5, Math.max(0, parseInt(record.pijn, 10) || 0));
-      record.kosten = Math.min(1000000, Math.max(0, parseFloat(record.kosten) || 0));
-      record.zituren = Math.min(100000, Math.max(0, parseFloat(record.zituren) || 0));
-      record.opacity = isFinite(+record.opacity) ? Math.max(0.2, Math.min(1, +record.opacity)) : 1;
-      record.stapel = parseInt(record.stapel, 10) || 0;
-      // Sync-velden hardenen: backup-tijdstempel behouden, deleted strikt boolean
-      record.updatedAt = Number.isFinite(+record.updatedAt) ? +record.updatedAt : Date.now();
-      record.deleted = record.deleted === true;
-      // Coördinaten/lasso hardenen → voorkomt NaN-decals en crashes bij niet-array waarden
-      if (record.positie3d) {
-        const ok3 = a => Array.isArray(a) && a.length === 3 && a.every(n => isFinite(n));
-        if (!ok3(record.positie3d.point) || !ok3(record.positie3d.normal)) record.positie3d = null;
-      }
-      if (record.positie && !(isFinite(record.positie.x) && isFinite(record.positie.y))) record.positie = null;
-      if (record.kunst3d) {
-        if (!Array.isArray(record.kunst3d.lasso)) record.kunst3d.lasso = [];
-        if (!Array.isArray(record.kunst3d.wand)) record.kunst3d.wand = [];
-        if (!Array.isArray(record.kunst3d.erase)) record.kunst3d.erase = [];
-      }
+      hardRecord(record);   // arrays/beelden/getallen/coördinaten saneren (gedeeld met cloud-sync)
       // Per-record afvangen: één slecht record breekt de hele import niet meer af
       try { await saveTattoo(record, true); geimporteerd++; }   // behoudTijd: backup-updatedAt bewaren
       catch (e) { console.error('Import: record overgeslagen', e); }

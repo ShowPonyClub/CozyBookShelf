@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://formsubmit.co; worker-src 'self' blob:; base-uri 'none'; form-action 'none'; frame-ancestors 'none'">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>tatties - plan your next tattoo</title>
 <meta name="description" content="tatties lets you plan your next tattoo on a body map and keep a private log of the ink you already have. No scan, no upload, no account - everything stays on your device. Coming soon.">
@@ -9,10 +10,15 @@
 <meta property="og:description" content="Plan your next tattoo on a body map - then log the ink you already have. Private by design. Coming soon.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://tatties.app">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
+  /* Zelf-gehost (privacy: geen bezoekers-IP naar Google Fonts). Variabel font 200-800, latin-subset. */
+  @font-face{
+    font-family:'Plus Jakarta Sans';
+    font-style:normal;
+    font-weight:200 800;
+    font-display:swap;
+    src:url('fonts/plus-jakarta-sans.woff2') format('woff2');
+  }
   :root{
     --skin:#E3BD9C; --skin-hi:#F1D7BD; --skin-lo:#C2986F; --skin-deep:#A87C56;
     --ink:#231F2A;           /* tattoo black (slightly blue-black) */
@@ -205,9 +211,12 @@
 
 <script>
 (function(){
-  /* Signups are delivered via FormSubmit using a private alias, so no email
-     address appears in the page source. Click "Activate Form" in the FormSubmit
-     email once to start receiving submissions. */
+  /* Signups are delivered via FormSubmit. Click "Activate Form" in the FormSubmit
+     email once to start receiving submissions.
+     TODO privacy: vervang het adres hieronder door de door FormSubmit gegenereerde
+     random-alias ("formsubmit.co/ajax/<hash>") zodat hello@tatties.app niet meer in
+     de paginabron staat (tegen e-mail-harvesting). Direct-POST-spam blijft mogelijk
+     zolang _captcha op 'false' staat; dat is een bewuste UX-keuze. */
   var FORMSPREE_ENDPOINT = "https://formsubmit.co/ajax/hello@tatties.app";
   // ── LATER: plak hier de Apps Script /exec-URL om aanmeldingen óók in de Google
   // Sheet te krijgen (mailt dan naar hello@tatties.app + schrijft naar de Sheet).

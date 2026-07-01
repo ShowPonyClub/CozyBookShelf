@@ -4,7 +4,7 @@
    - Offline → laatst gecachte build, zodat de app ook zonder netwerk laadt.
    Cachenaam is geversioneerd; bij activatie worden oude caches opgeruimd.
    Bump CACHE bij een breaking change om alle clients te verversen. */
-const CACHE = 'tatties-test-v0.2.0';   // bump bij elke release (gelijk aan APP_VERSIE in tatties-3d.html)
+const CACHE = 'tatties-test-v0.2.1';   // bump bij elke release (gelijk aan APP_VERSIE in tatties-3d.html)
 
 self.addEventListener('install', () => {
   // Nieuwe SW niet laten wachten op het sluiten van oude tabs.
@@ -29,8 +29,9 @@ self.addEventListener('fetch', (e) => {
     e.respondWith((async () => {
       try {
         const net = await fetch(req);
-        const cache = await caches.open(CACHE);
-        cache.put(req, net.clone());
+        // Alleen geslaagde responses cachen: een tijdelijke 404/500 mag de
+        // laatste goede build niet overschrijven en offline geserveerd worden.
+        if (net.ok) { const cache = await caches.open(CACHE); cache.put(req, net.clone()); }
         return net;
       } catch {
         // Offline: gecachte versie van dit pad, anders de gecachte index.
@@ -49,8 +50,7 @@ self.addEventListener('fetch', (e) => {
     if (cached) return cached;
     try {
       const net = await fetch(req);
-      const cache = await caches.open(CACHE);
-      cache.put(req, net.clone());
+      if (net.ok) { const cache = await caches.open(CACHE); cache.put(req, net.clone()); }
       return net;
     } catch {
       return Response.error();
