@@ -1524,11 +1524,8 @@ form label{text-transform:none;letter-spacing:.005em;font-size:.8rem;color:var(-
               <input id="cutSpread" type="range" min="0" max="160" value="55" class="slider" data-i18n-aria="ui.zachte_randen" aria-label="Zachte randen meenemen">
             </div>
             <div class="cutrow cut-tools">
-              <div id="cmToolLegend" class="cm-legend" hidden role="group" data-i18n-aria="ui.knop_uitleg" aria-label="Wat doen de knoppen?"></div>
               <button id="cropReset" class="cm-resetlink" data-i18n-title="ui.reset_uitsnede" data-i18n-aria="ui.reset_uitsnede" title="Reset uitsnede" aria-label="Reset uitsnede"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 9A8 8 0 0 1 18 7"/><path d="M19.5 15A8 8 0 0 1 6 17"/><path d="M18 3v4h-4"/><path d="M6 21v-4h4"/></svg><span data-i18n="ui.reset">Reset</span></button>
               <div class="ct-group">
-                <button id="cmToolInfo" class="linkbtn cm-toolinfo" aria-pressed="false" data-i18n-title="ui.knop_uitleg" data-i18n-aria="ui.knop_uitleg" title="Wat doen de knoppen?" aria-label="Wat doen de knoppen?"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5"/><path d="M12 7.6h.01"/></svg><span class="t-lbl" data-i18n="ui.info">Info</span></button>
-                <span class="ct-div" aria-hidden="true"></span>
                 <button id="lassoUndo" class="linkbtn" data-i18n-title="ui.ongedaan" data-i18n-aria="ui.ongedaan" title="Ongedaan" aria-label="Ongedaan"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 14L4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 5 5v3"/></svg><span class="t-lbl" data-i18n="ui.ongedaan">Ongedaan</span></button>
                 <button id="cmToolsToggle" type="button" class="linkbtn cm-toolstoggle" aria-expanded="false" aria-controls="cmAdvTools" data-i18n-title="ui.gereedschap" data-i18n-aria="ui.gereedschap" title="Gereedschap" aria-label="Gereedschap"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h9"/><path d="M17 7h3"/><circle cx="15" cy="7" r="2.2"/><path d="M4 17h3"/><path d="M11 17h9"/><circle cx="9" cy="17" r="2.2"/></svg><span class="tt-lbl" data-i18n="ui.gereedschap">Gereedschap</span><svg class="ik ik-chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
               </div>
@@ -12600,18 +12597,6 @@ async function verwijderVoorbeelden() {
         if(!openen){   // inklappen: actieve verfijn-tool netjes uitzetten zodat er geen verborgen-actieve tool blijft
           if(gumMode){ gumMode=false; gumStroke=null; zetGumUI(); }
           if(wandMode){ wandMode=false; zetWandUI(); } } }; }
-    { const ti=document.getElementById("cmToolInfo"), leg=document.getElementById("cmToolLegend");
-      const ids=["rotate90Btn","spiegelBtn","wandBtn","gumBtn","lassoUndo"];   // cropReset is nu een gelabelde tekstlink onder de balk
-      function bouwLegenda(){ leg.innerHTML = ids.map(id=>{ const b=document.getElementById(id); if(!b) return "";
-          const svg=b.querySelector("svg"); const naam=esc(b.getAttribute("aria-label")||"");
-          return `<div class="lg-row${id==="cropReset"?" lg-reset":""}">${svg?svg.outerHTML:""}<span>${naam}</span></div>`; }).join(""); }
-      function sluitLeg(e){ if(e && (leg.contains(e.target) || (ti&&ti.contains(e.target)))) return;
-        leg.hidden=true; if(ti){ ti.classList.remove("on"); ti.setAttribute("aria-pressed","false"); }
-        document.removeEventListener("pointerdown", sluitLeg, true); }
-      if(ti) ti.onclick=()=>{ if(leg.hidden){ bouwLegenda(); leg.hidden=false; ti.classList.add("on"); ti.setAttribute("aria-pressed","true");
-          setTimeout(()=>document.addEventListener("pointerdown", sluitLeg, true), 0); }
-        else { sluitLeg(); } };
-    }
     const addBtn=document.getElementById("t3d-add"); if(addBtn) addBtn.onclick=()=>openCutModalAdd('3d');
     window.__tattiesAdd2D=()=>openCutModalAdd('2d');   // 2D-FAB opent dezelfde toevoeg-flow
     window.__tattiesRecrop2D=(rec)=>openCutModalForEdit2D(rec);   // sleutel-knop 2D: opnieuw uitsnijden
