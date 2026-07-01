@@ -1525,8 +1525,9 @@ form label{text-transform:none;letter-spacing:.005em;font-size:.8rem;color:var(-
             </div>
             <div class="cutrow cut-tools">
               <div id="cmToolLegend" class="cm-legend" hidden role="group" data-i18n-aria="ui.knop_uitleg" aria-label="Wat doen de knoppen?"></div>
-              <button id="cmToolInfo" class="linkbtn cm-toolinfo" aria-pressed="false" data-i18n-title="ui.knop_uitleg" data-i18n-aria="ui.knop_uitleg" title="Wat doen de knoppen?" aria-label="Wat doen de knoppen?"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5"/><path d="M12 7.6h.01"/></svg><span class="t-lbl" data-i18n="ui.info">Info</span></button>
+              <button id="cropReset" class="cm-resetlink" data-i18n-title="ui.reset_uitsnede" data-i18n-aria="ui.reset_uitsnede" title="Reset uitsnede" aria-label="Reset uitsnede"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 9A8 8 0 0 1 18 7"/><path d="M19.5 15A8 8 0 0 1 6 17"/><path d="M18 3v4h-4"/><path d="M6 21v-4h4"/></svg><span data-i18n="ui.reset">Reset</span></button>
               <div class="ct-group">
+                <button id="cmToolInfo" class="linkbtn cm-toolinfo" aria-pressed="false" data-i18n-title="ui.knop_uitleg" data-i18n-aria="ui.knop_uitleg" title="Wat doen de knoppen?" aria-label="Wat doen de knoppen?"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5"/><path d="M12 7.6h.01"/></svg><span class="t-lbl" data-i18n="ui.info">Info</span></button>
                 <span class="ct-div" aria-hidden="true"></span>
                 <button id="lassoUndo" class="linkbtn" data-i18n-title="ui.ongedaan" data-i18n-aria="ui.ongedaan" title="Ongedaan" aria-label="Ongedaan"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 14L4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 5 5v3"/></svg><span class="t-lbl" data-i18n="ui.ongedaan">Ongedaan</span></button>
                 <button id="cmToolsToggle" type="button" class="linkbtn cm-toolstoggle" aria-expanded="false" aria-controls="cmAdvTools" data-i18n-title="ui.gereedschap" data-i18n-aria="ui.gereedschap" title="Gereedschap" aria-label="Gereedschap"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h9"/><path d="M17 7h3"/><circle cx="15" cy="7" r="2.2"/><path d="M4 17h3"/><path d="M11 17h9"/><circle cx="9" cy="17" r="2.2"/></svg><span class="tt-lbl" data-i18n="ui.gereedschap">Gereedschap</span><svg class="ik ik-chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
@@ -1538,9 +1539,6 @@ form label{text-transform:none;letter-spacing:.005em;font-size:.8rem;color:var(-
                 <button id="wandBtn" class="linkbtn" data-i18n-title="ui.toverstaf" data-i18n-aria="ui.toverstaf" title="Toverstaf" aria-label="Toverstaf"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 19L14 10"/><path d="M17 3l1 3 3 1-3 1-1 3-1-3-3-1 3-1z"/><path d="M6 5v2M5 6h2"/></svg><span class="t-lbl" data-i18n="ui.toverstaf">Toverstaf</span></button>
                 <button id="gumBtn" class="linkbtn" data-i18n-title="ui.gum" data-i18n-aria="ui.gum" title="Gum" aria-label="Gum"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M16 3l5 5-9 9H7l-4-4z"/><path d="M9 9l6 6"/><path d="M5 21h14"/></svg><span class="t-lbl" data-i18n="ui.gum">Gum</span></button>
               </div>
-            </div>
-            <div class="cm-resetrij">
-              <button id="cropReset" class="cm-resetlink" data-i18n-title="ui.reset_uitsnede" data-i18n-aria="ui.reset_uitsnede" title="Reset uitsnede" aria-label="Reset uitsnede"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 9A8 8 0 0 1 18 7"/><path d="M19.5 15A8 8 0 0 1 6 17"/><path d="M18 3v4h-4"/><path d="M6 21v-4h4"/></svg><span data-i18n="ui.reset_uitsnede">Reset uitsnede</span></button>
             </div>
           </div>
           <div class="cm-choose-rij">
@@ -6714,7 +6712,7 @@ const I18N = {
     'start.kies_2d':'Op de 2D-kaart','start.kies_2d_sub':'Plaats op de platte voor/achter-kaart','start.kies_2d_wip':'Nog in aanbouw',
     'ui.foto_maken':'Foto maken','ui.foto_uploaden':'Foto uploaden','ui.foto_toevoegen':'Tattoo toevoegen','ui.andere_foto':'Andere foto','ui.plaatsen':'Plaatsen','ui.nog_een':'+ Nog een','ui.nog_een_uitleg':'Plaats deze en knip daarna nog een tattoo uit dezelfde foto','ui.herhaal_hint':'Plaats ’m goed en tik op ✓ - daarna knip je de volgende uit deze foto','ui.herhaal_volgende':'Knip de volgende tattoo uit dezelfde foto','ui.volgende_uitsnede':'Volgende uitsnede','ui.uit_deze_foto':'uit deze foto',
     'ui.reset_uitsnede':'Reset uitsnede','ui.spiegelen':'Spiegelen','ui.achtergrond_weghalen':'Achtergrond weghalen',
-    'ui.toverstaf':'Toverstaf','ui.ongedaan':'Ongedaan','ui.niets_ongedaan':'Niets om ongedaan te maken','ui.teruggezet':'Teruggezet',
+    'ui.toverstaf':'Toverstaf','ui.ongedaan':'Ongedaan','ui.niets_ongedaan':'Niets om ongedaan te maken','ui.teruggezet':'Teruggezet','ui.uitsnede_gewist':'Uitsnede gewist - tik Ongedaan om terug te halen',
     'ui.tik_uitknippen':'Tik op het deel dat je wilt weghalen','ui.toverstaf_uit':'Toverstaf uit',
     'ui.wand_hint':'Toverstaf: tik op een effen achtergrond om die weg te halen. Werkt het best bij een duidelijke achtergrond, minder goed op een foto van de huid. Tik vaker voor meer; Ongedaan draait terug.',
     'ui.wand_hint_keep':'Tattoo houden: tik op de tattoo om die te bewaren, de rest wordt gewist. Tik vaker voor meerdere delen; Ongedaan draait terug. Werkt het best bij een tattoo met duidelijke kleur.',
@@ -6892,7 +6890,7 @@ const I18N = {
     'start.kies_2d':'On the 2D map','start.kies_2d_sub':'Place on the flat front/back map','start.kies_2d_wip':'Under construction',
     'ui.foto_maken':'Take photo','ui.foto_uploaden':'Upload photo','ui.foto_toevoegen':'Add tattoo','ui.andere_foto':'Other photo','ui.plaatsen':'Place','ui.nog_een':'+ Another','ui.nog_een_uitleg':'Place this one, then cut another tattoo from the same photo','ui.herhaal_hint':'Position it and tap ✓ - then cut the next one from this photo','ui.herhaal_volgende':'Cut the next tattoo from the same photo','ui.volgende_uitsnede':'Next cut-out','ui.uit_deze_foto':'from this photo',
     'ui.reset_uitsnede':'Reset cut-out','ui.spiegelen':'Mirror','ui.achtergrond_weghalen':'Remove background',
-    'ui.toverstaf':'Magic wand','ui.ongedaan':'Undo','ui.niets_ongedaan':'Nothing to undo','ui.teruggezet':'Reverted',
+    'ui.toverstaf':'Magic wand','ui.ongedaan':'Undo','ui.niets_ongedaan':'Nothing to undo','ui.teruggezet':'Reverted','ui.uitsnede_gewist':'Cut-out cleared - tap Undo to restore',
     'ui.tik_uitknippen':'Tap the part you want to remove','ui.toverstaf_uit':'Magic wand off',
     'ui.wand_hint':'Magic wand: tap a plain background to remove it. Works best with a clear background, not yet on skin photos. Tap again for more; Undo reverts.',
     'ui.wand_hint_keep':'Keep tattoo: tap the tattoo to keep it, the rest is erased. Tap again for more parts; Undo reverts. Works best on a tattoo with a clear color.',
@@ -12007,7 +12005,8 @@ async function verwijderVoorbeelden() {
   let wandMode=false;        // toverstaf actief: volgende tik knipt een aaneengesloten gebied weg
   let wandSeeds=[];          // {nx,ny} klikpunten voor de toverstaf
   let wandKeep=false;        // false = aangetikt gebied weghalen (achtergrond), true = aangetikt gebied behouden (tattoo)
-  let laatsteActie=null;     // 'wand' | 'lasso' | 'gum' - laatste uitsnede-actie, voor gedeelde Ongedaan
+  let laatsteActie=null;     // 'wand' | 'lasso' | 'gum' | 'reset' - laatste uitsnede-actie, voor gedeelde Ongedaan
+  let resetSnapshot=null;    // laatste gewiste uitsnede (voor Ongedaan na Reset)
   const WAND_TOL2=7500;      // kleurtolerantie^2 (≈50/kanaal) voor de toverstaf
   // Gum: handmatig stukjes wegvegen (alpha 0) of terughalen (originele pixels herstellen).
   // Streken zijn een recept (genormaliseerde punten + straal), net als de toverstaf: ze worden
@@ -12267,7 +12266,7 @@ async function verwijderVoorbeelden() {
     im.onerror=()=>toast(tr('ui.foto_niet_geladen'));
     im.src=k.srcUrl;
   }
-  function closeCutModal(){ cutModal.classList.remove("on"); pendingPlace=null; pendingEdit=null; pendingPlace2D=null; pendingNew=null; pendingEdit2D=null; toonCutInstellingen(false); toonInfo(false);
+  function closeCutModal(){ resetSnapshot=null; laatsteActie=null; cutModal.classList.remove("on"); pendingPlace=null; pendingEdit=null; pendingPlace2D=null; pendingNew=null; pendingEdit2D=null; toonCutInstellingen(false); toonInfo(false);
     plaatsHerhaal=false; window.__tattiesHerhaalSrc=null; herhaalTeller=1; vorigeLassos=[]; addDoel='3d';   // D6(a): herhaal-state opruimen + doel terug naar default (geen stale vlag/lasso/doel)
     if(imgTexture && imgTexture.dispose){ imgTexture.dispose(); } imgTexture=null;   // niet-geplaatste textuur vrijgeven (geen lek)
     cutPointers.clear(); pinch=null; drawingFree=false; gumStroke=null; lassoDragIdx=-1; clearTimeout(wheelEind);
@@ -12545,9 +12544,20 @@ async function verwijderVoorbeelden() {
           tip.hidden=true; inf.setAttribute("aria-expanded","false"); document.removeEventListener("pointerdown", sluit, true); };
         inf.onclick=()=>{ if(tip.hidden){ tip.hidden=false; inf.setAttribute("aria-expanded","true");
           setTimeout(()=>document.addEventListener("pointerdown", sluit, true), 0); } else sluit(); }; } }
-    document.getElementById("cropReset").onclick=()=>{ lassoPts=[]; wandSeeds=[]; eraseStrokes=[]; gumStroke=null; lassoDragIdx=-1; rebuildBase(); drawLasso(); updateCutout(); };
+    document.getElementById("cropReset").onclick=()=>{
+      if(lassoPts.length || wandSeeds.length || eraseStrokes.length){   // ongedaan-baar: bewaar de huidige uitsnede
+        resetSnapshot={lasso:lassoPts, wand:wandSeeds, erase:eraseStrokes, prevActie:laatsteActie};
+        laatsteActie='reset'; toast(tr('ui.uitsnede_gewist'));
+      }
+      lassoPts=[]; wandSeeds=[]; eraseStrokes=[]; gumStroke=null; lassoDragIdx=-1; rebuildBase(); drawLasso(); updateCutout();
+    };
     { const pb=document.getElementById('cmPuntBtn'); if(pb) pb.onclick=()=>{ cutModus=(cutModus==='punten'?'vrij':'punten'); drawingFree=false; lassoDragIdx=-1; zetSnijModusUI(); drawLasso(); }; }
     { const ub=document.getElementById("lassoUndo"); if(ub) ub.onclick=()=>{
+        if(laatsteActie==='reset' && resetSnapshot){   // Ongedaan na een Reset: hele uitsnede terugzetten
+          lassoPts=resetSnapshot.lasso; wandSeeds=resetSnapshot.wand; eraseStrokes=resetSnapshot.erase;
+          laatsteActie=resetSnapshot.prevActie||null; resetSnapshot=null;
+          gumStroke=null; lassoDragIdx=-1; rebuildBase(); drawLasso(); updateCutout(); toast(tr('ui.teruggezet')); return;
+        }
         // Ongedaan: verwijder de laatste actie - gum-streek, toverstaf-tik óf lasso-punt. Loopt nooit vast zolang er iets is.
         if(laatsteActie==='gum' && eraseStrokes.length){ eraseStrokes.pop(); }
         else if(laatsteActie==='wand' && wandSeeds.length){ wandSeeds.pop(); }
