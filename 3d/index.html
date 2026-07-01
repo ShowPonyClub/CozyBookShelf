@@ -289,7 +289,7 @@
   function loop(){ if(!running) return; requestAnimationFrame(loop);
     for(var i=0;i<groups.length;i++)groups[i].rotation.y+=0.008*(groups[i].userData.side<0?1:-1);
     var now=performance.now();
-    for(var j=0;j<fades.length;j++){ var f=fades[j]; if(f.done) continue; var t=(now-f.start)/800; if(t<0)t=0; if(t>=1){t=1;f.done=true;} f.m.opacity=t; }
+    for(var j=0;j<fades.length;j++){ var f=fades[j]; if(f.done) continue; var t=(now-f.start)/1600; if(t<0)t=0; if(t>=1){t=1;f.done=true;} f.m.opacity=t; }
     renderer.render(scene,camera);
     if(!faded && groups.length){ faded=true; renderer.domElement.style.opacity='1'; } }
   function start(){ init(); if(running) return; running=true; loop(); }
