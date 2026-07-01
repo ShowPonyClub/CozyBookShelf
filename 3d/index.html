@@ -242,8 +242,9 @@
   var host=document.getElementById('hero3d'); if(!host||!window.THREE) return;
   var CFG=window.__CFG;
   var renderer,scene,camera,skin,loader,texLoader,groups=[],running=false,inited=false,onscreen=false,faded=false;
+  var fades=[], fadeIdx=0;
   var TEX={}; function getTex(k){if(!TEX[k]){var t=texLoader.load(CFG.tat[k]);t.anisotropy=8;t.encoding=THREE.sRGBEncoding;TEX[k]=t;}return TEX[k];}
-  function decalMat(k){return new THREE.MeshStandardMaterial({map:getTex(k),transparent:true,alphaTest:0.3,roughness:0.72,metalness:0,polygonOffset:true,polygonOffsetFactor:-4,depthWrite:false});}
+  function decalMat(k){return new THREE.MeshStandardMaterial({map:getTex(k),transparent:true,opacity:0,alphaTest:0.2,roughness:0.72,metalness:0,polygonOffset:true,polygonOffsetFactor:-4,depthWrite:false});}
   var ray=new THREE.Raycaster(), dummy=new THREE.Object3D();
   function placeDecal(G,meshes,it){
     ray.set(new THREE.Vector3(it.x,it.y,3),new THREE.Vector3(0,0,-1));
@@ -251,7 +252,8 @@
     var mesh=hit.object,n=hit.face.normal.clone().transformDirection(mesh.matrixWorld).normalize();
     dummy.position.copy(hit.point); dummy.lookAt(hit.point.clone().add(n));
     var g=new THREE.DecalGeometry(mesh,hit.point,dummy.rotation,new THREE.Vector3(it.w,it.h,0.4));
-    G.add(new THREE.Mesh(g,decalMat(it.k)));
+    var d=new THREE.Mesh(g,decalMat(it.k)); G.add(d);
+    fades.push({m:d.material, start:performance.now()+600+(fadeIdx++)*260});
   }
   function xOffset(){var half=camera.position.z*Math.tan(THREE.MathUtils.degToRad(camera.fov/2))*camera.aspect;return Math.min(Math.max(half*0.6,0.7),1.9);}
   function onGltf(side,placements){return function(gltf){
@@ -286,6 +288,8 @@
   }
   function loop(){ if(!running) return; requestAnimationFrame(loop);
     for(var i=0;i<groups.length;i++)groups[i].rotation.y+=0.008*(groups[i].userData.side<0?1:-1);
+    var now=performance.now();
+    for(var j=0;j<fades.length;j++){ var f=fades[j]; if(f.done) continue; var t=(now-f.start)/800; if(t<0)t=0; if(t>=1){t=1;f.done=true;} f.m.opacity=t; }
     renderer.render(scene,camera);
     if(!faded && groups.length){ faded=true; renderer.domElement.style.opacity='1'; } }
   function start(){ init(); if(running) return; running=true; loop(); }
