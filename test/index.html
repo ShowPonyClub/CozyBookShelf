@@ -1095,6 +1095,13 @@ form label,
 .cutmodal .cut-tools .cm-toolinfo:hover{background:rgba(142,113,240,.16);color:var(--accent);border-color:transparent;}
 .cutmodal .cut-tools .cm-toolinfo.on{background:rgba(142,113,240,.20);color:var(--accent);border-color:transparent;}
 .cutmodal .cut-tools .cm-toolinfo .ik{width:18px;height:18px;}
+.cutmodal .cut-tools .cm-toolstoggle{gap:5px;}
+.cutmodal .cut-tools .cm-toolstoggle .tt-lbl{display:inline;font-size:.82rem;font-weight:600;line-height:1;}
+.cutmodal .cut-tools .cm-toolstoggle .ik-chev{width:13px;height:13px;transition:transform .18s;}
+.cutmodal .cut-tools .cm-toolstoggle[aria-expanded="true"]{background:var(--accent);border-color:var(--accent);color:var(--op-accent);}
+.cutmodal .cut-tools .cm-toolstoggle[aria-expanded="true"] .ik-chev{transform:rotate(180deg);}
+.cutmodal .cut-tools .cm-advrow{flex:0 0 100%;display:flex;justify-content:flex-end;align-items:center;gap:6px;flex-wrap:wrap;margin-top:6px;}
+.cutmodal .cut-tools .cm-advrow[hidden]{display:none;}
 /* Reset uitsnede: destructief + zeldzaam -> als subtiele tekstlink ONDER de balk (geen mis-tap naast de tools) */
 .cutmodal .cm-resetrij{display:flex;justify-content:center;margin-top:8px;}
 .cutmodal .cm-resetlink{display:inline-flex;align-items:center;gap:6px;background:transparent;border:0;cursor:pointer;
@@ -1555,11 +1562,14 @@ form label{text-transform:none;letter-spacing:.005em;font-size:.8rem;color:var(-
               <button id="cmToolInfo" class="linkbtn cm-toolinfo" aria-pressed="false" data-i18n-title="ui.knop_uitleg" data-i18n-aria="ui.knop_uitleg" title="Wat doen de knoppen?" aria-label="Wat doen de knoppen?"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5"/><path d="M12 7.6h.01"/></svg><span class="t-lbl" data-i18n="ui.info">Info</span></button>
               <div class="ct-group">
                 <span class="ct-div" aria-hidden="true"></span>
+                <button id="lassoUndo" class="linkbtn" data-i18n-title="ui.ongedaan" data-i18n-aria="ui.ongedaan" title="Ongedaan" aria-label="Ongedaan"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 14L4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 5 5v3"/></svg><span class="t-lbl" data-i18n="ui.ongedaan">Ongedaan</span></button>
+                <button id="cmToolsToggle" type="button" class="linkbtn cm-toolstoggle" aria-expanded="false" aria-controls="cmAdvTools" data-i18n-title="ui.gereedschap" data-i18n-aria="ui.gereedschap" title="Gereedschap" aria-label="Gereedschap"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h9"/><path d="M17 7h3"/><circle cx="15" cy="7" r="2.2"/><path d="M4 17h3"/><path d="M11 17h9"/><circle cx="9" cy="17" r="2.2"/></svg><span class="tt-lbl" data-i18n="ui.gereedschap">Gereedschap</span><svg class="ik ik-chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+              </div>
+              <div id="cmAdvTools" class="cm-advrow" hidden role="group" data-i18n-aria="ui.gereedschap" aria-label="Gereedschap">
                 <button id="rotate90Btn" class="linkbtn" data-i18n-title="ui.draaien90" data-i18n-aria="ui.draaien90" title="90&deg; draaien" aria-label="90&deg; draaien"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="10" width="11" height="11" rx="2"/><path d="M14 4h3a3 3 0 0 1 3 3v3"/><path d="M16.5 1.5L20 5l-3.5 3.5"/></svg><span class="t-lbl" data-i18n="ui.draaien90">90&deg; draaien</span></button>
                 <button id="spiegelBtn" class="linkbtn" data-i18n-title="ui.spiegelen" data-i18n-aria="ui.spiegelen" title="Spiegelen" aria-label="Spiegelen"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v18" stroke-dasharray="2 3"/><path d="M4 6L4 18L10 12Z"/><path d="M20 6L20 18L14 12Z"/></svg><span class="t-lbl" data-i18n="ui.spiegelen">Spiegelen</span></button>
                 <button id="wandBtn" class="linkbtn" data-i18n-title="ui.toverstaf" data-i18n-aria="ui.toverstaf" title="Toverstaf" aria-label="Toverstaf"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 19L14 10"/><path d="M17 3l1 3 3 1-3 1-1 3-1-3-3-1 3-1z"/><path d="M6 5v2M5 6h2"/></svg><span class="t-lbl" data-i18n="ui.toverstaf">Toverstaf</span></button>
                 <button id="gumBtn" class="linkbtn" data-i18n-title="ui.gum" data-i18n-aria="ui.gum" title="Gum" aria-label="Gum"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M16 3l5 5-9 9H7l-4-4z"/><path d="M9 9l6 6"/><path d="M5 21h14"/></svg><span class="t-lbl" data-i18n="ui.gum">Gum</span></button>
-                <button id="lassoUndo" class="linkbtn" data-i18n-title="ui.ongedaan" data-i18n-aria="ui.ongedaan" title="Ongedaan" aria-label="Ongedaan"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 14L4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 5 5v3"/></svg><span class="t-lbl" data-i18n="ui.ongedaan">Ongedaan</span></button>
               </div>
             </div>
             <div class="cm-resetrij">
@@ -6737,7 +6747,7 @@ const I18N = {
     'ui.geen_foto_bewaard':'Geen originele foto bewaard voor deze tattoo','ui.pas_aan_sla_op':'Pas de uitsnede aan en sla op',
     'ui.foto_niet_geladen':'Kon de foto niet laden','ui.teken_lijn':'Teken een lijn rond de tattoo en stel de grenswaarde in',
     'ui.geen_afbeelding':'Kies een afbeelding (geen ander bestandstype)','ui.foto_te_groot':'Foto te groot (max 30 MB)','ui.foto_mislukt':'Kon de foto niet verwerken',
-    'ui.reset':'Reset','ui.knop_uitleg':'Wat doen de knoppen?','ui.info':'Info',
+    'ui.reset':'Reset','ui.knop_uitleg':'Wat doen de knoppen?','ui.info':'Info','ui.gereedschap':'Gereedschap',
     'inst.vorm.binnenkort':'Binnenkort','ui.bouw2d_kop':'Nog in aanbouw','ui.bouw2d_sub':'Test vooral het 3D-model.',
     'aria.volledigoverzicht':'Volledig overzicht','aria.welkom':'Welkom',
     'ui.tik_achtergrond':'Tik op de achtergrond in de foto','ui.pipet_uit':'Pipet uit',
@@ -6915,7 +6925,7 @@ const I18N = {
     'ui.geen_foto_bewaard':'No original photo saved for this tattoo','ui.pas_aan_sla_op':'Adjust the cut-out and save',
     'ui.foto_niet_geladen':'Could not load the photo','ui.teken_lijn':'Draw a line around the tattoo and set the threshold',
     'ui.geen_afbeelding':'Please choose an image (not another file type)','ui.foto_te_groot':'Photo too large (max 30 MB)','ui.foto_mislukt':'Could not process the photo',
-    'ui.reset':'Reset','ui.knop_uitleg':'What do the buttons do?','ui.info':'Info',
+    'ui.reset':'Reset','ui.knop_uitleg':'What do the buttons do?','ui.info':'Info','ui.gereedschap':'Tools',
     'inst.vorm.binnenkort':'Coming soon','ui.bouw2d_kop':'Under construction','ui.bouw2d_sub':'Please test the 3D model.',
     'aria.volledigoverzicht':'Full overview','aria.welkom':'Welcome',
     'ui.tik_achtergrond':'Tap the background in the photo','ui.pipet_uit':'Eyedropper off',
@@ -12179,6 +12189,8 @@ async function verwijderVoorbeelden() {
   // Toon de uitsnede-instellingen (preview, sliders, achtergrond) pas na een foto
   function toonCutInstellingen(b){
     const s=document.getElementById("cmSettings"); if(s) s.hidden=!b;
+    if(b){ const adv=document.getElementById("cmAdvTools"), tt=document.getElementById("cmToolsToggle");   // verfijn-tools standaard ingeklapt bij openen
+           if(adv) adv.hidden=true; if(tt) tt.setAttribute("aria-expanded","false"); }
     if(cmPlaceBtn) cmPlaceBtn.style.display=b?"":"none";
     { const meerW=document.querySelector(".cm-meer-wrap"); if(meerW) meerW.style.display=(b&&pendingNew)?"":"none"; }   // '+ Nog een' (incl. info-knopje) alleen bij toevoegen
     cutModal.classList.toggle("cm-compact", !b);
@@ -12570,6 +12582,12 @@ async function verwijderVoorbeelden() {
         resetZoom();
         rebuildBase(); updateCutout(); drawLasso();
       }; }
+    // Progressive disclosure: verfijn-tools (90°/spiegel/toverstaf/gum) achter een 'Gereedschap'-uitklap.
+    { const tt=document.getElementById("cmToolsToggle"), adv=document.getElementById("cmAdvTools");
+      if(tt&&adv) tt.onclick=()=>{ const openen=adv.hidden; adv.hidden=!openen; tt.setAttribute("aria-expanded", openen?"true":"false");
+        if(!openen){   // inklappen: actieve verfijn-tool netjes uitzetten zodat er geen verborgen-actieve tool blijft
+          if(gumMode){ gumMode=false; gumStroke=null; zetGumUI(); }
+          if(wandMode){ wandMode=false; zetWandUI(); } } }; }
     { const ti=document.getElementById("cmToolInfo"), leg=document.getElementById("cmToolLegend");
       const ids=["rotate90Btn","spiegelBtn","wandBtn","gumBtn","lassoUndo"];   // cropReset is nu een gelabelde tekstlink onder de balk
       function bouwLegenda(){ leg.innerHTML = ids.map(id=>{ const b=document.getElementById(id); if(!b) return "";
