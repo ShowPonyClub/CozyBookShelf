@@ -245,7 +245,7 @@
 (function(){
   var host=document.getElementById('hero3d'); if(!host||!window.THREE) return;
   var CFG=window.__CFG;
-  var renderer,scene,camera,skin,loader,texLoader,groups=[],running=false,inited=false,onscreen=false;
+  var renderer,scene,camera,skin,loader,texLoader,groups=[],running=false,inited=false,onscreen=false,faded=false;
   var TEX={}; function getTex(k){if(!TEX[k]){var t=texLoader.load(CFG.tat[k]);t.anisotropy=8;t.encoding=THREE.sRGBEncoding;TEX[k]=t;}return TEX[k];}
   function decalMat(k){return new THREE.MeshStandardMaterial({map:getTex(k),transparent:true,alphaTest:0.3,roughness:0.72,metalness:0,polygonOffset:true,polygonOffsetFactor:-4,depthWrite:false});}
   var ray=new THREE.Raycaster(), dummy=new THREE.Object3D();
@@ -276,7 +276,8 @@
     var W=host.clientWidth,H=host.clientHeight||640;
     renderer=new THREE.WebGLRenderer({antialias:true,alpha:true,powerPreference:'low-power'});
     renderer.setPixelRatio(Math.min(devicePixelRatio,1.5)); renderer.setSize(W,H);
-    renderer.outputEncoding=THREE.sRGBEncoding; host.appendChild(renderer.domElement);
+    renderer.outputEncoding=THREE.sRGBEncoding;
+    var cv=renderer.domElement; cv.style.opacity='0'; cv.style.transition='opacity .7s ease'; host.appendChild(cv);
     scene=new THREE.Scene(); camera=new THREE.PerspectiveCamera(32,W/H,0.1,100); camera.position.set(0,0.95,5.0); camera.lookAt(0,0.95,0);
     scene.add(new THREE.HemisphereLight(0xffffff,0x9a7b5e,1.05));
     var dl=new THREE.DirectionalLight(0xffffff,0.8); dl.position.set(1.5,3,2.5); scene.add(dl);
@@ -289,7 +290,8 @@
   }
   function loop(){ if(!running) return; requestAnimationFrame(loop);
     for(var i=0;i<groups.length;i++)groups[i].rotation.y+=0.008*(groups[i].userData.side<0?1:-1);
-    renderer.render(scene,camera); }
+    renderer.render(scene,camera);
+    if(!faded && groups.length){ faded=true; renderer.domElement.style.opacity='1'; } }
   function start(){ init(); if(running) return; running=true; loop(); }
   function stop(){ running=false; }
   var iob=new IntersectionObserver(function(es){ onscreen=es[0].isIntersecting; if(onscreen) start(); else stop(); },{threshold:0.02});
