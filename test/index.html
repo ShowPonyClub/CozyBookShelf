@@ -1014,8 +1014,8 @@ form label,
 .cutmodal .cm-x:active{background:var(--rand);}
 .cutmodal .cm-body{padding:14px 16px;display:flex;flex-direction:column;gap:8px;overflow-y:auto;flex:1;}
 .cutmodal .cm-body>.btn{flex:0 0 auto;padding:10px;}
-.cutmodal .cm-toprow{display:flex;justify-content:space-between;align-items:center;gap:10px;}
-.cutmodal .cm-naam-top{flex:1;min-width:0;padding:9px 11px;border:1px solid var(--rand);border-radius:var(--r-sm);background:var(--veldbg);color:var(--tekst);font-size:var(--fs-base);font-family:inherit;}
+.cutmodal .cm-toprow{display:flex;justify-content:flex-end;align-items:center;gap:10px;}
+.cutmodal .cm-naam-top{width:100%;box-sizing:border-box;flex:0 0 auto;min-width:0;padding:9px 11px;border:1px solid var(--rand);border-radius:var(--r-sm);background:var(--veldbg);color:var(--tekst);font-size:var(--fs-base);font-family:inherit;}
 .cutmodal .cm-naam-top[aria-invalid="true"]{border-color:var(--invalid);box-shadow:0 0 0 2px rgba(209,67,67,.18);}
 .cutmodal .cm-onderrij{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:2px;}
 /* 'Meer details' = pill in dezelfde stijl als de Gezet/Wishlist-toggle: licht (dicht) -> accent-vulling (open) */
@@ -1481,44 +1481,10 @@ form label{text-transform:none;letter-spacing:.005em;font-size:.8rem;color:var(-
         <div class="cm-body">
           <span id="cmTitle" class="visueel-verborgen" data-i18n="ui.tattoo_toevoegen">Tattoo toevoegen</span>
           <div class="cm-toprow">
-            <input id="cmNaam" class="cm-naam-top" type="text" maxlength="80" autocomplete="off" hidden data-i18n-ph="ui.naam_ph" data-i18n-aria="ui.naam" placeholder="Tattoo name *" aria-label="Tattoo name">
             <button id="cmCancel" class="cm-x" data-i18n-title="form.annuleren" data-i18n-aria="form.annuleren" title="Annuleer" aria-label="Annuleer">&times;</button>
           </div>
           <input type="file" id="imgInput" accept="image/*" style="display:none">
           <input type="file" id="imgInputCamera" accept="image/*" capture="environment" style="display:none">
-          <div id="cmInfo" hidden>
-            <div id="cmHerhaalBadge" class="cm-herhaal-badge" hidden></div>
-            <div class="cm-onderrij">
-              <button type="button" id="cmMeerBtn" class="cm-meer-pill" aria-expanded="false"><span data-i18n="ui.meer_details">Meer details</span><svg class="cm-chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
-              <div class="silhouet-keuze compact cm-status" id="cmStatus" role="group" data-i18n-aria="form.type" aria-label="Status">
-                <button type="button" data-status="gezet" class="actief" data-i18n="form.gezet">Gezet</button>
-                <button type="button" data-status="wens" data-i18n="form.wishlist">Wishlist</button>
-              </div>
-            </div>
-            <div id="cmMeer" hidden>
-              <label class="cm-veld"><span data-i18n="form.artiest">Artiest</span><input id="cmArtiest" type="text" maxlength="120"></label>
-              <label class="cm-veld"><span data-i18n="form.studio">Studio</span><input id="cmStudio" type="text" maxlength="120"></label>
-              <label class="cm-veld"><span data-i18n="form.stijl">Stijl</span><input id="cmStijl" type="text" maxlength="120"></label>
-              <div class="cm-rij2">
-                <label class="cm-veld"><span data-i18n="form.kosten">Kosten</span><span class="kosten-veld"><span class="valuta-prefix" id="cmKostenSym">&euro;</span><input id="cmKosten" type="number" min="0" max="1000000" step="0.01" inputmode="decimal"></span></label>
-                <label class="cm-veld"><span data-i18n="form.datum">Datum</span><input id="cmDatum" type="date"></label>
-              </div>
-              <div class="cm-rij2">
-                <div class="cm-veld"><span data-i18n="form.pijn">Pijnscore (1&ndash;5)</span>
-                  <div id="cmPijn" class="druppel-kies" data-waarde="0" role="group" data-i18n-aria="form.pijn" aria-label="Pijnscore">
-                    <button type="button" class="druppel" data-waarde="1" aria-label="1/5"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3s-6 7-6 11a6 6 0 0 0 12 0c0-4-6-11-6-11z"/></svg></button>
-                    <button type="button" class="druppel" data-waarde="2" aria-label="2/5"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3s-6 7-6 11a6 6 0 0 0 12 0c0-4-6-11-6-11z"/></svg></button>
-                    <button type="button" class="druppel" data-waarde="3" aria-label="3/5"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3s-6 7-6 11a6 6 0 0 0 12 0c0-4-6-11-6-11z"/></svg></button>
-                    <button type="button" class="druppel" data-waarde="4" aria-label="4/5"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3s-6 7-6 11a6 6 0 0 0 12 0c0-4-6-11-6-11z"/></svg></button>
-                    <button type="button" class="druppel" data-waarde="5" aria-label="5/5"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3s-6 7-6 11a6 6 0 0 0 12 0c0-4-6-11-6-11z"/></svg></button>
-                  </div>
-                </div>
-                <label class="cm-veld"><span data-i18n="form.zituren">Zituren</span><input id="cmZituren" type="number" min="0" max="100000" step="0.5" inputmode="decimal"></label>
-              </div>
-              <label class="cm-veld"><span data-i18n="form.notities">Notities</span><textarea id="cmNotities" maxlength="2000" rows="2"></textarea></label>
-              <label class="cm-veld"><span data-i18n="form.accentkleur">Accentkleur van markering</span><small class="veld-hint" data-i18n="form.accentuitleg">Gebruikt als je geen tattoo-afbeelding toevoegt</small><input id="cmAccent" type="color" value="#8E71F0" style="width:64px;height:40px;padding:4px;border-radius:var(--r-md);cursor:pointer"></label>
-            </div>
-          </div>
           <div id="cmSettings" hidden>
             <div class="silhouet-keuze compact cm-modus" id="cmModus" role="group" data-i18n-aria="ui.snijmethode" aria-label="Snijmethode">
               <button type="button" data-modus="vrij" data-i18n="ui.snij_vrij">Vrij tekenen</button>
@@ -1579,6 +1545,40 @@ form label{text-transform:none;letter-spacing:.005em;font-size:.8rem;color:var(-
           <div class="cm-choose-rij">
             <button class="btn cm-choose cm-choose-cam" id="cmChooseCam"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h3l1.5-2h7L17 8h3v11H4z"/><circle cx="12" cy="13" r="3.2"/></svg> <span data-i18n="ui.foto_maken">Take photo</span></button>
             <button class="btn cm-choose" id="cmChoose"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="8.5" cy="10" r="1.6"/><path d="M5 18l4.5-4.5 3 3 3.5-3.5L21 17"/></svg> <span data-i18n="ui.foto_uploaden">Upload photo</span></button>
+          </div>
+          <input id="cmNaam" class="cm-naam-top" type="text" maxlength="80" autocomplete="off" hidden data-i18n-ph="ui.naam_ph" data-i18n-aria="ui.naam" placeholder="Tattoo name *" aria-label="Tattoo name">
+          <div id="cmInfo" hidden>
+            <div id="cmHerhaalBadge" class="cm-herhaal-badge" hidden></div>
+            <div class="cm-onderrij">
+              <button type="button" id="cmMeerBtn" class="cm-meer-pill" aria-expanded="false"><span data-i18n="ui.meer_details">Meer details</span><svg class="cm-chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+              <div class="silhouet-keuze compact cm-status" id="cmStatus" role="group" data-i18n-aria="form.type" aria-label="Status">
+                <button type="button" data-status="gezet" class="actief" data-i18n="form.gezet">Gezet</button>
+                <button type="button" data-status="wens" data-i18n="form.wishlist">Wishlist</button>
+              </div>
+            </div>
+            <div id="cmMeer" hidden>
+              <label class="cm-veld"><span data-i18n="form.artiest">Artiest</span><input id="cmArtiest" type="text" maxlength="120"></label>
+              <label class="cm-veld"><span data-i18n="form.studio">Studio</span><input id="cmStudio" type="text" maxlength="120"></label>
+              <label class="cm-veld"><span data-i18n="form.stijl">Stijl</span><input id="cmStijl" type="text" maxlength="120"></label>
+              <div class="cm-rij2">
+                <label class="cm-veld"><span data-i18n="form.kosten">Kosten</span><span class="kosten-veld"><span class="valuta-prefix" id="cmKostenSym">&euro;</span><input id="cmKosten" type="number" min="0" max="1000000" step="0.01" inputmode="decimal"></span></label>
+                <label class="cm-veld"><span data-i18n="form.datum">Datum</span><input id="cmDatum" type="date"></label>
+              </div>
+              <div class="cm-rij2">
+                <div class="cm-veld"><span data-i18n="form.pijn">Pijnscore (1&ndash;5)</span>
+                  <div id="cmPijn" class="druppel-kies" data-waarde="0" role="group" data-i18n-aria="form.pijn" aria-label="Pijnscore">
+                    <button type="button" class="druppel" data-waarde="1" aria-label="1/5"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3s-6 7-6 11a6 6 0 0 0 12 0c0-4-6-11-6-11z"/></svg></button>
+                    <button type="button" class="druppel" data-waarde="2" aria-label="2/5"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3s-6 7-6 11a6 6 0 0 0 12 0c0-4-6-11-6-11z"/></svg></button>
+                    <button type="button" class="druppel" data-waarde="3" aria-label="3/5"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3s-6 7-6 11a6 6 0 0 0 12 0c0-4-6-11-6-11z"/></svg></button>
+                    <button type="button" class="druppel" data-waarde="4" aria-label="4/5"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3s-6 7-6 11a6 6 0 0 0 12 0c0-4-6-11-6-11z"/></svg></button>
+                    <button type="button" class="druppel" data-waarde="5" aria-label="5/5"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3s-6 7-6 11a6 6 0 0 0 12 0c0-4-6-11-6-11z"/></svg></button>
+                  </div>
+                </div>
+                <label class="cm-veld"><span data-i18n="form.zituren">Zituren</span><input id="cmZituren" type="number" min="0" max="100000" step="0.5" inputmode="decimal"></label>
+              </div>
+              <label class="cm-veld"><span data-i18n="form.notities">Notities</span><textarea id="cmNotities" maxlength="2000" rows="2"></textarea></label>
+              <label class="cm-veld"><span data-i18n="form.accentkleur">Accentkleur van markering</span><small class="veld-hint" data-i18n="form.accentuitleg">Gebruikt als je geen tattoo-afbeelding toevoegt</small><input id="cmAccent" type="color" value="#8E71F0" style="width:64px;height:40px;padding:4px;border-radius:var(--r-md);cursor:pointer"></label>
+            </div>
           </div>
         </div>
         <div class="cm-foot">
