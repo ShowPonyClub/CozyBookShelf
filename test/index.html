@@ -6850,7 +6850,7 @@ const I18N = {
     'toast.opslaanmislukt':'Opslaan mislukt: ',
     'toast.nietsexport':'Niets te exporteren - nog geen tattoos','toast.geexporteerd':'{n} tattoo{s} geëxporteerd',
     'toast.importgeslaagd':'Import geslaagd: {n} tattoo{s} hersteld','toast.geengeldige':'Bestand gelezen, maar geen geldige tattoos gevonden',
-    'toast.importmislukt':'Import mislukt: dit is geen geldig Tatties-backupbestand',
+    'toast.importmislukt':'Import mislukt: dit is geen geldig Tatties-backupbestand','toast.import_te_groot':'Bestand te groot om te importeren (max 200 MB)',
     'toast.persist':'Let op: de browser garandeert je opslag niet - maak regelmatig een backup',
     'toast.opbeginscherm':'Tatties staat op je beginscherm','toast.ladenmislukt':'Laden van gegevens mislukt: ',
     'opslag.gebruik':'Opslag: {mb} MB in gebruik','opslag.van':'van ±{mb} MB','opslag.bijnavol':'· bijna vol - exporteer een back-up!'
@@ -7028,7 +7028,7 @@ const I18N = {
     'toast.opslaanmislukt':'Saving failed: ',
     'toast.nietsexport':'Nothing to export - no tattoos yet','toast.geexporteerd':'{n} tattoo{s} exported',
     'toast.importgeslaagd':'Import successful: {n} tattoo{s} restored','toast.geengeldige':'File read, but no valid tattoos found',
-    'toast.importmislukt':"Import failed: this isn't a valid Tatties backup file",
+    'toast.importmislukt':"Import failed: this isn't a valid Tatties backup file",'toast.import_te_groot':'File too large to import (max 200 MB)',
     'toast.persist':"Note: the browser doesn't guarantee your storage - back up regularly",
     'toast.opbeginscherm':'Tatties is on your home screen','toast.ladenmislukt':'Loading data failed: ',
     'opslag.gebruik':'Storage: {mb} MB in use','opslag.van':'of ~{mb} MB','opslag.bijnavol':'· almost full - export a backup!'
@@ -7184,7 +7184,7 @@ function createTattoo(overrides = {}) {
    ============================================================ */
 // App-versie (semver, handmatig ophogen bij een release). Bij een bump ook de
 // CACHE-naam in sw.js meebumpen, zodat clients de nieuwe build ophalen.
-const APP_VERSIE = '0.2.4';
+const APP_VERSIE = '0.2.5';
 const DB_NAAM = 'tatties';
 const OUD_DB_NAAM = 'tattoostics';   // vorige naam - eenmalig overgezet
 const DB_VERSIE = 1;
@@ -10234,6 +10234,10 @@ $('#import-file').addEventListener('change', async (e) => {
   const bestand = e.target.files[0];
   e.target.value = '';
   if (!bestand) return;
+  // Groottelimiet: een echte back-up is tientallen MB; een absurd groot bestand zou de
+  // opslag (IndexedDB-quota) kunnen vullen. Vroeg afvangen voordat we het inlezen/parsen.
+  const IMPORT_MAX_BYTES = 200 * 1024 * 1024;
+  if (bestand.size > IMPORT_MAX_BYTES) { toast(tr('toast.import_te_groot')); return; }
   try {
     const tekst = await bestand.text();
     const data = JSON.parse(tekst);
