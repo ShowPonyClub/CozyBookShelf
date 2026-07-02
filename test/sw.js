@@ -4,7 +4,7 @@
    - Offline → laatst gecachte build, zodat de app ook zonder netwerk laadt.
    Cachenaam is geversioneerd; bij activatie worden oude caches opgeruimd.
    Bump CACHE bij een breaking change om alle clients te verversen. */
-const CACHE = 'tatties-test-v0.2.6';   // bump bij elke release (gelijk aan APP_VERSIE in tatties-3d.html)
+const CACHE = 'tatties-test-v0.2.7';   // bump bij elke release (gelijk aan APP_VERSIE in tatties-3d.html)
 
 self.addEventListener('install', () => {
   // Nieuwe SW niet laten wachten op het sluiten van oude tabs.
