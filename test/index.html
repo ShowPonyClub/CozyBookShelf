@@ -129,7 +129,8 @@
   --op-accent:#F0EDE8;   /* tekst/icoon op een accent-vlak (warm wit, nooit puur #fff) */
   --gevaar:#A8341A;      /* destructief (reset/verwijderen) */
   --invalid:#D14343;     /* ongeldige invoer */
-  --succes:#5FBE86;      /* bevestiging/voltooid */
+  --succes:#5FBE86;      /* bevestiging/voltooid (licht, thema-onafhankelijk) */
+  --succes-diep:#227A3E; /* diepe succesgroen voor gevulde knoppen: donker genoeg voor --op-accent-tekst, in beide thema's gelijk */
   /* Lettergrootte-schaal (modulair, rem) - zie HUISSTIJL.md */
   --fs-xs:.72rem;
   --fs-sm:.82rem;
@@ -551,6 +552,10 @@ dl.toon-leeg .veldrij.leeg-veld{display:flex}
 .start-tegel{padding:16px;font-size:.95rem;font-weight:600;background:var(--kaart);border:1px solid var(--rand);
   border-radius:var(--radius);color:var(--tekst);cursor:pointer;text-align:center}
 .start-tegel:hover{border-color:var(--accent)}
+/* 2D tijdelijk uitgeschakeld (optie A, class op <html>): verberg de 2D-ingangen; 3D-tegel wordt hero (volle breedte) */
+html.tweed-uit #btn-2d{display:none}
+html.tweed-uit .start-tegel[data-ga="2d"]{display:none}
+html.tweed-uit .start-tegels .start-tegel[data-ga="3d"]{grid-column:1 / -1}
 .start-recent{display:flex;flex-direction:column;gap:8px}
 .start-recent-item{display:flex;align-items:center;gap:12px;width:100%;text-align:left;padding:8px;
   background:var(--kaart);border:1px solid var(--rand);border-radius:var(--radius);color:var(--tekst);cursor:pointer}
@@ -955,7 +960,8 @@ form label,
 .t3d-editbar .eb-btns button.eb-help:hover{border-color:transparent;background:rgba(142,113,240,.16);}
 .t3d-editbar .eb-btns button.eb-help.on{background:rgba(142,113,240,.20);color:var(--accent);}
 .t3d-editbar .eb-btns button.eb-help .ik{width:17px;height:17px;}
-.t3d-editbar .eb-af{color:#fff!important;background:#2e9e4f!important;border-color:#2e9e4f!important;font-weight:700;font-size:var(--fs-md);display:inline-flex;align-items:center;gap:6px;}   /* groene vink: blijft bij de groep (gecentreerd) */
+.t3d-editbar .eb-btns button.eb-help::after{content:"";position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:44px;height:44px;}   /* onzichtbaar 44px tap-doel rond de kleine 28px (i)-knop (touch-toegankelijkheid) */
+.t3d-editbar .eb-btns button.eb-af{background:var(--succes-diep);border-color:var(--succes-diep);color:var(--op-accent);font-weight:700;font-size:var(--fs-md);display:inline-flex;align-items:center;gap:6px;}   /* groene 'klaar'-vink: --succes-diep-token (thema-onafhankelijk, AA met --op-accent) i.p.v. hardcoded groen + !important */
 .t3d-editbar .eb-opacity{display:flex;align-items:center;gap:8px;flex:1;min-width:130px;}
 .t3d-editbar .eb-opacity .eb-op-label{font-size:var(--fs-xs);color:var(--gedempt);text-transform:uppercase;letter-spacing:.05em;white-space:nowrap;}
 .t3d-editbar .eb-opacity input[type=range]{flex:1;min-width:0;}
@@ -7184,7 +7190,9 @@ function createTattoo(overrides = {}) {
    ============================================================ */
 // App-versie (semver, handmatig ophogen bij een release). Bij een bump ook de
 // CACHE-naam in sw.js meebumpen, zodat clients de nieuwe build ophalen.
-const APP_VERSIE = '0.2.5';
+const APP_VERSIE = '0.2.6';
+const TWEE_D_AAN = false;   // 2D-kaart tijdelijk uit tot 'ie af is (optie A): verbergt de 2D-ingangen (header-toggle + starttegel). Zet op true om 2D weer aan te zetten.
+if (!TWEE_D_AAN && document.documentElement) document.documentElement.classList.add('tweed-uit');
 const DB_NAAM = 'tatties';
 const OUD_DB_NAAM = 'tattoostics';   // vorige naam - eenmalig overgezet
 const DB_VERSIE = 1;
