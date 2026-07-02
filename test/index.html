@@ -7184,7 +7184,7 @@ function createTattoo(overrides = {}) {
    ============================================================ */
 // App-versie (semver, handmatig ophogen bij een release). Bij een bump ook de
 // CACHE-naam in sw.js meebumpen, zodat clients de nieuwe build ophalen.
-const APP_VERSIE = '0.2.3';
+const APP_VERSIE = '0.2.4';
 const DB_NAAM = 'tatties';
 const OUD_DB_NAAM = 'tattoostics';   // vorige naam - eenmalig overgezet
 const DB_VERSIE = 1;
@@ -12581,7 +12581,7 @@ async function verwijderVoorbeelden() {
     document.getElementById("cropReset").onclick=()=>{
       if(lassoPts.length || wandSeeds.length || eraseStrokes.length){   // ongedaan-baar: bewaar de huidige uitsnede
         resetSnapshot={lasso:lassoPts, wand:wandSeeds, erase:eraseStrokes, prevActie:laatsteActie};
-        laatsteActie='reset'; toast(tr('ui.uitsnede_gewist'));
+        laatsteActie='reset';   // geen toast (lekte naar het 3D-scherm na sluiten); feedback = de Ongedaan-knop laten oplichten
         { const ub=document.getElementById('lassoUndo'); if(ub){ ub.classList.remove('cm-undo-pulse'); void ub.offsetWidth; ub.classList.add('cm-undo-pulse'); setTimeout(()=>ub.classList.remove('cm-undo-pulse'), 1500); } }   // Ongedaan kort laten oplichten: op-de-plek feedback dat de reset terug te draaien is
       }
       lassoPts=[]; wandSeeds=[]; eraseStrokes=[]; gumStroke=null; lassoDragIdx=-1; rebuildBase(); drawLasso(); updateCutout();
