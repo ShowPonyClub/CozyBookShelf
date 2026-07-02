@@ -771,11 +771,11 @@ input[type=range]:focus{box-shadow:none;border:none}
 .inst-tabs{display:flex;gap:0;padding:12px 16px 0;border-bottom:1px solid var(--rand)}
 .inst-tab{flex:1;padding:8px 12px;font-size:var(--fs-md);font-weight:700;font-family:inherit;border:none;background:none;color:var(--gedempt);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:color .15s,border-color .15s}
 .inst-tab.actief{color:var(--accent);border-bottom-color:var(--accent)}
-.inst-tab:focus-visible{outline:none}
+.inst-tab:focus-visible{outline:2px solid var(--accent);outline-offset:-2px;border-radius:var(--r-sm)}
 .inst-groepkop{display:flex;align-items:center;gap:12px;margin:18px 16px 0;padding:0;font-size:.7rem;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:var(--gedempt)}
 .inst-groepkop::before,.inst-groepkop::after{content:"";flex:1;height:1px;background:var(--rand)}
 .inst-groepkop:first-of-type{margin-top:10px}
-#inst-sluit:focus-visible{outline:none}
+#inst-sluit:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .inst-rij{display:flex;align-items:center;justify-content:space-between;gap:12px}
 .inst-rij .inst-label{margin:0;white-space:nowrap}
 .inst-rij .silhouet-keuze{flex-shrink:0}
@@ -946,12 +946,12 @@ form label,
 /* alleen een lijntje tussen navigatie | bewerken; delete is al afgescheiden via rode kleur + ruimte
    (geen lijntje, anders strandt het als los streepje vooraan een gewrapte regel) */
 .t3d-editbar .eb-btns [data-act="edit"]::before{content:"";position:absolute;left:-8px;top:50%;transform:translateY(-50%);width:1px;height:58%;background:var(--rand);}
-.t3d-editbar .eb-btns button{min-width:0;height:auto;padding:9px 12px;background:var(--veldbg);border:1px solid var(--rand);color:var(--tekst);border-radius:var(--r-sm);font-size:var(--fs-md);line-height:1;cursor:pointer;font-family:inherit;text-align:center;}
+.t3d-editbar .eb-btns button{min-width:44px;min-height:44px;height:auto;padding:9px 12px;background:var(--veldbg);border:1px solid var(--rand);color:var(--tekst);border-radius:var(--r-sm);font-size:var(--fs-md);line-height:1;cursor:pointer;font-family:inherit;text-align:center;}
 .t3d-editbar .eb-btns button:hover{border-color:var(--accent);}
 .t3d-editbar .eb-btns button.on{border-color:var(--accent);background:rgba(142,113,240,.14);color:var(--accent);}
 /* (i)-uitlegknop: kaderloos paars icoontje in de linkerbovenhoek (uit de flex-flow -> scheelt een slot).
    min-height:0 nodig: de globale knop-min-hoogte (44px) maakte 'm anders ovaal. Rond highlight pas bij tik/hover. */
-.t3d-editbar .eb-btns button.eb-help{position:absolute;top:7px;left:7px;width:28px;height:28px;min-height:0;padding:0;display:inline-flex;align-items:center;justify-content:center;z-index:2;border:none;border-radius:50%;background:transparent;color:var(--accent);}
+.t3d-editbar .eb-btns button.eb-help{position:absolute;top:7px;left:7px;width:28px;height:28px;min-width:0;min-height:0;padding:0;display:inline-flex;align-items:center;justify-content:center;z-index:2;border:none;border-radius:50%;background:transparent;color:var(--accent);}
 .t3d-editbar .eb-btns button.eb-help:hover{border-color:transparent;background:rgba(142,113,240,.16);}
 .t3d-editbar .eb-btns button.eb-help.on{background:rgba(142,113,240,.20);color:var(--accent);}
 .t3d-editbar .eb-btns button.eb-help .ik{width:17px;height:17px;}
@@ -1051,6 +1051,11 @@ form label,
 .cutmodal .btn{background:transparent;border:1px solid var(--rand);color:var(--tekst);padding:12px;border-radius:var(--r-sm);
   font-size:var(--fs-base);cursor:pointer;font-family:inherit;}
 .cutmodal .cm-foot .btn{flex:1;}
+/* In-modal feedback: body-toasts renderen onzichtbaar in de modal op iOS, dus tonen we
+   meldingen (reset/teruggezet/fouten) hier bovenaan de modal-body. Donker toast-vlak conform huisstijl. */
+.cutmodal .cm-feedback{flex:0 0 auto;margin:0 0 2px;padding:9px 12px;background:#2A2118;color:var(--op-accent);border-left:3px solid var(--accent);border-radius:var(--r-sm);font-size:var(--fs-sm);line-height:1.35;text-align:center;box-shadow:0 6px 16px rgba(34,26,18,.28);}
+.cutmodal .cm-feedback[hidden]{display:none;}
+.cutmodal.cm-compact .cm-feedback{display:none;}
 /* '+ Nog een' met een info-knopje + uitleg-wolkje ernaast */
 .cutmodal .cm-meer-wrap{flex:1;position:relative;display:flex;align-items:stretch;gap:6px;}
 /* Info-knop: zelfde ronde cirkel + 'open'=accent-vulling als de tool-info-knop (.cut-tools .linkbtn[.on]) */
@@ -1489,6 +1494,7 @@ form label{text-transform:none;letter-spacing:.005em;font-size:.8rem;color:var(-
     <div id="cutModal" class="cutmodal" role="dialog" aria-modal="true" aria-labelledby="cmTitle">
       <div class="cm-card">
         <div class="cm-body">
+          <div id="cmFeedback" class="cm-feedback" role="status" aria-live="polite" hidden></div>
           <div class="cm-toprow">
             <span id="cmTitle" class="cm-titel" data-i18n="ui.tattoo_toevoegen">Tattoo toevoegen</span>
             <button id="cmCancel" class="cm-x" data-i18n-title="form.annuleren" data-i18n-aria="form.annuleren" title="Annuleer" aria-label="Annuleer">&times;</button>
@@ -7178,7 +7184,7 @@ function createTattoo(overrides = {}) {
    ============================================================ */
 // App-versie (semver, handmatig ophogen bij een release). Bij een bump ook de
 // CACHE-naam in sw.js meebumpen, zodat clients de nieuwe build ophalen.
-const APP_VERSIE = '0.2.1';
+const APP_VERSIE = '0.2.2';
 const DB_NAAM = 'tatties';
 const OUD_DB_NAAM = 'tattoostics';   // vorige naam - eenmalig overgezet
 const DB_VERSIE = 1;
@@ -7840,7 +7846,19 @@ function bouwEuro() { euro = new Intl.NumberFormat(valutaLocale(), { style: 'cur
 bouwEuro();
 
 let toastTimer = null;
+let cmFeedbackTimer = null;
 function toast(tekst) {
+  // In de uitsnede-modal renderen body-toasts onzichtbaar (iOS) -> feedback in de modal zelf tonen.
+  const cm = document.getElementById('cutModal');
+  const fb = document.getElementById('cmFeedback');
+  if (cm && fb && cm.classList.contains('on') && !cm.classList.contains('cm-compact')) {
+    fb.textContent = tekst;
+    fb.hidden = false;
+    tril(12);
+    clearTimeout(cmFeedbackTimer);
+    cmFeedbackTimer = setTimeout(() => { fb.hidden = true; fb.textContent = ''; }, 2600);
+    return;
+  }
   const el = $('#toast');
   el.classList.remove('met-actie');
   el.textContent = tekst;
