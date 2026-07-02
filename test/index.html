@@ -996,7 +996,7 @@ form label,
 .cutmodal{position:fixed;inset:0;z-index:60;display:none;align-items:center;justify-content:center;
   background:rgba(0,0,0,.62);-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px);}
 .cutmodal.on{display:flex;}
-.cutmodal .cm-card{width:min(560px,94vw);max-height:92vh;display:flex;flex-direction:column;
+.cutmodal .cm-card{position:relative;width:min(560px,94vw);max-height:92vh;display:flex;flex-direction:column;
   background:var(--kaart);border:1px solid var(--rand);border-radius:var(--r-lg);overflow:hidden;color:var(--tekst);
   font-family:var(--app-font);}
 /* Keuzestand (alleen Foto maken/uploaden): geen grijs kaartje meer, alleen de
@@ -1053,7 +1053,7 @@ form label,
 .cutmodal .cm-foot .btn{flex:1;}
 /* In-modal feedback: body-toasts renderen onzichtbaar in de modal op iOS, dus tonen we
    meldingen (reset/teruggezet/fouten) hier bovenaan de modal-body. Donker toast-vlak conform huisstijl. */
-.cutmodal .cm-feedback{flex:0 0 auto;margin:0 0 2px;padding:9px 12px;background:#2A2118;color:var(--op-accent);border-left:3px solid var(--accent);border-radius:var(--r-sm);font-size:var(--fs-sm);line-height:1.35;text-align:center;box-shadow:0 6px 16px rgba(34,26,18,.28);}
+.cutmodal .cm-feedback{position:absolute;top:8px;left:50%;transform:translateX(-50%);z-index:5;max-width:calc(100% - 24px);pointer-events:none;margin:0;padding:9px 13px;background:#2A2118;color:var(--op-accent);border-left:3px solid var(--accent);border-radius:var(--r-sm);font-size:var(--fs-sm);line-height:1.35;text-align:center;box-shadow:0 8px 22px rgba(34,26,18,.4);}
 .cutmodal .cm-feedback[hidden]{display:none;}
 .cutmodal.cm-compact .cm-feedback{display:none;}
 /* '+ Nog een' met een info-knopje + uitleg-wolkje ernaast */
@@ -1493,8 +1493,8 @@ form label{text-transform:none;letter-spacing:.005em;font-size:.8rem;color:var(-
     <!-- volledig uitsnede-scherm -->
     <div id="cutModal" class="cutmodal" role="dialog" aria-modal="true" aria-labelledby="cmTitle">
       <div class="cm-card">
+        <div id="cmFeedback" class="cm-feedback" role="status" aria-live="polite" hidden></div>
         <div class="cm-body">
-          <div id="cmFeedback" class="cm-feedback" role="status" aria-live="polite" hidden></div>
           <div class="cm-toprow">
             <span id="cmTitle" class="cm-titel" data-i18n="ui.tattoo_toevoegen">Tattoo toevoegen</span>
             <button id="cmCancel" class="cm-x" data-i18n-title="form.annuleren" data-i18n-aria="form.annuleren" title="Annuleer" aria-label="Annuleer">&times;</button>
@@ -7184,7 +7184,7 @@ function createTattoo(overrides = {}) {
    ============================================================ */
 // App-versie (semver, handmatig ophogen bij een release). Bij een bump ook de
 // CACHE-naam in sw.js meebumpen, zodat clients de nieuwe build ophalen.
-const APP_VERSIE = '0.2.2';
+const APP_VERSIE = '0.2.3';
 const DB_NAAM = 'tatties';
 const OUD_DB_NAAM = 'tattoostics';   // vorige naam - eenmalig overgezet
 const DB_VERSIE = 1;
