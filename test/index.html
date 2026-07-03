@@ -982,6 +982,7 @@ form label,
 .t3d-editbar .eb-legend .lg-row .ik{flex:none;width:20px;height:20px;}
 .t3d-editbar .eb-legend .lg-row.lg-reset{color:var(--gevaar);}
 @media (pointer:coarse){ .t3d-editbar .eb-scarot{display:none;} }   /* schaal/draai: alleen op desktop (touch gebruikt pinch) */
+@media (pointer:coarse){ input:not([type=range]):not([type=checkbox]):not([type=radio]),select,textarea{font-size:16px;} }   /* iOS Safari zoomt in bij focus op een input <16px (en blijft ingezoomd) -> forceer 16px op touch */
 #t3d-reset{position:absolute;top:14px;right:14px;z-index:6;width:48px;height:48px;border-radius:50%;flex:none;
   background:var(--kaart);border:1px solid var(--rand);color:var(--tekst);font-size:18px;line-height:1;cursor:pointer;
   display:flex;align-items:center;justify-content:center;font-family:inherit;box-shadow:0 4px 14px rgba(0,0,0,.22);}
@@ -6737,7 +6738,7 @@ const I18N = {
     'ui.tattoo_toevoegen':'Tattoo toevoegen','ui.tattoo_aanpassen':'Tattoo aanpassen',
     'ui.beginstand':'Beginstand','ui.laden':'Laden…','ui.vergrendelen':'Vergrendelen','ui.verwijderen':'Verwijderen',
     'ui.huidblend':'In huid blenden','ui.huidblend_kort':'In huid','ui.blend_aan':'In huid geblend','ui.blend_uit':'Normale weergave',
-    'ui.aanpassen_bijknippen':'Aanpassen','ui.klaar':'Klaar','ui.kleiner':'Kleiner','ui.groter':'Groter',
+    'ui.aanpassen_bijknippen':'Aanpassen','ui.klaar':'Klaar','ui.kleiner':'Kleiner','ui.groter':'Groter','ui.sluiten_bevestig':'Uitsnede sluiten? Je niet-opgeslagen werk gaat verloren.','ui.sluiten_ja':'Sluiten',
     'ui.links_draaien':'Linksom draaien','ui.rechts_draaien':'Rechtsom draaien',
     'ui.eb_hint':'Sleep = verplaatsen · knijp = schalen · knijp-draai = roteren',
     'ui.draai_hint':'Sleep om te draaien · tik op + om een tattoo toe te voegen',
@@ -6915,7 +6916,7 @@ const I18N = {
     'ui.tattoo_toevoegen':'Add tattoo','ui.tattoo_aanpassen':'Edit tattoo',
     'ui.beginstand':'Reset view','ui.laden':'Loading…','ui.vergrendelen':'Lock','ui.verwijderen':'Delete',
     'ui.huidblend':'Blend into skin','ui.huidblend_kort':'In skin','ui.blend_aan':'Blended into skin','ui.blend_uit':'Normal view',
-    'ui.aanpassen_bijknippen':'Edit','ui.klaar':'Done','ui.kleiner':'Smaller','ui.groter':'Bigger',
+    'ui.aanpassen_bijknippen':'Edit','ui.klaar':'Done','ui.kleiner':'Smaller','ui.groter':'Bigger','ui.sluiten_bevestig':'Discard your cut-out? Unsaved work will be lost.','ui.sluiten_ja':'Discard',
     'ui.links_draaien':'Rotate left','ui.rechts_draaien':'Rotate right',
     'ui.eb_hint':'Drag = move · pinch = scale · pinch-twist = rotate',
     'ui.draai_hint':'Drag to rotate · tap + to add a tattoo',
@@ -7177,7 +7178,7 @@ function createTattoo(overrides = {}) {
    ============================================================ */
 // App-versie (semver, handmatig ophogen bij een release). Bij een bump ook de
 // CACHE-naam in sw.js meebumpen, zodat clients de nieuwe build ophalen.
-const APP_VERSIE = '0.2.7';
+const APP_VERSIE = '0.2.8';
 const TWEE_D_AAN = false;   // 2D-kaart tijdelijk uit tot 'ie af is (optie A): verbergt de 2D-ingangen (header-toggle + starttegel). Zet op true om 2D weer aan te zetten.
 if (!TWEE_D_AAN && document.documentElement) document.documentElement.classList.add('tweed-uit');
 const DB_NAAM = 'tatties';
@@ -12226,7 +12227,7 @@ async function verwijderVoorbeelden() {
     if(cutSpread) cutSpread.value=55;
     cmTitle.textContent=tr('ui.tattoo_toevoegen'); cmPlaceBtn.textContent=tr('ui.toevoegen');
     resetInfo(); toonInfo(false);
-    cutModal.classList.add("on"); toonCutInstellingen(false);
+    cutModal.classList.add("on"); cutOpenHistory(); toonCutInstellingen(false);
     drawPreview(null); drawLasso();
   }
 
@@ -12277,7 +12278,7 @@ async function verwijderVoorbeelden() {
     if(cutSpread) cutSpread.value=(k.spread!=null?k.spread:55);
     bgPickMode=false; if(bgPickBtn)bgPickBtn.classList.remove("on");
     setBgPick(k.bgColor ? {r:k.bgColor.r,g:k.bgColor.g,b:k.bgColor.b} : null);
-    cutModal.classList.add("on"); toonCutInstellingen(false);
+    cutModal.classList.add("on"); cutOpenHistory(); toonCutInstellingen(false);
     drawPreview(null); drawLasso();
     const im=new Image();
     im.onload=()=>{ origImg=im; lassoPts=(k.lasso||[]).slice(); toonCutInstellingen(true); toonInfo(true); rebuildBase(); updateCutout(); drawLasso();
@@ -12302,14 +12303,22 @@ async function verwijderVoorbeelden() {
     if(cutSpread) cutSpread.value=(k.spread!=null?k.spread:55);
     bgPickMode=false; if(bgPickBtn)bgPickBtn.classList.remove("on");
     setBgPick(k.bgColor ? {r:k.bgColor.r,g:k.bgColor.g,b:k.bgColor.b} : null);
-    cutModal.classList.add("on"); toonCutInstellingen(false); toonInfo(false);
+    cutModal.classList.add("on"); cutOpenHistory(); toonCutInstellingen(false); toonInfo(false);
     drawPreview(null); drawLasso();
     const im=new Image();
     im.onload=()=>{ origImg=im; lassoPts=(k.lasso||[]).slice(); toonCutInstellingen(true); toonInfo(true); rebuildBase(); updateCutout(); drawLasso(); toast(tr('ui.pas_aan_sla_op')); };
     im.onerror=()=>toast(tr('ui.foto_niet_geladen'));
     im.src=k.srcUrl;
   }
-  function closeCutModal(){ resetSnapshot=null; laatsteActie=null; cutModal.classList.remove("on"); pendingPlace=null; pendingEdit=null; pendingPlace2D=null; pendingNew=null; pendingEdit2D=null; toonCutInstellingen(false); toonInfo(false);
+  let cutHistPushed=false;
+  function cutOpenHistory(){ if(!cutHistPushed){ try{ history.pushState({tattiesCut:1}, ''); cutHistPushed=true; }catch(e){} } }   // Android/terug: history-entry neerleggen zodat 'terug' de modal sluit i.p.v. de app verlaat
+  function cutHeeftWerk(){ const n=(document.getElementById('cmNaam')||{}).value; return !!(lassoPts.length||wandSeeds.length||eraseStrokes.length||(n&&n.trim())); }
+  async function probeerAnnuleerCut(vanBack){
+    if(cutHeeftWerk()){ const ok=await askConfirm(tr('ui.sluiten_bevestig'), tr('ui.sluiten_ja')); if(!ok){ if(vanBack) cutOpenHistory(); return; } }   // bevestig bij noemenswaardig werk; 'blijf bewerken' her-armt de terug-trap
+    closeCutModal();
+  }
+  function closeCutModal(){ if(cutHistPushed){ cutHistPushed=false; try{ history.back(); }catch(e){} }   // onze history-entry opruimen (tenzij we al via 'terug' hier kwamen)
+    resetSnapshot=null; laatsteActie=null; cutModal.classList.remove("on"); pendingPlace=null; pendingEdit=null; pendingPlace2D=null; pendingNew=null; pendingEdit2D=null; toonCutInstellingen(false); toonInfo(false);
     plaatsHerhaal=false; window.__tattiesHerhaalSrc=null; herhaalTeller=1; vorigeLassos=[]; addDoel='3d';   // D6(a): herhaal-state opruimen + doel terug naar default (geen stale vlag/lasso/doel)
     if(imgTexture && imgTexture.dispose){ imgTexture.dispose(); } imgTexture=null;   // niet-geplaatste textuur vrijgeven (geen lek)
     cutPointers.clear(); pinch=null; drawingFree=false; gumStroke=null; lassoDragIdx=-1; clearTimeout(wheelEind);
@@ -12323,7 +12332,7 @@ async function verwijderVoorbeelden() {
     bgPickMode=false; setBgPick(null); if(bgPickBtn)bgPickBtn.classList.remove("on");
     if(cutSpread) cutSpread.value=55;
     cmTitle.textContent=tr('ui.tattoo_toevoegen'); cmPlaceBtn.textContent=tr('ui.tattoo_toevoegen');
-    cutModal.classList.add("on"); toonCutInstellingen(false);
+    cutModal.classList.add("on"); cutOpenHistory(); toonCutInstellingen(false);
     drawPreview(null); drawLasso();
   }
   window.__tattiesPlaats2D = openCutModal2D;
@@ -12578,7 +12587,8 @@ async function verwijderVoorbeelden() {
     imgInputCamera=document.getElementById("imgInputCamera");
     document.getElementById("cmChoose").onclick=()=>imgInput.click();
     { const cc=document.getElementById("cmChooseCam"); if(cc) cc.onclick=()=>imgInputCamera.click(); }   // 'Foto maken' -> camera (Android krijgt anders geen camera-optie)
-    document.getElementById("cmCancel").onclick=closeCutModal;
+    document.getElementById("cmCancel").onclick=()=>probeerAnnuleerCut(false);   // × / Escape: bevestig eerst als er werk is
+    window.addEventListener('popstate', ()=>{ if(cutModal.classList.contains('on')){ cutHistPushed=false; probeerAnnuleerCut(true); } });   // hardware/terug-knop sluit de modal (met bevestiging) i.p.v. de app te verlaten
     { const meerBtn=document.getElementById("cmPlaceMeer"); if(meerBtn) meerBtn.onclick=()=>{ plaatsHerhaal=true; if(cmPlaceBtn) cmPlaceBtn.onclick(); }; }   // plaats deze + heropen cut met dezelfde foto
     // Info-wolkje bij '+ Nog een' (tik = uitleg tonen; sluit bij buiten-tik) - zelfde patroon als de tool-legenda
     { const inf=document.getElementById("cmMeerInfo"), tip=document.getElementById("cmMeerTip");
