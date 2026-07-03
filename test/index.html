@@ -1104,22 +1104,8 @@ form label,
   border:1px solid var(--rand);border-radius:999px;color:var(--tekst);text-decoration:none;font-size:var(--fs-sm);font-weight:600;
   padding:9px 13px;min-height:44px;}
 .cutmodal .cut-tools .linkbtn:hover{border-color:var(--accent);color:var(--accent);}
-.cutmodal .cut-tools .t-lbl{display:none;}                              /* icon-only; uitleg via de Info-pop-up */
-.cutmodal .cut-tools .cm-toolinfo.on{border-color:var(--accent);color:var(--accent);}
-.cutmodal .cm-legend{position:absolute;bottom:100%;left:0;margin-bottom:10px;z-index:9;
-  background:var(--kaart);border:1px solid var(--rand);border-radius:var(--r-md);box-shadow:0 8px 22px rgba(0,0,0,.22);
-  padding:6px;min-width:170px;max-width:min(280px,90%);display:flex;flex-direction:column;}
-.cutmodal .cm-legend[hidden]{display:none;}
-.cutmodal .cm-legend .lg-row{display:flex;align-items:center;gap:11px;padding:8px 10px;border-radius:var(--r-sm);
-  font-size:var(--fs-sm);font-weight:600;color:var(--tekst);white-space:nowrap;}
-.cutmodal .cm-legend .lg-row .ik{flex:none;}
-.cutmodal .cm-legend .lg-row.lg-reset{color:var(--gevaar);}
+.cutmodal .cut-tools .t-lbl{display:inline;font-size:.82rem;font-weight:600;line-height:1;}   /* tool-namen zichtbaar naast het icoon (de info-popover die de uitleg gaf bestaat niet meer) */
 .cutmodal .cut-tools .linkbtn.on{background:var(--accent);border-color:var(--accent);color:var(--op-accent);}
-/* Info-(i) in de uitsnede-balk gelijkgetrokken met de (i) in het bewerkmenu: rond, paars, kaderloos */
-.cutmodal .cut-tools .cm-toolinfo{background:transparent;border:none;border-radius:50%;color:var(--accent);padding:0;width:44px;height:44px;min-height:44px;gap:0;align-items:center;justify-content:center;}
-.cutmodal .cut-tools .cm-toolinfo:hover{background:rgba(142,113,240,.16);color:var(--accent);border-color:transparent;}
-.cutmodal .cut-tools .cm-toolinfo.on{background:rgba(142,113,240,.20);color:var(--accent);border-color:transparent;}
-.cutmodal .cut-tools .cm-toolinfo .ik{width:18px;height:18px;}
 .cutmodal .cut-tools .cm-toolstoggle{gap:5px;}
 .cutmodal .cut-tools .cm-toolstoggle .tt-lbl{display:inline;font-size:.82rem;font-weight:600;line-height:1;}
 .cutmodal .cut-tools .cm-toolstoggle .ik-chev{width:13px;height:13px;transition:transform .18s;}
@@ -6838,6 +6824,7 @@ const I18N = {
     'toast.afbmislukt':'Afbeelding maken lukte niet in deze omgeving','toast.kaartopgeslagen':'Kaart opgeslagen als afbeelding',
     'toast.vastgezet':'Tattoo vastgezet','toast.ontgrendeld':'Tattoo ontgrendeld',
     'toast.wensverwijderd':'Wens verwijderd','toast.tattooverwijderd':'Tattoo verwijderd','toast.ongedaan':'Ongedaan maken',
+    'toast.sessieverwijderd':'Sessie verwijderd','toast.touchupverwijderd':'Touch-up verwijderd','toast.taakverwijderd':'Taak verwijderd',
     'toast.teruggezet':'"{naam}" teruggezet','confirm.verwijder':'"{naam}" verwijderen?',
     'toast.kiessessiedatum':'Kies eerst een sessiedatum','toast.sessietoegevoegd':'Sessie toegevoegd',
     'toast.kiestouchupdatum':'Kies eerst een touch-up datum','toast.touchuptoegevoegd':'Touch-up toegevoegd',
@@ -6852,7 +6839,7 @@ const I18N = {
     'toast.opslaanmislukt':'Opslaan mislukt: ',
     'toast.nietsexport':'Niets te exporteren - nog geen tattoos','toast.geexporteerd':'{n} tattoo{s} geëxporteerd',
     'toast.importgeslaagd':'Import geslaagd: {n} tattoo{s} hersteld','toast.geengeldige':'Bestand gelezen, maar geen geldige tattoos gevonden',
-    'toast.importmislukt':'Import mislukt: dit is geen geldig Tatties-backupbestand','toast.import_te_groot':'Bestand te groot om te importeren (max 200 MB)','toast.opslagvol':'De opslag is vol - exporteer een back-up en verwijder wat foto\'s',
+    'toast.importmislukt':'Import mislukt: dit is geen geldig Tatties-backupbestand','toast.import_te_groot':'Bestand te groot om te importeren (max 200 MB)','toast.opslagvol':'De opslag is vol - exporteer een back-up en verwijder wat foto\'s','toast.kosten_ongeldig':'Kosten niet herkend - gebruik een punt als decimaalteken (bv. 12.50)','confirm.import':'Importeren voegt {n} nieuwe toe en overschrijft {m} bestaande tattoo{s}. Doorgaan?','confirm.import_ja':'Importeren','toast.importgeannuleerd':'Import geannuleerd',
     'toast.persist':'Let op: de browser garandeert je opslag niet - maak regelmatig een backup',
     'toast.opbeginscherm':'Tatties staat op je beginscherm','toast.ladenmislukt':'Laden van gegevens mislukt: ',
     'opslag.gebruik':'Opslag: {mb} MB in gebruik','opslag.van':'van ±{mb} MB','opslag.bijnavol':'· bijna vol - exporteer een back-up!'
@@ -7016,6 +7003,7 @@ const I18N = {
     'toast.afbmislukt':"Couldn't create the image in this environment",'toast.kaartopgeslagen':'Map saved as image',
     'toast.vastgezet':'Tattoo pinned','toast.ontgrendeld':'Tattoo unlocked',
     'toast.wensverwijderd':'Wish deleted','toast.tattooverwijderd':'Tattoo deleted','toast.ongedaan':'Undo',
+    'toast.sessieverwijderd':'Session removed','toast.touchupverwijderd':'Touch-up removed','toast.taakverwijderd':'Task removed',
     'toast.teruggezet':'"{naam}" restored','confirm.verwijder':'Delete "{naam}"?',
     'toast.kiessessiedatum':'Pick a session date first','toast.sessietoegevoegd':'Session added',
     'toast.kiestouchupdatum':'Pick a touch-up date first','toast.touchuptoegevoegd':'Touch-up added',
@@ -7030,7 +7018,7 @@ const I18N = {
     'toast.opslaanmislukt':'Saving failed: ',
     'toast.nietsexport':'Nothing to export - no tattoos yet','toast.geexporteerd':'{n} tattoo{s} exported',
     'toast.importgeslaagd':'Import successful: {n} tattoo{s} restored','toast.geengeldige':'File read, but no valid tattoos found',
-    'toast.importmislukt':"Import failed: this isn't a valid Tatties backup file",'toast.import_te_groot':'File too large to import (max 200 MB)','toast.opslagvol':'Storage is full - export a backup and remove some photos',
+    'toast.importmislukt':"Import failed: this isn't a valid Tatties backup file",'toast.import_te_groot':'File too large to import (max 200 MB)','toast.opslagvol':'Storage is full - export a backup and remove some photos','toast.kosten_ongeldig':'Cost not recognized - use a dot as decimal separator (e.g. 12.50)','confirm.import':'Importing adds {n} new and overwrites {m} existing tattoo{s}. Continue?','confirm.import_ja':'Import','toast.importgeannuleerd':'Import cancelled',
     'toast.persist':"Note: the browser doesn't guarantee your storage - back up regularly",
     'toast.opbeginscherm':'Tatties is on your home screen','toast.ladenmislukt':'Loading data failed: ',
     'opslag.gebruik':'Storage: {mb} MB in use','opslag.van':'of ~{mb} MB','opslag.bijnavol':'· almost full - export a backup!'
@@ -7186,7 +7174,7 @@ function createTattoo(overrides = {}) {
    ============================================================ */
 // App-versie (semver, handmatig ophogen bij een release). Bij een bump ook de
 // CACHE-naam in sw.js meebumpen, zodat clients de nieuwe build ophalen.
-const APP_VERSIE = '0.2.9.3';
+const APP_VERSIE = '0.2.9.4';
 const TWEE_D_AAN = false;   // 2D-kaart tijdelijk uit tot 'ie af is (optie A): verbergt de 2D-ingangen (header-toggle + starttegel). Zet op true om 2D weer aan te zetten.
 if (!TWEE_D_AAN && document.documentElement) document.documentElement.classList.add('tweed-uit');
 const DB_NAAM = 'tatties';
@@ -7916,6 +7904,13 @@ function zetNavActief(welke) {
     if (b) { const on = key === navActiefKey; b.classList.toggle('actief', on); b.setAttribute('aria-pressed', on ? 'true' : 'false'); }
   });
 }
+/* Kosten-invoer lezen met komma-waarschuwing: type=number geeft bij een niet-geaccepteerde
+   komma ("12,50") een lege value + badInput -> dat werd stil als 0 opgeslagen. */
+function leesKostenVeld(el) {
+  if (el && el.validity && el.validity.badInput) toast(tr('toast.kosten_ongeldig'));
+  return Math.min(1000000, Math.max(0, parseFloat(el && el.value) || 0));
+}
+
 function toonView(naam) {
   // 2D uit (optie A): alle oude 'home'-routes (collectie-terug, detail-/formulier-fallbacks) landen
   // op start i.p.v. de verborgen 2D-kaart - anders is de in-aanbouw-flow alsnog bedienbaar.
@@ -8012,7 +8007,9 @@ function renderStart() {
       hz.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); tog(); } }); } }
   const rec = $('#start-recent');
   if (rec) {
-    rec.innerHTML = tattoos.slice(0, 3).map(t => {
+    // Op updatedAt (laatst toegevoegd/gewijzigd), niet op tattoo-datum: de 3D-flow laat de
+    // datum leeg, waardoor een verse tattoo anders onderaan sorteerde en hier nooit verscheen.
+    rec.innerHTML = [...tattoos].sort((a, b) => (+b.updatedAt || 0) - (+a.updatedAt || 0)).slice(0, 3).map(t => {
       const foto = hoofdFoto(t) || (t.kunst && t.kunst.src) || null;
       const thumb = foto ? `<img src="${esc(foto)}" alt="">` : esc((String(t.naam ?? '') || '?').charAt(0).toUpperCase());
       return `<button type="button" class="start-recent-item" data-id="${esc(t.id)}"><span class="sri-thumb">${thumb}</span><span class="sri-naam">${esc(t.naam)}</span><span class="sri-zone">${esc(zoneLabel(t.lichaamsdeel))}</span></button>`;
@@ -9152,6 +9149,21 @@ async function bewaarEnVerversDetail(t, { ookLijst = false } = {}) {
   renderDetail();
 }
 
+/* Sub-item (sessie/touch-up/nazorgtaak) verwijderen mét ongedaan-maken - zelfde patroon als
+   tattoo-verwijderen: één mis-tap mag geen sessie-uur kosten. Bij undo het record opnieuw
+   opzoeken (kan door een tussentijdse herlaad() een vers object zijn) en op de oude plek terugzetten. */
+async function verwijderSubItem(t, veld, idx, toastKey) {
+  const [item] = t[veld].splice(idx, 1);
+  if (item === undefined) return;   // index verlopen (bv. dubbele klik): niets te verwijderen
+  await bewaarEnVerversDetail(t);
+  toastMetActie(tr(toastKey), tr('toast.ongedaan'), async () => {
+    const rec = tattoos.find(x => x.id === t.id) || t;
+    if (!Array.isArray(rec[veld])) rec[veld] = [];
+    rec[veld].splice(Math.min(idx, rec[veld].length), 0, item);
+    await bewaarEnVerversDetail(rec);
+  });
+}
+
 function renderDetail() {
   const t = tattoos.find(x => x.id === detailId);
   const view = $('#view-detail');
@@ -9346,16 +9358,10 @@ function renderDetail() {
       toast(tr('toast.touchuptoegevoegd'));
     });
     view.querySelectorAll('[data-del-sessie]').forEach(b =>
-      b.addEventListener('click', async () => {
-        t.sessies.splice(Number(b.dataset.delSessie), 1);
-        await bewaarEnVerversDetail(t);
-      })
+      b.addEventListener('click', () => verwijderSubItem(t, 'sessies', Number(b.dataset.delSessie), 'toast.sessieverwijderd'))
     );
     view.querySelectorAll('[data-del-touchup]').forEach(b =>
-      b.addEventListener('click', async () => {
-        t.touchUps.splice(Number(b.dataset.delTouchup), 1);
-        await bewaarEnVerversDetail(t);
-      })
+      b.addEventListener('click', () => verwijderSubItem(t, 'touchUps', Number(b.dataset.delTouchup), 'toast.touchupverwijderd'))
     );
   }
   if (detailTab === 'nazorg' && !isWens) {
@@ -9401,10 +9407,7 @@ function renderDetail() {
       c.addEventListener('input', taakToggle);
     });
     view.querySelectorAll('[data-del-taak]').forEach(b =>
-      b.addEventListener('click', async () => {
-        t.nazorgTaken.splice(Number(b.dataset.delTaak), 1);
-        await bewaarEnVerversDetail(t);
-      })
+      b.addEventListener('click', () => verwijderSubItem(t, 'nazorgTaken', Number(b.dataset.delTaak), 'toast.taakverwijderd'))
     );
   }
 }
@@ -10048,7 +10051,7 @@ function openFormulier(id = null) {
       artiest: $('#f-artiest').value.trim(),
       studio: $('#f-studio').value.trim(),
       stijl: $('#f-stijl').value,
-      kosten: Math.min(1000000, Math.max(0, parseFloat($('#f-kosten').value) || 0)),
+      kosten: leesKostenVeld($('#f-kosten')),
       zituren: Math.min(100000, Math.max(0, parseFloat($('#f-zituren').value) || 0)),
       pijn: Math.min(5, Math.max(0, parseInt($('#f-pijn').value, 10) || 0)),
       sessies: t.sessies || [],
@@ -10274,6 +10277,21 @@ $('#import-file').addEventListener('change', async (e) => {
     const data = JSON.parse(tekst);
     const lijst = Array.isArray(data) ? data : data.tattoos;
     if (!Array.isArray(lijst)) throw new Error('Geen tattoolijst gevonden');
+
+    // Overschrijf-bescherming: een record met een bestaand id vervangt de lokale versie
+    // (een óudere back-up kan zo nieuwere data overschrijven, zonder undo). Vooraf tellen
+    // en expliciet laten bevestigen; zonder overlap importeren we zonder extra vraag.
+    const bestaandeIds = new Set(tattoos.map(x => String(x.id)));
+    const geldig = lijst.filter(it => it && typeof it === 'object' && it.naam);
+    const overschrijft = geldig.filter(it => it.id && bestaandeIds.has(String(it.id))).length;
+    if (overschrijft > 0) {
+      const vraag = tr('confirm.import').replace('{n}', geldig.length - overschrijft)
+        .replace('{m}', overschrijft).replace('{s}', overschrijft === 1 ? '' : 's');
+      const ok = (typeof window.__tattiesConfirm === 'function')
+        ? await window.__tattiesConfirm(vraag, tr('confirm.import_ja'))
+        : window.confirm(vraag);
+      if (!ok) { toast(tr('toast.importgeannuleerd')); return; }
+    }
 
     let geimporteerd = 0;
     for (const item of lijst) {
@@ -12218,7 +12236,7 @@ async function verwijderVoorbeelden() {
     const v=id=>{ const el=document.getElementById(id); return el?el.value:""; };
     return { naam:(v("cmNaam")||"").trim(), info:{
       artiest:v("cmArtiest").trim(), studio:v("cmStudio").trim(), stijl:v("cmStijl").trim(),
-      kosten:Math.min(1000000,Math.max(0,parseFloat(v("cmKosten"))||0)),
+      kosten:leesKostenVeld(document.getElementById("cmKosten")),
       pijn:leesPijnDruppels(), datum:v("cmDatum"),
       zituren:Math.min(100000,Math.max(0,parseFloat(v("cmZituren"))||0)),
       accentkleur:(document.getElementById("cmAccent")?document.getElementById("cmAccent").value:"#8E71F0"),
@@ -12269,8 +12287,11 @@ async function verwijderVoorbeelden() {
   // Toon de uitsnede-instellingen (preview, sliders, achtergrond) pas na een foto
   function toonCutInstellingen(b){
     const s=document.getElementById("cmSettings"); if(s) s.hidden=!b;
-    if(b){ const adv=document.getElementById("cmAdvTools"), tt=document.getElementById("cmToolsToggle");   // verfijn-tools standaard ingeklapt bij openen
-           if(adv) adv.hidden=true; if(tt) tt.setAttribute("aria-expanded","false"); }
+    if(b){ const adv=document.getElementById("cmAdvTools"), tt=document.getElementById("cmToolsToggle");
+           // Verfijn-tools (punten/rotatie/spiegel/toverstaf/gum): stand onthouden, standaard OPEN.
+           // Altijd-dichtklappen verstopte juist de correctie-tools die je bij een echte huidfoto nodig hebt.
+           let open=true; try{ open = localStorage.getItem('tatties-kniptools-open') !== '0'; }catch(e){}
+           if(adv) adv.hidden=!open; if(tt) tt.setAttribute("aria-expanded", open?"true":"false"); }
     if(cmPlaceBtn) cmPlaceBtn.style.display=b?"":"none";
     { const meerW=document.querySelector(".cm-meer-wrap"); if(meerW) meerW.style.display=(b&&pendingNew)?"":"none"; }   // '+ Nog een' (incl. info-knopje) alleen bij toevoegen
     cutModal.classList.toggle("cm-compact", !b);
@@ -12696,6 +12717,7 @@ async function verwijderVoorbeelden() {
     // Progressive disclosure: verfijn-tools (90°/spiegel/toverstaf/gum) achter een 'Gereedschap'-uitklap.
     { const tt=document.getElementById("cmToolsToggle"), adv=document.getElementById("cmAdvTools");
       if(tt&&adv) tt.onclick=()=>{ const openen=adv.hidden; adv.hidden=!openen; tt.setAttribute("aria-expanded", openen?"true":"false");
+        try{ localStorage.setItem('tatties-kniptools-open', openen?'1':'0'); }catch(e){}   // keuze onthouden voor volgende openingen
         if(!openen){   // inklappen: actieve verfijn-tool netjes uitzetten zodat er geen verborgen-actieve tool blijft
           if(gumMode){ gumMode=false; gumStroke=null; zetGumUI(); }
           if(wandMode){ wandMode=false; zetWandUI(); } } }; }
