@@ -7178,7 +7178,7 @@ function createTattoo(overrides = {}) {
    ============================================================ */
 // App-versie (semver, handmatig ophogen bij een release). Bij een bump ook de
 // CACHE-naam in sw.js meebumpen, zodat clients de nieuwe build ophalen.
-const APP_VERSIE = '0.2.8';
+const APP_VERSIE = '0.2.9.1';
 const TWEE_D_AAN = false;   // 2D-kaart tijdelijk uit tot 'ie af is (optie A): verbergt de 2D-ingangen (header-toggle + starttegel). Zet op true om 2D weer aan te zetten.
 if (!TWEE_D_AAN && document.documentElement) document.documentElement.classList.add('tweed-uit');
 const DB_NAAM = 'tatties';
@@ -12310,14 +12310,19 @@ async function verwijderVoorbeelden() {
     im.onerror=()=>toast(tr('ui.foto_niet_geladen'));
     im.src=k.srcUrl;
   }
-  let cutHistPushed=false;
+  let cutHistPushed=false, annuleerBezig=false;
   function cutOpenHistory(){ if(!cutHistPushed){ try{ history.pushState({tattiesCut:1}, ''); cutHistPushed=true; }catch(e){} } }   // Android/terug: history-entry neerleggen zodat 'terug' de modal sluit i.p.v. de app verlaat
+  function cutHistoryOpruimen(){ if(cutHistPushed){ cutHistPushed=false; try{ history.back(); }catch(e){} } }   // onze entry weghalen; no-op als 'terug' 'm al consumeerde. MOET op ELK sluitpad draaien (ook succes), anders raakt de terug-trap ontregeld
   function cutHeeftWerk(){ const n=(document.getElementById('cmNaam')||{}).value; return !!(lassoPts.length||wandSeeds.length||eraseStrokes.length||(n&&n.trim())); }
   async function probeerAnnuleerCut(vanBack){
-    if(cutHeeftWerk()){ const ok=await askConfirm(tr('ui.sluiten_bevestig'), tr('ui.sluiten_ja')); if(!ok){ if(vanBack) cutOpenHistory(); return; } }   // bevestig bij noemenswaardig werk; 'blijf bewerken' her-armt de terug-trap
-    closeCutModal();
+    if(annuleerBezig) return;   // herhaald Escape/terug: geen stapel bevestigingsdialogen
+    annuleerBezig=true;
+    try{
+      if(cutHeeftWerk()){ const ok=await askConfirm(tr('ui.sluiten_bevestig'), tr('ui.sluiten_ja')); if(!ok){ if(vanBack) cutOpenHistory(); return; } }   // bevestig bij noemenswaardig werk; 'blijf bewerken' her-armt de terug-trap (no-op als al her-armd)
+      closeCutModal();
+    } finally { annuleerBezig=false; }
   }
-  function closeCutModal(){ if(cutHistPushed){ cutHistPushed=false; try{ history.back(); }catch(e){} }   // onze history-entry opruimen (tenzij we al via 'terug' hier kwamen)
+  function closeCutModal(){ cutHistoryOpruimen();
     resetSnapshot=null; laatsteActie=null; cutModal.classList.remove("on"); pendingPlace=null; pendingEdit=null; pendingPlace2D=null; pendingNew=null; pendingEdit2D=null; toonCutInstellingen(false); toonInfo(false);
     plaatsHerhaal=false; window.__tattiesHerhaalSrc=null; herhaalTeller=1; vorigeLassos=[]; addDoel='3d';   // D6(a): herhaal-state opruimen + doel terug naar default (geen stale vlag/lasso/doel)
     if(imgTexture && imgTexture.dispose){ imgTexture.dispose(); } imgTexture=null;   // niet-geplaatste textuur vrijgeven (geen lek)
@@ -12588,7 +12593,12 @@ async function verwijderVoorbeelden() {
     document.getElementById("cmChoose").onclick=()=>imgInput.click();
     { const cc=document.getElementById("cmChooseCam"); if(cc) cc.onclick=()=>imgInputCamera.click(); }   // 'Foto maken' -> camera (Android krijgt anders geen camera-optie)
     document.getElementById("cmCancel").onclick=()=>probeerAnnuleerCut(false);   // × / Escape: bevestig eerst als er werk is
-    window.addEventListener('popstate', ()=>{ if(cutModal.classList.contains('on')){ cutHistPushed=false; probeerAnnuleerCut(true); } });   // hardware/terug-knop sluit de modal (met bevestiging) i.p.v. de app te verlaten
+    window.addEventListener('popstate', ()=>{   // hardware/terug-knop sluit de modal (met bevestiging) i.p.v. de app te verlaten
+      if(cutModal.classList.contains('on')){
+        cutHistPushed=false; cutOpenHistory();   // entry is geconsumeerd -> DIRECT her-armen, vóór de vraag: dubbel-terug tijdens de bevestiging verlaat de app dan niet
+        probeerAnnuleerCut(true);                // re-entrancy-guard vangt een tweede terug-druk tijdens de open vraag af
+      } else if(cutHistPushed){ cutHistPushed=false; }   // vangnet: zwevende entry netjes consumeren (hoort na de succes-pad-fix niet meer voor te komen)
+    });
     { const meerBtn=document.getElementById("cmPlaceMeer"); if(meerBtn) meerBtn.onclick=()=>{ plaatsHerhaal=true; if(cmPlaceBtn) cmPlaceBtn.onclick(); }; }   // plaats deze + heropen cut met dezelfde foto
     // Info-wolkje bij '+ Nog een' (tik = uitleg tonen; sluit bij buiten-tik) - zelfde patroon als de tool-legenda
     { const inf=document.getElementById("cmMeerInfo"), tip=document.getElementById("cmMeerTip");
@@ -12831,7 +12841,7 @@ async function verwijderVoorbeelden() {
         if(!naam){ const naamEl=document.getElementById("cmNaam"); toast(tr('ui.naam_verplicht'));
           if(naamEl){ naamEl.setAttribute('aria-invalid','true'); naamEl.focus(); naamEl.addEventListener('input',()=>naamEl.removeAttribute('aria-invalid'),{once:true}); }
           return; }
-        cutModal.classList.remove("on"); pendingEdit2D=null;
+        cutModal.classList.remove("on"); cutHistoryOpruimen(); pendingEdit2D=null;
         const cv=imgTexture.image; const src=canvasToPNG(cv,700);
         const aspect=(cv&&cv.width)?(cv.height/cv.width):1;
         if(imgTexture && imgTexture.dispose) imgTexture.dispose(); imgTexture=null;
@@ -12865,18 +12875,18 @@ async function verwijderVoorbeelden() {
           const cv=imgTexture.image; const src=canvasToPNG(cv,700);
           const aspect=(cv&&cv.width)?(cv.height/cv.width):1;
           if(imgTexture && imgTexture.dispose) imgTexture.dispose(); imgTexture=null;
-          cutModal.classList.remove("on"); pendingNew=null; toonCutInstellingen(false); toonInfo(false);
+          cutModal.classList.remove("on"); cutHistoryOpruimen(); pendingNew=null; toonCutInstellingen(false); toonInfo(false);
           if(typeof window.__tattiesStartPlaats2D==='function') window.__tattiesStartPlaats2D({ naam, info, kunst3d, src, aspect, status, herhaal });
           return;
         }
         plaatsData={ tex:imgTexture, naam, info, kunst3d, status, herhaal };
         imgTexture=null;   // eigendom gaat naar plaatsData; geen dispose
-        cutModal.classList.remove("on"); pendingNew=null; toonCutInstellingen(false); toonInfo(false);
+        cutModal.classList.remove("on"); cutHistoryOpruimen(); pendingNew=null; toonCutInstellingen(false); toonInfo(false);
         plaatsModus=true; if(window.__plaatsHintAan) window.__plaatsHintAan();   // paarse banner weg: de 'tik om te plaatsen'-hint op het lichaam volstaat
         return;
       }
       if(pendingPlace2D){
-        const pp=pendingPlace2D; cutModal.classList.remove("on"); pendingPlace2D=null;
+        const pp=pendingPlace2D; cutModal.classList.remove("on"); cutHistoryOpruimen(); pendingPlace2D=null;
         const cv=imgTexture.image;
         const src=canvasToPNG(cv,700);
         const aspect=(cv&&cv.width)?(cv.height/cv.width):1;
@@ -12902,7 +12912,7 @@ async function verwijderVoorbeelden() {
         if(!naam){ const naamEl=document.getElementById("cmNaam"); toast(tr('ui.naam_verplicht'));
           if(naamEl){ naamEl.setAttribute('aria-invalid','true'); naamEl.focus(); naamEl.addEventListener('input',()=>naamEl.removeAttribute('aria-invalid'),{once:true}); }
           return; }
-        cutModal.classList.remove("on"); pendingEdit=null;
+        cutModal.classList.remove("on"); cutHistoryOpruimen(); pendingEdit=null;
         if(m.tex && m.tex!==imgTexture && m.tex.dispose) m.tex.dispose();   // oude textuur vrijgeven
         m.tex=imgTexture; rebuildMarker(m);
         if(m.rec){
@@ -12919,7 +12929,7 @@ async function verwijderVoorbeelden() {
         return;
       }
       if(!pendingPlace){ closeCutModal(); return; }
-      const pp=pendingPlace; cutModal.classList.remove("on"); pendingPlace=null;
+      const pp=pendingPlace; cutModal.classList.remove("on"); cutHistoryOpruimen(); pendingPlace=null;
       const rot=0, size=0.09;
       const obj=makeImage(pp.point, pp.normal, rot, size, imgTexture, pp.mesh);
       if(!obj){ toast(tr('ui.plaatsen_mislukt')); if(imgTexture&&imgTexture.dispose){imgTexture.dispose();} imgTexture=null; return; }   // textuur niet laten lekken bij faal
