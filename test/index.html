@@ -30,6 +30,7 @@
      ============================================================ -->
 <meta name="theme-color" content="#CCA585" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#181511" media="(prefers-color-scheme: dark)">
+<meta name="color-scheme" content="light dark"><!-- declareert eigen licht+donker-support: voorkomt dat Samsung Internet 'force dark' de app algoritmisch inverteert -->
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -155,8 +156,13 @@ body{
   background-color:var(--bg);
   color:var(--tekst);
   min-height:100vh;
+  overscroll-behavior-y:none;   /* pull-to-refresh uit (standalone Android): een swipe-omlaag bovenaan een half ingevuld formulier = stille reload = werk kwijt */
   -webkit-font-smoothing:antialiased;
 }
+/* Eigen kleurenschema per thema doorgeven aan de browser (native scrollbars/inputs kleuren mee;
+   samen met de color-scheme-meta houdt dit Samsung 'force dark' buiten de deur). */
+:root[data-theme="light"]{color-scheme:light}
+:root[data-theme="dark"]{color-scheme:dark}
 button{font:inherit;color:inherit;background:none;border:none;cursor:pointer;min-height:44px;transition:transform .06s ease}
 button:active{transform:scale(.97)}
 input,select,textarea{
@@ -1063,7 +1069,9 @@ form label,
    meldingen (reset/teruggezet/fouten) hier bovenaan de modal-body. Donker toast-vlak conform huisstijl. */
 .cutmodal .cm-feedback{position:absolute;top:8px;left:50%;transform:translateX(-50%);z-index:5;max-width:calc(100% - 24px);pointer-events:none;margin:0;padding:9px 13px;background:#2A2118;color:var(--op-accent);border-left:3px solid var(--accent);border-radius:var(--r-sm);font-size:var(--fs-sm);line-height:1.35;text-align:center;box-shadow:0 8px 22px rgba(34,26,18,.4);}
 .cutmodal .cm-feedback[hidden]{display:none;}
-.cutmodal.cm-compact .cm-feedback{display:none;}
+/* Compact (fotokeuze): de kaart is klein/transparant -> feedback als vaste strook bovenin het scherm,
+   anders zijn juist de fotokeuze-fouten (geen afbeelding/te groot/niet geladen) op iOS onzichtbaar. */
+.cutmodal.cm-compact .cm-feedback{position:fixed;top:calc(env(safe-area-inset-top,0px) + 14px);left:50%;width:max-content;max-width:88vw;}
 /* '+ Nog een' met een info-knopje + uitleg-wolkje ernaast */
 .cutmodal .cm-meer-wrap{flex:1;position:relative;display:flex;align-items:stretch;gap:6px;}
 /* Info-knop: zelfde ronde cirkel + 'open'=accent-vulling als de tool-info-knop (.cut-tools .linkbtn[.on]) */
@@ -6844,7 +6852,7 @@ const I18N = {
     'toast.opslaanmislukt':'Opslaan mislukt: ',
     'toast.nietsexport':'Niets te exporteren - nog geen tattoos','toast.geexporteerd':'{n} tattoo{s} geëxporteerd',
     'toast.importgeslaagd':'Import geslaagd: {n} tattoo{s} hersteld','toast.geengeldige':'Bestand gelezen, maar geen geldige tattoos gevonden',
-    'toast.importmislukt':'Import mislukt: dit is geen geldig Tatties-backupbestand','toast.import_te_groot':'Bestand te groot om te importeren (max 200 MB)',
+    'toast.importmislukt':'Import mislukt: dit is geen geldig Tatties-backupbestand','toast.import_te_groot':'Bestand te groot om te importeren (max 200 MB)','toast.opslagvol':'De opslag is vol - exporteer een back-up en verwijder wat foto\'s',
     'toast.persist':'Let op: de browser garandeert je opslag niet - maak regelmatig een backup',
     'toast.opbeginscherm':'Tatties staat op je beginscherm','toast.ladenmislukt':'Laden van gegevens mislukt: ',
     'opslag.gebruik':'Opslag: {mb} MB in gebruik','opslag.van':'van ±{mb} MB','opslag.bijnavol':'· bijna vol - exporteer een back-up!'
@@ -7022,7 +7030,7 @@ const I18N = {
     'toast.opslaanmislukt':'Saving failed: ',
     'toast.nietsexport':'Nothing to export - no tattoos yet','toast.geexporteerd':'{n} tattoo{s} exported',
     'toast.importgeslaagd':'Import successful: {n} tattoo{s} restored','toast.geengeldige':'File read, but no valid tattoos found',
-    'toast.importmislukt':"Import failed: this isn't a valid Tatties backup file",'toast.import_te_groot':'File too large to import (max 200 MB)',
+    'toast.importmislukt':"Import failed: this isn't a valid Tatties backup file",'toast.import_te_groot':'File too large to import (max 200 MB)','toast.opslagvol':'Storage is full - export a backup and remove some photos',
     'toast.persist':"Note: the browser doesn't guarantee your storage - back up regularly",
     'toast.opbeginscherm':'Tatties is on your home screen','toast.ladenmislukt':'Loading data failed: ',
     'opslag.gebruik':'Storage: {mb} MB in use','opslag.van':'of ~{mb} MB','opslag.bijnavol':'· almost full - export a backup!'
@@ -7178,7 +7186,7 @@ function createTattoo(overrides = {}) {
    ============================================================ */
 // App-versie (semver, handmatig ophogen bij een release). Bij een bump ook de
 // CACHE-naam in sw.js meebumpen, zodat clients de nieuwe build ophalen.
-const APP_VERSIE = '0.2.9.2';
+const APP_VERSIE = '0.2.9.3';
 const TWEE_D_AAN = false;   // 2D-kaart tijdelijk uit tot 'ie af is (optie A): verbergt de 2D-ingangen (header-toggle + starttegel). Zet op true om 2D weer aan te zetten.
 if (!TWEE_D_AAN && document.documentElement) document.documentElement.classList.add('tweed-uit');
 const DB_NAAM = 'tatties';
@@ -7551,7 +7559,16 @@ function openDB() {
         db.createObjectStore(STORE, { keyPath: 'id' });
       }
     };
-    req.onsuccess = () => resolve(req.result);
+    // Twee-vensters-bescherming (relevant zodra DB_VERSIE ooit omhoog gaat):
+    // - onblocked: een ouder venster houdt de connectie vast -> zichtbaar loggen i.p.v. stil eeuwig wachten.
+    // - onversionchange: een ander venster wil upgraden -> onze connectie loslaten zodat dát venster niet
+    //   blokkeert; onze volgende DB-acties falen dan via de bestaande foutafhandeling (geen stille hang).
+    req.onblocked = () => console.warn('IndexedDB: open geblokkeerd door een ouder venster/tab met dezelfde app');
+    req.onsuccess = () => {
+      const db = req.result;
+      db.onversionchange = () => { try { db.close(); } catch (e) {} _dbPromise = null; };
+      resolve(db);
+    };
     req.onerror = () => reject(req.error);
   });
   return _dbPromise;
@@ -7662,7 +7679,7 @@ async function saveTattoo(tattoo, behoudTijd = false) {
     });
   } catch (e) {
     if (e && (e.name === 'QuotaExceededError' || /quota/i.test(e.message || ''))) {
-      throw new Error('De opslag is vol - exporteer een backup en verwijder wat foto\'s');
+      throw new Error(tr('toast.opslagvol'));   // gelokaliseerd: bereikt de gebruiker via toast(opslaanmislukt + message)
     }
     dbBeschikbaar = false; meldFallback();
     return saveTattoo(tattoo, behoudTijd);
@@ -7855,7 +7872,7 @@ function toast(tekst) {
   // In de uitsnede-modal renderen body-toasts onzichtbaar (iOS) -> feedback in de modal zelf tonen.
   const cm = document.getElementById('cutModal');
   const fb = document.getElementById('cmFeedback');
-  if (cm && fb && cm.classList.contains('on') && !cm.classList.contains('cm-compact')) {
+  if (cm && fb && cm.classList.contains('on')) {   // ook in compact (fotokeuze): juist die fouten waren op iOS onzichtbaar
     fb.textContent = tekst;
     fb.hidden = false;
     tril(12);
@@ -7900,6 +7917,9 @@ function zetNavActief(welke) {
   });
 }
 function toonView(naam) {
+  // 2D uit (optie A): alle oude 'home'-routes (collectie-terug, detail-/formulier-fallbacks) landen
+  // op start i.p.v. de verborgen 2D-kaart - anders is de in-aanbouw-flow alsnog bedienbaar.
+  if (naam === 'home' && !TWEE_D_AAN) naam = 'start';
   huidigeView = naam;
   if (naam !== 'home') window.__tattiesHerhaalSrc = null;   // D6(a): bij wegnavigeren de 'nog een uit deze foto'-vlag opruimen
   if (naam === 'collectie' || naam === 'stats') zetNavActief(naam);      // highlight volgt de bestemming
