@@ -7178,7 +7178,7 @@ function createTattoo(overrides = {}) {
    ============================================================ */
 // App-versie (semver, handmatig ophogen bij een release). Bij een bump ook de
 // CACHE-naam in sw.js meebumpen, zodat clients de nieuwe build ophalen.
-const APP_VERSIE = '0.2.9.1';
+const APP_VERSIE = '0.2.9.2';
 const TWEE_D_AAN = false;   // 2D-kaart tijdelijk uit tot 'ie af is (optie A): verbergt de 2D-ingangen (header-toggle + starttegel). Zet op true om 2D weer aan te zetten.
 if (!TWEE_D_AAN && document.documentElement) document.documentElement.classList.add('tweed-uit');
 const DB_NAAM = 'tatties';
@@ -7469,10 +7469,18 @@ async function _syncMetCloudKern() {
 
   // OMHOOG: beelden uploaden, rij bouwen, upserten
   const rijen = [];
+  let uitgesteld = 0;
   for (const l of omhoog) {
     const data = stripVoorCloud(l);
     if (!l.deleted) {
-      try { data._cloud = await uploadBeelden(user.id, l); } catch (e) { console.error('Foto-upload:', e); }
+      // Faalt de beeld-upload, dan dit record deze ronde OVERSLAAN (niet upserten).
+      // Zo blijft het lokaal nieuwer (lt > ct) en wordt alles bij de volgende sync
+      // opnieuw geprobeerd (Storage-upload is idempotent via upsert:true). Zonder
+      // deze skip zou de upsert de bestaande _cloud-referenties in de cloud wissen
+      // en komt er geen retry meer (ct == lt) -> andere toestellen krijgen het
+      // record dan permanent zonder beelden.
+      try { data._cloud = await uploadBeelden(user.id, l); }
+      catch (e) { console.error('Foto-upload mislukt, record uitgesteld tot volgende sync:', l.id, e); uitgesteld++; continue; }
     }
     rijen.push({ id: l.id, user_id: user.id, deleted: !!l.deleted, data });
   }
@@ -7481,7 +7489,7 @@ async function _syncMetCloudKern() {
     const { error } = await sb.from('tattoos').upsert(rijen.slice(i, i + BATCH), { onConflict: 'id' });
     if (error) return { ok: false, reden: 'fout', error };
   }
-  return { ok: true, omlaag: omlaag.length, omhoog: rijen.length };
+  return { ok: true, omlaag: omlaag.length, omhoog: rijen.length, uitgesteld };   // uitgesteld: records waarvan de beeld-upload faalde; volgende sync probeert opnieuw
 }
 window.__tattiesSync = syncMetCloud;   // dev/test-haak
 
@@ -10035,6 +10043,7 @@ function openFormulier(id = null) {
       zijde: tempZijde,
       status: tempStatus,
       vergrendeld: tempVergrendeld,
+      opacity: t.opacity,                    // ingestelde doorzichtigheid behouden (viel anders terug naar 1)
       stapel: t.stapel || 0,                 // stapelvolgorde behouden (viel anders terug naar 0)
       nazorgTaken: t.nazorgTaken || [],
       kunst: tempKunst,
@@ -10064,6 +10073,12 @@ function openFormulier(id = null) {
         } catch (e) { /* zonder model geen 3D-plek; posV=2 volstaat voor 2D */ }
       }
     }
+    // Bewerken in ortho-modus: tempPositie is bij het OPENEN al naar ortho-space omgerekend
+    // (remapLegacy2D voor legacy records / projectie voor 3D-records). Tag dat ook bij edits,
+    // anders remapt de volgende render de al-omgerekende coördinaten nóg een keer en
+    // verschuift de tattoo bij elke bewerking (de tag werd alleen bij nieuwe records gezet).
+    // Alleen de tag - plaatsing (positie3d) blijft bij bewerken ongemoeid, zie hierboven.
+    if (bewerkId && orthoActief2D() && record.positie && isFinite(record.positie.x) && isFinite(record.positie.y)) record.posV = 2;
     bezigMetOpslaan = true;
     try {
       await saveTattoo(record);
