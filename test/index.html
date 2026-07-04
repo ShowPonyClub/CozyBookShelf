@@ -1129,14 +1129,18 @@ html.knipfull .cutmodal.cm-fullcut .cm-prev{flex:1;min-height:0;max-height:none;
 html.knipfull .cutmodal.cm-fullcut .cm-toprow{position:absolute;top:calc(10px + env(safe-area-inset-top,0px));left:10px;right:10px;z-index:8;pointer-events:none;}
 html.knipfull .cutmodal.cm-fullcut #cmTitle{display:none;}
 html.knipfull .cutmodal.cm-fullcut .cm-x{pointer-events:auto;width:44px;height:44px;margin:0;border-radius:50%;border:1px solid var(--rand);color:var(--tekst);
-  background:var(--kaart);background:color-mix(in srgb, var(--kaart) 88%, transparent);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);}
+  background:var(--kaart);background:color-mix(in srgb, var(--kaart) 88%, transparent);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);
+  box-shadow:0 8px 22px rgba(0,0,0,.22);}
 html.knipfull .cutmodal.cm-fullcut #cmHint{position:absolute;top:calc(16px + env(safe-area-inset-top,0px));left:50%;transform:translateX(-50%);z-index:7;
-  max-width:54%;text-align:center;margin:0;padding:9px 14px;border-radius:999px;border:1px solid var(--rand);font-size:var(--fs-sm);
-  background:var(--kaart);background:color-mix(in srgb, var(--kaart) 90%, transparent);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);}
+  pointer-events:none;   /* puur informatief: een lasso-streek die hier begint mag niet doodlopen */
+  max-width:calc(100% - 128px);text-align:center;margin:0;padding:9px 14px;border-radius:999px;border:1px solid var(--rand);font-size:var(--fs-sm);
+  background:var(--kaart);background:color-mix(in srgb, var(--kaart) 90%, transparent);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);
+  box-shadow:0 8px 22px rgba(0,0,0,.22);}
 html.knipfull .cutmodal.cm-fullcut .cut-tip{display:none;}
 /* actieve-tool-rijen (toverstaf/gum-keuze + kwastgrootte) zweven onder de hint */
 html.knipfull .cutmodal.cm-fullcut #cmWandModus,
-html.knipfull .cutmodal.cm-fullcut #cmGumModus{position:absolute;top:calc(68px + env(safe-area-inset-top,0px));left:50%;transform:translateX(-50%);z-index:7;}
+html.knipfull .cutmodal.cm-fullcut #cmGumModus{position:absolute;top:calc(68px + env(safe-area-inset-top,0px));left:50%;transform:translateX(-50%);z-index:7;
+  width:min(320px,82%);}   /* niet schermbreed uitrekken (erfde width:100% van .silhouet-keuze.compact) */
 html.knipfull .cutmodal.cm-fullcut #cmGumGrootte{position:absolute;top:calc(118px + env(safe-area-inset-top,0px));left:50%;transform:translateX(-50%);z-index:7;
   width:min(320px,82%);padding:8px 12px;border-radius:var(--r-md);border:1px solid var(--rand);
   background:var(--kaart);background:color-mix(in srgb, var(--kaart) 90%, transparent);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);}
@@ -1154,6 +1158,16 @@ html.knipfull .cutmodal.cm-fullcut .cm-volgende{display:flex;position:absolute;t
   background:var(--accent);color:var(--op-accent);box-shadow:0 4px 14px rgba(var(--accent-rgb),.35);}
 html.knipfull .cutmodal.cm-fullcut .cm-volgende .ik{width:22px;height:22px;}
 html.knipfull .cutmodal.cm-fullcut .cm-volgende .cv-lbl{display:none;}
+/* in-modal meldingen (#cmFeedback) moeten in de fullscreen-fase BOVEN de hint-pill (z7) en
+   onder de statusbalk vandaan - anders zijn juist de tool-hints/fouten hier onzichtbaar */
+html.knipfull .cutmodal.cm-fullcut .cm-feedback{top:calc(16px + env(safe-area-inset-top,0px));z-index:9;}
+/* 'Bewerken'-badge: alleen in de fullscreen-fase (in de gewone kaart staat de titel er al);
+   pill linksboven ONDER de x, zodat je ook zonder titel/knoptekst ziet dat je bewerkt i.p.v. toevoegt */
+.cutmodal .cm-bewerk-badge{display:none;}
+html.knipfull .cutmodal.cm-fullcut .cm-bewerk-badge{display:block;position:absolute;z-index:8;
+  top:calc(62px + env(safe-area-inset-top,0px));left:10px;padding:5px 11px;border-radius:999px;
+  font-size:var(--fs-xs);font-weight:700;letter-spacing:.02em;color:var(--op-accent);background:var(--accent);
+  box-shadow:0 4px 14px rgba(var(--accent-rgb),.35);}
 .cutmodal .cut-tools .linkbtn.on{background:var(--accent);border-color:var(--accent);color:var(--op-accent);}
 .cutmodal .cut-tools .cm-toolstoggle{gap:5px;}
 .cutmodal .cut-tools .cm-toolstoggle .tt-lbl{display:inline;font-size:.82rem;font-weight:600;line-height:1;}
@@ -1534,6 +1548,7 @@ form label{text-transform:none;letter-spacing:.005em;font-size:.8rem;color:var(-
         <div class="cm-body">
           <div class="cm-toprow">
             <span id="cmTitle" class="cm-titel" data-i18n="ui.tattoo_toevoegen">Tattoo toevoegen</span>
+            <span id="cmBewerkBadge" class="cm-bewerk-badge" hidden data-i18n="ui.bewerken">Bewerken</span>
             <button id="cmCancel" class="cm-x" data-i18n-title="form.annuleren" data-i18n-aria="form.annuleren" title="Annuleer" aria-label="Annuleer">&times;</button>
           </div>
           <input type="file" id="imgInput" accept="image/*" style="display:none">
@@ -6779,7 +6794,7 @@ const I18N = {
     'ui.huid_weghalen':'Huid weghalen','ui.huid_methode':'Methode','ui.huid_kleur':'Kleur','ui.huid_helder':'Helderheid',
     'ui.huidskleur_prikken':'Huidskleur prikken','ui.drempel':'Drempel - sleep tot de huid weg is','ui.tik_huid':'Tik op de huid in de foto',
     'ui.achtergrondkleur':'Achtergrondkleur kiezen','ui.auto':'Auto',
-    'ui.tattoo_toevoegen':'Tattoo toevoegen','ui.tattoo_aanpassen':'Tattoo aanpassen',
+    'ui.tattoo_toevoegen':'Tattoo toevoegen','ui.tattoo_aanpassen':'Tattoo aanpassen','ui.bewerken':'Bewerken',
     'ui.beginstand':'Beginstand','ui.laden':'Laden…','ui.vergrendelen':'Vergrendelen','ui.verwijderen':'Verwijderen',
     'ui.huidblend':'In huid blenden','ui.huidblend_kort':'In huid','ui.blend_aan':'In huid geblend','ui.blend_uit':'Normale weergave',
     'ui.aanpassen_bijknippen':'Aanpassen','ui.klaar':'Klaar','ui.kleiner':'Kleiner','ui.groter':'Groter','ui.sluiten_bevestig':'Uitsnede sluiten? Je niet-opgeslagen werk gaat verloren.','ui.sluiten_ja':'Sluiten',
@@ -6958,7 +6973,7 @@ const I18N = {
     'ui.huid_weghalen':'Remove skin','ui.huid_methode':'Method','ui.huid_kleur':'Colour','ui.huid_helder':'Brightness',
     'ui.huidskleur_prikken':'Pick skin colour','ui.drempel':'Threshold - drag until the skin is gone','ui.tik_huid':'Tap the skin in the photo',
     'ui.achtergrondkleur':'Pick background colour','ui.auto':'Auto',
-    'ui.tattoo_toevoegen':'Add tattoo','ui.tattoo_aanpassen':'Edit tattoo',
+    'ui.tattoo_toevoegen':'Add tattoo','ui.tattoo_aanpassen':'Edit tattoo','ui.bewerken':'Editing',
     'ui.beginstand':'Reset view','ui.laden':'Loading…','ui.vergrendelen':'Lock','ui.verwijderen':'Delete',
     'ui.huidblend':'Blend into skin','ui.huidblend_kort':'In skin','ui.blend_aan':'Blended into skin','ui.blend_uit':'Normal view',
     'ui.aanpassen_bijknippen':'Edit','ui.klaar':'Done','ui.kleiner':'Smaller','ui.groter':'Bigger','ui.sluiten_bevestig':'Discard your cut-out? Unsaved work will be lost.','ui.sluiten_ja':'Discard',
@@ -7224,7 +7239,7 @@ function createTattoo(overrides = {}) {
    ============================================================ */
 // App-versie (semver, handmatig ophogen bij een release). Bij een bump ook de
 // CACHE-naam in sw.js meebumpen, zodat clients de nieuwe build ophalen.
-const APP_VERSIE = '0.2.9.8';
+const APP_VERSIE = '0.2.9.9';
 const TWEE_D_AAN = false;   // 2D-kaart tijdelijk uit tot 'ie af is (optie A): verbergt de 2D-ingangen (header-toggle + starttegel). Zet op true om 2D weer aan te zetten.
 if (!TWEE_D_AAN && document.documentElement) document.documentElement.classList.add('tweed-uit');
 const KNIP_ZWEEF_TOOLS = true;   // FASE-1-EXPERIMENT: kniptools zweven als kaart-balk over de foto-onderrand (grotere foto). TERUGDRAAIEN = false (CSS-laag 'knipzweef' valt dan volledig weg).
@@ -12144,6 +12159,7 @@ async function verwijderVoorbeelden() {
     const pb=document.getElementById('cmPuntBtn');
     if(pb){ const aan=cutModus==='punten'; pb.classList.toggle('on',aan); pb.setAttribute('aria-pressed',aan?'true':'false'); }
     const h=document.getElementById('cmHint'); if(h) h.textContent=tr(cutModus==='vrij'?'ui.cut_hint_vrij':'ui.cut_hint_punten');
+    stapelFullcutOverlays();   // hint-hoogte kan gewijzigd zijn
   }
   let huidMethode='kleur';   // 'kleur' = huidskleur prikken, 'helder' = helderheidsdrempel
   function zetHuidUI(){
@@ -12177,6 +12193,7 @@ async function verwijderVoorbeelden() {
       if(gumMode){ h.textContent=tr(gumHerstel?'ui.gum_hint_terug':'ui.gum_hint'); h.classList.add('wand-aan'); }
       else if(!wandMode){ h.classList.remove('wand-aan'); zetSnijModusUI(); }
     }
+    stapelFullcutOverlays();   // rijen/slider net getoond of verborgen + hint-hoogte gewijzigd
   }
   function penStreek(ctx,pts,W,H){ ctx.beginPath(); pts.forEach((p,i)=>{ const X=p.nx*W,Y=p.ny*H; i?ctx.lineTo(X,Y):ctx.moveTo(X,Y); }); }
   // Pas gum-streken toe op canvas-context x (W×H). 'weg' wist (destination-out), 'terug'
@@ -12216,6 +12233,7 @@ async function verwijderVoorbeelden() {
       if(wandMode){ h.textContent=tr(wandKeep?'ui.wand_hint_keep':'ui.wand_hint'); h.classList.add('wand-aan'); }
       else { h.classList.remove('wand-aan'); zetSnijModusUI(); }   // herstel de normale snij-hint
     }
+    stapelFullcutOverlays();   // weg/houden-rij net getoond of verborgen + hint-hoogte gewijzigd
   }
   // dichtstbijzijnde lasso-punt bij een pointer-event (in schermpixels), of -1
   function lassoPuntBij(e){
@@ -12307,6 +12325,12 @@ async function verwijderVoorbeelden() {
   // Een (al geladen) afbeelding in de cut-UI zetten: lasso wissen, preview opbouwen, details tonen.
   function zetCutFoto(image){
     origImg=image; lassoPts=[]; lassoDragIdx=-1; drawingFree=false; cutPointers.clear(); pinch=null;
+    // Nieuwe foto = verse knip-sessie: ook de RECEPTEN (toverstaf/gum/spiegel/huidkleur) wissen,
+    // anders werden die genormaliseerde coordinaten op de nieuwe foto toegepast (gaten/spiegeling).
+    wandSeeds=[]; wandKeep=false; wandMode=false; zetWandUI();
+    eraseStrokes=[]; gumStroke=null; gumMode=false; gumHerstel=false; zetGumUI();
+    flipH=false; zetSpiegelUI(); bgPickMode=false; setBgPick(null); if(bgPickBtn)bgPickBtn.classList.remove("on");
+    cutModus='vrij'; zetSnijModusUI();
     resetZoom(); rot90=0; toonCutInstellingen(true); rebuildBase(); updateCutout();
     if(pendingNew) toonInfo(true);
   }
@@ -12338,18 +12362,33 @@ async function verwijderVoorbeelden() {
     drawPreview(null); drawLasso();
   }
 
-  // FASE-2: schermvullende knip-fase aan/uit (class op de modal). Bij een wissel de preview
-  // opnieuw opbouwen (zelfde trio als bij 90°-draaien), want de canvas-maat verandert fors.
+  // FASE-2: schermvullende knip-fase aan/uit (class op de modal).
   function zetFullcut(aan){
     const wil = aan && document.documentElement.classList.contains('knipfull');
     if(cutModal.classList.contains('cm-fullcut')===wil) return;
     cutModal.classList.toggle('cm-fullcut', wil);
-    if(origImg){ rebuildBase(); updateCutout(); drawLasso(); }
+    // Herbouw ALLEEN bij de ✓-overgang (fullscreen -> details, aan=false, modal nog in beeld): daar
+    // verandert de canvas-maat fors en rebuildt niemand anders. Bij de show-overgang (-> fullscreen)
+    // doet de foto-loader zelf de rebuild (ook nodig als KNIP_FULLSCREEN uit staat) -> hier niet,
+    // anders dubbel werk. Bij sluiten ('on' al weg) evenmin: geen rebuild op een onzichtbare modal.
+    if(!aan && origImg && cutModal.classList.contains('on')){ rebuildBase(); updateCutout(); drawLasso(); }
+    stapelFullcutOverlays();
     fitCutModalVV();
+  }
+  // Fullcut-overlays stapelen: de hint-pill is variabel hoog (lange toverstaf/gum-uitleg, grote
+  // systeemfont) - zet de zwevende modus-rijen en de kwast-slider er dynamisch ONDER i.p.v. op
+  // vaste offsets (die overlapten zodra de pill meerregelig werd). Buiten fullcut: inline tops weg.
+  function stapelFullcutOverlays(){
+    const rijen=[document.getElementById('cmWandModus'),document.getElementById('cmGumModus'),document.getElementById('cmGumGrootte')];
+    if(!cutModal.classList.contains('cm-fullcut')){ rijen.forEach(r=>{ if(r) r.style.top=''; }); return; }
+    const h=document.getElementById('cmHint');
+    let y=(h && !h.hidden ? h.offsetTop+h.offsetHeight : 56)+8;
+    for(const r of rijen){ if(!r||r.hidden) continue; r.style.top=y+'px'; y+=r.offsetHeight+8; }
   }
   // Toon de uitsnede-instellingen (preview, sliders, achtergrond) pas na een foto
   function toonCutInstellingen(b){
     const s=document.getElementById("cmSettings"); if(s) s.hidden=!b;
+    { const bb=document.getElementById("cmBewerkBadge"); if(bb) bb.hidden=!(b && (pendingEdit||pendingEdit2D)); }   // 'Bewerken'-badge: alleen in de knipfase van een bewerk-flow
     zetFullcut(b);   // foto in beeld = schermvullend knippen (vlag-afhankelijk); 'Volgende' onthult naam/details
     if(b){ const adv=document.getElementById("cmAdvTools"), tt=document.getElementById("cmToolsToggle");
            // Verfijn-tools (punten/rotatie/spiegel/toverstaf/gum): stand onthouden, standaard OPEN.
@@ -12380,6 +12419,7 @@ async function verwijderVoorbeelden() {
     cutModal.style.left=vv.offsetLeft+"px"; cutModal.style.top=vv.offsetTop+"px";
     cutModal.style.width=vv.width+"px"; cutModal.style.height=vv.height+"px";
     if(card) card.style.maxHeight = cutModal.classList.contains('cm-fullcut') ? "" : Math.round(vv.height*0.94)+"px";   // fullscreen-fase: CSS (100%) bepaalt de kaart, geen inline cap
+    stapelFullcutOverlays();   // viewport gewijzigd (toetsenbord/rotatie) -> overlays opnieuw stapelen
   }
   // Heropen het uitsnede-scherm voor een bestaande tattoo (bijknippen + achtergrond)
   function openCutModalForEdit(m){
