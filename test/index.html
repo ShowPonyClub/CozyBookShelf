@@ -1119,6 +1119,24 @@ html.knipzweef .cutmodal .cut-tools{position:absolute;left:8px;right:8px;bottom:
   -webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);
   box-shadow:0 8px 22px rgba(0,0,0,.22);}
 html.knipzweef .cutmodal .cm-prev{min-height:clamp(280px,54vh,560px);}
+/* FASE-2-EXPERIMENT schermvullende knip-stap (vlag KNIP_FULLSCREEN, class cm-fullcut op de modal):
+   zolang je knipt vult de kaart het hele scherm met donkere editor-tokens (iOS-fotokiezer-gevoel);
+   alleen foto + zwevende tools + 'Volgende' zichtbaar. Naam/details volgen daarna in de gewone
+   kaart-layout. Terugdraaien = vlag op false; deze hele laag valt dan weg. */
+html.knipfull .cutmodal.cm-fullcut .cm-card{width:100%;height:100%;max-height:none;border:none;border-radius:0;
+  /* lokale donkere tokens (gelijk aan het donkere thema) zodat alle knip-UI leesbaar is op de editor-achtergrond */
+  --kaart:#221E17;--veldbg:#201C15;--rand:#3A352B;--tekst:#ECE3D2;--gedempt:#B8AE9C;--accent-diep:#B7A6F6;
+  background:#16120D;}
+html.knipfull .cutmodal.cm-fullcut #cmSettings{display:flex;flex-direction:column;flex:1;min-height:0;}
+html.knipfull .cutmodal.cm-fullcut .cm-prev{flex:1;min-height:0;max-height:none;}
+html.knipfull .cutmodal.cm-fullcut #cmNaam,
+html.knipfull .cutmodal.cm-fullcut #cmInfo,
+html.knipfull .cutmodal.cm-fullcut .cm-choose-rij,
+html.knipfull .cutmodal.cm-fullcut .cm-meer-wrap,
+html.knipfull .cutmodal.cm-fullcut #cmPlace{display:none!important;}
+.cutmodal .cm-volgende{display:none;}
+html.knipfull .cutmodal.cm-fullcut .cm-volgende{display:block;}
+html.knipfull .cutmodal.cm-fullcut .cm-foot{padding-bottom:calc(12px + env(safe-area-inset-bottom,0px));}
 .cutmodal .cut-tools .linkbtn.on{background:var(--accent);border-color:var(--accent);color:var(--op-accent);}
 .cutmodal .cut-tools .cm-toolstoggle{gap:5px;}
 .cutmodal .cut-tools .cm-toolstoggle .tt-lbl{display:inline;font-size:.82rem;font-weight:600;line-height:1;}
@@ -1599,6 +1617,7 @@ form label{text-transform:none;letter-spacing:.005em;font-size:.8rem;color:var(-
             <button type="button" id="cmMeerInfo" class="cm-meer-info" aria-expanded="false" data-i18n-aria="ui.nog_een_uitleg" data-i18n-title="ui.nog_een_uitleg" aria-label="Wat doet '+ Nog een'?"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5"/><path d="M12 7.6h.01"/></svg></button>
             <div id="cmMeerTip" class="cm-meer-tip" hidden role="status" data-i18n="ui.nog_een_uitleg">Plaats deze en knip daarna nog een tattoo uit dezelfde foto</div>
           </div>
+          <button id="cmVolgende" class="btn cm-place cm-volgende" data-i18n="ui.volgende">Volgende</button>
           <button id="cmPlace" class="btn cm-place" data-i18n="ui.plaatsen">Plaatsen</button>
         </div>
       </div>
@@ -6766,7 +6785,7 @@ const I18N = {
     'ui.kies_eerst_foto':'Kies eerst een foto en knip de tattoo uit','ui.tattoo_geplaatst':'Tattoo geplaatst ✓',
     'ui.tattoo_bijgewerkt':'Tattoo bijgewerkt ✓','ui.plaatsen_mislukt':'Plaatsen mislukt','ui.fout':'fout',
     'ui.hersteld':'{n} tattoo{s} hersteld','ui.verwijder_bevestig':'Weet je zeker dat je deze tattoo wilt verwijderen?',
-    'ui.toevoegen':'Toevoegen','ui.klik_plaatsen':'Klik op het model waar je de tattoo wilt','ui.naam_verplicht':'Geef de tattoo eerst een naam','ui.meer_details':'Meer details','ui.naam':'Naam tattoo','ui.naam_ph':'Naam tattoo *',
+    'ui.toevoegen':'Toevoegen','ui.volgende':'Volgende','ui.klik_plaatsen':'Klik op het model waar je de tattoo wilt','ui.naam_verplicht':'Geef de tattoo eerst een naam','ui.meer_details':'Meer details','ui.naam':'Naam tattoo','ui.naam_ph':'Naam tattoo *',
     'ui.stage_aria':'3D-lichaamsmodel; gebruik de 2D-knop bovenaan voor de toegankelijke platte kaart',
     'ui.lege_cta':'Nog geen tattoos - tik op + om er een toe te voegen',
     'ui.details':'Details',
@@ -6945,7 +6964,7 @@ const I18N = {
     'ui.kies_eerst_foto':'Pick a photo first and cut out the tattoo','ui.tattoo_geplaatst':'Tattoo placed ✓',
     'ui.tattoo_bijgewerkt':'Tattoo updated ✓','ui.plaatsen_mislukt':'Placing failed','ui.fout':'error',
     'ui.hersteld':'{n} tattoo{s} restored','ui.verwijder_bevestig':'Are you sure you want to delete this tattoo?',
-    'ui.toevoegen':'Add','ui.klik_plaatsen':'Click on the model where you want the tattoo','ui.naam_verplicht':'Give the tattoo a name first','ui.meer_details':'More details','ui.naam':'Tattoo name','ui.naam_ph':'Tattoo name *',
+    'ui.toevoegen':'Add','ui.volgende':'Next','ui.klik_plaatsen':'Click on the model where you want the tattoo','ui.naam_verplicht':'Give the tattoo a name first','ui.meer_details':'More details','ui.naam':'Tattoo name','ui.naam_ph':'Tattoo name *',
     'ui.stage_aria':'3D body model; use the 2D button at the top for the accessible flat map',
     'ui.lege_cta':'No tattoos yet - tap + to add one',
     'ui.details':'Details',
@@ -7188,11 +7207,13 @@ function createTattoo(overrides = {}) {
    ============================================================ */
 // App-versie (semver, handmatig ophogen bij een release). Bij een bump ook de
 // CACHE-naam in sw.js meebumpen, zodat clients de nieuwe build ophalen.
-const APP_VERSIE = '0.2.9.5';
+const APP_VERSIE = '0.2.9.6';
 const TWEE_D_AAN = false;   // 2D-kaart tijdelijk uit tot 'ie af is (optie A): verbergt de 2D-ingangen (header-toggle + starttegel). Zet op true om 2D weer aan te zetten.
 if (!TWEE_D_AAN && document.documentElement) document.documentElement.classList.add('tweed-uit');
 const KNIP_ZWEEF_TOOLS = true;   // FASE-1-EXPERIMENT: kniptools zweven als kaart-balk over de foto-onderrand (grotere foto). TERUGDRAAIEN = false (CSS-laag 'knipzweef' valt dan volledig weg).
 if (KNIP_ZWEEF_TOOLS && document.documentElement) document.documentElement.classList.add('knipzweef');
+const KNIP_FULLSCREEN = true;   // FASE-2-EXPERIMENT: knip-stap schermvullend op donker (iOS-fotokiezer-gevoel); naam/details volgen na 'Volgende'. TERUGDRAAIEN = false.
+if (KNIP_FULLSCREEN && document.documentElement) document.documentElement.classList.add('knipfull');
 const DB_NAAM = 'tatties';
 const OUD_DB_NAAM = 'tattoostics';   // vorige naam - eenmalig overgezet
 const DB_VERSIE = 1;
@@ -12300,9 +12321,19 @@ async function verwijderVoorbeelden() {
     drawPreview(null); drawLasso();
   }
 
+  // FASE-2: schermvullende knip-fase aan/uit (class op de modal). Bij een wissel de preview
+  // opnieuw opbouwen (zelfde trio als bij 90°-draaien), want de canvas-maat verandert fors.
+  function zetFullcut(aan){
+    const wil = aan && document.documentElement.classList.contains('knipfull');
+    if(cutModal.classList.contains('cm-fullcut')===wil) return;
+    cutModal.classList.toggle('cm-fullcut', wil);
+    if(origImg){ rebuildBase(); updateCutout(); drawLasso(); }
+    fitCutModalVV();
+  }
   // Toon de uitsnede-instellingen (preview, sliders, achtergrond) pas na een foto
   function toonCutInstellingen(b){
     const s=document.getElementById("cmSettings"); if(s) s.hidden=!b;
+    zetFullcut(b);   // foto in beeld = schermvullend knippen (vlag-afhankelijk); 'Volgende' onthult naam/details
     if(b){ const adv=document.getElementById("cmAdvTools"), tt=document.getElementById("cmToolsToggle");
            // Verfijn-tools (punten/rotatie/spiegel/toverstaf/gum): stand onthouden, standaard OPEN.
            // Altijd-dichtklappen verstopte juist de correctie-tools die je bij een echte huidfoto nodig hebt.
@@ -12331,7 +12362,7 @@ async function verwijderVoorbeelden() {
     }
     cutModal.style.left=vv.offsetLeft+"px"; cutModal.style.top=vv.offsetTop+"px";
     cutModal.style.width=vv.width+"px"; cutModal.style.height=vv.height+"px";
-    if(card) card.style.maxHeight=Math.round(vv.height*0.94)+"px";
+    if(card) card.style.maxHeight = cutModal.classList.contains('cm-fullcut') ? "" : Math.round(vv.height*0.94)+"px";   // fullscreen-fase: CSS (100%) bepaalt de kaart, geen inline cap
   }
   // Heropen het uitsnede-scherm voor een bestaande tattoo (bijknippen + achtergrond)
   function openCutModalForEdit(m){
@@ -12665,6 +12696,7 @@ async function verwijderVoorbeelden() {
     document.getElementById("cmChoose").onclick=()=>imgInput.click();
     { const cc=document.getElementById("cmChooseCam"); if(cc) cc.onclick=()=>imgInputCamera.click(); }   // 'Foto maken' -> camera (Android krijgt anders geen camera-optie)
     document.getElementById("cmCancel").onclick=()=>probeerAnnuleerCut(false);   // × / Escape: bevestig eerst als er werk is
+    { const vb=document.getElementById("cmVolgende"); if(vb) vb.onclick=()=>zetFullcut(false); }   // fase 2: knippen klaar -> naam/details in de gewone kaart
     window.addEventListener('popstate', ()=>{   // hardware/terug-knop sluit de modal (met bevestiging) i.p.v. de app te verlaten
       if(cutModal.classList.contains('on')){
         cutHistPushed=false; cutOpenHistory();   // entry is geconsumeerd -> DIRECT her-armen, vóór de vraag: dubbel-terug tijdens de bevestiging verlaat de app dan niet
