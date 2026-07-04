@@ -1104,7 +1104,21 @@ form label,
   border:1px solid var(--rand);border-radius:999px;color:var(--tekst);text-decoration:none;font-size:var(--fs-sm);font-weight:600;
   padding:9px 13px;min-height:44px;}
 .cutmodal .cut-tools .linkbtn:hover{border-color:var(--accent);color:var(--accent);}
-.cutmodal .cut-tools .t-lbl{display:inline;font-size:.82rem;font-weight:600;line-height:1;}   /* tool-namen zichtbaar naast het icoon (de info-popover die de uitleg gaf bestaat niet meer) */
+/* Micro-label bij icoonknop (huisstijl): --label-font + --fs-xs + --gedempt - benoemt de tool
+   zonder te schreeuwen. Op een actieve (accent-gevulde) knop leest het label mee via inherit. */
+.cutmodal .cut-tools .t-lbl{display:inline;font-family:var(--label-font);font-size:var(--fs-xs);font-weight:600;line-height:1;color:var(--gedempt);}
+.cutmodal .cut-tools .linkbtn.on .t-lbl{color:inherit;}
+/* FASE-1-EXPERIMENT zwevende kniptools (vlag KNIP_ZWEEF_TOOLS, class op <html>): de tool-balk ligt
+   als semi-transparant kaart-vlak over de onderrand van de foto en de foto krijgt de vrijgekomen
+   hoogte. De balk vangt z'n eigen touch-events (los element boven de canvas), dus een lasso-streek
+   die op de balk begint tekent nooit op de foto. Terugdraaien = vlag op false; deze laag valt weg. */
+html.knipzweef .cutmodal #cmSettings{position:relative;}
+html.knipzweef .cutmodal .cut-tools{position:absolute;left:8px;right:8px;bottom:8px;z-index:6;
+  padding:7px 9px;border:1px solid var(--rand);border-radius:var(--r-md);
+  background:var(--kaart);background:color-mix(in srgb, var(--kaart) 90%, transparent);
+  -webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);
+  box-shadow:0 8px 22px rgba(0,0,0,.22);}
+html.knipzweef .cutmodal .cm-prev{min-height:clamp(280px,54vh,560px);}
 .cutmodal .cut-tools .linkbtn.on{background:var(--accent);border-color:var(--accent);color:var(--op-accent);}
 .cutmodal .cut-tools .cm-toolstoggle{gap:5px;}
 .cutmodal .cut-tools .cm-toolstoggle .tt-lbl{display:inline;font-size:.82rem;font-weight:600;line-height:1;}
@@ -7174,9 +7188,11 @@ function createTattoo(overrides = {}) {
    ============================================================ */
 // App-versie (semver, handmatig ophogen bij een release). Bij een bump ook de
 // CACHE-naam in sw.js meebumpen, zodat clients de nieuwe build ophalen.
-const APP_VERSIE = '0.2.9.4';
+const APP_VERSIE = '0.2.9.5';
 const TWEE_D_AAN = false;   // 2D-kaart tijdelijk uit tot 'ie af is (optie A): verbergt de 2D-ingangen (header-toggle + starttegel). Zet op true om 2D weer aan te zetten.
 if (!TWEE_D_AAN && document.documentElement) document.documentElement.classList.add('tweed-uit');
+const KNIP_ZWEEF_TOOLS = true;   // FASE-1-EXPERIMENT: kniptools zweven als kaart-balk over de foto-onderrand (grotere foto). TERUGDRAAIEN = false (CSS-laag 'knipzweef' valt dan volledig weg).
+if (KNIP_ZWEEF_TOOLS && document.documentElement) document.documentElement.classList.add('knipzweef');
 const DB_NAAM = 'tatties';
 const OUD_DB_NAAM = 'tattoostics';   // vorige naam - eenmalig overgezet
 const DB_VERSIE = 1;
