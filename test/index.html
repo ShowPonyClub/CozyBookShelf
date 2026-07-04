@@ -1120,23 +1120,42 @@ html.knipzweef .cutmodal .cut-tools{position:absolute;left:8px;right:8px;bottom:
   box-shadow:0 8px 22px rgba(0,0,0,.22);}
 html.knipzweef .cutmodal .cm-prev{min-height:clamp(280px,54vh,560px);}
 /* FASE-2-EXPERIMENT schermvullende knip-stap (vlag KNIP_FULLSCREEN, class cm-fullcut op de modal):
-   zolang je knipt vult de kaart het hele scherm met donkere editor-tokens (iOS-fotokiezer-gevoel);
-   alleen foto + zwevende tools + 'Volgende' zichtbaar. Naam/details volgen daarna in de gewone
-   kaart-layout. Terugdraaien = vlag op false; deze hele laag valt dan weg. */
-html.knipfull .cutmodal.cm-fullcut .cm-card{width:100%;height:100%;max-height:none;border:none;border-radius:0;
-  /* lokale donkere tokens (gelijk aan het donkere thema) zodat alle knip-UI leesbaar is op de editor-achtergrond */
-  --kaart:#221E17;--veldbg:#201C15;--rand:#3A352B;--tekst:#ECE3D2;--gedempt:#B8AE9C;--accent-diep:#B7A6F6;
-  background:#16120D;}
-html.knipfull .cutmodal.cm-fullcut #cmSettings{display:flex;flex-direction:column;flex:1;min-height:0;}
-html.knipfull .cutmodal.cm-fullcut .cm-prev{flex:1;min-height:0;max-height:none;}
+   foto edge-to-edge in het actieve thema (licht/donker volgt de app/toestel-instelling); alles zweeft
+   erover: x linksboven, hint-pill bovenin, checkmark-Volgende rechtsboven, tools onderop. Naam/details
+   volgen na 'Volgende' in de gewone kaart. Terugdraaien = vlag op false; deze hele laag valt weg. */
+html.knipfull .cutmodal.cm-fullcut .cm-card{width:100%;height:100%;max-height:none;border:none;border-radius:0;background:var(--bg);}
+html.knipfull .cutmodal.cm-fullcut .cm-body{padding:0;gap:0;overflow:hidden;}
+html.knipfull .cutmodal.cm-fullcut #cmSettings{display:flex;flex-direction:column;flex:1;min-height:0;position:relative;}
+html.knipfull .cutmodal.cm-fullcut .cm-prev{flex:1;min-height:0;max-height:none;border:none;border-radius:0;background:var(--bg);}
+/* top-overlays: x links (toprow, titel weg), hint-pill midden, checkmark rechts */
+html.knipfull .cutmodal.cm-fullcut .cm-toprow{position:absolute;top:calc(10px + env(safe-area-inset-top,0px));left:10px;right:10px;z-index:8;pointer-events:none;}
+html.knipfull .cutmodal.cm-fullcut #cmTitle{display:none;}
+html.knipfull .cutmodal.cm-fullcut .cm-x{pointer-events:auto;width:44px;height:44px;margin:0;border-radius:50%;border:1px solid var(--rand);color:var(--tekst);
+  background:var(--kaart);background:color-mix(in srgb, var(--kaart) 88%, transparent);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);}
+html.knipfull .cutmodal.cm-fullcut #cmHint{position:absolute;top:calc(16px + env(safe-area-inset-top,0px));left:50%;transform:translateX(-50%);z-index:7;
+  max-width:54%;text-align:center;margin:0;padding:9px 14px;border-radius:999px;border:1px solid var(--rand);font-size:var(--fs-sm);
+  background:var(--kaart);background:color-mix(in srgb, var(--kaart) 90%, transparent);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);}
+html.knipfull .cutmodal.cm-fullcut .cut-tip{display:none;}
+/* actieve-tool-rijen (toverstaf/gum-keuze + kwastgrootte) zweven onder de hint */
+html.knipfull .cutmodal.cm-fullcut #cmWandModus,
+html.knipfull .cutmodal.cm-fullcut #cmGumModus{position:absolute;top:calc(68px + env(safe-area-inset-top,0px));left:50%;transform:translateX(-50%);z-index:7;}
+html.knipfull .cutmodal.cm-fullcut #cmGumGrootte{position:absolute;top:calc(118px + env(safe-area-inset-top,0px));left:50%;transform:translateX(-50%);z-index:7;
+  width:min(320px,82%);padding:8px 12px;border-radius:var(--r-md);border:1px solid var(--rand);
+  background:var(--kaart);background:color-mix(in srgb, var(--kaart) 90%, transparent);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);}
+/* tools onderop de foto, met safe-area */
+html.knipfull .cutmodal.cm-fullcut .cut-tools{bottom:calc(10px + env(safe-area-inset-bottom,0px));}
+/* de rest van de kaart verdwijnt in deze fase */
 html.knipfull .cutmodal.cm-fullcut #cmNaam,
 html.knipfull .cutmodal.cm-fullcut #cmInfo,
 html.knipfull .cutmodal.cm-fullcut .cm-choose-rij,
-html.knipfull .cutmodal.cm-fullcut .cm-meer-wrap,
-html.knipfull .cutmodal.cm-fullcut #cmPlace{display:none!important;}
+html.knipfull .cutmodal.cm-fullcut .cm-foot{display:none!important;}
+/* 'Volgende' = ronde checkmark rechtsboven (iOS-fotokiezer-patroon); buiten deze fase onzichtbaar */
 .cutmodal .cm-volgende{display:none;}
-html.knipfull .cutmodal.cm-fullcut .cm-volgende{display:block;}
-html.knipfull .cutmodal.cm-fullcut .cm-foot{padding-bottom:calc(12px + env(safe-area-inset-bottom,0px));}
+html.knipfull .cutmodal.cm-fullcut .cm-volgende{display:flex;position:absolute;top:calc(10px + env(safe-area-inset-top,0px));right:10px;z-index:8;
+  width:44px;height:44px;min-height:44px;padding:0;border-radius:50%;align-items:center;justify-content:center;
+  background:var(--accent);color:var(--op-accent);box-shadow:0 4px 14px rgba(var(--accent-rgb),.35);}
+html.knipfull .cutmodal.cm-fullcut .cm-volgende .ik{width:22px;height:22px;}
+html.knipfull .cutmodal.cm-fullcut .cm-volgende .cv-lbl{display:none;}
 .cutmodal .cut-tools .linkbtn.on{background:var(--accent);border-color:var(--accent);color:var(--op-accent);}
 .cutmodal .cut-tools .cm-toolstoggle{gap:5px;}
 .cutmodal .cut-tools .cm-toolstoggle .tt-lbl{display:inline;font-size:.82rem;font-weight:600;line-height:1;}
@@ -1617,9 +1636,9 @@ form label{text-transform:none;letter-spacing:.005em;font-size:.8rem;color:var(-
             <button type="button" id="cmMeerInfo" class="cm-meer-info" aria-expanded="false" data-i18n-aria="ui.nog_een_uitleg" data-i18n-title="ui.nog_een_uitleg" aria-label="Wat doet '+ Nog een'?"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5"/><path d="M12 7.6h.01"/></svg></button>
             <div id="cmMeerTip" class="cm-meer-tip" hidden role="status" data-i18n="ui.nog_een_uitleg">Plaats deze en knip daarna nog een tattoo uit dezelfde foto</div>
           </div>
-          <button id="cmVolgende" class="btn cm-place cm-volgende" data-i18n="ui.volgende">Volgende</button>
           <button id="cmPlace" class="btn cm-place" data-i18n="ui.plaatsen">Plaatsen</button>
         </div>
+        <button id="cmVolgende" class="cm-volgende" data-i18n-aria="ui.volgende" data-i18n-title="ui.volgende" aria-label="Volgende" title="Volgende"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12l5 5L20 6"/></svg><span class="cv-lbl" data-i18n="ui.volgende">Volgende</span></button>
       </div>
     </div>
 
@@ -7207,7 +7226,7 @@ function createTattoo(overrides = {}) {
    ============================================================ */
 // App-versie (semver, handmatig ophogen bij een release). Bij een bump ook de
 // CACHE-naam in sw.js meebumpen, zodat clients de nieuwe build ophalen.
-const APP_VERSIE = '0.2.9.6';
+const APP_VERSIE = '0.2.9.7';
 const TWEE_D_AAN = false;   // 2D-kaart tijdelijk uit tot 'ie af is (optie A): verbergt de 2D-ingangen (header-toggle + starttegel). Zet op true om 2D weer aan te zetten.
 if (!TWEE_D_AAN && document.documentElement) document.documentElement.classList.add('tweed-uit');
 const KNIP_ZWEEF_TOOLS = true;   // FASE-1-EXPERIMENT: kniptools zweven als kaart-balk over de foto-onderrand (grotere foto). TERUGDRAAIEN = false (CSS-laag 'knipzweef' valt dan volledig weg).
