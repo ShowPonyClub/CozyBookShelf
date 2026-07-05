@@ -282,7 +282,7 @@
     if(inited) return; inited=true;
     var W=host.clientWidth,H=host.clientHeight||640;
     renderer=new THREE.WebGLRenderer({antialias:true,alpha:true,powerPreference:'low-power'});
-    renderer.setPixelRatio(Math.min(devicePixelRatio,1.5)); renderer.setSize(W,H);
+    renderer.setPixelRatio(Math.min(devicePixelRatio,1)); renderer.setSize(W,H);
     renderer.outputEncoding=THREE.sRGBEncoding;
     var cv=renderer.domElement; cv.style.opacity='0'; cv.style.transition='opacity .7s ease'; host.appendChild(cv);
     scene=new THREE.Scene(); camera=new THREE.PerspectiveCamera(32,W/H,0.1,100); camera.position.set(0,0.95,5.0); camera.lookAt(0,0.95,0);
