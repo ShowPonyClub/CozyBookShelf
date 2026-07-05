@@ -1237,6 +1237,12 @@ html.knipfull .cutmodal.cm-fullcut .cm-bewerk-badge{display:block;position:absol
   padding:8px 14px;border-radius:999px;text-align:center;box-shadow:0 2px 10px rgba(0,0,0,.18);pointer-events:none;}
 .lege-hint[hidden]{display:none;}
 .cutmodal .cm-veld{display:flex;flex-direction:column;gap:4px;font-size:var(--fs-sm);color:var(--gedempt);margin:8px 0 0;}
+/* Accentkleur: swatch naast de tekst (rij) i.p.v. eronder */
+.cutmodal .cm-accent-veld{flex-direction:row;align-items:center;justify-content:space-between;gap:14px;}
+.cutmodal .cm-accent-veld .cm-accent-tekst{display:flex;flex-direction:column;gap:2px;min-width:0;}
+.cutmodal .cm-accent-veld .veld-hint{margin:0;}
+/* Datumveld iets compacter (type=date zoomt niet op iOS, dus <16px is hier veilig) */
+.cutmodal #cmDatum{font-size:var(--fs-sm);}
 .cutmodal .cm-veld input,.cutmodal .cm-veld select{padding:9px 10px;border:1px solid var(--rand);border-radius:var(--r-sm);background:var(--veldbg);color:var(--tekst);font-size:var(--fs-base);font-family:inherit;}
 .cutmodal .verplicht{color:var(--accent);font-weight:700;}
 .cutmodal .cm-veld input[aria-invalid="true"]{border-color:var(--invalid);box-shadow:0 0 0 2px rgba(209,67,67,.18);}
@@ -1656,7 +1662,7 @@ form label{text-transform:none;letter-spacing:.005em;font-size:.8rem;color:var(-
                 <label class="cm-veld"><span data-i18n="form.zituren">Zituren</span><input id="cmZituren" type="number" min="0" max="100000" step="0.5" inputmode="decimal"></label>
               </div>
               <label class="cm-veld"><span data-i18n="form.notities">Notities</span><textarea id="cmNotities" maxlength="2000" rows="2"></textarea></label>
-              <label class="cm-veld"><span data-i18n="form.accentkleur">Accentkleur van markering</span><small class="veld-hint" data-i18n="form.accentuitleg">Gebruikt als je geen tattoo-afbeelding toevoegt</small><input id="cmAccent" type="color" value="#8E71F0" style="width:64px;height:40px;padding:4px;border-radius:var(--r-md);cursor:pointer"></label>
+              <label class="cm-veld cm-accent-veld"><span class="cm-accent-tekst"><span data-i18n="form.accentkleur">Accentkleur van markering</span><small class="veld-hint" data-i18n="form.accentuitleg">Gebruikt als je geen tattoo-afbeelding toevoegt</small></span><input id="cmAccent" type="color" value="#8E71F0" style="width:52px;height:38px;padding:3px;border-radius:var(--r-md);cursor:pointer;flex:none"></label>
             </div>
           </div>
         </div>
@@ -7256,7 +7262,7 @@ function createTattoo(overrides = {}) {
    ============================================================ */
 // App-versie (semver, handmatig ophogen bij een release). Bij een bump ook de
 // CACHE-naam in sw.js meebumpen, zodat clients de nieuwe build ophalen.
-const APP_VERSIE = '0.2.9.12';
+const APP_VERSIE = '0.2.9.13';
 const TWEE_D_AAN = false;   // 2D-kaart tijdelijk uit tot 'ie af is (optie A): verbergt de 2D-ingangen (header-toggle + starttegel). Zet op true om 2D weer aan te zetten.
 if (!TWEE_D_AAN && document.documentElement) document.documentElement.classList.add('tweed-uit');
 const KNIP_ZWEEF_TOOLS = true;   // FASE-1-EXPERIMENT: kniptools zweven als kaart-balk over de foto-onderrand (grotere foto). TERUGDRAAIEN = false (CSS-laag 'knipzweef' valt dan volledig weg).
