@@ -281,7 +281,7 @@
   function init(){
     if(inited) return; inited=true;
     var W=host.clientWidth,H=host.clientHeight||640;
-    renderer=new THREE.WebGLRenderer({antialias:true,alpha:true,powerPreference:'low-power'});
+    renderer=new THREE.WebGLRenderer({antialias:false,alpha:true,powerPreference:'low-power'});
     renderer.setPixelRatio(Math.min(devicePixelRatio,1)); renderer.setSize(W,H);
     renderer.outputEncoding=THREE.sRGBEncoding;
     var cv=renderer.domElement; cv.style.opacity='0'; cv.style.transition='opacity .7s ease'; host.appendChild(cv);
@@ -297,7 +297,7 @@
   }
   function loop(){ if(!running) return; requestAnimationFrame(loop);
     var now=performance.now();
-    if(scrolling || now-lastT<32) return;
+    if(scrolling || now-lastT<40) return;
     var dt=Math.min(now-lastT,50); lastT=now;
     for(var i=0;i<groups.length;i++)groups[i].rotation.y+=0.008*(dt/16.67)*(groups[i].userData.side<0?1:-1);
     for(var j=0;j<fades.length;j++){ var f=fades[j]; if(f.done) continue; var t=(now-f.start)/1600; if(t<0)t=0; if(t>=1){t=1;f.done=true;} f.m.opacity=t; }
