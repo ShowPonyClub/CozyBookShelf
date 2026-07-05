@@ -1095,7 +1095,7 @@ form label,
 .cutmodal .linkbtn:hover{color:var(--accent);}
 .cutmodal .bgrow{justify-content:flex-start;margin-top:6px;}
 .cutmodal .bg-controls{justify-content:flex-start;flex-wrap:wrap;gap:8px 16px;margin:8px 0;}
-.cutmodal .cut-tools{display:flex;align-items:center;justify-content:space-between;gap:6px;flex-wrap:wrap;margin-top:10px;position:relative;}
+.cutmodal .cut-tools{display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap;margin-top:10px;position:relative;}
 /* (i)-help links, scheidingslijntje, dan de 5 bewerktools rechts bij elkaar */
 .cutmodal .cut-tools .ct-group{display:flex;align-items:center;gap:6px;}
 .cutmodal .cut-tools .ct-div{width:1px;align-self:stretch;min-height:30px;background:var(--rand);flex:none;margin:0 4px 0 0;}
@@ -1191,7 +1191,7 @@ html.knipfull .cutmodal.cm-fullcut .cm-bewerk-badge{display:block;position:absol
 .cutmodal .cut-tools .cm-toolstoggle .ik-chev{width:13px;height:13px;transition:transform .18s;}
 .cutmodal .cut-tools .cm-toolstoggle[aria-expanded="true"]{background:var(--accent);border-color:var(--accent);color:var(--op-accent);}
 .cutmodal .cut-tools .cm-toolstoggle[aria-expanded="true"] .ik-chev{transform:rotate(180deg);}
-.cutmodal .cut-tools .cm-advrow{flex:0 0 100%;display:flex;justify-content:flex-end;align-items:center;gap:6px;flex-wrap:wrap;margin-top:6px;}
+.cutmodal .cut-tools .cm-advrow{flex:0 0 100%;display:flex;justify-content:center;align-items:center;gap:8px;flex-wrap:wrap;margin-top:8px;padding-top:8px;border-top:1px solid var(--rand);}
 .cutmodal .cut-tools .cm-advrow[hidden]{display:none;}
 /* Reset uitsnede: destructief + zeldzaam -> als subtiele tekstlink ONDER de balk (geen mis-tap naast de tools) */
 .cutmodal .cm-resetrij{display:flex;justify-content:center;margin-top:8px;}
@@ -1200,7 +1200,7 @@ html.knipfull .cutmodal.cm-fullcut .cm-bewerk-badge{display:block;position:absol
 .cutmodal .cm-resetlink .ik{width:15px;height:15px;stroke:currentColor;fill:none;}
 .cutmodal .cm-resetlink:hover{background:rgba(168,52,26,.08);}
 .cutmodal .cm-resetlink:active{transform:scale(.97);}
-.cutmodal .cut-tools .ct-resetwrap{flex:1;display:flex;justify-content:center;min-width:0;}
+.cutmodal .cut-tools .ct-resetwrap{flex:none;display:flex;justify-content:center;min-width:0;}
 .cutmodal .cut-tools .cm-reseticon{border:1px solid rgba(168,52,26,.4);background:rgba(168,52,26,.08);border-radius:999px;color:var(--gevaar);padding:9px 13px;min-height:44px;gap:5px;font-size:var(--fs-sm);font-weight:600;}
 .cutmodal .cut-tools .cm-reseticon:hover{border-color:var(--gevaar);background:rgba(168,52,26,.14);}
 .cutmodal .cut-tools .cm-undobtn .tt-lbl{display:inline;font-size:.82rem;font-weight:600;line-height:1;}
@@ -7256,7 +7256,7 @@ function createTattoo(overrides = {}) {
    ============================================================ */
 // App-versie (semver, handmatig ophogen bij een release). Bij een bump ook de
 // CACHE-naam in sw.js meebumpen, zodat clients de nieuwe build ophalen.
-const APP_VERSIE = '0.2.9.11';
+const APP_VERSIE = '0.2.9.12';
 const TWEE_D_AAN = false;   // 2D-kaart tijdelijk uit tot 'ie af is (optie A): verbergt de 2D-ingangen (header-toggle + starttegel). Zet op true om 2D weer aan te zetten.
 if (!TWEE_D_AAN && document.documentElement) document.documentElement.classList.add('tweed-uit');
 const KNIP_ZWEEF_TOOLS = true;   // FASE-1-EXPERIMENT: kniptools zweven als kaart-balk over de foto-onderrand (grotere foto). TERUGDRAAIEN = false (CSS-laag 'knipzweef' valt dan volledig weg).
