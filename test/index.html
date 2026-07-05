@@ -1166,6 +1166,20 @@ html.knipfull .cutmodal.cm-fullcut .cm-volgende .cv-lbl{display:none;}
 html.knipfull .cutmodal.cm-fullcut .cm-feedback{top:calc(16px + env(safe-area-inset-top,0px));z-index:9;}
 /* 'Bewerken'-badge: alleen in de fullscreen-fase (in de gewone kaart staat de titel er al);
    pill linksboven ONDER de x, zodat je ook zonder titel/knoptekst ziet dat je bewerkt i.p.v. toevoegt */
+/* REVIEW-fase (na de checkmark, vlag KNIP_FULLSCREEN, class cm-review): alleen de bijgesneden
+   uitsnede op het schaakbord + een 'Bewerken'-pill; knip-tools/hints weg, preview niet-tekenbaar. */
+.cutmodal .cm-bewerkbtn{display:none;}
+html.knipfull .cutmodal.cm-review .cut-tools,
+html.knipfull .cutmodal.cm-review #cmHint,
+html.knipfull .cutmodal.cm-review .cut-tip,
+html.knipfull .cutmodal.cm-review #cmWandModus,
+html.knipfull .cutmodal.cm-review #cmGumModus,
+html.knipfull .cutmodal.cm-review #cmGumGrootte{display:none !important;}   /* !important: #cmHint heeft een inline display:block */
+html.knipfull .cutmodal.cm-review .cm-prev{pointer-events:none;}
+html.knipfull .cutmodal.cm-review .cm-bewerkbtn{display:inline-flex;align-items:center;gap:6px;position:absolute;z-index:6;top:10px;right:10px;
+  pointer-events:auto;padding:8px 13px;border-radius:999px;border:1px solid var(--rand);font-size:var(--fs-sm);font-weight:600;color:var(--tekst);cursor:pointer;
+  background:var(--kaart);background:color-mix(in srgb, var(--kaart) 90%, transparent);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);box-shadow:0 6px 16px rgba(0,0,0,.25);}
+html.knipfull .cutmodal.cm-review .cm-bewerkbtn .ik{width:17px;height:17px;}
 .cutmodal .cm-bewerk-badge{display:none;}
 html.knipfull .cutmodal.cm-fullcut .cm-bewerk-badge{display:block;position:absolute;z-index:8;
   top:calc(62px + env(safe-area-inset-top,0px));left:calc(10px + env(safe-area-inset-left,0px));padding:5px 11px;border-radius:999px;
@@ -1571,7 +1585,7 @@ form label{text-transform:none;letter-spacing:.005em;font-size:.8rem;color:var(-
               <input id="gumRadius" type="range" min="15" max="150" value="40" class="slider" data-i18n-aria="ui.gum_grootte" aria-label="Kwastgrootte">
             </div>
             <p class="cut-tip" data-i18n="ui.cut_tip">Tip: knip rond de tattoo en stel daarna de opaciteit in bij het plaatsen.</p>
-            <div class="cm-prev" id="cutPrev"><canvas id="cutCanvas" class="cutcv"></canvas><canvas id="lassoCanvas" class="lassocv"></canvas></div>
+            <div class="cm-prev" id="cutPrev"><canvas id="cutCanvas" class="cutcv"></canvas><canvas id="lassoCanvas" class="lassocv"></canvas><button id="cmBewerkBtn" class="cm-bewerkbtn" type="button" data-i18n-aria="aria.bewerken" data-i18n-title="aria.bewerken" aria-label="Bewerken" title="Bewerken"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M14.5 5.5l4 4"/><path d="M4 20l1-4L16 5a2 2 0 0 1 3 3L8 19l-4 1z"/></svg><span data-i18n="aria.bewerken">Bewerken</span></button></div>
             <!-- 'Huid weghalen' verborgen: simpele kleur/helderheid-isolatie wordt op echte huidfoto's te vlekkerig.
                  Code blijft staan; AI-isolatie volgt later (Fase 3). Standaard = nette uitsnede mét huid. -->
             <label class="chk" id="cmHuidWegRij" style="display:none"><input type="checkbox" id="bgRemove"> <span data-i18n="ui.huid_weghalen">Huid weghalen</span></label>
@@ -7242,7 +7256,7 @@ function createTattoo(overrides = {}) {
    ============================================================ */
 // App-versie (semver, handmatig ophogen bij een release). Bij een bump ook de
 // CACHE-naam in sw.js meebumpen, zodat clients de nieuwe build ophalen.
-const APP_VERSIE = '0.2.9.10';
+const APP_VERSIE = '0.2.9.11';
 const TWEE_D_AAN = false;   // 2D-kaart tijdelijk uit tot 'ie af is (optie A): verbergt de 2D-ingangen (header-toggle + starttegel). Zet op true om 2D weer aan te zetten.
 if (!TWEE_D_AAN && document.documentElement) document.documentElement.classList.add('tweed-uit');
 const KNIP_ZWEEF_TOOLS = true;   // FASE-1-EXPERIMENT: kniptools zweven als kaart-balk over de foto-onderrand (grotere foto). TERUGDRAAIEN = false (CSS-laag 'knipzweef' valt dan volledig weg).
@@ -12176,6 +12190,7 @@ async function verwijderVoorbeelden() {
   let wandSeeds=[];          // {nx,ny} klikpunten voor de toverstaf
   let wandKeep=false;        // false = aangetikt gebied weghalen (achtergrond), true = aangetikt gebied behouden (tattoo)
   let laatsteActie=null;     // 'wand' | 'lasso' | 'gum' | 'reset' - laatste uitsnede-actie, voor gedeelde Ongedaan
+  let laatsteUitsnede=null;  // laatst berekende, bijgesneden uitsnede-canvas (= de decal-textuur) - voor de review-preview
   let resetSnapshot=null;    // laatste gewiste uitsnede (voor Ongedaan na Reset)
   const WAND_TOL2=7500;      // kleurtolerantie^2 (≈50/kanaal) voor de toverstaf
   // Gum: handmatig stukjes wegvegen (alpha 0) of terughalen (originele pixels herstellen).
@@ -12370,6 +12385,8 @@ async function verwijderVoorbeelden() {
     const wil = aan && document.documentElement.classList.contains('knipfull');
     if(cutModal.classList.contains('cm-fullcut')===wil) return;
     cutModal.classList.toggle('cm-fullcut', wil);
+    // Review-fase = uit fullscreen (wil=false) naar de details/review-kaart, met foto en modal open.
+    cutModal.classList.toggle('cm-review', document.documentElement.classList.contains('knipfull') && !wil && cutModal.classList.contains('on') && !!origImg);
     // Herbouw ALLEEN bij de ✓-overgang (fullscreen -> details, aan=false, modal nog in beeld): daar
     // verandert de canvas-maat fors en rebuildt niemand anders. Bij de show-overgang (-> fullscreen)
     // doet de foto-loader zelf de rebuild (ook nodig als KNIP_FULLSCREEN uit staat) -> hier niet,
@@ -12391,6 +12408,7 @@ async function verwijderVoorbeelden() {
   // Toon de uitsnede-instellingen (preview, sliders, achtergrond) pas na een foto
   function toonCutInstellingen(b){
     const s=document.getElementById("cmSettings"); if(s) s.hidden=!b;
+    if(!b) cutModal.classList.remove("cm-review");   // fotokeuze/sluiten: nooit in review-stand
     { const bb=document.getElementById("cmBewerkBadge"); if(bb) bb.hidden=!(b && (pendingEdit||pendingEdit2D)); }   // 'Bewerken'-badge: alleen in de knipfase van een bewerk-flow
     zetFullcut(b);   // foto in beeld = schermvullend knippen (vlag-afhankelijk); 'Volgende' onthult naam/details
     if(b){ const adv=document.getElementById("cmAdvTools"), tt=document.getElementById("cmToolsToggle");
@@ -12672,7 +12690,20 @@ async function verwijderVoorbeelden() {
   }
   // Alleen de zichtbare preview (cutCanvas) hertekenen, zonder de THREE-textuur te herbouwen.
   // Gebruikt tijdens het slepen (lasso/gum) -> vloeiend, geen texture-allocatie per move.
+  // Review-fase (na de checkmark): alleen de geïsoleerde uitsnede tonen, gecentreerd op het
+  // schaakbord (CSS-achtergrond toont de transparantie). Geen gedimd origineel, geen lasso.
+  function drawReviewPreview(){
+    const cv=cutCanvas; cv.width=cutPrev.clientWidth; cv.height=cutPrev.clientHeight;
+    const ctx=cv.getContext("2d"); ctx.clearRect(0,0,cv.width,cv.height);
+    const src=laatsteUitsnede; if(!src || !src.width || !src.height) return;
+    const pad=18, availW=cv.width-pad*2, availH=cv.height-pad*2;
+    const s=Math.min(availW/src.width, availH/src.height, 2);   // 'contain' met marge; kleine uitsnedes niet te ver opblazen
+    const w=src.width*s, h=src.height*s;
+    ctx.imageSmoothingQuality="high";
+    ctx.drawImage(src, (cv.width-w)/2, (cv.height-h)/2, w, h);
+  }
   function drawCutPreview(){
+    if(cutModal.classList.contains("cm-review")){ drawReviewPreview(); return; }
     if(!origImg || !baseCanvas) return;
     const shown=clippedCanvas(); if(!shown) return;
     // rest van de foto gedimd (35%) i.p.v. verborgen, zodat je context houdt tijdens het uitsnijden
@@ -12703,7 +12734,8 @@ async function verwijderVoorbeelden() {
     if(!origImg) return;
     if(!baseCanvas) rebuildBase();
     const shown=clippedCanvas(); if(!shown) return;
-    drawCutPreview();
+    // Uitsnede bijsnijden tot de lasso-bbox = de geïsoleerde tattoo (ook de decal-textuur).
+    // Eerst berekenen, zodat de review-preview (drawCutPreview) deze uitsnede kan tonen.
     let texCanvas=shown;
     if(lassoPts.length>=3){
       let mnx=1,mny=1,mxx=0,mxy=0;
@@ -12714,13 +12746,15 @@ async function verwijderVoorbeelden() {
       cc.getContext("2d").drawImage(shown, sx,sy,sw,sh, 0,0,sw,sh);
       texCanvas=cc;
     }
+    laatsteUitsnede=texCanvas;
+    drawCutPreview();
     if(imgTexture && imgTexture.dispose) imgTexture.dispose();   // vorige tussentijdse textuur vrijgeven
     imgTexture=new THREE.CanvasTexture(texCanvas); imgTexture.encoding=THREE.sRGBEncoding; imgTexture.anisotropy=maxAniso(); imgTexture.needsUpdate=true;
   }
   function drawLasso(){
     const cv=lassoCanvas; cv.width=cutPrev.clientWidth; cv.height=cutPrev.clientHeight;
     const ctx=cv.getContext("2d"); ctx.clearRect(0,0,cv.width,cv.height);
-    if(!origImg) return;
+    if(!origImg || cutModal.classList.contains("cm-review")) return;   // review-fase: geen lasso-punten tonen
     const r=viewRect(cv.width,cv.height,beeldDims().w,beeldDims().h);
     // D6(a) verbetering 3: eerder geknipte uitsnedes uit dezelfde foto vaag tonen (alleen bij gelijke oriëntatie)
     if(vorigeLassos && vorigeLassos.length){
@@ -12777,7 +12811,10 @@ async function verwijderVoorbeelden() {
         // Niets geknipt (geen lasso/toverstaf/gum) -> hele foto wordt de decal: even melden, niet blokkeren
         if(!(lassoPts.length>=3 || wandSeeds.length || eraseStrokes.length)) toast(tr('ui.geen_uitsnede_hint'));
         zetFullcut(false);
-      }; }   // fase 2: knippen klaar -> naam/details in de gewone kaart
+      }; }   // fase 2: knippen klaar -> review-scherm met naam/details
+    { const bb=document.getElementById("cmBewerkBtn"); if(bb) bb.onclick=()=>{   // review -> terug naar de fullscreen-editor
+        zetFullcut(true); if(origImg){ rebuildBase(); updateCutout(); drawLasso(); }
+      }; }
     window.addEventListener('popstate', ()=>{   // hardware/terug-knop sluit de modal (met bevestiging) i.p.v. de app te verlaten
       if(cutModal.classList.contains('on')){
         cutHistPushed=false; cutOpenHistory();   // entry is geconsumeerd -> DIRECT her-armen, vóór de vraag: dubbel-terug tijdens de bevestiging verlaat de app dan niet
