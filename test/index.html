@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="nl">
+<html lang="nl" class="tweed-uit"><!-- tweed-uit statisch: verbergt de 2D-ingangen ook al tijdens het parsen (vóór JS); wordt bij boot gesynct met TWEE_D_AAN -->
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
@@ -1347,7 +1347,10 @@ form label{text-transform:none;letter-spacing:.005em;font-size:.8rem;color:var(-
 
 <main>
   <!-- ===================== START / LANDINGSSCHERM ===================== -->
-  <section id="view-start" hidden>
+  <!-- Bewust NIET hidden: dit is de landings-view, en tijdens het parsen van dit (grote)
+       bestand draait er nog geen JS. Zo staat het startscherm er direct bij het openen
+       (statisch; teksten/stats worden bij boot door i18n/renderStart ingevuld). -->
+  <section id="view-start">
     <div class="start-wrap">
       <div class="start-hero">
         <h2 class="start-titel" data-i18n="start.titel">Welkom terug</h2>
@@ -7268,9 +7271,9 @@ function createTattoo(overrides = {}) {
    ============================================================ */
 // App-versie (semver, handmatig ophogen bij een release). Bij een bump ook de
 // CACHE-naam in sw.js meebumpen, zodat clients de nieuwe build ophalen.
-const APP_VERSIE = '0.2.9.15';
+const APP_VERSIE = '0.2.9.16';
 const TWEE_D_AAN = false;   // 2D-kaart tijdelijk uit tot 'ie af is (optie A): verbergt de 2D-ingangen (header-toggle + starttegel). Zet op true om 2D weer aan te zetten.
-if (!TWEE_D_AAN && document.documentElement) document.documentElement.classList.add('tweed-uit');
+if (document.documentElement) document.documentElement.classList.toggle('tweed-uit', !TWEE_D_AAN);   // class staat statisch op <html>; hier synchroniseren (weghalen zodra 2D weer aan gaat)
 const KNIP_ZWEEF_TOOLS = true;   // FASE-1-EXPERIMENT: kniptools zweven als kaart-balk over de foto-onderrand (grotere foto). TERUGDRAAIEN = false (CSS-laag 'knipzweef' valt dan volledig weg).
 if (KNIP_ZWEEF_TOOLS && document.documentElement) document.documentElement.classList.add('knipzweef');
 const KNIP_FULLSCREEN = true;   // FASE-2-EXPERIMENT: knip-stap schermvullend op donker (iOS-fotokiezer-gevoel); naam/details volgen na 'Volgende'. TERUGDRAAIEN = false.
@@ -10887,7 +10890,9 @@ async function verwijderVoorbeelden() {
   { const sp = $('#start-privacy-link'); if (sp) sp.addEventListener('click', () => { legalRetour = 'start'; toonView('privacy'); }); }
   { const tt = $('#terms-terug'); if (tt) tt.addEventListener('click', () => toonView(legalRetour || 'start')); }
   { const pt = $('#privacy-terug'); if (pt) pt.addEventListener('click', () => toonView(legalRetour || 'start')); }
-  if (isStandalone()) { const s = $('#inst-install-sectie'); if (s) s.hidden = true; }   // al geïnstalleerd -> knop verbergen
+  // Al geïnstalleerd -> alleen de install-KNOP verbergen. Niet de hele kaart: daar staan
+  // inmiddels ook Introductie/Feedback/Privacy/Voorwaarden in ('App & info' leek anders leeg).
+  if (isStandalone()) { const b = $('#inst-install'); if (b) b.hidden = true; const u = $('#inst-install-uitleg'); if (u) u.hidden = true; }
   { const next = $('#onb-next'); if (next) next.addEventListener('click', () => { const s1 = $('#onb-stap1'), s2 = $('#onb-stap2'); if (s1) s1.hidden = true; if (s2) s2.hidden = false; }); }
   { const terug = $('#onb-terug'); if (terug) terug.addEventListener('click', () => { const s1 = $('#onb-stap1'), s2 = $('#onb-stap2'); if (s1) s1.hidden = false; if (s2) s2.hidden = true; }); }
   $('#kaart-reset').addEventListener('click', () => { zetFilter(null); setTimeout(renderMarkers, 320); });
