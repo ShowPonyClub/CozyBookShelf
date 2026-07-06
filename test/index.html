@@ -571,6 +571,9 @@ dl.toon-leeg .veldrij.leeg-veld{display:flex}
 html.tweed-uit #btn-2d{display:none}
 html.tweed-uit .start-tegel[data-ga="2d"]{display:none}
 html.tweed-uit .start-tegels .start-tegel[data-ga="3d"]{grid-column:1 / -1}
+/* Uitleg-punt 'Wisselen: gebruik de 2D/3D-knop' verwijst naar een verborgen knop zolang
+   2D uit staat -> eerste tester zocht zich suf. Regel mee-verbergen; komt terug met 2D. */
+html.tweed-uit [data-i18n-html="uitleg.3d5"]{display:none}
 .start-recent{display:flex;flex-direction:column;gap:8px}
 .start-recent-item{display:flex;align-items:center;gap:12px;width:100%;text-align:left;padding:8px;
   background:var(--kaart);border:1px solid var(--rand);border-radius:var(--radius);color:var(--tekst);cursor:pointer}
@@ -6877,7 +6880,7 @@ const I18N = {
     'ui.tattoo_bijgewerkt':'Tattoo bijgewerkt ✓','ui.plaatsen_mislukt':'Plaatsen mislukt','ui.fout':'fout',
     'ui.hersteld':'{n} tattoo{s} hersteld','ui.verwijder_bevestig':'Weet je zeker dat je deze tattoo wilt verwijderen?',
     'ui.toevoegen':'Toevoegen','ui.volgende':'Volgende','ui.geen_uitsnede_hint':'Nog niets geknipt - de hele foto wordt gebruikt','ui.klik_plaatsen':'Klik op het model waar je de tattoo wilt','ui.naam_verplicht':'Geef de tattoo eerst een naam','ui.meer_details':'Meer details','ui.naam':'Naam tattoo','ui.naam_ph':'Naam tattoo *',
-    'ui.stage_aria':'3D-lichaamsmodel; gebruik de 2D-knop bovenaan voor de toegankelijke platte kaart',
+    'ui.stage_aria':'3D-lichaamsmodel; gebruik de 2D-knop bovenaan voor de toegankelijke platte kaart','ui.stage_aria_solo':'3D-lichaamsmodel',
     'ui.lege_cta':'Nog geen tattoos - tik op + om er een toe te voegen',
     'ui.details':'Details',
     'col.titel':'Collectie & Wishlist','col.collectie':'Collectie','col.wishlist':'Wishlist',
@@ -7056,7 +7059,7 @@ const I18N = {
     'ui.tattoo_bijgewerkt':'Tattoo updated ✓','ui.plaatsen_mislukt':'Placing failed','ui.fout':'error',
     'ui.hersteld':'{n} tattoo{s} restored','ui.verwijder_bevestig':'Are you sure you want to delete this tattoo?',
     'ui.toevoegen':'Add','ui.volgende':'Next','ui.geen_uitsnede_hint':'Nothing cut out yet - the whole photo will be used','ui.klik_plaatsen':'Click on the model where you want the tattoo','ui.naam_verplicht':'Give the tattoo a name first','ui.meer_details':'More details','ui.naam':'Tattoo name','ui.naam_ph':'Tattoo name *',
-    'ui.stage_aria':'3D body model; use the 2D button at the top for the accessible flat map',
+    'ui.stage_aria':'3D body model; use the 2D button at the top for the accessible flat map','ui.stage_aria_solo':'3D body model',
     'ui.lege_cta':'No tattoos yet - tap + to add one',
     'ui.details':'Details',
     'col.titel':'Collection & Wishlist','col.collectie':'Collection','col.wishlist':'Wishlist',
@@ -7298,9 +7301,11 @@ function createTattoo(overrides = {}) {
    ============================================================ */
 // App-versie (semver, handmatig ophogen bij een release). Bij een bump ook de
 // CACHE-naam in sw.js meebumpen, zodat clients de nieuwe build ophalen.
-const APP_VERSIE = '0.2.9.21';
+const APP_VERSIE = '0.2.9.22';
 const TWEE_D_AAN = false;   // 2D-kaart tijdelijk uit tot 'ie af is (optie A): verbergt de 2D-ingangen (header-toggle + starttegel). Zet op true om 2D weer aan te zetten.
 if (document.documentElement) document.documentElement.classList.toggle('tweed-uit', !TWEE_D_AAN);   // class staat statisch op <html>; hier synchroniseren (weghalen zodra 2D weer aan gaat)
+// Zolang 2D uit staat: het 3D-model niet via aria naar de (verborgen) 2D-knop verwijzen
+if (!TWEE_D_AAN) { const _st = document.getElementById('stage'); if (_st) _st.setAttribute('data-i18n-aria', 'ui.stage_aria_solo'); }
 const KNIP_ZWEEF_TOOLS = true;   // FASE-1-EXPERIMENT: kniptools zweven als kaart-balk over de foto-onderrand (grotere foto). TERUGDRAAIEN = false (CSS-laag 'knipzweef' valt dan volledig weg).
 if (KNIP_ZWEEF_TOOLS && document.documentElement) document.documentElement.classList.add('knipzweef');
 const KNIP_FULLSCREEN = true;   // FASE-2-EXPERIMENT: knip-stap schermvullend op donker (iOS-fotokiezer-gevoel); naam/details volgen na 'Volgende'. TERUGDRAAIEN = false.
