@@ -543,6 +543,7 @@ dl.toon-leeg .veldrij.leeg-veld{display:flex}
 #view-start{max-width:560px;margin:0 auto}
 .start-wrap{display:flex;flex-direction:column;gap:16px;padding:6px 0 28px}
 .start-hero{text-align:center;margin-top:6px}
+.start-privacy{text-align:center;font-family:var(--label-font);font-size:var(--fs-xs);color:var(--gedempt);margin:0}
 .start-titel{margin:0;font-size:1.55rem;font-weight:800}
 .start-tagline{margin:4px 0 0;color:var(--gedempt);font-family:var(--serif);letter-spacing:.03em}
 .start-foot-tagline{margin:22px 0 0;text-align:center;color:var(--gedempt);font-family:var(--serif);font-size:.82rem;letter-spacing:.04em;opacity:.7}
@@ -776,6 +777,7 @@ input[type=range]:focus{box-shadow:none;border:none}
 .inst-kaart .inst-rij{margin:0}
 .inst-kaart-app .inst-app-rij{display:block;width:100%;padding:13px 14px;text-align:left;background:none;border:none;border-bottom:1px solid var(--rand);color:var(--tekst);font-size:.93rem;font-weight:500;font-family:inherit;cursor:pointer;text-decoration:none}
 .inst-kaart-app .inst-app-rij:last-child,.inst-kaart-app .inst-app-rij-last{border-bottom:none}
+.inst-kaart-app .inst-wis-rij{color:var(--gevaar);font-weight:600}
 .inst-kaart-app .inst-app-rij:active{background:var(--rand)}
 /* Compactere segmented controls in instellingen */
 .inst-kaart .silhouet-keuze{width:auto;flex-shrink:0}
@@ -1361,6 +1363,8 @@ form label{text-transform:none;letter-spacing:.005em;font-size:.8rem;color:var(-
         <span class="sa-tekst" id="start-account-tekst">Inloggen om je collectie overal te zien</span>
       </button>
       <button type="button" class="start-cta" id="start-nieuw" data-i18n="start.nieuw">+ Nieuwe tattoo</button>
+      <!-- START-1: privacy-geruststelling, subtiel onder de CTA -->
+      <p class="start-privacy" data-i18n="start.privacy">Alles blijft op dit toestel - sync is optioneel.</p>
       <div class="start-stats" id="start-stats"></div>
       <div class="start-tegels" id="start-tegels">
         <button type="button" class="start-tegel" data-ga="3d" data-i18n="start.tegel3d">3D-model</button>
@@ -1793,7 +1797,9 @@ form label{text-transform:none;letter-spacing:.005em;font-size:.8rem;color:var(-
     <button type="button" class="inst-app-rij" id="inst-onboarding" data-i18n="onb.opnieuw">Introductie opnieuw</button>
     <a class="inst-app-rij" id="inst-feedback" href="mailto:hello@tatties.app?subject=Tatties%20feedback" data-i18n="inst.feedback_knop">Stuur feedback</a>
     <button type="button" class="inst-app-rij" id="inst-privacy" data-i18n="inst.privacy">Privacybeleid</button>
-    <button type="button" class="inst-app-rij inst-app-rij-last" id="inst-terms" data-i18n="inst.terms">Gebruiksvoorwaarden</button>
+    <button type="button" class="inst-app-rij" id="inst-terms" data-i18n="inst.terms">Gebruiksvoorwaarden</button>
+    <!-- DATA-5: destructief -> rode tekstrij, met bevestiging; cloud-data blijft staan -->
+    <button type="button" class="inst-app-rij inst-wis-rij" id="inst-wis-data" data-i18n="inst.wisdata">Alle lokale data wissen</button>
   </div>
   </div><!-- /inst-pane-app -->
 </div>
@@ -6803,7 +6809,7 @@ const I18N = {
     'start.stat_aantal':'Tattoos','start.leeg':'Nog geen tattoos - voeg je eerste toe.','start.recent':'Recent toegevoegd',
     'start.tegel3d':'3D-model','start.tegel2d':'2D-kaart','start.tegelcol':'Collectie','start.tegelstats':'Statistieken',
     'start.account_uit':'Inloggen om je collectie overal te zien','start.account_in':'Gesynchroniseerd ✓',
-    'start.leeg_uitleg':'Plan of bewaar je volgende tattoo.',
+    'start.leeg_uitleg':'Zie waar je volgende tattoo past - op een 3D-lichaam. En bewaar de inkt die je al hebt.','start.privacy':'Alles blijft op dit toestel - sync is optioneel.','ui.gl_verloren':'De 3D-weergave is gestopt (grafisch geheugen). Ververs om verder te gaan.',
     'start.kies_titel':'Tattoo toevoegen','start.kies_3d':'Op het 3D-model','start.kies_3d_sub':'Plaats op het draaibare lichaam',
     'start.kies_2d':'Op de 2D-kaart','start.kies_2d_sub':'Plaats op de platte voor/achter-kaart','start.kies_2d_wip':'Nog in aanbouw',
     'ui.foto_maken':'Foto maken','ui.foto_uploaden':'Foto uploaden','ui.foto_toevoegen':'Tattoo toevoegen','ui.andere_foto':'Andere foto','ui.plaatsen':'Plaatsen','ui.nog_een':'+ Nog een','ui.nog_een_uitleg':'Plaats deze en knip daarna nog een tattoo uit dezelfde foto','ui.herhaal_hint':'Plaats ’m goed en tik op ✓ - daarna knip je de volgende uit deze foto','ui.herhaal_volgende':'Knip de volgende tattoo uit dezelfde foto','ui.volgende_uitsnede':'Volgende uitsnede','ui.uit_deze_foto':'uit deze foto',
@@ -6835,7 +6841,7 @@ const I18N = {
     'ui.draai_hint':'Sleep om te draaien · tik op + om een tattoo toe te voegen',
     'ui.plaats_hint':'Tik op het lichaam om de tattoo te plaatsen',
     'ui.gepland':'Wishlist','ui.toon_gepland':'Wishlist op het lichaam tonen',
-    'ui.geen_model':'Geen 3D-model gevonden','ui.man_laden':'Manmodel laden…','ui.vrouw_laden':'Vrouwmodel laden…',
+    'ui.geen_model':'Geen 3D-model gevonden','ui.man_laden':'Manmodel laden…','ui.ander_model_verborgen':'{n} tattoo(s) staan op het andere lichaamsmodel en zijn hier verborgen.','ui.vrouw_laden':'Vrouwmodel laden…',
     'ui.klaar_dubbeltik':'Klaar - dubbeltik op de huid','ui.model_mislukt':'Model laden mislukt',
     'ui.aanpas_hint':'Aanpassen: sleep om te verplaatsen · scroll/knijp om te schalen',
     'ui.tattoo_verwijderd':'Tattoo verwijderd','ui.vergrendeld':'Tattoo vergrendeld','ui.ontgrendeld':'Tattoo ontgrendeld',
@@ -6862,11 +6868,11 @@ const I18N = {
     'inst.titel':'Instellingen','inst.tab_lichaam':'Lichaam','inst.tab_app':'App','inst.groep_lichaam':'Je lichaam','inst.groep_voorkeuren':'Voorkeuren','inst.groep_account':'Account','inst.groep_app':'App & info','inst.geslacht':'Geslacht','inst.man':'Man','inst.vrouw':'Vrouw','inst.huid':'Huidskleur','inst.taal':'Taal',
     'inst.vorm':'Lichaamsvorm','inst.vorm.slank':'Slank','inst.vorm.gemiddeld':'Gemiddeld','inst.vorm.atletisch':'Atletisch','inst.vorm.zwaar':'Zwaar',
     'inst.thema':'Thema','inst.thema.auto':'Systeem','inst.thema.licht':'Licht','inst.thema.donker':'Donker',
-    'inst.feedback':'Feedback','inst.feedback_sub':'Iets kapot of een idee? Ik hoor het graag.','inst.feedback_knop':'Stuur feedback','inst.privacy':'Privacybeleid','inst.terms':'Gebruiksvoorwaarden',
+    'inst.feedback':'Feedback','inst.feedback_sub':'Iets kapot of een idee? Ik hoor het graag.','inst.feedback_knop':'Stuur feedback','inst.privacy':'Privacybeleid','inst.terms':'Gebruiksvoorwaarden','inst.wisdata':'Alle lokale data wissen','inst.wisdata_bevestig':'Alles op dit toestel wissen? Al je tattoos, foto\'s en instellingen verdwijnen van dit apparaat en je wordt uitgelogd. Cloud-data blijft bestaan. Dit kan niet ongedaan worden gemaakt.',
     'legal.terms_titel':'Gebruiksvoorwaarden','legal.privacy_titel':'Privacybeleid','legal.bijw':'Laatst bijgewerkt: 30 juni 2026',
     'legal.terms_body':'<h3>1. Over Tatties</h3><p>Tatties is een persoonlijke tattoo-tracking-app die volledig in je browser draait. Je gegevens worden lokaal op je apparaat opgeslagen. Met een optioneel account kun je je collectie tussen apparaten synchroniseren.</p><h3>2. Toegestaan gebruik</h3><p>Tatties is alleen voor persoonlijk, niet-commercieel gebruik. Je mag de app niet verspreiden, doorverkopen of reverse-engineeren.</p><h3>3. Jouw content</h3><p>Alle tattoofoto’s en gegevens die je toevoegt, blijven van jou. Wij claimen geen eigendom over jouw content. Je bent zelf verantwoordelijk voor het recht om de foto’s te gebruiken die je uploadt.</p><h3>4. Disclaimer</h3><p>De app wordt aangeboden "as is", zonder enige garantie. Wij zijn niet aansprakelijk voor gegevensverlies, storingen of schade die voortkomt uit je gebruik van de app.</p><h3>5. Wijzigingen</h3><p>We kunnen deze voorwaarden van tijd tot tijd bijwerken. Door de app te blijven gebruiken na wijzigingen ga je akkoord met de nieuwe voorwaarden.</p><h3>6. Toepasselijk recht</h3><p>Op deze voorwaarden is Nederlands recht van toepassing.</p><h3>7. Contact</h3><p><a href="mailto:hello@tatties.app">hello@tatties.app</a></p>',
     'legal.privacy_body':'<h3>Wat Tatties opslaat</h3><p>Tatties slaat de volgende gegevens <strong>lokaal op je apparaat</strong> op (IndexedDB - de ingebouwde database van je browser):</p><ul><li>Tattoo-info die je invult: naam, artiest, studio, stijl, datum, notities, kosten, sessies</li><li>Foto’s die je uploadt of maakt</li><li>Lichaams- en huidskleurinstellingen</li></ul><p>Standaard wordt er niets naar een server gestuurd.</p><h3>Optionele cloud-sync</h3><p>Als je een account aanmaakt, wordt je collectie (inclusief foto’s) versleuteld verzonden en opgeslagen op een beveiligde server in de EU (Supabase, Ierland). Jij bepaalt wanneer er gesynchroniseerd wordt. Je kunt je account en alle bijbehorende cloud-gegevens op elk moment verwijderen via Instellingen → Account.</p><h3>Wat we NIET verzamelen</h3><ul><li>Geen gebruiksstatistieken of gedragstracking</li><li>Geen advertenties of advertentienetwerken</li><li>Geen gegevens delen met derden</li></ul><h3>Jouw rechten (AVG)</h3><ul><li><strong>Inzien &amp; corrigeren</strong> - al je gegevens zijn zichtbaar en aanpasbaar in de app</li><li><strong>Lokale gegevens wissen</strong> - wis de sitegegevens voor tatties.app in je browser</li><li><strong>Cloud-gegevens wissen</strong> - verwijder je account in Instellingen → Account</li><li><strong>Overdraagbaarheid</strong> - gebruik de Exporteren-functie om een kopie van al je gegevens te downloaden</li></ul><h3>Verwerkingsverantwoordelijke</h3><p>Tatties - <a href="mailto:hello@tatties.app">hello@tatties.app</a></p>',
-    'inst.account':'Account & cloud-sync','account.uitleg':'Optioneel. Log in om je collectie, inclusief foto\'s, via de cloud tussen apparaten te synchroniseren. Zonder inloggen blijft alles lokaal op dit toestel.','account.email_ph':'E-mailadres','account.ww_ph':'Wachtwoord','account.inloggen':'Inloggen','account.aanmaken':'Account aanmaken','account.uitloggen':'Uitloggen','account.ingelogd_als':'Ingelogd als','account.bezig':'Bezig…','account.check_mail':'Bijna klaar! Check je mail ({email}) en klik op de bevestigingslink om je account te activeren.','account.ingelogd':'Ingelogd. Welkom terug!','account.uitgelogd':'Uitgelogd.','sw.update':'Er staat een nieuwe versie van Tatties klaar.','sw.ververs':'Ververs','sync.bezig':'Synchroniseren…','sync.klaar':'Bijgewerkt','account.fout_velden':'Vul een e-mailadres en wachtwoord in.','account.fout_generiek':'Er ging iets mis. Probeer het later opnieuw.','account.offline':'Cloud-sync is nu niet beschikbaar (geen verbinding).','account.backup_uitleg':'Zet je gegevens veilig in de cloud, inclusief foto\'s.','account.backup_knop':'Nu back-uppen','account.backup_bezig':'Bezig met back-uppen…','account.backup_klaar':'{n} item(s) geback-upt naar de cloud.','account.backup_fout':'Back-up mislukt. Probeer het later opnieuw.','account.pull_knop':'Ophalen uit cloud','account.pull_bezig':'Bezig met ophalen…','account.pull_klaar':'{n} item(s) opgehaald uit de cloud.','account.pull_niks':'Niets nieuws om op te halen.','account.pull_fout':'Ophalen mislukt. Probeer het later opnieuw.','account.sync_uitleg':'Synchroniseer je collectie (inclusief foto\'s) met de cloud.','account.sync_knop':'Nu synchroniseren','account.sync_bezig':'Bezig met synchroniseren…','account.sync_klaar':'Gesynchroniseerd: {omhoog} verstuurd, {omlaag} opgehaald.','account.sync_niks':'Alles is al up-to-date.','account.sync_fout':'Synchroniseren mislukt. Probeer het later opnieuw.','account.verwijder_knop':'Account verwijderen','account.verwijder_bevestig':'Weet je het zeker? Dit verwijdert je account en alle gegevens en foto\'s in de cloud. Je lokale collectie op dit toestel blijft staan. Dit kan niet ongedaan worden gemaakt.','account.verwijder_bezig':'Account verwijderen…','account.verwijder_klaar':'Je account en cloud-gegevens zijn verwijderd.','account.verwijder_fout':'Verwijderen mislukt. Probeer het later opnieuw.','account.fout_login':'E-mail of wachtwoord klopt niet.','account.fout_onbevestigd':'Je e-mailadres is nog niet bevestigd. Check je inbox (en spam) voor de bevestigingsmail.','account.resend_knop':'Bevestigingsmail opnieuw sturen','account.resend_klaar':'Bevestigingsmail opnieuw verstuurd. Check je inbox.','account.reset_knop':'Wachtwoord vergeten?','account.reset_geen_email':'Vul je e-mailadres in.','account.reset_klaar':'Als dit e-mailadres bij ons bekend is, hebben we een resetlink gestuurd. Check je mail.','account.herstel_titel':'Stel een nieuw wachtwoord in.','account.herstel_ph':'Nieuw wachtwoord','account.herstel_knop':'Wachtwoord opslaan','account.herstel_kort':'Kies een wachtwoord van minstens 8 tekens.','account.herstel_klaar':'Je wachtwoord is bijgewerkt. Je bent ingelogd.','account.herstel_fout':'Opslaan mislukt. Vraag eventueel een nieuwe resetlink aan.','account.google':'Doorgaan met Google','account.of':'of',
+    'inst.account':'Account & cloud-sync','account.uitleg':'Optioneel. Log in om je collectie, inclusief foto\'s, via de cloud tussen apparaten te synchroniseren. Zonder inloggen blijft alles lokaal op dit toestel.','account.email_ph':'E-mailadres','account.ww_ph':'Wachtwoord','account.inloggen':'Inloggen','account.aanmaken':'Account aanmaken','account.uitloggen':'Uitloggen','account.ingelogd_als':'Ingelogd als','account.bezig':'Bezig…','account.check_mail':'Bijna klaar! Check je mail ({email}) en klik op de bevestigingslink om je account te activeren.','account.ingelogd':'Ingelogd. Welkom terug!','account.uitgelogd':'Uitgelogd.','sw.update':'Er staat een nieuwe versie van Tatties klaar.','sync.klok_skew':'De klok van dit toestel wijkt ~{min} min af. Zet de tijd op automatisch, anders kan synchroniseren oude gegevens laten winnen.','sw.ververs':'Ververs','sync.bezig':'Synchroniseren…','sync.klaar':'Bijgewerkt','account.fout_velden':'Vul een e-mailadres en wachtwoord in.','account.fout_generiek':'Er ging iets mis. Probeer het later opnieuw.','account.offline':'Cloud-sync is nu niet beschikbaar (geen verbinding).','account.backup_uitleg':'Zet je gegevens veilig in de cloud, inclusief foto\'s.','account.backup_knop':'Nu back-uppen','account.backup_bezig':'Bezig met back-uppen…','account.backup_klaar':'{n} item(s) geback-upt naar de cloud.','account.backup_fout':'Back-up mislukt. Probeer het later opnieuw.','account.pull_knop':'Ophalen uit cloud','account.pull_bezig':'Bezig met ophalen…','account.pull_klaar':'{n} item(s) opgehaald uit de cloud.','account.pull_niks':'Niets nieuws om op te halen.','account.pull_fout':'Ophalen mislukt. Probeer het later opnieuw.','account.sync_uitleg':'Synchroniseer je collectie (inclusief foto\'s) met de cloud.','account.sync_knop':'Nu synchroniseren','account.sync_bezig':'Bezig met synchroniseren…','account.sync_klaar':'Gesynchroniseerd: {omhoog} verstuurd, {omlaag} opgehaald.','account.sync_niks':'Alles is al up-to-date.','account.sync_fout':'Synchroniseren mislukt. Probeer het later opnieuw.','account.verwijder_knop':'Account verwijderen','account.verwijder_bevestig':'Weet je het zeker? Dit verwijdert je account en alle gegevens en foto\'s in de cloud. Je lokale collectie op dit toestel blijft staan. Dit kan niet ongedaan worden gemaakt.','account.verwijder_bezig':'Account verwijderen…','account.verwijder_klaar':'Je account en cloud-gegevens zijn verwijderd.','account.verwijder_fout':'Verwijderen mislukt. Probeer het later opnieuw.','account.fout_login':'E-mail of wachtwoord klopt niet.','account.fout_onbevestigd':'Je e-mailadres is nog niet bevestigd. Check je inbox (en spam) voor de bevestigingsmail.','account.resend_knop':'Bevestigingsmail opnieuw sturen','account.resend_klaar':'Bevestigingsmail opnieuw verstuurd. Check je inbox.','account.reset_knop':'Wachtwoord vergeten?','account.reset_geen_email':'Vul je e-mailadres in.','account.reset_klaar':'Als dit e-mailadres bij ons bekend is, hebben we een resetlink gestuurd. Check je mail.','account.herstel_titel':'Stel een nieuw wachtwoord in.','account.herstel_ph':'Nieuw wachtwoord','account.herstel_knop':'Wachtwoord opslaan','account.herstel_kort':'Kies een wachtwoord van minstens 8 tekens.','account.herstel_klaar':'Je wachtwoord is bijgewerkt. Je bent ingelogd.','account.herstel_fout':'Opslaan mislukt. Vraag eventueel een nieuwe resetlink aan.','account.google':'Doorgaan met Google','account.of':'of',
     'stats.titel':'Statistieken','stats.collectie':'Collectie','stats.aantal':'Aantal tattoos','stats.uitgegeven':'Totaal uitgegeven',
     'stats.zituren':'Totale zituren','stats.gempijn':'Gemiddelde pijn','stats.geheeld':'Geheeld','stats.perstijl':'Per stijl','stats.perartiest':'Per artiest',
     'stats.perdeel':'Per lichaamsdeel','stats.tijdlijn':'Tijdlijn (per jaar)','stats.wishlist':'Wishlist','stats.hoogtepunten':'Hoogtepunten','stats.goedkoopste':'Goedkoopste tattoo','stats.lievelingsartiest':'Lievelingsartiest',
@@ -6982,7 +6988,7 @@ const I18N = {
     'start.stat_aantal':'Tattoos','start.leeg':'No tattoos yet - add your first.','start.recent':'Recently added',
     'start.tegel3d':'3D model','start.tegel2d':'2D map','start.tegelcol':'Collection','start.tegelstats':'Statistics',
     'start.account_uit':'Sign in to see your collection anywhere','start.account_in':'Synced ✓',
-    'start.leeg_uitleg':'Plan or save your next tattoo.',
+    'start.leeg_uitleg':'See where your next tattoo fits - on a 3D body. And keep the ink you already have.','start.privacy':'Everything stays on this device - syncing is optional.','ui.gl_verloren':'The 3D view stopped (graphics memory). Refresh to continue.',
     'start.kies_titel':'Add tattoo','start.kies_3d':'On the 3D model','start.kies_3d_sub':'Place on the rotatable body',
     'start.kies_2d':'On the 2D map','start.kies_2d_sub':'Place on the flat front/back map','start.kies_2d_wip':'Under construction',
     'ui.foto_maken':'Take photo','ui.foto_uploaden':'Upload photo','ui.foto_toevoegen':'Add tattoo','ui.andere_foto':'Other photo','ui.plaatsen':'Place','ui.nog_een':'+ Another','ui.nog_een_uitleg':'Place this one, then cut another tattoo from the same photo','ui.herhaal_hint':'Position it and tap ✓ - then cut the next one from this photo','ui.herhaal_volgende':'Cut the next tattoo from the same photo','ui.volgende_uitsnede':'Next cut-out','ui.uit_deze_foto':'from this photo',
@@ -7014,7 +7020,7 @@ const I18N = {
     'ui.draai_hint':'Drag to rotate · tap + to add a tattoo',
     'ui.plaats_hint':'Tap on the body to place the tattoo',
     'ui.gepland':'Wishlist','ui.toon_gepland':'Show wishlist on the body',
-    'ui.geen_model':'No 3D model found','ui.man_laden':'Loading male model…','ui.vrouw_laden':'Loading female model…',
+    'ui.geen_model':'No 3D model found','ui.man_laden':'Loading male model…','ui.ander_model_verborgen':'{n} tattoo(s) are on the other body model and are hidden here.','ui.vrouw_laden':'Loading female model…',
     'ui.klaar_dubbeltik':'Ready - double-tap the skin','ui.model_mislukt':'Loading the model failed',
     'ui.aanpas_hint':'Editing: drag to move · scroll/pinch to scale',
     'ui.tattoo_verwijderd':'Tattoo deleted','ui.vergrendeld':'Tattoo locked','ui.ontgrendeld':'Tattoo unlocked',
@@ -7041,11 +7047,11 @@ const I18N = {
     'inst.titel':'Settings','inst.tab_lichaam':'Body','inst.tab_app':'App','inst.groep_lichaam':'Your body','inst.groep_voorkeuren':'Preferences','inst.groep_account':'Account','inst.groep_app':'App & info','inst.geslacht':'Gender','inst.man':'Male','inst.vrouw':'Female','inst.huid':'Skin tone','inst.taal':'Language',
     'inst.vorm':'Body shape','inst.vorm.slank':'Slim','inst.vorm.gemiddeld':'Average','inst.vorm.atletisch':'Athletic','inst.vorm.zwaar':'Heavy',
     'inst.thema':'Appearance','inst.thema.auto':'System','inst.thema.licht':'Light','inst.thema.donker':'Dark',
-    'inst.feedback':'Feedback','inst.feedback_sub':'Something broken, or an idea? Let me know.','inst.feedback_knop':'Send feedback','inst.privacy':'Privacy policy','inst.terms':'Terms of Use',
+    'inst.feedback':'Feedback','inst.feedback_sub':'Something broken, or an idea? Let me know.','inst.feedback_knop':'Send feedback','inst.privacy':'Privacy policy','inst.terms':'Terms of Use','inst.wisdata':'Erase all local data','inst.wisdata_bevestig':'Erase everything on this device? All your tattoos, photos and settings will be removed from this device and you will be signed out. Cloud data is kept. This cannot be undone.',
     'legal.terms_titel':'Terms of Use','legal.privacy_titel':'Privacy policy','legal.bijw':'Last updated: June 30, 2026',
     'legal.terms_body':'<h3>1. About Tatties</h3><p>Tatties is a personal tattoo-tracking app that runs entirely in your browser. Your data is stored locally on your device. An optional account lets you sync your collection across devices.</p><h3>2. Permitted use</h3><p>Tatties is for personal, non-commercial use only. You may not redistribute, resell, or reverse-engineer the app.</p><h3>3. Your content</h3><p>All tattoo photos and data you add remain yours. We make no claim of ownership over your content. You are responsible for ensuring you have the right to use any photos you upload.</p><h3>4. Disclaimer</h3><p>The app is provided "as is", without warranties of any kind. We are not liable for data loss, service interruptions, or any damages arising from your use of the app.</p><h3>5. Changes</h3><p>We may update these terms from time to time. Continued use of the app after changes constitutes your acceptance of the new terms.</p><h3>6. Governing law</h3><p>These terms are governed by the laws of the Netherlands.</p><h3>7. Contact</h3><p><a href="mailto:hello@tatties.app">hello@tatties.app</a></p>',
     'legal.privacy_body':'<h3>What Tatties stores</h3><p>Tatties stores the following data <strong>locally on your device</strong> (IndexedDB - your browser’s built-in database):</p><ul><li>Tattoo info you enter: name, artist, studio, style, date, notes, cost, sessions</li><li>Photos you upload or take</li><li>Body and skin tone settings</li></ul><p>Nothing is sent to any server by default.</p><h3>Optional cloud sync</h3><p>If you create an account, your collection (including photos) is encrypted in transit and stored on a secure server in the EU (Supabase, Ireland). You control when sync happens. You can delete your account and all associated cloud data at any time via Settings → Account.</p><h3>What we do NOT collect</h3><ul><li>No usage analytics or behavioural tracking</li><li>No advertising or ad networks</li><li>No data sharing with third parties</li></ul><h3>Your rights (GDPR)</h3><ul><li><strong>Access &amp; correct</strong> - all your data is visible and editable in the app</li><li><strong>Delete local data</strong> - clear your browser’s site data for tatties.app</li><li><strong>Delete cloud data</strong> - delete your account in Settings → Account</li><li><strong>Portability</strong> - use the Export function to download a copy of all your data</li></ul><h3>Data controller</h3><p>Tatties - <a href="mailto:hello@tatties.app">hello@tatties.app</a></p>',
-    'inst.account':'Account & cloud sync','account.uitleg':'Optional. Sign in to sync your collection, including photos, across devices via the cloud. Without signing in, everything stays local on this device.','account.email_ph':'Email address','account.ww_ph':'Password','account.inloggen':'Sign in','account.aanmaken':'Create account','account.uitloggen':'Sign out','account.ingelogd_als':'Signed in as','account.bezig':'Working…','account.check_mail':'Almost there! Check your email ({email}) and click the confirmation link to activate your account.','account.ingelogd':'Signed in. Welcome back!','account.uitgelogd':'Signed out.','sw.update':'A new version of Tatties is ready.','sw.ververs':'Refresh','sync.bezig':'Syncing…','sync.klaar':'Updated','account.fout_velden':'Enter an email address and password.','account.fout_generiek':'Something went wrong. Please try again later.','account.offline':'Cloud sync is unavailable right now (no connection).','account.backup_uitleg':'Save your data safely to the cloud, including photos.','account.backup_knop':'Back up now','account.backup_bezig':'Backing up…','account.backup_klaar':'Backed up {n} item(s) to the cloud.','account.backup_fout':'Backup failed. Please try again later.','account.pull_knop':'Pull from cloud','account.pull_bezig':'Pulling…','account.pull_klaar':'Pulled {n} item(s) from the cloud.','account.pull_niks':'Nothing new to pull.','account.pull_fout':'Pull failed. Please try again later.','account.sync_uitleg':'Sync your collection (including photos) with the cloud.','account.sync_knop':'Sync now','account.sync_bezig':'Syncing…','account.sync_klaar':'Synced: {omhoog} uploaded, {omlaag} downloaded.','account.sync_niks':'Everything is already up to date.','account.sync_fout':'Sync failed. Please try again later.','account.verwijder_knop':'Delete account','account.verwijder_bevestig':'Are you sure? This deletes your account and all data and photos in the cloud. Your local collection on this device stays. This cannot be undone.','account.verwijder_bezig':'Deleting account…','account.verwijder_klaar':'Your account and cloud data have been deleted.','account.verwijder_fout':'Deletion failed. Please try again later.','account.fout_login':'Email or password is incorrect.','account.fout_onbevestigd':'Your email is not confirmed yet. Check your inbox (and spam) for the confirmation email.','account.resend_knop':'Resend confirmation email','account.resend_klaar':'Confirmation email resent. Check your inbox.','account.reset_knop':'Forgot password?','account.reset_geen_email':'Enter your email address.','account.reset_klaar':'If this email is on file, we\'ve sent a reset link. Check your inbox.','account.herstel_titel':'Set a new password.','account.herstel_ph':'New password','account.herstel_knop':'Save password','account.herstel_kort':'Choose a password of at least 8 characters.','account.herstel_klaar':'Your password has been updated. You\'re signed in.','account.herstel_fout':'Saving failed. You may want to request a new reset link.','account.google':'Continue with Google','account.of':'or',
+    'inst.account':'Account & cloud sync','account.uitleg':'Optional. Sign in to sync your collection, including photos, across devices via the cloud. Without signing in, everything stays local on this device.','account.email_ph':'Email address','account.ww_ph':'Password','account.inloggen':'Sign in','account.aanmaken':'Create account','account.uitloggen':'Sign out','account.ingelogd_als':'Signed in as','account.bezig':'Working…','account.check_mail':'Almost there! Check your email ({email}) and click the confirmation link to activate your account.','account.ingelogd':'Signed in. Welcome back!','account.uitgelogd':'Signed out.','sw.update':'A new version of Tatties is ready.','sync.klok_skew':'This device\'s clock is ~{min} min off. Set the time to automatic, otherwise syncing may let older data win.','sw.ververs':'Refresh','sync.bezig':'Syncing…','sync.klaar':'Updated','account.fout_velden':'Enter an email address and password.','account.fout_generiek':'Something went wrong. Please try again later.','account.offline':'Cloud sync is unavailable right now (no connection).','account.backup_uitleg':'Save your data safely to the cloud, including photos.','account.backup_knop':'Back up now','account.backup_bezig':'Backing up…','account.backup_klaar':'Backed up {n} item(s) to the cloud.','account.backup_fout':'Backup failed. Please try again later.','account.pull_knop':'Pull from cloud','account.pull_bezig':'Pulling…','account.pull_klaar':'Pulled {n} item(s) from the cloud.','account.pull_niks':'Nothing new to pull.','account.pull_fout':'Pull failed. Please try again later.','account.sync_uitleg':'Sync your collection (including photos) with the cloud.','account.sync_knop':'Sync now','account.sync_bezig':'Syncing…','account.sync_klaar':'Synced: {omhoog} uploaded, {omlaag} downloaded.','account.sync_niks':'Everything is already up to date.','account.sync_fout':'Sync failed. Please try again later.','account.verwijder_knop':'Delete account','account.verwijder_bevestig':'Are you sure? This deletes your account and all data and photos in the cloud. Your local collection on this device stays. This cannot be undone.','account.verwijder_bezig':'Deleting account…','account.verwijder_klaar':'Your account and cloud data have been deleted.','account.verwijder_fout':'Deletion failed. Please try again later.','account.fout_login':'Email or password is incorrect.','account.fout_onbevestigd':'Your email is not confirmed yet. Check your inbox (and spam) for the confirmation email.','account.resend_knop':'Resend confirmation email','account.resend_klaar':'Confirmation email resent. Check your inbox.','account.reset_knop':'Forgot password?','account.reset_geen_email':'Enter your email address.','account.reset_klaar':'If this email is on file, we\'ve sent a reset link. Check your inbox.','account.herstel_titel':'Set a new password.','account.herstel_ph':'New password','account.herstel_knop':'Save password','account.herstel_kort':'Choose a password of at least 8 characters.','account.herstel_klaar':'Your password has been updated. You\'re signed in.','account.herstel_fout':'Saving failed. You may want to request a new reset link.','account.google':'Continue with Google','account.of':'or',
     'stats.titel':'Statistics','stats.collectie':'Collection','stats.aantal':'Number of tattoos','stats.uitgegeven':'Total spent',
     'stats.zituren':'Total sitting hours','stats.gempijn':'Average pain','stats.geheeld':'Healed','stats.perstijl':'By style','stats.perartiest':'By artist',
     'stats.perdeel':'By body part','stats.tijdlijn':'Timeline (by year)','stats.wishlist':'Wishlist','stats.hoogtepunten':'Highlights','stats.goedkoopste':'Cheapest tattoo','stats.lievelingsartiest':'Favourite artist',
@@ -7271,7 +7277,7 @@ function createTattoo(overrides = {}) {
    ============================================================ */
 // App-versie (semver, handmatig ophogen bij een release). Bij een bump ook de
 // CACHE-naam in sw.js meebumpen, zodat clients de nieuwe build ophalen.
-const APP_VERSIE = '0.2.9.19';
+const APP_VERSIE = '0.2.9.20';
 const TWEE_D_AAN = false;   // 2D-kaart tijdelijk uit tot 'ie af is (optie A): verbergt de 2D-ingangen (header-toggle + starttegel). Zet op true om 2D weer aan te zetten.
 if (document.documentElement) document.documentElement.classList.toggle('tweed-uit', !TWEE_D_AAN);   // class staat statisch op <html>; hier synchroniseren (weghalen zodra 2D weer aan gaat)
 const KNIP_ZWEEF_TOOLS = true;   // FASE-1-EXPERIMENT: kniptools zweven als kaart-balk over de foto-onderrand (grotere foto). TERUGDRAAIEN = false (CSS-laag 'knipzweef' valt dan volledig weg).
@@ -7535,6 +7541,26 @@ async function syncMetCloud() {
     return r;
   } catch (e) { zetSyncIndicator('uit'); throw e; }
   finally { clearTimeout(tShow); syncLoopt = false; }
+}
+/* DATA-7: sync vergelijkt updatedAt-tijdstempels van dit toestel met die van andere
+   apparaten. Staat de klok hier fors verkeerd, dan kan de sync-richting omdraaien
+   (oude data "wint"). Servertijd meten we via het 'iat' (issued-at) van een VERS
+   access-token - dat zet de Supabase-server met zijn eigen klok. (Een Date-header
+   uitlezen kan niet: CORS geeft die niet vrij.) Eén melding per sessie bij >5 min.
+   Bewust alleen waarschuwen, niet corrigeren: stil aan tijdstempels sleutelen maakt
+   het conflictgedrag ondoorzichtig. Aangeroepen bij SIGNED_IN/TOKEN_REFRESHED. */
+let klokSkewGemeld = false;
+function checkKlokSkew(accessToken) {
+  if (klokSkewGemeld || !accessToken) return;
+  try {
+    const claims = JSON.parse(atob(accessToken.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')));
+    if (!claims || !Number.isFinite(claims.iat)) return;
+    const skewMs = Math.abs(Date.now() - claims.iat * 1000);
+    if (skewMs > 5 * 60 * 1000) {
+      klokSkewGemeld = true;
+      toast(tr('sync.klok_skew').replace('{min}', String(Math.round(skewMs / 60000))));
+    }
+  } catch { /* onleesbaar token: geen check */ }
 }
 async function _syncMetCloudKern() {
   const { data: s } = await sb.auth.getSession();
@@ -9454,7 +9480,14 @@ function detailTerug() {
    de database opnieuw inlezen + lichaamskaart/lijst/samenvatting
    hertekenen) is niet nodig. We verversen alleen wat de wijziging raakt. */
 async function bewaarEnVerversDetail(t, { ookLijst = false } = {}) {
-  await saveTattoo(t);
+  // DATA-6: opslagfouten (m.n. quota vol) niet stil inslikken - de gebruiker denkt anders
+  // dat z'n sessie/nazorgtaak is bewaard terwijl alleen het scherm is bijgewerkt.
+  // (De RAM-wijziging blijft staan; bij de volgende herlaad toont de app weer de DB-stand.)
+  try {
+    await saveTattoo(t);
+  } catch (e) {
+    toast(tr('toast.opslaanmislukt') + (e && e.message ? e.message : tr('ui.fout')));
+  }
   if (ookLijst) renderLijst();
   renderDetail();
 }
@@ -10685,7 +10718,6 @@ if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
     toastMetActie(tr('sw.update'), tr('sw.ververs'), () => location.reload());
   });
 }
-
 let uitgesteldeInstallPrompt = null;
 
 function isStandalone() {
@@ -11048,6 +11080,24 @@ async function verwijderVoorbeelden() {
   // Al geïnstalleerd -> alleen de install-KNOP verbergen. Niet de hele kaart: daar staan
   // inmiddels ook Introductie/Feedback/Privacy/Voorwaarden in ('App & info' leek anders leeg).
   if (isStandalone()) { const b = $('#inst-install'); if (b) b.hidden = true; const u = $('#inst-install-uitleg'); if (u) u.hidden = true; }
+  // DATA-5: alle lokale data wissen (destructief; cloud blijft staan, sessie wordt beëindigd
+  // zodat de sync de collectie niet meteen stilletjes terugzet). Reload rondt de wis af.
+  { const wd = $('#inst-wis-data'); if (wd) wd.addEventListener('click', async () => {
+      const vraag = tr('inst.wisdata_bevestig');
+      const ok = (typeof window.__tattiesConfirm === 'function') ? await window.__tattiesConfirm(vraag) : confirm(vraag);
+      if (!ok) return;
+      try {
+        await new Promise((res) => { const rq = indexedDB.deleteDatabase(DB_NAAM);
+          rq.onsuccess = res; rq.onblocked = res;   // blocked: open verbinding sluit bij de reload, delete rondt dan af
+          rq.onerror = () => res(); });
+      } catch { /* wis zo veel mogelijk; reload toont de echte stand */ }
+      try {
+        Object.keys(localStorage)
+          .filter(k => k.startsWith('tatties-') || k.startsWith('sb-'))   // voorkeuren + Supabase-sessie (uitloggen)
+          .forEach(k => localStorage.removeItem(k));
+      } catch { /* geen localStorage */ }
+      location.reload();
+    }); }
   { const next = $('#onb-next'); if (next) next.addEventListener('click', () => { const s1 = $('#onb-stap1'), s2 = $('#onb-stap2'); if (s1) s1.hidden = true; if (s2) s2.hidden = false; }); }
   { const terug = $('#onb-terug'); if (terug) terug.addEventListener('click', () => { const s1 = $('#onb-stap1'), s2 = $('#onb-stap2'); if (s1) s1.hidden = false; if (s2) s2.hidden = true; }); }
   $('#kaart-reset').addEventListener('click', () => { zetFilter(null); setTimeout(renderMarkers, 320); });
@@ -11279,6 +11329,11 @@ async function verwijderVoorbeelden() {
     // initiële status (lokaal, geen netwerk) + live updates
     sb.auth.getSession().then(({ data }) => toonSessie(data && data.session)).catch(()=>{});
     sb.auth.onAuthStateChange((event, session) => {
+      // DATA-7: alleen bij een VERS token (login/refresh) - het iat van een herstelde
+      // oude sessie kan tot een uur oud zijn en zou een valse skew-melding geven.
+      if ((event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') && session && session.access_token) {
+        checkKlokSkew(session.access_token);
+      }
       if (event === 'PASSWORD_RECOVERY') {   // gebruiker kwam binnen via de resetlink
         toonHerstel();
         try { if (typeof openAccount === 'function') openAccount(); } catch(_) {}
@@ -11329,7 +11384,7 @@ async function verwijderVoorbeelden() {
   /* ---- module-state ---- */
   let inited=false, el=null, stage=null;
   let actief3D=true;            // false als de 3D-view verborgen is -> renderlus slaat het tekenen over
-  let currentGender="man", loadToken=0;
+  let currentGender="man", loadToken=0, meldAndereModel=false;   // meld: LOGIC-5, gezet bij een gender-wissel
   // Lichaamsvorm-presets (geslacht x vorm). Nu: alle vormen -> het huidige GLB van dat geslacht
   // (placeholder). Echte modellen later: vul SHAPE_NODES[`${gender}-${shape}`] met een eigen <script>-node-id.
   const BODY_SHAPES=["slank","gemiddeld","atletisch","zwaar"];
@@ -13642,6 +13697,14 @@ async function verwijderVoorbeelden() {
     zetLaadVoortgang(0,0);   // label terug naar 'Laden…'
     if(typeof renderMarkers==="function"){ try{renderMarkers();}catch(_){} }
     // Herstel-melding ('N tattoos hersteld') bewust uitgezet - zie 'later'-lijst (hele herstel-feature evalueren).
+    // LOGIC-5: na een gender-WISSEL uitleggen dat tattoos van het andere model hier verborgen
+    // zijn (voorheen 'verdwenen' ze stil). Alleen bij een echte wissel, niet bij elke 3D-entry.
+    if(meldAndereModel){
+      meldAndereModel=false;
+      const verborgen=list.reduce((n,t)=>n+((t && !t.deleted && t.positie3d && t.positie3d.point &&
+        ((t.positie3d.gender||"man")!==currentGender))?1:0),0);
+      if(verborgen>0) toast(tr('ui.ander_model_verborgen').replace('{n}', verborgen));
+    }
   }
   // Eén 3D-decal verwijderen (na verwijderen van een tattoo via detail/2D); host roept dit aan.
   window.__tatties3DVerwijder = function(id){
@@ -13701,7 +13764,7 @@ async function verwijderVoorbeelden() {
   /* ---- 3D gekoppeld aan de host-instellingen (man/vrouw + huidskleur) ---- */
   function applySkin3D(hex){ if(hex && skinMat){ skinMat.color.set(hex); skinMat.color.convertSRGBToLinear(); } }
   function setSkin3D(hex){ if(hex){ pendingSkin=hex; applySkin3D(hex); } }
-  function setGender3D(g){ g=(g==="vrouw")?"vrouw":"man"; if(inited){ if(g!==currentGender) loadEmbedded(g); } else { currentGender=g; } markOnderbroekZichtbaar(); }
+  function setGender3D(g){ g=(g==="vrouw")?"vrouw":"man"; if(inited){ if(g!==currentGender){ meldAndereModel=true; loadEmbedded(g); } } else { currentGender=g; } markOnderbroekZichtbaar(); }
   // Onderbroek-sectie alleen tonen bij het mannenmodel (voorlopig alleen man ondersteund)
   function markOnderbroekZichtbaar(){ const s=document.getElementById("inst-onderbroek-sectie"); if(s) s.style.display=(currentGender==="man")?"":"none"; }
   window.__tattiesSetGender3D = setGender3D;   // gebruikt door het opstartscherm
@@ -13716,7 +13779,8 @@ async function verwijderVoorbeelden() {
   window.__tattiesSetSkin3D = setSkin3D;
   window.__tatties3DPauze = function(){ actief3D=false; };   // renderlus pauzeren als een host-view wordt getoond
   // Dev-haakje (preview/console): decal-culling direct kunnen meten zonder UI-flow. Geen product-pad.
-  window.__tattiesDecalDbg = { faceGridFor, connectedDecalGeo, localDecalGeo, meshAtPoint, sceneRef:()=>scene, modelRef:()=>modelRoot };
+  window.__tattiesDecalDbg = { faceGridFor, connectedDecalGeo, localDecalGeo, meshAtPoint, sceneRef:()=>scene, modelRef:()=>modelRoot,
+    stateRef:()=>({ inited, currentGender, meldAndereModel, actief3D }) };
 
   /* ---- lazy init ---- */
   function initEngine(){
@@ -13728,6 +13792,22 @@ async function verwijderVoorbeelden() {
     renderer=new THREE.WebGLRenderer({antialias:true}); renderer.setPixelRatio(Math.min(devicePixelRatio,2));
     renderer.outputEncoding=THREE.sRGBEncoding;
     stage.appendChild(renderer.domElement); el=renderer.domElement;
+    // PLAT-3: WebGL-context-verlies (low-end/geheugendruk). three r128 herstelt GL-state
+    // zelf bij 'restored'; wij pauzeren de renderlus zolang de context weg is en bieden
+    // een ververs-knop aan als het herstel uitblijft (anders: permanent zwart scherm).
+    let glVerlorenTimer=null;
+    el.addEventListener("webglcontextlost", ()=>{
+      actief3D=false;
+      clearTimeout(glVerlorenTimer);
+      glVerlorenTimer=setTimeout(()=>{
+        if(typeof toastMetActie==="function") toastMetActie(tr('ui.gl_verloren'), tr('sw.ververs'), ()=>location.reload());
+      }, 4000);
+    }, false);
+    el.addEventListener("webglcontextrestored", ()=>{
+      clearTimeout(glVerlorenTimer); glVerlorenTimer=null;
+      const v3=document.getElementById("view-3d");
+      if(v3 && !v3.classList.contains("verborgen")) actief3D=true;   // alleen hervatten als 3D in beeld is
+    }, false);
     scene.add(new THREE.HemisphereLight(0xfff1e0,0x2a2420,0.6));
     key=new THREE.DirectionalLight(0xffffff,0.65); scene.add(key);
     rim=new THREE.DirectionalLight(0xd8e4ff,0.22); rim.position.set(-4,2,-5); scene.add(rim);
