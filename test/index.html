@@ -7271,7 +7271,7 @@ function createTattoo(overrides = {}) {
    ============================================================ */
 // App-versie (semver, handmatig ophogen bij een release). Bij een bump ook de
 // CACHE-naam in sw.js meebumpen, zodat clients de nieuwe build ophalen.
-const APP_VERSIE = '0.2.9.17';
+const APP_VERSIE = '0.2.9.18';
 const TWEE_D_AAN = false;   // 2D-kaart tijdelijk uit tot 'ie af is (optie A): verbergt de 2D-ingangen (header-toggle + starttegel). Zet op true om 2D weer aan te zetten.
 if (document.documentElement) document.documentElement.classList.toggle('tweed-uit', !TWEE_D_AAN);   // class staat statisch op <html>; hier synchroniseren (weghalen zodra 2D weer aan gaat)
 const KNIP_ZWEEF_TOOLS = true;   // FASE-1-EXPERIMENT: kniptools zweven als kaart-balk over de foto-onderrand (grotere foto). TERUGDRAAIEN = false (CSS-laag 'knipzweef' valt dan volledig weg).
@@ -7306,6 +7306,8 @@ function stripVoorCloud(t) {
   const c = JSON.parse(JSON.stringify(t));
   delete c.foto;            // verouderd enkel-foto-veld
   delete c.thumb;           // afgeleide lijst-thumb: client maakt 'm zelf opnieuw
+  delete c.__licht;         // interne RAM-markers horen niet in de cloud
+  delete c.__geenBeeld;
   c.fotos = [];             // foto's volgen via Storage (slice 6)
   if (c.kunst) delete c.kunst.src;
   if (c.kunst3d) delete c.kunst3d.srcUrl;
@@ -7451,6 +7453,10 @@ function hardRecord(record) {
     const s = veiligeBeeldSrc(record.kunst3d.srcUrl);
     if (s) record.kunst3d.srcUrl = s; else delete record.kunst3d.srcUrl;
   }
+  // Interne RAM-markers uit onvertrouwde bron nooit overnemen (zouden de merge-guard
+  // onterecht activeren of een record als beeld-loos markeren)
+  delete record.__licht;
+  delete record.__geenBeeld;
   // Lijst-thumb is afgeleide data uit onvertrouwde bron: saneren of weggooien (wordt lui opnieuw gemaakt)
   if (record.thumb) {
     const s = record.thumb.src && veiligeBeeldSrc(record.thumb.src);
@@ -7748,12 +7754,138 @@ async function getAllTattoos() {
   }
 }
 
+/* ---- PERF-1 slice 2: lichte records ----
+   getAllTattoos() blijft VOLLE records leveren (export/sync/3D-restore hebben de beelden
+   nodig), maar de permanente in-RAM lijst (`tattoos`) is LICHT: de zware base64-velden
+   (fotos/foto/kunst.src/kunst3d.srcUrl) blijven in IndexedDB en komen niet in het
+   werkgeheugen (300 tattoos ≈ 300MB). laadLichteTattoos() leest per record via een cursor
+   (geen volle-lijst-piek), draait de oude-veld-migraties op het VOLLE record en stript
+   daarna. Beeld-consumenten (detailpagina, formulier, knip-bewerken) waarderen het record
+   eerst op met volledigInRam() - in place, zodat 3D-markers/closures dezelfde referentie
+   houden. saveTattoo() heeft een merge-guard zodat een licht record nooit de beelden in
+   de DB kan overschrijven, en houdt daar ook de lijst-thumb vers. */
+function stripBeelden(t) {
+  delete t.foto;
+  if (Array.isArray(t.fotos) && t.fotos.length) t.fotos = [];
+  if (t.kunst && t.kunst.src) delete t.kunst.src;
+  if (t.kunst3d && t.kunst3d.srcUrl) delete t.kunst3d.srcUrl;
+  // Bewust ENUMERABLE: zo overleeft de marker ook JSON-/structured-clones (bv. de
+  // undo-snapshot bij verwijderen) en beschermt de merge-guard élke kloon-flow.
+  // saveTattoo/export/stripVoorCloud strippen 'm aan de uitgangs-grenzen weer weg.
+  t.__licht = true;
+  return t;
+}
+async function volledigRecord(id) {
+  if (!dbBeschikbaar) return fallbackLees().find(t => t.id === id) || null;
+  try {
+    const db = await openDB();
+    return await new Promise((resolve, reject) => {
+      const rq = db.transaction(STORE, 'readonly').objectStore(STORE).get(id);
+      rq.onsuccess = () => resolve(rq.result || null);
+      rq.onerror = () => reject(rq.error);
+    });
+  } catch { return null; }
+}
+/* Licht in-RAM record IN PLACE opwaarderen naar vol (beeldvelden erbij uit de DB). */
+async function volledigInRam(id) {
+  const t = (typeof tattoos !== 'undefined' && Array.isArray(tattoos)) ? tattoos.find(x => x.id === id) : null;
+  if (!t) return volledigRecord(id);
+  if (!t.__licht) return t;
+  const vol = await volledigRecord(id);
+  if (vol) {
+    if ((!Array.isArray(t.fotos) || !t.fotos.length) && Array.isArray(vol.fotos) && vol.fotos.length) t.fotos = vol.fotos;
+    if (!t.foto && vol.foto) t.foto = vol.foto;
+    if (vol.kunst && vol.kunst.src && (!t.kunst || !t.kunst.src)) { t.kunst = t.kunst || vol.kunst; t.kunst.src = vol.kunst.src; }
+    if (vol.kunst3d && vol.kunst3d.srcUrl && (!t.kunst3d || !t.kunst3d.srcUrl)) { t.kunst3d = t.kunst3d || vol.kunst3d; t.kunst3d.srcUrl = vol.kunst3d.srcUrl; }
+  }
+  delete t.__licht;
+  return t;
+}
+/* Migratie van oudere records - op het VOLLE record (vóór het strippen). */
+function migreerRecord(t) {
+  let gewijzigd = false;
+  if (typeof t.naam !== 'string') { t.naam = String(t.naam ?? ''); gewijzigd = true; }
+  if (t.lichaamsdeel === 'buik-rug') { t.lichaamsdeel = 'buik'; gewijzigd = true; }
+  if (!t.zijde) { t.zijde = t.lichaamsdeel === 'rug' ? 'achter' : 'voor'; gewijzigd = true; }
+  if (!t.status) { t.status = 'gezet'; gewijzigd = true; }
+  if (!Array.isArray(t.fotos) || (t.foto && t.fotos.length === 0)) {
+    t.fotos = t.foto ? [t.foto] : (Array.isArray(t.fotos) ? t.fotos : []);
+    t.foto = null; gewijzigd = true;
+  }
+  if (!Array.isArray(t.nazorgTaken)) { t.nazorgTaken = []; gewijzigd = true; }
+  if (!Array.isArray(t.sessies)) { t.sessies = []; gewijzigd = true; }
+  if (!Array.isArray(t.touchUps)) { t.touchUps = []; gewijzigd = true; }
+  return gewijzigd;
+}
+async function laadLichteTattoos() {
+  if (!dbBeschikbaar) {
+    // Fallback-modus (localStorage): alles staat toch al vol in RAM - niet strippen.
+    const alles = await getAllTattoos();
+    for (const t of alles) { if (migreerRecord(t)) { try { await saveTattoo(t); } catch (e) { console.error(e); } } }
+    return alles;
+  }
+  try {
+    const db = await openDB();
+    const { uit, teMigreren } = await new Promise((resolve, reject) => {
+      const uit = [], teMigreren = [];
+      const rq = db.transaction(STORE, 'readonly').objectStore(STORE).openCursor();
+      rq.onsuccess = () => {
+        const cur = rq.result;
+        if (!cur) { resolve({ uit, teMigreren }); return; }
+        const t = cur.value;
+        if (migreerRecord(t)) teMigreren.push(t);   // vol houden tot de save hieronder
+        else stripBeelden(t);
+        uit.push(t);
+        cur.continue();
+      };
+      rq.onerror = () => reject(rq.error);
+    });
+    _hardSyncVelden(uit);
+    for (const t of teMigreren) {
+      try { await saveTattoo(t); } catch (e) { console.error(e); }
+      stripBeelden(t);   // zelfde objectreferentie in `uit`: nu alsnog licht
+    }
+    return uit;
+  } catch {
+    dbBeschikbaar = false; meldFallback();
+    return _hardSyncVelden([...fallbackLees()]);
+  }
+}
+
 /* behoudTijd: bewaar een al aanwezige updatedAt (bv. import van een backup),
    zodat sync-tijdstempels niet verloren gaan. Standaard stempelt elke save 'nu'
    - dat is "updatedAt gezet bij elke wijziging". saveTattoo is het enige schrijfpunt. */
 async function saveTattoo(tattoo, behoudTijd = false) {
   if (!(behoudTijd && Number.isFinite(tattoo.updatedAt))) tattoo.updatedAt = Date.now();
   if (typeof tattoo.deleted !== 'boolean') tattoo.deleted = false;
+  // Merge-guard (PERF-1 slice 2): een licht record mag bij opslaan nooit de beelden in de
+  // DB overschrijven. Ontbrekende zware velden komen uit de DB-kopie; velden die de flow
+  // juist nieuw zette (recrop, sync2D) blijven staan. Na de merge is het record vol.
+  if (tattoo.__licht) {
+    try {
+      const vol = await volledigRecord(tattoo.id);
+      if (vol) {
+        if ((!Array.isArray(tattoo.fotos) || !tattoo.fotos.length) && Array.isArray(vol.fotos) && vol.fotos.length) tattoo.fotos = vol.fotos;
+        if (!tattoo.foto && vol.foto) tattoo.foto = vol.foto;
+        if (vol.kunst && vol.kunst.src && (!tattoo.kunst || !tattoo.kunst.src)) { tattoo.kunst = tattoo.kunst || vol.kunst; tattoo.kunst.src = vol.kunst.src; }
+        if (vol.kunst3d && vol.kunst3d.srcUrl && (!tattoo.kunst3d || !tattoo.kunst3d.srcUrl)) { tattoo.kunst3d = tattoo.kunst3d || vol.kunst3d; tattoo.kunst3d.srcUrl = vol.kunst3d.srcUrl; }
+      }
+    } catch (e) { console.error('merge-guard', e); }
+  }
+  // Interne markers nooit persisteren (enumerable, dus zouden anders mee de DB in gaan)
+  delete tattoo.__licht;
+  delete tattoo.__geenBeeld;
+  // Lijst-thumb vers houden op het enige schrijfpunt (goedkope fp-check, regeneratie
+  // alleen als de beeld-bron echt wijzigde). Afgeleide data: fouten nooit fataal.
+  if (!tattoo.deleted) {
+    try {
+      const bron = lijstBron(tattoo);
+      if (!bron) { if (tattoo.thumb) delete tattoo.thumb; }
+      else if (!tattoo.thumb || !tattoo.thumb.src || tattoo.thumb.fp !== thumbFp(bron)) {
+        tattoo.thumb = { src: await maakThumbDataURL(bron), fp: thumbFp(bron) };
+      }
+    } catch { /* thumb blijft eventueel oud; wordt bij een volgende save opnieuw geprobeerd */ }
+  }
   if (typeof planAutoSync === 'function') planAutoSync();   // wijziging -> debounced auto-sync (indien ingelogd)
   if (!dbBeschikbaar) {
     fallbackLees();
@@ -7873,9 +8005,10 @@ const THUMB_MAX = 240;
 function lijstBron(t) { return hoofdFoto(t) || (t.kunst && t.kunst.src) || null; }
 function thumbFp(src) { return src ? (src.length + ':' + src.slice(30, 62)) : ''; }   // lengte + stukje data (na de mime-prefix)
 function lijstThumbSrc(t) {
-  const bron = lijstBron(t);
-  if (!bron) return null;
-  return (t.thumb && t.thumb.src && t.thumb.fp === thumbFp(bron)) ? t.thumb.src : bron;
+  // Thumb is leidend: saveTattoo houdt 'm vers bij elke beeld-wijziging. Bij een licht
+  // record (beelden in de DB) is de thumb bovendien het enige beschikbare beeld.
+  if (t.thumb && t.thumb.src) return t.thumb.src;
+  return lijstBron(t);   // (nog) geen thumb: volle bron als terugval; licht zonder thumb -> null (letter)
 }
 function maakThumbDataURL(src) {
   return new Promise((resolve, reject) => {
@@ -7895,21 +8028,34 @@ function maakThumbDataURL(src) {
 }
 let thumbsBezig = false, thumbsWachtrij = false;
 async function zorgLijstThumbs(naKlaar, forceerRender = false) {
-  // Kick tijdens een lopende run niet droppen maar onthouden: de renderende view kan
-  // anders op volle beelden blijven hangen als juist déze run z'n thumbs maakt.
+  // Backfill/migratie: records zonder (verse) thumb er alsnog een geven. De regeneratie
+  // zelf zit in saveTattoo (incl. merge-guard voor lichte records); deze lus bepaalt
+  // alleen WIE er een nodig heeft. Kick tijdens een lopende run niet droppen maar
+  // onthouden: de renderende view kan anders op volle beelden blijven hangen.
   if (thumbsBezig) { thumbsWachtrij = true; return; }
   thumbsBezig = true;
   let bijgewerkt = 0;
   try {
     for (const t of [...tattoos]) {
-      const bron = lijstBron(t);
-      const fp = thumbFp(bron);
-      if (!bron) { if (!t.thumb) continue; delete t.thumb; }
-      else if (t.thumb && t.thumb.src && t.thumb.fp === fp) continue;
-      else { try { t.thumb = { src: await maakThumbDataURL(bron), fp }; } catch { continue; } }
-      // Race-guard: record kan tijdens de (async) backfill verwijderd/ververst zijn
-      if (t.deleted || !tattoos.includes(t)) continue;
-      await saveTattoo(t, true);   // behoudTijd: afgeleide data, geen sync-/sorteerwijziging
+      if (t.deleted || t.__geenBeeld) continue;
+      if (t.thumb && t.thumb.src) {
+        // Licht record: thumb is leidend (beeld-wijzigingen lopen altijd via een vol
+        // record door saveTattoo, dus een lichte thumb kan niet stiekem verouderen).
+        if (t.__licht) continue;
+        const bron = lijstBron(t);
+        if (bron && t.thumb.fp === thumbFp(bron)) continue;   // vers
+      } else if (!t.__licht && !lijstBron(t)) {
+        continue;   // vol record zonder beeld: niets te maken
+      }
+      if (!tattoos.includes(t)) continue;   // race-guard: herlaad kan de lijst vervangen hebben
+      const wasLicht = !!t.__licht;
+      try { await saveTattoo(t, true); } catch { continue; }   // behoudTijd: afgeleide data
+      if (wasLicht) {
+        stripBeelden(t);   // RAM weer licht na de merge in saveTattoo
+        // Licht record dat óók in de DB geen beeld blijkt te hebben: markeren, anders
+        // probeert elke render-run 'm opnieuw (zinloze save-lus).
+        if (!t.thumb || !t.thumb.src) t.__geenBeeld = true;
+      }
       bijgewerkt++;
     }
   } finally { thumbsBezig = false; }
@@ -8190,25 +8336,9 @@ function renderStart() {
 
 async function herlaad() {
   // Soft-deleted records (tombstones) wegfilteren: de app/lijsten/2D+3D zien ze niet.
-  tattoos = (await getAllTattoos()).filter(t => !t.deleted);
-  // Migratie van oudere records: zone 'buik-rug' en ontbrekend zijde-veld
-  const teMigreren = [];
-  for (const t of tattoos) {
-    let gewijzigd = false;
-    if (typeof t.naam !== 'string') { t.naam = String(t.naam ?? ''); gewijzigd = true; }
-    if (t.lichaamsdeel === 'buik-rug') { t.lichaamsdeel = 'buik'; gewijzigd = true; }
-    if (!t.zijde) { t.zijde = t.lichaamsdeel === 'rug' ? 'achter' : 'voor'; gewijzigd = true; }
-    if (!t.status) { t.status = 'gezet'; gewijzigd = true; }
-    if (!Array.isArray(t.fotos) || (t.foto && t.fotos.length === 0)) {
-      t.fotos = t.foto ? [t.foto] : (Array.isArray(t.fotos) ? t.fotos : []);
-      t.foto = null; gewijzigd = true;
-    }
-    if (!Array.isArray(t.nazorgTaken)) { t.nazorgTaken = []; gewijzigd = true; }
-    if (!Array.isArray(t.sessies)) { t.sessies = []; gewijzigd = true; }
-    if (!Array.isArray(t.touchUps)) { t.touchUps = []; gewijzigd = true; }
-    if (gewijzigd) teMigreren.push(t);
-  }
-  for (const t of teMigreren) await saveTattoo(t);
+  // LICHTE kopieën (PERF-1 slice 2): beeldvelden blijven in IndexedDB; migratie van
+  // oude velden zit in laadLichteTattoos (op het volle record, vóór het strippen).
+  tattoos = (await laadLichteTattoos()).filter(t => !t.deleted);
   tattoos.sort((a, b) => (b.datum || '').localeCompare(a.datum || ''));
   renderBodyMap();
   renderLijst();
@@ -8773,6 +8903,7 @@ async function edit2DActie(a){
   if(a === 'undo'){ await undo2D(); return; }
   if(a === 'info'){ const id = editMarker2D; await exitEdit2D(); openDetail(id); return; }
   if(a === 'edit'){ const id = editMarker2D;
+    await volledigInRam(id);   // licht record: beelden erbij vóór de heeft-foto-check
     if(((t.kunst3d&&t.kunst3d.srcUrl)||(t.kunst&&t.kunst.src)) && typeof window.__tattiesRecrop2D === 'function'){ window.__tattiesRecrop2D(t); }   // zelfde overzicht als toevoegen
     else { await exitEdit2D(); openFormulier(id); }                                                                      // terugval: geen bewaarde foto
     return; }
@@ -8796,6 +8927,18 @@ function renderMarkers() {
   const g = $('#markers');
   const ingezoomd = isIngezoomd();
   const rand = tintIsDonker ? '#F0EDE8' : '#0A0A0A';
+  // 2D-mini's tonen kunst.src, maar lichte records hebben die niet in RAM (PERF-1 slice 2).
+  // Zolang 2D uitstaat is dit slapend; met 2D aan waarderen we de zichtbare records lui op
+  // en her-renderen één keer. (Geen wachtrij nodig: opgewaardeerd = blijvend vol tot herlaad.)
+  if (TWEE_D_AAN && !renderMarkers._upgraden) {
+    const lichte = tattoos.filter(t => t.__licht && zijdeVan(t) === huidigeZijde).map(t => t.id);
+    if (lichte.length) {
+      renderMarkers._upgraden = true;
+      Promise.all(lichte.map(id => volledigInRam(id).catch(() => null)))
+        .then(() => { renderMarkers._upgraden = false; renderMarkers(); })
+        .catch(() => { renderMarkers._upgraden = false; });
+    }
+  }
   const zichtbaar = tattoos.filter(t =>
     (t.positie || (t.positie3d && t.positie3d.point) || (t.kunst && t.kunst.src && ZONE_POS[t.lichaamsdeel])) &&
     zijdeVan(t) === huidigeZijde && (bijModus(t) || (toonGepland && t.status === 'wens')) &&
@@ -9287,12 +9430,15 @@ function renderLijst() {
   zorgLijstThumbs(naThumbBackfill);   // ontbrekende/verouderde thumbs lui bijmaken
 }
 
-function openDetail(id, tab = 'info', retour) {
+async function openDetail(id, tab = 'info', retour) {
   // onthoud waar we vandaan kwamen, zodat 'terug' naar de juiste weergave gaat (3D/2D/collectie/stats/start)
   detailRetour = retour || (['collectie', 'stats', 'start', 'home'].includes(huidigeView) ? huidigeView : 'home');
   detailId = id;
   detailTab = tab;
   detailToonExtra = false;
+  // Licht record eerst opwaarderen (foto's + uitsnede uit de DB), anders toont de
+  // detailpagina lege beelden. In place: closures/markers houden dezelfde referentie.
+  await volledigInRam(id);
   renderDetail();
   toonView('detail');
 }
@@ -9581,8 +9727,9 @@ function renderDetail() {
    ============================================================ */
 // Na bewerken via de uitsnede-modal: ververs de detailpagina als die open staat (anders blijft 'ie verouderd).
 window.__tattiesNaBewerk = (id) => { try { if (huidigeView === 'detail' && id) openDetail(id); } catch (e) { /* geen detail open */ } };
-function openFormulier(id = null) {
+async function openFormulier(id = null) {
   bewerkId = id;
+  if (id) await volledigInRam(id);   // licht record: foto's/uitsnede eerst uit de DB erbij (in place)
   const t = id ? tattoos.find(x => x.id === id) : createTattoo({ status: lijstModus === 'wens' ? 'wens' : 'gezet' });
   // Nieuwe tattoo vanuit een aangeklikt lichaamsdeel: dat deel + de juiste kant
   // alvast invullen, zodat de gebruiker niet opnieuw hoeft te kiezen.
@@ -10433,9 +10580,9 @@ $('#btn-export').addEventListener('click', async () => {
   // gebruikersbackup. (Sync zal tombstones later apart afhandelen.)
   const alles = (await getAllTattoos()).filter(t => !t.deleted);
   if (alles.length === 0) { toast(tr('toast.nietsexport')); return; }
-  // Verouderd 'foto'-veld + afgeleide lijst-thumb weglaten; houdt de backup schoon
-  // (thumbs worden na import lui opnieuw gemaakt)
-  const schoon = alles.map(t => { const { foto, thumb, ...rest } = t; return rest; });
+  // Verouderd 'foto'-veld + afgeleide lijst-thumb + interne markers weglaten; houdt de
+  // backup schoon (thumbs worden na import lui opnieuw gemaakt)
+  const schoon = alles.map(t => { const { foto, thumb, __licht, __geenBeeld, ...rest } = t; return rest; });
   const blob = new Blob(
     [JSON.stringify({ app: 'Tatties', versie: 1, geexporteerd: new Date().toISOString(), tattoos: schoon }, null, 2)],
     { type: 'application/json' }
@@ -12226,11 +12373,12 @@ async function verwijderVoorbeelden() {
   }
   function bindEditUI(){
     const eb=document.getElementById("editbar"); if(!eb) return;
-    eb.querySelectorAll("button").forEach(b=>{ b.onclick=()=>{
+    eb.querySelectorAll("button").forEach(b=>{ b.onclick=async()=>{
       const a=b.dataset.act;
       if(a==="help"){ if(window.__tattiesEditLegend) window.__tattiesEditLegend('#editbar'); return; }
       if(a==="info"){ const rec=editDecal&&editDecal.rec; exitEditDecal(); if(rec&&typeof openDetail==="function") openDetail(rec.id, 'info', '3d'); return; }
       if(a==="edit"){ const rec=editDecal&&editDecal.rec;
+        if(rec && typeof volledigInRam==="function") await volledigInRam(rec.id);   // licht record: beelden erbij vóór de heeft-foto-check
         if(editDecal && rec && ((rec.kunst3d&&rec.kunst3d.srcUrl)||(rec.kunst&&rec.kunst.src))){ openCutModalForEdit(editDecal); }   // zelfde overzicht als toevoegen
         else { exitEditDecal(); if(rec&&typeof openFormulier==="function") openFormulier(rec.id); }     // terugval: geen bewaarde foto
         return; }
@@ -13452,7 +13600,10 @@ async function verwijderVoorbeelden() {
     const recRef=(typeof tattoos!=="undefined" && Array.isArray(tattoos)) ? (tattoos.find(x=>x.id===t.id)||t) : t;
     markers.push({ id:t.id, rec:recRef, obj, point:point.clone(), normal:normal.clone(),
       mesh, rot:P.rot||0, size:P.size||0.09, locked:!!P.locked, tex });
-    if(!recRef.positie || !recRef.kunst || !recRef.kunst.src){      // ouder record: 2D-velden bijvullen
+    // Ouder record: 2D-velden bijvullen. Check op de VOLLE DB-kopie `t` - het in-RAM
+    // record (recRef) is licht (kunst.src gestript), anders zou dit elke 3D-load voor
+    // álle tattoos draaien en schrijven.
+    if(!t.positie || !t.kunst || !t.kunst.src){
       sync2D(recRef, point, P.side||"voor", P.rot||0, P.size||0.09, tex);
       try{ await saveTattoo(recRef); }catch(e){ console.error(e); }
     }
