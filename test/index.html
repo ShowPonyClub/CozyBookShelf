@@ -1379,7 +1379,10 @@ form label{text-transform:none;letter-spacing:.005em;font-size:.8rem;color:var(-
     </div>
   </section>
   <!-- ===================== 2D-KAART ===================== -->
-  <section id="view-home">
+  <!-- 'hidden' vanaf de start: tijdens het parsen van dit (grote) bestand is er nog geen JS
+       actief en zou deze view anders seconden zichtbaar zijn (de 'flits' van de 2D-kaart bij
+       het openen van de PWA) totdat ensureStart() naar het startscherm schakelt. -->
+  <section id="view-home" hidden>
     <div class="canvas-balk">
       <button type="button" id="toon-gepland" class="gepland-toggle" aria-pressed="false" data-i18n-aria="ui.toon_gepland" aria-label="Geplande tattoos tonen">
         <svg viewBox="0 0 24 24" class="ik" aria-hidden="true" style="width:15px;height:15px"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>
@@ -7265,7 +7268,7 @@ function createTattoo(overrides = {}) {
    ============================================================ */
 // App-versie (semver, handmatig ophogen bij een release). Bij een bump ook de
 // CACHE-naam in sw.js meebumpen, zodat clients de nieuwe build ophalen.
-const APP_VERSIE = '0.2.9.14';
+const APP_VERSIE = '0.2.9.15';
 const TWEE_D_AAN = false;   // 2D-kaart tijdelijk uit tot 'ie af is (optie A): verbergt de 2D-ingangen (header-toggle + starttegel). Zet op true om 2D weer aan te zetten.
 if (!TWEE_D_AAN && document.documentElement) document.documentElement.classList.add('tweed-uit');
 const KNIP_ZWEEF_TOOLS = true;   // FASE-1-EXPERIMENT: kniptools zweven als kaart-balk over de foto-onderrand (grotere foto). TERUGDRAAIEN = false (CSS-laag 'knipzweef' valt dan volledig weg).
@@ -7299,6 +7302,7 @@ window.__sb = sb;   // dev/test-haak
 function stripVoorCloud(t) {
   const c = JSON.parse(JSON.stringify(t));
   delete c.foto;            // verouderd enkel-foto-veld
+  delete c.thumb;           // afgeleide lijst-thumb: client maakt 'm zelf opnieuw
   c.fotos = [];             // foto's volgen via Storage (slice 6)
   if (c.kunst) delete c.kunst.src;
   if (c.kunst3d) delete c.kunst3d.srcUrl;
@@ -7443,6 +7447,12 @@ function hardRecord(record) {
   if (record.kunst3d && record.kunst3d.srcUrl) {
     const s = veiligeBeeldSrc(record.kunst3d.srcUrl);
     if (s) record.kunst3d.srcUrl = s; else delete record.kunst3d.srcUrl;
+  }
+  // Lijst-thumb is afgeleide data uit onvertrouwde bron: saneren of weggooien (wordt lui opnieuw gemaakt)
+  if (record.thumb) {
+    const s = record.thumb.src && veiligeBeeldSrc(record.thumb.src);
+    if (s && typeof record.thumb.fp === 'string') record.thumb = { src: s, fp: record.thumb.fp };
+    else delete record.thumb;
   }
   // Getalvelden clampen (corrupte/out-of-range waarden afvangen)
   record.pijn = Math.min(5, Math.max(0, parseInt(record.pijn, 10) || 0));
@@ -7847,6 +7857,67 @@ let tintIsDonker = false;
 function hoofdFoto(t) {
   return (t.fotos && t.fotos[0]) || t.foto || null;
 }
+/* ---- Lijst-thumbnails (PERF-1) ----
+   Lijstweergaven (collectie + 'recent' op start) toonden de VOLLE foto/uitsnede als <img>;
+   bij veel tattoos zijn dat honderden MB's aan gedecodeerde bitmaps. Elk record krijgt
+   daarom een klein afgeleid lijst-thumbnailtje: t.thumb = {src, fp}. 'fp' is een goedkope
+   vingerafdruk van de bron; klopt die niet meer (nieuwe foto/uitsnede, import, sync), dan
+   maakt zorgLijstThumbs() de thumb lui opnieuw ná het renderen en rendert dan één keer bij.
+   Render valt terug op de volle afbeelding zolang er geen verse thumb is. Thumbs zijn
+   afgeleide data: ze gaan NIET mee in export/cloud en een backfill-save bewaart updatedAt
+   (saveTattoo behoudTijd=true), zodat sync/sortering er niets van merken. */
+const THUMB_MAX = 240;
+function lijstBron(t) { return hoofdFoto(t) || (t.kunst && t.kunst.src) || null; }
+function thumbFp(src) { return src ? (src.length + ':' + src.slice(30, 62)) : ''; }   // lengte + stukje data (na de mime-prefix)
+function lijstThumbSrc(t) {
+  const bron = lijstBron(t);
+  if (!bron) return null;
+  return (t.thumb && t.thumb.src && t.thumb.fp === thumbFp(bron)) ? t.thumb.src : bron;
+}
+function maakThumbDataURL(src) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onerror = () => reject(new Error('thumb: bron laadt niet'));
+    img.onload = () => {
+      const schaal = Math.min(1, THUMB_MAX / Math.max(img.width, img.height));
+      const c = document.createElement('canvas');
+      c.width = Math.max(1, Math.round(img.width * schaal));
+      c.height = Math.max(1, Math.round(img.height * schaal));
+      c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+      // PNG behoudt transparantie (uitsnedes/stickers); foto's zijn JPEG
+      resolve(src.startsWith('data:image/png') ? c.toDataURL('image/png') : c.toDataURL('image/jpeg', 0.72));
+    };
+    img.src = src;
+  });
+}
+let thumbsBezig = false, thumbsWachtrij = false;
+async function zorgLijstThumbs(naKlaar, forceerRender = false) {
+  // Kick tijdens een lopende run niet droppen maar onthouden: de renderende view kan
+  // anders op volle beelden blijven hangen als juist déze run z'n thumbs maakt.
+  if (thumbsBezig) { thumbsWachtrij = true; return; }
+  thumbsBezig = true;
+  let bijgewerkt = 0;
+  try {
+    for (const t of [...tattoos]) {
+      const bron = lijstBron(t);
+      const fp = thumbFp(bron);
+      if (!bron) { if (!t.thumb) continue; delete t.thumb; }
+      else if (t.thumb && t.thumb.src && t.thumb.fp === fp) continue;
+      else { try { t.thumb = { src: await maakThumbDataURL(bron), fp }; } catch { continue; } }
+      // Race-guard: record kan tijdens de (async) backfill verwijderd/ververst zijn
+      if (t.deleted || !tattoos.includes(t)) continue;
+      await saveTattoo(t, true);   // behoudTijd: afgeleide data, geen sync-/sorteerwijziging
+      bijgewerkt++;
+    }
+  } finally { thumbsBezig = false; }
+  if ((bijgewerkt || forceerRender) && typeof naKlaar === 'function') naKlaar(bijgewerkt);
+  if (thumbsWachtrij) { thumbsWachtrij = false; zorgLijstThumbs(naKlaar, bijgewerkt > 0); }
+}
+// Na een backfill de zichtbare lijst één keer verversen (volle <img>'s -> thumbs)
+function naThumbBackfill() {
+  if (huidigeView === 'collectie') renderLijst();
+  else if (huidigeView === 'start' && typeof renderStart === 'function') renderStart();
+}
 function bijModus(t) {
   return (t.status === 'wens') === (lijstModus === 'wens');
 }
@@ -8105,10 +8176,11 @@ function renderStart() {
     // Op updatedAt (laatst toegevoegd/gewijzigd), niet op tattoo-datum: de 3D-flow laat de
     // datum leeg, waardoor een verse tattoo anders onderaan sorteerde en hier nooit verscheen.
     rec.innerHTML = [...tattoos].sort((a, b) => (+b.updatedAt || 0) - (+a.updatedAt || 0)).slice(0, 3).map(t => {
-      const foto = hoofdFoto(t) || (t.kunst && t.kunst.src) || null;
+      const foto = lijstThumbSrc(t);   // kleine lijst-thumb; volle bron als terugval
       const thumb = foto ? `<img src="${esc(foto)}" alt="">` : esc((String(t.naam ?? '') || '?').charAt(0).toUpperCase());
       return `<button type="button" class="start-recent-item" data-id="${esc(t.id)}"><span class="sri-thumb">${thumb}</span><span class="sri-naam">${esc(t.naam)}</span><span class="sri-zone">${esc(zoneLabel(t.lichaamsdeel))}</span></button>`;
     }).join('');
+    zorgLijstThumbs(naThumbBackfill);   // ontbrekende/verouderde thumbs lui bijmaken
   }
   if (recentBlok) recentBlok.hidden = false;
 }
@@ -9188,7 +9260,7 @@ function renderLijst() {
   lijst.innerHTML = items.map(t => {
     const galerijFoto = hoofdFoto(t);
     const kunstFoto = (!galerijFoto && t.kunst && t.kunst.src) ? t.kunst.src : null;
-    const foto = galerijFoto || kunstFoto;
+    const foto = lijstThumbSrc(t);   // kleine lijst-thumb (zelfde bron-voorrang); vol als terugval
     const badge = t.status === 'wens'
       ? '<span class="badge wens">' + tr('badge.wishlist') + '</span>'
       : `<span class="badge ${t.geheeld ? 'geheeld' : 'herstellende'}">${t.geheeld ? tr('badge.geheeld') : tr('badge.herstellende')}</span>`;
@@ -9209,6 +9281,7 @@ function renderLijst() {
   lijst.querySelectorAll('.tcard').forEach(el =>
     el.addEventListener('click', () => openDetail(el.dataset.id))
   );
+  zorgLijstThumbs(naThumbBackfill);   // ontbrekende/verouderde thumbs lui bijmaken
 }
 
 function openDetail(id, tab = 'info', retour) {
@@ -10357,8 +10430,9 @@ $('#btn-export').addEventListener('click', async () => {
   // gebruikersbackup. (Sync zal tombstones later apart afhandelen.)
   const alles = (await getAllTattoos()).filter(t => !t.deleted);
   if (alles.length === 0) { toast(tr('toast.nietsexport')); return; }
-  // Verouderd 'foto'-veld weglaten (vervangen door fotos[]); houdt de backup schoon
-  const schoon = alles.map(t => { const { foto, ...rest } = t; return rest; });
+  // Verouderd 'foto'-veld + afgeleide lijst-thumb weglaten; houdt de backup schoon
+  // (thumbs worden na import lui opnieuw gemaakt)
+  const schoon = alles.map(t => { const { foto, thumb, ...rest } = t; return rest; });
   const blob = new Blob(
     [JSON.stringify({ app: 'Tatties', versie: 1, geexporteerd: new Date().toISOString(), tattoos: schoon }, null, 2)],
     { type: 'application/json' }
