@@ -7271,7 +7271,7 @@ function createTattoo(overrides = {}) {
    ============================================================ */
 // App-versie (semver, handmatig ophogen bij een release). Bij een bump ook de
 // CACHE-naam in sw.js meebumpen, zodat clients de nieuwe build ophalen.
-const APP_VERSIE = '0.2.9.16';
+const APP_VERSIE = '0.2.9.17';
 const TWEE_D_AAN = false;   // 2D-kaart tijdelijk uit tot 'ie af is (optie A): verbergt de 2D-ingangen (header-toggle + starttegel). Zet op true om 2D weer aan te zetten.
 if (document.documentElement) document.documentElement.classList.toggle('tweed-uit', !TWEE_D_AAN);   // class staat statisch op <html>; hier synchroniseren (weghalen zodra 2D weer aan gaat)
 const KNIP_ZWEEF_TOOLS = true;   // FASE-1-EXPERIMENT: kniptools zweven als kaart-balk over de foto-onderrand (grotere foto). TERUGDRAAIEN = false (CSS-laag 'knipzweef' valt dan volledig weg).
@@ -11665,15 +11665,91 @@ async function verwijderVoorbeelden() {
         if(dd<seedD && inBox(f)){ seedD=dd; seed=fi; } }
     }
     if(seed<0) return null;
-    // flood-fill over gedeelde vertices, begrensd door de box
-    const visited=new Uint8Array(faces.length), stack=[seed], keep=[];
-    visited[seed]=1;
-    while(stack.length){
-      const fi=stack.pop(); keep.push(fi); const f=faces[fi];
+    // Flood-fill over gedeelde vertices, begrensd door de box ÉN een geodetisch AFSTANDSBUDGET.
+    // De box alleen was niet genoeg waar lichaamsdelen elkaar RAKEN (binnendijen bij het kruis):
+    // daar is het oppervlak verbonden, dus een wraparound op de rechterdij vloeide via het kruis
+    // door naar het linkerbeen (tester-melding 2026-07-06). Budget = wat de decal maximaal over
+    // het oppervlak kan beslaan: 1.7x de halve diagonaal dekt een volledige tangentiële wikkel
+    // om een rond lichaamsdeel (r*pi/2 <= halve breedte * pi/2) plus marge voor golvend oppervlak;
+    // de omweg via het raakpunt is aanzienlijk langer en valt daardoor af.
+    // Afstand centroid->centroid, met her-relaxatie bij een korter pad (SPFA: FIFO-wachtrij,
+    // niet LIFO - een stack geeft diepte-eerst-volgorde en dan explodeert het aantal
+    // her-relaxaties; FIFO gedraagt zich op bijna-uniforme randgewichten als BFS).
+    const BUDGET=0.85*Math.hypot(size.x,size.y)+2*MG;
+    const dist=new Float32Array(faces.length).fill(Infinity);
+    const inQ=new Uint8Array(faces.length);
+    const f0=faces[seed];
+    dist[seed]=Math.hypot(f0.cx-point.x,f0.cy-point.y,f0.cz-point.z);
+    const queue=[seed]; inQ[seed]=1; let kop=0;
+    while(kop<queue.length){
+      const fi=queue[kop++]; inQ[fi]=0; const f=faces[fi], df=dist[fi];
       for(let k=0;k<3;k++){ const arr=vmap.get(f.vk[k]); if(!arr) continue;
-        for(let q=0;q<arr.length;q++){ const nf=arr[q]; if(visited[nf]) continue;
-          visited[nf]=1; if(inBox(faces[nf])) stack.push(nf); } }
+        for(let q=0;q<arr.length;q++){ const nf=arr[q]; if(nf===fi) continue;
+          const n=faces[nf];
+          const nd=df+Math.hypot(n.cx-f.cx,n.cy-f.cy,n.cz-f.cz);
+          if(nd>BUDGET || nd>=dist[nf]) continue;
+          dist[nf]=nd;
+          if(inBox(n) && !inQ[nf]){ queue.push(nf); inQ[nf]=1; }   // buiten de box: afstand noteren, niet verder reizen
+        } }
     }
+    const keep=[];
+    for(let i=0;i<faces.length;i++){ if(dist[i]<Infinity && inBox(faces[i])) keep.push(i); }
+    if(!keep.length) return null;
+    // OCCLUSIE-pass voor de VERRE rand van de flood. Waar lichaamsdelen elkaar echt raken
+    // (binnendijen: de mesh deelt daar vertices) is het pad kort genoeg om binnen het budget
+    // op het andere been te komen. Die faces liggen vanuit de decal-projector gezien wél
+    // verstopt ACHTER het eigen been -> ray per face-centroid tegen de kijkas in; eerste hit
+    // duidelijk vóór de face = verstopt = weg. Twee begrenzingen houden dit veilig:
+    // (1) alleen faces geodetisch VER van het plaatspunt (> 0.45x budget) worden getest, zodat
+    //     holle plekken vlak bij de decal (borstbeen, plooien) nooit gaten krijgen;
+    // (2) alleen flood-faces zelf tellen als occluder, zodat een los deel dat toevallig in de
+    //     diepe projectie-box hangt (arm naast de dij) nooit vals kan occluden.
+    // Orthografische projectie -> de test kan exact in 2D in BOX-ruimte (z-buffer-semantiek):
+    // een face is verstopt als een andere flood-driehoek zijn (u,v)-punt bevat op een z die
+    // duidelijk dichter bij de projector ligt (box +z = naar buiten). Geen rays/voxels nodig.
+    const wv=new THREE.Vector3();
+    const btri=new Float32Array(keep.length*9);   // box-ruimte-driehoeken (u,v,z per vertex)
+    const bctr=new Float32Array(keep.length*3);   // box-ruimte-centroids
+    for(let s=0;s<keep.length;s++){ const f=faces[keep[s]]; const tri=[f.a,f.b,f.c];
+      for(let k=0;k<3;k++){ wv.fromBufferAttribute(posA,tri[k]).applyMatrix4(mesh.matrixWorld).applyMatrix4(_decInv);
+        btri[s*9+k*3]=wv.x; btri[s*9+k*3+1]=wv.y; btri[s*9+k*3+2]=wv.z; }
+      bctr[s*3]=(btri[s*9]+btri[s*9+3]+btri[s*9+6])/3;
+      bctr[s*3+1]=(btri[s*9+1]+btri[s*9+4]+btri[s*9+7])/3;
+      bctr[s*3+2]=(btri[s*9+2]+btri[s*9+5]+btri[s*9+8])/3;
+    }
+    // (u,v)-bin-index op centroid: een driehoek die een punt bevat heeft z'n centroid binnen
+    // maxR van dat punt, dus bingrootte >= MG + 3x3-buurt zoeken dekt alle kandidaten.
+    const binW=Math.max(MG, 0.02), bins=new Map();
+    const BK=(u,v)=>Math.floor(u/binW)+'|'+Math.floor(v/binW);
+    for(let s=0;s<keep.length;s++){ const k=BK(bctr[s*3],bctr[s*3+1]);
+      let a=bins.get(k); if(!a){ a=[]; bins.set(k,a); } a.push(s); }
+    const gapMin=Math.max(0.02, 2*MG), verGrens=BUDGET*0.45;
+    const eind=[];
+    for(let s=0;s<keep.length;s++){
+      const fi=keep[s];
+      if(dist[fi]<=verGrens){ eind.push(fi); continue; }   // dichtbij het plaatspunt: nooit occluden (holtes/plooien)
+      const u=bctr[s*3], v=bctr[s*3+1], z=bctr[s*3+2];
+      const bu=Math.floor(u/binW), bv=Math.floor(v/binW);
+      let verstopt=false;
+      for(let du=-1;du<=1 && !verstopt;du++) for(let dv=-1;dv<=1 && !verstopt;dv++){
+        const a=bins.get((bu+du)+'|'+(bv+dv)); if(!a) continue;
+        for(let q=0;q<a.length;q++){ const so=a[q]; if(so===s) continue;
+          const ax=btri[so*9],   ay=btri[so*9+1], az=btri[so*9+2],
+                bx=btri[so*9+3], by=btri[so*9+4], bz=btri[so*9+5],
+                cx2=btri[so*9+6],cy2=btri[so*9+7],cz2=btri[so*9+8];
+          // 2D barycentrisch: bevat driehoek (a,b,c) het punt (u,v)?
+          const d00x=bx-ax, d00y=by-ay, d01x=cx2-ax, d01y=cy2-ay, dpx=u-ax, dpy=v-ay;
+          const den=d00x*d01y-d01x*d00y; if(Math.abs(den)<1e-12) continue;
+          const s1=(dpx*d01y-d01x*dpy)/den, s2=(d00x*dpy-dpx*d00y)/den;
+          if(s1<0 || s2<0 || s1+s2>1) continue;
+          const zTri=az+s1*(bz-az)+s2*(cz2-az);          // z van het occluder-vlak op (u,v)
+          if(zTri>z+gapMin){ verstopt=true; break; }     // ligt duidelijk vóór deze face -> verstopt
+        }
+      }
+      if(!verstopt) eind.push(fi);
+    }
+    if(!eind.length) return null;
+    keep.length=0; for(const fi of eind) keep.push(fi);
     const pos=[], nor=[], v=new THREE.Vector3();
     for(let i=0;i<keep.length;i++){ const f=faces[keep[i]], tri=[f.a,f.b,f.c];
       for(let k=0;k<3;k++){ const j=tri[k];
@@ -13480,6 +13556,8 @@ async function verwijderVoorbeelden() {
   window.__tattiesGetUnderwear3D = ()=>underwear;
   window.__tattiesSetSkin3D = setSkin3D;
   window.__tatties3DPauze = function(){ actief3D=false; };   // renderlus pauzeren als een host-view wordt getoond
+  // Dev-haakje (preview/console): decal-culling direct kunnen meten zonder UI-flow. Geen product-pad.
+  window.__tattiesDecalDbg = { faceGridFor, connectedDecalGeo, localDecalGeo, meshAtPoint, sceneRef:()=>scene, modelRef:()=>modelRoot };
 
   /* ---- lazy init ---- */
   function initEngine(){
