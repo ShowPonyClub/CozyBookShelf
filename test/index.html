@@ -7301,7 +7301,7 @@ function createTattoo(overrides = {}) {
    ============================================================ */
 // App-versie (semver, handmatig ophogen bij een release). Bij een bump ook de
 // CACHE-naam in sw.js meebumpen, zodat clients de nieuwe build ophalen.
-const APP_VERSIE = '0.2.9.22';
+const APP_VERSIE = '0.2.9.23';
 const TWEE_D_AAN = false;   // 2D-kaart tijdelijk uit tot 'ie af is (optie A): verbergt de 2D-ingangen (header-toggle + starttegel). Zet op true om 2D weer aan te zetten.
 if (document.documentElement) document.documentElement.classList.toggle('tweed-uit', !TWEE_D_AAN);   // class staat statisch op <html>; hier synchroniseren (weghalen zodra 2D weer aan gaat)
 // Zolang 2D uit staat: het 3D-model niet via aria naar de (verborgen) 2D-knop verwijzen
@@ -11958,7 +11958,8 @@ async function verwijderVoorbeelden() {
   // begrensd door de decal-box. Zo blijft de tattoo op het aaneengesloten lichaamsdeel (bv. de arm)
   // en springt 'ie niet over het okselgat naar de buik/torso, ook al liggen die ruimtelijk in de box.
   // Geeft null terug bij geen zaadje -> aanroeper valt terug op de gewone box-cull.
-  function connectedDecalGeo(mesh, point, size, orientation){
+  function connectedDecalGeo(mesh, point, size, orientation, dbgOpts){
+    dbgOpts = dbgOpts || {};   // {zonderBudget, zonderOcclusie}: alleen voor metingen via __tattiesDecalDbg
     const grid=faceGridFor(mesh); if(!grid || !grid.vmap) return null;
     const g=mesh.geometry, posA=g.attributes.position, norA=g.attributes.normal;
     const faces=grid.faces, vmap=grid.vmap;
@@ -11989,7 +11990,8 @@ async function verwijderVoorbeelden() {
     // Afstand centroid->centroid, met her-relaxatie bij een korter pad (SPFA: FIFO-wachtrij,
     // niet LIFO - een stack geeft diepte-eerst-volgorde en dan explodeert het aantal
     // her-relaxaties; FIFO gedraagt zich op bijna-uniforme randgewichten als BFS).
-    const BUDGET=0.85*Math.hypot(size.x,size.y)+2*MG;
+    const BUDGET_BASIS=0.85*Math.hypot(size.x,size.y)+2*MG;
+    const BUDGET=dbgOpts.zonderBudget ? Infinity : BUDGET_BASIS;
     const dist=new Float32Array(faces.length).fill(Infinity);
     const inQ=new Uint8Array(faces.length);
     const f0=faces[seed];
@@ -12037,9 +12039,10 @@ async function verwijderVoorbeelden() {
     const BK=(u,v)=>Math.floor(u/binW)+'|'+Math.floor(v/binW);
     for(let s=0;s<keep.length;s++){ const k=BK(bctr[s*3],bctr[s*3+1]);
       let a=bins.get(k); if(!a){ a=[]; bins.set(k,a); } a.push(s); }
-    const gapMin=Math.max(0.02, 2*MG), verGrens=BUDGET*0.45;
+    const gapMin=Math.max(0.02, 2*MG), verGrens=BUDGET_BASIS*0.45;
     const eind=[];
     for(let s=0;s<keep.length;s++){
+      if(dbgOpts.zonderOcclusie){ eind.push(keep[s]); continue; }   // meting: occlusie-pass overslaan
       const fi=keep[s];
       if(dist[fi]<=verGrens){ eind.push(fi); continue; }   // dichtbij het plaatspunt: nooit occluden (holtes/plooien)
       const u=bctr[s*3], v=bctr[s*3+1], z=bctr[s*3+2];
@@ -12057,7 +12060,21 @@ async function verwijderVoorbeelden() {
           const s1=(dpx*d01y-d01x*dpy)/den, s2=(d00x*dpy-dpx*d00y)/den;
           if(s1<0 || s2<0 || s1+s2>1) continue;
           const zTri=az+s1*(bz-az)+s2*(cz2-az);          // z van het occluder-vlak op (u,v)
-          if(zTri>z+gapMin){ verstopt=true; break; }     // ligt duidelijk vóór deze face -> verstopt
+          // Alleen 'verstopt' als de occluder ook GEODETISCH veel dichter bij het plaatspunt
+          // ligt (= een ander stuk lichaam vóór ons verre stuk, zoals het andere been). Liggen
+          // occluder en face geodetisch bij elkaar, dan is het gewoon het eigen gekromde
+          // oppervlak (armflank, elleboogknik) - dat mag nooit sneuvelen. Zonder deze check
+          // sneed de pass zichtbare stukken van arm-decals en de selectie-ring weg (regressie
+          // gemeld door de eerste testers, 2026-07-06).
+          if(zTri>z+gapMin){
+            if(dbgOpts.gapLog) dbgOpts.gapLog.push({ gap:+(zTri-z).toFixed(4), dv:+((dist[fi]-dist[keep[so]])).toFixed(4) });
+            // Alleen 'verstopt' als ruimtelijke gap ÉN geodetisch afstandsverschil groot zijn -
+            // beide ABSOLUUT (meters), want ze zijn geometrie-bepaald, niet decal-bepaald:
+            // eigen kromming (armflank, elleboogknik) meet ~0.05-0.09 op beide assen; een écht
+            // ander lichaamsdeel ervoor (het andere been) meet 0.16-0.30. Gemeten 2026-07-06
+            // (arm-regressie eerste testers); grens 0.11 ligt ruim tussen beide verdelingen.
+            if((zTri-z)>0.11 && (dist[fi]-dist[keep[so]])>0.11){ verstopt=true; break; }
+          }
         }
       }
       if(!verstopt) eind.push(fi);
