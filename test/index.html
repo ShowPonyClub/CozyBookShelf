@@ -940,10 +940,13 @@ form label,
 /* ===================== 3D-INTEGRATIE - STIJLEN ===================== */
 #view-3d{display:flex;flex-direction:column;gap:10px;}
 #view-3d.verborgen{display:none;}
-/* Hoogte in svh (kleinste viewport): de mobiele browserbalk schuift bij scrollen in en uit,
-   en met vh groeide/kromp het veld dan mee - wat als 'het model zoomt vanzelf in' oogt.
-   vh blijft de terugval voor browsers zonder svh (daar vangt de fov-ijking in resize() het op). */
-#stage{position:relative;width:100%;height:72vh;height:72svh;min-height:420px;touch-action:none;cursor:grab;
+/* Vaste veldhoogte. De mobiele browserbalk (en bv. de vertaalbalk) schuift bij scrollen in en uit;
+   met een viewport-hoogte groeide en kromp het veld daardoor mee, en trok het aan het beeld.
+   svh dekt de adresbalk af maar niet elke extra balk, dus JS pint de gemeten hoogte eenmalig vast
+   in --stage-h (zie pinStageHoogte) en meet alleen opnieuw bij een echte breedtewissel (rotatie).
+   De vh/svh-regels blijven de terugval zolang die pin er nog niet is. */
+#stage{position:relative;width:100%;height:72vh;height:72svh;height:var(--stage-h,72svh);
+  min-height:420px;touch-action:none;cursor:grab;
   background:#0e1116;border-radius:var(--r-lg);overflow:hidden;}
 #stage:active{cursor:grabbing;}
 #stage canvas{display:block;}
@@ -7378,7 +7381,7 @@ function createTattoo(overrides = {}) {
    ============================================================ */
 // App-versie (semver, handmatig ophogen bij een release). Bij een bump ook de
 // CACHE-naam in sw.js meebumpen, zodat clients de nieuwe build ophalen.
-const APP_VERSIE = '0.2.9.26';
+const APP_VERSIE = '0.2.9.27';
 const TWEE_D_AAN = false;   // 2D-kaart tijdelijk uit tot 'ie af is (optie A): verbergt de 2D-ingangen (header-toggle + starttegel). Zet op true om 2D weer aan te zetten.
 if (document.documentElement) document.documentElement.classList.toggle('tweed-uit', !TWEE_D_AAN);   // class staat statisch op <html>; hier synchroniseren (weghalen zodra 2D weer aan gaat)
 // Zolang 2D uit staat: het 3D-model niet via aria naar de (verborgen) 2D-knop verwijzen
@@ -11771,7 +11774,26 @@ async function verwijderVoorbeelden() {
   }
   const FOV_BASIS=45;              // fov waarop de schaal geijkt is (= startwaarde van de camera)
   let hIjk=0, wIjk=-1, ebIjk=-1;   // renderhoogte/breedte/balkhoogte waarop die ijking hoort
+  let pinW=-1;                     // breedte waarop de vaste veldhoogte gemeten is
+  /* Veldhoogte vastzetten op wat de CSS bij het openen geeft. Daarna beweegt het veld niet meer mee
+     met in- en uitschuivende browserbalken; alleen een echte breedtewissel (rotatie, venster) meet
+     opnieuw - de breedte verandert namelijk niet als zo'n balk verschijnt of verdwijnt. */
+  function pinStageHoogte(){
+    if(!stage) return;
+    // Alleen op touch: daar schuiven de balken. Op desktop mag het veld gewoon meegroeien met het venster.
+    if(!(window.matchMedia && window.matchMedia("(pointer:coarse)").matches)){
+      if(pinW!==-1){ stage.style.removeProperty("--stage-h"); pinW=-1; }
+      return;
+    }
+    const w=stage.clientWidth;
+    if(!w || w===pinW) return;   // verborgen view (0) of dezelfde breedte: niets te herijken
+    pinW=w;
+    stage.style.removeProperty("--stage-h");   // eerst terug naar de CSS-hoogte, dan pas meten
+    const h=stage.clientHeight;
+    if(h>0) stage.style.setProperty("--stage-h", h+"px");
+  }
   function resize(){ if(!renderer||!stage)return;
+    pinStageHoogte();
     // Bewerkbalk gedockt onder het model: render-hoogte krimpt met de balkhoogte, zodat de
     // tattoo/het lichaam niet meer onder de balk verdwijnt (alles blijft binnen de stage -> geen scroll).
     const eb=document.getElementById("editbar");
