@@ -940,7 +940,10 @@ form label,
 /* ===================== 3D-INTEGRATIE - STIJLEN ===================== */
 #view-3d{display:flex;flex-direction:column;gap:10px;}
 #view-3d.verborgen{display:none;}
-#stage{position:relative;width:100%;height:72vh;min-height:420px;touch-action:none;cursor:grab;
+/* Hoogte in svh (kleinste viewport): de mobiele browserbalk schuift bij scrollen in en uit,
+   en met vh groeide/kromp het veld dan mee - wat als 'het model zoomt vanzelf in' oogt.
+   vh blijft de terugval voor browsers zonder svh (daar vangt de fov-ijking in resize() het op). */
+#stage{position:relative;width:100%;height:72vh;height:72svh;min-height:420px;touch-action:none;cursor:grab;
   background:#0e1116;border-radius:var(--r-lg);overflow:hidden;}
 #stage:active{cursor:grabbing;}
 #stage canvas{display:block;}
@@ -7375,7 +7378,7 @@ function createTattoo(overrides = {}) {
    ============================================================ */
 // App-versie (semver, handmatig ophogen bij een release). Bij een bump ook de
 // CACHE-naam in sw.js meebumpen, zodat clients de nieuwe build ophalen.
-const APP_VERSIE = '0.2.9.25';
+const APP_VERSIE = '0.2.9.26';
 const TWEE_D_AAN = false;   // 2D-kaart tijdelijk uit tot 'ie af is (optie A): verbergt de 2D-ingangen (header-toggle + starttegel). Zet op true om 2D weer aan te zetten.
 if (document.documentElement) document.documentElement.classList.toggle('tweed-uit', !TWEE_D_AAN);   // class staat statisch op <html>; hier synchroniseren (weghalen zodra 2D weer aan gaat)
 // Zolang 2D uit staat: het 3D-model niet via aria naar de (verborgen) 2D-knop verwijzen
@@ -11766,13 +11769,23 @@ async function verwijderVoorbeelden() {
       target.z+radius*Math.sin(phi)*Math.cos(theta));
     camera.lookAt(target);
   }
+  const FOV_BASIS=45;              // fov waarop de schaal geijkt is (= startwaarde van de camera)
+  let hIjk=0, wIjk=-1, ebIjk=-1;   // renderhoogte/breedte/balkhoogte waarop die ijking hoort
   function resize(){ if(!renderer||!stage)return;
     // Bewerkbalk gedockt onder het model: render-hoogte krimpt met de balkhoogte, zodat de
-    // tattoo/het lichaam niet meer onder de balk verdwijnt (alles blijft binnen de 72vh -> geen scroll).
+    // tattoo/het lichaam niet meer onder de balk verdwijnt (alles blijft binnen de stage -> geen scroll).
     const eb=document.getElementById("editbar");
     const ebH=(eb&&eb.classList.contains("on")) ? eb.offsetHeight+12 : 0;
     const w=stage.clientWidth||320, h=Math.max(220,(stage.clientHeight||420)-ebH);
-    renderer.setSize(w,h); camera.aspect=w/h; camera.updateProjectionMatrix(); }
+    // Bij een vaste verticale fov schaalt het beeld recht mee met de renderhoogte. Op mobiel
+    // verandert die hoogte tijdens het scrollen (browserbalk schuift in/uit), en dan zoomt het model
+    // zichtbaar mee. Daarom ijken we de schaal alleen opnieuw bij een BEWUSTE layoutwissel: de eerste
+    // render, een andere breedte (rotatie/venster) of de bewerkbalk die aan/uit gaat. Verandert alleen
+    // de hoogte, dan corrigeert de fov dat, zodat het model even groot op het scherm blijft.
+    if(!hIjk || w!==wIjk || ebH!==ebIjk){ hIjk=h; wIjk=w; ebIjk=ebH; }
+    const fov=2*Math.atan(Math.tan(FOV_BASIS*Math.PI/360)*(h/hIjk))*180/Math.PI;
+    renderer.setSize(w,h); camera.aspect=w/h; camera.fov=Math.max(15,Math.min(80,fov));
+    camera.updateProjectionMatrix(); }
 
   /* ---- model laden ---- */
   function b64ToBuffer(b64){ const bin=atob(b64), len=bin.length, bytes=new Uint8Array(len);
@@ -14175,6 +14188,7 @@ async function verwijderVoorbeelden() {
   // Dev-haakje (preview/console): decal-culling direct kunnen meten zonder UI-flow. Geen product-pad.
   window.__tattiesDecalDbg = { faceGridFor, connectedDecalGeo, localDecalGeo, meshAtPoint, sceneRef:()=>scene, modelRef:()=>modelRoot,
     stateRef:()=>({ inited, currentGender, meldAndereModel, actief3D, plaatsModus, plaatsDataAan: !!plaatsData, plaatsTex: !!(plaatsData && plaatsData.tex) }),
+    cameraRef:()=>camera, rendererRef:()=>renderer,   // schaal-/fov-metingen (zie resize)
     addMetFoto:(src)=>openCutModalAddMetFoto(src,'3d') };
 
   /* ---- lazy init ---- */
