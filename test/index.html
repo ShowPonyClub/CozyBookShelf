@@ -6829,8 +6829,17 @@ Resources:`;for(let t of c){if(!t||typeof t!=`string`)throw Error(`@supabase/aut
    I18N - taalondersteuning (Nederlands / Engels)
    tr() = vertaalfunctie (NIET t(): 't' is overal de tattoo-variabele)
    ============================================================ */
-let taal = 'en';   // standaardtaal Engels; toesteltaal NL kiest NL; localStorage-voorkeur wint altijd
-try { const _o = localStorage.getItem('tatties-taal'); if (_o === 'nl' || _o === 'en') taal = _o; else if ((navigator.language || '').toLowerCase().startsWith('nl')) taal = 'nl'; } catch { /* geen voorkeur */ }
+let taal = 'en';   // ALTIJD Engels, tenzij de gebruiker zelf NL kiest
+let taalGekozen = false;   // true zodra de gebruiker zelf NL/EN aantikt
+/* Alleen een bewuste keuze blijft plakken. De app keek eerder ook naar de toesteltaal en stond
+   daarvoor standaard op NL (automatisch opgeslagen); beide hielden Engelstalige testers voorgoed
+   in het Nederlands. Dus: geen toesteltaal-detectie meer, en een oude auto-voorkeur (zonder
+   'gekozen'-vlag) telt niet mee. */
+try {
+  const _o = localStorage.getItem('tatties-taal');
+  taalGekozen = localStorage.getItem('tatties-taal-gekozen') === '1';
+  if (taalGekozen && (_o === 'nl' || _o === 'en')) taal = _o;
+} catch { /* geen voorkeur */ }
 let huidigeView = 'home';
 
 const ZONE_EN = {
@@ -7226,9 +7235,12 @@ function vertaalStatisch(){
   document.querySelectorAll('[data-i18n-aria]').forEach(el => { el.setAttribute('aria-label', tr(el.getAttribute('data-i18n-aria'))); });
   document.querySelectorAll('[data-i18n-title]').forEach(el => { el.setAttribute('title', tr(el.getAttribute('data-i18n-title'))); });
 }
-function pasTaal(lang){
+function pasTaal(lang, gekozen){
   taal = (lang === 'en') ? 'en' : 'nl';
-  try { localStorage.setItem('tatties-taal', taal); } catch { /* geen voorkeur */ }
+  try {
+    localStorage.setItem('tatties-taal', taal);
+    if (gekozen) { taalGekozen = true; localStorage.setItem('tatties-taal-gekozen', '1'); }
+  } catch { /* geen voorkeur */ }
   document.documentElement.lang = taal;
   bouwEuro();
   vertaalStatisch();
@@ -7363,7 +7375,7 @@ function createTattoo(overrides = {}) {
    ============================================================ */
 // App-versie (semver, handmatig ophogen bij een release). Bij een bump ook de
 // CACHE-naam in sw.js meebumpen, zodat clients de nieuwe build ophalen.
-const APP_VERSIE = '0.2.9.24';
+const APP_VERSIE = '0.2.9.25';
 const TWEE_D_AAN = false;   // 2D-kaart tijdelijk uit tot 'ie af is (optie A): verbergt de 2D-ingangen (header-toggle + starttegel). Zet op true om 2D weer aan te zetten.
 if (document.documentElement) document.documentElement.classList.toggle('tweed-uit', !TWEE_D_AAN);   // class staat statisch op <html>; hier synchroniseren (weghalen zodra 2D weer aan gaat)
 // Zolang 2D uit staat: het 3D-model niet via aria naar de (verborgen) 2D-knop verwijzen
@@ -11318,7 +11330,7 @@ async function verwijderVoorbeelden() {
   { const terug = $('#onb-terug'); if (terug) terug.addEventListener('click', () => { const s1 = $('#onb-stap1'), s2 = $('#onb-stap2'); if (s1) s1.hidden = false; if (s2) s2.hidden = true; }); }
   $('#kaart-reset').addEventListener('click', () => { zetFilter(null); setTimeout(renderMarkers, 320); });
   document.querySelectorAll('#taal-keuze button[data-taal]').forEach((b) =>
-    b.addEventListener('click', () => pasTaal(b.dataset.taal)));
+    b.addEventListener('click', () => pasTaal(b.dataset.taal, true)));
   pasTaal(taal);
   document.querySelectorAll('#valuta-keuze button[data-valuta]').forEach((b) => {
     b.classList.toggle('actief', b.dataset.valuta === valuta);
@@ -12852,7 +12864,9 @@ async function verwijderVoorbeelden() {
   function magicBezigTonen(aan){
     const ov=document.getElementById('cmMagicOverlay');
     const tx=ov?ov.querySelector('.cm-magic-tekst'):null;
+    const h=document.getElementById('cmHint');
     magicBezigTimers.forEach(clearTimeout); magicBezigTimers=[];
+    if(h) h.style.visibility = aan ? 'hidden' : '';   // top-hint weg tijdens de AI-actie; de overlay toont de status
     if(!ov) return;
     if(aan){
       if(tx) tx.textContent=tr('ui.magic_bezig');
