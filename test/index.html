@@ -7366,7 +7366,10 @@ function createTattoo(overrides = {}) {
     stapel: 0,               // stapelvolgorde bij overlap (hoger = ligt bovenop)
     nazorgTaken: [],         // Array<{tekst, klaar}> - nazorg-checklist
     kunst: null,             // {src, aspect, schaal, rotatie} - uitsnede voor op de pop
-    positie3d: null,         // 3D: {point:[x,y,z],normal:[x,y,z],rot,size,gender,zone,side}
+    positie3d: null,         // 3D: {point:[x,y,z],normal:[x,y,z],rot,size,gender,zone,side,
+                             //      bind:{tri,b:[u,v],rot,n}}  bind = plek op de HUID (driehoek +
+                             //      barycentrisch + hoek t.o.v. de driehoek); beweegt mee als het
+                             //      model van vorm verandert. point/normal blijven de terugval.
     kunst3d: null,           // 3D: {srcUrl,lasso:[{nx,ny}],thresh,bg}
     // Sync-velden (cloud-sync slice 1) - lokaal onzichtbaar, klaar voor latere sync.
     updatedAt: 0,            // epoch-ms van laatste wijziging; saveTattoo stempelt dit bij elke write
@@ -7381,7 +7384,7 @@ function createTattoo(overrides = {}) {
    ============================================================ */
 // App-versie (semver, handmatig ophogen bij een release). Bij een bump ook de
 // CACHE-naam in sw.js meebumpen, zodat clients de nieuwe build ophalen.
-const APP_VERSIE = '0.2.9.27';
+const APP_VERSIE = '0.2.9.28';
 const TWEE_D_AAN = false;   // 2D-kaart tijdelijk uit tot 'ie af is (optie A): verbergt de 2D-ingangen (header-toggle + starttegel). Zet op true om 2D weer aan te zetten.
 if (document.documentElement) document.documentElement.classList.toggle('tweed-uit', !TWEE_D_AAN);   // class staat statisch op <html>; hier synchroniseren (weghalen zodra 2D weer aan gaat)
 // Zolang 2D uit staat: het 3D-model niet via aria naar de (verborgen) 2D-knop verwijzen
@@ -12254,6 +12257,89 @@ async function verwijderVoorbeelden() {
     return rg;
   }
   let _decalTmp=null;   // herbruikbare tijdelijke mesh voor de gereduceerde geometry
+  /* ---- Pose-onafhankelijke plek (fundament voor A-pose + lichaamsvormen) ---------------------
+     Een tattoo hoort bij een stukje HUID, niet bij een coordinaat in de ruimte. `positie3d.point`
+     is absoluut en wijst dus naar niets zodra het model van vorm verandert. Daarom bewaren we er
+     een BINDING naast: welke driehoek, waar binnen die driehoek (barycentrisch) en de draaihoek
+     ten opzichte van een raakvector van diezelfde driehoek. Die drie gegevens bewegen mee met het
+     oppervlak, dus punt, normaal en rotatie zijn er altijd uit terug te rekenen.
+     `point`/`normal` blijven als terugval staan (oude records, import, ander model).
+     Guard `n` = aantal driehoeken van de mesh waarop de binding is gemaakt; klopt dat niet meer,
+     dan is het een ander model en zegt de binding niets. */
+  const _bwv=[new THREE.Vector3(),new THREE.Vector3(),new THREE.Vector3()];
+  const _bE1=new THREE.Vector3(), _bE2=new THREE.Vector3(), _bN=new THREE.Vector3();
+  const _bT=new THREE.Vector3(), _bB=new THREE.Vector3(), _bUp=new THREE.Vector3();
+  const _bHelper=new THREE.Object3D(), _bDoel=new THREE.Vector3();
+  function triAantal(mesh){ const g=mesh&&mesh.geometry; if(!g||!g.attributes.position) return 0;
+    return g.index ? g.index.count/3 : g.attributes.position.count/3; }
+  function triIndex(g,tri,k){ return g.index ? g.index.getX(tri*3+k) : (tri*3+k); }
+  // Hoekpunten in WERELDruimte + de vlaknormaal (zelfde afleiding als een raycast-hit: winding + matrixWorld).
+  function triWereld(mesh, tri){
+    const g=mesh&&mesh.geometry, pos=g&&g.attributes.position; if(!pos) return null;
+    if(!(tri>=0 && tri<triAantal(mesh))) return null;
+    mesh.updateWorldMatrix(true,false);
+    for(let k=0;k<3;k++) _bwv[k].fromBufferAttribute(pos, triIndex(g,tri,k));
+    _bN.crossVectors(_bE1.subVectors(_bwv[1],_bwv[0]), _bE2.subVectors(_bwv[2],_bwv[0])).normalize();
+    _bN.transformDirection(mesh.matrixWorld).normalize();
+    for(let k=0;k<3;k++) _bwv[k].applyMatrix4(mesh.matrixWorld);
+    return _bwv;
+  }
+  // Raakassen van de driehoek: T langs de eerste rand (op het vlak geprojecteerd), B loodrecht in het vlak.
+  function triAssen(v, n){
+    _bT.copy(v[1]).sub(v[0]); _bT.addScaledVector(n, -_bT.dot(n));
+    if(_bT.lengthSq()<1e-14) _bT.set(1,0,0).addScaledVector(n,-n.x);
+    _bT.normalize(); _bB.crossVectors(n,_bT).normalize();
+  }
+  // De 'omhoog'-richting die makeImage bij deze hoek aan de decal geeft (identieke helper-opzet).
+  function decalUp(point, normal, rotDeg){
+    _bHelper.position.copy(point); _bHelper.lookAt(_bDoel.copy(point).add(normal));
+    _bHelper.rotateZ((rotDeg||0)*Math.PI/180); _bHelper.updateMatrixWorld();
+    return _bUp.set(0,1,0).applyQuaternion(_bHelper.quaternion);
+  }
+  function hoekInVlak(v3){ return Math.atan2(v3.dot(_bB), v3.dot(_bT))*180/Math.PI; }
+  // Driehoek onder een punt terugvinden (migratie + plaatsen zonder aanwijzen): prik van buitenaf naar binnen.
+  function triBijPunt(mesh, point, normal){
+    if(!mesh||!point||!normal) return -1;
+    try{
+      const rc=new THREE.Raycaster();
+      rc.set(point.clone().addScaledVector(normal,0.05), normal.clone().multiplyScalar(-1).normalize());
+      const hits=rc.intersectObject(mesh,true);
+      for(const h of hits){ if(h.faceIndex!==undefined && h.point.distanceTo(point)<0.02) return h.faceIndex; }
+      if(hits[0] && hits[0].faceIndex!==undefined) return hits[0].faceIndex;
+    }catch(e){ /* geen driehoek: terugval op het absolute punt */ }
+    return -1;
+  }
+  function maakBind(mesh, tri, point, normal, rotDeg){
+    const v=triWereld(mesh,tri); if(!v) return null;
+    const b=new THREE.Vector3();
+    try{ THREE.Triangle.getBarycoord(point, v[0], v[1], v[2], b); }catch(e){ return null; }
+    if(!isFinite(b.x)||!isFinite(b.y)||!isFinite(b.z)) return null;
+    triAssen(v,_bN);
+    const a=hoekInVlak(decalUp(point, normal||_bN, rotDeg));
+    return { tri, b:[+b.x.toFixed(6), +b.y.toFixed(6)], rot:+a.toFixed(3), n:triAantal(mesh) };
+  }
+  function uitBind(mesh, bind){
+    if(!mesh || !bind || !Array.isArray(bind.b) || !(bind.tri>=0)) return null;
+    if(bind.n && bind.n!==triAantal(mesh)) return null;      // ander model -> binding zegt niets
+    const v=triWereld(mesh,bind.tri); if(!v) return null;
+    const u=+bind.b[0], w=+bind.b[1], t=1-u-w;
+    if(!isFinite(u)||!isFinite(w)) return null;
+    const point=new THREE.Vector3().addScaledVector(v[0],u).addScaledVector(v[1],w).addScaledVector(v[2],t);
+    const normal=_bN.clone();
+    triAssen(v,normal);
+    const rot=(((+bind.rot||0)-hoekInVlak(decalUp(point,normal,0)))%360+360)%360;
+    return { point, normal, rot };
+  }
+  // Binding (her)berekenen en in een positie3d-object zetten. Lukt het niet, dan weg ermee:
+  // een verouderde binding is erger dan geen binding (die wijst naar de vorige plek).
+  function zetBind(P, mesh, point, normal, rotDeg, tri){
+    if(!P || !mesh || !point) return null;
+    const t=(tri>=0) ? tri : triBijPunt(mesh, point, normal);
+    const b=(t>=0) ? maakBind(mesh, t, point, normal, rotDeg) : null;
+    if(b) P.bind=b; else delete P.bind;
+    return b;
+  }
+
   function makeImage(point, normal, rotDeg, sizeM, tex, mesh, mul){
     const aspect=(tex&&tex.image&&tex.image.width) ? (tex.image.height/tex.image.width) : 1;
     // Multiply-blend: lichte huid in de foto verdwijnt (×onderlaag = ongewijzigd), donkere inkt
@@ -12316,7 +12402,7 @@ async function verwijderVoorbeelden() {
     const h=hits[0]; let n;
     if(h.face) n=h.face.normal.clone().transformDirection(h.object.matrixWorld).normalize();
     else n=camera.position.clone().sub(h.point).normalize();
-    return {point:h.point.clone(), normal:n, mesh:h.object};
+    return {point:h.point.clone(), normal:n, mesh:h.object, tri:(h.faceIndex!==undefined?h.faceIndex:-1)};
   }
   function pickDecal(x,y){
     const objs=markers.map(m=>m.obj).filter(Boolean); if(!objs.length) return null;
@@ -12371,10 +12457,12 @@ async function verwijderVoorbeelden() {
       positie3d:{ point:[s.point.x,s.point.y,s.point.z], normal:[s.normal.x,s.normal.y,s.normal.z],
                   rot, size, gender:currentGender, preset:presetId(), zone:nz.zone, side:nz.side },
       kunst3d:d.kunst3d }, d.info));
+    zetBind(rec.positie3d, s.mesh, s.point, s.normal, rot, (s.tri>=0?s.tri:-1));   // plek op de huid, niet in de ruimte
     sync2D(rec, s.point, nz.side, rot, size, d.tex);
     try{ await saveTattoo(rec); }catch(e){ console.error(e); toast(tr('toast.opslaanmislukt')+(e&&e.message?e.message:tr('ui.fout'))); }
     if(typeof tattoos!=="undefined" && Array.isArray(tattoos)) tattoos.push(rec);
-    const m={ id:rec.id, rec, obj, point:s.point.clone(), normal:s.normal.clone(), mesh:s.mesh, rot, size, tex:d.tex };
+    const m={ id:rec.id, rec, obj, point:s.point.clone(), normal:s.normal.clone(), mesh:s.mesh,
+      tri:(s.tri>=0?s.tri:((rec.positie3d&&rec.positie3d.bind)?rec.positie3d.bind.tri:-1)), rot, size, tex:d.tex };
     zetDecalOpacity(obj, rec.opacity);
     markers.push(m); plaatsData=null; plaatsModus=false; verbergBanner(); if(window.__plaatsHintUit) window.__plaatsHintUit();
     if(typeof renderMarkers==="function"){ try{renderMarkers();}catch(_){} }
@@ -12426,7 +12514,7 @@ async function verwijderVoorbeelden() {
     if(!editDecal||editDecal.locked) return;
     const s=surfaceAt(x,y); if(!s) return;
     if(editDecal.point.distanceTo(s.point)<0.004) return;   // throttle
-    editDecal.point=s.point; editDecal.normal=s.normal; editDecal.mesh=s.mesh;
+    editDecal.point=s.point; editDecal.normal=s.normal; editDecal.mesh=s.mesh; editDecal.tri=(s.tri>=0?s.tri:-1);
     rebuildMarker(editDecal);
   }
   function scaleDecal(f){ if(!editDecal||editDecal.locked)return; editDecal.size=clamp((editDecal.size||0.09)*f,0.03,0.40); rebuildMarker(editDecal); }
@@ -12696,6 +12784,7 @@ async function verwijderVoorbeelden() {
     P.point=[m.point.x,m.point.y,m.point.z];
     P.normal=[m.normal.x,m.normal.y,m.normal.z];
     P.rot=m.rot||0; P.size=m.size||0.09; P.locked=!!m.locked; P.gender=currentGender; P.preset=presetId(); P.zone=nz.zone; P.side=nz.side;
+    zetBind(P, m.mesh||pickMeshes[0], m.point, m.normal, m.rot||0, (m.tri>=0?m.tri:-1));
     m.rec.zijde=nz.side; m.rec.lichaamsdeel=nz.zone;
     sync2D(m.rec, m.point, nz.side, m.rot, m.size, m.tex);
     clearTimeout(m._persistT);   // per-marker timer: alleen deze tattoo's eigen save herplannen
@@ -13974,11 +14063,12 @@ async function verwijderVoorbeelden() {
             rot, size, gender:currentGender, zone:nz.zone, side:nz.side },
           kunst3d:bouwKunst3d()
         });
+        zetBind(rec.positie3d, pp.mesh, pp.point, pp.normal, rot, (pp.tri>=0?pp.tri:-1));
         sync2D(rec, pp.point, nz.side, rot, size, imgTexture);
         await saveTattoo(rec);
         if(typeof tattoos!=="undefined" && Array.isArray(tattoos)) tattoos.push(rec);
-        const m={ id:rec.id, rec, obj, point:pp.point.clone(), normal:pp.normal.clone(),
-          mesh:pp.mesh, rot, size, tex:imgTexture };
+        const m={ id:rec.id, rec, obj, point:pp.point.clone(), normal:pp.normal.clone(), mesh:pp.mesh,
+          tri:(pp.tri>=0?pp.tri:((rec.positie3d&&rec.positie3d.bind)?rec.positie3d.bind.tri:-1)), rot, size, tex:imgTexture };
         markers.push(m);
         imgTexture=null;   // marker bezit de textuur nu; voorkom dispose door volgende updateCutout
         if(typeof renderMarkers==="function"){ try{renderMarkers();}catch(_){} }
@@ -14070,6 +14160,7 @@ async function verwijderVoorbeelden() {
     // Andere preset (lichaamsvorm) dan waarvoor het 3D-punt is opgeslagen -> herleiden uit de 2D-referentie.
     if(P&&P.point&&P.preset&&P.preset!==presetId()) P=null;
     if(!P||!P.point){ P=afleid3DUitZone(t); if(P) P.preset=presetId(); }
+    const eigenP=(P===(t&&t.positie3d));   // alleen een ECHT opgeslagen plek migreren, geen afgeleide
     if(!P||!P.point) return false;
     if((P.gender||"man")!==currentGender) return false;    // alleen tattoos van dit model
     const k3 = (t.kunst3d && t.kunst3d.srcUrl) ? t.kunst3d
@@ -14078,10 +14169,23 @@ async function verwijderVoorbeelden() {
     try{ tex=await rebuildTextureFromKunst(k3); }catch(e){ console.error("herstel-textuur mislukt",e); }
     if(token!==undefined && token!==loadToken) return false;
     if(!tex) return false;
-    const point=new THREE.Vector3(P.point[0],P.point[1],P.point[2]);
-    const normal=new THREE.Vector3(P.normal[0],P.normal[1],P.normal[2]);
+    let point=new THREE.Vector3(P.point[0],P.point[1],P.point[2]);
+    let normal=new THREE.Vector3(P.normal[0],P.normal[1],P.normal[2]);
+    let rot=P.rot||0;
     const mesh=meshAtPoint(point,normal);
-    const obj=makeImage(point,normal,P.rot||0,P.size||0.09,tex,mesh,recMul(t));
+    // De plek komt bij voorkeur uit de binding: die zit op de huid en beweegt dus mee met het model.
+    // Wijkt hij meer dan 2 mm af van het opgeslagen punt, dan klopt er iets niet (ander model, kapotte
+    // data) en houden we het oude punt aan - een verschoven tattoo is erger dan een oude plek.
+    let bindNieuw=null;
+    const ub=uitBind(mesh, P.bind);
+    if(ub){
+      const afw=ub.point.distanceTo(point);
+      if(afw<=0.002){ point=ub.point; normal=ub.normal; rot=ub.rot; }
+      else console.warn("3D-binding wijkt af ("+afw.toFixed(4)+" m), oude plek aangehouden:", t.id);
+    } else if(mesh && eigenP){
+      bindNieuw=zetBind(P, mesh, point, normal, rot, -1);   // eenmalige migratie van een ouder record
+    }
+    const obj=makeImage(point,normal,rot,P.size||0.09,tex,mesh,recMul(t));
     if(!obj) return false;
     obj.renderOrder=(t.stapel)||0;
     const _wens=(t.status==='wens');
@@ -14091,14 +14195,14 @@ async function verwijderVoorbeelden() {
     // zodat 2D-bewerkingen (slepen) en 3D-`persistEdit` op hetzelfde record werken en niet uiteenlopen.
     const recRef=(typeof tattoos!=="undefined" && Array.isArray(tattoos)) ? (tattoos.find(x=>x.id===t.id)||t) : t;
     markers.push({ id:t.id, rec:recRef, obj, point:point.clone(), normal:normal.clone(),
-      mesh, rot:P.rot||0, size:P.size||0.09, locked:!!P.locked, tex });
+      mesh, tri:(P.bind&&P.bind.tri>=0?P.bind.tri:-1), rot, size:P.size||0.09, locked:!!P.locked, tex });
     // Ouder record: 2D-velden bijvullen. Check op de VOLLE DB-kopie `t` - het in-RAM
     // record (recRef) is licht (kunst.src gestript), anders zou dit elke 3D-load voor
     // álle tattoos draaien en schrijven.
-    if(!t.positie || !t.kunst || !t.kunst.src){
-      sync2D(recRef, point, P.side||"voor", P.rot||0, P.size||0.09, tex);
-      try{ await saveTattoo(recRef); }catch(e){ console.error(e); }
-    }
+    const magSync=(!t.positie || !t.kunst || !t.kunst.src);
+    if(magSync) sync2D(recRef, point, P.side||"voor", rot, P.size||0.09, tex);
+    if(bindNieuw && recRef.positie3d && recRef.positie3d!==P) recRef.positie3d.bind=bindNieuw;
+    if(magSync || bindNieuw){ try{ await saveTattoo(recRef); }catch(e){ console.error(e); } }
     return true;
   }
   async function restore3D(token){
@@ -14211,6 +14315,7 @@ async function verwijderVoorbeelden() {
   window.__tattiesDecalDbg = { faceGridFor, connectedDecalGeo, localDecalGeo, meshAtPoint, sceneRef:()=>scene, modelRef:()=>modelRoot,
     stateRef:()=>({ inited, currentGender, meldAndereModel, actief3D, plaatsModus, plaatsDataAan: !!plaatsData, plaatsTex: !!(plaatsData && plaatsData.tex) }),
     cameraRef:()=>camera, rendererRef:()=>renderer,   // schaal-/fov-metingen (zie resize)
+    bindDbg:{ maakBind, uitBind, triBijPunt, triAantal, triWereld, surfaceAt, markersRef:()=>markers },
     addMetFoto:(src)=>openCutModalAddMetFoto(src,'3d') };
 
   /* ---- lazy init ---- */
