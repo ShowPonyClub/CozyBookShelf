@@ -6946,8 +6946,10 @@ const I18N = {
     'ui.aanpassen_bijknippen':'Aanpassen','ui.klaar':'Klaar','ui.kleiner':'Kleiner','ui.groter':'Groter','ui.sluiten_bevestig':'Uitsnede sluiten? Je niet-opgeslagen werk gaat verloren.','ui.sluiten_ja':'Sluiten',
     'ui.links_draaien':'Linksom draaien','ui.rechts_draaien':'Rechtsom draaien',
     'ui.eb_hint':'Sleep = verplaatsen · knijp = schalen · knijp-draai = roteren',
-    'ui.draai_hint':'Sleep om te draaien · tik op een arm, been of hoofd om het los te bekijken',
+    'ui.draai_hint':'Sleep om te draaien · tik op een arm, been of hoofd · + voor een nieuwe tattoo',
     'ui.heel_lichaam':'Terug naar het hele lichaam','ui.heel_kort':'Heel lichaam',
+    'lede.bezig':'Alleen {deel} in beeld · tik + om er een tattoo op te zetten',
+    'lede.plaats_op_deel':'Tik op het deel dat je los bekijkt',
     'lede.arm-links':'Linkerarm','lede.arm-rechts':'Rechterarm',
     'lede.been-links':'Linkerbeen','lede.been-rechts':'Rechterbeen','lede.hoofd':'Hoofd en nek',
     'ui.plaats_hint':'Tik op het lichaam om de tattoo te plaatsen',
@@ -7130,8 +7132,10 @@ const I18N = {
     'ui.aanpassen_bijknippen':'Edit','ui.klaar':'Done','ui.kleiner':'Smaller','ui.groter':'Bigger','ui.sluiten_bevestig':'Discard your cut-out? Unsaved work will be lost.','ui.sluiten_ja':'Discard',
     'ui.links_draaien':'Rotate left','ui.rechts_draaien':'Rotate right',
     'ui.eb_hint':'Drag = move · pinch = scale · pinch-twist = rotate',
-    'ui.draai_hint':'Drag to rotate · tap an arm, leg or head to view it on its own',
+    'ui.draai_hint':'Drag to rotate · tap an arm, leg or head · + for a new tattoo',
     'ui.heel_lichaam':'Back to the whole body','ui.heel_kort':'Whole body',
+    'lede.bezig':'Showing {deel} only · tap + to put a tattoo on it',
+    'lede.plaats_op_deel':'Tap the part you are viewing on its own',
     'lede.arm-links':'Left arm','lede.arm-rechts':'Right arm',
     'lede.been-links':'Left leg','lede.been-rechts':'Right leg','lede.hoofd':'Head and neck',
     'ui.plaats_hint':'Tap on the body to place the tattoo',
@@ -7252,6 +7256,8 @@ function tr(k){
 }
 function vertaalStatisch(){
   document.querySelectorAll('[data-i18n]').forEach(el => { el.textContent = tr(el.getAttribute('data-i18n')); });
+  // De 3D-hint kan een eigen tekst hebben (welk ledemaat los staat); die zetten we hierna terug.
+  try{ if (window.__tattiesLedeUI) window.__tattiesLedeUI(); }catch(e){ /* 3D nog niet geladen */ }
   document.querySelectorAll('[data-i18n-html]').forEach(el => { el.innerHTML = tr(el.getAttribute('data-i18n-html')); });
   document.querySelectorAll('[data-i18n-ph]').forEach(el => { el.setAttribute('placeholder', tr(el.getAttribute('data-i18n-ph'))); });
   document.querySelectorAll('[data-i18n-aria]').forEach(el => { el.setAttribute('aria-label', tr(el.getAttribute('data-i18n-aria'))); });
@@ -11975,7 +11981,7 @@ async function verwijderVoorbeelden() {
         // Ortho-data (cal/masker/zones) VÓÓR het herstel publiceren: 2D-only tattoos leiden hun
         // 3D-plek af via de host-2D-positie (basisPos2D), die window.Ortho2D nodig heeft.
         try{ publishOrtho2D(); }catch(e){ console.error(e); }
-        Promise.resolve(restore3D(token)).finally(()=>{ if(token===loadToken){ showLoading(false); } });
+        Promise.resolve(restore3D(token)).finally(()=>{ if(token===loadToken){ showLoading(false); meetVooruit(token); } });
       }, err=>{ console.error(err); toast(tr('ui.model_mislukt')); showLoading(false); });
     }catch(e){ console.error(e); toast(tr('ui.model_mislukt')); showLoading(false); }
   }
@@ -13101,22 +13107,44 @@ async function verwijderVoorbeelden() {
     return null;
   }
   function tikLedemaat(x,y){
-    if(ledeActief) return false;             // al los: een tik zoomt gewoon weer in
-    const deel=deelBijPunt(x,y); if(!deel) return false;
-    if(!isoleerLedemaat(deel)) return false;
+    const deel=deelBijPunt(x,y);
+    if(!deel) return false;                                  // romp of naast het model: oude tik
+    if(ledeActief && deel===ledeActief.deel) return false;   // ditzelfde deel: gewoon inzoomen
+    /* Eerst de melding en de tril, dan pas bouwen. Het bouwen kost op een telefoon een paar
+       honderd ms; zonder dit voelt de tik dood aan omdat er tot die tijd niets gebeurt. */
     toast(tr('lede.'+deel));
+    tril(10);
+    frameAdem().then(()=>{ isoleerLedemaat(deel); });   // isoleerLedemaat stopt een vorig deel zelf
     return true;
   }
   function zetLedeUI(){
     const b=document.getElementById('t3d-heel'); if(b) b.hidden=!ledeActief;
+    // De hintregel onder het model zegt welk deel los staat; anders zie je alleen een toast die
+    // wegvalt en weet je even later niet meer waar je naar kijkt.
+    const h=document.getElementById('hint');
+    if(h) h.textContent = ledeActief ? tr('lede.bezig').replace('{deel}', tr('lede.'+ledeActief.deel).toLowerCase())
+                                     : tr('ui.draai_hint');
   }
   function heelLichaam(){
     if(!ledeActief) return;
     stopIsolatie();
     targetGoal=new THREE.Vector3(CAM0.tx,CAM0.ty,CAM0.tz); radiusGoal=CAM0.radius;   // soepel terug
   }
+  /* De knip van alle delen alvast meten zodra het model geladen is, met een adempauze ertussen.
+     De meting is het trage deel van een tik (op deze machine 40 tot 80 ms per deel); vooruit meten
+     haalt dat uit de tik zelf. Alles is gecached op de mesh, dus dit is puur voorwerk. */
+  async function meetVooruit(token){
+    for(const deel of LEDE_DELEN){
+      if(token!==undefined && token!==loadToken) return;
+      for(const mesh of pickMeshes){
+        try{ knipVoor(mesh, deel); }catch(e){ console.error("knip vooraf meten mislukt", e); }
+      }
+      await frameAdem();
+    }
+  }
   /* Dev-haakje: meten en isoleren zonder UI.
      Bv. __tattiesLedemaat.isoleer('been-links') en __tattiesLedemaat.stop(). */
+  window.__tattiesLedeUI=zetLedeUI;   // taalwissel zet de hint terug; hierna weer ons eigen bericht
   window.__tattiesLedemaat={ isoleer:isoleerLedemaat, stop:stopIsolatie, delen:LEDE_DELEN,
     actief:()=>ledeActief&&ledeActief.deel,
     deksel:(aan)=>{ LEDE_DEKSEL=!!aan; const d=ledeActief&&ledeActief.deel; if(d){ stopIsolatie(); return isoleerLedemaat(d); } return LEDE_DEKSEL; },
@@ -13300,7 +13328,7 @@ async function verwijderVoorbeelden() {
   }
   async function plaatsNieuwe(x,y){
     if(!plaatsData){ plaatsModus=false; verbergBanner(); if(window.__plaatsHintUit) window.__plaatsHintUit(); return; }
-    const s=surfaceAt(x,y); if(!s){ toast(tr('ui.klik_plaatsen')); return; }
+    const s=surfaceAt(x,y); if(!s){ toast(tr(ledeActief ? 'lede.plaats_op_deel' : 'ui.klik_plaatsen')); return; }
     await plaatsOpPunt(s);
   }
   // A11Y-4: plaatsen zonder aanwijzen - het zone-midden als oppervlaktepunt, zodat
@@ -15178,7 +15206,12 @@ async function verwijderVoorbeelden() {
   window.__tatties3DGepland = function(){
     markers.forEach(m=>{ if(!m.obj||!m.rec) return; const w=(m.rec.status==='wens');
       m.obj.visible = !w || toonGepland;
-      zetDecalOpacity(m.obj, (isFinite(+m.rec.opacity)?Math.max(0.2,Math.min(1,+m.rec.opacity)):1)*(w?0.5:1)); });
+      const op=(isFinite(+m.rec.opacity)?Math.max(0.2,Math.min(1,+m.rec.opacity)):1)*(w?0.5:1);
+      zetDecalOpacity(m.obj, op);
+      // Loopt de tattoo over een knip, dan hangt de rest in een tweede mesh: die hoort dezelfde
+      // zichtbaarheid te volgen, anders blijft van een verborgen wens-tattoo de romphelft staan.
+      if(ledeActief && ledeActief.decalOp.has(m)) ledeActief.decalOp.set(m, op);
+      if(m.__ledeHelft){ m.__ledeHelft.visible=m.obj.visible; zetDecalOpacity(m.__ledeHelft, LEDE_DECAL_OP*op); } });
   };
 
   /* ---- render-lus ---- */
