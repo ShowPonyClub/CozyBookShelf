@@ -12441,7 +12441,7 @@ async function verwijderVoorbeelden() {
       const ub=(P&&P.bind) ? uitBind(m.mesh||pickMeshes[0], P.bind) : null;
       if(ub){ m.point=ub.point; m.normal=ub.normal; m.rot=ub.rot; }
       try{ rebuildMarker(m); }catch(e){ console.error("decal na houdingswissel mislukt",e); }
-      if((++i%4)===0) await new Promise(r=>requestAnimationFrame(()=>r()));
+      if((++i%4)===0) await frameAdem();
     }
     if(editDecal && selRingOn) buildSelRing();
   }
@@ -15093,6 +15093,18 @@ async function verwijderVoorbeelden() {
     if(magSync || bindNieuw){ try{ await saveTattoo(recRef); }catch(e){ console.error(e); } }
     return true;
   }
+  /* Adempauze tussen zware stappen door. Normaal wachten we op het volgende frame, zodat de UI
+     tussendoor kan tekenen. Maar in een verborgen tab (andere app, scherm op slot) vuurt
+     requestAnimationFrame NIET, en dan bleef het herstel halverwege hangen tot je terugkwam - met
+     de laadmelding in beeld. Daarom een timer ernaast: wie het eerst komt. */
+  function frameAdem(){
+    return new Promise(r=>{
+      let klaar=false;
+      const af=()=>{ if(klaar) return; klaar=true; r(); };
+      const t=setTimeout(af,60);
+      requestAnimationFrame(()=>{ clearTimeout(t); af(); });
+    });
+  }
   async function restore3D(token){
     if(token!==undefined && token!==loadToken) return;
     if(!pickMeshes.length) return;
@@ -15113,7 +15125,7 @@ async function verwijderVoorbeelden() {
       // Yield op tijdsbudget (~12ms) i.p.v. vast per 4 decals: zo blijft de UI per frame
       // responsief, ongeacht hoe zwaar een losse decal is (één trage decal blokkeerde voorheen
       // tot 4 op rij synchroon). Lichte decals lopen door zonder onnodige frame-waits.
-      if(performance.now()-_laatsteYield>12){ await new Promise(r=>requestAnimationFrame(r)); _laatsteYield=performance.now(); if(token!==undefined && token!==loadToken){ zetLaadVoortgang(0,0); return; } }
+      if(performance.now()-_laatsteYield>12){ await frameAdem(); _laatsteYield=performance.now(); if(token!==undefined && token!==loadToken){ zetLaadVoortgang(0,0); return; } }
     }
     zetLaadVoortgang(0,0);   // label terug naar 'Laden…'
     if(typeof renderMarkers==="function"){ try{renderMarkers();}catch(_){} }
