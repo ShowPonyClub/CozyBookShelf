@@ -1607,6 +1607,14 @@ form label{text-transform:none;letter-spacing:.005em;font-size:.8rem;color:var(-
         <svg viewBox="0 0 24 24" class="ik" aria-hidden="true" style="width:15px;height:15px"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>
         <span data-i18n="ui.gepland">Gepland</span>
       </button>
+      <button type="button" id="t3d-pose" class="gepland-toggle" aria-pressed="false" data-i18n-title="ui.pose_arm" data-i18n-aria="ui.pose_arm" title="Armen wijd" aria-label="Armen wijd">
+        <svg viewBox="0 0 24 24" class="ik" aria-hidden="true" style="width:15px;height:15px"><circle cx="12" cy="5.4" r="1.9"/><path d="M12 8v6"/><path d="M3.5 11.5L12 9l8.5 2.5"/><path d="M9 20.5l3-6.5 3 6.5"/></svg>
+        <span data-i18n="ui.pose_kort">Armen</span>
+      </button>
+      <button type="button" id="t3d-heel" class="gepland-toggle" hidden data-i18n-title="ui.heel_lichaam" data-i18n-aria="ui.heel_lichaam" title="Heel lichaam" aria-label="Heel lichaam">
+        <svg viewBox="0 0 24 24" class="ik" aria-hidden="true" style="width:15px;height:15px"><circle cx="12" cy="4.6" r="2"/><path d="M12 7v7"/><path d="M5 9.5h14"/><path d="M9 21l3-7 3 7"/></svg>
+        <span data-i18n="ui.heel_kort">Heel lichaam</span>
+      </button>
       <button type="button" id="t3d-reset" data-i18n-title="ui.beginstand" data-i18n-aria="ui.beginstand" title="Beginstand" aria-label="Beginstand"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12a8 8 0 1 0 2.3-5.6"/><path d="M3 4v4h4"/></svg></button>
     </div>
     <div id="stage" role="img" data-i18n-aria="ui.stage_aria" aria-label="3D-lichaamsmodel; gebruik de 2D-knop bovenaan voor de toegankelijke platte kaart">
@@ -6938,7 +6946,10 @@ const I18N = {
     'ui.aanpassen_bijknippen':'Aanpassen','ui.klaar':'Klaar','ui.kleiner':'Kleiner','ui.groter':'Groter','ui.sluiten_bevestig':'Uitsnede sluiten? Je niet-opgeslagen werk gaat verloren.','ui.sluiten_ja':'Sluiten',
     'ui.links_draaien':'Linksom draaien','ui.rechts_draaien':'Rechtsom draaien',
     'ui.eb_hint':'Sleep = verplaatsen · knijp = schalen · knijp-draai = roteren',
-    'ui.draai_hint':'Sleep om te draaien · tik op + om een tattoo toe te voegen',
+    'ui.draai_hint':'Sleep om te draaien · tik op een arm, been of hoofd om het los te bekijken',
+    'ui.heel_lichaam':'Terug naar het hele lichaam','ui.heel_kort':'Heel lichaam',
+    'lede.arm-links':'Linkerarm','lede.arm-rechts':'Rechterarm',
+    'lede.been-links':'Linkerbeen','lede.been-rechts':'Rechterbeen','lede.hoofd':'Hoofd en nek',
     'ui.plaats_hint':'Tik op het lichaam om de tattoo te plaatsen',
     'ui.gepland':'Wishlist','ui.toon_gepland':'Wishlist op het lichaam tonen',
     'ui.geen_model':'Geen 3D-model gevonden','ui.man_laden':'Manmodel laden…','ui.ander_model_verborgen':'{n} tattoo(s) staan op het andere lichaamsmodel en zijn hier verborgen.','ui.plaats_zonder_aanwijzen':'Plaatsen zonder aanwijzen - kies een lichaamsdeel','ui.plaats_daar':'Plaats','ui.vrouw_laden':'Vrouwmodel laden…',
@@ -6966,6 +6977,7 @@ const I18N = {
     'install.tekst':'Zet Tatties op je beginscherm voor offline gebruik','install.knop':'Installeren','install.opbeginscherm':'Op beginscherm zetten','install.algeinstalleerd':'Al geïnstalleerd','install.handmatig':'Installeren kan via het menu van je browser.',
     'install.ios':'Tik op de <b>Deel</b>-knop en kies <b>Zet op beginscherm</b>.','install.ios_kop':'Op iPhone of iPad',
     'inst.titel':'Instellingen','inst.tab_lichaam':'Lichaam','inst.tab_app':'App','inst.groep_lichaam':'Je lichaam','inst.groep_voorkeuren':'Voorkeuren','inst.groep_account':'Account','inst.groep_app':'App & info','inst.geslacht':'Geslacht','inst.man':'Man','inst.vrouw':'Vrouw','inst.huid':'Huidskleur','inst.taal':'Taal',
+    'ui.pose_arm':'Armen wijd','ui.pose_kort':'Armen',
     'inst.vorm':'Lichaamsvorm','inst.vorm.slank':'Slank','inst.vorm.gemiddeld':'Gemiddeld','inst.vorm.atletisch':'Atletisch','inst.vorm.zwaar':'Zwaar',
     'inst.thema':'Thema','inst.thema.auto':'Systeem','inst.thema.licht':'Licht','inst.thema.donker':'Donker',
     'inst.feedback':'Feedback','inst.feedback_sub':'Iets kapot of een idee? Ik hoor het graag.','inst.feedback_knop':'Stuur feedback','inst.privacy':'Privacybeleid','inst.terms':'Gebruiksvoorwaarden','inst.wisdata':'Alle lokale data wissen','inst.wisdata_bevestig':'Alles op dit toestel wissen? Al je tattoos, foto\'s en instellingen verdwijnen van dit apparaat en je wordt uitgelogd. Cloud-data blijft bestaan. Dit kan niet ongedaan worden gemaakt.',
@@ -7118,7 +7130,10 @@ const I18N = {
     'ui.aanpassen_bijknippen':'Edit','ui.klaar':'Done','ui.kleiner':'Smaller','ui.groter':'Bigger','ui.sluiten_bevestig':'Discard your cut-out? Unsaved work will be lost.','ui.sluiten_ja':'Discard',
     'ui.links_draaien':'Rotate left','ui.rechts_draaien':'Rotate right',
     'ui.eb_hint':'Drag = move · pinch = scale · pinch-twist = rotate',
-    'ui.draai_hint':'Drag to rotate · tap + to add a tattoo',
+    'ui.draai_hint':'Drag to rotate · tap an arm, leg or head to view it on its own',
+    'ui.heel_lichaam':'Back to the whole body','ui.heel_kort':'Whole body',
+    'lede.arm-links':'Left arm','lede.arm-rechts':'Right arm',
+    'lede.been-links':'Left leg','lede.been-rechts':'Right leg','lede.hoofd':'Head and neck',
     'ui.plaats_hint':'Tap on the body to place the tattoo',
     'ui.gepland':'Wishlist','ui.toon_gepland':'Show wishlist on the body',
     'ui.geen_model':'No 3D model found','ui.man_laden':'Loading male model…','ui.ander_model_verborgen':'{n} tattoo(s) are on the other body model and are hidden here.','ui.plaats_zonder_aanwijzen':'Place without pointing - choose a body part','ui.plaats_daar':'Place','ui.vrouw_laden':'Loading female model…',
@@ -7146,6 +7161,7 @@ const I18N = {
     'install.tekst':'Add Tatties to your home screen for offline use','install.knop':'Install','install.opbeginscherm':'Add to home screen','install.algeinstalleerd':'Already installed','install.handmatig':'Install via your browser menu.',
     'install.ios':'Tap the <b>Share</b> button, then choose <b>Add to Home Screen</b>.','install.ios_kop':'On iPhone or iPad',
     'inst.titel':'Settings','inst.tab_lichaam':'Body','inst.tab_app':'App','inst.groep_lichaam':'Your body','inst.groep_voorkeuren':'Preferences','inst.groep_account':'Account','inst.groep_app':'App & info','inst.geslacht':'Gender','inst.man':'Male','inst.vrouw':'Female','inst.huid':'Skin tone','inst.taal':'Language',
+    'ui.pose_arm':'Arms out','ui.pose_kort':'Arms',
     'inst.vorm':'Body shape','inst.vorm.slank':'Slim','inst.vorm.gemiddeld':'Average','inst.vorm.atletisch':'Athletic','inst.vorm.zwaar':'Heavy',
     'inst.thema':'Appearance','inst.thema.auto':'System','inst.thema.licht':'Light','inst.thema.donker':'Dark',
     'inst.feedback':'Feedback','inst.feedback_sub':'Something broken, or an idea? Let me know.','inst.feedback_knop':'Send feedback','inst.privacy':'Privacy policy','inst.terms':'Terms of Use','inst.wisdata':'Erase all local data','inst.wisdata_bevestig':'Erase everything on this device? All your tattoos, photos and settings will be removed from this device and you will be signed out. Cloud data is kept. This cannot be undone.',
@@ -11838,6 +11854,7 @@ async function verwijderVoorbeelden() {
     markers.slice().forEach(disposeMarker); markers.length=0;
   }
   function setModel(root){
+    stopIsolatie();   // een geisoleerd ledemaat hoort bij het oude model
     if(modelRoot){ modelRoot.traverse(o=>{ if(o.isMesh && o.geometry) o.geometry.dispose(); }); body.remove(modelRoot); }
     clearMarkers(); modelRoot=root;
     const box=new THREE.Box3().setFromObject(root); const size=new THREE.Vector3(); box.getSize(size);
@@ -11851,6 +11868,8 @@ async function verwijderVoorbeelden() {
     orthoCal=null; computeOrthoCal();   // SLICE 1: ortho-kalibratie verversen voor dit model
     radius=3.2; theta=0; phi=1.35; target.set(0,0.95,0); applyCam();
     try{ rebuildUnderwear(); }catch(e){ console.error("onderbroek opbouwen mislukt",e); }   // onderbroek opnieuw plaatsen na (her)laden model
+    // Houding pas NA computeOrthoCal: de 2D-kaart hoort op de rusthouding gekalibreerd te zijn.
+    try{ poseZet((POSE_AAN&&poseVoorkeur())?POSE_MAX:0); zetPoseKnop(); }catch(e){ console.error("houding zetten mislukt",e); }
   }
   /* ---- Onderbroek (tweede-huid uit lichaamsdriehoeken in de heup/kruis-zone) ----
      Volgt het lichaam exact omdat het dezelfde driehoeken hergebruikt, iets naar buiten
@@ -12257,6 +12276,637 @@ async function verwijderVoorbeelden() {
     return rg;
   }
   let _decalTmp=null;   // herbruikbare tijdelijke mesh voor de gereduceerde geometry
+  /* ---- Pose: armen wijd ------------------------------------------------------------------------
+     Het model heeft geen skelet, dus de houding komt uit code: de armvertices draaien om een
+     schouderpunt, posities en normalen mee. De rustpose blijft bewaard in `mesh.__basePos`; die is
+     de bron voor de 2D-kaart, de zones en het opgeslagen `positie3d.point`.
+     De armregio wordt uit het model zelf GEMETEN (waar loopt de arm los van de romp?), zodat het
+     ook klopt voor het vrouwmodel en voor latere lichaamsvormen. Binnen die regio draait de arm
+     rigide mee; alleen vlak bij de schouder loopt het gewicht af, anders knikt de schouderplooi. */
+  /* GEPARKEERD: de knop staat uit tot er een gemodelleerde A-pose is (zie blender-opdracht/).
+     Armen draaien in code laat een gespannen vlies in de oksel achter; dat is met gewichten niet op
+     te lossen, want daar zit in de rusthouding geen huid. De rest van de code blijft werken, dus
+     zodra de shape key binnen is, gaat deze vlag weer aan. */
+  const POSE_AAN=false;
+  let POSE_MAX=35;                    // verder knijpt de schouder zichtbaar samen
+  /* Vorm van het gewichtsverloop, uitgemeten op het mannenmodel (maten bij 1,80 m, schalen mee).
+     R0/R1 = het verloop rond het draaipunt; bepaalt hoe de schouderkap vervormt.
+     D = overgangsbreedte dwars op de romp/arm-grens; houdt de naad glad maar vervormt de arm, dus
+     standaard uit. NAAD_ONDER/BOVEN = de band rond de oksel waarin dat dwarsverloop zou gelden. */
+  const POSE_R0=0.02, POSE_R1=0.12;   // radiaal verloop rond het draaipunt (schoudervorm)
+  /* Uitloop van het gewicht de ROMP in, over de romp/arm-naad heen. Zonder die uitloop springt het
+     gewicht daar in een enkele rand van 0 naar vol: de driehoeken ertussen worden dan opgespannen
+     tot een vlies met scherpe randen. De uitloop verdeelt die sprong over een paar centimeter
+     romphuid, die zo mee omhoog wordt getrokken - net als bij een echte okselplooi. De arm zelf
+     blijft onaangeroerd, dus de schoudervorm en de armdikte veranderen er niet van.
+     Op het MANNENmodel werkte dat goed (rek van 29x naar 4,7x, knikkende randen van 245 naar 87),
+     maar op het VROUWENmodel valt de romp/arm-grens samen met de zijkant van de borst: de uitloop
+     trok die tot 6 cm mee en vervormde de borst zichtbaar. Kleinere uitloop hielp niet - dan
+     verschuift de sprong maar wordt hij niet zachter (gemeten: bij 15 mm werden het er juist meer).
+     Daarom standaard UIT; via de dev-hook nog wel in te schakelen om mee te vergelijken. */
+  let POSE_UITLOOP=0;                 // 0 = uit; zie de afweging hierboven
+  let POSE_D=0;                       // 0 = uit: de arm houdt exact zijn dikte
+  const NAAD_ONDER=0.03, NAAD_BOVEN=0.04;
+  /* Hoogte van het draaipunt boven de okselplooi. Anatomisch hoort dit lager (0,07 geeft veel minder
+     rek in de plooi), maar dan wordt de schoudervorm zelf onnatuurlijk: de kap zakt in. Dus hoog
+     houden en het vlies in de oksel apart aanpakken. */
+  const SCHOUDER_BOVEN_OKSEL=0.19;
+  let poseHoek=0;                     // 0 = rusthouding
+  function poseBasis(mesh){
+    if(!mesh.__basePos){
+      const g=mesh.geometry;
+      mesh.__basePos=g.attributes.position.array.slice();
+      mesh.__baseNor=g.attributes.normal?g.attributes.normal.array.slice():null;
+    }
+    return mesh.__basePos;
+  }
+  function _smooth(a,b,x){ const t=Math.max(0,Math.min(1,(x-a)/(b-a))); return t*t*(3-2*t); }
+  /* Armregio + gewichten, eenmalig per mesh. Rekent in LOKALE coordinaten: de modeltransform is
+     enkel schaal en verschuiving, dus de assen blijven evenwijdig aan de wereldassen. */
+  function poseGewichten(mesh){
+    if(mesh.__poseW) return mesh.__poseW;
+    const g=mesh.geometry, pos=g.attributes.position, base=poseBasis(mesh), n=pos.count;
+    mesh.updateWorldMatrix(true,false);
+    const mw=mesh.matrixWorld, inv=new THREE.Matrix4().copy(mw).invert(), v=new THREE.Vector3();
+    const wx=new Float32Array(n), wy=new Float32Array(n);
+    let ymin=1e9, ymax=-1e9;
+    for(let i=0;i<n;i++){
+      v.set(base[i*3],base[i*3+1],base[i*3+2]).applyMatrix4(mw);
+      wx[i]=v.x; wy[i]=v.y; if(v.y<ymin)ymin=v.y; if(v.y>ymax)ymax=v.y;
+    }
+    const lengte=Math.max(0.5, ymax-ymin), BAND=0.02, nb=Math.max(1,Math.ceil(lengte/BAND));
+    // Per hoogteband de grootste opening in de x-verdeling: daar loopt de arm los van de romp.
+    const bakken=[]; for(let b=0;b<nb;b++) bakken.push([]);
+    for(let i=0;i<n;i++){ if(wx[i]<=0.02) continue;
+      bakken[Math.min(nb-1,Math.max(0,Math.floor((wy[i]-ymin)/BAND)))].push(wx[i]); }
+    const grens=new Float32Array(nb).fill(NaN);
+    let bLaag=-1, bHoog=-1;
+    for(let b=0;b<nb;b++){
+      const xs=bakken[b]; if(xs.length<12) continue;
+      xs.sort((q,r)=>q-r);
+      let gMax=0, gAt=NaN;
+      for(let i=1;i<xs.length;i++){ const d=xs[i]-xs[i-1]; if(d>gMax){ gMax=d; gAt=(xs[i]+xs[i-1])/2; } }
+      if(gMax>0.02*lengte/1.8){ grens[b]=gAt; if(bLaag<0) bLaag=b; bHoog=b; }
+    }
+    if(bLaag<0) return (mesh.__poseW={ W:new Float32Array(n), leeg:true });   // geen losse arm gevonden
+    // Boven de oksel is er geen spleet meer: daar loopt de schoudergrens door op de okselwaarde.
+    const okselX=grens[bHoog], okselY=ymin+(bHoog+1)*BAND;
+    for(let b=bHoog+1;b<nb;b++) grens[b]=okselX;
+    for(let b=bLaag+1;b<bHoog;b++) if(isNaN(grens[b])) grens[b]=grens[b-1];
+    const Sx=okselX, Sy=okselY+SCHOUDER_BOVEN_OKSEL*lengte/1.8;   // draaipunt vlak boven de okselplooi
+    // Richting van de arm vanaf dat draaipunt: het zwaartepunt van de arm op 25 tot 45 cm afstand.
+    let sax=0, say=0, saN=0;
+    for(let i=0;i<n;i++){
+      const ax2=Math.abs(wx[i]); if(ax2<Sx) continue;
+      const d=Math.hypot(ax2-Sx, wy[i]-Sy);
+      if(d>0.25*lengte/1.8 && d<0.45*lengte/1.8){ sax+=ax2; say+=wy[i]; saN++; }
+    }
+    let aX=saN?(sax/saN-Sx):0, aY=saN?(say/saN-Sy):-1;
+    const aLen=Math.hypot(aX,aY)||1; aX/=aLen; aY/=aLen;
+    const armY0=ymin+bLaag*BAND-0.03*lengte/1.8, armY1=Sy+0.30*lengte/1.8;
+    const grensBij=(y)=>{
+      const f=(y-ymin)/BAND, b=Math.floor(f);
+      if(b<bLaag) return NaN;
+      if(b>=nb-1) return grens[nb-1];
+      const g0=grens[Math.max(0,b)], g1=grens[b+1];
+      if(isNaN(g0)) return isNaN(g1)?NaN:g1;
+      if(isNaN(g1)) return g0;
+      return g0+(g1-g0)*(f-b);
+    };
+    const W=new Float32Array(n);
+    let armN=0;
+    for(let i=0;i<n;i++){
+      const y=wy[i], ax=Math.abs(wx[i]);
+      if(y<=armY0 || y>=armY1) continue;
+      const gr=grensBij(y);
+      if(isNaN(gr)) continue;
+      // Waarde die de arm op deze hoogte krijgt; voor romphuid rekenen we met de grens, zodat het
+      // gewichtsveld over de naad heen doorloopt in plaats van te springen.
+      const radArm=_smooth(POSE_R0,POSE_R1, Math.hypot(Math.max(ax,gr)-Sx, y-Sy));
+      if(ax>gr){
+        // Optioneel tweede verloop DWARS op de naad. Houdt de naad glad, maar vervormt de arm
+        // (gemeten: tot 23% dikker bij de aanzet), dus standaard uit - de uitloop hieronder doet
+        // dat werk vanaf de rompkant.
+        const naad=_smooth(okselY-NAAD_ONDER*lengte/1.8, okselY+NAAD_BOVEN*lengte/1.8, y);
+        const dwars=(POSE_D>0) ? _smooth(0, POSE_D*lengte/1.8, ax-gr) : 1;   // 0 = uit (geen deling door nul)
+        W[i]=radArm*(1-naad*(1-dwars));
+      } else if(POSE_UITLOOP>0){
+        W[i]=radArm*_smooth(gr-POSE_UITLOOP*lengte/1.8, gr, ax);   // romphuid wordt meegetrokken
+      }
+      if(W[i]>0) armN++;
+    }
+    // schouderpunten terug naar lokale coordinaten (daar draaien we de vertices)
+    const Sr=new THREE.Vector3(Sx,Sy,0).applyMatrix4(inv);
+    const Sl=new THREE.Vector3(-Sx,Sy,0).applyMatrix4(inv);
+    const midX=new THREE.Vector3(0,Sy,0).applyMatrix4(inv).x;
+    return (mesh.__poseW={ W, Sr, Sl, midX, meta:{ Sx:+Sx.toFixed(4), Sy:+Sy.toFixed(4),
+      armas:[+aX.toFixed(3),+aY.toFixed(3)],
+      okselY:+okselY.toFixed(3), armY0:+armY0.toFixed(3), armY1:+armY1.toFixed(3), armVerts:armN } });
+  }
+  /* De houding op alle lichaamsmeshes zetten. Gooit het voxelraster weg: dat staat in
+     wereldposities en die kloppen na een vervorming niet meer (de decal-begrenzing rekent erop). */
+  function poseZet(hoek){
+    const th=(hoek||0)*Math.PI/180;
+    for(const mesh of pickMeshes){
+      const g=mesh.geometry, pos=g.attributes.position, nor=g.attributes.normal;
+      const base=poseBasis(mesh), bnor=mesh.__baseNor, pw=poseGewichten(mesh);
+      if(!pw || pw.leeg) continue;
+      const W=pw.W, Sr=pw.Sr, Sl=pw.Sl, midX=pw.midX;
+      for(let i=0;i<pos.count;i++){
+        const x=base[i*3], y=base[i*3+1], z=base[i*3+2], w=W[i];
+        if(w<=0 || th===0){
+          pos.array[i*3]=x; pos.array[i*3+1]=y; pos.array[i*3+2]=z;
+          if(bnor&&nor){ nor.array[i*3]=bnor[i*3]; nor.array[i*3+1]=bnor[i*3+1]; nor.array[i*3+2]=bnor[i*3+2]; }
+          continue;
+        }
+        const rechts=(x>=midX), S=rechts?Sr:Sl, a=th*w*(rechts?1:-1);
+        const ca=Math.cos(a), sa=Math.sin(a), dx=x-S.x, dy=y-S.y;
+        pos.array[i*3]=S.x+(dx*ca-dy*sa); pos.array[i*3+1]=S.y+(dx*sa+dy*ca); pos.array[i*3+2]=z;
+        if(bnor&&nor){ const nx=bnor[i*3], ny=bnor[i*3+1];
+          nor.array[i*3]=nx*ca-ny*sa; nor.array[i*3+1]=nx*sa+ny*ca; nor.array[i*3+2]=bnor[i*3+2]; }
+      }
+      pos.needsUpdate=true; if(nor) nor.needsUpdate=true;
+      g.computeBoundingSphere(); g.computeBoundingBox();
+      mesh.__faceGrid=null; mesh.__ledeScan=null; mesh.__ledeKnip=null;   // wereldposities zijn veranderd
+    }
+    poseHoek=hoek||0;
+  }
+  /* Decals weer op de huid zetten na een houdingswissel. Per vier een adempauze, zodat de UI niet
+     bevriest bij een volle collectie (zelfde aanpak als het herstel bij opstarten). */
+  async function poseDecalsBij(){
+    let i=0;
+    for(const m of markers.slice()){
+      const P=m.rec && m.rec.positie3d;
+      const ub=(P&&P.bind) ? uitBind(m.mesh||pickMeshes[0], P.bind) : null;
+      if(ub){ m.point=ub.point; m.normal=ub.normal; m.rot=ub.rot; }
+      try{ rebuildMarker(m); }catch(e){ console.error("decal na houdingswissel mislukt",e); }
+      if((++i%4)===0) await new Promise(r=>requestAnimationFrame(()=>r()));
+    }
+    if(editDecal && selRingOn) buildSelRing();
+  }
+  let poseBezig=false;
+  async function poseWissel(aan){
+    if(poseBezig || !pickMeshes.length) return;
+    poseBezig=true;
+    try{
+      poseZet(aan?POSE_MAX:0);
+      try{ localStorage.setItem('tatties-pose', aan?'arm':'rust'); }catch(e){ /* geen voorkeur */ }
+      zetPoseKnop();
+      await poseDecalsBij();
+    } finally { poseBezig=false; }
+  }
+  function zetPoseKnop(){
+    const b=document.getElementById('t3d-pose'); if(!b) return;
+    const aan=poseHoek>0;
+    b.classList.toggle('actief', aan);
+    b.setAttribute('aria-pressed', aan?'true':'false');
+  }
+  function poseVoorkeur(){ try{ return localStorage.getItem('tatties-pose')==='arm'; }catch(e){ return false; } }
+  /* Dev-hook om de twee knoppen live te vergelijken (`dwars` en `max`); de vorm van de schouder
+     laat zich niet meten, alleen zien. Bv. __tattiesPose.stel({dwars:0}) of .stel({max:30}). */
+  window.__tattiesPose={ zet:poseZet, wissel:poseWissel, hoek:()=>poseHoek,
+    stel:async(o)=>{ o=o||{};
+      if(isFinite(+o.dwars)) POSE_D=+o.dwars;
+      if(isFinite(+o.max)) POSE_MAX=+o.max;
+      if(isFinite(+o.uitloop)) POSE_UITLOOP=+o.uitloop;
+      pickMeshes.forEach(m=>{ m.__poseW=null; });
+      poseZet(poseHoek>0?POSE_MAX:0);
+      await poseDecalsBij();
+      return { dwars:POSE_D, max:POSE_MAX, uitloop:POSE_UITLOOP }; },
+    meta:()=>pickMeshes.map(m=>{ const pw=poseGewichten(m); return pw&&pw.meta; }) };
+
+  /* ---- Ledemaat los bekijken ------------------------------------------------------------------
+     Tik op een arm, been of het hoofd: de rest van het lichaam wordt echt doorzichtig en de camera
+     draait om dat deel. Zo komen plekken binnen bereik die nu door de romp verstopt zitten: de
+     binnenkant van de bovenarm, de oksel, de binnenkant van het been.
+
+     METEN. Waar een ledemaat los van de romp hangt, zit LUCHT tussen de twee. Die vinden we per
+     hoogteband en per z-plak als een gat in de x-verdeling, hetzelfde idee als de okselmeting bij de
+     houding, maar met een controle erbij: het moet echt lucht zijn en niet de BINNENkant van een arm
+     of been (daar zit net zo goed een gat, en zonder die controle loopt de "arm" door tot in de
+     voeten). De toets zit in de vertexnormalen van de twee punten rond het gat: bij lucht kijken ze
+     elkaar aan, bij een holte kijken ze van elkaar weg. Een parallelle toets met stralen (even aantal
+     doorsnijdingen = buiten het lichaam) gaf hetzelfde antwoord op 217 van de 218 kandidaten, maar
+     kostte 1,9 s tegen enkele ms.
+     Gemeten op het mannenmodel (1,80 m): armen los van 0,74 (vingertoppen) tot 1,34 (okselplooi),
+     grens bij x ~0,21; benen gescheiden tot het kruis op 0,82, split op x ~0. De losse hoogtebanden
+     geven vrijwel dezelfde waarde, dus een mediaan per band is genoeg; de z-plakken zijn alleen nodig
+     om het gat te VINDEN.
+
+     Waar geen lucht meer zit, loopt de knip door als rechte lijn: bij de arm naar binnen
+     (ARM_HELLING) zodat de schouderkap meekomt, bij het been naar buiten (BEEN_HELLING) als een
+     broekspijp tot over de heup. Het hoofd heeft nergens lucht, dus daar knippen we op de smalste
+     doorsnede: de nek (eerste lokale minimum omhoog vanaf de schouders; verder omhoog wordt de
+     schedel vanzelf weer smaller, dus het globale minimum deugt niet). */
+  const LEDE_BAND_Y=0.02, LEDE_BAND_Z=0.05, LEDE_MINGAP=0.03;   // maten bij 1,80 m, schalen mee
+  const LEDE_NORM=0.1;        // speling in de normaaltoets (randen kunnen bijna rakelings staan)
+  const ARM_HELLING=-0.5, ARM_TOP=0.16;    // knip boven de oksel: naar binnen, schouder komt mee
+  const BEEN_HELLING=0.9, BEEN_TOP=0.20;   // knip boven het kruis: naar buiten, over de heup
+  const NEK_ONDER=0.78;       // vanaf welke lichaamshoogte we naar de nek zoeken
+  const NEK_VOET=1.6;         // knip bij de nekVOET: omlaag tot de doorsnede zoveel keer de nek is
+  let LEDE_DEKSEL=true;       // knip dichtmaken (anders kijk je van bovenaf in de holle schaal)
+  const LEDE_ROMP_OP=0.10;    // doorzichtigheid van de rest van het lichaam
+  const LEDE_DECAL_OP=0.18;   // tattoos buiten het gekozen deel dimmen mee
+  const LEDE_DELEN=['arm-links','arm-rechts','been-links','been-rechts','hoofd'];
+  let ledeActief=null;        // {deel, groep, delen:[{mesh,K,mat}], box, decalOp:Map}
+
+  // Wereldposities en -normalen van alle vertices, met de houding van dit moment.
+  function ledeWereld(mesh){
+    mesh.updateWorldMatrix(true,false);
+    const g=mesh.geometry, pos=g.attributes.position, nor=g.attributes.normal, n=pos.count;
+    const P=new Float32Array(n*3), N=new Float32Array(n*3);
+    const v=new THREE.Vector3(), mw=mesh.matrixWorld, nmat=new THREE.Matrix3().getNormalMatrix(mw);
+    for(let i=0;i<n;i++){
+      v.fromBufferAttribute(pos,i).applyMatrix4(mw); P[i*3]=v.x; P[i*3+1]=v.y; P[i*3+2]=v.z;
+      if(nor){ v.fromBufferAttribute(nor,i).applyMatrix3(nmat).normalize(); N[i*3]=v.x; N[i*3+1]=v.y; N[i*3+2]=v.z; }
+    }
+    return {P,N,n};
+  }
+  /* Alle luchtopeningen van het model, per hoogteband. Eenmalig per mesh; poseZet gooit het weg
+     zodra de vorm verandert. Levert per band een lijst {mid, op} in wereld-x: mid = het midden van
+     de opening, op = hoe breed hij is. De armen en de benen plukken hier allebei uit. */
+  function ledeScan(mesh, w){
+    if(mesh.__ledeScan) return mesh.__ledeScan;
+    w=w||ledeWereld(mesh);
+    const W=w.P, NW=w.N, n=w.n;
+    let ymin=1e9, ymax=-1e9;
+    for(let i=0;i<n;i++){ const y=W[i*3+1]; if(y<ymin)ymin=y; if(y>ymax)ymax=y; }
+    const L=Math.max(0.5,ymax-ymin), S=L/1.8;
+    const BY=LEDE_BAND_Y*S, BZ=LEDE_BAND_Z*S, MIN=LEDE_MINGAP*S, nb=Math.max(1,Math.ceil(L/BY));
+    const cel=new Map();
+    for(let i=0;i<n;i++){
+      const b=Math.min(nb-1,Math.max(0,Math.floor((W[i*3+1]-ymin)/BY)));
+      const sleutel=b+"|"+Math.floor(W[i*3+2]/BZ);
+      let a=cel.get(sleutel); if(!a){ a=[]; cel.set(sleutel,a); } a.push([W[i*3],i]);
+    }
+    const banden=[]; for(let b=0;b<nb;b++) banden.push([]);
+    for(const [sleutel,xs] of cel){
+      if(xs.length<4) continue;
+      xs.sort((p,q)=>p[0]-q[0]);
+      const b=+sleutel.split("|")[0];
+      for(let i=1;i<xs.length;i++){
+        const op=xs[i][0]-xs[i-1][0]; if(op<MIN) continue;
+        // lucht: de ene wand kijkt naar buiten (+x), de andere kijkt terug (-x). Bij een holte in
+        // een ledemaat is het net andersom.
+        if(!(NW[xs[i-1][1]*3]>LEDE_NORM && NW[xs[i][1]*3]<LEDE_NORM)) continue;
+        banden[b].push({ mid:(xs[i][0]+xs[i-1][0])/2, op });
+      }
+    }
+    return (mesh.__ledeScan={ ymin, ymax, L, S, BY, nb, banden });
+  }
+  const _mediaan=(a)=>{ a=a.slice().sort((p,q)=>p-q); return a[a.length>>1]; };
+  /* Grenslijn uit de gemeten banden: per band de mediaan van de openingen die bij dit deel horen,
+     losse banden zonder buur eruit (ruis), gaatjes ertussen overbrugd. Alles in s-ruimte, dus
+     gespiegeld met de zijde: s = zijde * x. */
+  function grensUitBanden(sc, zijde, kies, minCellen){
+    const nb=sc.nb, med=new Float32Array(nb).fill(NaN);
+    for(let b=0;b<nb;b++){
+      const uit=[];
+      for(const g of sc.banden[b]){ const s=zijde*g.mid; if(kies(s,g,sc)) uit.push(s); }
+      if(uit.length>=(minCellen||1)) med[b]=_mediaan(uit);
+    }
+    for(let b=0;b<nb;b++){
+      if(isNaN(med[b])) continue;
+      if((b===0||isNaN(med[b-1])) && (b===nb-1||isNaN(med[b+1]))) med[b]=NaN;
+    }
+    let bLaag=-1, bHoog=-1;
+    for(let b=0;b<nb;b++){ if(isNaN(med[b])) continue; if(bLaag<0) bLaag=b; bHoog=b; }
+    if(bLaag<0) return null;
+    for(let b=bLaag+1;b<bHoog;b++) if(isNaN(med[b])) med[b]=med[b-1];
+    return { med, bLaag, bHoog };
+  }
+  function bandWaarde(sc, G, y){
+    const f=(y-sc.ymin)/sc.BY-0.5, b=Math.floor(f);
+    const g0=G.med[Math.max(G.bLaag,Math.min(G.bHoog,b))];
+    const g1=G.med[Math.max(G.bLaag,Math.min(G.bHoog,b+1))];
+    if(isNaN(g0)) return g1; if(isNaN(g1)) return g0;
+    return g0+(g1-g0)*Math.max(0,Math.min(1,f-b));
+  }
+  /* De knip voor een deel: waar loopt de scheiding, en hoe knippen we een driehoek af.
+     `binnen(x,y)` beslist per vertex; `halfs` zijn dezelfde grenzen als ongelijkheden, zodat
+     randdriehoeken er exact op afgesneden kunnen worden. */
+  function knipVoor(mesh, deel, w){
+    mesh.__ledeKnip=mesh.__ledeKnip||{};
+    if(mesh.__ledeKnip[deel]) return mesh.__ledeKnip[deel];
+    const sc=ledeScan(mesh,w);
+    const S=sc.S;
+    let K={ deel, leeg:true };
+    if(deel==='arm-links' || deel==='arm-rechts'){
+      const zijde=(deel==='arm-links')?1:-1;
+      // de arm hangt los van de romp: pak per band de breedste opening aan die kant
+      const G=grensUitBanden(sc, zijde, (s)=>s>0.02*S, 1);
+      if(G){
+        const okselS=G.med[G.bHoog], okselY=sc.ymin+(G.bHoog+1)*sc.BY;
+        const y0=sc.ymin+G.bLaag*sc.BY-0.02*S, yTop=okselY+ARM_TOP*S;
+        const grens=(y)=> (y>okselY) ? okselS+(y-okselY)*ARM_HELLING : bandWaarde(sc,G,y);
+        K={ deel, zijde, leeg:false, seed:'laag',
+          binnen:(x,y)=> y>=y0 && y<=yTop && (zijde*x)>grens(y),
+          halfs:[ (q)=>zijde*q.x-grens(q.y), (q)=>q.y-y0, (q)=>yTop-q.y ],
+          meta:{ deel, knipX:+okselS.toFixed(4), knipY:+okselY.toFixed(3),
+            vanaf:+(sc.ymin+G.bLaag*sc.BY).toFixed(3), tot:+yTop.toFixed(3), banden:G.bHoog-G.bLaag+1 } };
+      }
+    } else if(deel==='been-links' || deel==='been-rechts'){
+      const zijde=(deel==='been-links')?1:-1;
+      // de twee benen staan los van elkaar: pak de opening rond het midden, minstens twee z-plakken
+      // (een enkele losse plak hogerop is ruis van de arm/romp-spleet)
+      const G=grensUitBanden(sc, zijde, (s)=>Math.abs(s)<0.12*S, 2);
+      if(G){
+        const kruisS=G.med[G.bHoog], kruisY=sc.ymin+(G.bHoog+1)*sc.BY;
+        const y0=sc.ymin-0.05*S, yTop=kruisY+BEEN_TOP*S;
+        const grens=(y)=> (y>kruisY) ? kruisS+(y-kruisY)*BEEN_HELLING : bandWaarde(sc,G,y);
+        K={ deel, zijde, leeg:false, seed:'laag',
+          binnen:(x,y)=> y>=y0 && y<=yTop && (zijde*x)>grens(y),
+          halfs:[ (q)=>zijde*q.x-grens(q.y), (q)=>q.y-y0, (q)=>yTop-q.y ],
+          meta:{ deel, knipX:+kruisS.toFixed(4), kruisY:+kruisY.toFixed(3),
+            tot:+yTop.toFixed(3), banden:G.bHoog-G.bLaag+1 } };
+      }
+    } else if(deel==='hoofd'){
+      // smalste doorsnede boven de schouders = de nek. Eerste lokale minimum omhoog: hoger op wordt
+      // de schedel vanzelf weer smaller, dus het globale minimum zou de kruin pakken.
+      const W=(w||ledeWereld(mesh)).P, n=(w||{n:W.length/3}).n||W.length/3;
+      const vanB=Math.floor((NEK_ONDER*sc.L)/sc.BY);
+      const bx=[]; for(let b=0;b<sc.nb;b++) bx.push(null);
+      for(let i=0;i<n;i++){
+        const b=Math.min(sc.nb-1,Math.max(0,Math.floor((W[i*3+1]-sc.ymin)/sc.BY)));
+        if(b<vanB) continue;
+        let r=bx[b]; if(!r){ r={x0:1e9,x1:-1e9,z0:1e9,z1:-1e9,n:0}; bx[b]=r; }
+        const x=W[i*3], z=W[i*3+2];
+        if(x<r.x0)r.x0=x; if(x>r.x1)r.x1=x; if(z<r.z0)r.z0=z; if(z>r.z1)r.z1=z; r.n++;
+      }
+      let besteB=-1, besteW=1e9, stijgt=0;
+      for(let b=vanB;b<sc.nb;b++){
+        const r=bx[b]; if(!r || r.n<8) continue;
+        const breed=((r.x1-r.x0)+(r.z1-r.z0))/4;
+        if(breed<besteW*0.995){ besteW=breed; besteB=b; stijgt=0; }
+        else if(breed>besteW*1.10 && besteB>=0){ if(++stijgt>=2) break; }
+      }
+      if(besteB>=0){
+        /* Niet op het smalste punt knippen maar op de nekVOET: daar zit de nek nog aan het hoofd
+           vast, en juist de nek is een plek waar tattoos komen. Omlaag lopen tot de doorsnede
+           duidelijk uitwaaiert naar de schouders. */
+        let voetB=besteB;
+        for(let b=besteB-1;b>=vanB;b--){
+          const r=bx[b]; if(!r || r.n<8) continue;
+          if(((r.x1-r.x0)+(r.z1-r.z0))/4 > besteW*NEK_VOET) break;
+          voetB=b;
+        }
+        const nekY=sc.ymin+(voetB+0.5)*sc.BY;
+        K={ deel, zijde:1, leeg:false, seed:'hoog',
+          binnen:(x,y)=> y>=nekY,
+          halfs:[ (q)=>q.y-nekY ],
+          meta:{ deel, nekY:+nekY.toFixed(3), smalstY:+(sc.ymin+(besteB+0.5)*sc.BY).toFixed(3),
+            nekBreedte:+besteW.toFixed(3) } };
+      }
+    }
+    mesh.__ledeKnip[deel]=K;
+    return K;
+  }
+  /* Van het gekozen deel een tweede mesh bouwen: de driehoeken aan de deelkant van de knip, daarna
+     een flood-fill vanaf de punt (vingers, tenen of kruin) zodat er geen losse stukken meekomen
+     (zelfde buur-truc als bij de onderbroek: gedeelde, afgeronde vertexposities). De driehoeken die
+     de knip KRUISEN worden erop afgesneden (Sutherland-Hodgman tegen de halfruimtes van de knip);
+     hele driehoeken houden gaf een zichtbaar getrapte rand. De geometry staat in wereldcoordinaten
+     en gaat in `body`, net als de onderbroek. */
+  function bouwDeelGeo(mesh, K, w){
+    w=w||ledeWereld(mesh);
+    const W=w.P, NW=w.N, n=w.n, g=mesh.geometry;
+    const erbij=new Uint8Array(n);
+    for(let i=0;i<n;i++) if(K.binnen(W[i*3],W[i*3+1])) erbij[i]=1;
+    const idx=g.index, cnt=idx?idx.count:g.attributes.position.count;
+    const tris=[], kaart=new Map();
+    const sleutel=(j)=>Math.round(W[j*3]*800)+","+Math.round(W[j*3+1]*800)+","+Math.round(W[j*3+2]*800);
+    for(let i=0;i<cnt;i+=3){
+      const a=idx?idx.getX(i):i, b=idx?idx.getX(i+1):i+1, c=idx?idx.getX(i+2):i+2;
+      if(!(erbij[a]&&erbij[b]&&erbij[c])) continue;
+      const t=tris.length; tris.push([a,b,c]);
+      for(const j of [a,b,c]){ const k=sleutel(j); let arr=kaart.get(k); if(!arr){ arr=[]; kaart.set(k,arr); } arr.push(t); }
+    }
+    if(!tris.length) return null;
+    const omhoog=(K.seed==='hoog');
+    let seed=0, uiterste=omhoog?-1e9:1e9;
+    for(let t=0;t<tris.length;t++){
+      const y=(W[tris[t][0]*3+1]+W[tris[t][1]*3+1]+W[tris[t][2]*3+1])/3;
+      if(omhoog ? (y>uiterste) : (y<uiterste)){ uiterste=y; seed=t; }
+    }
+    const houd=new Uint8Array(tris.length), stapel=[seed]; houd[seed]=1;
+    while(stapel.length){ const t=stapel.pop();
+      for(const j of tris[t]){ const arr=kaart.get(sleutel(j)); if(!arr) continue;
+        for(const u of arr) if(!houd[u]){ houd[u]=1; stapel.push(u); } } }
+    const P=[], N=[], box=new THREE.Box3(), pv=new THREE.Vector3();
+    let aantal=0;
+    const zetPunt=(q)=>{
+      P.push(q.x,q.y,q.z);
+      const len=Math.hypot(q.nx,q.ny,q.nz)||1;
+      N.push(q.nx/len,q.ny/len,q.nz/len);
+      box.expandByPoint(pv.set(q.x,q.y,q.z));
+    };
+    const punt=(j)=>({x:W[j*3],y:W[j*3+1],z:W[j*3+2],nx:NW[j*3],ny:NW[j*3+1],nz:NW[j*3+2]});
+    const opEiland=new Set();
+    for(let t=0;t<tris.length;t++){ if(!houd[t]) continue; aantal++;
+      for(const j of tris[t]){ zetPunt(punt(j)); opEiland.add(sleutel(j)); } }
+    // De grenzen zijn stuksgewijs recht, dus lineair interpoleren langs een driehoekrand landt op de knip.
+    const snij=(poly, f)=>{
+      const uit=[];
+      for(let i=0;i<poly.length;i++){
+        const a=poly[i], b=poly[(i+1)%poly.length], fa=f(a), fb=f(b);
+        if(fa>=0) uit.push(a);
+        if((fa>=0)!==(fb>=0)){
+          const s=fa/(fa-fb);
+          uit.push({ x:a.x+(b.x-a.x)*s, y:a.y+(b.y-a.y)*s, z:a.z+(b.z-a.z)*s,
+            nx:a.nx+(b.nx-a.nx)*s, ny:a.ny+(b.ny-a.ny)*s, nz:a.nz+(b.nz-a.nz)*s });
+        }
+      }
+      return uit;
+    };
+    // Randdriehoeken: deels op het deel, deels erbuiten, en grenzend aan het eiland dat we houden.
+    for(let i=0;i<cnt;i+=3){
+      const a=idx?idx.getX(i):i, b=idx?idx.getX(i+1):i+1, c=idx?idx.getX(i+2):i+2;
+      const na=erbij[a]+erbij[b]+erbij[c];
+      if(na===0 || na===3) continue;
+      let raakt=false;
+      for(const j of [a,b,c]) if(erbij[j] && opEiland.has(sleutel(j))){ raakt=true; break; }
+      if(!raakt) continue;
+      let poly=[punt(a),punt(b),punt(c)];
+      for(const f of K.halfs){ poly=snij(poly,f); if(poly.length<3) break; }
+      if(poly.length<3) continue;
+      for(let k=2;k<poly.length;k++){ zetPunt(poly[0]); zetPunt(poly[k-1]); zetPunt(poly[k]); aantal++; }
+    }
+    if(!P.length) return null;
+    /* Dekseltje. Het losgesneden deel is een open schaal: van bovenaf kijk je zo de arm in. De open
+       rand vinden we terug als de randen die maar in EEN driehoek voorkomen; die vormen een lus rond
+       de knip, die we vullen met een waaier vanuit het zwaartepunt. */
+    let deksels=0;
+    if(LEDE_DEKSEL){
+      const sl3=(i)=>Math.round(P[i*3]*1e5)+","+Math.round(P[i*3+1]*1e5)+","+Math.round(P[i*3+2]*1e5);
+      const randen=new Map(), nTri=P.length/9;
+      for(let t=0;t<nTri;t++) for(let e=0;e<3;e++){
+        const i=t*3+e, j=t*3+((e+1)%3), ka=sl3(i), kb=sl3(j);
+        if(ka===kb) continue;
+        const k=(ka<kb)?(ka+"|"+kb):(kb+"|"+ka);
+        const r=randen.get(k);
+        if(r) r.n++; else randen.set(k,{ka, kb, ia:i, ib:j, n:1});
+      }
+      const buren=new Map(), plek=new Map();
+      const koppel=(a,b)=>{ let l=buren.get(a); if(!l){ l=[]; buren.set(a,l); } l.push(b); };
+      for(const r of randen.values()){
+        if(r.n!==1) continue;
+        plek.set(r.ka,[P[r.ia*3],P[r.ia*3+1],P[r.ia*3+2]]);
+        plek.set(r.kb,[P[r.ib*3],P[r.ib*3+1],P[r.ib*3+2]]);
+        koppel(r.ka,r.kb); koppel(r.kb,r.ka);
+      }
+      /* De rand aflopen vanaf een willekeurig punt loopt maar EEN kant op; begin je midden in de
+         ketting, dan valt hij in stukken uiteen. Daarom vanaf het startpunt beide kanten op lopen
+         en de helften aan elkaar plakken. Losse eindjes (een enkele niet-passende hoek) mogen: de
+         waaier sluit de lus dan zelf. */
+      const gezien=new Set();
+      const wandel=(van, vorig)=>{
+        const rij=[]; let hier=van, prev=vorig, veilig=0;
+        while(hier && !gezien.has(hier) && veilig++<50000){
+          gezien.add(hier); rij.push(hier);
+          let volgend=null;
+          for(const b of (buren.get(hier)||[])) if(b!==prev && !gezien.has(b)){ volgend=b; break; }
+          prev=hier; hier=volgend;
+        }
+        return rij;
+      };
+      // eindpunten (graad 1) eerst, dan pas de gesloten lussen
+      const beginnen=[...buren.keys()].sort((a,b)=>buren.get(a).length-buren.get(b).length);
+      for(const start of beginnen){
+        if(gezien.has(start)) continue;
+        const voor=wandel(start,null);
+        let achter=[];
+        for(const b of (buren.get(start)||[])) if(!gezien.has(b)){ achter=wandel(b,start); break; }
+        const keten=achter.reverse().concat(voor);
+        if(keten.length<3) continue;
+        const lus=keten.map(k=>plek.get(k));
+        let cx=0, cy=0, cz=0;
+        for(const q of lus){ cx+=q[0]; cy+=q[1]; cz+=q[2]; }
+        cx/=lus.length; cy/=lus.length; cz/=lus.length;
+        // vlaknormaal van de lus (Newell), weg van het deel gericht
+        let nx=0, ny=0, nz=0;
+        for(let i=0;i<lus.length;i++){ const a=lus[i], b=lus[(i+1)%lus.length];
+          nx+=(a[1]-b[1])*(a[2]+b[2]); ny+=(a[2]-b[2])*(a[0]+b[0]); nz+=(a[0]-b[0])*(a[1]+b[1]); }
+        const len=Math.hypot(nx,ny,nz)||1; nx/=len; ny/=len; nz/=len;
+        const mid=box.getCenter(new THREE.Vector3());
+        if((cx-mid.x)*nx+(cy-mid.y)*ny+(cz-mid.z)*nz < 0){ nx=-nx; ny=-ny; nz=-nz; }
+        const kern={x:cx,y:cy,z:cz,nx,ny,nz};
+        for(let i=0;i<lus.length;i++){
+          const a=lus[i], b=lus[(i+1)%lus.length];
+          zetPunt(kern);
+          zetPunt({x:a[0],y:a[1],z:a[2],nx,ny,nz});
+          zetPunt({x:b[0],y:b[1],z:b[2],nx,ny,nz});
+          aantal++;
+        }
+        deksels++;
+      }
+    }
+    const geo=new THREE.BufferGeometry();
+    geo.setAttribute('position',new THREE.Float32BufferAttribute(P,3));
+    geo.setAttribute('normal',new THREE.Float32BufferAttribute(N,3));
+    return { geo, box, driehoeken:aantal, gevonden:tris.length, deksels };
+  }
+  // Ligt dit wereldpunt op het geisoleerde deel? (zonder isolatie telt alles mee)
+  function opGeisoleerdDeel(p){
+    if(!ledeActief) return true;
+    for(const d of ledeActief.delen) if(d.K.binnen(p.x,p.y)) return true;
+    return false;
+  }
+  // Tattoos buiten het gekozen deel dimmen mee met de romp; die op het deel blijven vol.
+  function ledeDecals(aan){
+    for(const m of markers){
+      if(!m.obj || !m.obj.material) continue;
+      if(aan){
+        if(!ledeActief.decalOp.has(m)) ledeActief.decalOp.set(m, m.obj.material.opacity);
+        if(!opGeisoleerdDeel(m.point||new THREE.Vector3())) zetDecalOpacity(m.obj, LEDE_DECAL_OP*(m.obj.material.opacity||1));
+      } else {
+        const op=ledeActief && ledeActief.decalOp.get(m);
+        if(op!=null) zetDecalOpacity(m.obj, op);
+      }
+    }
+  }
+  function stopIsolatie(){
+    if(!ledeActief) return;
+    ledeDecals(false);
+    body.remove(ledeActief.groep);
+    ledeActief.groep.traverse(o=>{ if(o.isMesh){ if(o.geometry) o.geometry.dispose(); if(o.material&&o.material.dispose) o.material.dispose(); } });
+    skinMat.transparent=false; skinMat.opacity=1; skinMat.depthWrite=true; skinMat.needsUpdate=true;
+    ledeActief=null;
+    zetLedeUI();
+  }
+  /* Een ledemaat isoleren: 'arm-links', 'arm-rechts', 'been-links', 'been-rechts' of 'hoofd'. */
+  function isoleerLedemaat(deel){
+    if(!pickMeshes.length || LEDE_DELEN.indexOf(deel)<0) return null;
+    stopIsolatie();
+    // Tijden per stap; het dev-haakje geeft ze terug, zodat de kosten van een tik meetbaar blijven.
+    const tijden=[]; let tMark=performance.now();
+    const tik=(k)=>{ const q=performance.now(); tijden.push([k,+(q-tMark).toFixed(1)]); tMark=q; };
+    const groep=new THREE.Group(), delen=[], box=new THREE.Box3();
+    for(const mesh of pickMeshes){
+      const w=ledeWereld(mesh); tik('wereld');
+      const K=knipVoor(mesh,deel,w); tik('meten'); if(!K || K.leeg) continue;
+      const r=bouwDeelGeo(mesh,K,w); tik('mesh'); if(!r) continue;
+      const mat=skinMat.clone();
+      mat.transparent=false; mat.opacity=1; mat.depthWrite=true;
+      mat.polygonOffset=true; mat.polygonOffsetFactor=-2;   // decals (-6) blijven er ruim voor liggen
+      const mm=new THREE.Mesh(r.geo,mat); mm.renderOrder=1; groep.add(mm);
+      delen.push({mesh, K, mat, driehoeken:r.driehoeken, deksels:r.deksels});
+      box.union(r.box);
+    }
+    if(!delen.length) return null;
+    body.add(groep);
+    // de rest van het lichaam echt doorzichtig: er dwars doorheen kunnen kijken is het hele punt
+    skinMat.transparent=true; skinMat.opacity=LEDE_ROMP_OP; skinMat.depthWrite=false; skinMat.needsUpdate=true;
+    ledeActief={ deel, groep, delen, box, decalOp:new Map() };
+    zetLedeUI();
+    ledeDecals(true);
+    // draaipunt naar het midden van het deel + inzoomen; armen en benen hangen verticaal, dus het
+    // deel staat daarmee vanzelf rechtop en gecentreerd in beeld.
+    const c=box.getCenter(new THREE.Vector3()), maat=box.getSize(new THREE.Vector3());
+    focusTo(c);
+    radiusGoal=Math.max(0.55, Math.max(maat.x,maat.y,maat.z)*1.35);
+    tik('tonen');
+    return { tijden, deel, driehoeken:delen.reduce((s,d)=>s+d.driehoeken,0),
+      deksels:delen.reduce((s,d)=>s+(d.deksels||0),0),
+      knip:delen.map(d=>d.K.meta), midden:c.toArray().map(v=>+v.toFixed(3)) };
+  }
+  /* ---- bediening: tik op een deel ----
+     Een tik op het model kiest het deel dat je aanraakt; is dat geen arm/been/hoofd (dus de romp),
+     dan blijft het de oude tik: inzoomen op dat punt. Terug kan met de knop in de balk en met de
+     beginstand-knop. De tik loopt via dezelfde vertraagde timer als voorheen, zodat een dubbeltik
+     (tattoo bewerken) er nog steeds tussendoor kan. */
+  function deelBijPunt(x,y){
+    const hits=rayTo(x,y); if(!hits.length) return null;
+    const p=hits[0].point, mesh=hits[0].object;
+    let w=null;
+    for(const d of LEDE_DELEN){
+      let K=mesh.__ledeKnip && mesh.__ledeKnip[d];
+      if(!K){ w=w||ledeWereld(mesh); K=knipVoor(mesh,d,w); }
+      if(K && !K.leeg && K.binnen(p.x,p.y)) return d;
+    }
+    return null;
+  }
+  function tikLedemaat(x,y){
+    if(ledeActief) return false;             // al los: een tik zoomt gewoon weer in
+    const deel=deelBijPunt(x,y); if(!deel) return false;
+    if(!isoleerLedemaat(deel)) return false;
+    toast(tr('lede.'+deel));
+    return true;
+  }
+  function zetLedeUI(){
+    const b=document.getElementById('t3d-heel'); if(b) b.hidden=!ledeActief;
+  }
+  function heelLichaam(){
+    if(!ledeActief) return;
+    stopIsolatie();
+    targetGoal=new THREE.Vector3(CAM0.tx,CAM0.ty,CAM0.tz); radiusGoal=CAM0.radius;   // soepel terug
+  }
+  /* Dev-haakje: meten en isoleren zonder UI.
+     Bv. __tattiesLedemaat.isoleer('been-links') en __tattiesLedemaat.stop(). */
+  window.__tattiesLedemaat={ isoleer:isoleerLedemaat, stop:stopIsolatie, delen:LEDE_DELEN,
+    actief:()=>ledeActief&&ledeActief.deel,
+    deksel:(aan)=>{ LEDE_DEKSEL=!!aan; const d=ledeActief&&ledeActief.deel; if(d){ stopIsolatie(); return isoleerLedemaat(d); } return LEDE_DEKSEL; },
+    meet:(deel)=>pickMeshes.map(m=>{ const K=knipVoor(m,deel||'arm-links'); return K&&K.meta; }) };
+
   /* ---- Pose-onafhankelijke plek (fundament voor A-pose + lichaamsvormen) ---------------------
      Een tattoo hoort bij een stukje HUID, niet bij een coordinaat in de ruimte. `positie3d.point`
      is absoluut en wijst dus naar niets zodra het model van vorm verandert. Daarom bewaren we er
@@ -12274,11 +12924,13 @@ async function verwijderVoorbeelden() {
     return g.index ? g.index.count/3 : g.attributes.position.count/3; }
   function triIndex(g,tri,k){ return g.index ? g.index.getX(tri*3+k) : (tri*3+k); }
   // Hoekpunten in WERELDruimte + de vlaknormaal (zelfde afleiding als een raycast-hit: winding + matrixWorld).
-  function triWereld(mesh, tri){
+  function triWereld(mesh, tri, rust){
     const g=mesh&&mesh.geometry, pos=g&&g.attributes.position; if(!pos) return null;
     if(!(tri>=0 && tri<triAantal(mesh))) return null;
     mesh.updateWorldMatrix(true,false);
-    for(let k=0;k<3;k++) _bwv[k].fromBufferAttribute(pos, triIndex(g,tri,k));
+    const bp=rust?mesh.__basePos:null;   // rustpose: rekenen alsof de armen niet gedraaid staan
+    for(let k=0;k<3;k++){ const vi=triIndex(g,tri,k);
+      if(bp) _bwv[k].set(bp[vi*3],bp[vi*3+1],bp[vi*3+2]); else _bwv[k].fromBufferAttribute(pos, vi); }
     _bN.crossVectors(_bE1.subVectors(_bwv[1],_bwv[0]), _bE2.subVectors(_bwv[2],_bwv[0])).normalize();
     _bN.transformDirection(mesh.matrixWorld).normalize();
     for(let k=0;k<3;k++) _bwv[k].applyMatrix4(mesh.matrixWorld);
@@ -12318,10 +12970,10 @@ async function verwijderVoorbeelden() {
     const a=hoekInVlak(decalUp(point, normal||_bN, rotDeg));
     return { tri, b:[+b.x.toFixed(6), +b.y.toFixed(6)], rot:+a.toFixed(3), n:triAantal(mesh) };
   }
-  function uitBind(mesh, bind){
+  function uitBind(mesh, bind, rust){
     if(!mesh || !bind || !Array.isArray(bind.b) || !(bind.tri>=0)) return null;
     if(bind.n && bind.n!==triAantal(mesh)) return null;      // ander model -> binding zegt niets
-    const v=triWereld(mesh,bind.tri); if(!v) return null;
+    const v=triWereld(mesh,bind.tri,rust); if(!v) return null;
     const u=+bind.b[0], w=+bind.b[1], t=1-u-w;
     if(!isFinite(u)||!isFinite(w)) return null;
     const point=new THREE.Vector3().addScaledVector(v[0],u).addScaledVector(v[1],w).addScaledVector(v[2],t);
@@ -12399,7 +13051,11 @@ async function verwijderVoorbeelden() {
   }
   function surfaceAt(x,y){
     const hits=rayTo(x,y); if(!hits.length) return null;
-    const h=hits[0]; let n;
+    let h=hits[0];
+    // Ledemaat geisoleerd: de doorzichtige romp mag geen treffers meer opvangen, anders plaats je
+    // een tattoo op de romp die er alleen maar voor hangt.
+    if(ledeActief){ const g=hits.find(q=>opGeisoleerdDeel(q.point)); if(!g) return null; h=g; }
+    let n;
     if(h.face) n=h.face.normal.clone().transformDirection(h.object.matrixWorld).normalize();
     else n=camera.position.clone().sub(h.point).normalize();
     return {point:h.point.clone(), normal:n, mesh:h.object, tri:(h.faceIndex!==undefined?h.faceIndex:-1)};
@@ -12458,6 +13114,11 @@ async function verwijderVoorbeelden() {
                   rot, size, gender:currentGender, preset:presetId(), zone:nz.zone, side:nz.side },
       kunst3d:d.kunst3d }, d.info));
     zetBind(rec.positie3d, s.mesh, s.point, s.normal, rot, (s.tri>=0?s.tri:-1));   // plek op de huid, niet in de ruimte
+    if(poseHoek!==0 && rec.positie3d.bind){        // armen wijd: het opgeslagen punt hoort de rusthouding te zijn
+      const r=uitBind(s.mesh, rec.positie3d.bind, true);
+      if(r){ rec.positie3d.point=[r.point.x,r.point.y,r.point.z];
+             rec.positie3d.normal=[r.normal.x,r.normal.y,r.normal.z]; rec.positie3d.rot=r.rot||0; }
+    }
     sync2D(rec, s.point, nz.side, rot, size, d.tex);
     try{ await saveTattoo(rec); }catch(e){ console.error(e); toast(tr('toast.opslaanmislukt')+(e&&e.message?e.message:tr('ui.fout'))); }
     if(typeof tattoos!=="undefined" && Array.isArray(tattoos)) tattoos.push(rec);
@@ -12779,14 +13440,18 @@ async function verwijderVoorbeelden() {
   }
   function persistEdit(m){
     if(!m||!m.rec) return;
-    const nz=nearestZone(m.point);
     const P=m.rec.positie3d||(m.rec.positie3d={});
-    P.point=[m.point.x,m.point.y,m.point.z];
-    P.normal=[m.normal.x,m.normal.y,m.normal.z];
-    P.rot=m.rot||0; P.size=m.size||0.09; P.locked=!!m.locked; P.gender=currentGender; P.preset=presetId(); P.zone=nz.zone; P.side=nz.side;
-    zetBind(P, m.mesh||pickMeshes[0], m.point, m.normal, m.rot||0, (m.tri>=0?m.tri:-1));
+    const mesh=m.mesh||pickMeshes[0];
+    zetBind(P, mesh, m.point, m.normal, m.rot||0, (m.tri>=0?m.tri:-1));
+    // Opslaan gebeurt ALTIJD in de rusthouding: dat punt voedt de 2D-kaart, de zone-indeling en de
+    // terugval. Staan de armen wijd, dan rekenen we het via de binding terug naar de rusthouding.
+    const r=(P.bind ? uitBind(mesh, P.bind, true) : null) || { point:m.point, normal:m.normal, rot:m.rot||0 };
+    const nz=nearestZone(r.point);
+    P.point=[r.point.x,r.point.y,r.point.z];
+    P.normal=[r.normal.x,r.normal.y,r.normal.z];
+    P.rot=r.rot||0; P.size=m.size||0.09; P.locked=!!m.locked; P.gender=currentGender; P.preset=presetId(); P.zone=nz.zone; P.side=nz.side;
     m.rec.zijde=nz.side; m.rec.lichaamsdeel=nz.zone;
-    sync2D(m.rec, m.point, nz.side, m.rot, m.size, m.tex);
+    sync2D(m.rec, r.point, nz.side, r.rot||0, m.size, m.tex);
     clearTimeout(m._persistT);   // per-marker timer: alleen deze tattoo's eigen save herplannen
     m._persistT=setTimeout(async()=>{ try{ await saveTattoo(m.rec); if(typeof tattoos!=="undefined"&&Array.isArray(tattoos)){ const j=tattoos.findIndex(t=>t.id===m.rec.id); if(j>=0)tattoos[j]=m.rec; } if(typeof renderMarkers==="function"){ try{renderMarkers();}catch(_){} } }catch(e){ console.error(e); } },300);
   }
@@ -12881,7 +13546,7 @@ async function verwijderVoorbeelden() {
       const wasTap=!moved && performance.now()-t0<TAP_MS; drag=false;
       if(wasTap){
         if(plaatsModus){ clearTimeout(tapTimer); plaatsNieuwe(e.clientX,e.clientY); return; }
-        clearTimeout(tapTimer); tapTimer=setTimeout(()=>focusAt(e.clientX,e.clientY),300);
+        clearTimeout(tapTimer); tapTimer=setTimeout(()=>{ if(!tikLedemaat(e.clientX,e.clientY)) focusAt(e.clientX,e.clientY); },300);
       }});
     el.addEventListener("dblclick",e=>{ clearTimeout(tapTimer); dblAt(e.clientX,e.clientY); });
     el.addEventListener("wheel",e=>{ e.preventDefault();
@@ -12911,7 +13576,8 @@ async function verwijderVoorbeelden() {
         if(plaatsModus){ clearTimeout(tapTimer); plaatsNieuwe(ct.clientX,ct.clientY); lastTapT=0; drag=false;pinchD=0;pinchMid=null; return; }
         const now=performance.now();
         if(now-lastTapT<320){ clearTimeout(tapTimer); dblAt(ct.clientX,ct.clientY); lastTapT=0; drag=false;pinchD=0;pinchMid=null; return; }
-        lastTapT=now; clearTimeout(tapTimer); tapTimer=setTimeout(()=>focusAt(ct.clientX,ct.clientY),330); }
+        lastTapT=now; clearTimeout(tapTimer);
+        tapTimer=setTimeout(()=>{ if(!tikLedemaat(ct.clientX,ct.clientY)) focusAt(ct.clientX,ct.clientY); },330); }
       drag=false;pinchD=0;pinchA=null;pinchMid=null;pinchModel=false;});
   }
 
@@ -14178,12 +14844,15 @@ async function verwijderVoorbeelden() {
     // data) en houden we het oude punt aan - een verschoven tattoo is erger dan een oude plek.
     let bindNieuw=null;
     const ub=uitBind(mesh, P.bind);
-    if(ub){
-      const afw=ub.point.distanceTo(point);
+    const ubRust=ub ? uitBind(mesh, P.bind, true) : null;   // toets in de RUSTHOUDING: daar hoort `point` bij
+    if(ub && ubRust){
+      const afw=ubRust.point.distanceTo(point);
       if(afw<=0.002){ point=ub.point; normal=ub.normal; rot=ub.rot; }
       else console.warn("3D-binding wijkt af ("+afw.toFixed(4)+" m), oude plek aangehouden:", t.id);
-    } else if(mesh && eigenP){
-      bindNieuw=zetBind(P, mesh, point, normal, rot, -1);   // eenmalige migratie van een ouder record
+    } else if(mesh && eigenP && poseHoek===0){
+      // Alleen in de rusthouding migreren: de binding wordt met een raycast op het HUIDIGE model
+      // gezocht, en met gedraaide armen hoort een rustpose-punt daar niet meer bij.
+      bindNieuw=zetBind(P, mesh, point, normal, rot, -1);
     }
     const obj=makeImage(point,normal,rot,P.size||0.09,tex,mesh,recMul(t));
     if(!obj) return false;
@@ -14200,7 +14869,9 @@ async function verwijderVoorbeelden() {
     // record (recRef) is licht (kunst.src gestript), anders zou dit elke 3D-load voor
     // álle tattoos draaien en schrijven.
     const magSync=(!t.positie || !t.kunst || !t.kunst.src);
-    if(magSync) sync2D(recRef, point, P.side||"voor", rot, P.size||0.09, tex);
+    // De 2D-kaart hoort altijd de rusthouding te tonen, ook als de armen nu wijd staan.
+    const rustPt=(ubRust?ubRust.point:point), rustRot=(ubRust?ubRust.rot:rot);
+    if(magSync) sync2D(recRef, rustPt, P.side||"voor", rustRot, P.size||0.09, tex);
     if(bindNieuw && recRef.positie3d && recRef.positie3d!==P) recRef.positie3d.bind=bindNieuw;
     if(magSync || bindNieuw){ try{ await saveTattoo(recRef); }catch(e){ console.error(e); } }
     return true;
@@ -14295,7 +14966,8 @@ async function verwijderVoorbeelden() {
   }
 
   /* ---- 3D gekoppeld aan de host-instellingen (man/vrouw + huidskleur) ---- */
-  function applySkin3D(hex){ if(hex && skinMat){ skinMat.color.set(hex); skinMat.color.convertSRGBToLinear(); } }
+  function applySkin3D(hex){ if(hex && skinMat){ skinMat.color.set(hex); skinMat.color.convertSRGBToLinear();
+    if(ledeActief) ledeActief.delen.forEach(d=>d.mat.color.copy(skinMat.color)); } }
   function setSkin3D(hex){ if(hex){ pendingSkin=hex; applySkin3D(hex); } }
   function setGender3D(g){ g=(g==="vrouw")?"vrouw":"man"; if(inited){ if(g!==currentGender){ meldAndereModel=true; loadEmbedded(g); } } else { currentGender=g; } markOnderbroekZichtbaar(); }
   // Onderbroek-sectie alleen tonen bij het mannenmodel (voorlopig alleen man ondersteund)
@@ -14356,7 +15028,10 @@ async function verwijderVoorbeelden() {
     ground.rotation.x=-Math.PI/2; scene.add(ground);
     body=new THREE.Group(); scene.add(body);
     // selectie-ring wordt on-demand als huid-decal gebouwd (buildSelRing), niet meer als platte ring vooraf
-    const rb=document.getElementById("t3d-reset"); if(rb) rb.onclick=resetView;
+    const rb=document.getElementById("t3d-reset"); if(rb) rb.onclick=()=>{ stopIsolatie(); resetView(); };
+    const hb=document.getElementById("t3d-heel"); if(hb) hb.onclick=heelLichaam;
+    const pb=document.getElementById("t3d-pose");
+    if(pb){ if(!POSE_AAN) pb.hidden=true; else pb.onclick=()=>poseWissel(poseHoek===0); }
     skinMat=new THREE.MeshStandardMaterial({color:0xe2b48f, roughness:0.78, metalness:0.0, side:THREE.DoubleSide});
     activeSkin=skinMat;
     loader=new THREE.GLTFLoader();   // GEEN DRACO (ingebed model is pure-geometry GLB)
