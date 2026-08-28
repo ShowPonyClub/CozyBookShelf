@@ -12500,7 +12500,17 @@ async function verwijderVoorbeelden() {
      schedel vanzelf weer smaller, dus het globale minimum deugt niet). */
   const LEDE_BAND_Y=0.02, LEDE_BAND_Z=0.05, LEDE_MINGAP=0.03;   // maten bij 1,80 m, schalen mee
   const LEDE_NORM=0.1;        // speling in de normaaltoets (randen kunnen bijna rakelings staan)
+  /* Waar in de luchtspleet de knip komt te liggen: 0 = tegen de romp, 1 = tegen het ledemaat.
+     Precies in het midden (0,5) lijkt logisch, maar dan komt er bij een smalle spleet een strook
+     romphuid mee - op het vrouwmodel hing er zo een lap ribbenkast aan de arm. Dicht tegen het
+     ledemaat aan scheelt hooguit een paar millimeter arm, en die zit toch weggestopt in de plooi. */
+  const LEDE_KANT=0.72;
   const ARM_HELLING=-0.5, ARM_TOP=0.16;    // knip boven de oksel: naar binnen, schouder komt mee
+  /* Hoe ver die schuine knip maximaal naar binnen mag: als deel van de halve breedte van het lichaam
+     op die hoogte. Zonder rem loopt een vaste helling bij een smal model tot vlak bij het midden -
+     op het vrouwmodel (arm hangt dichter tegen de romp, okselgrens 0,14 tegen 0,21 bij de man) kwam
+     zo een strook borstkas mee met de arm. Op het mannenmodel raakt deze rem de knip nauwelijks. */
+  const ARM_MIN_BREED=0.6;
   const BEEN_HELLING=0.9, BEEN_TOP=0.20;   // knip boven het kruis: naar buiten, over de heup
   const NEK_ONDER=0.78;       // vanaf welke lichaamshoogte we naar de nek zoeken
   const NEK_VOET=1.6;         // knip bij de nekVOET: omlaag tot de doorsnede zoveel keer de nek is
@@ -12540,30 +12550,50 @@ async function verwijderVoorbeelden() {
       let a=cel.get(sleutel); if(!a){ a=[]; cel.set(sleutel,a); } a.push([W[i*3],i]);
     }
     const banden=[]; for(let b=0;b<nb;b++) banden.push([]);
+    const breedR=new Float32Array(nb), breedL=new Float32Array(nb);   // halve breedte per band, per kant
+    for(let i=0;i<n;i++){
+      const b=Math.min(nb-1,Math.max(0,Math.floor((W[i*3+1]-ymin)/BY))), x=W[i*3];
+      if(x>breedR[b]) breedR[b]=x;
+      if(-x>breedL[b]) breedL[b]=-x;
+    }
     for(const [sleutel,xs] of cel){
       if(xs.length<4) continue;
       xs.sort((p,q)=>p[0]-q[0]);
-      const b=+sleutel.split("|")[0];
+      const dl=sleutel.split("|"), b=+dl[0], zc=(+dl[1]+0.5)*BZ;
       for(let i=1;i<xs.length;i++){
         const op=xs[i][0]-xs[i-1][0]; if(op<MIN) continue;
         // lucht: de ene wand kijkt naar buiten (+x), de andere kijkt terug (-x). Bij een holte in
         // een ledemaat is het net andersom.
         if(!(NW[xs[i-1][1]*3]>LEDE_NORM && NW[xs[i][1]*3]<LEDE_NORM)) continue;
-        banden[b].push({ mid:(xs[i][0]+xs[i-1][0])/2, op });
+        banden[b].push({ mid:(xs[i][0]+xs[i-1][0])/2, op, laag:xs[i-1][0], hoog:xs[i][0], z:zc });
       }
     }
-    return (mesh.__ledeScan={ ymin, ymax, L, S, BY, nb, banden });
+    return (mesh.__ledeScan={ ymin, ymax, L, S, BY, nb, banden, breedR, breedL });
   }
   const _mediaan=(a)=>{ a=a.slice().sort((p,q)=>p-q); return a[a.length>>1]; };
   /* Grenslijn uit de gemeten banden: per band de mediaan van de openingen die bij dit deel horen,
      losse banden zonder buur eruit (ruis), gaatjes ertussen overbrugd. Alles in s-ruimte, dus
      gespiegeld met de zijde: s = zijde * x. */
   function grensUitBanden(sc, zijde, kies, minCellen){
-    const nb=sc.nb, med=new Float32Array(nb).fill(NaN);
+    const nb=sc.nb, med=new Float32Array(nb).fill(NaN), cellen=[];
     for(let b=0;b<nb;b++){
-      const uit=[];
-      for(const g of sc.banden[b]){ const s=zijde*g.mid; if(kies(s,g,sc)) uit.push(s); }
+      const uit=[], rij=[];
+      for(const g of sc.banden[b]){
+        const s=zijde*g.mid; if(!kies(s,g,sc)) continue;
+        // in s-ruimte ligt de kant van het ledemaat altijd het hoogst
+        const sa=zijde*g.laag, sb=zijde*g.hoog, romp=Math.min(sa,sb), deel=Math.max(sa,sb);
+        const w=romp+(deel-romp)*LEDE_KANT;
+        uit.push(w); rij.push([g.z,w]);
+      }
+      cellen.push(rij.sort((p,q)=>p[0]-q[0]));
       if(uit.length>=(minCellen||1)) med[b]=_mediaan(uit);
+      else cellen[b]=[];
+    }
+    // z-bereik waarin het ledemaat op die hoogte hangt (uit de cellen die een opening gaven)
+    const z0=new Float32Array(nb).fill(NaN), z1=new Float32Array(nb).fill(NaN);
+    for(let b=0;b<nb;b++){
+      const rij=cellen[b]; if(!rij.length) continue;
+      z0[b]=rij[0][0]; z1[b]=rij[rij.length-1][0];
     }
     for(let b=0;b<nb;b++){
       if(isNaN(med[b])) continue;
@@ -12573,14 +12603,110 @@ async function verwijderVoorbeelden() {
     for(let b=0;b<nb;b++){ if(isNaN(med[b])) continue; if(bLaag<0) bLaag=b; bHoog=b; }
     if(bLaag<0) return null;
     for(let b=bLaag+1;b<bHoog;b++) if(isNaN(med[b])) med[b]=med[b-1];
-    return { med, bLaag, bHoog };
+    for(let b=bLaag+1;b<=bHoog;b++){ if(isNaN(z0[b])){ z0[b]=z0[b-1]; z1[b]=z1[b-1]; } }
+    for(let b=bHoog-1;b>=bLaag;b--){ if(isNaN(z0[b])){ z0[b]=z0[b+1]; z1[b]=z1[b+1]; } }
+    return { med, cellen, z0, z1, bLaag, bHoog };
   }
-  function bandWaarde(sc, G, y){
+  /* De grens op hoogte y en diepte z. Per hoogteband is de grens op meerdere diepten gemeten; we
+     pakken de dichtstbijzijnde gemeten diepte en vallen terug op de mediaan van de band. Een enkele
+     waarde per band volstaat niet: bij het vrouwmodel ligt de borstkas op een andere diepte verder
+     naar buiten dan de arm, en die kwam dan als lap mee met de arm. */
+  function bandWaarde(sc, G, y, z){
+    const bijBand=(b)=>{
+      b=Math.max(G.bLaag,Math.min(G.bHoog,b));
+      const rij=G.cellen[b];
+      if(rij && rij.length && isFinite(z)){
+        let best=rij[0], bd=Math.abs(rij[0][0]-z);
+        for(let i=1;i<rij.length;i++){ const d=Math.abs(rij[i][0]-z); if(d<bd){ bd=d; best=rij[i]; } }
+        // Is de grens uit het EILAND van het deel gehaald, dan weten we ook waar het deel NIET zit:
+        // buiten die diepten hoort niets erbij. (Bij een grens uit de luchtopening weten we dat niet,
+        // want de opening zit niet per se op de diepte van het ledemaat.)
+        if(G.blob && G.blob[b] && bd>sc.BZ) return Infinity;
+        return best[1];
+      }
+      return (G.blob && G.blob[b]) ? Infinity : G.med[b];
+    };
     const f=(y-sc.ymin)/sc.BY-0.5, b=Math.floor(f);
-    const g0=G.med[Math.max(G.bLaag,Math.min(G.bHoog,b))];
-    const g1=G.med[Math.max(G.bLaag,Math.min(G.bHoog,b+1))];
+    const g0=bijBand(b), g1=bijBand(b+1);
     if(isNaN(g0)) return g1; if(isNaN(g1)) return g0;
     return g0+(g1-g0)*Math.max(0,Math.min(1,f-b));
+  }
+  /* Per hoogteband het EILAND van de arm zoeken in de doorsnede (s tegen z) en daaruit de grens
+     per diepte halen. Een grens die alleen uit de luchtopening komt is een lijn in x: alles wat op
+     die hoogte verder naar buiten steekt hoort er dan bij, ook als het ervoor of erachter ligt. Op
+     het vrouwmodel bleef zo de zijkant van de borst aan de arm hangen. Het eiland lost dat op: de
+     arm is in de doorsnede een losse vlek, de borst een andere.
+     Vanaf het buitenste punt (dat is onder de oksel altijd de arm) groeien we over punten die dicht
+     genoeg bij elkaar liggen. Raakt de vlek meer dan 60 procent van de doorsnede, dan zitten arm en
+     romp daar aan elkaar vast; die band houdt zijn oude grens uit de luchtopening. */
+  function armEilanden(sc, w, zijde, G){
+    const W=w.P, n=w.n, S=sc.S, BY=sc.BY, BZ=sc.BZ, c=0.022*S;
+    const perBand=new Map();
+    for(let i=0;i<n;i++){
+      const b=Math.floor((W[i*3+1]-sc.ymin)/BY);
+      if(b<G.bLaag || b>G.bHoog) continue;
+      const s=zijde*W[i*3]; if(s<=0.02*S) continue;
+      let a=perBand.get(b); if(!a){ a=[]; perBand.set(b,a); } a.push([s,W[i*3+2]]);
+    }
+    const blob=new Uint8Array(sc.nb);
+    for(const [b,pts] of perBand){
+      if(pts.length<12) continue;
+      const grid=new Map();
+      for(let i=0;i<pts.length;i++){
+        const k=Math.floor(pts[i][0]/c)+","+Math.floor(pts[i][1]/c);
+        let a=grid.get(k); if(!a){ a=[]; grid.set(k,a); } a.push(i);
+      }
+      let seed=0; for(let i=1;i<pts.length;i++) if(pts[i][0]>pts[seed][0]) seed=i;
+      const erin=new Uint8Array(pts.length), stapel=[seed]; erin[seed]=1; let aantal=1;
+      while(stapel.length){
+        const i=stapel.pop(), gx=Math.floor(pts[i][0]/c), gz=Math.floor(pts[i][1]/c);
+        for(let dx=-1;dx<=1;dx++) for(let dz=-1;dz<=1;dz++){
+          const a=grid.get((gx+dx)+","+(gz+dz)); if(!a) continue;
+          for(const j of a){
+            if(erin[j]) continue;
+            const ds=pts[j][0]-pts[i][0], dz2=pts[j][1]-pts[i][1];
+            if(ds*ds+dz2*dz2<=c*c){ erin[j]=1; aantal++; stapel.push(j); }
+          }
+        }
+      }
+      if(aantal>0.6*pts.length) continue;   // arm en romp zitten hier vast aan elkaar
+      const binnenkant=new Map(), rompkant=new Map();
+      for(let i=0;i<pts.length;i++){
+        if(!erin[i]) continue;
+        const zc=Math.floor(pts[i][1]/BZ), v=binnenkant.get(zc);
+        if(v==null || pts[i][0]<v) binnenkant.set(zc, pts[i][0]);
+      }
+      for(let i=0;i<pts.length;i++){
+        if(erin[i]) continue;
+        const zc=Math.floor(pts[i][1]/BZ), mb=binnenkant.get(zc);
+        if(mb==null || pts[i][0]>=mb) continue;
+        const v=rompkant.get(zc);
+        if(v==null || pts[i][0]>v) rompkant.set(zc, pts[i][0]);
+      }
+      const rij=[], waarden=[];
+      for(const [zc,mb] of binnenkant){
+        const mt=rompkant.get(zc);
+        const g=(mt!=null) ? mt+(mb-mt)*LEDE_KANT : mb-0.01*S;
+        rij.push([(zc+0.5)*BZ, g]); waarden.push(g);
+      }
+      if(!rij.length) continue;
+      G.cellen[b]=rij.sort((p,q)=>p[0]-q[0]);
+      G.med[b]=_mediaan(waarden);
+      blob[b]=1;
+    }
+    /* Vlak onder de oksel zitten arm en romp aan elkaar vast (op het vrouwmodel vanaf 1,26), dus
+       daar valt geen eiland te vinden. De arm springt over acht centimeter hoogte niet ineens van
+       diepte, dus trekken we het laatste gevonden profiel omhoog door - inclusief de diepten, want
+       juist die houden de borst eruit. Een cel extra aan beide kanten geeft de schouder wat ruimte. */
+    let laatst=-1;
+    for(let b=G.bLaag;b<=G.bHoog;b++) if(blob[b]) laatst=b;
+    if(laatst>=0){
+      const bron=G.cellen[laatst];
+      const breder=[[bron[0][0]-sc.BZ, bron[0][1]]].concat(bron, [[bron[bron.length-1][0]+sc.BZ, bron[bron.length-1][1]]]);
+      for(let b=laatst+1;b<=G.bHoog;b++){ G.cellen[b]=breder; G.med[b]=G.med[laatst]; blob[b]=1; }
+    }
+    G.blob=blob;
+    return G;
   }
   /* De knip voor een deel: waar loopt de scheiding, en hoe knippen we een driehoek af.
      `binnen(x,y)` beslist per vertex; `halfs` zijn dezelfde grenzen als ongelijkheden, zodat
@@ -12594,14 +12720,24 @@ async function verwijderVoorbeelden() {
     if(deel==='arm-links' || deel==='arm-rechts'){
       const zijde=(deel==='arm-links')?1:-1;
       // de arm hangt los van de romp: pak per band de breedste opening aan die kant
-      const G=grensUitBanden(sc, zijde, (s)=>s>0.02*S, 1);
+      let G=grensUitBanden(sc, zijde, (s)=>s>0.02*S, 1);
       if(G){
+        G=armEilanden(sc, w||ledeWereld(mesh), zijde, G);
         const okselS=G.med[G.bHoog], okselY=sc.ymin+(G.bHoog+1)*sc.BY;
         const y0=sc.ymin+G.bLaag*sc.BY-0.02*S, yTop=okselY+ARM_TOP*S;
-        const grens=(y)=> (y>okselY) ? okselS+(y-okselY)*ARM_HELLING : bandWaarde(sc,G,y);
+        const breed=(zijde>0)?sc.breedR:sc.breedL;
+        const halveBreedte=(y)=>{ const b=Math.max(0,Math.min(sc.nb-1,Math.floor((y-sc.ymin)/sc.BY))); return breed[b]; };
+        const grens=(y,z)=> (y>okselY)
+          ? Math.max(okselS+(y-okselY)*ARM_HELLING, ARM_MIN_BREED*halveBreedte(y))
+          : bandWaarde(sc,G,y,z);
+        /* Een strook in de diepte erbij (de arm hangt onder de oksel maar in een beperkt z-bereik)
+           leek logisch tegen de borst-lap op het vrouwmodel, maar de gemeten z van een luchtopening
+           is NIET de z van de arm zelf: bij de hand zit de opening voor het lichaam terwijl de arm
+           erachter hangt. Het sneed de arm tot een schouderkap terug (899 driehoeken). Daarom uit;
+           zie de notitie bij LEDE_KANT voor wat er wel tegen die lap helpt. */
         K={ deel, zijde, leeg:false, seed:'laag',
-          binnen:(x,y)=> y>=y0 && y<=yTop && (zijde*x)>grens(y),
-          halfs:[ (q)=>zijde*q.x-grens(q.y), (q)=>q.y-y0, (q)=>yTop-q.y ],
+          binnen:(x,y,z)=> y>=y0 && y<=yTop && (zijde*x)>grens(y,z),
+          halfs:[ (q)=>zijde*q.x-grens(q.y,q.z), (q)=>q.y-y0, (q)=>yTop-q.y ],
           meta:{ deel, knipX:+okselS.toFixed(4), knipY:+okselY.toFixed(3),
             vanaf:+(sc.ymin+G.bLaag*sc.BY).toFixed(3), tot:+yTop.toFixed(3), banden:G.bHoog-G.bLaag+1 } };
       }
@@ -12613,10 +12749,10 @@ async function verwijderVoorbeelden() {
       if(G){
         const kruisS=G.med[G.bHoog], kruisY=sc.ymin+(G.bHoog+1)*sc.BY;
         const y0=sc.ymin-0.05*S, yTop=kruisY+BEEN_TOP*S;
-        const grens=(y)=> (y>kruisY) ? kruisS+(y-kruisY)*BEEN_HELLING : bandWaarde(sc,G,y);
+        const grens=(y,z)=> (y>kruisY) ? kruisS+(y-kruisY)*BEEN_HELLING : bandWaarde(sc,G,y,z);
         K={ deel, zijde, leeg:false, seed:'laag',
-          binnen:(x,y)=> y>=y0 && y<=yTop && (zijde*x)>grens(y),
-          halfs:[ (q)=>zijde*q.x-grens(q.y), (q)=>q.y-y0, (q)=>yTop-q.y ],
+          binnen:(x,y,z)=> y>=y0 && y<=yTop && (zijde*x)>grens(y,z),
+          halfs:[ (q)=>zijde*q.x-grens(q.y,q.z), (q)=>q.y-y0, (q)=>yTop-q.y ],
           meta:{ deel, knipX:+kruisS.toFixed(4), kruisY:+kruisY.toFixed(3),
             tot:+yTop.toFixed(3), banden:G.bHoog-G.bLaag+1 } };
       }
@@ -12652,7 +12788,7 @@ async function verwijderVoorbeelden() {
         }
         const nekY=sc.ymin+(voetB+0.5)*sc.BY;
         K={ deel, zijde:1, leeg:false, seed:'hoog',
-          binnen:(x,y)=> y>=nekY,
+          binnen:(x,y,z)=> y>=nekY,
           halfs:[ (q)=>q.y-nekY ],
           meta:{ deel, nekY:+nekY.toFixed(3), smalstY:+(sc.ymin+(besteB+0.5)*sc.BY).toFixed(3),
             nekBreedte:+besteW.toFixed(3) } };
@@ -12671,7 +12807,7 @@ async function verwijderVoorbeelden() {
     w=w||ledeWereld(mesh);
     const W=w.P, NW=w.N, n=w.n, g=mesh.geometry;
     const erbij=new Uint8Array(n);
-    for(let i=0;i<n;i++) if(K.binnen(W[i*3],W[i*3+1])) erbij[i]=1;
+    for(let i=0;i<n;i++) if(K.binnen(W[i*3],W[i*3+1],W[i*3+2])) erbij[i]=1;
     const idx=g.index, cnt=idx?idx.count:g.attributes.position.count;
     const tris=[], kaart=new Map();
     const sleutel=(j)=>Math.round(W[j*3]*800)+","+Math.round(W[j*3+1]*800)+","+Math.round(W[j*3+2]*800);
@@ -12808,7 +12944,7 @@ async function verwijderVoorbeelden() {
   // Ligt dit wereldpunt op het geisoleerde deel? (zonder isolatie telt alles mee)
   function opGeisoleerdDeel(p){
     if(!ledeActief) return true;
-    for(const d of ledeActief.delen) if(d.K.binnen(p.x,p.y)) return true;
+    for(const d of ledeActief.delen) if(d.K.binnen(p.x,p.y,p.z)) return true;
     return false;
   }
   // Tattoos buiten het gekozen deel dimmen mee met de romp; die op het deel blijven vol.
@@ -12881,7 +13017,7 @@ async function verwijderVoorbeelden() {
     for(const d of LEDE_DELEN){
       let K=mesh.__ledeKnip && mesh.__ledeKnip[d];
       if(!K){ w=w||ledeWereld(mesh); K=knipVoor(mesh,d,w); }
-      if(K && !K.leeg && K.binnen(p.x,p.y)) return d;
+      if(K && !K.leeg && K.binnen(p.x,p.y,p.z)) return d;
     }
     return null;
   }
