@@ -11832,7 +11832,8 @@ async function verwijderVoorbeelden() {
   function b64ToBuffer(b64){ const bin=atob(b64), len=bin.length, bytes=new Uint8Array(len);
     for(let i=0;i<len;i++) bytes[i]=bin.charCodeAt(i); return bytes.buffer; }
   function disposeMarker(m){
-    clearTimeout(m._persistT);   // nog-lopende debounced save afbreken (marker verdwijnt)
+    clearTimeout(m._persistT);
+    ledeDecalTerug(m);   // tweede helft van een gesplitste tattoo mee opruimen   // nog-lopende debounced save afbreken (marker verdwijnt)
     if(m.obj){ body.remove(m.obj);
       if(m.obj.geometry) m.obj.geometry.dispose();
       if(m.obj.material && m.obj.material.dispose) m.obj.material.dispose(); }
@@ -12515,6 +12516,7 @@ async function verwijderVoorbeelden() {
   const NEK_ONDER=0.78;       // vanaf welke lichaamshoogte we naar de nek zoeken
   const NEK_VOET=1.6;         // knip bij de nekVOET: omlaag tot de doorsnede zoveel keer de nek is
   let LEDE_DEKSEL=true;       // knip dichtmaken (anders kijk je van bovenaf in de holle schaal)
+  const LEDE_DEKSEL_TINT=0.45;   // hoeveel donkerder dan de huid het dekseltje is
   const LEDE_ROMP_OP=0.10;    // doorzichtigheid van de rest van het lichaam
   const LEDE_DECAL_OP=0.18;   // tattoos buiten het gekozen deel dimmen mee
   const LEDE_DELEN=['arm-links','arm-rechts','been-links','been-rechts','hoofd'];
@@ -12616,12 +12618,17 @@ async function verwijderVoorbeelden() {
       b=Math.max(G.bLaag,Math.min(G.bHoog,b));
       const rij=G.cellen[b];
       if(rij && rij.length && isFinite(z)){
-        let best=rij[0], bd=Math.abs(rij[0][0]-z);
-        for(let i=1;i<rij.length;i++){ const d=Math.abs(rij[i][0]-z); if(d<bd){ bd=d; best=rij[i]; } }
         // Is de grens uit het EILAND van het deel gehaald, dan weten we ook waar het deel NIET zit:
         // buiten die diepten hoort niets erbij. (Bij een grens uit de luchtopening weten we dat niet,
         // want de opening zit niet per se op de diepte van het ledemaat.)
-        if(G.blob && G.blob[b] && bd>sc.BZ) return Infinity;
+        const strikt=!!(G.blob && G.blob[b]);
+        /* De dichtstbijzijnde gemeten diepte, niet interpoleren. De waarde per diepte is de
+           BINNENSTE rand van het ledemaat in die plak; tussen twee plakken in een lijn trekken tilt
+           de grens op waar de arm juist naar binnen bocht, en dan snijd je arm weg (gemeten: 4870
+           naar 3628 driehoeken en het dekseltje viel weg). */
+        let best=rij[0], bd=Math.abs(rij[0][0]-z);
+        for(let i=1;i<rij.length;i++){ const d=Math.abs(rij[i][0]-z); if(d<bd){ bd=d; best=rij[i]; } }
+        if(strikt && bd>sc.BZ) return Infinity;
         return best[1];
       }
       return (G.blob && G.blob[b]) ? Infinity : G.med[b];
@@ -12872,6 +12879,8 @@ async function verwijderVoorbeelden() {
        rand vinden we terug als de randen die maar in EEN driehoek voorkomen; die vormen een lus rond
        de knip, die we vullen met een waaier vanuit het zwaartepunt. */
     let deksels=0;
+    const capP=[], capN=[];
+    const zetCap=(q)=>{ capP.push(q.x,q.y,q.z); capN.push(q.nx,q.ny,q.nz); box.expandByPoint(pv.set(q.x,q.y,q.z)); };
     if(LEDE_DEKSEL){
       const sl3=(i)=>Math.round(P[i*3]*1e5)+","+Math.round(P[i*3+1]*1e5)+","+Math.round(P[i*3+2]*1e5);
       const randen=new Map(), nTri=P.length/9;
@@ -12928,9 +12937,9 @@ async function verwijderVoorbeelden() {
         const kern={x:cx,y:cy,z:cz,nx,ny,nz};
         for(let i=0;i<lus.length;i++){
           const a=lus[i], b=lus[(i+1)%lus.length];
-          zetPunt(kern);
-          zetPunt({x:a[0],y:a[1],z:a[2],nx,ny,nz});
-          zetPunt({x:b[0],y:b[1],z:b[2],nx,ny,nz});
+          zetCap(kern);
+          zetCap({x:a[0],y:a[1],z:a[2],nx,ny,nz});
+          zetCap({x:b[0],y:b[1],z:b[2],nx,ny,nz});
           aantal++;
         }
         deksels++;
@@ -12939,25 +12948,86 @@ async function verwijderVoorbeelden() {
     const geo=new THREE.BufferGeometry();
     geo.setAttribute('position',new THREE.Float32BufferAttribute(P,3));
     geo.setAttribute('normal',new THREE.Float32BufferAttribute(N,3));
-    return { geo, box, driehoeken:aantal, gevonden:tris.length, deksels };
+    let capGeo=null;
+    if(capP.length){
+      capGeo=new THREE.BufferGeometry();
+      capGeo.setAttribute('position',new THREE.Float32BufferAttribute(capP,3));
+      capGeo.setAttribute('normal',new THREE.Float32BufferAttribute(capN,3));
+    }
+    return { geo, capGeo, box, driehoeken:aantal, gevonden:tris.length, deksels };
   }
   // Ligt dit wereldpunt op het geisoleerde deel? (zonder isolatie telt alles mee)
-  function opGeisoleerdDeel(p){
+  function opDeelXYZ(x,y,z){
     if(!ledeActief) return true;
-    for(const d of ledeActief.delen) if(d.K.binnen(p.x,p.y,p.z)) return true;
+    for(const d of ledeActief.delen) if(d.K.binnen(x,y,z)) return true;
     return false;
   }
-  // Tattoos buiten het gekozen deel dimmen mee met de romp; die op het deel blijven vol.
+  function opGeisoleerdDeel(p){ return opDeelXYZ(p.x,p.y,p.z); }
+  /* Tattoos buiten het gekozen deel dimmen mee met de romp. Een tattoo die OVER de knip heen loopt
+     (bv. van heup naar bovenbeen) wordt gesplitst: de driehoeken op het deel blijven vol in de
+     bestaande decal-mesh, de rest gaat naar een tweede mesh op lage dekking. Zo verdwijnt niet de
+     hele tattoo zodra hij ook maar een randje romp raakt. De decal-geometrie staat in
+     wereldcoordinaten (DecalGeometry), dus dezelfde knip-toets werkt erop; de platte terugval-sticker
+     heeft wel een eigen positie en die splitsen we niet. */
+  function ledeDecalTerug(m){
+    if(m.__ledeHelft){
+      body.remove(m.__ledeHelft);
+      if(m.__ledeHelft.geometry) m.__ledeHelft.geometry.dispose();
+      if(m.__ledeHelft.material && m.__ledeHelft.material.dispose) m.__ledeHelft.material.dispose();
+      m.__ledeHelft=null;
+    }
+    if(m.__ledeHeel){
+      if(m.obj && m.obj.geometry && m.obj.geometry!==m.__ledeHeel){ m.obj.geometry.dispose(); m.obj.geometry=m.__ledeHeel; }
+      m.__ledeHeel=null;
+    }
+  }
+  function ledeDecalSplits(m){
+    if(!ledeActief || !m.obj || !m.obj.material) return;
+    if(!ledeActief.decalOp.has(m)) ledeActief.decalOp.set(m, m.obj.material.opacity);
+    const vol=ledeActief.decalOp.get(m);
+    ledeDecalTerug(m);
+    const geo=m.obj.geometry, pos=geo && geo.attributes && geo.attributes.position;
+    const plat=m.obj.position.lengthSq()>1e-9;   // terugval-sticker: eigen transform, niet splitsen
+    if(!pos || plat){
+      zetDecalOpacity(m.obj, opGeisoleerdDeel(m.point||new THREE.Vector3()) ? vol : LEDE_DECAL_OP*vol);
+      return;
+    }
+    const nor=geo.attributes.normal, uv=geo.attributes.uv, cnt=pos.count;
+    const opDeel=[], erbuiten=[];
+    for(let i=0;i<cnt;i+=3){
+      const cx=(pos.getX(i)+pos.getX(i+1)+pos.getX(i+2))/3;
+      const cy=(pos.getY(i)+pos.getY(i+1)+pos.getY(i+2))/3;
+      const cz=(pos.getZ(i)+pos.getZ(i+1)+pos.getZ(i+2))/3;
+      (opDeelXYZ(cx,cy,cz) ? opDeel : erbuiten).push(i);
+    }
+    if(!erbuiten.length){ zetDecalOpacity(m.obj, vol); return; }
+    if(!opDeel.length){ zetDecalOpacity(m.obj, LEDE_DECAL_OP*vol); return; }
+    const bouw=(lijst)=>{
+      const P=[], N=[], U=[];
+      for(const i of lijst) for(let j=0;j<3;j++){
+        P.push(pos.getX(i+j),pos.getY(i+j),pos.getZ(i+j));
+        if(nor) N.push(nor.getX(i+j),nor.getY(i+j),nor.getZ(i+j));
+        if(uv) U.push(uv.getX(i+j),uv.getY(i+j));
+      }
+      const g=new THREE.BufferGeometry();
+      g.setAttribute('position',new THREE.Float32BufferAttribute(P,3));
+      if(nor) g.setAttribute('normal',new THREE.Float32BufferAttribute(N,3));
+      if(uv) g.setAttribute('uv',new THREE.Float32BufferAttribute(U,2));
+      return g;
+    };
+    m.__ledeHeel=geo;
+    m.obj.geometry=bouw(opDeel);
+    zetDecalOpacity(m.obj, vol);
+    const helft=new THREE.Mesh(bouw(erbuiten), m.obj.material.clone());
+    helft.renderOrder=m.obj.renderOrder; helft.visible=m.obj.visible;
+    zetDecalOpacity(helft, LEDE_DECAL_OP*vol);
+    body.add(helft); m.__ledeHelft=helft;
+  }
   function ledeDecals(aan){
     for(const m of markers){
       if(!m.obj || !m.obj.material) continue;
-      if(aan){
-        if(!ledeActief.decalOp.has(m)) ledeActief.decalOp.set(m, m.obj.material.opacity);
-        if(!opGeisoleerdDeel(m.point||new THREE.Vector3())) zetDecalOpacity(m.obj, LEDE_DECAL_OP*(m.obj.material.opacity||1));
-      } else {
-        const op=ledeActief && ledeActief.decalOp.get(m);
-        if(op!=null) zetDecalOpacity(m.obj, op);
-      }
+      if(aan) ledeDecalSplits(m);
+      else { ledeDecalTerug(m); const op=ledeActief && ledeActief.decalOp.get(m); if(op!=null) zetDecalOpacity(m.obj, op); }
     }
   }
   function stopIsolatie(){
@@ -12985,7 +13055,16 @@ async function verwijderVoorbeelden() {
       mat.transparent=false; mat.opacity=1; mat.depthWrite=true;
       mat.polygonOffset=true; mat.polygonOffsetFactor=-2;   // decals (-6) blijven er ruim voor liggen
       const mm=new THREE.Mesh(r.geo,mat); mm.renderOrder=1; groep.add(mm);
-      delen.push({mesh, K, mat, driehoeken:r.driehoeken, deksels:r.deksels});
+      /* Het dekseltje krijgt een eigen, gelijkmatig materiaal: als vlak stuk huid ving het nauwelijks
+         licht (de lamp hangt bij de camera) en werd het bijna zwart. Nu een egale tint, iets donkerder
+         dan de huid, zodat het als doorsnede leest zonder gat te lijken. */
+      let capMat=null;
+      if(r.capGeo){
+        capMat=new THREE.MeshBasicMaterial({ side:THREE.DoubleSide, polygonOffset:true, polygonOffsetFactor:-2 });
+        capMat.color.copy(skinMat.color).multiplyScalar(LEDE_DEKSEL_TINT);
+        const cm=new THREE.Mesh(r.capGeo,capMat); cm.renderOrder=1; groep.add(cm);
+      }
+      delen.push({mesh, K, mat, capMat, driehoeken:r.driehoeken, deksels:r.deksels});
       box.union(r.box);
     }
     if(!delen.length) return null;
@@ -13272,12 +13351,14 @@ async function verwijderVoorbeelden() {
   // Staat deze tattoo op multiply-blend ("in huid blenden")?
   function recMul(rec){ return !!(rec && rec.kunst3d && rec.kunst3d.blend==='multiply'); }
   function rebuildMarker(m){
+    ledeDecalTerug(m);   // eventuele splitsing over de knip eerst terugdraaien
     if(m.obj){ body.remove(m.obj);
       if(m.obj.geometry)m.obj.geometry.dispose();
       if(m.obj.material&&m.obj.material.dispose)m.obj.material.dispose(); }
     m.obj=makeImage(m.point,m.normal,m.rot||0,m.size||0.09,m.tex,m.mesh||pickMeshes[0],recMul(m.rec));
     if(m.obj) m.obj.renderOrder=(m.rec&&m.rec.stapel)||0;   // stapelvolgorde bij overlap
     zetDecalOpacity(m.obj, m.rec && m.rec.opacity);
+    if(ledeActief){ if(ledeActief.decalOp.has(m)) ledeActief.decalOp.delete(m); ledeDecalSplits(m); }
     if(m===editDecal && selRingOn) buildSelRing();   // selectie-ring soepel meeschalen/-draaien/-verplaatsen (per frame; ring-box is klein -> goedkoop)
   }
   // Net geplaatste tattoo met auto-blend: de live-plaatsing gebruikt de rauwe uitsnede-textuur,
@@ -15103,7 +15184,8 @@ async function verwijderVoorbeelden() {
 
   /* ---- 3D gekoppeld aan de host-instellingen (man/vrouw + huidskleur) ---- */
   function applySkin3D(hex){ if(hex && skinMat){ skinMat.color.set(hex); skinMat.color.convertSRGBToLinear();
-    if(ledeActief) ledeActief.delen.forEach(d=>d.mat.color.copy(skinMat.color)); } }
+    if(ledeActief) ledeActief.delen.forEach(d=>{ d.mat.color.copy(skinMat.color);
+      if(d.capMat) d.capMat.color.copy(skinMat.color).multiplyScalar(LEDE_DEKSEL_TINT); }); } }
   function setSkin3D(hex){ if(hex){ pendingSkin=hex; applySkin3D(hex); } }
   function setGender3D(g){ g=(g==="vrouw")?"vrouw":"man"; if(inited){ if(g!==currentGender){ meldAndereModel=true; loadEmbedded(g); } } else { currentGender=g; } markOnderbroekZichtbaar(); }
   // Onderbroek-sectie alleen tonen bij het mannenmodel (voorlopig alleen man ondersteund)
