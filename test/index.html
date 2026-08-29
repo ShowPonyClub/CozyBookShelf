@@ -11815,7 +11815,14 @@ function rondOnboardingAf() {
 const terugLagen = [];        // [{naam, sluit}]
 let terugBackBezig = false;   // true = wij riepen zelf history.back() aan (opruimen) -> die popstate negeren
 function laagOpenHistory(naam, sluitFn) {
-  terugLagen.push({ naam, sluit: sluitFn });
+  // Vangnet voor een OVERDRACHT (laag A sluit en laag B opent in dezelfde tik): het sluiten
+  // van A heeft dan een history.back() lopen, en die is asynchroon - hij slokt de push die we
+  // hier doen meteen weer op. Zouden we die laag toch als 'met entry' noteren, dan popt het
+  // sluiten van B straks een ECHTE entry en val je de app uit (leeg scherm). Dus: geen push,
+  // en onthouden dat deze laag geen eigen entry heeft.
+  const zonderEntry = terugBackBezig;
+  terugLagen.push({ naam, sluit: sluitFn, zonderEntry });
+  if (zonderEntry) return;
   try { history.pushState({ tattiesLaag: naam }, ''); } catch { /* geen history (bv. file://) */ }
 }
 function laagSluitHistory(naam) {
@@ -11823,7 +11830,8 @@ function laagSluitHistory(naam) {
   // heeft de entry dan geconsumeerd en de laag uit de stapel gehaald): no-op.
   const i = terugLagen.map(l => l.naam).lastIndexOf(naam);
   if (i < 0) return;
-  terugLagen.splice(i, 1);
+  const laag = terugLagen.splice(i, 1)[0];
+  if (laag && laag.zonderEntry) return;   // nooit een entry gehad: niets te poppen
   terugBackBezig = true;
   try { history.back(); } catch { terugBackBezig = false; }
 }
@@ -12151,7 +12159,19 @@ async function verwijderVoorbeelden() {
       if (pane) pane.hidden = false;
     }));
   }
-  { const ao = $('#inst-account-open'); if (ao) ao.addEventListener('click', () => { sluitInstellingen(); openAccount(); }); }
+  { const ao = $('#inst-account-open'); if (ao) ao.addEventListener('click', () => {
+      sluitInstellingen();
+      // sluitInstellingen() start een history.back() en die is asynchroon. Openen we het
+      // account meteen, dan eet die back de zojuist gepushte entry op en heeft de modal geen
+      // eigen terug-entry meer (het vangnet in laagOpenHistory voorkomt dan wel het uitvallen,
+      // maar de hardwareknop sluit de modal niet meer). Daarom pas openen als die back echt
+      // verwerkt is: wachten op de popstate, met een timer als vangnet.
+      let gestart = false;
+      const ga = () => { if (gestart) return; gestart = true;
+        window.removeEventListener('popstate', ga); openAccount(); };
+      window.addEventListener('popstate', ga);
+      setTimeout(ga, 400);
+    }); }
   { const as = $('#account-sluit'); if (as) as.addEventListener('click', sluitAccount); }
   { const aov = $('#account-overlay'); if (aov) aov.addEventListener('click', sluitAccount); }
   document.querySelectorAll('#onb-geslacht button[data-onb-geslacht]').forEach((b) =>
