@@ -308,7 +308,10 @@ main > section{animation:opkomen .3s ease both}
 .stat-toggle{background:none;border:0;padding:0;font:inherit;color:inherit;cursor:pointer;border-bottom:1px dotted var(--gedempt);line-height:1.1;}
 .stat-toggle:hover{color:var(--accent);border-bottom-color:var(--accent);}
 .start-stat-getal.klikbaar{cursor:pointer;display:inline-block;border-bottom:2px dotted currentColor;line-height:1.05;
-  padding:10px 8px;margin:-10px -8px;}   /* tikvlak naar 44px zonder de layout te verschuiven */
+  position:relative;}
+/* Tikvlak vergroten zonder de opmaak te raken. Met padding + negatieve marge schoof het label in de
+   tegel eronder omhoog en liep het door het getal heen; een onzichtbaar laagje eromheen niet. */
+.start-stat-getal.klikbaar::after{content:"";position:absolute;left:-10px;right:-10px;top:-12px;bottom:-12px;}
 .start-stat-getal.klikbaar:hover{opacity:.78;}
 .silhouet-keuze.compact{width:100%}
 .silhouet-keuze.compact button{flex:1;min-height:44px;padding:8px 6px;font-size:.78rem}
