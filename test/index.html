@@ -9186,6 +9186,15 @@ function leesKostenVeld(el) {
 }
 
 function toonView(naam) {
+  // '3d' is geen host-view maar een eigen laag (de 3D-module beheert 'm). Toch moet toonView
+  // 'm kennen: verschillende plekken voeren huidigeView terug in toonView (de terugknop van
+  // Privacy/Terms bijvoorbeeld), en zonder deze route verbergt hij dan élke view - een leeg
+  // scherm. De 3D-knop is de enige ingang, dus daar sturen we 'm heen.
+  if (naam === '3d') {
+    const b3d = $('#btn-3d');
+    if (b3d) { b3d.click(); return; }
+    naam = 'start';
+  }
   // 2D uit (optie A): alle oude 'home'-routes (collectie-terug, detail-/formulier-fallbacks) landen
   // op start i.p.v. de verborgen 2D-kaart - anders is de in-aanbouw-flow alsnog bedienbaar.
   if (naam === 'home' && !TWEE_D_AAN) naam = 'start';
@@ -16271,6 +16280,14 @@ async function verwijderVoorbeelden() {
   }
   function show3D(){
     actief3D=true;
+    /* De 3D-weergave verbergt de host-views zelf en ging dus niet door toonView(). Daardoor bleef
+       een openstaande detail-laag hangen (met z'n history-entry) en bleef huidigeView op 'detail'
+       staan. Wat de gebruiker daarvan merkte: één keer terug deed niets, twéé keer terug viel de
+       app uit naar een lege browser. En omdat huidigeView al 'detail' was, duwde de volgende
+       detailpagina geen nieuwe laag meer - dan viel je er meteen uit. Hier alsnog afsluiten.
+       show2D() heeft dit niet: die roept gewoon toonView('home') aan. */
+    if(typeof laagSluitHistory==="function"){ try{ laagSluitHistory('detail'); }catch(e){} }
+    huidigeView='3d';
     cancelPlaatsModus();   // een lopende (2D-)plaatsstand annuleren bij binnenkomst in 3D
     { const a=document.getElementById("t3d-add"); if(a) a.style.display=""; }   // + knop weer zichtbaar bij binnenkomst
     markers.forEach(m=>{ if(m.obj) m.obj.renderOrder=(m.rec&&m.rec.stapel)||0; });   // stapelvolgorde uit 2D overnemen
