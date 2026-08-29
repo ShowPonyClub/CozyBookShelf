@@ -957,6 +957,9 @@ form label,
 #stage canvas{display:block;}
 #view-3d #hint{margin:2px 0 0;background:var(--veldbg);border:1px solid var(--rand);
   color:var(--gedempt);font-size:var(--fs-sm);padding:8px 12px;border-radius:var(--r-md);text-align:center;}
+/* Op een kort scherm viel de hintregel half onder de vouw (gemeten op 320x640: de onderste 34px).
+   Het veld iets korter maken scheelt genoeg en houdt het model nog ruim in beeld. */
+@media (max-height:700px){ #stage{height:66vh;height:66svh;height:var(--stage-h,66svh);min-height:380px} }
 #t3d-uitleg{background:var(--veldbg);border:1px solid var(--rand);border-radius:var(--r-md);padding:12px 14px;color:var(--gedempt);}
 #t3d-uitleg .t3d-u-titel{font-size:var(--fs-sm);font-weight:600;color:var(--tekst);margin:0 0 8px;}
 #t3d-uitleg ol{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px;font-size:var(--fs-sm);line-height:1.45;}
@@ -1340,7 +1343,11 @@ html.knipfull .cutmodal.cm-fullcut .cm-bewerk-badge{display:block;position:absol
 .onboarding-kaart{width:100%;max-width:340px;margin:auto;display:flex;flex-direction:column;gap:14px;text-align:center}
 .onboarding-titel{margin:0;font-size:1.5rem;font-weight:800}
 .onboarding-sub{margin:0 0 6px;opacity:.75;font-size:.92rem}
-.onboarding-feedback{margin:8px 0 10px;font-size:.9rem;font-weight:600;color:var(--accent-diep);line-height:1.35}
+/* De regel onder de subtitel is de merkregel, geen knop. Hij stond in accentpaars en vet en werd
+   daardoor als tweede uitweg naast 'Overslaan' gelezen; nu dezelfde ingetogen stijl als de tagline
+   onderaan het startscherm. */
+.onboarding-feedback{margin:8px 0 12px;font-size:.82rem;font-weight:400;color:var(--gedempt);
+  font-family:var(--serif);letter-spacing:.04em;opacity:.75;line-height:1.35}
 .onboarding .inst-label{text-align:left}
 .onboarding .silhouet-keuze{width:100%}
 .onboarding .silhouet-keuze button{flex:1}
@@ -6958,9 +6965,9 @@ const I18N = {
     'ui.aanpassen_bijknippen':'Aanpassen','ui.klaar':'Klaar','ui.kleiner':'Kleiner','ui.groter':'Groter','ui.sluiten_bevestig':'Uitsnede sluiten? Je niet-opgeslagen werk gaat verloren.','ui.sluiten_ja':'Sluiten',
     'ui.links_draaien':'Linksom draaien','ui.rechts_draaien':'Rechtsom draaien',
     'ui.eb_hint':'Sleep = verplaatsen · knijp = schalen · knijp-draai = roteren',
-    'ui.draai_hint':'Sleep om te draaien · tik op een arm, been of hoofd · + voor een nieuwe tattoo',
+    'ui.draai_hint':'Sleep = draaien · tik een arm of been · + = tattoo',
     'ui.heel_lichaam':'Terug naar het hele lichaam','ui.heel_kort':'Heel lichaam',
-    'lede.bezig':'Alleen {deel} in beeld · tik + om er een tattoo op te zetten',
+    'lede.bezig':'Alleen {deel} · tik + voor een tattoo',
     'lede.plaats_op_deel':'Tik op het deel dat je los bekijkt',
     'lede.a11y_label':'Lichaamsdeel los bekijken','lede.a11y_knop':'Bekijk los',
     'lede.arm-links':'Linkerarm','lede.arm-rechts':'Rechterarm',
@@ -6991,7 +6998,7 @@ const I18N = {
     'btn.export':'Exporteren','btn.import':'Importeren','btn.png':'Kaart als PNG',
     'install.tekst':'Zet Tatties op je beginscherm voor offline gebruik','install.knop':'Installeren','install.opbeginscherm':'Op beginscherm zetten','install.algeinstalleerd':'Al geïnstalleerd','install.handmatig':'Installeren kan via het menu van je browser.',
     'install.ios':'Tik op de <b>Deel</b>-knop en kies <b>Zet op beginscherm</b>.','install.ios_kop':'Op iPhone of iPad',
-    'inst.titel':'Instellingen','inst.tab_lichaam':'Lichaam','inst.tab_app':'App','inst.groep_lichaam':'Je lichaam','inst.groep_voorkeuren':'Voorkeuren','inst.groep_account':'Account','inst.groep_app':'App & info','inst.geslacht':'Geslacht','inst.man':'Man','inst.vrouw':'Vrouw','inst.huid':'Huidskleur','inst.taal':'Taal',
+    'inst.titel':'Instellingen','inst.tab_lichaam':'Lichaam','inst.tab_app':'App','inst.groep_lichaam':'Je lichaam','inst.groep_voorkeuren':'Voorkeuren','inst.groep_account':'Account','inst.groep_app':'App & info','inst.geslacht':'Lichaam','inst.man':'Mannelijk','inst.vrouw':'Vrouwelijk','inst.huid':'Huidskleur','inst.taal':'Taal',
     'ui.pose_arm':'Armen wijd','ui.pose_kort':'Armen',
     'inst.vorm':'Lichaamsvorm','inst.vorm.slank':'Slank','inst.vorm.gemiddeld':'Gemiddeld','inst.vorm.atletisch':'Atletisch','inst.vorm.zwaar':'Zwaar',
     'inst.thema':'Thema','inst.thema.auto':'Systeem','inst.thema.licht':'Licht','inst.thema.donker':'Donker',
@@ -7145,9 +7152,9 @@ const I18N = {
     'ui.aanpassen_bijknippen':'Edit','ui.klaar':'Done','ui.kleiner':'Smaller','ui.groter':'Bigger','ui.sluiten_bevestig':'Discard your cut-out? Unsaved work will be lost.','ui.sluiten_ja':'Discard',
     'ui.links_draaien':'Rotate left','ui.rechts_draaien':'Rotate right',
     'ui.eb_hint':'Drag = move · pinch = scale · pinch-twist = rotate',
-    'ui.draai_hint':'Drag to rotate · tap an arm, leg or head · + for a new tattoo',
+    'ui.draai_hint':'Drag = rotate · tap an arm or leg · + = tattoo',
     'ui.heel_lichaam':'Back to the whole body','ui.heel_kort':'Whole body',
-    'lede.bezig':'Showing {deel} only · tap + to put a tattoo on it',
+    'lede.bezig':'{deel} only · tap + for a tattoo',
     'lede.plaats_op_deel':'Tap the part you are viewing on its own',
     'lede.a11y_label':'View a body part on its own','lede.a11y_knop':'View on its own',
     'lede.arm-links':'Left arm','lede.arm-rechts':'Right arm',
@@ -7178,7 +7185,7 @@ const I18N = {
     'btn.export':'Export','btn.import':'Import','btn.png':'Map as PNG',
     'install.tekst':'Add Tatties to your home screen for offline use','install.knop':'Install','install.opbeginscherm':'Add to home screen','install.algeinstalleerd':'Already installed','install.handmatig':'Install via your browser menu.',
     'install.ios':'Tap the <b>Share</b> button, then choose <b>Add to Home Screen</b>.','install.ios_kop':'On iPhone or iPad',
-    'inst.titel':'Settings','inst.tab_lichaam':'Body','inst.tab_app':'App','inst.groep_lichaam':'Your body','inst.groep_voorkeuren':'Preferences','inst.groep_account':'Account','inst.groep_app':'App & info','inst.geslacht':'Gender','inst.man':'Male','inst.vrouw':'Female','inst.huid':'Skin tone','inst.taal':'Language',
+    'inst.titel':'Settings','inst.tab_lichaam':'Body','inst.tab_app':'App','inst.groep_lichaam':'Your body','inst.groep_voorkeuren':'Preferences','inst.groep_account':'Account','inst.groep_app':'App & info','inst.geslacht':'Body','inst.man':'Masculine','inst.vrouw':'Feminine','inst.huid':'Skin tone','inst.taal':'Language',
     'ui.pose_arm':'Arms out','ui.pose_kort':'Arms',
     'inst.vorm':'Body shape','inst.vorm.slank':'Slim','inst.vorm.gemiddeld':'Average','inst.vorm.atletisch':'Athletic','inst.vorm.zwaar':'Heavy',
     'inst.thema':'Appearance','inst.thema.auto':'System','inst.thema.licht':'Light','inst.thema.donker':'Dark',
@@ -12557,7 +12564,16 @@ async function verwijderVoorbeelden() {
   let LEDE_DEKSEL=true;       // knip dichtmaken (anders kijk je van bovenaf in de holle schaal)
   const LEDE_DEKSEL_TINT=0.45;   // hoeveel donkerder dan de huid het dekseltje is
   const LEDE_ROMP_OP=0.10;    // doorzichtigheid van de rest van het lichaam
-  const LEDE_DECAL_OP=0.18;   // tattoos buiten het gekozen deel dimmen mee
+  const LEDE_DECAL_OP=0.18;   // tattoos buiten het gekozen deel dimmen mee (bij een kleine collectie)
+  const LEDE_DECAL_MIN=0.07;  // ondergrens; bij een volle collectie telt de som van alle inkt zwaar
+  /* Met vijf tattoos is 18 procent een prettige achtergrond, met honderd is het een bonte massa die
+     de aandacht wegtrekt van het deel waar het om gaat. Daarom zakt de dekking met de wortel van het
+     aantal: 15 tattoos houdt 0,18, 60 komt op 0,09, alles daarboven op de ondergrens. */
+  function ledeDimOp(){
+    const n=markers.length;
+    if(n<=15) return LEDE_DECAL_OP;
+    return Math.max(LEDE_DECAL_MIN, LEDE_DECAL_OP*Math.sqrt(15/n));
+  }
   const LEDE_SPLIT_MIN=0.15;  // kleiner deel dan dit over de knip? dan niet opknippen
   const LEDE_DELEN=['arm-links','arm-rechts','been-links','been-rechts','hoofd'];
   let ledeActief=null;        // {deel, groep, delen:[{mesh,K,mat}], box, decalOp:Map}
@@ -13036,7 +13052,7 @@ async function verwijderVoorbeelden() {
     const geo=m.obj.geometry, pos=geo && geo.attributes && geo.attributes.position;
     const plat=m.obj.position.lengthSq()>1e-9;   // terugval-sticker: eigen transform, niet splitsen
     if(!pos || plat){
-      zetDecalOpacity(m.obj, opGeisoleerdDeel(m.point||new THREE.Vector3()) ? vol : LEDE_DECAL_OP*vol);
+      zetDecalOpacity(m.obj, opGeisoleerdDeel(m.point||new THREE.Vector3()) ? vol : ledeDimOp()*vol);
       return;
     }
     const nor=geo.attributes.normal, uv=geo.attributes.uv, cnt=pos.count;
@@ -13052,7 +13068,7 @@ async function verwijderVoorbeelden() {
        grootste helft. */
     const totaal=opDeel.length+erbuiten.length;
     if(!erbuiten.length || erbuiten.length<LEDE_SPLIT_MIN*totaal){ zetDecalOpacity(m.obj, vol); return; }
-    if(!opDeel.length || opDeel.length<LEDE_SPLIT_MIN*totaal){ zetDecalOpacity(m.obj, LEDE_DECAL_OP*vol); return; }
+    if(!opDeel.length || opDeel.length<LEDE_SPLIT_MIN*totaal){ zetDecalOpacity(m.obj, ledeDimOp()*vol); return; }
     const bouw=(lijst)=>{
       const P=[], N=[], U=[];
       for(const i of lijst) for(let j=0;j<3;j++){
@@ -13071,7 +13087,7 @@ async function verwijderVoorbeelden() {
     zetDecalOpacity(m.obj, vol);
     const helft=new THREE.Mesh(bouw(erbuiten), m.obj.material.clone());
     helft.renderOrder=m.obj.renderOrder; helft.visible=m.obj.visible;
-    zetDecalOpacity(helft, LEDE_DECAL_OP*vol);
+    zetDecalOpacity(helft, ledeDimOp()*vol);
     body.add(helft); m.__ledeHelft=helft;
   }
   function ledeDecals(aan){
