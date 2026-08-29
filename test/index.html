@@ -1954,6 +1954,13 @@ form label{text-transform:none;letter-spacing:.005em;font-size:.8rem;color:var(-
 </div>
 <!-- A11Y-4: plaatsen zonder aanwijzen (TalkBack/VoiceOver/toetsenbord). Visueel verborgen
      tot het focus krijgt (skip-link-patroon); alleen actief tijdens de plaats-modus. -->
+<div id="lede-a11y" class="plaats-a11y">
+  <label for="lede-a11y-deel" data-i18n="lede.a11y_label">Lichaamsdeel los bekijken</label>
+  <select id="lede-a11y-deel"></select>
+  <button type="button" id="lede-a11y-knop" data-i18n="lede.a11y_knop">Bekijk los</button>
+  <button type="button" id="lede-a11y-terug" data-i18n="ui.heel_kort">Heel lichaam</button>
+</div>
+
 <div id="plaats-a11y" class="plaats-a11y" hidden>
   <label for="plaats-a11y-zone" data-i18n="ui.plaats_zonder_aanwijzen">Plaatsen zonder aanwijzen - kies een lichaamsdeel</label>
   <select id="plaats-a11y-zone"></select>
@@ -6950,6 +6957,7 @@ const I18N = {
     'ui.heel_lichaam':'Terug naar het hele lichaam','ui.heel_kort':'Heel lichaam',
     'lede.bezig':'Alleen {deel} in beeld · tik + om er een tattoo op te zetten',
     'lede.plaats_op_deel':'Tik op het deel dat je los bekijkt',
+    'lede.a11y_label':'Lichaamsdeel los bekijken','lede.a11y_knop':'Bekijk los',
     'lede.arm-links':'Linkerarm','lede.arm-rechts':'Rechterarm',
     'lede.been-links':'Linkerbeen','lede.been-rechts':'Rechterbeen','lede.hoofd':'Hoofd en nek',
     'ui.plaats_hint':'Tik op het lichaam om de tattoo te plaatsen',
@@ -7136,6 +7144,7 @@ const I18N = {
     'ui.heel_lichaam':'Back to the whole body','ui.heel_kort':'Whole body',
     'lede.bezig':'Showing {deel} only · tap + to put a tattoo on it',
     'lede.plaats_op_deel':'Tap the part you are viewing on its own',
+    'lede.a11y_label':'View a body part on its own','lede.a11y_knop':'View on its own',
     'lede.arm-links':'Left arm','lede.arm-rechts':'Right arm',
     'lede.been-links':'Left leg','lede.been-rechts':'Right leg','lede.hoofd':'Head and neck',
     'ui.plaats_hint':'Tap on the body to place the tattoo',
@@ -8456,6 +8465,25 @@ function vulPlaatsA11yZones() {
   const huidig = sel.value;
   sel.innerHTML = BODY_PARTS.map(z => `<option value="${esc(z.id)}">${esc(zoneLabel(z.id))}</option>`).join('');
   if (huidig) sel.value = huidig;
+}
+/* A11Y: hetzelfde patroon als plaatsen-zonder-aanwijzen, maar dan voor het losse ledemaat. Tikken
+   op het model kan niet met een schermlezer of toetsenbord; deze keuzelijst staat buiten beeld tot
+   je hem met tab bereikt. */
+{ const sel = document.getElementById('lede-a11y-deel');
+  const vul = () => { if (!sel || !window.__tattiesLedemaat) return;
+    const huidig = sel.value;
+    sel.innerHTML = window.__tattiesLedemaat.delen.map(d => `<option value="${esc(d)}">${esc(tr('lede.' + d))}</option>`).join('');
+    if (huidig) sel.value = huidig; };
+  if (sel) sel.addEventListener('focus', vul);
+  const kies = document.getElementById('lede-a11y-knop');
+  if (kies) kies.addEventListener('click', () => {
+    if (!window.__tattiesLedemaat) return;
+    vul();
+    const deel = sel && sel.value; if (!deel) return;
+    if (window.__tattiesLedemaat.isoleer(deel)) toast(tr('lede.' + deel));
+  });
+  const terug = document.getElementById('lede-a11y-terug');
+  if (terug) terug.addEventListener('click', () => { if (window.__tattiesLedemaat) window.__tattiesLedemaat.stop(); });
 }
 { const knop = document.getElementById('plaats-a11y-knop');
   if (knop) knop.addEventListener('click', async () => {
@@ -12525,6 +12553,7 @@ async function verwijderVoorbeelden() {
   const LEDE_DEKSEL_TINT=0.45;   // hoeveel donkerder dan de huid het dekseltje is
   const LEDE_ROMP_OP=0.10;    // doorzichtigheid van de rest van het lichaam
   const LEDE_DECAL_OP=0.18;   // tattoos buiten het gekozen deel dimmen mee
+  const LEDE_SPLIT_MIN=0.15;  // kleiner deel dan dit over de knip? dan niet opknippen
   const LEDE_DELEN=['arm-links','arm-rechts','been-links','been-rechts','hoofd'];
   let ledeActief=null;        // {deel, groep, delen:[{mesh,K,mat}], box, decalOp:Map}
 
@@ -12683,15 +12712,18 @@ async function verwijderVoorbeelden() {
         }
       }
       if(aantal>0.6*pts.length) continue;   // arm en romp zitten hier vast aan elkaar
+      // Halve z-cellen: de knip volgt de vorm fijner, dus minder trapjes in de rand. De waarde per
+      // cel is een minimum over de punten erin, dus te fijn maakt hem gevoelig voor ruis.
+      const BZf=BZ/2;
       const binnenkant=new Map(), rompkant=new Map();
       for(let i=0;i<pts.length;i++){
         if(!erin[i]) continue;
-        const zc=Math.floor(pts[i][1]/BZ), v=binnenkant.get(zc);
+        const zc=Math.floor(pts[i][1]/BZf), v=binnenkant.get(zc);
         if(v==null || pts[i][0]<v) binnenkant.set(zc, pts[i][0]);
       }
       for(let i=0;i<pts.length;i++){
         if(erin[i]) continue;
-        const zc=Math.floor(pts[i][1]/BZ), mb=binnenkant.get(zc);
+        const zc=Math.floor(pts[i][1]/BZf), mb=binnenkant.get(zc);
         if(mb==null || pts[i][0]>=mb) continue;
         const v=rompkant.get(zc);
         if(v==null || pts[i][0]>v) rompkant.set(zc, pts[i][0]);
@@ -12700,7 +12732,7 @@ async function verwijderVoorbeelden() {
       for(const [zc,mb] of binnenkant){
         const mt=rompkant.get(zc);
         const g=(mt!=null) ? mt+(mb-mt)*LEDE_KANT : mb-0.01*S;
-        rij.push([(zc+0.5)*BZ, g]); waarden.push(g);
+        rij.push([(zc+0.5)*BZf, g]); waarden.push(g);
       }
       if(!rij.length) continue;
       G.cellen[b]=rij.sort((p,q)=>p[0]-q[0]);
@@ -12885,8 +12917,11 @@ async function verwijderVoorbeelden() {
        rand vinden we terug als de randen die maar in EEN driehoek voorkomen; die vormen een lus rond
        de knip, die we vullen met een waaier vanuit het zwaartepunt. */
     let deksels=0;
-    const capP=[], capN=[];
-    const zetCap=(q)=>{ capP.push(q.x,q.y,q.z); capN.push(q.nx,q.ny,q.nz); box.expandByPoint(pv.set(q.x,q.y,q.z)); };
+    const capP=[], capN=[], capC=[];
+    // Vertexkleur: midden iets lichter dan de rand, zodat het deksel als bolling leest in plaats van
+    // als een vlakke schijf. De basiskleur zit in het materiaal, dit vermenigvuldigt.
+    const zetCap=(q,tint)=>{ capP.push(q.x,q.y,q.z); capN.push(q.nx,q.ny,q.nz);
+      capC.push(tint,tint,tint); box.expandByPoint(pv.set(q.x,q.y,q.z)); };
     if(LEDE_DEKSEL){
       const sl3=(i)=>Math.round(P[i*3]*1e5)+","+Math.round(P[i*3+1]*1e5)+","+Math.round(P[i*3+2]*1e5);
       const randen=new Map(), nTri=P.length/9;
@@ -12943,9 +12978,9 @@ async function verwijderVoorbeelden() {
         const kern={x:cx,y:cy,z:cz,nx,ny,nz};
         for(let i=0;i<lus.length;i++){
           const a=lus[i], b=lus[(i+1)%lus.length];
-          zetCap(kern);
-          zetCap({x:a[0],y:a[1],z:a[2],nx,ny,nz});
-          zetCap({x:b[0],y:b[1],z:b[2],nx,ny,nz});
+          zetCap(kern,1.12);
+          zetCap({x:a[0],y:a[1],z:a[2],nx,ny,nz},0.9);
+          zetCap({x:b[0],y:b[1],z:b[2],nx,ny,nz},0.9);
           aantal++;
         }
         deksels++;
@@ -12959,6 +12994,7 @@ async function verwijderVoorbeelden() {
       capGeo=new THREE.BufferGeometry();
       capGeo.setAttribute('position',new THREE.Float32BufferAttribute(capP,3));
       capGeo.setAttribute('normal',new THREE.Float32BufferAttribute(capN,3));
+      capGeo.setAttribute('color',new THREE.Float32BufferAttribute(capC,3));
     }
     return { geo, capGeo, box, driehoeken:aantal, gevonden:tris.length, deksels };
   }
@@ -13006,8 +13042,12 @@ async function verwijderVoorbeelden() {
       const cz=(pos.getZ(i)+pos.getZ(i+1)+pos.getZ(i+2))/3;
       (opDeelXYZ(cx,cy,cz) ? opDeel : erbuiten).push(i);
     }
-    if(!erbuiten.length){ zetDecalOpacity(m.obj, vol); return; }
-    if(!opDeel.length){ zetDecalOpacity(m.obj, LEDE_DECAL_OP*vol); return; }
+    /* Steekt de tattoo maar een paar procent over de knip, dan is opknippen erger dan de kwaal:
+       je houdt twee snippers over waarvan er een bijna onzichtbaar is. Onder de drempel telt de
+       grootste helft. */
+    const totaal=opDeel.length+erbuiten.length;
+    if(!erbuiten.length || erbuiten.length<LEDE_SPLIT_MIN*totaal){ zetDecalOpacity(m.obj, vol); return; }
+    if(!opDeel.length || opDeel.length<LEDE_SPLIT_MIN*totaal){ zetDecalOpacity(m.obj, LEDE_DECAL_OP*vol); return; }
     const bouw=(lijst)=>{
       const P=[], N=[], U=[];
       for(const i of lijst) for(let j=0;j<3;j++){
@@ -13066,7 +13106,7 @@ async function verwijderVoorbeelden() {
          dan de huid, zodat het als doorsnede leest zonder gat te lijken. */
       let capMat=null;
       if(r.capGeo){
-        capMat=new THREE.MeshBasicMaterial({ side:THREE.DoubleSide, polygonOffset:true, polygonOffsetFactor:-2 });
+        capMat=new THREE.MeshBasicMaterial({ side:THREE.DoubleSide, vertexColors:true, polygonOffset:true, polygonOffsetFactor:-2 });
         capMat.color.copy(skinMat.color).multiplyScalar(LEDE_DEKSEL_TINT);
         const cm=new THREE.Mesh(r.capGeo,capMat); cm.renderOrder=1; groep.add(cm);
       }
@@ -13076,7 +13116,12 @@ async function verwijderVoorbeelden() {
     if(!delen.length) return null;
     body.add(groep);
     // de rest van het lichaam echt doorzichtig: er dwars doorheen kunnen kijken is het hele punt
-    skinMat.transparent=true; skinMat.opacity=LEDE_ROMP_OP; skinMat.depthWrite=false; skinMat.needsUpdate=true;
+    /* Een donkere huid verdwijnt op de donkere achtergrond bij dezelfde dekking, een lichte huid
+       blijft goed zichtbaar. Daarom iets meer dekking naarmate de huid donkerder is. */
+    const lum=0.2126*skinMat.color.r+0.7152*skinMat.color.g+0.0722*skinMat.color.b;
+    skinMat.transparent=true; skinMat.depthWrite=false;
+    skinMat.opacity=Math.max(0.08, Math.min(0.22, LEDE_ROMP_OP+(1-Math.min(1,lum))*0.10));
+    skinMat.needsUpdate=true;
     ledeActief={ deel, groep, delen, box, decalOp:new Map() };
     zetLedeUI();
     ledeDecals(true);
@@ -13791,9 +13836,22 @@ async function verwijderVoorbeelden() {
       const wasTap=!moved && performance.now()-t0<TAP_MS; drag=false;
       if(wasTap){
         if(plaatsModus){ clearTimeout(tapTimer); plaatsNieuwe(e.clientX,e.clientY); return; }
-        clearTimeout(tapTimer); tapTimer=setTimeout(()=>{ if(!tikLedemaat(e.clientX,e.clientY)) focusAt(e.clientX,e.clientY); },300);
+        clearTimeout(tapTimer);
+        /* Wachten hoeft alleen als er een tattoo onder je vinger zit: daar betekent dubbeltikken
+           'bewerken'. Op kale huid reageren we meteen, dat scheelt 300 ms gevoelde traagheid. */
+        if(pickDecal(e.clientX,e.clientY)) tapTimer=setTimeout(()=>{ if(!tikLedemaat(e.clientX,e.clientY)) focusAt(e.clientX,e.clientY); },300);
+        else if(!tikLedemaat(e.clientX,e.clientY)) focusAt(e.clientX,e.clientY);
       }});
     el.addEventListener("dblclick",e=>{ clearTimeout(tapTimer); dblAt(e.clientX,e.clientY); });
+    /* Op desktop verraadt de aanwijzer dat een arm, been of hoofd aanklikbaar is; op touch bestaat
+       zweven niet, daar doet de hintregel het werk. Hooguit 8 keer per seconde een straal. */
+    let wijsT=0;
+    el.addEventListener("mousemove",e=>{
+      if(drag || editDecal || plaatsModus) return;
+      const nu=performance.now(); if(nu-wijsT<120) return; wijsT=nu;
+      const d=deelBijPunt(e.clientX,e.clientY);
+      el.style.cursor=(d && (!ledeActief || d!==ledeActief.deel)) ? "pointer" : "";
+    });
     el.addEventListener("wheel",e=>{ e.preventDefault();
       if(editDecal && !editDecal.locked && onEditDecal(e.clientX,e.clientY)){ const nu=performance.now(); if(nu-lastWheelSnap>500){ snapEdit(editDecal); lastWheelSnap=nu; } scaleDecal(1-e.deltaY*0.001); persistEdit(editDecal); return; }
       radius=Math.max(0.3,Math.min(7,radius*(1+e.deltaY*0.0012)));applyCam(); },{passive:false});
@@ -13822,7 +13880,8 @@ async function verwijderVoorbeelden() {
         const now=performance.now();
         if(now-lastTapT<320){ clearTimeout(tapTimer); dblAt(ct.clientX,ct.clientY); lastTapT=0; drag=false;pinchD=0;pinchMid=null; return; }
         lastTapT=now; clearTimeout(tapTimer);
-        tapTimer=setTimeout(()=>{ if(!tikLedemaat(ct.clientX,ct.clientY)) focusAt(ct.clientX,ct.clientY); },330); }
+        if(pickDecal(ct.clientX,ct.clientY)) tapTimer=setTimeout(()=>{ if(!tikLedemaat(ct.clientX,ct.clientY)) focusAt(ct.clientX,ct.clientY); },330);
+        else if(!tikLedemaat(ct.clientX,ct.clientY)) focusAt(ct.clientX,ct.clientY); }
       drag=false;pinchD=0;pinchA=null;pinchMid=null;pinchModel=false;});
   }
 
