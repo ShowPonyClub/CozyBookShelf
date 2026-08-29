@@ -115,6 +115,10 @@
   --accent:#8E71F0;
   --accent-rgb:142,113,240;        /* voor schaduwen/gloed afgeleid van het accent */
   --accent-diep:#6A4BD4;           /* donkerder paars voor tekst op licht (contrast) */
+  /* Accent als VLAK waar kleine tekst op staat. Op #8E71F0 haalt --op-accent maar 3,1:1, en voor
+     tekst onder 18,7px vraagt de norm 4,5:1. Deze donkerdere tint (zelfde kleur, 80%) haalt 4,6:1.
+     Grote of dikke tekst (de +-knop, koppen) mag op het gewone accent blijven: daar geldt 3:1. */
+  --accent-vlak:#725AC0;
   --inktblauw:#1B2A4A;
   --kaart:#F8F2E7;
   --veldbg:#FBF7EE;
@@ -251,14 +255,14 @@ main > section{animation:opkomen .3s ease both}
 .zijde-balk #fab{padding:9px 14px;font-size:.86rem}
 .gepland-toggle{display:inline-flex;align-items:center;gap:6px;background:var(--veldbg);border:1px solid var(--rand);border-radius:999px;
   color:var(--gedempt);font-size:.76rem;font-weight:600;padding:6px 12px;cursor:pointer;font-family:inherit;white-space:nowrap}
-.gepland-toggle.actief{background:var(--accent);border-color:var(--accent);color:var(--op-accent)}
+.gepland-toggle.actief{background:var(--accent-vlak);border-color:var(--accent-vlak);color:var(--op-accent)}
 .gepland-toggle .ik{stroke:currentColor;fill:none}
 #toon-gepland,#toon-gepland-3d{position:absolute;left:14px;top:14px;z-index:6}
 /* Slanke balk BUITEN het canvas: Wishlist-toggle (links) + reset (rechts); het lichaam/de kaart
    blijft vrij van knoppen. De + blijft als FAB op het canvas. */
 .canvas-balk{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:0 14px;min-height:44px}
 .canvas-balk #toon-gepland,.canvas-balk #toon-gepland-3d{position:static;left:auto;top:auto;z-index:auto}
-.canvas-balk #t3d-reset,.canvas-balk #kaart-reset{position:static;top:auto;right:auto;width:40px;height:40px;z-index:auto}
+.canvas-balk #t3d-reset,.canvas-balk #kaart-reset{position:static;top:auto;right:auto;width:44px;height:44px;z-index:auto}   /* 44 = het kleinste tikdoel dat prettig raakt */
 .canvas-balk .zijde-balk{position:static;left:auto;bottom:auto;z-index:auto;flex-direction:row;margin:0}
 .kaart-layout{
   display:flex;align-items:stretch;gap:10px;margin-bottom:10px;
@@ -288,10 +292,10 @@ main > section{animation:opkomen .3s ease both}
   background:var(--veldbg);border:1px solid var(--rand);border-radius:999px;padding:3px;
 }
 .silhouet-keuze button{
-  min-height:38px;padding:6px 16px;border-radius:999px;
+  min-height:44px;padding:6px 16px;border-radius:999px;
   color:var(--gedempt);font-weight:600;font-size:.86rem;letter-spacing:.02em;
 }
-.silhouet-keuze button.actief{background:var(--accent);color:var(--op-accent)}
+.silhouet-keuze button.actief{background:var(--accent-vlak);color:var(--op-accent)}
 .silhouet-keuze button:disabled{opacity:.4;cursor:not-allowed}
 .inst-soon{display:inline-block;margin-left:8px;padding:1px 8px;border-radius:999px;background:var(--veldbg);border:1px solid var(--rand);color:var(--gedempt);font-size:.66rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase;vertical-align:middle}
 .bouw-melding{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);z-index:6;width:84%;max-width:330px;margin:0;padding:6px;border-radius:16px;background:repeating-linear-gradient(45deg,var(--accent) 0 12px,#BCB09A 12px 24px);box-shadow:0 8px 22px rgba(0,0,0,.28);pointer-events:none}   /* strepen: paars + knop-grijs (i.p.v. zwart) */
@@ -303,7 +307,8 @@ main > section{animation:opkomen .3s ease both}
 .bouw-txt span{font-size:.8rem;font-weight:600;color:var(--gedempt);font-family:var(--label-font)}
 .stat-toggle{background:none;border:0;padding:0;font:inherit;color:inherit;cursor:pointer;border-bottom:1px dotted var(--gedempt);line-height:1.1;}
 .stat-toggle:hover{color:var(--accent);border-bottom-color:var(--accent);}
-.start-stat-getal.klikbaar{cursor:pointer;display:inline-block;border-bottom:2px dotted currentColor;line-height:1.05;}
+.start-stat-getal.klikbaar{cursor:pointer;display:inline-block;border-bottom:2px dotted currentColor;line-height:1.05;
+  padding:10px 8px;margin:-10px -8px;}   /* tikvlak naar 44px zonder de layout te verschuiven */
 .start-stat-getal.klikbaar:hover{opacity:.78;}
 .silhouet-keuze.compact{width:100%}
 .silhouet-keuze.compact button{flex:1;min-height:44px;padding:8px 6px;font-size:.78rem}
@@ -487,7 +492,7 @@ main > section{animation:opkomen .3s ease both}
 .seg-toggle{display:inline-flex;border:1px solid var(--rand);border-radius:var(--r-md);overflow:hidden;background:var(--kaart);flex:none}
 .seg-btn{min-width:46px;min-height:44px;padding:0 14px;border:0;background:transparent;color:var(--tekst);font-weight:700;font-size:var(--fs-sm);font-family:inherit;cursor:pointer;display:inline-flex;align-items:center;justify-content:center}
 .seg-btn+.seg-btn{border-left:1px solid var(--rand)}
-.seg-btn.actief{background:var(--accent);color:var(--op-accent)}
+.seg-btn.actief{background:var(--accent-vlak);color:var(--op-accent)}
 #btn-2d{background:repeating-linear-gradient(45deg,#BCB09A 0 7px,#D9CFBC 7px 14px);color:var(--gedempt)}   /* 2D = gedempt grijs met lichte strepen ('in aanbouw') */
 #btn-2d.actief{background:repeating-linear-gradient(45deg,var(--accent) 0 7px,#D9CFBC 7px 14px);color:var(--tekst)}   /* geselecteerd: donkere strepen -> paars */
 [data-theme="dark"] #btn-2d{background:repeating-linear-gradient(45deg,#4A4439 0 7px,#5C5547 7px 14px);color:#B8AE9C}   /* leesbaar-gedempt (>=3:1) i.p.v. --gedempt (2.4:1) */
@@ -550,13 +555,13 @@ dl.toon-leeg .veldrij.leeg-veld{display:flex}
   padding:10px 12px;box-shadow:0 8px 22px rgba(0,0,0,.22);font-size:var(--fs-sm)}
 .plaats-a11y:focus-within{left:50%;transform:translateX(-50%)}
 .plaats-a11y select,.plaats-a11y button{font-family:inherit;font-size:var(--fs-sm);padding:8px 10px;border-radius:var(--r-sm);border:1px solid var(--rand);background:var(--veldbg);color:var(--tekst)}
-.plaats-a11y button{background:var(--accent);color:var(--op-accent);border-color:var(--accent);cursor:pointer}
+.plaats-a11y button{background:var(--accent-vlak);color:var(--op-accent);border-color:var(--accent-vlak);cursor:pointer}
 .start-titel{margin:0;font-size:1.55rem;font-weight:800}
 .start-tagline{margin:4px 0 0;color:var(--gedempt);font-family:var(--serif);letter-spacing:.03em}
 .start-foot-tagline{margin:22px 0 0;text-align:center;color:var(--gedempt);font-family:var(--serif);font-size:.82rem;letter-spacing:.04em;opacity:.7}
 .start-versie{margin:6px 0 0;text-align:center;color:var(--gedempt);opacity:.55;font-size:.72rem;letter-spacing:.04em}
 .start-cta{width:100%;padding:16px;font-size:1.05rem;font-weight:700;border:0;border-radius:var(--radius);
-  background:var(--accent);color:var(--op-accent);cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.18)}
+  background:var(--accent-vlak);color:var(--op-accent);cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.18)}
 .start-cta:hover{filter:brightness(1.05)}
 .start-stats{display:flex;gap:10px}
 .start-stat{flex:1;background:var(--kaart);border:1px solid var(--rand);border-radius:var(--radius);padding:14px 8px;text-align:center}
@@ -846,7 +851,7 @@ input[type=range]:focus{box-shadow:none;border:none}
 .account-modal-kop{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:16px 18px;border-bottom:1px solid var(--rand);position:sticky;top:0;background:var(--kaart)}
 .account-modal-kop h2{font-size:1.1rem;margin:0}
 .account-modal-body{padding:16px 18px 22px}
-.start-account{display:flex;width:fit-content;align-items:center;gap:8px;margin:2px auto 4px;background:none;border:1px solid var(--rand);border-radius:999px;color:var(--gedempt);font:inherit;font-size:.85rem;font-weight:600;padding:9px 16px;cursor:pointer;min-height:40px;transition:color .14s,border-color .14s}
+.start-account{display:flex;width:fit-content;align-items:center;gap:8px;margin:2px auto 4px;background:none;border:1px solid var(--rand);border-radius:999px;color:var(--gedempt);font:inherit;font-size:.85rem;font-weight:600;padding:9px 16px;cursor:pointer;min-height:44px;transition:color .14s,border-color .14s}
 .start-account .sa-icoon{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linejoin:round}
 .start-account:hover{color:var(--tekst);border-color:var(--gedempt)}
 /* ============================================================
@@ -1386,7 +1391,7 @@ form label{text-transform:none;letter-spacing:.005em;font-size:.8rem;color:var(-
 
 /* ===== BETA-BADGE (tijdelijk) - verwijder dit blok + de wrapper/badge in de header bij de echte release ===== */
 .logo-wrap{position:relative;display:inline-flex;flex:none}
-.beta-badge{position:absolute;left:50%;bottom:-7px;transform:translateX(-50%);background:var(--accent);color:var(--op-accent);font-family:var(--label-font);font-size:var(--fs-xs);font-weight:700;letter-spacing:.14em;text-transform:uppercase;padding:2px 9px;border-radius:999px;box-shadow:0 1px 3px rgba(0,0,0,.3);pointer-events:none;white-space:nowrap}
+.beta-badge{position:absolute;left:50%;bottom:-7px;transform:translateX(-50%);background:var(--accent-vlak);color:var(--op-accent);font-family:var(--label-font);font-size:var(--fs-xs);font-weight:700;letter-spacing:.14em;text-transform:uppercase;padding:2px 9px;border-radius:999px;box-shadow:0 1px 3px rgba(0,0,0,.3);pointer-events:none;white-space:nowrap}
 
 /* Grond-schaduw onder de 2D-figuur (breed, achter de figuur, loopt door in het grijs) */
 .grond-schaduw{position:absolute;left:50%;bottom:4%;transform:translateX(-50%);width:88%;height:9%;pointer-events:none;z-index:0;background:radial-gradient(ellipse at center, rgba(0,0,0,.36) 0%, rgba(0,0,0,.15) 46%, rgba(0,0,0,0) 72%)}
@@ -13413,7 +13418,9 @@ async function verwijderVoorbeelden() {
     const m={ id:rec.id, rec, obj, point:s.point.clone(), normal:s.normal.clone(), mesh:s.mesh,
       tri:(s.tri>=0?s.tri:((rec.positie3d&&rec.positie3d.bind)?rec.positie3d.bind.tri:-1)), rot, size, tex:d.tex };
     zetDecalOpacity(obj, rec.opacity);
-    markers.push(m); plaatsData=null; plaatsModus=false; verbergBanner(); if(window.__plaatsHintUit) window.__plaatsHintUit();
+    markers.push(m);
+    if(ledeActief) ledeDecalSplits(m);   // meteen meedoen met de dimming/splitsing van het losse deel
+    plaatsData=null; plaatsModus=false; verbergBanner(); if(window.__plaatsHintUit) window.__plaatsHintUit();
     if(typeof renderMarkers==="function"){ try{renderMarkers();}catch(_){} }
     toast(tr('ui.tattoo_geplaatst')); enterEditDecal(m); pasBlendOpNieuw(m);   // auto-blend meteen tonen
     if(rec.status==='wens' && typeof window.__tattiesNaStatus==='function') window.__tattiesNaStatus('wens');   // wens: 'geplande tonen' aan + dimmen
@@ -15167,8 +15174,10 @@ async function verwijderVoorbeelden() {
     // Eén bron van waarheid: koppel de marker aan het host-`tattoos`-object (niet de DB-kopie `t`),
     // zodat 2D-bewerkingen (slepen) en 3D-`persistEdit` op hetzelfde record werken en niet uiteenlopen.
     const recRef=(typeof tattoos!=="undefined" && Array.isArray(tattoos)) ? (tattoos.find(x=>x.id===t.id)||t) : t;
-    markers.push({ id:t.id, rec:recRef, obj, point:point.clone(), normal:normal.clone(),
-      mesh, tri:(P.bind&&P.bind.tri>=0?P.bind.tri:-1), rot, size:P.size||0.09, locked:!!P.locked, tex });
+    const _m={ id:t.id, rec:recRef, obj, point:point.clone(), normal:normal.clone(),
+      mesh, tri:(P.bind&&P.bind.tri>=0?P.bind.tri:-1), rot, size:P.size||0.09, locked:!!P.locked, tex };
+    markers.push(_m);
+    if(ledeActief) ledeDecalSplits(_m);   // herstel tijdens een isolatie: meteen mee dimmen/splitsen
     // Ouder record: 2D-velden bijvullen. Check op de VOLLE DB-kopie `t` - het in-RAM
     // record (recRef) is licht (kunst.src gestript), anders zou dit elke 3D-load voor
     // álle tattoos draaien en schrijven.
@@ -15266,11 +15275,12 @@ async function verwijderVoorbeelden() {
     markers.forEach(m=>{ if(!m.obj||!m.rec) return; const w=(m.rec.status==='wens');
       m.obj.visible = !w || toonGepland;
       const op=(isFinite(+m.rec.opacity)?Math.max(0.2,Math.min(1,+m.rec.opacity)):1)*(w?0.5:1);
-      zetDecalOpacity(m.obj, op);
-      // Loopt de tattoo over een knip, dan hangt de rest in een tweede mesh: die hoort dezelfde
-      // zichtbaarheid te volgen, anders blijft van een verborgen wens-tattoo de romphelft staan.
-      if(ledeActief && ledeActief.decalOp.has(m)) ledeActief.decalOp.set(m, op);
-      if(m.__ledeHelft){ m.__ledeHelft.visible=m.obj.visible; zetDecalOpacity(m.__ledeHelft, LEDE_DECAL_OP*op); } });
+      /* Staat er een ledemaat los, dan is de VOLLE dekking niet wat je moet zetten: alles buiten dat
+         deel hoort gedimd te blijven en een tattoo over de knip gesplitst. Deze functie loopt ook via
+         renderMarkers (o.a. na het plaatsen van een nieuwe tattoo), dus zonder dit sprong de hele
+         collectie daar terug naar vol. */
+      if(ledeActief){ ledeActief.decalOp.set(m, op); ledeDecalSplits(m); }
+      else zetDecalOpacity(m.obj, op); });
   };
 
   /* ---- render-lus ---- */
