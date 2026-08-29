@@ -998,6 +998,16 @@ form label,
 .t3d-editbar .eb-btns button{min-width:44px;min-height:44px;height:auto;padding:9px 12px;background:var(--veldbg);border:1px solid var(--rand);color:var(--tekst);border-radius:var(--r-sm);font-size:var(--fs-md);line-height:1;cursor:pointer;font-family:inherit;text-align:center;}
 .t3d-editbar .eb-btns button:hover{border-color:var(--accent);}
 .t3d-editbar .eb-btns button.on{border-color:var(--accent);background:rgba(142,113,240,.14);color:var(--accent);}
+/* Verwijderen: rood en met extra ruimte, los van 'klaar' en de schaalknoppen. Die afstand
+   is het hele punt - de knop stond hier eerder tússen de bewerkknoppen en werd mis-getikt. */
+/* Ruime marge links, zodat de knop nooit tegen de groene 'klaar'-vink aan komt te staan.
+   Op een telefoon past hij daardoor net niet meer op de knoppenrij en zakt hij naar een
+   eigen regel - dat is prima: nog verder van de andere knoppen af. Niet met flex-basis
+   forceren: samen met max-width blijft de knop dan tóch inline, pal naast 'klaar'. */
+.t3d-editbar .eb-btns button.eb-del{margin-left:15px;margin-top:2px;color:var(--gevaar);border-color:#E0B8A6;}
+.t3d-editbar .eb-btns button.eb-del:hover{border-color:var(--gevaar);background:rgba(168,52,26,.10);}
+[data-theme="dark"] .t3d-editbar .eb-btns button.eb-del{color:#E5837A;border-color:#6B3B33;}
+[data-theme="dark"] .t3d-editbar .eb-btns button.eb-del:hover{border-color:#E5837A;background:rgba(229,131,122,.12);}
 /* (i)-uitlegknop: kaderloos paars icoontje in de linkerbovenhoek (uit de flex-flow -> scheelt een slot).
    min-height:0 nodig: de globale knop-min-hoogte (44px) maakte 'm anders ovaal. Rond highlight pas bij tik/hover. */
 .t3d-editbar .eb-btns button.eb-help{position:absolute;top:7px;left:7px;width:28px;height:28px;min-width:0;min-height:0;padding:0;display:inline-flex;align-items:center;justify-content:center;z-index:2;border:none;border-radius:50%;background:transparent;color:var(--accent);}
@@ -1533,7 +1543,7 @@ form label{text-transform:none;letter-spacing:.005em;font-size:.8rem;color:var(-
       <ol>
         <li data-i18n-html="uitleg.2d1"><strong>Tattoo toevoegen:</strong> tik op &#43; (rechtsonder), kies een foto, knip uit en geef een naam → Toevoegen. Tik daarna op de kaart waar hij moet komen. <strong>Tip:</strong> het makkelijkst is om één tattoo tegelijk toe te voegen, maar je kunt er ook meerdere uit één foto knippen (knop "+ Nog een" na het plaatsen).</li>
         <li data-i18n-html="uitleg.2d2"><strong>Bijstellen:</strong> versleep om te verplaatsen, knijp/draai met twee vingers om te schalen en roteren - of gebruik de knoppen in het bewerkmenu.</li>
-        <li data-i18n-html="uitleg.2d3"><strong>Bewerken:</strong> dubbelklik op een tattoo voor het bewerkmenu (ook opnieuw uitsnijden of verwijderen); één tik opent de details.</li>
+        <li data-i18n-html="uitleg.2d3"><strong>Bewerken:</strong> dubbelklik op een tattoo voor het bewerkmenu (daar zitten ook opnieuw uitsnijden en de prullenbak); één tik opent de details.</li>
         <li data-i18n-html="uitleg.2d4"><strong>Inzoomen:</strong> tik op een lichaamsdeel om in te zoomen (cirkelknop linksboven = terug) en wissel voor/achter met de knoppen onder de kaart.</li>
         <li data-i18n-html="uitleg.2d5"><strong>Wisselen:</strong> gebruik de 2D/3D-knop bovenaan voor het 3D-model.</li>
       </ol>
@@ -1656,6 +1666,7 @@ form label{text-transform:none;letter-spacing:.005em;font-size:.8rem;color:var(-
           <button type="button" class="eb-scarot" data-act="size+" data-i18n-title="ui.groter" data-i18n-aria="ui.groter" title="Groter" aria-label="Groter"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>
           <button type="button" class="eb-scarot" data-act="rot-" data-i18n-title="ui.links_draaien" data-i18n-aria="ui.links_draaien" title="Linksom draaien" aria-label="Linksom draaien"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12a8 8 0 1 0 2.3-5.6"/><path d="M3 4v4h4"/></svg></button>
           <button type="button" class="eb-scarot" data-act="rot+" data-i18n-title="ui.rechts_draaien" data-i18n-aria="ui.rechts_draaien" title="Rechtsom draaien" aria-label="Rechtsom draaien"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.3-5.6"/><path d="M21 4v4h-4"/></svg></button>                    <button type="button" data-act="done" class="eb-af" data-i18n-title="ui.klaar" data-i18n-aria="ui.klaar" title="Klaar" aria-label="Klaar"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12l5 5L20 6"/></svg></button>
+          <button type="button" data-act="del" class="eb-del" data-i18n-title="aria.verwijderen" data-i18n-aria="aria.verwijderen" title="Verwijderen" aria-label="Verwijderen"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M9 7V5h6v2M7 7l1 13h8l1-13"/><path d="M10 11v5M14 11v5"/></svg></button>
         </div>
         <button type="button" data-act="blend" class="eb-blend" data-i18n-title="ui.huidblend" data-i18n-aria="ui.huidblend" title="In huid blenden" aria-label="In huid blenden"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="12" r="6"/><circle cx="15" cy="12" r="6"/></svg><span data-i18n="ui.huidblend_kort">In huid</span></button>
         <div class="eb-opacity"><span class="eb-op-label" data-i18n="ui.opaciteit">Opaciteit</span><input id="eb3d-opacity" type="range" min="20" max="100" value="100" class="slider" data-i18n-aria="ui.opaciteit" aria-label="Opaciteit"></div>
@@ -6947,7 +6958,7 @@ const I18N = {
     'uitleg.titel2d':'Zo werkt de 2D-kaart',
     'uitleg.2d1':'<strong>Tattoo toevoegen:</strong> tik op + (rechtsonder), kies een foto, knip uit en geef een naam → Toevoegen. Tik daarna op de kaart waar hij moet komen. <strong>Tip:</strong> het makkelijkst is om één tattoo tegelijk toe te voegen, maar je kunt er ook meerdere uit één foto knippen (knop "+ Nog een" na het plaatsen).',
     'uitleg.2d2':'<strong>Bijstellen:</strong> versleep om te verplaatsen, knijp/draai met twee vingers om te schalen en roteren - of gebruik de knoppen in het bewerkmenu.',
-    'uitleg.2d3':'<strong>Bewerken:</strong> dubbelklik op een tattoo voor het bewerkmenu (ook opnieuw uitsnijden of verwijderen); één tik opent de details.',
+    'uitleg.2d3':'<strong>Bewerken:</strong> dubbelklik op een tattoo voor het bewerkmenu (daar zitten ook opnieuw uitsnijden en de prullenbak); één tik opent de details.',
     'uitleg.2d4':'<strong>Inzoomen:</strong> tik op een lichaamsdeel om in te zoomen (cirkelknop linksboven = terug) en wissel voor/achter met de knoppen onder de kaart.',
     'uitleg.2d5':'<strong>Wisselen:</strong> gebruik de 2D/3D-knop bovenaan voor het 3D-model.',
     'sub.collectie':'Al je tattoos en je wishlist op één plek - zoek en sorteer ze hier.',
@@ -9893,6 +9904,32 @@ window.__tattiesEditLegend = function(ebSel){
     setTimeout(()=>document.addEventListener('pointerdown', sluit, true), 0); }
   else { sluit(); }
 };
+/* Verwijderen vanuit een bewerkbalk. Bevestiging en uitvoering staan los, zodat een
+   annulering je gewoon in de bewerkmodus laat staan (pas na 'ja' verlaten we die).
+   Zelfde gedrag als de prullenbak op de detailpagina: soft-delete + ongedaan-maken. */
+async function bevestigVerwijderen(){
+  return (typeof window.__tattiesConfirm === 'function')
+    ? await window.__tattiesConfirm(tr('ui.verwijder_bevestig'))
+    : window.confirm(tr('ui.verwijder_bevestig'));
+}
+async function verwijderMetUndo(t){
+  if(!t) return;
+  // Kloon vóór het verwijderen; de __licht-marker reist mee, zodat een undo-save
+  // via de merge-guard geen beelden in de database kan overschrijven.
+  const kopie = JSON.parse(JSON.stringify(t));
+  await deleteTattoo(t.id);
+  if (typeof window.__tatties3DVerwijder === 'function') window.__tatties3DVerwijder(t.id);
+  await herlaad();
+  toastMetActie(t.status === 'wens' ? tr('toast.wensverwijderd') : tr('toast.tattooverwijderd'),
+                tr('toast.ongedaan'), async () => {
+    kopie.deleted = false;   // ongedaan maken = tombstone opheffen
+    await saveTattoo(kopie);
+    await herlaad();
+    if (typeof window.__tatties3DHerstel === 'function') window.__tatties3DHerstel(kopie.id);
+    toast(tr('toast.teruggezet').replace('{naam}', kopie.naam));
+  });
+}
+
 async function edit2DActie(a){
   if(a === 'help'){ if(window.__tattiesEditLegend) window.__tattiesEditLegend('#editbar2d'); return; }
   const t = editMarker2D ? vindTattoo2D(editMarker2D) : null; if(!t) return;
@@ -9903,6 +9940,7 @@ async function edit2DActie(a){
     if(((t.kunst3d&&t.kunst3d.srcUrl)||(t.kunst&&t.kunst.src)) && typeof window.__tattiesRecrop2D === 'function'){ window.__tattiesRecrop2D(t); }   // zelfde overzicht als toevoegen
     else { await exitEdit2D(); openFormulier(id); }                                                                      // terugval: geen bewaarde foto
     return; }
+  if(a === 'del'){ if(!(await bevestigVerwijderen())) return; await exitEdit2D(); await verwijderMetUndo(t); return; }
   if(a === 'done'){ const s=window.__tattiesHerhaalSrc; window.__tattiesHerhaalSrc=null; await exitEdit2D(); if(s && typeof window.__tattiesNogEenUitFoto==='function') window.__tattiesNogEenUitFoto(s); return; }   // D6(a): na ✓ volgende uitsnede
   if(a === 'lock'){ t.vergrendeld = !t.vergrendeld; setLockUI2D(); renderMarkers();
     try{ await saveTattoo(t); }catch(e){ console.error(e); }
@@ -10620,22 +10658,9 @@ function renderDetail() {
   });
   $('#d-verwijder').addEventListener('click', async (e) => {
     const btn = e.currentTarget; if (btn.disabled) return; btn.disabled = true;   // dubbelklik-race voorkomen
-    const ok = (typeof window.__tattiesConfirm === 'function')
-      ? await window.__tattiesConfirm(tr('ui.verwijder_bevestig'))
-      : window.confirm(tr('ui.verwijder_bevestig'));
-    if (!ok) { btn.disabled = false; return; }   // geannuleerd: knop weer vrijgeven, niets verwijderen
-    const kopie = JSON.parse(JSON.stringify(t));
-    await deleteTattoo(t.id);
-    if (typeof window.__tatties3DVerwijder === 'function') window.__tatties3DVerwijder(t.id);   // 3D-decal ook weghalen
-    await herlaad();
+    if (!(await bevestigVerwijderen())) { btn.disabled = false; return; }   // geannuleerd: knop weer vrijgeven
+    await verwijderMetUndo(t);   // zelfde bron als de bewerkbalken
     detailTerug();
-    toastMetActie(isWens ? tr('toast.wensverwijderd') : tr('toast.tattooverwijderd'), tr('toast.ongedaan'), async () => {
-      kopie.deleted = false;   // ongedaan maken = tombstone opheffen
-      await saveTattoo(kopie);
-      await herlaad();
-      if (typeof window.__tatties3DHerstel === 'function') window.__tatties3DHerstel(kopie.id);   // 3D-decal terugzetten bij ongedaan maken
-      toast(tr('toast.teruggezet').replace('{naam}', kopie.naam));
-    });
   });
   view.querySelectorAll('.tabs button').forEach(b =>
     b.addEventListener('click', () => { detailTab = b.dataset.tab; renderDetail(); })
@@ -14608,6 +14633,9 @@ async function verwijderVoorbeelden() {
         if(editDecal && rec && ((rec.kunst3d&&rec.kunst3d.srcUrl)||(rec.kunst&&rec.kunst.src))){ openCutModalForEdit(editDecal); }   // zelfde overzicht als toevoegen
         else { exitEditDecal(); if(rec&&typeof openFormulier==="function") openFormulier(rec.id); }     // terugval: geen bewaarde foto
         return; }
+      if(a==="del"){ const rec=editDecal&&editDecal.rec; if(!rec) return;
+        if(!(await bevestigVerwijderen())) return;
+        exitEditDecal(); await verwijderMetUndo(rec); return; }
       if(a==="done"){ exitEditDecal(); if(window.__tattiesHerhaalSrc){ const s=window.__tattiesHerhaalSrc; window.__tattiesHerhaalSrc=null; openCutModalAddMetFoto(s,'3d'); } return; }   // D6(a): na ✓ volgende uitsnede
       if(a==="undo"){ undoEdit(); return; }
       if(a==="lock"){ if(editDecal){ editDecal.locked=!editDecal.locked; setLockUI();
