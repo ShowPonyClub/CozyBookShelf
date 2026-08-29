@@ -14260,7 +14260,7 @@ async function verwijderVoorbeelden() {
     const m={ id:rec.id, rec, obj, point:s.point.clone(), normal:s.normal.clone(), mesh:s.mesh,
       tri:(s.tri>=0?s.tri:((rec.positie3d&&rec.positie3d.bind)?rec.positie3d.bind.tri:-1)), rot, size, tex:d.tex };
     zetDecalOpacity(obj, rec.opacity);
-    markers.push(m);
+    markers.push(m); onthoudFp(m);
     if(ledeActief) ledeDecalSplits(m);   // meteen meedoen met de dimming/splitsing van het losse deel
     plaatsData=null; plaatsModus=false; verbergBanner(); if(window.__plaatsHintUit) window.__plaatsHintUit();
     if(typeof renderMarkers==="function"){ try{renderMarkers();}catch(_){} }
@@ -14272,6 +14272,23 @@ async function verwijderVoorbeelden() {
   /* ---- aanpas-modus voor een geplaatste tattoo ---- */
   // Staat deze tattoo op multiply-blend ("in huid blenden")?
   function recMul(rec){ return !!(rec && rec.kunst3d && rec.kunst3d.blend==='multiply'); }
+  /* Vingerafdruk van alles waar de DECAL van afhangt: de uitsnede-instellingen, de plek en
+     de weergave. Wijzigt die, dan moet de decal opnieuw gebouwd worden. De bronfoto zelf is
+     base64 en dus groot - daarvan nemen we lengte + een stukje, net als de lijst-thumb.
+     Bewust NIET meegenomen: naam, notities en andere velden die de decal niet tekenen; die
+     komen mee via het her-koppelen van `rec` en kosten geen rebuild. */
+  function decalVingerafdruk(rec){
+    if(!rec) return '';
+    try{
+      const k = Object.assign({}, rec.kunst3d);
+      const src = k.srcUrl || (rec.kunst && rec.kunst.src) || '';
+      delete k.srcUrl;
+      return (src ? src.length + ':' + src.slice(30, 62) : '') + '|' + JSON.stringify(k)
+        + '|' + JSON.stringify(rec.positie3d || null)
+        + '|' + rec.opacity + '|' + (rec.status || '') + '|' + (rec.stapel || 0);
+    }catch(e){ return '?'; }   // onserialiseerbaar record: geen rebuild uitlokken
+  }
+  function onthoudFp(m){ if(m) m._fp = decalVingerafdruk(m.rec); }
   function rebuildMarker(m){
     ledeDecalTerug(m);   // eventuele splitsing over de knip eerst terugdraaien
     if(m.obj){ body.remove(m.obj);
@@ -14592,7 +14609,8 @@ async function verwijderVoorbeelden() {
     m.rec.zijde=nz.side; m.rec.lichaamsdeel=nz.zone;
     sync2D(m.rec, r.point, nz.side, r.rot||0, m.size, m.tex);
     clearTimeout(m._persistT);   // per-marker timer: alleen deze tattoo's eigen save herplannen
-    m._persistT=setTimeout(async()=>{ try{ await saveTattoo(m.rec); if(typeof tattoos!=="undefined"&&Array.isArray(tattoos)){ const j=tattoos.findIndex(t=>t.id===m.rec.id); if(j>=0)tattoos[j]=m.rec; } if(typeof renderMarkers==="function"){ try{renderMarkers();}catch(_){} } }catch(e){ console.error(e); } },300);
+    m._persistT=setTimeout(async()=>{ try{ await saveTattoo(m.rec); if(typeof tattoos!=="undefined"&&Array.isArray(tattoos)){ const j=tattoos.findIndex(t=>t.id===m.rec.id); if(j>=0)tattoos[j]=m.rec; } onthoudFp(m);   /* eigen wijziging: decal is al bij, geen rebuild nodig bij de volgende herlaad */
+      if(typeof renderMarkers==="function"){ try{renderMarkers();}catch(_){} } }catch(e){ console.error(e); } },300);
   }
   function askConfirm(msg, jaLabel){
     return new Promise(res=>{
@@ -15891,7 +15909,7 @@ async function verwijderVoorbeelden() {
         if(typeof tattoos!=="undefined" && Array.isArray(tattoos)) tattoos.push(rec);
         const m={ id:rec.id, rec, obj, point:pp.point.clone(), normal:pp.normal.clone(), mesh:pp.mesh,
           tri:(pp.tri>=0?pp.tri:((rec.positie3d&&rec.positie3d.bind)?rec.positie3d.bind.tri:-1)), rot, size, tex:imgTexture };
-        markers.push(m);
+        markers.push(m); onthoudFp(m);
         imgTexture=null;   // marker bezit de textuur nu; voorkom dispose door volgende updateCutout
         if(typeof renderMarkers==="function"){ try{renderMarkers();}catch(_){} }
         enterEditDecal(m);   // direct in aanpasmodus: meteen schalen/verplaatsen/roteren
@@ -16032,6 +16050,9 @@ async function verwijderVoorbeelden() {
     if(magSync) sync2D(recRef, rustPt, P.side||"voor", rustRot, P.size||0.09, tex);
     if(bindNieuw && recRef.positie3d && recRef.positie3d!==P) recRef.positie3d.bind=bindNieuw;
     if(magSync || bindNieuw){ try{ await saveTattoo(recRef); }catch(e){ console.error(e); } }
+    // Vingerafdruk PAS hier: hierboven worden positie3d/2D-velden nog bijgevuld, en met een
+    // te vroeg genomen afdruk zou de eerstvolgende herlaad de decal onnodig herbouwen.
+    onthoudFp(_m);
     return true;
   }
   /* Adempauze tussen zware stappen door. Normaal wachten we op het volgende frame, zodat de UI
@@ -16108,9 +16129,20 @@ async function verwijderVoorbeelden() {
     _herlaad3DBezig=true;
     try{
       const lijst=(typeof tattoos!=="undefined" && Array.isArray(tattoos)) ? tattoos : [];
-      const levend=new Set(lijst.filter(t=>t && !t.deleted).map(t=>t.id));
-      for(const m of markers.slice()){ if(!levend.has(m.id)) window.__tatties3DVerwijder(m.id); }   // weg/gewist -> decal verwijderen
-      await restore3D(loadToken);                                                                   // nieuwe toevoegen (bestaande overgeslagen)
+      const versPerId=new Map(lijst.filter(t=>t && !t.deleted).map(t=>[t.id, t]));
+      for(const m of markers.slice()){
+        const vers=versPerId.get(m.id);
+        if(!vers){ window.__tatties3DVerwijder(m.id); continue; }   // weg/gewist -> decal verwijderen
+        // Is de tekening/plek/weergave veranderd (bv. een conflict die van de andere kant
+        // binnenkwam), dan moet de decal opnieuw: restore3D bouwt 'm hieronder terug.
+        const fp=decalVingerafdruk(vers);
+        if(m._fp!==undefined && m._fp!==fp){ window.__tatties3DVerwijder(m.id); continue; }
+        // Altijd HER-KOPPELEN. herlaad() bouwt de tattoos-lijst met verse objecten op, dus
+        // zonder dit blijft de marker naar een losgeraakt record wijzen - en schrijft
+        // persistEdit dat verouderde record zo weer over de binnengekomen versie heen.
+        m.rec=vers; m._fp=fp;
+      }
+      await restore3D(loadToken);                                                                   // nieuwe + opnieuw te bouwen decals
     }catch(e){ console.error("3D-herlaad",e); }
     finally{ _herlaad3DBezig=false; }
     return true;
