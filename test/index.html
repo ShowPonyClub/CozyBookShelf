@@ -6991,7 +6991,7 @@ const I18N = {
     'ui.kies_eerst_foto':'Kies eerst een foto en knip de tattoo uit','ui.tattoo_geplaatst':'Tattoo geplaatst ✓',
     'ui.tattoo_bijgewerkt':'Tattoo bijgewerkt ✓','ui.plaatsen_mislukt':'Plaatsen mislukt','ui.fout':'fout',
     'ui.hersteld':'{n} tattoo{s} hersteld','ui.verwijder_bevestig':'Weet je zeker dat je deze tattoo wilt verwijderen?',
-    'ui.toevoegen':'Toevoegen','ui.volgende':'Volgende','ui.geen_uitsnede_hint':'Nog niets geknipt - de hele foto wordt gebruikt','ui.klik_plaatsen':'Klik op het model waar je de tattoo wilt','ui.naam_verplicht':'Geef de tattoo eerst een naam','ui.meer_details':'Meer details','ui.naam':'Naam tattoo','ui.naam_ph':'Naam tattoo *',
+    'ui.toevoegen':'Toevoegen','ui.volgende':'Volgende','ui.geen_uitsnede_hint':'Nog niets geknipt - de hele foto wordt gebruikt','ui.klik_plaatsen':'Klik op het model waar je de tattoo wilt','ui.zonder3d_formulier':'Geen 3D op dit toestel - je kunt de tattoo wel als gegevens opslaan','ui.naam_verplicht':'Geef de tattoo eerst een naam','ui.meer_details':'Meer details','ui.naam':'Naam tattoo','ui.naam_ph':'Naam tattoo *',
     'ui.stage_aria':'3D-lichaamsmodel; gebruik de 2D-knop bovenaan voor de toegankelijke platte kaart','ui.stage_aria_solo':'3D-lichaamsmodel',
     'ui.lege_cta':'Nog geen tattoos - tik op + om er een toe te voegen',
     'ui.details':'Details',
@@ -7178,7 +7178,7 @@ const I18N = {
     'ui.kies_eerst_foto':'Pick a photo first and cut out the tattoo','ui.tattoo_geplaatst':'Tattoo placed ✓',
     'ui.tattoo_bijgewerkt':'Tattoo updated ✓','ui.plaatsen_mislukt':'Placing failed','ui.fout':'error',
     'ui.hersteld':'{n} tattoo{s} restored','ui.verwijder_bevestig':'Are you sure you want to delete this tattoo?',
-    'ui.toevoegen':'Add','ui.volgende':'Next','ui.geen_uitsnede_hint':'Nothing cut out yet - the whole photo will be used','ui.klik_plaatsen':'Click on the model where you want the tattoo','ui.naam_verplicht':'Give the tattoo a name first','ui.meer_details':'More details','ui.naam':'Tattoo name','ui.naam_ph':'Tattoo name *',
+    'ui.toevoegen':'Add','ui.volgende':'Next','ui.geen_uitsnede_hint':'Nothing cut out yet - the whole photo will be used','ui.klik_plaatsen':'Click on the model where you want the tattoo','ui.zonder3d_formulier':'No 3D on this device - you can still save the tattoo as details','ui.naam_verplicht':'Give the tattoo a name first','ui.meer_details':'More details','ui.naam':'Tattoo name','ui.naam_ph':'Tattoo name *',
     'ui.stage_aria':'3D body model; use the 2D button at the top for the accessible flat map','ui.stage_aria_solo':'3D body model',
     'ui.lege_cta':'No tattoos yet - tap + to add one',
     'ui.details':'Details',
@@ -11301,7 +11301,13 @@ async function verwijderVoorbeelden() {
   // '+ New tattoo' op het startscherm: keuzemenu 3D/2D
   function startToevoegen(doel) {
     if (doel === '2d') { $('#btn-2d').click(); setTimeout(() => { if (typeof window.__tattiesAdd2D === 'function') window.__tattiesAdd2D(); }, 60); }
-    else { $('#btn-3d').click(); setTimeout(() => { if (window.__tatties3DKapot) return; const a = $('#t3d-add'); if (a && a.onclick) a.onclick(); }, 60); }   // PLAT-13: geen fotokiezer als 3D niet kan
+    else { $('#btn-3d').click(); setTimeout(() => {
+      /* PLAT-13: geen fotokiezer als 3D niet kan. Maar dan helemaal niets kunnen toevoegen is te
+         streng: zonder werkende 3D (oude of geblokkeerde GPU) kun je nog prima je tattoos vastleggen
+         via het gewone formulier, alleen zonder plek op het model. */
+      if (window.__tatties3DKapot) { toast(tr('ui.zonder3d_formulier')); formZonderPlek = true; openFormulier(null); return; }
+      const a = $('#t3d-add'); if (a && a.onclick) a.onclick();
+    }, 60); }
   }
   const addKies = $('#add-kies');
   const sluitKies = () => { if (addKies) addKies.hidden = true; };
