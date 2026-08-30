@@ -394,7 +394,7 @@ main > section{animation:opkomen .3s ease both}
 /* ---- Tattoo-kaarten ---- */
 #tattoo-list{display:flex;flex-direction:column;gap:10px}
 .tcard{
-  display:flex;gap:12px;align-items:center;width:100%;text-align:left;
+  display:flex;gap:12px;align-items:flex-start;width:100%;text-align:left;
   background:var(--kaart);border:1px solid var(--rand);border-radius:var(--radius);
   padding:12px;border-left:3px solid var(--acc,var(--accent));
   box-shadow:0 1px 3px rgba(34,26,18,.06);
@@ -632,7 +632,7 @@ html.tweed-uit [data-i18n-html="uitleg.3d5"]{display:none}
 .tabs button.actief{color:var(--tekst);border-bottom-color:var(--accent)}
 
 .paneel{background:var(--kaart);border:1px solid var(--rand);border-radius:var(--radius);padding:14px;box-shadow:0 1px 3px rgba(34,26,18,.05)}
-.veldrij{display:flex;justify-content:space-between;gap:12px;padding:9px 0;border-bottom:1px solid var(--rand)}
+.veldrij{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:9px 0;border-bottom:1px solid var(--rand)}
 .veldrij:last-child{border-bottom:none}
 .veldrij dt{
   color:var(--gedempt);font-size:.72rem;font-weight:700;
@@ -679,7 +679,7 @@ form label{
   color:var(--gedempt);margin-bottom:7px;
 }
 form label .verplicht{color:var(--accent-diep)}
-.rij2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.rij2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px}
 .toggle-rij{
   display:flex;align-items:center;justify-content:space-between;gap:12px;
   background:var(--veldbg);border:1px solid var(--rand);border-radius:var(--r-md);padding:10px 12px;
@@ -1341,7 +1341,7 @@ html.knipfull .cutmodal.cm-fullcut .cm-bewerk-badge{display:block;position:absol
 
 /* ---- huidskleur-kiezer (vakjes + schuif), gedeeld door instellingen en opstartscherm ---- */
 .huidkiezer{display:flex;flex-direction:column;gap:12px;width:100%}
-.tint-swatches{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+.tint-swatches{display:grid;grid-template-columns:repeat(6,auto);gap:8px;justify-content:end}
 .tint-swatch{width:30px;height:30px;border-radius:50%;border:2px solid transparent;cursor:pointer;padding:0;box-shadow:0 0 0 1px rgba(0,0,0,.18) inset}
 .tint-swatch.actief{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent)}
 /* ---- opstartscherm (eerste keer) ---- */
@@ -7464,7 +7464,7 @@ function createTattoo(overrides = {}) {
    ============================================================ */
 // App-versie (semver, handmatig ophogen bij een release). Bij een bump ook de
 // CACHE-naam in sw.js meebumpen, zodat clients de nieuwe build ophalen.
-const APP_VERSIE = '0.3.2';
+const APP_VERSIE = '0.3.3';
 /* ---- Retentiemeting (opt-in) ------------------------------------------------------------------
    Fase 2 van de roadmap vraagt bewijs dat mensen terugkomen. Dat kan niet zonder iets te versturen,
    dus: standaard UIT, aan te zetten in de instellingen, en dan hooguit een bericht per dag met een
