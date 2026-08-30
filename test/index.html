@@ -1780,7 +1780,7 @@ form label{text-transform:none;letter-spacing:.005em;font-size:.8rem;color:var(-
               <label class="cm-veld"><span data-i18n="form.studio">Studio</span><input id="cmStudio" type="text" maxlength="120"></label>
               <label class="cm-veld"><span data-i18n="form.stijl">Stijl</span><input id="cmStijl" type="text" maxlength="120"></label>
               <div class="cm-rij2">
-                <label class="cm-veld"><span data-i18n="form.kosten">Kosten</span><span class="kosten-veld"><span class="valuta-prefix" id="cmKostenSym">&euro;</span><input id="cmKosten" type="number" min="0" max="1000000" step="0.01" inputmode="decimal"></span></label>
+                <label class="cm-veld"><span data-i18n="form.kosten">Kosten</span><span class="kosten-veld"><span class="valuta-prefix" id="cmKostenSym">&euro;</span><input id="cmKosten" type="text" inputmode="decimal" autocomplete="off"></span></label>
                 <label class="cm-veld"><span data-i18n="form.datum">Datum</span><input id="cmDatum" type="date"></label>
               </div>
               <div class="cm-rij2">
@@ -7111,7 +7111,7 @@ const I18N = {
     'toast.gebruik_aan':'Dank je - je helpt Tatties hiermee vooruit','toast.gebruik_uit':'Er wordt niets meer verstuurd','toast.opslaanmislukt':'Opslaan mislukt: ',
     'toast.nietsexport':'Niets te exporteren - nog geen tattoos','toast.geexporteerd':'{n} tattoo{s} geëxporteerd',
     'toast.importgeslaagd':'Import geslaagd: {n} tattoo{s} hersteld','toast.geengeldige':'Bestand gelezen, maar geen geldige tattoos gevonden',
-    'toast.importmislukt':'Import mislukt: dit is geen geldig Tatties-back-upbestand','toast.import_te_groot':'Bestand te groot om te importeren (max 200 MB)','toast.opslagvol':'De opslag is vol - exporteer een back-up en verwijder wat foto\'s','toast.kosten_ongeldig':'Kosten niet herkend - typ het bedrag met een punt, bijvoorbeeld 12.50','confirm.import':'Importeren voegt {n} nieuwe toe en overschrijft {m} bestaande tattoo{s}. Doorgaan?','confirm.import_ja':'Importeren','toast.importgeannuleerd':'Import geannuleerd',
+    'toast.importmislukt':'Import mislukt: dit is geen geldig Tatties-back-upbestand','toast.import_te_groot':'Bestand te groot om te importeren (max 200 MB)','toast.opslagvol':'De opslag is vol - exporteer een back-up en verwijder wat foto\'s','toast.kosten_ongeldig':'Kosten niet herkend - typ alleen cijfers, bijvoorbeeld 12,50','confirm.import':'Importeren voegt {n} nieuwe toe en overschrijft {m} bestaande tattoo{s}. Doorgaan?','confirm.import_ja':'Importeren','toast.importgeannuleerd':'Import geannuleerd',
     'toast.persist':'Let op: de browser garandeert je opslag niet - maak regelmatig een back-up',
     'toast.opbeginscherm':'Tatties staat op je beginscherm','toast.ladenmislukt':'Laden van gegevens mislukt: ',
     'opslag.gebruik':'Opslag: {mb} MB in gebruik','opslag.van':'van ±{mb} MB','opslag.bijnavol':'· bijna vol - exporteer een back-up!'
@@ -7300,7 +7300,7 @@ const I18N = {
     'toast.gebruik_aan':'Thank you - this helps Tatties along','toast.gebruik_uit':'Nothing is sent anymore','toast.opslaanmislukt':'Saving failed: ',
     'toast.nietsexport':'Nothing to export - no tattoos yet','toast.geexporteerd':'{n} tattoo{s} exported',
     'toast.importgeslaagd':'Import successful: {n} tattoo{s} restored','toast.geengeldige':'File read, but no valid tattoos found',
-    'toast.importmislukt':"Import failed: this isn't a valid Tatties backup file",'toast.import_te_groot':'File too large to import (max 200 MB)','toast.opslagvol':'Storage is full - export a backup and remove some photos','toast.kosten_ongeldig':'Cost not recognised - type the amount with a dot, for example 12.50','confirm.import':'Importing adds {n} new and overwrites {m} existing tattoo{s}. Continue?','confirm.import_ja':'Import','toast.importgeannuleerd':'Import cancelled',
+    'toast.importmislukt':"Import failed: this isn't a valid Tatties backup file",'toast.import_te_groot':'File too large to import (max 200 MB)','toast.opslagvol':'Storage is full - export a backup and remove some photos','toast.kosten_ongeldig':'Cost not recognised - type numbers only, for example 12.50','confirm.import':'Importing adds {n} new and overwrites {m} existing tattoo{s}. Continue?','confirm.import_ja':'Import','toast.importgeannuleerd':'Import cancelled',
     'toast.persist':"Note: the browser doesn't guarantee your storage - back up regularly",
     'toast.opbeginscherm':'Tatties is on your home screen','toast.ladenmislukt':'Loading data failed: ',
     'opslag.gebruik':'Storage: {mb} MB in use','opslag.van':'of ~{mb} MB','opslag.bijnavol':'· almost full - export a backup!'
@@ -7464,7 +7464,7 @@ function createTattoo(overrides = {}) {
    ============================================================ */
 // App-versie (semver, handmatig ophogen bij een release). Bij een bump ook de
 // CACHE-naam in sw.js meebumpen, zodat clients de nieuwe build ophalen.
-const APP_VERSIE = '0.3.3';
+const APP_VERSIE = '0.3.4';
 /* ---- Retentiemeting (opt-in) ------------------------------------------------------------------
    Fase 2 van de roadmap vraagt bewijs dat mensen terugkomen. Dat kan niet zonder iets te versturen,
    dus: standaard UIT, aan te zetten in de instellingen, en dan hooguit een bericht per dag met een
@@ -9180,9 +9180,47 @@ function zetNavActief(welke) {
 }
 /* Kosten-invoer lezen met komma-waarschuwing: type=number geeft bij een niet-geaccepteerde
    komma ("12,50") een lege value + badInput -> dat werd stil als 0 opgeslagen. */
+/* Kosten-invoer. Mensen typen "60", "60,50", "60.50" of "1.250,00"; het veld is
+   daarom type=text en niet type=number, want die laatste geeft bij een komma een
+   lege value + badInput en dan was de invoer stil weg. Beide decimaaltekens zijn
+   goed. Staan ze er allebei, dan is de LAATSTE het decimaalteken en is de andere
+   een duizendtalscheiding ("1.250,00" en "1,250.00" leveren allebei 1250). Puur,
+   zodat tests/logica.test.js hem zonder DOM kan draaien. */
+function parseKosten(tekst) {
+  const ruw = String(tekst == null ? '' : tekst).trim();
+  if (!ruw) return { waarde: 0, ok: true, leeg: true };
+  const s = ruw.replace(/[\s\u00a0]/g, '').replace(/[\u20ac$\u00a3]/g, '');
+  const stukken = s.split(/[.,]/);
+  const tekens = s.match(/[.,]/g) || [];
+  if (stukken.some(p => !/^\d+$/.test(p))) return { waarde: 0, ok: false };
+
+  let heel = stukken, deel = '';
+  if (tekens.length) {
+    const laatsteStuk = stukken[stukken.length - 1];
+    // Wisselt het teken van soort, dan is het laatste het decimaalteken. Anders
+    // beslist de groepslengte: 3 cijfers is duizendtal (1.250), de rest decimaal.
+    const wisselt = tekens.length > 1 && tekens[tekens.length - 1] !== tekens[tekens.length - 2];
+    if (wisselt || laatsteStuk.length !== 3) { heel = stukken.slice(0, -1); deel = laatsteStuk; }
+  }
+  // Alles voor het decimaalteken moet in groepen van 3 staan, anders is het onzin.
+  if (heel.length > 1 && heel.slice(1).some(p => p.length !== 3)) return { waarde: 0, ok: false };
+
+  const n = parseFloat(heel.join('') + (deel ? '.' + deel : ''));
+  if (!isFinite(n)) return { waarde: 0, ok: false };
+  return { waarde: Math.min(1000000, Math.max(0, n)), ok: true };
+}
+/* Andersom: het opgeslagen getal in het veld zetten met het decimaalteken dat bij
+   de gekozen valuta hoort, zodat een Nederlander "60,5" terugziet en niet "60.5". */
+function kostenNaarVeld(n) {
+  if (!n && n !== 0) return '';
+  if (!n) return '';
+  const dec = (1.5).toLocaleString(valutaLocale()).indexOf(',') > -1 ? ',' : '.';
+  return String(n).replace('.', dec);
+}
 function leesKostenVeld(el) {
-  if (el && el.validity && el.validity.badInput) toast(tr('toast.kosten_ongeldig'));
-  return Math.min(1000000, Math.max(0, parseFloat(el && el.value) || 0));
+  const r = parseKosten(el && el.value);
+  if (!r.ok) toast(tr('toast.kosten_ongeldig'));
+  return r.waarde;
 }
 
 function toonView(naam) {
@@ -10901,7 +10939,7 @@ async function openFormulier(id = null) {
       <div class="rij2">
         <div class="veld">
           <label for="f-kosten" id="f-kosten-label">${tr('form.kosten')}</label>
-          <input id="f-kosten" type="number" min="0" max="1000000" step="0.01" inputmode="decimal" value="${t.kosten || ''}">
+          <input id="f-kosten" type="text" inputmode="decimal" autocomplete="off" value="${kostenNaarVeld(t.kosten)}">
         </div>
         <div class="veld">
           <label for="f-zituren">${tr('form.zituren')}</label>
@@ -15008,7 +15046,7 @@ async function verwijderVoorbeelden() {
     if(!rec) return;
     const set=(id,val)=>{ const el=document.getElementById(id); if(el) el.value=(val==null?"":val); };
     set("cmNaam",rec.naam||""); set("cmArtiest",rec.artiest||""); set("cmStudio",rec.studio||"");
-    set("cmStijl",rec.stijl||""); set("cmKosten",rec.kosten?rec.kosten:"");
+    set("cmStijl",rec.stijl||""); set("cmKosten",kostenNaarVeld(rec.kosten));
     set("cmDatum",rec.datum||""); set("cmZituren",rec.zituren?rec.zituren:""); set("cmNotities",rec.notities||"");
     zetPijnDruppels(rec.pijn||0); zetKostenSymbool(); zetStatusToggle(rec.status==='wens'?'wens':'gezet'); { const hb=document.getElementById("cmHerhaalBadge"); if(hb) hb.hidden=true; }
     const acc=document.getElementById("cmAccent"); if(acc) acc.value=rec.accentkleur||"#8E71F0";
