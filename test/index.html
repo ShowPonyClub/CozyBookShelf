@@ -1351,7 +1351,12 @@ html.knipfull .cutmodal.cm-fullcut .cm-bewerk-badge{display:block;position:absol
 
 /* ---- huidskleur-kiezer (vakjes + schuif), gedeeld door instellingen en opstartscherm ---- */
 .huidkiezer{display:flex;flex-direction:column;gap:12px;width:100%}
-.tint-swatches{display:grid;grid-template-columns:repeat(6,auto);gap:8px;justify-content:end}
+/* 8 tinten in 4 kolommen: twee volle rijen, dus geen restrij die onder de eerste
+   zweeft (dat was het probleem met flex-wrap + center bij 6 + 2). Omdat beide
+   rijen even breed zijn, kan het geheel gewoon gecentreerd staan.
+   flex:1 laat het raster de ruimte naast het label vullen; zonder dat duwt de
+   space-between van .inst-rij het smalle raster helemaal naar rechts. */
+.tint-swatches{flex:1;display:grid;grid-template-columns:repeat(4,auto);gap:8px;justify-content:center}
 .tint-swatch{width:30px;height:30px;border-radius:50%;border:2px solid transparent;cursor:pointer;padding:0;box-shadow:0 0 0 1px rgba(0,0,0,.18) inset}
 .tint-swatch.actief{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent)}
 /* ---- opstartscherm (eerste keer) ---- */
@@ -7474,7 +7479,7 @@ function createTattoo(overrides = {}) {
    ============================================================ */
 // App-versie (semver, handmatig ophogen bij een release). Bij een bump ook de
 // CACHE-naam in sw.js meebumpen, zodat clients de nieuwe build ophalen.
-const APP_VERSIE = '0.3.5';
+const APP_VERSIE = '0.3.6';
 /* ---- Retentiemeting (opt-in) ------------------------------------------------------------------
    Fase 2 van de roadmap vraagt bewijs dat mensen terugkomen. Dat kan niet zonder iets te versturen,
    dus: standaard UIT, aan te zetten in de instellingen, en dan hooguit een bericht per dag met een
