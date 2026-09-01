@@ -7479,7 +7479,7 @@ function createTattoo(overrides = {}) {
    ============================================================ */
 // App-versie (semver, handmatig ophogen bij een release). Bij een bump ook de
 // CACHE-naam in sw.js meebumpen, zodat clients de nieuwe build ophalen.
-const APP_VERSIE = '0.3.7';
+const APP_VERSIE = '0.3.8';
 /* ---- Retentiemeting (opt-in) ------------------------------------------------------------------
    Fase 2 van de roadmap vraagt bewijs dat mensen terugkomen. Dat kan niet zonder iets te versturen,
    dus: standaard UIT, aan te zetten in de instellingen, en dan hooguit een bericht per dag met een
@@ -12442,9 +12442,14 @@ async function verwijderVoorbeelden() {
       try {
         const r = await syncMetCloud();
         if (r.ok) {
-          if (typeof herlaad === 'function') await herlaad();   // lijsten/2D/3D verversen na sync
-          if (r.omhoog || r.omlaag) bericht('account.sync_klaar','ok',{ omhoog: r.omhoog, omlaag: r.omlaag });
+          // Eerst melden, dan pas verversen. Een conflict of een teruggedraaide verwijdering
+          // is het enige wat je echt moet weten, en dat mag niet alleen in een toast staan:
+          // die dooft na 2,6 s en herlaad() kan er langer over doen. Hier blijft het staan.
+          if (r.undeletes) bericht('sync.undelete','ok',{ n: r.undeletes, s: r.undeletes === 1 ? '' : 's' });
+          else if (r.conflicten) bericht('sync.conflict','ok',{ n: r.conflicten, s: r.conflicten === 1 ? '' : 's' });
+          else if (r.omhoog || r.omlaag) bericht('account.sync_klaar','ok',{ omhoog: r.omhoog, omlaag: r.omlaag });
           else bericht('account.sync_niks','ok');
+          if (typeof herlaad === 'function') await herlaad();   // lijsten/2D/3D verversen na sync
         } else if (r.reden === 'bezig') {
           bericht('account.sync_bezig', null);   // auto-sync is al bezig; geen fout
         } else if (r.reden === 'ander-account') {
