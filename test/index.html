@@ -1993,8 +1993,14 @@ form label{text-transform:none;letter-spacing:.005em;font-size:.8rem;color:var(-
 
     <div id="account-in" hidden>
       <p class="account-status"><span data-i18n="account.ingelogd_als">Ingelogd als</span> <strong id="account-email-weergave"></strong></p>
-      <p class="inst-feedback-sub" data-i18n="account.sync_uitleg" style="margin-bottom:8px">Synchroniseer je collectie (inclusief foto's) met de cloud.</p>
-      <div class="account-knoppen">
+      <div id="account-grens" hidden>
+        <p class="inst-feedback-sub" data-i18n="sync.grens_uitleg" style="margin-bottom:8px">Deze collectie hoort bij een ander account. Synchroniseren staat uit, je tattoos blijven op dit toestel.</p>
+        <div class="account-knoppen">
+          <button type="button" class="knop-sec" id="account-samenvoegen" data-i18n="sync.grens_knop">Deze tattoos aan dit account toevoegen</button>
+        </div>
+      </div>
+      <p class="inst-feedback-sub" id="account-sync-uitleg" data-i18n="account.sync_uitleg" style="margin-bottom:8px">Synchroniseer je collectie (inclusief foto's) met de cloud.</p>
+      <div class="account-knoppen" id="account-sync-rij">
         <button type="button" class="knop-sec" id="account-sync" data-i18n="account.sync_knop">Nu synchroniseren</button>
       </div>
       <div class="account-knoppen" style="margin-top:8px">
@@ -6982,7 +6988,7 @@ const I18N = {
     'start.titel':'Welkom terug','start.titel_nieuw':'Welkom bij Tatties','start.tagline':'show me your tatties','start.nieuw':'+ Nieuwe tattoo',
     'start.stat_aantal':'Tattoos','start.leeg':'Nog geen tattoos - voeg je eerste toe.','start.recent':'Recent toegevoegd',
     'start.tegel3d':'3D-model','start.tegel2d':'2D-kaart','start.tegelcol':'Collectie','start.tegelstats':'Statistieken',
-    'start.account_uit':'Inloggen om je collectie overal te zien','start.account_backup':'Zet je collectie veilig in de cloud','sync.voortgang':'{n} van {totaal} overgezet','sync.veilig':'Je collectie staat in de cloud: {n} tattoo{s} en {f} foto{fs}.','sync.ander_account':'De tattoos op dit toestel horen bij een ander account. Samenvoegen met {email}?\n\nKies Annuleren om ze alleen op dit toestel te houden; er wordt dan niet gesynchroniseerd.','sync.ander_account_nee':'Er wordt niet gesynchroniseerd. Je tattoos blijven gewoon op dit toestel staan.','sync.ander_account_geblokkeerd':'Synchroniseren staat uit: deze collectie hoort bij een ander account.','start.account_in':'Gesynchroniseerd ✓',
+    'start.account_uit':'Inloggen om je collectie overal te zien','start.account_backup':'Zet je collectie veilig in de cloud','sync.voortgang':'{n} van {totaal} overgezet','sync.veilig':'Je collectie staat in de cloud: {n} tattoo{s} en {f} foto{fs}.','sync.grens_uitleg':'Deze collectie hoort bij een ander account. Synchroniseren staat uit, je tattoos blijven op dit toestel.','sync.grens_knop':'Deze tattoos aan dit account toevoegen','sync.grens_bevestig':'Deze tattoos aan {email} toevoegen? Ze komen dan in dat account terecht en dit is niet ongedaan te maken.','sync.grens_klaar':'Je tattoos horen nu bij dit account. Synchroniseren staat weer aan.','sync.ander_account_geblokkeerd':'Synchroniseren staat uit: deze collectie hoort bij een ander account.','start.account_in':'Gesynchroniseerd ✓',
     'start.leeg_uitleg':'Zie waar je volgende tattoo past - op een 3D-lichaam. En bewaar de inkt die je al hebt.','start.privacy':'Alles blijft op dit toestel - sync is optioneel.','start.kijk3d':'Bekijk eerst het 3D-lichaam','ui.geen_foto_link':'Geen foto? Alleen gegevens opslaan','ui.gl_onbeschikbaar':'3D-weergave is niet beschikbaar op dit toestel (WebGL werkt niet).','inapp.tekst':'Je zit in de app-browser van TikTok/Instagram - je tattoos worden hier mogelijk niet bewaard. Open Tatties in Safari of Chrome.','inapp.kopieer':'Kopieer link','inapp.gekopieerd':'Link gekopieerd - plak hem in je browser','ui.gl_verloren':'De 3D-weergave is gestopt omdat je toestel geheugen tekortkwam. Ververs om verder te gaan.',
     'start.kies_titel':'Tattoo toevoegen','start.kies_3d':'Op het 3D-model','start.kies_3d_sub':'Plaats op het draaibare lichaam',
     'start.kies_2d':'Op de 2D-kaart','start.kies_2d_sub':'Plaats op de platte voor/achter-kaart','start.kies_2d_wip':'Nog in aanbouw',
@@ -7171,7 +7177,7 @@ const I18N = {
     'start.titel':'Welcome back','start.titel_nieuw':'Welcome to Tatties','start.tagline':'show me your tatties','start.nieuw':'+ New tattoo',
     'start.stat_aantal':'Tattoos','start.leeg':'No tattoos yet - add your first.','start.recent':'Recently added',
     'start.tegel3d':'3D model','start.tegel2d':'2D map','start.tegelcol':'Collection','start.tegelstats':'Statistics',
-    'start.account_uit':'Sign in to see your collection anywhere','start.account_backup':'Back up your collection to the cloud','sync.voortgang':'{n} of {totaal} uploaded','sync.veilig':'Your collection is in the cloud: {n} tattoo{s} and {f} photo{fs}.','sync.ander_account':'The tattoos on this device belong to a different account. Merge them into {email}?\n\nChoose Cancel to keep them on this device only; nothing will be synced.','sync.ander_account_nee':'Syncing is off. Your tattoos stay on this device.','sync.ander_account_geblokkeerd':'Syncing is off: this collection belongs to a different account.','start.account_in':'Synced ✓',
+    'start.account_uit':'Sign in to see your collection anywhere','start.account_backup':'Back up your collection to the cloud','sync.voortgang':'{n} of {totaal} uploaded','sync.veilig':'Your collection is in the cloud: {n} tattoo{s} and {f} photo{fs}.','sync.grens_uitleg':'This collection belongs to a different account. Syncing is off and your tattoos stay on this device.','sync.grens_knop':'Add these tattoos to this account','sync.grens_bevestig':'Add these tattoos to {email}? They will end up in that account and this cannot be undone.','sync.grens_klaar':'Your tattoos now belong to this account. Syncing is back on.','sync.ander_account_geblokkeerd':'Syncing is off: this collection belongs to a different account.','start.account_in':'Synced ✓',
     'start.leeg_uitleg':'See where your next tattoo fits - on a 3D body. And keep the ink you already have.','start.privacy':'Everything stays on this device - syncing is optional.','start.kijk3d':'Just explore the 3D body first','ui.geen_foto_link':'No photo? Just save the details','ui.gl_onbeschikbaar':"3D view isn't available on this device (WebGL is not working).",'inapp.tekst':"You're in the TikTok/Instagram in-app browser - your tattoos may not be saved here. Open Tatties in Safari or Chrome.",'inapp.kopieer':'Copy link','inapp.gekopieerd':'Link copied - paste it in your browser','ui.gl_verloren':'The 3D view stopped because your device ran out of memory. Refresh to continue.',
     'start.kies_titel':'Add tattoo','start.kies_3d':'On the 3D model','start.kies_3d_sub':'Place on the rotatable body',
     'start.kies_2d':'On the 2D map','start.kies_2d_sub':'Place on the flat front/back map','start.kies_2d_wip':'Under construction',
@@ -7479,7 +7485,7 @@ function createTattoo(overrides = {}) {
    ============================================================ */
 // App-versie (semver, handmatig ophogen bij een release). Bij een bump ook de
 // CACHE-naam in sw.js meebumpen, zodat clients de nieuwe build ophalen.
-const APP_VERSIE = '0.3.8';
+const APP_VERSIE = '0.3.9';
 /* ---- Retentiemeting (opt-in) ------------------------------------------------------------------
    Fase 2 van de roadmap vraagt bewijs dat mensen terugkomen. Dat kan niet zonder iets te versturen,
    dus: standaard UIT, aan te zetten in de instellingen, en dan hooguit een bericht per dag met een
@@ -7705,12 +7711,11 @@ async function controleerEigenaar(user) {
   const meta = await leesSyncMeta(SYNC_EIGENAAR_ID);
   collectieEigenaar = meta && meta.ownerId || null;
   if (!collectieEigenaar || collectieEigenaar === user.id) { syncGeblokkeerd = false; return true; }
-  const vraag = tr('sync.ander_account').replace('{email}', user.email || '');
-  const ok = (typeof window.__tattiesConfirm === 'function')
-    ? await window.__tattiesConfirm(vraag) : window.confirm(vraag);
-  if (ok) { await adopteerCollectie(user.id); syncGeblokkeerd = false; return true; }
+  // Geen vraag op dit moment. Inloggen is het verkeerde moment voor de zwaarste, onomkeerbare
+  // keuze in de app, en wie hier een tweede account invoert wil vrijwel nooit samenvoegen.
+  // We kiezen stil de veilige kant; het accountscherm toont de blokkade en biedt het
+  // samenvoegen aan als aparte knop (toonGrens / btnSamenvoeg).
   syncGeblokkeerd = true;
-  toast(tr('sync.ander_account_nee'));
   return false;
 }
 window.__tattiesEigenaar = { controleer: controleerEigenaar, adopteer: adopteerCollectie,
@@ -12305,6 +12310,8 @@ async function verwijderVoorbeelden() {
           btnBackup = $('#account-backup'), btnPull = $('#account-pull'), btnSync = $('#account-sync'),
           btnVerwijder = $('#account-verwijder'),
           btnReset = $('#account-reset'), btnResend = $('#account-resend'), blokHerstel = $('#account-herstel'),
+          blokGrens = $('#account-grens'), btnSamenvoeg = $('#account-samenvoegen'),
+          elSyncUitleg = $('#account-sync-uitleg'), elSyncRij = $('#account-sync-rij'),
           elNieuwWw = $('#account-nieuwww'), btnHerstel = $('#account-herstel-opslaan'),
           startRij = $('#start-account'), startTekst = $('#start-account-tekst');
     if (startRij) { startRij.hidden = false; startRij.addEventListener('click', openAccount); }   // startscherm-ingang tonen
@@ -12332,6 +12339,7 @@ async function verwijderVoorbeelden() {
       elBericht.classList.toggle('ok', soort === 'ok');
     }
     function toonSessie(session){
+      toonGrens();
       const ingelogd = !!(session && session.user);
       if (blokHerstel) blokHerstel.hidden = true;   // normale flow: wachtwoord-herstel verborgen
       if (elUit) elUit.hidden = ingelogd;
@@ -12352,7 +12360,16 @@ async function verwijderVoorbeelden() {
       if (elIn) elIn.hidden = true;
       if (blokHerstel) blokHerstel.hidden = false;
     }
-    function bezig(aan){ [btnGoogle, btnIn, btnMaak, btnUit, btnBackup, btnPull, btnSync, btnVerwijder, btnReset, btnResend, btnHerstel].forEach(b => { if (b) b.disabled = aan; }); }
+    function bezig(aan){ [btnGoogle, btnIn, btnMaak, btnUit, btnBackup, btnPull, btnSync, btnVerwijder, btnReset, btnResend, btnHerstel, btnSamenvoeg].forEach(b => { if (b) b.disabled = aan; }); }
+    /* Accountgrens zichtbaar maken. De collectie hoort bij een ander account: dat blijft
+       staan tot de gebruiker zelf kiest, in plaats van een toast die je gemist kunt hebben.
+       Zolang het blok er staat is synchroniseren zinloos, dus die knop gaat weg. */
+    function toonGrens(){
+      const blok = !!syncGeblokkeerd;
+      if (blokGrens) blokGrens.hidden = !blok;
+      if (elSyncUitleg) elSyncUitleg.hidden = blok;
+      if (elSyncRij) elSyncRij.hidden = blok;
+    }
     function foutTekst(err){
       const m = (err && (err.message || '') + '').toLowerCase();
       if (/failed to fetch|networkerror|network|offline/.test(m)) return 'account.offline';
@@ -12397,6 +12414,29 @@ async function verwijderVoorbeelden() {
         if (error) bericht(foutTekst(error),'fout');
         else { if (elWw) elWw.value = ''; bericht('account.check_mail','ok',{ email }); }
       } catch(e){ bericht(foutTekst(e),'fout'); }
+      finally { bezig(false); }
+    });
+    /* Samenvoegen: de enige plek waar de collectie van eigenaar verandert. Bewust een
+       aparte handeling met een eigen bevestiging, niet iets wat je tijdens het inloggen
+       per ongeluk wegtikt. */
+    if (btnSamenvoeg) btnSamenvoeg.addEventListener('click', async () => {
+      let u = null;
+      try { const { data } = await sb.auth.getSession(); u = data && data.session && data.session.user; }
+      catch (e) { bericht(foutTekst(e), 'fout'); return; }
+      if (!u) { bericht('account.fout_generiek', 'fout'); return; }
+      const vraag = tr('sync.grens_bevestig').replace('{email}', u.email || '');
+      const ok = (typeof window.__tattiesConfirm === 'function')
+        ? await window.__tattiesConfirm(vraag) : window.confirm(vraag);
+      if (!ok) return;
+      bezig(true); bericht('account.bezig', null);
+      try {
+        await adopteerCollectie(u.id);
+        syncGeblokkeerd = false;
+        toonGrens();
+        bericht('sync.grens_klaar', 'ok');
+        const r = await syncMetCloud();
+        if (r && r.ok && typeof herlaad === 'function') await herlaad();
+      } catch(e){ bericht(foutTekst(e), 'fout'); }
       finally { bezig(false); }
     });
     if (btnUit) btnUit.addEventListener('click', async () => {
@@ -12549,7 +12589,9 @@ async function verwijderVoorbeelden() {
         // Eerst de accountgrens, dan pas synchroniseren: anders staat de collectie al in het
         // verkeerde account voordat de vraag beantwoord is.
         if (session && session.user) {
-          controleerEigenaar(session.user).then(mag => { if (mag) planAutoSync(); }).catch(() => {});
+          controleerEigenaar(session.user)
+            .then(mag => { toonGrens(); if (mag) planAutoSync(); })
+            .catch(() => { toonGrens(); });
         } else { syncGeblokkeerd = false; }
       }
     });
