@@ -7439,9 +7439,20 @@ function createSessie(datum = '', duurUren = 0, notities = '') {
 function createTouchUp(datum = '', notities = '') {
   return { datum, notities };
 }
+/* De id van een record is geen los label: hij wordt letterlijk een map in een Storage-pad
+   (`${userId}/${id}/...`) en is de sleutel in IndexedDB. Zelf maken we alleen een uuid of
+   `id-<tijd>-<random>`, maar een geimporteerd of gesynct record kan er alles in zetten - en
+   een id met een schuine streep of `..` erin schrijft buiten de eigen map. Daarom hier de
+   toegestane vorm, en nergens anders. */
+function veiligeId(id) { return typeof id === 'string' && /^[A-Za-z0-9_-]{1,128}$/.test(id); }
+function nieuweId() {
+  return crypto.randomUUID ? crypto.randomUUID()
+                           : 'id-' + Date.now() + '-' + Math.random().toString(36).slice(2);
+}
+
 function createTattoo(overrides = {}) {
   const tattoo = {
-    id: (crypto.randomUUID ? crypto.randomUUID() : 'id-' + Date.now() + '-' + Math.random().toString(36).slice(2)),
+    id: nieuweId(),
     naam: '',
     lichaamsdeel: '',
     datum: '',
@@ -7485,7 +7496,7 @@ function createTattoo(overrides = {}) {
    ============================================================ */
 // App-versie (semver, handmatig ophogen bij een release). Bij een bump ook de
 // CACHE-naam in sw.js meebumpen, zodat clients de nieuwe build ophalen.
-const APP_VERSIE = '0.3.10';
+const APP_VERSIE = '0.3.11';
 
 /* Dev-haken die de CLOUD raken hangen alleen op een ontwikkelmachine aan window. Ze zijn geen
    lek op zichzelf (zonder XSS roept niemand ze aan, en CSP + esc() houden XSS tegen), maar ze
@@ -8061,6 +8072,9 @@ function legacyManifest(man) {
    voorheen werd bij elke push alles opnieuw geüpload, ook als alleen de naam veranderde. */
 async function uploadBeelden(userId, t, vorig) {
   const man = { fotos: [], kunst: null, kunst3d: null };
+  // Tweede slot op de plek waar het pad echt gebouwd wordt: hardRecord hoort dit al te hebben
+  // afgevangen, dus komen we hier toch, dan is er iets grondig mis en uploaden we niets.
+  if (!veiligeId(t.id)) throw new Error('onveilige record-id, upload geweigerd');
   const basis = userId + '/' + t.id;
   let overgeslagen = 0;
   async function up(pad, src, oud) {
@@ -8183,6 +8197,9 @@ function hardRecord(record) {
   // levert altijd #rrggbb via <input type=color>; alleen import/sync kan iets anders bevatten).
   if (typeof record.accentkleur !== 'string' || !/^#[0-9a-f]{3,8}$/i.test(record.accentkleur.trim())) record.accentkleur = '#8E71F0';
   else record.accentkleur = record.accentkleur.trim();
+  // Id klemmen: onbruikbare of gevaarlijke vorm -> vers record-id. Liever een duplicaat dan
+  // een record dat buiten zijn eigen Storage-map schrijft.
+  if (!veiligeId(record.id)) record.id = nieuweId();
   // Sync-velden: tijdstempel behouden, deleted strikt boolean
   record.updatedAt = Number.isFinite(+record.updatedAt) ? +record.updatedAt : Date.now();
   record.deleted = record.deleted === true;

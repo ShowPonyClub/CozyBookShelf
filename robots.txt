@@ -1,0 +1,12 @@
+# tatties.app
+#
+# /test/ is de werkversie van de app: publiek bereikbaar zodat testers erbij kunnen,
+# maar niets om via een zoekmachine binnen te vallen. Een zoekresultaat leidt daar
+# naar een build die morgen alweer anders is, en de landingspagina is de plek waar
+# bezoekers horen te beginnen.
+#
+# Let op: dit houdt nette crawlers tegen, geen mensen en geen kwaadwillenden. De
+# testbuild blijft dus gewoon bereikbaar voor wie de URL heeft.
+
+User-agent: *
+Disallow: /test/
