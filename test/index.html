@@ -7485,7 +7485,21 @@ function createTattoo(overrides = {}) {
    ============================================================ */
 // App-versie (semver, handmatig ophogen bij een release). Bij een bump ook de
 // CACHE-naam in sw.js meebumpen, zodat clients de nieuwe build ophalen.
-const APP_VERSIE = '0.3.9';
+const APP_VERSIE = '0.3.10';
+
+/* Dev-haken die de CLOUD raken hangen alleen op een ontwikkelmachine aan window. Ze zijn geen
+   lek op zichzelf (zonder XSS roept niemand ze aan, en CSP + esc() houden XSS tegen), maar ze
+   bepalen wel hoeveel schade een hypothetische XSS aanricht: __tattiesBackup schrijft de hele
+   collectie naar de cloud en __tattiesEigenaar.adopteer zet 'm op naam van een ander account.
+   De 3D- en knip-haken blijven overal staan: die kunnen niets naar buiten brengen, en ze zijn
+   nodig om op een echt toestel te kunnen meekijken. */
+const DEV_HAKEN = (() => {
+  try {
+    const h = location.hostname;
+    return h === '' || h === 'localhost' || h === '127.0.0.1' || h === '[::1]' || h.endsWith('.localhost');
+  } catch { return false; }
+})();
+function devHaak(naam, waarde) { if (DEV_HAKEN) window[naam] = waarde; }
 /* ---- Retentiemeting (opt-in) ------------------------------------------------------------------
    Fase 2 van de roadmap vraagt bewijs dat mensen terugkomen. Dat kan niet zonder iets te versturen,
    dus: standaard UIT, aan te zetten in de instellingen, en dan hooguit een bericht per dag met een
@@ -7718,9 +7732,9 @@ async function controleerEigenaar(user) {
   syncGeblokkeerd = true;
   return false;
 }
-window.__tattiesEigenaar = { controleer: controleerEigenaar, adopteer: adopteerCollectie,
-                             get geblokkeerd() { return syncGeblokkeerd; },
-                             get eigenaar() { return collectieEigenaar; } };   // dev/test-haak
+devHaak('__tattiesEigenaar', { controleer: controleerEigenaar, adopteer: adopteerCollectie,
+                               get geblokkeerd() { return syncGeblokkeerd; },
+                               get eigenaar() { return collectieEigenaar; } });   // dev/test-haak
 
 /* Gezet op het enige schrijfpunt (saveTattoo/deleteTattoo). Schrijfacties die uit de
    cloud komen of alleen afgeleide data bijwerken tellen niet als 'lokaal gewijzigd'. */
@@ -7737,8 +7751,8 @@ async function zonderDirty(fn) {
   try { return await fn(); } finally { _cloudSchrijft--; }
 }
 
-window.__tattiesSyncMeta = { lees: leesSyncMeta, alle: alleSyncMeta, zet: zetSyncMeta, wis: wisSyncMeta,
-                             leeg: leegSyncMeta, get userId() { return huidigeUserId; } };   // dev/test-haak
+devHaak('__tattiesSyncMeta', { lees: leesSyncMeta, alle: alleSyncMeta, zet: zetSyncMeta, wis: wisSyncMeta,
+                               leeg: leegSyncMeta, get userId() { return huidigeUserId; } });   // dev/test-haak
 
 /* ---- Hardening-kolommen: werken met én zonder de SQL-migratie ----
    Een deploy en het draaien van supabase-sync-hardening.sql gebeuren niet op hetzelfde
@@ -7914,7 +7928,7 @@ function beslisSync(l, c, m) {
   return _syncBesluit('conflict', 'beide kanten gewijzigd',
                       { meld: 'conflict', winnaar: ct > lt ? 'cloud' : 'lokaal' });
 }
-window.__tattiesBeslisSync = beslisSync;   // dev/test-haak (nog niet aangesloten op de sync)
+devHaak('__tattiesBeslisSync', beslisSync);   // dev/test-haak (nog niet aangesloten op de sync)
 
 /* Strip de zware beeldvelden eruit voor de cloud-backup. Foto's/uitsnedes gaan
    in slice 6 naar Supabase Storage, niet in de database (gratis tier = 500 MB).
@@ -7936,6 +7950,9 @@ function stripVoorCloud(t) {
    Eenrichting: leest niets terug, overschrijft niets lokaal. */
 async function backupNaarCloud() {
   if (!sb) return { ok: false, reden: 'geen-client' };
+  // Accountgrens hier en niet alleen bij de aanroeper: deze functie schrijft naar de
+  // cloud van wie er nu is ingelogd, en dat is precies wat de grens moet tegenhouden.
+  if (syncGeblokkeerd) return { ok: false, reden: 'ander-account' };
   const { data: s } = await sb.auth.getSession();
   const user = s && s.session && s.session.user;
   if (!user) return { ok: false, reden: 'niet-ingelogd' };
@@ -7954,7 +7971,7 @@ async function backupNaarCloud() {
   }
   return { ok: true, n: rows.length };
 }
-window.__tattiesBackup = backupNaarCloud;   // dev/test-haak
+devHaak('__tattiesBackup', backupNaarCloud);   // dev/test-haak
 
 /* Pull (cloud -> toestel), slice 4. ADDITIEF: haalt cloud-records op die hier
    nog NIET bestaan en voegt ze lokaal toe (zonder foto's - die volgen in slice 6).
@@ -7963,6 +7980,9 @@ window.__tattiesBackup = backupNaarCloud;   // dev/test-haak
    overschrijven of foto's wissen. */
 async function pullVanCloud() {
   if (!sb) return { ok: false, reden: 'geen-client' };
+  // Accountgrens hier en niet alleen bij de aanroeper: deze functie schrijft naar de
+  // cloud van wie er nu is ingelogd, en dat is precies wat de grens moet tegenhouden.
+  if (syncGeblokkeerd) return { ok: false, reden: 'ander-account' };
   const { data: s } = await sb.auth.getSession();
   const user = s && s.session && s.session.user;
   if (!user) return { ok: false, reden: 'niet-ingelogd' };
@@ -7985,7 +8005,7 @@ async function pullVanCloud() {
   }
   return { ok: true, n: nieuw };
 }
-window.__tattiesPull = pullVanCloud;   // dev/test-haak
+devHaak('__tattiesPull', pullVanCloud);   // dev/test-haak
 
 /* ---- Foto's via Supabase Storage (slice 6) ----
    Privé bucket; map per gebruiker: {user_id}/{tattoo_id}/...
@@ -8573,7 +8593,7 @@ async function _syncMetCloudKern() {
            conflicten, undeletes, backfill, beeldenOpen, opgeruimd, overgeslagenBeelden,
            eersteRonde, beeldenGeteld };
 }
-window.__tattiesSync = syncMetCloud;   // dev/test-haak
+devHaak('__tattiesSync', syncMetCloud);   // dev/test-haak
 
 /* Auto-sync: na een lokale wijziging (debounced) of na inloggen stil
    synchroniseren wanneer ingelogd + online. Achtergrond: geen UI-ruis, fouten
@@ -8598,7 +8618,7 @@ function planAutoSync() {
     } catch (_) { /* stille achtergrond-sync */ }
   }, 2500);
 }
-window.__tattiesPlanAutoSync = planAutoSync;   // dev/test-haak
+devHaak('__tattiesPlanAutoSync', planAutoSync);   // dev/test-haak
 
 /* Fallback-opslag voor omgevingen waar IndexedDB geblokkeerd is
    (bijv. sommige voorbeeldweergaven of privé-vensters). We vallen
