@@ -2068,7 +2068,7 @@ form label{text-transform:none;letter-spacing:.005em;font-size:.8rem;color:var(-
     </div>
     <div id="onb-stap2" hidden>
       <h1 class="onboarding-titel" data-i18n="onb.stap2_titel">Je eerste tattoo toevoegen</h1>
-      <p class="onboarding-sub" data-i18n="onb.stap2_sub">Tik straks op &lsquo;+ Nieuwe tattoo&rsquo; om een foto te kiezen, uit te snijden en op het model te plaatsen.</p>
+      <p class="onboarding-sub" data-i18n="onb.stap2_sub">Tik straks rechtsonder op de knop met de + om een foto te kiezen, uit te snijden en op het model te plaatsen.</p>
       <button type="button" class="knop onboarding-start" id="onb-start" data-i18n="onb.start">Aan de slag</button>
       <button type="button" class="linkbtn" id="onb-terug" data-i18n="onb.terug">Terug</button>
     </div>
@@ -6968,7 +6968,7 @@ const I18N = {
     'hint.begrepen':'Begrepen',
     'onb.titel':'Welkom bij Tatties','onb.sub':'Kies je lichaam en huidskleur om te beginnen.','onb.start':'Aan de slag',
     'onb.volgende':'Volgende','onb.terug':'Terug','onb.overslaan':'Overslaan','onb.opnieuw':'Introductie opnieuw','onb.stap2_titel':'Je eerste tattoo toevoegen',
-    'onb.stap2_sub':"Tik straks op '+ Nieuwe tattoo' om een foto te kiezen, uit te snijden en op het model te plaatsen.",
+    'onb.stap2_sub':'Tik straks rechtsonder op de knop met de + om een foto te kiezen, uit te snijden en op het model te plaatsen.',
     'sv.collectie':'Collectie','sv.wishlist':'Wishlist',
     'uitleg.titel3d':'Zo werkt de 3D-weergave',
     'uitleg.3d1':'<strong>Model kiezen:</strong> stel man of vrouw en je huidskleur in via Instellingen (tandwiel rechtsboven).',
@@ -7157,7 +7157,7 @@ const I18N = {
     'hint.begrepen':'Got it',
     'onb.titel':'Welcome to Tatties','onb.sub':'Pick your body and skin tone to get started.','onb.start':'Get started',
     'onb.volgende':'Next','onb.terug':'Back','onb.overslaan':'Skip','onb.opnieuw':'Replay intro','onb.stap2_titel':'Add your first tattoo',
-    'onb.stap2_sub':"Next, tap '+ New tattoo' to pick a photo, cut it out and place it on the model.",
+    'onb.stap2_sub':'Next, tap the + button at the bottom right to pick a photo, cut it out and place it on the model.',
     'sv.collectie':'Collection','sv.wishlist':'Wishlist',
     'uitleg.titel3d':'How the 3D view works',
     'uitleg.3d1':'<strong>Pick a model:</strong> set male or female and your skin tone via Settings (gear, top right).',
@@ -7496,7 +7496,7 @@ function createTattoo(overrides = {}) {
    ============================================================ */
 // App-versie (semver, handmatig ophogen bij een release). Bij een bump ook de
 // CACHE-naam in sw.js meebumpen, zodat clients de nieuwe build ophalen.
-const APP_VERSIE = '0.3.11';
+const APP_VERSIE = '0.3.12';
 
 /* Dev-haken die de CLOUD raken hangen alleen op een ontwikkelmachine aan window. Ze zijn geen
    lek op zichzelf (zonder XSS roept niemand ze aan, en CSP + esc() houden XSS tegen), maar ze
@@ -12792,9 +12792,17 @@ async function verwijderVoorbeelden() {
     sp.textContent = (total>0 && done<total) ? (tr('ui.laden')+' '+done+'/'+total) : tr('ui.laden');
   }
 
-  /* ---- toast (eigen, target #t3d-toast; schaduwt host-toast binnen deze IIFE) ---- */
+  /* ---- toast (eigen, target #t3d-toast; schaduwt host-toast binnen deze IIFE) ----
+     Staat de knip-modal open, dan is #t3d-toast (z-index 4) onzichtbaar achter de modal
+     (z-index 60): de melding vuurt wel, maar niemand leest 'm. Dat trof o.a. 'Geef de tattoo
+     eerst een naam' bij het toevoegen - je zag alleen een rood randje en een toetsenbord, niet
+     waarom. Daarom hier doorschakelen naar de host-toast, die in een open modal zelf naar de
+     in-modal strip (#cmFeedback) omleidt. Eén plek, zodat elke aanroep in deze module klopt. */
   let toastT=null;
-  const toast=(msg)=>{ const t=document.getElementById("t3d-toast"); if(!t)return;
+  const toast=(msg)=>{
+    const cm=document.getElementById("cutModal");
+    if(cm && cm.classList.contains("on") && typeof window.toast==="function"){ window.toast(msg); return; }
+    const t=document.getElementById("t3d-toast"); if(!t)return;
     t.textContent=msg; t.style.opacity=1; clearTimeout(toastT); toastT=setTimeout(()=>t.style.opacity=0,2200); };
 
   const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
