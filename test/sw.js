@@ -10,7 +10,7 @@
    (controllerchange na skipWaiting+claim; zie de registratie in tatties-3d.html).
    Cachenaam is geversioneerd; bij activatie worden oude caches opgeruimd.
    Bump CACHE bij elke release (gelijk aan APP_VERSIE in tatties-3d.html). */
-const CACHE = 'tatties-test-v0.3.13';
+const CACHE = 'tatties-test-v0.3.15';
 const NET_TIMEOUT_MS = 3500;     // deadline op de response-headers
 const BODY_TIMEOUT_MS = 20000;   // deadline op de volledige body (app is ~3.5MB)
 
