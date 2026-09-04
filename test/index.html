@@ -1386,24 +1386,30 @@ html.knipfull .cutmodal.cm-fullcut.cm-gegevens .cm-bewerkbtn span{position:absol
 html.knipfull .cutmodal.cm-fullcut.cm-gegevens.cm-strook-krap #cmGegevensHint{display:none;}
 html.knipfull .cutmodal.cm-fullcut.cm-gegevens #cmSettings{flex:0 0 auto;}
 html.knipfull .cutmodal.cm-fullcut.cm-gegevens .cm-prev{flex:0 0 auto;height:var(--strook-h,34%);
-  min-height:0;max-height:none;overflow:hidden;border-bottom:1px solid var(--rand);}
+  min-height:0;max-height:none;overflow:hidden;}
 html.knipfull .cutmodal.cm-fullcut.cm-gegevens .cutcv,
 html.knipfull .cutmodal.cm-fullcut.cm-gegevens .lassocv{inset:auto;top:0;left:0;
   width:var(--prev-w,100%);height:var(--prev-h,100%);transform-origin:0 0;
   transform:translate(var(--prev-tx,0px),var(--prev-ty,0px)) scale(var(--prev-s,1));}
 /* de velden zijn de enige scrollende laag van dit scherm */
-/* De zwevende kaart had een max-width van 560px; in de flow moet die begrenzing terugkomen,
-   anders rekken de velden op een tablet of desktop over de volle schermbreedte uit. Padding in
-   plaats van een breedte, zodat de scroller zelf schermbreed blijft. */
+/* Zelfde behandeling als de gereedschapsbalk in de knipstand: een kaartvlak met rand, ronding,
+   blur en schaduw op dezelfde marges en dezelfde maximumbreedte. Zo spreken de twee tabbladen
+   dezelfde taal - eerder was dit een schermbreed blok met een streep erboven. */
 html.knipfull .cutmodal.cm-fullcut.cm-gegevens .cm-veldenkaart{display:flex;flex-direction:column;gap:10px;
   flex:1 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;
-  padding:12px max(14px, calc((100% - 560px)/2));background:var(--bg);}
+  width:min(560px, calc(100% - 16px));margin:8px auto 0;
+  padding:10px 11px;border:1px solid var(--rand);border-radius:var(--r-md);
+  background:var(--kaart);background:color-mix(in srgb, var(--kaart) 90%, transparent);
+  -webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);box-shadow:0 8px 22px rgba(0,0,0,.22);}
 html.knipfull .cutmodal.cm-fullcut.cm-gegevens .cm-veldenkaart #cmNaam{display:block;width:auto;margin:0;}
 html.knipfull .cutmodal.cm-fullcut.cm-gegevens .cm-veldenkaart #cmInfo,
 html.knipfull .cutmodal.cm-fullcut.cm-gegevens .cm-veldenkaart .cm-choose-rij{margin:0;}
 /* knoppenbalk: vast onderaan, buiten de scroll, met ruimte voor de home-indicator */
+/* De knop staat los op de achtergrond, net zoals de gereedschapsbalk vrij over de foto ligt:
+   geen eigen balk met streep en schaduw eromheen. */
 html.knipfull .cutmodal.cm-fullcut.cm-gegevens .cm-foot{display:flex;flex:0 0 auto;
-  padding:12px max(16px, calc((100% - 560px)/2)) calc(12px + env(safe-area-inset-bottom,0px));}
+  width:min(560px, calc(100% - 16px));margin:8px auto;padding:0;
+  background:transparent;border-top:none;box-shadow:none;}
 /* De krimp zit op het canvas (transform = compositor-werk) en op de hoogte van de strook. De
    velden komen van onderen mee omhoog, zoals ze dat als zwevende kaart ook deden. */
 @media (prefers-reduced-motion:no-preference){
@@ -7703,7 +7709,7 @@ function createTattoo(overrides = {}) {
    ============================================================ */
 // App-versie (semver, handmatig ophogen bij een release). Bij een bump ook de
 // CACHE-naam in sw.js meebumpen, zodat clients de nieuwe build ophalen.
-const APP_VERSIE = '0.3.26';
+const APP_VERSIE = '0.3.27';
 
 /* Dev-haken die de CLOUD raken hangen alleen op een ontwikkelmachine aan window. Ze zijn geen
    lek op zichzelf (zonder XSS roept niemand ze aan, en CSP + esc() houden XSS tegen), maar ze
@@ -15487,7 +15493,7 @@ async function verwijderVoorbeelden() {
     // foto groot; klap je 'Meer details' open, dan krimpt hij tot zijn minimum en scrollen de
     // velden. Zonder dit stond er onder een half ingevuld formulier een scherm vol lege ruimte.
     const kaart=cutModal.querySelector('.cm-veldenkaart');
-    const wens=(kaart&&kaart.scrollHeight)||0;
+    const wens=((kaart&&kaart.scrollHeight)||0)+10;   // +10: de marge en de randen van de kaart
     // Bovengrens ruim (0.8): de velden nemen precies wat ze nodig hebben en de foto slokt de
     // rest op. Met een krappere grens (0.55 was het eerst) bleef het verschil als een leeg vlak
     // tussen de laatste veldregel en de knoppenbalk staan.
@@ -15513,7 +15519,15 @@ async function verwijderVoorbeelden() {
     const links=16, rechts=16, boven=krap?10:62, onder=10;   // boven: ruimte voor de hint-pil en de x
     const vw=Math.max(40,W-links-rechts), vh=Math.max(40,H-boven-onder);
     const sc=Math.min(vw/bw, vh/bh, 1);
-    const tx=links+(vw-bw*sc)/2-x0*sc, ty=boven+(vh-bh*sc)/2-y0*sc;
+    /* Niet klakkeloos centreren: de tattoo hoort te blijven staan waar hij in de knipstand stond
+       (feedback Bram, 2026-09-04). Verschuif dus zo min mogelijk - alleen zover als nodig is om
+       de uitsnede binnen de strook te houden. Past hij er niet in, dan pas centreren. */
+    const schuif=(a,b,laag,hoog)=>{
+      const min=laag-a, max=hoog-b;                 // grenzen waartussen de verschuiving mag liggen
+      return min<=max ? Math.min(max, Math.max(min, 0)) : (min+max)/2;
+    };
+    const tx=schuif(x0*sc, x1*sc, links, W-rechts);
+    const ty=schuif(y0*sc, y1*sc, boven, H-onder);
     cutModal.style.setProperty('--strook-h',H+'px');
     cutModal.style.setProperty('--prev-w',W+'px');
     cutModal.style.setProperty('--prev-h',prevBevroren.h+'px');
