@@ -1256,6 +1256,43 @@ html.knipfull .cutmodal.cm-review #cmWandModus,
 html.knipfull .cutmodal.cm-review #cmGumModus,
 html.knipfull .cutmodal.cm-review #cmGumGrootte{display:none !important;}   /* !important: #cmHint heeft een inline display:block */
 html.knipfull .cutmodal.cm-review .cm-prev{pointer-events:none;}
+/* ---- Reviewfase erft de schil van de knipfase (2026-09-02) ----
+   Voorheen sprong de modal na de checkmark terug naar de gewone kaart: afgeronde rand, een
+   titelbalk en het kruisje ineens rechtsboven. Dat leest als een NIEUW scherm, terwijl het
+   dezelfde modal met dezelfde foto is - vandaar de indruk van twee losse stappen. Nu blijft de
+   schil exact staan en krimpt alleen de foto, met de velden die er van onderen inschuiven.
+   De foto-hoogte animeert NIET: het canvas wordt bij die overgang herbouwd (rebuildBase/
+   updateCutout in zetFullcut), en meebewegen zou per frame een herbouw of een uitgerekte
+   bitmap opleveren. De continuiteit komt van de schil, de beweging van de velden. */
+html.knipfull .cutmodal.cm-review .cm-card{width:100%;height:100%;max-height:none;border:none;border-radius:0;background:var(--bg);}
+html.knipfull .cutmodal.cm-review .cm-body{padding:0 0 10px;gap:10px;}
+html.knipfull .cutmodal.cm-review #cmSettings{display:flex;flex-direction:column;position:relative;flex:0 0 auto;}
+html.knipfull .cutmodal.cm-review .cm-prev{flex:0 0 auto;height:clamp(220px,42vh,340px);min-height:0;max-height:none;
+  border:none;border-radius:0;background:var(--bg);}
+/* Kruisje blijft liggen waar het in de knipfase lag: linksboven, zwevend over de foto. */
+html.knipfull .cutmodal.cm-review .cm-toprow{position:absolute;z-index:8;pointer-events:none;
+  top:calc(10px + env(safe-area-inset-top,0px));left:calc(10px + env(safe-area-inset-left,0px));
+  right:calc(10px + env(safe-area-inset-right,0px));}
+html.knipfull .cutmodal.cm-review .cm-x{pointer-events:auto;width:44px;height:44px;margin:0;border-radius:50%;
+  border:1px solid var(--rand);background:var(--kaart);color:var(--tekst);}
+/* Titel niet display:none maar onzichtbaar-voor-het-oog: de dialog verwijst er met
+   aria-labelledby naar, dus een screenreader heeft 'm nodig om het venster te benoemen. */
+html.knipfull .cutmodal.cm-review #cmTitle{position:absolute;width:1px;height:1px;padding:0;margin:-1px;
+  overflow:hidden;clip-path:inset(50%);white-space:nowrap;border:0;}
+/* .cm-body heeft geen padding meer in deze stand: de velden dragen 'm nu zelf. */
+html.knipfull .cutmodal.cm-review #cmNaam,
+html.knipfull .cutmodal.cm-review #cmInfo,
+html.knipfull .cutmodal.cm-review .cm-choose-rij{margin-left:16px;margin-right:16px;}
+html.knipfull .cutmodal.cm-review #cmNaam{display:block;width:auto;margin-top:auto;}   /* duwt naam + details als blok naar de knoppenbalk: bediening in duimbereik, lege ruimte valt onder de foto */
+html.knipfull .cutmodal.cm-review .cm-foot{background:var(--bg);}
+/* De velden schuiven van onderen in, kort na elkaar, zodat je ziet dat ze BIJ de foto komen
+   in plaats van dat er een ander scherm verschijnt. */
+@media (prefers-reduced-motion:no-preference){
+  html.knipfull .cutmodal.cm-review #cmNaam{animation:cmVeldenIn .26s ease both;}
+  html.knipfull .cutmodal.cm-review #cmInfo{animation:cmVeldenIn .26s ease .05s both;}
+  html.knipfull .cutmodal.cm-review .cm-foot{animation:cmVeldenIn .26s ease .1s both;}
+}
+@keyframes cmVeldenIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
 html.knipfull .cutmodal.cm-review .cm-bewerkbtn{display:inline-flex;align-items:center;gap:6px;position:absolute;z-index:6;top:10px;right:10px;
   pointer-events:auto;padding:8px 13px;border-radius:999px;border:1px solid var(--rand);font-size:var(--fs-sm);font-weight:600;color:var(--tekst);cursor:pointer;
   background:var(--kaart);background:color-mix(in srgb, var(--kaart) 90%, transparent);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);box-shadow:0 6px 16px rgba(0,0,0,.25);}
@@ -7496,7 +7533,7 @@ function createTattoo(overrides = {}) {
    ============================================================ */
 // App-versie (semver, handmatig ophogen bij een release). Bij een bump ook de
 // CACHE-naam in sw.js meebumpen, zodat clients de nieuwe build ophalen.
-const APP_VERSIE = '0.3.12';
+const APP_VERSIE = '0.3.13';
 
 /* Dev-haken die de CLOUD raken hangen alleen op een ontwikkelmachine aan window. Ze zijn geen
    lek op zichzelf (zonder XSS roept niemand ze aan, en CSP + esc() houden XSS tegen), maar ze
@@ -15293,7 +15330,8 @@ async function verwijderVoorbeelden() {
     }
     cutModal.style.left=vv.offsetLeft+"px"; cutModal.style.top=vv.offsetTop+"px";
     cutModal.style.width=vv.width+"px"; cutModal.style.height=vv.height+"px";
-    if(card) card.style.maxHeight = cutModal.classList.contains('cm-fullcut') ? "" : Math.round(vv.height*0.94)+"px";   // fullscreen-fase: CSS (100%) bepaalt de kaart, geen inline cap
+    if(card) card.style.maxHeight = (cutModal.classList.contains('cm-fullcut') || cutModal.classList.contains('cm-review'))
+      ? "" : Math.round(vv.height*0.94)+"px";   // fullscreen- EN reviewfase: CSS (100%) bepaalt de kaart, geen inline cap
     stapelFullcutOverlays();   // viewport gewijzigd (toetsenbord/rotatie) -> overlays opnieuw stapelen
     // Rotatie/resize: de canvas-bitmap is clientWidth-gebaseerd en werd pas bij de volgende
     // tekenactie hertekend -> beeld stond uitgerekt tot de eerste aanraking. Nu meteen hertekenen
