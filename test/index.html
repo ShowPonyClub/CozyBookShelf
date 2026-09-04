@@ -1323,6 +1323,14 @@ html.knipfull .cutmodal.cm-fullcut.cm-gegevens #cmGumGrootte,
 html.knipfull .cutmodal.cm-fullcut.cm-gegevens .cm-volgende{display:none!important;}
 /* niet meer in de foto tekenen terwijl je typt */
 html.knipfull .cutmodal.cm-fullcut.cm-gegevens .cm-prev{pointer-events:none;}
+/* Zelfde hint-pil als bij het knippen, zodat de bovenkant van het scherm dezelfde taal spreekt:
+   daar staat wat je moet doen, hier ook. Buiten deze fase blijft hij verborgen via [hidden]. */
+html.knipfull .cutmodal.cm-fullcut.cm-gegevens #cmGegevensHint{display:block;position:absolute;
+  top:calc(16px + env(safe-area-inset-top,0px));left:50%;transform:translateX(-50%);z-index:7;
+  pointer-events:none;max-width:calc(100% - 128px);text-align:center;margin:0;padding:9px 14px;
+  border-radius:999px;border:1px solid var(--rand);font-size:var(--fs-sm);color:var(--tekst);
+  background:var(--kaart);background:color-mix(in srgb, var(--kaart) 90%, transparent);
+  -webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);box-shadow:0 8px 22px rgba(0,0,0,.22);}
 /* de bewerkknop neemt de plek van de checkmark over */
 html.knipfull .cutmodal.cm-fullcut.cm-gegevens .cm-bewerkbtn{display:inline-flex;align-items:center;justify-content:center;
   position:absolute;z-index:8;top:calc(10px + env(safe-area-inset-top,0px));right:calc(10px + env(safe-area-inset-right,0px));
@@ -1362,7 +1370,8 @@ html.knipfull .cutmodal.cm-fullcut.cm-gegevens .cm-veldenkaart{box-shadow:0 -2px
 @media (prefers-reduced-motion:no-preference){
   html.knipfull .cutmodal.cm-fullcut.cm-gegevens.cm-inkomend .cm-veldenkaart,
   html.knipfull .cutmodal.cm-fullcut.cm-gegevens.cm-inkomend .cm-foot{animation:cmKaartOmhoog .28s cubic-bezier(.22,.61,.36,1);}
-  html.knipfull .cutmodal.cm-fullcut.cm-gegevens.cm-inkomend .cm-bewerkbtn{animation:cmVeldenIn .2s ease .1s;}
+  html.knipfull .cutmodal.cm-fullcut.cm-gegevens.cm-inkomend .cm-bewerkbtn,
+  html.knipfull .cutmodal.cm-fullcut.cm-gegevens.cm-inkomend #cmGegevensHint{animation:cmVeldenIn .2s ease .1s;}
 }
 /* 'Andere foto' is een zeldzame actie die alleen bij bewerken bestaat. Als omlijnde pil midden
    op een eigen regel trok hij evenveel aandacht als 'Meer details' en brak hij het links-rechts
@@ -1405,10 +1414,11 @@ html.knipfull .cutmodal.cm-review .cm-bewerkbtn .ik{width:22px;height:22px;}
 html.knipfull .cutmodal.cm-review .cm-bewerkbtn span{position:absolute;width:1px;height:1px;padding:0;margin:-1px;
   overflow:hidden;clip-path:inset(50%);white-space:nowrap;border:0;}
 .cutmodal .cm-bewerk-badge{display:none;}
-html.knipfull .cutmodal.cm-fullcut .cm-bewerk-badge{display:block;position:absolute;z-index:8;
-  top:calc(62px + env(safe-area-inset-top,0px));left:calc(10px + env(safe-area-inset-left,0px));padding:5px 11px;border-radius:999px;
-  font-size:var(--fs-xs);font-weight:700;letter-spacing:.02em;color:var(--op-accent);background:var(--accent);
-  box-shadow:0 4px 14px rgba(var(--accent-rgb),.35);}
+/* De 'Bewerken'-badge is helemaal weg (Bram, 2026-09-02). Hij stond linksboven onder het
+   kruisje en vertelde niets wat je niet al zag: in de gegevens-fase zegt de knop al
+   Opslaan in plaats van Toevoegen. Element en JS-toggle blijven staan voor het geval we
+   ooit weer een status-aanduiding willen; de basisregel .cm-bewerk-badge{display:none}
+   houdt hem verborgen. */
 .cutmodal .cut-tools .linkbtn.on{background:var(--accent);border-color:var(--accent);color:var(--op-accent);}
 .cutmodal .cut-tools .cm-toolstoggle{gap:5px;}
 .cutmodal .cut-tools .cm-toolstoggle .tt-lbl{display:inline;font-size:.82rem;font-weight:600;line-height:1;}
@@ -1864,6 +1874,7 @@ form label{text-transform:none;letter-spacing:.005em;font-size:.8rem;color:var(-
           <input type="file" id="imgInputCamera" accept="image/*" capture="environment" style="display:none">
           <div id="cmSettings" hidden>
             <span class="hintline" id="cmHint" style="display:block;margin:0 0 6px">Teken met je vinger een lijn rond de tattoo.</span>
+            <span class="hintline" id="cmGegevensHint" data-i18n="ui.gegevens_hint" hidden>Geef je tattoo een naam. De rest kan later.</span>
             <div class="silhouet-keuze compact cm-modus" id="cmWandModus" hidden role="group" data-i18n-aria="ui.wand_wat" aria-label="Toverstaf: wat tik je" style="margin:0 0 8px">
               <button type="button" data-wandkeep="0" data-i18n="ui.wand_weg">Achtergrond weg</button>
               <button type="button" data-wandkeep="1" data-i18n="ui.wand_houden">Tattoo houden</button>
@@ -7188,7 +7199,7 @@ const I18N = {
     'ui.kies_eerst_foto':'Kies eerst een foto en knip de tattoo uit','ui.tattoo_geplaatst':'Tattoo geplaatst ✓',
     'ui.tattoo_bijgewerkt':'Tattoo bijgewerkt ✓','ui.plaatsen_mislukt':'Plaatsen mislukt','ui.fout':'fout',
     'ui.hersteld':'{n} tattoo{s} hersteld','ui.verwijder_bevestig':'Weet je zeker dat je deze tattoo wilt verwijderen?',
-    'ui.toevoegen':'Toevoegen','ui.volgende':'Volgende','ui.geen_uitsnede_hint':'Nog niets geknipt - de hele foto wordt gebruikt','ui.klik_plaatsen':'Tik op het model waar je de tattoo wilt','ui.zonder3d_formulier':'Geen 3D op dit toestel - je kunt de tattoo wel als gegevens opslaan','ui.naam_verplicht':'Geef de tattoo eerst een naam','ui.meer_details':'Meer details','ui.naam':'Naam tattoo','ui.naam_ph':'Naam tattoo *',
+    'ui.toevoegen':'Toevoegen','ui.volgende':'Volgende','ui.gegevens_hint':'Geef je tattoo een naam. De rest kan later.','ui.geen_uitsnede_hint':'Nog niets geknipt - de hele foto wordt gebruikt','ui.klik_plaatsen':'Tik op het model waar je de tattoo wilt','ui.zonder3d_formulier':'Geen 3D op dit toestel - je kunt de tattoo wel als gegevens opslaan','ui.naam_verplicht':'Geef de tattoo eerst een naam','ui.meer_details':'Meer details','ui.naam':'Naam tattoo','ui.naam_ph':'Naam tattoo *',
     'ui.stage_aria':'3D-lichaamsmodel; gebruik de 2D-knop bovenaan voor de toegankelijke platte kaart','ui.stage_aria_solo':'3D-lichaamsmodel',
     'ui.lege_cta':'Nog geen tattoos - tik op + om er een toe te voegen',
     'ui.details':'Details',
@@ -7377,7 +7388,7 @@ const I18N = {
     'ui.kies_eerst_foto':'Pick a photo first and cut out the tattoo','ui.tattoo_geplaatst':'Tattoo placed ✓',
     'ui.tattoo_bijgewerkt':'Tattoo updated ✓','ui.plaatsen_mislukt':'Placing failed','ui.fout':'error',
     'ui.hersteld':'{n} tattoo{s} restored','ui.verwijder_bevestig':'Are you sure you want to delete this tattoo?',
-    'ui.toevoegen':'Add','ui.volgende':'Next','ui.geen_uitsnede_hint':'Nothing cut out yet - the whole photo will be used','ui.klik_plaatsen':'Tap the model where you want the tattoo','ui.zonder3d_formulier':'No 3D on this device - you can still save the tattoo as details','ui.naam_verplicht':'Give the tattoo a name first','ui.meer_details':'More details','ui.naam':'Tattoo name','ui.naam_ph':'Tattoo name *',
+    'ui.toevoegen':'Add','ui.volgende':'Next','ui.gegevens_hint':'Give your tattoo a name. The rest can wait.','ui.geen_uitsnede_hint':'Nothing cut out yet - the whole photo will be used','ui.klik_plaatsen':'Tap the model where you want the tattoo','ui.zonder3d_formulier':'No 3D on this device - you can still save the tattoo as details','ui.naam_verplicht':'Give the tattoo a name first','ui.meer_details':'More details','ui.naam':'Tattoo name','ui.naam_ph':'Tattoo name *',
     'ui.stage_aria':'3D body model; use the 2D button at the top for the accessible flat map','ui.stage_aria_solo':'3D body model',
     'ui.lege_cta':'No tattoos yet - tap + to add one',
     'ui.details':'Details',
@@ -7642,7 +7653,7 @@ function createTattoo(overrides = {}) {
    ============================================================ */
 // App-versie (semver, handmatig ophogen bij een release). Bij een bump ook de
 // CACHE-naam in sw.js meebumpen, zodat clients de nieuwe build ophalen.
-const APP_VERSIE = '0.3.21';
+const APP_VERSIE = '0.3.22';
 
 /* Dev-haken die de CLOUD raken hangen alleen op een ontwikkelmachine aan window. Ze zijn geen
    lek op zichzelf (zonder XSS roept niemand ze aan, en CSP + esc() houden XSS tegen), maar ze
@@ -15388,8 +15399,15 @@ async function verwijderVoorbeelden() {
   /* De gegevens-fase aanzetten. De foto blijft staan zoals hij staat; we hertekenen alleen even
      zodat de gedimde omgeving wegvalt. De hoogte van de knoppenbalk gaat als variabele mee, zodat
      de veldenkaart er precies bovenop landt (die hoogte verschilt per taal en tekstgrootte). */
+  /* De app heeft een globale [hidden]{display:none!important}, dus een element tonen doe je hier
+     via het attribuut en niet via CSS. Daarom zit het aan- en uitzetten van de fase en van de
+     hint in een handeling: anders blijft de hint een keer hangen. */
+  function zetGegevensFase(aan){
+    cutModal.classList.toggle('cm-gegevens', !!aan);
+    const gh=document.getElementById('cmGegevensHint'); if(gh) gh.hidden=!aan;
+  }
   function toonGegevens(){
-    cutModal.classList.add('cm-gegevens');
+    zetGegevensFase(true);
     const voet = cutModal.querySelector('.cm-foot');
     if(voet){ const h = Math.round(voet.getBoundingClientRect().height); if(h) cutModal.style.setProperty('--voet-h', h+'px'); }
     if(origImg){ drawCutPreview(); drawLasso(); }
@@ -15449,7 +15467,7 @@ async function verwijderVoorbeelden() {
   // Toon de uitsnede-instellingen (preview, sliders, achtergrond) pas na een foto
   function toonCutInstellingen(b){
     const s=document.getElementById("cmSettings"); if(s) s.hidden=!b;
-    if(!b) cutModal.classList.remove("cm-review","cm-gegevens");   // fotokeuze/sluiten: nooit in review- of gegevens-stand
+    if(!b){ cutModal.classList.remove("cm-review"); zetGegevensFase(false); }   // fotokeuze/sluiten: nooit in review- of gegevens-stand
     { const bb=document.getElementById("cmBewerkBadge"); if(bb) bb.hidden=!(b && (pendingEdit||pendingEdit2D)); }   // 'Bewerken'-badge: alleen in de knipfase van een bewerk-flow
     zetFullcut(b);   // foto in beeld = schermvullend knippen (vlag-afhankelijk); 'Volgende' onthult naam/details
     if(b){ const adv=document.getElementById("cmAdvTools"), tt=document.getElementById("cmToolsToggle");
@@ -15554,7 +15572,7 @@ async function verwijderVoorbeelden() {
     } finally { annuleerBezig=false; }
   }
   function closeCutModal(){ cutHistoryOpruimen();
-    resetSnapshot=null; laatsteActie=null; cutModal.classList.remove("on","cm-gegevens","cm-inkomend","cm-naarreview"); pendingPlace=null; pendingEdit=null; pendingPlace2D=null; pendingNew=null; pendingEdit2D=null; toonCutInstellingen(false); toonInfo(false);
+    resetSnapshot=null; laatsteActie=null; cutModal.classList.remove("on","cm-inkomend","cm-naarreview"); zetGegevensFase(false); pendingPlace=null; pendingEdit=null; pendingPlace2D=null; pendingNew=null; pendingEdit2D=null; toonCutInstellingen(false); toonInfo(false);
     plaatsHerhaal=false; window.__tattiesHerhaalSrc=null; herhaalTeller=1; vorigeLassos=[]; addDoel='3d';   // D6(a): herhaal-state opruimen + doel terug naar default (geen stale vlag/lasso/doel)
     if(imgTexture && imgTexture.dispose){ imgTexture.dispose(); } imgTexture=null;   // niet-geplaatste textuur vrijgeven (geen lek)
     cutPointers.clear(); pinch=null; drawingFree=false; gumStroke=null; lassoDragIdx=-1; clearTimeout(wheelEind);
@@ -15870,7 +15888,7 @@ async function verwijderVoorbeelden() {
         naarReview();
       }; }   // fase 2: knippen klaar -> review-scherm met naam/details
     { const bb=document.getElementById("cmBewerkBtn"); if(bb) bb.onclick=()=>{   // gegevens -> terug naar knippen
-        cutModal.classList.remove('cm-gegevens');
+        zetGegevensFase(false);
         zetFullcut(true);   // no-op in de nieuwe flow (we staan al in de knipfase); nodig voor de terugval
         if(origImg){ drawCutPreview(); drawLasso(); }   // alleen hertekenen: de uitsnede verandert niet
       }; }
