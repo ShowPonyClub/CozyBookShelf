@@ -1241,6 +1241,12 @@ html.knipfull .cutmodal.cm-fullcut .cm-tab{flex:1 1 0;max-width:220px;min-height
   color:var(--gedempt);font-family:inherit;font-size:var(--fs-xs);font-weight:700;cursor:pointer;}
 html.knipfull .cutmodal.cm-fullcut .cm-tab .ik{width:22px;height:22px;}
 html.knipfull .cutmodal.cm-fullcut .cm-tab.actief{background:var(--accent-vlak);color:var(--op-accent);}
+/* Liggend scherm: icoon en label naast elkaar, zodat de balk 48 in plaats van 65 pixels kost.
+   Daar telt elke regel - de foto heeft dan al de zwevende gereedschapsbalk over zich heen. */
+@media (max-height:480px){
+  html.knipfull .cutmodal.cm-fullcut .cm-tabs{padding:4px 8px calc(4px + env(safe-area-inset-bottom,0px));}
+  html.knipfull .cutmodal.cm-fullcut .cm-tab{flex-direction:row;gap:8px;min-height:40px;}
+}
 /* De chevron in de strook is met de tabbalk dubbelop; het potlood blijft voor de reviewfase. */
 html.knipfull .cutmodal.cm-fullcut.cm-gegevens .cm-bewerkbtn{display:none!important;}
 /* 'Volgende' = ronde checkmark rechtsboven (iOS-fotokiezer-patroon); buiten deze fase onzichtbaar */
@@ -1386,15 +1392,18 @@ html.knipfull .cutmodal.cm-fullcut.cm-gegevens .lassocv{inset:auto;top:0;left:0;
   width:var(--prev-w,100%);height:var(--prev-h,100%);transform-origin:0 0;
   transform:translate(var(--prev-tx,0px),var(--prev-ty,0px)) scale(var(--prev-s,1));}
 /* de velden zijn de enige scrollende laag van dit scherm */
+/* De zwevende kaart had een max-width van 560px; in de flow moet die begrenzing terugkomen,
+   anders rekken de velden op een tablet of desktop over de volle schermbreedte uit. Padding in
+   plaats van een breedte, zodat de scroller zelf schermbreed blijft. */
 html.knipfull .cutmodal.cm-fullcut.cm-gegevens .cm-veldenkaart{display:flex;flex-direction:column;gap:10px;
   flex:1 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;
-  padding:12px 14px;background:var(--bg);}
+  padding:12px max(14px, calc((100% - 560px)/2));background:var(--bg);}
 html.knipfull .cutmodal.cm-fullcut.cm-gegevens .cm-veldenkaart #cmNaam{display:block;width:auto;margin:0;}
 html.knipfull .cutmodal.cm-fullcut.cm-gegevens .cm-veldenkaart #cmInfo,
 html.knipfull .cutmodal.cm-fullcut.cm-gegevens .cm-veldenkaart .cm-choose-rij{margin:0;}
 /* knoppenbalk: vast onderaan, buiten de scroll, met ruimte voor de home-indicator */
 html.knipfull .cutmodal.cm-fullcut.cm-gegevens .cm-foot{display:flex;flex:0 0 auto;
-  padding-bottom:calc(12px + env(safe-area-inset-bottom,0px));}
+  padding:12px max(16px, calc((100% - 560px)/2)) calc(12px + env(safe-area-inset-bottom,0px));}
 /* De krimp zit op het canvas (transform = compositor-werk) en op de hoogte van de strook. De
    velden komen van onderen mee omhoog, zoals ze dat als zwevende kaart ook deden. */
 @media (prefers-reduced-motion:no-preference){
@@ -7694,7 +7703,7 @@ function createTattoo(overrides = {}) {
    ============================================================ */
 // App-versie (semver, handmatig ophogen bij een release). Bij een bump ook de
 // CACHE-naam in sw.js meebumpen, zodat clients de nieuwe build ophalen.
-const APP_VERSIE = '0.3.25';
+const APP_VERSIE = '0.3.26';
 
 /* Dev-haken die de CLOUD raken hangen alleen op een ontwikkelmachine aan window. Ze zijn geen
    lek op zichzelf (zonder XSS roept niemand ze aan, en CSP + esc() houden XSS tegen), maar ze
@@ -15449,7 +15458,12 @@ async function verwijderVoorbeelden() {
   /* De app heeft een globale [hidden]{display:none!important}, dus een element tonen doe je hier
      via het attribuut en niet via CSS. Daarom zit het aan- en uitzetten van de fase en van de
      hint in een handeling: anders blijft de hint een keer hangen. */
+  // Elke fasewissel trekt een nieuw nummer. Een overgang die nog in zijn wachttijd zit en
+  // terugkomt met een oud nummer, weet dat hij is ingehaald en doet niets meer. Zonder dit
+  // kwam je na 'Gegevens' + meteen 'Uitknippen' alsnog in de gegevens-stand terecht.
+  let faseTicket=0;
   function zetGegevensFase(aan){
+    faseTicket++;
     cutModal.classList.toggle('cm-gegevens', !!aan);
     const gh=document.getElementById('cmGegevensHint'); if(gh) gh.hidden=!aan;
     { const tk=document.getElementById('cmTabKnip'), ti=document.getElementById('cmTabInfo');
@@ -15477,7 +15491,10 @@ async function verwijderVoorbeelden() {
     // Bovengrens ruim (0.8): de velden nemen precies wat ze nodig hebben en de foto slokt de
     // rest op. Met een krappere grens (0.55 was het eerst) bleef het verschil als een leeg vlak
     // tussen de laatste veldregel en de knoppenbalk staan.
-    const H=Math.max(150,Math.min(Math.round(hostH*0.8), hostH-wens)), W=prevBevroren.w;
+    // Het minimum schaalt mee: op een liggend scherm is 150px al een derde van de kolom en
+    // hield de strook ruimte weg bij de velden die daar toch al krap zitten.
+    const minH=Math.min(150, Math.max(90, Math.round(hostH*0.3)));
+    const H=Math.max(minH,Math.min(Math.round(hostH*0.8), hostH-wens)), W=prevBevroren.w;
     const bd=beeldDims(), r=viewRect(W,prevBevroren.h,bd.w,bd.h);
     let x0=r.left,y0=r.top,x1=r.left+r.w,y1=r.top+r.h;
     if(lassoPts.length>=3){
@@ -15536,9 +15553,11 @@ async function verwijderVoorbeelden() {
     if(!document.documentElement.classList.contains('knipfull')){ zetFullcut(false); return; }   // terugval-layout
     if(stil){ toonGegevens(); return; }
     naarReviewBezig=true;
+    const mijnTicket=faseTicket;
     cutModal.classList.add('cm-naarreview');
     setTimeout(()=>{
       cutModal.classList.remove('cm-naarreview');
+      if(mijnTicket!==faseTicket){ naarReviewBezig=false; return; }   // ingehaald door een andere tik
       toonGegevens();
       // Pas STARTEN als dat werk klaar is. Deden we het in hetzelfde frame, dan viel het begin
       // van de animatie samen met het hertekenen en zag je de eerste frames overslaan - dat is
@@ -16010,7 +16029,11 @@ async function verwijderVoorbeelden() {
     // Tabbalk: dezelfde twee overgangen als de checkmark en de oude chevron, nu als vaste keuze.
     // Terug naar knippen hertekent alleen; de uitsnede zelf blijft onaangeraakt.
     { const tk=document.getElementById("cmTabKnip"); if(tk) tk.onclick=()=>{
-        if(!cutModal.classList.contains('cm-gegevens')) return;
+        // Ook tijdens de overgang (cm-naarreview) moet deze tik gelden: anders gaat de wissel
+        // die al onderweg is gewoon door en beland je alsnog bij de gegevens.
+        const onderweg=cutModal.classList.contains('cm-naarreview');
+        if(!cutModal.classList.contains('cm-gegevens') && !onderweg) return;
+        cutModal.classList.remove('cm-naarreview');
         zetGegevensFase(false); zetFullcut(true);
         if(origImg){ drawCutPreview(); drawLasso(); }
       }; }
