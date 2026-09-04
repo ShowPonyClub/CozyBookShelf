@@ -1296,6 +1296,22 @@ html.knipfull .cutmodal.cm-review .cm-foot{background:var(--bg);}
   html.knipfull .cutmodal.cm-review .cm-foot{animation:cmVeldenIn .26s ease .1s both;}
 }
 @keyframes cmVeldenIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+/* ---- Overgang knippen -> gegevens (2026-09-02) ----
+   Op de checkmark verdwijnt eerst de gereedschapsbalk (die is het teken dat het knippen klaar
+   is), daarna stijgt de uitsnede naar zijn plek en schuiven de velden omhoog in de ruimte die
+   de balk achterlaat. Gemeten op 430x932: de balk stond op y=741..922, de velden landen op
+   765..867 - ze komen dus letterlijk omhoog tot waar de balk stond.
+   De beweging zit op het CANVAS, niet op het vak eromheen: een transform is compositor-werk,
+   terwijl het vak animeren per frame een canvas-herbouw zou vragen. De bewerkknop rechtsboven
+   valt buiten die transform, zodat hij blijft staan waar de checkmark stond. */
+html.knipfull .cutmodal.cm-fullcut.cm-naarreview .cut-tools,
+html.knipfull .cutmodal.cm-fullcut.cm-naarreview #cmHint{animation:cmToolsUit .13s ease both;}
+@keyframes cmToolsUit{to{opacity:0;transform:translateY(18px)}}
+@media (prefers-reduced-motion:no-preference){
+  html.knipfull .cutmodal.cm-review .cutcv{animation:cmUitsnedeOmhoog .24s cubic-bezier(.22,.61,.36,1) both;}
+  html.knipfull .cutmodal.cm-review .cm-bewerkbtn{animation:cmVeldenIn .2s ease .06s both;}
+}
+@keyframes cmUitsnedeOmhoog{from{opacity:.45;transform:translateY(28px)}to{opacity:1;transform:none}}
 /* Bovenbalk gelijk aan de knipfase: links het ronde kruisje, rechts een even grote ronde knop
    op dezelfde plek als de checkmark daar. Voorheen was dit een brede cremekleurige pil met
    tekst, terwijl er in de knipfase een paarse cirkel stond - dat was het zichtbaarste verschil
@@ -7545,7 +7561,7 @@ function createTattoo(overrides = {}) {
    ============================================================ */
 // App-versie (semver, handmatig ophogen bij een release). Bij een bump ook de
 // CACHE-naam in sw.js meebumpen, zodat clients de nieuwe build ophalen.
-const APP_VERSIE = '0.3.15';
+const APP_VERSIE = '0.3.16';
 
 /* Dev-haken die de CLOUD raken hangen alleen op een ontwikkelmachine aan window. Ze zijn geen
    lek op zichzelf (zonder XSS roept niemand ze aan, en CSP + esc() houden XSS tegen), maar ze
@@ -15284,6 +15300,23 @@ async function verwijderVoorbeelden() {
   }
 
   // FASE-2: schermvullende knip-fase aan/uit (class op de modal).
+  /* Checkmark: eerst de gereedschapsbalk laten vertrekken, dan pas van fase wisselen. Die korte
+     pauze is wat de overgang leesbaar maakt - de balk verdwijnt, en in de ruimte die vrijkomt
+     schuiven de velden omhoog. Zonder pauze gebeurt alles op hetzelfde frame en zie je een
+     sprong. Bij 'beweging beperken' slaan we de pauze over en schakelen we meteen. */
+  let naarReviewBezig=false;
+  function naarReview(){
+    if(naarReviewBezig) return;
+    const stil = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if(stil || !document.documentElement.classList.contains('knipfull')){ zetFullcut(false); return; }
+    naarReviewBezig=true;
+    cutModal.classList.add('cm-naarreview');
+    setTimeout(()=>{
+      cutModal.classList.remove('cm-naarreview');
+      naarReviewBezig=false;
+      zetFullcut(false);
+    }, 130);
+  }
   function zetFullcut(aan){
     const wil = aan && document.documentElement.classList.contains('knipfull');
     if(cutModal.classList.contains('cm-fullcut')===wil) return;
@@ -15726,7 +15759,7 @@ async function verwijderVoorbeelden() {
     { const vb=document.getElementById("cmVolgende"); if(vb) vb.onclick=()=>{
         // Niets geknipt (geen lasso/toverstaf/gum) -> hele foto wordt de decal: even melden, niet blokkeren
         if(!(lassoPts.length>=3 || wandSeeds.length || eraseStrokes.length || aiMask)) toast(tr('ui.geen_uitsnede_hint'));
-        zetFullcut(false);
+        naarReview();
       }; }   // fase 2: knippen klaar -> review-scherm met naam/details
     { const bb=document.getElementById("cmBewerkBtn"); if(bb) bb.onclick=()=>{   // review -> terug naar de fullscreen-editor
         zetFullcut(true); if(origImg){ rebuildBase(); updateCutout(); drawLasso(); }
