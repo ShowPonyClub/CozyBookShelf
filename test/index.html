@@ -1228,6 +1228,21 @@ html.knipfull .cutmodal.cm-fullcut:not(.cm-gegevens) #cmNaam,
 html.knipfull .cutmodal.cm-fullcut:not(.cm-gegevens) #cmInfo,
 html.knipfull .cutmodal.cm-fullcut:not(.cm-gegevens) .cm-choose-rij,
 html.knipfull .cutmodal.cm-fullcut:not(.cm-gegevens) .cm-foot{display:none!important;}
+/* ---- Tabbalk onderin: 'Uitknippen' en 'Gegevens' (2026-09-04, idee Bram: het Reddit-model) ----
+   De twee standen bestonden al, maar de schakelaar was een chevron die je moest ontdekken. Als
+   balk onderaan is zichtbaar DAT er twee standen zijn en in welke je staat. Hij staat in de flow
+   (laatste kind van de kaart), zodat de gereedschapsbalk - die absoluut in #cmSettings zweeft -
+   er vanzelf bovenop blijft in plaats van eronder te verdwijnen. */
+.cutmodal .cm-tabs{display:none;}
+html.knipfull .cutmodal.cm-fullcut .cm-tabs{display:flex;flex:0 0 auto;justify-content:center;gap:6px;
+  padding:6px 8px calc(6px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--rand);background:var(--kaart);}
+html.knipfull .cutmodal.cm-fullcut .cm-tab{flex:1 1 0;max-width:220px;min-height:52px;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:3px;padding:4px 10px;border:0;border-radius:999px;background:transparent;
+  color:var(--gedempt);font-family:inherit;font-size:var(--fs-xs);font-weight:700;cursor:pointer;}
+html.knipfull .cutmodal.cm-fullcut .cm-tab .ik{width:22px;height:22px;}
+html.knipfull .cutmodal.cm-fullcut .cm-tab.actief{background:var(--accent-vlak);color:var(--op-accent);}
+/* De chevron in de strook is met de tabbalk dubbelop; het potlood blijft voor de reviewfase. */
+html.knipfull .cutmodal.cm-fullcut.cm-gegevens .cm-bewerkbtn{display:none!important;}
 /* 'Volgende' = ronde checkmark rechtsboven (iOS-fotokiezer-patroon); buiten deze fase onzichtbaar */
 .cutmodal .cm-volgende{display:none;}
 html.knipfull .cutmodal.cm-fullcut .cm-volgende{display:flex;position:absolute;top:calc(10px + env(safe-area-inset-top,0px));right:calc(10px + env(safe-area-inset-right,0px));z-index:8;
@@ -2001,6 +2016,10 @@ form label{text-transform:none;letter-spacing:.005em;font-size:.8rem;color:var(-
             <div id="cmMeerTip" class="cm-meer-tip" hidden role="status" data-i18n="ui.nog_een_uitleg">Plaats deze en knip daarna nog een tattoo uit dezelfde foto</div>
           </div>
           <button id="cmPlace" class="btn cm-place" data-i18n="ui.plaatsen">Plaatsen</button>
+        </div>
+        <div class="cm-tabs" role="group" data-i18n-aria="ui.tabs_aria" aria-label="Stap">
+          <button type="button" id="cmTabKnip" class="cm-tab actief" aria-pressed="true"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><circle cx="6" cy="6" r="2.6"/><circle cx="6" cy="18" r="2.6"/><path d="M8.1 7.4L20 18"/><path d="M8.1 16.6L20 6"/></svg><span data-i18n="ui.tab_knippen">Uitknippen</span></button>
+          <button type="button" id="cmTabInfo" class="cm-tab" aria-pressed="false"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 7h14"/><path d="M5 12h14"/><path d="M5 17h8"/></svg><span data-i18n="ui.tab_gegevens">Gegevens</span></button>
         </div>
         <button id="cmVolgende" class="cm-volgende" data-i18n-aria="ui.volgende" data-i18n-title="ui.volgende" aria-label="Volgende" title="Volgende"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12l5 5L20 6"/></svg><span class="cv-lbl" data-i18n="ui.volgende">Volgende</span></button>
       </div>
@@ -7221,7 +7240,7 @@ const I18N = {
     'ui.kies_eerst_foto':'Kies eerst een foto en knip de tattoo uit','ui.tattoo_geplaatst':'Tattoo geplaatst ✓',
     'ui.tattoo_bijgewerkt':'Tattoo bijgewerkt ✓','ui.plaatsen_mislukt':'Plaatsen mislukt','ui.fout':'fout',
     'ui.hersteld':'{n} tattoo{s} hersteld','ui.verwijder_bevestig':'Weet je zeker dat je deze tattoo wilt verwijderen?',
-    'ui.toevoegen':'Toevoegen','ui.volgende':'Volgende','ui.gegevens_hint':'Geef je tattoo een naam. De rest kan later.','ui.geen_uitsnede_hint':'Nog niets geknipt - de hele foto wordt gebruikt','ui.klik_plaatsen':'Tik op het model waar je de tattoo wilt','ui.zonder3d_formulier':'Geen 3D op dit toestel - je kunt de tattoo wel als gegevens opslaan','ui.naam_verplicht':'Geef de tattoo eerst een naam','ui.meer_details':'Meer details','ui.naam':'Naam tattoo','ui.naam_ph':'Naam tattoo *',
+    'ui.toevoegen':'Toevoegen','ui.volgende':'Volgende','ui.tab_knippen':'Uitknippen','ui.tab_gegevens':'Gegevens','ui.tabs_aria':'Stap','ui.gegevens_hint':'Geef je tattoo een naam. De rest kan later.','ui.geen_uitsnede_hint':'Nog niets geknipt - de hele foto wordt gebruikt','ui.klik_plaatsen':'Tik op het model waar je de tattoo wilt','ui.zonder3d_formulier':'Geen 3D op dit toestel - je kunt de tattoo wel als gegevens opslaan','ui.naam_verplicht':'Geef de tattoo eerst een naam','ui.meer_details':'Meer details','ui.naam':'Naam tattoo','ui.naam_ph':'Naam tattoo *',
     'ui.stage_aria':'3D-lichaamsmodel; gebruik de 2D-knop bovenaan voor de toegankelijke platte kaart','ui.stage_aria_solo':'3D-lichaamsmodel',
     'ui.lege_cta':'Nog geen tattoos - tik op + om er een toe te voegen',
     'ui.details':'Details',
@@ -7410,7 +7429,7 @@ const I18N = {
     'ui.kies_eerst_foto':'Pick a photo first and cut out the tattoo','ui.tattoo_geplaatst':'Tattoo placed ✓',
     'ui.tattoo_bijgewerkt':'Tattoo updated ✓','ui.plaatsen_mislukt':'Placing failed','ui.fout':'error',
     'ui.hersteld':'{n} tattoo{s} restored','ui.verwijder_bevestig':'Are you sure you want to delete this tattoo?',
-    'ui.toevoegen':'Add','ui.volgende':'Next','ui.gegevens_hint':'Give your tattoo a name. The rest can wait.','ui.geen_uitsnede_hint':'Nothing cut out yet - the whole photo will be used','ui.klik_plaatsen':'Tap the model where you want the tattoo','ui.zonder3d_formulier':'No 3D on this device - you can still save the tattoo as details','ui.naam_verplicht':'Give the tattoo a name first','ui.meer_details':'More details','ui.naam':'Tattoo name','ui.naam_ph':'Tattoo name *',
+    'ui.toevoegen':'Add','ui.volgende':'Next','ui.tab_knippen':'Cut out','ui.tab_gegevens':'Details','ui.tabs_aria':'Step','ui.gegevens_hint':'Give your tattoo a name. The rest can wait.','ui.geen_uitsnede_hint':'Nothing cut out yet - the whole photo will be used','ui.klik_plaatsen':'Tap the model where you want the tattoo','ui.zonder3d_formulier':'No 3D on this device - you can still save the tattoo as details','ui.naam_verplicht':'Give the tattoo a name first','ui.meer_details':'More details','ui.naam':'Tattoo name','ui.naam_ph':'Tattoo name *',
     'ui.stage_aria':'3D body model; use the 2D button at the top for the accessible flat map','ui.stage_aria_solo':'3D body model',
     'ui.lege_cta':'No tattoos yet - tap + to add one',
     'ui.details':'Details',
@@ -7675,7 +7694,7 @@ function createTattoo(overrides = {}) {
    ============================================================ */
 // App-versie (semver, handmatig ophogen bij een release). Bij een bump ook de
 // CACHE-naam in sw.js meebumpen, zodat clients de nieuwe build ophalen.
-const APP_VERSIE = '0.3.24';
+const APP_VERSIE = '0.3.25';
 
 /* Dev-haken die de CLOUD raken hangen alleen op een ontwikkelmachine aan window. Ze zijn geen
    lek op zichzelf (zonder XSS roept niemand ze aan, en CSP + esc() houden XSS tegen), maar ze
@@ -15433,6 +15452,9 @@ async function verwijderVoorbeelden() {
   function zetGegevensFase(aan){
     cutModal.classList.toggle('cm-gegevens', !!aan);
     const gh=document.getElementById('cmGegevensHint'); if(gh) gh.hidden=!aan;
+    { const tk=document.getElementById('cmTabKnip'), ti=document.getElementById('cmTabInfo');
+      if(tk){ tk.classList.toggle('actief', !aan); tk.setAttribute('aria-pressed', aan?'false':'true'); }
+      if(ti){ ti.classList.toggle('actief', !!aan); ti.setAttribute('aria-pressed', aan?'true':'false'); } }
     if(!aan){   // terug naar knippen: vak en canvas weer 1:1, dus alle strook-vars weg
       prevBevroren=null; cutModal.classList.remove('cm-strook-krap');
       ['--strook-h','--prev-w','--prev-h','--prev-s','--prev-tx','--prev-ty'].forEach(v=>cutModal.style.removeProperty(v));
@@ -15452,7 +15474,10 @@ async function verwijderVoorbeelden() {
     // velden. Zonder dit stond er onder een half ingevuld formulier een scherm vol lege ruimte.
     const kaart=cutModal.querySelector('.cm-veldenkaart');
     const wens=(kaart&&kaart.scrollHeight)||0;
-    const H=Math.max(150,Math.min(Math.round(hostH*0.55), hostH-wens)), W=prevBevroren.w;
+    // Bovengrens ruim (0.8): de velden nemen precies wat ze nodig hebben en de foto slokt de
+    // rest op. Met een krappere grens (0.55 was het eerst) bleef het verschil als een leeg vlak
+    // tussen de laatste veldregel en de knoppenbalk staan.
+    const H=Math.max(150,Math.min(Math.round(hostH*0.8), hostH-wens)), W=prevBevroren.w;
     const bd=beeldDims(), r=viewRect(W,prevBevroren.h,bd.w,bd.h);
     let x0=r.left,y0=r.top,x1=r.left+r.w,y1=r.top+r.h;
     if(lassoPts.length>=3){
@@ -15467,9 +15492,8 @@ async function verwijderVoorbeelden() {
     // hint helpt bij het begin, maar wie de details openklapt is allang bezig - en met de pil
     // erboven bleef er van de foto een postzegel over.
     const krap=H<210; cutModal.classList.toggle('cm-strook-krap', krap);
-    // Links en rechts even breed, anders staat de uitsnede zichtbaar uit het midden. De
-    // uitklap-knop mag bij een brede foto over de rand vallen; hij heeft zijn eigen achtergrond.
-    const links=48, rechts=48, boven=krap?10:62, onder=10;   // boven: ruimte voor de hint-pil en de x
+    // Links en rechts even breed, anders staat de uitsnede zichtbaar uit het midden.
+    const links=16, rechts=16, boven=krap?10:62, onder=10;   // boven: ruimte voor de hint-pil en de x
     const vw=Math.max(40,W-links-rechts), vh=Math.max(40,H-boven-onder);
     const sc=Math.min(vw/bw, vh/bh, 1);
     const tx=links+(vw-bw*sc)/2-x0*sc, ty=boven+(vh-bh*sc)/2-y0*sc;
@@ -15983,6 +16007,17 @@ async function verwijderVoorbeelden() {
         if(!(lassoPts.length>=3 || wandSeeds.length || eraseStrokes.length || aiMask)) toast(tr('ui.geen_uitsnede_hint'));
         naarReview();
       }; }   // fase 2: knippen klaar -> review-scherm met naam/details
+    // Tabbalk: dezelfde twee overgangen als de checkmark en de oude chevron, nu als vaste keuze.
+    // Terug naar knippen hertekent alleen; de uitsnede zelf blijft onaangeraakt.
+    { const tk=document.getElementById("cmTabKnip"); if(tk) tk.onclick=()=>{
+        if(!cutModal.classList.contains('cm-gegevens')) return;
+        zetGegevensFase(false); zetFullcut(true);
+        if(origImg){ drawCutPreview(); drawLasso(); }
+      }; }
+    { const ti=document.getElementById("cmTabInfo"); if(ti) ti.onclick=()=>{
+        if(cutModal.classList.contains('cm-gegevens')) return;
+        naarReview();
+      }; }
     { const bb=document.getElementById("cmBewerkBtn"); if(bb) bb.onclick=()=>{   // gegevens -> terug naar knippen
         zetGegevensFase(false);
         zetFullcut(true);   // no-op in de nieuwe flow (we staan al in de knipfase); nodig voor de terugval
