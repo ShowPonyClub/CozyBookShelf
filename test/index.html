@@ -1291,9 +1291,8 @@ html.knipfull .cutmodal.cm-review .cm-foot{background:var(--bg);}
 /* De velden schuiven van onderen in, kort na elkaar, zodat je ziet dat ze BIJ de foto komen
    in plaats van dat er een ander scherm verschijnt. */
 @media (prefers-reduced-motion:no-preference){
-  html.knipfull .cutmodal.cm-review #cmNaam{animation:cmVeldenIn .26s ease both;}
-  html.knipfull .cutmodal.cm-review #cmInfo{animation:cmVeldenIn .26s ease .05s both;}
-  html.knipfull .cutmodal.cm-review .cm-foot{animation:cmVeldenIn .26s ease .1s both;}
+  html.knipfull .cutmodal.cm-review.cm-inkomend .cm-veldenkaart{animation:cmVeldenIn .26s ease;}
+  html.knipfull .cutmodal.cm-review.cm-inkomend .cm-foot{animation:cmVeldenIn .26s ease .06s;}
 }
 @keyframes cmVeldenIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
 /* ---- Overgang knippen -> gegevens (2026-09-02) ----
@@ -1308,10 +1307,22 @@ html.knipfull .cutmodal.cm-fullcut.cm-naarreview .cut-tools,
 html.knipfull .cutmodal.cm-fullcut.cm-naarreview #cmHint{animation:cmToolsUit .13s ease both;}
 @keyframes cmToolsUit{to{opacity:0;transform:translateY(18px)}}
 @media (prefers-reduced-motion:no-preference){
-  html.knipfull .cutmodal.cm-review .cutcv{animation:cmUitsnedeOmhoog .24s cubic-bezier(.22,.61,.36,1) both;}
-  html.knipfull .cutmodal.cm-review .cm-bewerkbtn{animation:cmVeldenIn .2s ease .06s both;}
+  html.knipfull .cutmodal.cm-review.cm-inkomend .cutcv{animation:cmUitsnedeOmhoog .24s cubic-bezier(.22,.61,.36,1);}
+  html.knipfull .cutmodal.cm-review.cm-inkomend .cm-bewerkbtn{animation:cmVeldenIn .2s ease .06s;}
 }
 @keyframes cmUitsnedeOmhoog{from{opacity:.45;transform:translateY(28px)}to{opacity:1;transform:none}}
+/* De velden krijgen dezelfde behandeling als de gereedschapsbalk in de knipfase: een crème
+   kaartje met rand, blur en schaduw, in plaats van losse velden op de kale achtergrond. Dat
+   was het laatste dat de twee fases uit elkaar trok. De wrapper staat standaard op
+   display:contents, dus in alle andere standen (compact, fullcut, de niet-fullscreen terugval)
+   verandert er niets aan de layout. */
+.cutmodal .cm-veldenkaart{display:contents;}
+html.knipfull .cutmodal.cm-review .cm-veldenkaart{display:flex;flex-direction:column;gap:10px;
+  margin:0 8px;padding:10px 11px;border:1px solid var(--rand);border-radius:var(--r-md);
+  background:var(--kaart);background:color-mix(in srgb, var(--kaart) 90%, transparent);
+  -webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);box-shadow:0 8px 22px rgba(0,0,0,.22);}
+html.knipfull .cutmodal.cm-review .cm-veldenkaart #cmNaam,
+html.knipfull .cutmodal.cm-review .cm-veldenkaart #cmInfo{margin-left:0;margin-right:0;}
 /* Bovenbalk gelijk aan de knipfase: links het ronde kruisje, rechts een even grote ronde knop
    op dezelfde plek als de checkmark daar. Voorheen was dit een brede cremekleurige pil met
    tekst, terwijl er in de knipfase een paarse cirkel stond - dat was het zichtbaarste verschil
@@ -1845,6 +1856,7 @@ form label{text-transform:none;letter-spacing:.005em;font-size:.8rem;color:var(-
             <!-- FLOW-1: record zonder foto -> het gewone formulier (naam + details), zonder plaatsing -->
             <button type="button" class="linkbtn cm-geenfoto" id="cmGeenFoto" data-i18n="ui.geen_foto_link">Geen foto? Alleen gegevens opslaan</button>
           </div>
+          <div class="cm-veldenkaart">
           <input id="cmNaam" class="cm-naam-top" type="text" maxlength="80" autocomplete="off" hidden data-i18n-ph="ui.naam_ph" data-i18n-aria="ui.naam" placeholder="Tattoo name *" aria-label="Tattoo name">
           <div id="cmInfo" hidden>
             <div id="cmHerhaalBadge" class="cm-herhaal-badge" hidden></div>
@@ -1878,6 +1890,7 @@ form label{text-transform:none;letter-spacing:.005em;font-size:.8rem;color:var(-
               <label class="cm-veld"><span data-i18n="form.notities">Notities</span><textarea id="cmNotities" maxlength="2000" rows="2"></textarea></label>
               <label class="cm-veld cm-accent-veld"><span class="cm-accent-tekst"><span data-i18n="form.accentkleur">Accentkleur van markering</span><small class="veld-hint" data-i18n="form.accentuitleg">Gebruikt als je geen tattoo-afbeelding toevoegt</small></span><input id="cmAccent" type="color" value="#8E71F0" style="width:52px;height:38px;padding:3px;border-radius:var(--r-md);cursor:pointer;flex:none"></label>
             </div>
+          </div>
           </div>
         </div>
         <div class="cm-foot">
@@ -7561,7 +7574,7 @@ function createTattoo(overrides = {}) {
    ============================================================ */
 // App-versie (semver, handmatig ophogen bij een release). Bij een bump ook de
 // CACHE-naam in sw.js meebumpen, zodat clients de nieuwe build ophalen.
-const APP_VERSIE = '0.3.16';
+const APP_VERSIE = '0.3.17';
 
 /* Dev-haken die de CLOUD raken hangen alleen op een ontwikkelmachine aan window. Ze zijn geen
    lek op zichzelf (zonder XSS roept niemand ze aan, en CSP + esc() houden XSS tegen), maar ze
@@ -15313,8 +15326,14 @@ async function verwijderVoorbeelden() {
     cutModal.classList.add('cm-naarreview');
     setTimeout(()=>{
       cutModal.classList.remove('cm-naarreview');
-      naarReviewBezig=false;
-      zetFullcut(false);
+      zetFullcut(false);   // zwaar: layoutwissel + canvas opnieuw tekenen
+      // Pas STARTEN als dat werk klaar is. Deden we het in hetzelfde frame, dan viel het begin
+      // van de animatie samen met het hertekenen en zag je de eerste frames overslaan - dat is
+      // het haperen. Twee frames wachten: eentje voor de layout, eentje voor de eerste paint.
+      requestAnimationFrame(()=>requestAnimationFrame(()=>{
+        cutModal.classList.add('cm-inkomend');
+        setTimeout(()=>{ cutModal.classList.remove('cm-inkomend'); naarReviewBezig=false; }, 340);
+      }));
     }, 130);
   }
   function zetFullcut(aan){
