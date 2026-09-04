@@ -1266,8 +1266,11 @@ html.knipfull .cutmodal.cm-review .cm-prev{pointer-events:none;}
    bitmap opleveren. De continuiteit komt van de schil, de beweging van de velden. */
 html.knipfull .cutmodal.cm-review .cm-card{width:100%;height:100%;max-height:none;border:none;border-radius:0;background:var(--bg);}
 html.knipfull .cutmodal.cm-review .cm-body{padding:0 0 10px;gap:10px;}
-html.knipfull .cutmodal.cm-review #cmSettings{display:flex;flex-direction:column;position:relative;flex:0 0 auto;}
-html.knipfull .cutmodal.cm-review .cm-prev{flex:0 0 auto;height:clamp(220px,42vh,340px);min-height:0;max-height:none;
+html.knipfull .cutmodal.cm-review #cmSettings{display:flex;flex-direction:column;position:relative;flex:1 1 auto;min-height:0;}
+/* De foto pakt de vrije ruimte in plaats van vast op 340px te staan. Op een lang toestel bleef
+   er anders een half scherm leeg tussen de foto en de velden. drawReviewPreview schaalt de
+   uitsnede mee (contain met marge, cap 2x), dus groter vak = grotere uitsnede. */
+html.knipfull .cutmodal.cm-review .cm-prev{flex:1 1 auto;height:auto;min-height:clamp(200px,32vh,340px);max-height:none;
   border:none;border-radius:0;background:var(--bg);}
 /* Kruisje blijft liggen waar het in de knipfase lag: linksboven, zwevend over de foto. */
 html.knipfull .cutmodal.cm-review .cm-toprow{position:absolute;z-index:8;pointer-events:none;
@@ -1283,7 +1286,7 @@ html.knipfull .cutmodal.cm-review #cmTitle{position:absolute;width:1px;height:1p
 html.knipfull .cutmodal.cm-review #cmNaam,
 html.knipfull .cutmodal.cm-review #cmInfo,
 html.knipfull .cutmodal.cm-review .cm-choose-rij{margin-left:16px;margin-right:16px;}
-html.knipfull .cutmodal.cm-review #cmNaam{display:block;width:auto;margin-top:auto;}   /* duwt naam + details als blok naar de knoppenbalk: bediening in duimbereik, lege ruimte valt onder de foto */
+html.knipfull .cutmodal.cm-review #cmNaam{display:block;width:auto;}
 html.knipfull .cutmodal.cm-review .cm-foot{background:var(--bg);}
 /* De velden schuiven van onderen in, kort na elkaar, zodat je ziet dat ze BIJ de foto komen
    in plaats van dat er een ander scherm verschijnt. */
@@ -1293,10 +1296,19 @@ html.knipfull .cutmodal.cm-review .cm-foot{background:var(--bg);}
   html.knipfull .cutmodal.cm-review .cm-foot{animation:cmVeldenIn .26s ease .1s both;}
 }
 @keyframes cmVeldenIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
-html.knipfull .cutmodal.cm-review .cm-bewerkbtn{display:inline-flex;align-items:center;gap:6px;position:absolute;z-index:6;top:10px;right:10px;
-  pointer-events:auto;padding:8px 13px;border-radius:999px;border:1px solid var(--rand);font-size:var(--fs-sm);font-weight:600;color:var(--tekst);cursor:pointer;
-  background:var(--kaart);background:color-mix(in srgb, var(--kaart) 90%, transparent);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);box-shadow:0 6px 16px rgba(0,0,0,.25);}
-html.knipfull .cutmodal.cm-review .cm-bewerkbtn .ik{width:17px;height:17px;}
+/* Bovenbalk gelijk aan de knipfase: links het ronde kruisje, rechts een even grote ronde knop
+   op dezelfde plek als de checkmark daar. Voorheen was dit een brede cremekleurige pil met
+   tekst, terwijl er in de knipfase een paarse cirkel stond - dat was het zichtbaarste verschil
+   tussen de twee fases. Het label blijft voor schermlezers staan (aria-label + de span). */
+html.knipfull .cutmodal.cm-review .cm-bewerkbtn{display:inline-flex;align-items:center;justify-content:center;
+  position:absolute;z-index:8;top:calc(10px + env(safe-area-inset-top,0px));right:calc(10px + env(safe-area-inset-right,0px));
+  pointer-events:auto;width:44px;height:44px;min-height:44px;padding:0;border-radius:50%;
+  border:1px solid var(--rand);color:var(--tekst);cursor:pointer;
+  background:var(--kaart);background:color-mix(in srgb, var(--kaart) 88%, transparent);
+  -webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);box-shadow:0 8px 22px rgba(0,0,0,.22);}
+html.knipfull .cutmodal.cm-review .cm-bewerkbtn .ik{width:22px;height:22px;}
+html.knipfull .cutmodal.cm-review .cm-bewerkbtn span{position:absolute;width:1px;height:1px;padding:0;margin:-1px;
+  overflow:hidden;clip-path:inset(50%);white-space:nowrap;border:0;}
 .cutmodal .cm-bewerk-badge{display:none;}
 html.knipfull .cutmodal.cm-fullcut .cm-bewerk-badge{display:block;position:absolute;z-index:8;
   top:calc(62px + env(safe-area-inset-top,0px));left:calc(10px + env(safe-area-inset-left,0px));padding:5px 11px;border-radius:999px;
@@ -7533,7 +7545,7 @@ function createTattoo(overrides = {}) {
    ============================================================ */
 // App-versie (semver, handmatig ophogen bij een release). Bij een bump ook de
 // CACHE-naam in sw.js meebumpen, zodat clients de nieuwe build ophalen.
-const APP_VERSIE = '0.3.13';
+const APP_VERSIE = '0.3.15';
 
 /* Dev-haken die de CLOUD raken hangen alleen op een ontwikkelmachine aan window. Ze zijn geen
    lek op zichzelf (zonder XSS roept niemand ze aan, en CSP + esc() houden XSS tegen), maar ze
