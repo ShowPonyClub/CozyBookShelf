@@ -1239,9 +1239,14 @@ html.knipfull .cutmodal.cm-fullcut .cm-volgende .cv-lbl{display:none;}
    onder de statusbalk vandaan - anders zijn juist de tool-hints/fouten hier onzichtbaar */
 html.knipfull .cutmodal.cm-fullcut .cm-feedback{top:calc(16px + env(safe-area-inset-top,0px));z-index:9;}
 /* Melding en hint delen dezelfde plek bovenin. Zolang er een melding staat verdwijnt de hint,
-   anders lees je twee teksten door elkaar (zichtbaar op Brams toestel, 2026-09-02). */
+   anders lees je twee teksten door elkaar (zichtbaar op Brams toestel, 2026-09-02).
+   De animation:none hoort erbij: een keyframe-animatie wint in de cascade van een gewone
+   opacity, dus de inkomende hint (cmHintIn) fadede tijdens de fasewissel toch over de melding
+   heen. Dat is precies het geval 'tik op de checkmark zonder uitsnede': de melding staat er,
+   en 130ms later komt de gegevens-fase eroverheen. Valt de melding weg, dan verschijnt de hint
+   alsnog netjes via de transitie hieronder. */
 html.knipfull .cutmodal.cm-melding #cmHint,
-html.knipfull .cutmodal.cm-melding #cmGegevensHint{opacity:0;transition:opacity .15s ease;}
+html.knipfull .cutmodal.cm-melding #cmGegevensHint{opacity:0;transition:opacity .15s ease;animation:none!important;}
 /* 'Bewerken'-badge: alleen in de fullscreen-fase (in de gewone kaart staat de titel er al);
    pill linksboven ONDER de x, zodat je ook zonder titel/knoptekst ziet dat je bewerkt i.p.v. toevoegt */
 /* REVIEW-fase (na de checkmark, vlag KNIP_FULLSCREEN, class cm-review): alleen de bijgesneden
@@ -1310,12 +1315,10 @@ html.knipfull .cutmodal.cm-fullcut.cm-naarreview #cmHint{animation:cmToolsUit .1
 @keyframes cmUitsnedeOmhoog{from{opacity:.45;transform:translateY(28px)}to{opacity:1;transform:none}}
 
 /* ================= GEGEVENS-FASE: naam invullen ZONDER het knipscherm te verlaten =================
-   (2026-09-02, voorstel Bram) De foto blijft exact staan: geen nieuwe vakmaat, geen herbouw, geen
-   textuur-upload. Alleen de gereedschapskaart maakt plaats voor de veldenkaart, die van onderen
-   omhoog schuift. Daarom kan deze overgang niet meer haperen: er is niets zwaars meer te doen.
-   De veldenkaart en de knoppenbalk zijn twee losse elementen die als EEN kaart ogen: de bovenste
-   heeft alleen bovenhoeken en geen onderrand, de onderste andersom. De hoogte van de balk komt via
-   --voet-h binnen (in toonGegevens gemeten), want die verschilt per taal en tekstgrootte.
+   (2026-09-02, voorstel Bram) Het knipscherm wordt hier een kolom: de foto krimpt tot een strook
+   bovenin, de velden staan eronder, de knoppenbalk vast onderaan. De foto wordt daarbij nooit
+   opnieuw opgemeten - geen nieuwe vakmaat, geen herbouw, geen textuur-upload - want het canvas
+   houdt zijn bevroren maat en verhuist met een transform (zie het blok verderop).
    De reviewfase hieronder blijft bestaan als terugval wanneer KNIP_FULLSCREEN uit staat; in de
    normale flow wordt die niet meer bereikt. */
 html.knipfull .cutmodal.cm-fullcut.cm-gegevens .cut-tools,
@@ -1335,43 +1338,54 @@ html.knipfull .cutmodal.cm-fullcut.cm-gegevens #cmGegevensHint{display:block;pos
   border-radius:999px;border:1px solid var(--rand);font-size:var(--fs-sm);color:var(--tekst);
   background:var(--kaart);background:color-mix(in srgb, var(--kaart) 90%, transparent);
   -webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);box-shadow:0 8px 22px rgba(0,0,0,.22);}
-/* de bewerkknop neemt de plek van de checkmark over */
+/* De uitklap-knop hoort bij de foto-strook, niet bij de bovenrand van het scherm: hij staat
+   rechts in de strook, verticaal gecentreerd, met een chevron naar beneden - 'klap de foto
+   weer open'. In de reviewfase (terugval) blijft het een potlood rechtsboven. */
 html.knipfull .cutmodal.cm-fullcut.cm-gegevens .cm-bewerkbtn{display:inline-flex;align-items:center;justify-content:center;
-  position:absolute;z-index:8;top:calc(10px + env(safe-area-inset-top,0px));right:calc(10px + env(safe-area-inset-right,0px));
+  position:absolute;z-index:8;top:50%;transform:translateY(-50%);right:calc(10px + env(safe-area-inset-right,0px));
   pointer-events:auto;width:44px;height:44px;min-height:44px;padding:0;border-radius:50%;
   border:1px solid var(--rand);color:var(--tekst);cursor:pointer;
   background:var(--kaart);background:color-mix(in srgb, var(--kaart) 88%, transparent);
   -webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);box-shadow:0 8px 22px rgba(0,0,0,.22);}
 html.knipfull .cutmodal.cm-fullcut.cm-gegevens .cm-bewerkbtn .ik{width:22px;height:22px;}
+.cutmodal .cm-bewerkbtn .ik-uitklap{display:none;}
+html.knipfull .cutmodal.cm-fullcut.cm-gegevens .cm-bewerkbtn .ik-potlood{display:none;}
+html.knipfull .cutmodal.cm-fullcut.cm-gegevens .cm-bewerkbtn .ik-uitklap{display:block;}
 html.knipfull .cutmodal.cm-fullcut.cm-gegevens .cm-bewerkbtn span{position:absolute;width:1px;height:1px;padding:0;margin:-1px;
   overflow:hidden;clip-path:inset(50%);white-space:nowrap;border:0;}
-/* veldenkaart: zwevend onderin, op dezelfde marges als de gereedschapsbalk */
+/* ---- De gegevens-fase is een kolom: foto-strook, velden, knoppenbalk (2026-09-04) ----
+   Hiervoor lag de veldenkaart als zwevende laag OVER de foto. Met 'Meer details' open bedekte
+   die 95% van het scherm (gemeten 375x812) en op een 667px-scherm liep hij 80px buiten beeld,
+   waar niets viel te scrollen: de onderste velden waren daar onbereikbaar. Nu is het een echte
+   stapeling, waarin alleen de velden scrollen en de knoppenbalk vast staat.
+   De foto wordt daarbij NIET opnieuw opgemeten: het canvas houdt zijn bevroren vakmaat
+   (--prev-w/--prev-h) en verhuist met een transform de strook in. Geen nieuwe bitmap, geen
+   herbouw, geen textuur-upload - dezelfde afspraak als v0.3.19, alleen krimpt de foto nu
+   zichtbaar mee. zetFotoStrook() rekent de vars uit (strookhoogte, schaal, verschuiving). */
+html.knipfull .cutmodal.cm-fullcut.cm-gegevens.cm-strook-krap #cmGegevensHint{display:none;}
+html.knipfull .cutmodal.cm-fullcut.cm-gegevens #cmSettings{flex:0 0 auto;}
+html.knipfull .cutmodal.cm-fullcut.cm-gegevens .cm-prev{flex:0 0 auto;height:var(--strook-h,34%);
+  min-height:0;max-height:none;overflow:hidden;border-bottom:1px solid var(--rand);}
+html.knipfull .cutmodal.cm-fullcut.cm-gegevens .cutcv,
+html.knipfull .cutmodal.cm-fullcut.cm-gegevens .lassocv{inset:auto;top:0;left:0;
+  width:var(--prev-w,100%);height:var(--prev-h,100%);transform-origin:0 0;
+  transform:translate(var(--prev-tx,0px),var(--prev-ty,0px)) scale(var(--prev-s,1));}
+/* de velden zijn de enige scrollende laag van dit scherm */
 html.knipfull .cutmodal.cm-fullcut.cm-gegevens .cm-veldenkaart{display:flex;flex-direction:column;gap:10px;
-  position:absolute;z-index:7;
-  left:calc(8px + env(safe-area-inset-left,0px));right:calc(8px + env(safe-area-inset-right,0px));
-  bottom:calc(var(--voet-h, 64px) + 8px + env(safe-area-inset-bottom,0px));
-  max-width:560px;margin-inline:auto;padding:10px 11px;
-  border:1px solid var(--rand);border-bottom:none;border-radius:var(--r-md) var(--r-md) 0 0;
-  background:var(--kaart);background:color-mix(in srgb, var(--kaart) 90%, transparent);
-  -webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);box-shadow:0 8px 22px rgba(0,0,0,.22);}
+  flex:1 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;
+  padding:12px 14px;background:var(--bg);}
 html.knipfull .cutmodal.cm-fullcut.cm-gegevens .cm-veldenkaart #cmNaam{display:block;width:auto;margin:0;}
 html.knipfull .cutmodal.cm-fullcut.cm-gegevens .cm-veldenkaart #cmInfo,
 html.knipfull .cutmodal.cm-fullcut.cm-gegevens .cm-veldenkaart .cm-choose-rij{margin:0;}
-/* knoppenbalk sluit er naadloos op aan */
-/* De knoppenbalk is technisch een apart element maar mag geen eigen kaartje lijken: geen
-   bovenrand en geen eigen slagschaduw naar boven, en dezelfde zijmarges als de velden erboven.
-   Samen met de border-bottom:none hierboven vormen de twee randen een doorlopende omlijning. */
-html.knipfull .cutmodal.cm-fullcut.cm-gegevens .cm-foot{display:flex;position:absolute;z-index:7;
-  left:calc(8px + env(safe-area-inset-left,0px));right:calc(8px + env(safe-area-inset-right,0px));
-  bottom:calc(8px + env(safe-area-inset-bottom,0px));max-width:560px;margin-inline:auto;
-  padding:0 11px 10px;border:1px solid var(--rand);border-top:none;box-shadow:none;
-  border-radius:0 0 var(--r-md) var(--r-md);
-  background:var(--kaart);background:color-mix(in srgb, var(--kaart) 90%, transparent);
-  -webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);}
-/* De kaart erboven sluit de schaduw af voor het geheel. */
-html.knipfull .cutmodal.cm-fullcut.cm-gegevens .cm-veldenkaart{box-shadow:0 -2px 22px rgba(0,0,0,.18);}
-/* Beide schuiven met dezelfde afstand omhoog, zodat de naad tussen de twee heel blijft. */
+/* knoppenbalk: vast onderaan, buiten de scroll, met ruimte voor de home-indicator */
+html.knipfull .cutmodal.cm-fullcut.cm-gegevens .cm-foot{display:flex;flex:0 0 auto;
+  padding-bottom:calc(12px + env(safe-area-inset-bottom,0px));}
+/* De krimp zit op het canvas (transform = compositor-werk) en op de hoogte van de strook. De
+   velden komen van onderen mee omhoog, zoals ze dat als zwevende kaart ook deden. */
 @media (prefers-reduced-motion:no-preference){
+  html.knipfull .cutmodal.cm-fullcut.cm-gegevens .cm-prev{transition:height .28s cubic-bezier(.22,.61,.36,1);}
+  html.knipfull .cutmodal.cm-fullcut.cm-gegevens .cutcv,
+  html.knipfull .cutmodal.cm-fullcut.cm-gegevens .lassocv{transition:transform .28s cubic-bezier(.22,.61,.36,1);}
   html.knipfull .cutmodal.cm-fullcut.cm-gegevens.cm-inkomend .cm-veldenkaart,
   html.knipfull .cutmodal.cm-fullcut.cm-gegevens.cm-inkomend .cm-foot{animation:cmKaartOmhoog .28s cubic-bezier(.22,.61,.36,1);}
   html.knipfull .cutmodal.cm-fullcut.cm-gegevens.cm-inkomend .cm-bewerkbtn{animation:cmVeldenIn .2s ease .1s;}
@@ -1896,7 +1910,7 @@ form label{text-transform:none;letter-spacing:.005em;font-size:.8rem;color:var(-
               <input id="gumRadius" type="range" min="15" max="150" value="40" class="slider" data-i18n-aria="ui.gum_grootte" aria-label="Kwastgrootte">
             </div>
             <p class="cut-tip" data-i18n="ui.cut_tip">Tip: knip rond de tattoo en stel daarna de opaciteit in bij het plaatsen.</p>
-            <div class="cm-prev" id="cutPrev"><canvas id="cutCanvas" class="cutcv"></canvas><canvas id="lassoCanvas" class="lassocv"></canvas><button id="cmBewerkBtn" class="cm-bewerkbtn" type="button" data-i18n-aria="aria.bewerken" data-i18n-title="aria.bewerken" aria-label="Bewerken" title="Bewerken"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M14.5 5.5l4 4"/><path d="M4 20l1-4L16 5a2 2 0 0 1 3 3L8 19l-4 1z"/></svg><span data-i18n="aria.bewerken">Bewerken</span></button><div id="cmMagicOverlay" class="cm-magic-overlay" hidden aria-live="polite"><div class="cm-magic-scan" aria-hidden="true"></div><div class="cm-magic-tekst"></div></div></div>
+            <div class="cm-prev" id="cutPrev"><canvas id="cutCanvas" class="cutcv"></canvas><canvas id="lassoCanvas" class="lassocv"></canvas><button id="cmBewerkBtn" class="cm-bewerkbtn" type="button" data-i18n-aria="aria.bewerken" data-i18n-title="aria.bewerken" aria-label="Bewerken" title="Bewerken"><svg class="ik ik-potlood" viewBox="0 0 24 24" aria-hidden="true"><path d="M14.5 5.5l4 4"/><path d="M4 20l1-4L16 5a2 2 0 0 1 3 3L8 19l-4 1z"/></svg><svg class="ik ik-uitklap" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg><span data-i18n="aria.bewerken">Bewerken</span></button><div id="cmMagicOverlay" class="cm-magic-overlay" hidden aria-live="polite"><div class="cm-magic-scan" aria-hidden="true"></div><div class="cm-magic-tekst"></div></div></div>
             <!-- 'Huid weghalen' verborgen: simpele kleur/helderheid-isolatie wordt op echte huidfoto's te vlekkerig.
                  Code blijft staan; AI-isolatie volgt later (Fase 3). Standaard = nette uitsnede mét huid. -->
             <label class="chk" id="cmHuidWegRij" style="display:none"><input type="checkbox" id="bgRemove"> <span data-i18n="ui.huid_weghalen">Huid weghalen</span></label>
@@ -7661,7 +7675,7 @@ function createTattoo(overrides = {}) {
    ============================================================ */
 // App-versie (semver, handmatig ophogen bij een release). Bij een bump ook de
 // CACHE-naam in sw.js meebumpen, zodat clients de nieuwe build ophalen.
-const APP_VERSIE = '0.3.23';
+const APP_VERSIE = '0.3.24';
 
 /* Dev-haken die de CLOUD raken hangen alleen op een ontwikkelmachine aan window. Ze zijn geen
    lek op zichzelf (zonder XSS roept niemand ze aan, en CSP + esc() houden XSS tegen), maar ze
@@ -12975,6 +12989,11 @@ async function verwijderVoorbeelden() {
   function imgRectInBox(bw,bh,iw,ih){ const s=Math.min(bw/iw,bh/ih), w=iw*s, h=ih*s; return {left:(bw-w)/2, top:(bh-h)/2, w, h}; }
   // Zoom/pan in het uitsnijvak: viewRect = fit-rechthoek × zoom, verschoven met pan.
   let zoom=1, panX=0, panY=0, rot90=0;   // rot90: 0..3 = 0/90/180/270° (van het bron-beeld)
+  // In de gegevens-fase krimpt het vak om de foto tot een strook, maar het CANVAS houdt zijn
+  // maat: die bevriezen we hier, zodat de teken-code dezelfde pixels blijft vullen en de krimp
+  // puur een CSS-transform is. null = gewoon de live maat van het vak gebruiken.
+  let prevBevroren=null;
+  function prevVak(){ return prevBevroren || {w:cutPrev.clientWidth,h:cutPrev.clientHeight}; }
   // Getoonde beeld-afmetingen (na flip+rotatie); valt terug op origImg vóór de eerste build.
   function beeldDims(){ return baseCanvas ? {w:baseCanvas.width,h:baseCanvas.height} : {w:origImg.naturalWidth,h:origImg.naturalHeight}; }
   function viewRect(bw,bh,iw,ih){
@@ -15414,12 +15433,77 @@ async function verwijderVoorbeelden() {
   function zetGegevensFase(aan){
     cutModal.classList.toggle('cm-gegevens', !!aan);
     const gh=document.getElementById('cmGegevensHint'); if(gh) gh.hidden=!aan;
+    if(!aan){   // terug naar knippen: vak en canvas weer 1:1, dus alle strook-vars weg
+      prevBevroren=null; cutModal.classList.remove('cm-strook-krap');
+      ['--strook-h','--prev-w','--prev-h','--prev-s','--prev-tx','--prev-ty'].forEach(v=>cutModal.style.removeProperty(v));
+      if(cutPrev) cutPrev.style.height='';
+    }
+  }
+  /* De foto-strook uitrekenen. We schalen niet het hele vak (dan staat een kleine uitsnede
+     verloren in het midden), maar de UITSNEDE zelf: bereken waar die in het bevroren vak ligt
+     en leg hem gecentreerd in de strook. Boven blijft ruimte voor de hint-pil en de x, rechts
+     voor de uitklap-knop. Nooit vergroten (s<=1): opblazen geeft alleen onscherpte. */
+  function zetFotoStrook(){
+    if(!cutModal.classList.contains('cm-gegevens') || !prevBevroren || !cutPrev) return;
+    const host=cutModal.querySelector('.cm-body');
+    const hostH=(host&&host.clientHeight)||cutModal.clientHeight||prevBevroren.h;
+    // De strook krijgt wat de velden niet nodig hebben. Vul je alleen een naam in, dan blijft de
+    // foto groot; klap je 'Meer details' open, dan krimpt hij tot zijn minimum en scrollen de
+    // velden. Zonder dit stond er onder een half ingevuld formulier een scherm vol lege ruimte.
+    const kaart=cutModal.querySelector('.cm-veldenkaart');
+    const wens=(kaart&&kaart.scrollHeight)||0;
+    const H=Math.max(150,Math.min(Math.round(hostH*0.55), hostH-wens)), W=prevBevroren.w;
+    const bd=beeldDims(), r=viewRect(W,prevBevroren.h,bd.w,bd.h);
+    let x0=r.left,y0=r.top,x1=r.left+r.w,y1=r.top+r.h;
+    if(lassoPts.length>=3){
+      let mnx=1,mny=1,mxx=0,mxy=0;
+      lassoPts.forEach(pt=>{mnx=Math.min(mnx,pt.nx);mny=Math.min(mny,pt.ny);mxx=Math.max(mxx,pt.nx);mxy=Math.max(mxy,pt.ny);});
+      x0=r.left+mnx*r.w; x1=r.left+mxx*r.w; y0=r.top+mny*r.h; y1=r.top+mxy*r.h;
+    }
+    // buiten het vak is niets getekend, dus daar hoeft ook niets van in beeld
+    x0=Math.max(0,x0); y0=Math.max(0,y0); x1=Math.min(W,x1); y1=Math.min(prevBevroren.h,y1);
+    const bw=Math.max(1,x1-x0), bh=Math.max(1,y1-y0);
+    // Krappe strook (velden opengeklapt): dan wint de foto het van de instructie-pil. Die
+    // hint helpt bij het begin, maar wie de details openklapt is allang bezig - en met de pil
+    // erboven bleef er van de foto een postzegel over.
+    const krap=H<210; cutModal.classList.toggle('cm-strook-krap', krap);
+    // Links en rechts even breed, anders staat de uitsnede zichtbaar uit het midden. De
+    // uitklap-knop mag bij een brede foto over de rand vallen; hij heeft zijn eigen achtergrond.
+    const links=48, rechts=48, boven=krap?10:62, onder=10;   // boven: ruimte voor de hint-pil en de x
+    const vw=Math.max(40,W-links-rechts), vh=Math.max(40,H-boven-onder);
+    const sc=Math.min(vw/bw, vh/bh, 1);
+    const tx=links+(vw-bw*sc)/2-x0*sc, ty=boven+(vh-bh*sc)/2-y0*sc;
+    cutModal.style.setProperty('--strook-h',H+'px');
+    cutModal.style.setProperty('--prev-w',W+'px');
+    cutModal.style.setProperty('--prev-h',prevBevroren.h+'px');
+    cutModal.style.setProperty('--prev-s',String(Math.round(sc*1000)/1000));
+    cutModal.style.setProperty('--prev-tx',Math.round(tx)+'px');
+    cutModal.style.setProperty('--prev-ty',Math.round(ty)+'px');
+  }
+  // De velden groeien en krimpen (Meer details, een langere naam, een andere taal): dan moet de
+  // strook mee. Een ResizeObserver op het detailblok is genoeg; de knop zelf hoeft niets te weten.
+  let strookRO=null;
+  function volgVelden(){
+    if(strookRO || typeof ResizeObserver==='undefined') return;
+    const info=document.getElementById('cmInfo'); if(!info) return;
+    strookRO=new ResizeObserver(()=>{ if(cutModal.classList.contains('cm-gegevens')) zetFotoStrook(); });
+    strookRO.observe(info);
   }
   function toonGegevens(){
+    // Maat bevriezen VOOR de fasewissel: daarna is het vak een strook en zou het canvas
+    // opnieuw opgemeten worden - precies wat we niet willen.
+    if(cutPrev){ const r=cutPrev.getBoundingClientRect();
+      prevBevroren={w:Math.round(r.width),h:Math.round(r.height)};
+      cutPrev.style.height=prevBevroren.h+'px';   // startwaarde, anders is er niets om vanaf te krimpen
+    }
     zetGegevensFase(true);
-    const voet = cutModal.querySelector('.cm-foot');
-    if(voet){ const h = Math.round(voet.getBoundingClientRect().height); if(h) cutModal.style.setProperty('--voet-h', h+'px'); }
+    zetFotoStrook(); volgVelden();
     if(origImg){ drawCutPreview(); drawLasso(); }
+    // Startwaarde vastleggen met een geforceerde reflow, dan de inline hoogte loslaten: de
+    // computed hoogte gaat van 'volle foto' naar de strook en de krimp loopt als transitie.
+    // Bewust GEEN requestAnimationFrame: die vuurt niet als de app op dat moment naar de
+    // achtergrond gaat, en dan zou de inline hoogte blijven staan en de velden buiten beeld.
+    if(cutPrev){ void cutPrev.offsetHeight; cutPrev.style.height=''; }
   }
   let naarReviewBezig=false;
   function naarReview(){
@@ -15513,7 +15597,10 @@ async function verwijderVoorbeelden() {
     // Rotatie/resize: de canvas-bitmap is clientWidth-gebaseerd en werd pas bij de volgende
     // tekenactie hertekend -> beeld stond uitgerekt tot de eerste aanraking. Nu meteen hertekenen
     // (baseCanvas is schermonafhankelijk, dus geen dure rebuildBase nodig).
-    if(origImg){ clampPan(); drawCutPreview(); drawLasso(); }
+    // In de gegevens-fase staat de foto stil in zijn strook: niet opnieuw klemmen of tekenen
+    // (dat gooit juist de bevroren vakmaat om), alleen de strook herberekenen.
+    if(cutModal.classList.contains('cm-gegevens')) zetFotoStrook();
+    else if(origImg){ clampPan(); drawCutPreview(); drawLasso(); }
   }
   // Heropen het uitsnede-scherm voor een bestaande tattoo (bijknippen + achtergrond)
   function openCutModalForEdit(m){
@@ -15758,7 +15845,7 @@ async function verwijderVoorbeelden() {
     return shown;
   }
   function drawPreview(shown){
-    const cv=cutCanvas; cv.width=cutPrev.clientWidth; cv.height=cutPrev.clientHeight;
+    const vak=prevVak(); const cv=cutCanvas; cv.width=vak.w; cv.height=vak.h;
     const ctx=cv.getContext("2d"); ctx.clearRect(0,0,cv.width,cv.height);
     if(!shown) return;
     const r=viewRect(cv.width,cv.height,shown.width,shown.height);
@@ -15769,7 +15856,7 @@ async function verwijderVoorbeelden() {
   // Review-fase (na de checkmark): alleen de geïsoleerde uitsnede tonen, gecentreerd op het
   // schaakbord (CSS-achtergrond toont de transparantie). Geen gedimd origineel, geen lasso.
   function drawReviewPreview(){
-    const cv=cutCanvas; cv.width=cutPrev.clientWidth; cv.height=cutPrev.clientHeight;
+    const vak=prevVak(); const cv=cutCanvas; cv.width=vak.w; cv.height=vak.h;
     const ctx=cv.getContext("2d"); ctx.clearRect(0,0,cv.width,cv.height);
     const src=laatsteUitsnede; if(!src || !src.width || !src.height) return;
     const pad=18, availW=cv.width-pad*2, availH=cv.height-pad*2;
@@ -15783,7 +15870,7 @@ async function verwijderVoorbeelden() {
     if(!origImg || !baseCanvas) return;
     const shown=clippedCanvas(); if(!shown) return;
     // rest van de foto gedimd (35%) i.p.v. verborgen, zodat je context houdt tijdens het uitsnijden
-    const cv=cutCanvas; cv.width=cutPrev.clientWidth; cv.height=cutPrev.clientHeight;
+    const vak=prevVak(); const cv=cutCanvas; cv.width=vak.w; cv.height=vak.h;
     const ctx=cv.getContext("2d"); ctx.clearRect(0,0,cv.width,cv.height);
     const r=viewRect(cv.width,cv.height,baseCanvas.width,baseCanvas.height);
     // In de gegevens-fase valt de context weg: alleen je uitsnede blijft staan, op exact dezelfde
@@ -15831,7 +15918,7 @@ async function verwijderVoorbeelden() {
     imgTexture=new THREE.CanvasTexture(texCanvas); imgTexture.encoding=THREE.sRGBEncoding; imgTexture.anisotropy=maxAniso(); imgTexture.needsUpdate=true;
   }
   function drawLasso(){
-    const cv=lassoCanvas; cv.width=cutPrev.clientWidth; cv.height=cutPrev.clientHeight;
+    const vak=prevVak(); const cv=lassoCanvas; cv.width=vak.w; cv.height=vak.h;
     const ctx=cv.getContext("2d"); ctx.clearRect(0,0,cv.width,cv.height);
     if(!origImg || cutModal.classList.contains("cm-review") || cutModal.classList.contains("cm-gegevens")) return;   // review/gegevens: geen lasso-punten tonen
     const r=viewRect(cv.width,cv.height,beeldDims().w,beeldDims().h);
