@@ -1238,6 +1238,10 @@ html.knipfull .cutmodal.cm-fullcut .cm-volgende .cv-lbl{display:none;}
 /* in-modal meldingen (#cmFeedback) moeten in de fullscreen-fase BOVEN de hint-pill (z7) en
    onder de statusbalk vandaan - anders zijn juist de tool-hints/fouten hier onzichtbaar */
 html.knipfull .cutmodal.cm-fullcut .cm-feedback{top:calc(16px + env(safe-area-inset-top,0px));z-index:9;}
+/* Melding en hint delen dezelfde plek bovenin. Zolang er een melding staat verdwijnt de hint,
+   anders lees je twee teksten door elkaar (zichtbaar op Brams toestel, 2026-09-02). */
+html.knipfull .cutmodal.cm-melding #cmHint,
+html.knipfull .cutmodal.cm-melding #cmGegevensHint{opacity:0;transition:opacity .15s ease;}
 /* 'Bewerken'-badge: alleen in de fullscreen-fase (in de gewone kaart staat de titel er al);
    pill linksboven ONDER de x, zodat je ook zonder titel/knoptekst ziet dat je bewerkt i.p.v. toevoegt */
 /* REVIEW-fase (na de checkmark, vlag KNIP_FULLSCREEN, class cm-review): alleen de bijgesneden
@@ -1370,8 +1374,11 @@ html.knipfull .cutmodal.cm-fullcut.cm-gegevens .cm-veldenkaart{box-shadow:0 -2px
 @media (prefers-reduced-motion:no-preference){
   html.knipfull .cutmodal.cm-fullcut.cm-gegevens.cm-inkomend .cm-veldenkaart,
   html.knipfull .cutmodal.cm-fullcut.cm-gegevens.cm-inkomend .cm-foot{animation:cmKaartOmhoog .28s cubic-bezier(.22,.61,.36,1);}
-  html.knipfull .cutmodal.cm-fullcut.cm-gegevens.cm-inkomend .cm-bewerkbtn,
-  html.knipfull .cutmodal.cm-fullcut.cm-gegevens.cm-inkomend #cmGegevensHint{animation:cmVeldenIn .2s ease .1s;}
+  html.knipfull .cutmodal.cm-fullcut.cm-gegevens.cm-inkomend .cm-bewerkbtn{animation:cmVeldenIn .2s ease .1s;}
+  /* Eigen keyframes: de hint staat gecentreerd met translateX(-50%), en cmVeldenIn zou die
+     verschuiving overschrijven. Dan schuift de pil tijdens de animatie een halve breedte naar
+     rechts en springt hij aan het eind terug. */
+  html.knipfull .cutmodal.cm-fullcut.cm-gegevens.cm-inkomend #cmGegevensHint{animation:cmHintIn .2s ease .1s;}
 }
 /* 'Andere foto' is een zeldzame actie die alleen bij bewerken bestaat. Als omlijnde pil midden
    op een eigen regel trok hij evenveel aandacht als 'Meer details' en brak hij het links-rechts
@@ -1383,6 +1390,7 @@ html.knipfull .cutmodal.cm-fullcut.cm-gegevens .cm-choose{align-self:flex-start;
   font-size:var(--fs-xs);text-decoration:underline;gap:5px;}
 html.knipfull .cutmodal.cm-fullcut.cm-gegevens .cm-choose .ik{width:14px;height:14px;}
 @keyframes cmKaartOmhoog{from{opacity:0;transform:translateY(120px)}to{opacity:1;transform:none}}
+@keyframes cmHintIn{from{opacity:0;transform:translateX(-50%) translateY(16px)}to{opacity:1;transform:translateX(-50%)}}
 /* De velden krijgen dezelfde behandeling als de gereedschapsbalk in de knipfase: een crème
    kaartje met rand, blur en schaduw, in plaats van losse velden op de kale achtergrond. Dat
    was het laatste dat de twee fases uit elkaar trok. De wrapper staat standaard op
@@ -7653,7 +7661,7 @@ function createTattoo(overrides = {}) {
    ============================================================ */
 // App-versie (semver, handmatig ophogen bij een release). Bij een bump ook de
 // CACHE-naam in sw.js meebumpen, zodat clients de nieuwe build ophalen.
-const APP_VERSIE = '0.3.22';
+const APP_VERSIE = '0.3.23';
 
 /* Dev-haken die de CLOUD raken hangen alleen op een ontwikkelmachine aan window. Ze zijn geen
    lek op zichzelf (zonder XSS roept niemand ze aan, en CSP + esc() houden XSS tegen), maar ze
@@ -9351,9 +9359,10 @@ function toast(tekst) {
   if (cm && fb && cm.classList.contains('on')) {   // ook in compact (fotokeuze): juist die fouten waren op iOS onzichtbaar
     fb.textContent = tekst;
     fb.hidden = false;
+    cm.classList.add('cm-melding');   // hint bovenin stapt opzij: zelfde plek
     tril(12);
     clearTimeout(cmFeedbackTimer);
-    cmFeedbackTimer = setTimeout(() => { fb.hidden = true; fb.textContent = ''; }, 2600);
+    cmFeedbackTimer = setTimeout(() => { fb.hidden = true; fb.textContent = ''; cm.classList.remove('cm-melding'); }, 2600);
     return;
   }
   const el = $('#toast');
