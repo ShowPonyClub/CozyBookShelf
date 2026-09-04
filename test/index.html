@@ -1316,6 +1316,7 @@ html.knipfull .cutmodal.cm-fullcut.cm-naarreview #cmHint{animation:cmToolsUit .1
    normale flow wordt die niet meer bereikt. */
 html.knipfull .cutmodal.cm-fullcut.cm-gegevens .cut-tools,
 html.knipfull .cutmodal.cm-fullcut.cm-gegevens #cmHint,
+html.knipfull .cutmodal.cm-fullcut.cm-gegevens .cm-bewerk-badge,
 html.knipfull .cutmodal.cm-fullcut.cm-gegevens #cmWandModus,
 html.knipfull .cutmodal.cm-fullcut.cm-gegevens #cmGumModus,
 html.knipfull .cutmodal.cm-fullcut.cm-gegevens #cmGumGrootte,
@@ -1345,18 +1346,33 @@ html.knipfull .cutmodal.cm-fullcut.cm-gegevens .cm-veldenkaart #cmNaam{display:b
 html.knipfull .cutmodal.cm-fullcut.cm-gegevens .cm-veldenkaart #cmInfo,
 html.knipfull .cutmodal.cm-fullcut.cm-gegevens .cm-veldenkaart .cm-choose-rij{margin:0;}
 /* knoppenbalk sluit er naadloos op aan */
+/* De knoppenbalk is technisch een apart element maar mag geen eigen kaartje lijken: geen
+   bovenrand en geen eigen slagschaduw naar boven, en dezelfde zijmarges als de velden erboven.
+   Samen met de border-bottom:none hierboven vormen de twee randen een doorlopende omlijning. */
 html.knipfull .cutmodal.cm-fullcut.cm-gegevens .cm-foot{display:flex;position:absolute;z-index:7;
   left:calc(8px + env(safe-area-inset-left,0px));right:calc(8px + env(safe-area-inset-right,0px));
   bottom:calc(8px + env(safe-area-inset-bottom,0px));max-width:560px;margin-inline:auto;
-  border:1px solid var(--rand);border-top:1px solid var(--rand);border-radius:0 0 var(--r-md) var(--r-md);
+  padding:0 11px 10px;border:1px solid var(--rand);border-top:none;box-shadow:none;
+  border-radius:0 0 var(--r-md) var(--r-md);
   background:var(--kaart);background:color-mix(in srgb, var(--kaart) 90%, transparent);
-  -webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);box-shadow:0 8px 22px rgba(0,0,0,.22);}
+  -webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);}
+/* De kaart erboven sluit de schaduw af voor het geheel. */
+html.knipfull .cutmodal.cm-fullcut.cm-gegevens .cm-veldenkaart{box-shadow:0 -2px 22px rgba(0,0,0,.18);}
 /* Beide schuiven met dezelfde afstand omhoog, zodat de naad tussen de twee heel blijft. */
 @media (prefers-reduced-motion:no-preference){
   html.knipfull .cutmodal.cm-fullcut.cm-gegevens.cm-inkomend .cm-veldenkaart,
   html.knipfull .cutmodal.cm-fullcut.cm-gegevens.cm-inkomend .cm-foot{animation:cmKaartOmhoog .28s cubic-bezier(.22,.61,.36,1);}
   html.knipfull .cutmodal.cm-fullcut.cm-gegevens.cm-inkomend .cm-bewerkbtn{animation:cmVeldenIn .2s ease .1s;}
 }
+/* 'Andere foto' is een zeldzame actie die alleen bij bewerken bestaat. Als omlijnde pil midden
+   op een eigen regel trok hij evenveel aandacht als 'Meer details' en brak hij het links-rechts
+   ritme van de regel erboven. Nu een subtiele tekstlink links uitgelijnd, dezelfde behandeling
+   die 'Reset uitsnede' in de gereedschapsbalk krijgt. */
+html.knipfull .cutmodal.cm-fullcut.cm-gegevens .cm-choose-rij{align-items:flex-start;}
+html.knipfull .cutmodal.cm-fullcut.cm-gegevens .cm-choose{align-self:flex-start;margin:0;padding:2px 0;
+  min-height:0;background:transparent;border:0;border-radius:0;color:var(--gedempt);
+  font-size:var(--fs-xs);text-decoration:underline;gap:5px;}
+html.knipfull .cutmodal.cm-fullcut.cm-gegevens .cm-choose .ik{width:14px;height:14px;}
 @keyframes cmKaartOmhoog{from{opacity:0;transform:translateY(120px)}to{opacity:1;transform:none}}
 /* De velden krijgen dezelfde behandeling als de gereedschapsbalk in de knipfase: een crème
    kaartje met rand, blur en schaduw, in plaats van losse velden op de kale achtergrond. Dat
@@ -7626,7 +7642,7 @@ function createTattoo(overrides = {}) {
    ============================================================ */
 // App-versie (semver, handmatig ophogen bij een release). Bij een bump ook de
 // CACHE-naam in sw.js meebumpen, zodat clients de nieuwe build ophalen.
-const APP_VERSIE = '0.3.20';
+const APP_VERSIE = '0.3.21';
 
 /* Dev-haken die de CLOUD raken hangen alleen op een ontwikkelmachine aan window. Ze zijn geen
    lek op zichzelf (zonder XSS roept niemand ze aan, en CSP + esc() houden XSS tegen), maar ze
