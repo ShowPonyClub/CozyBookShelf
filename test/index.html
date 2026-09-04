@@ -1220,10 +1220,14 @@ html.knipfull .cutmodal.cm-fullcut #cmGumGrootte{position:absolute;top:calc(118p
 /* tools onderop de foto, met safe-area */
 html.knipfull .cutmodal.cm-fullcut .cut-tools{bottom:calc(10px + env(safe-area-inset-bottom,0px));}
 /* de rest van de kaart verdwijnt in deze fase */
-html.knipfull .cutmodal.cm-fullcut #cmNaam,
-html.knipfull .cutmodal.cm-fullcut #cmInfo,
-html.knipfull .cutmodal.cm-fullcut .cm-choose-rij,
-html.knipfull .cutmodal.cm-fullcut .cm-foot{display:none!important;}
+/* :not(.cm-gegevens) - in de gegevens-fase komen deze juist terug. Liever de verbergregel
+   uitscopen dan er een tweede !important overheen leggen: anders zou die ook de inline
+   display:none van toonCutInstellingen overrulen, en dan verscheen 'Andere foto' ook in de
+   toevoegflow waar hij niet hoort. */
+html.knipfull .cutmodal.cm-fullcut:not(.cm-gegevens) #cmNaam,
+html.knipfull .cutmodal.cm-fullcut:not(.cm-gegevens) #cmInfo,
+html.knipfull .cutmodal.cm-fullcut:not(.cm-gegevens) .cm-choose-rij,
+html.knipfull .cutmodal.cm-fullcut:not(.cm-gegevens) .cm-foot{display:none!important;}
 /* 'Volgende' = ronde checkmark rechtsboven (iOS-fotokiezer-patroon); buiten deze fase onzichtbaar */
 .cutmodal .cm-volgende{display:none;}
 html.knipfull .cutmodal.cm-fullcut .cm-volgende{display:flex;position:absolute;top:calc(10px + env(safe-area-inset-top,0px));right:calc(10px + env(safe-area-inset-right,0px));z-index:8;
@@ -1300,6 +1304,60 @@ html.knipfull .cutmodal.cm-fullcut.cm-naarreview #cmHint{animation:cmToolsUit .1
   html.knipfull .cutmodal.cm-review.cm-inkomend .cm-bewerkbtn{animation:cmVeldenIn .2s ease .06s;}
 }
 @keyframes cmUitsnedeOmhoog{from{opacity:.45;transform:translateY(28px)}to{opacity:1;transform:none}}
+
+/* ================= GEGEVENS-FASE: naam invullen ZONDER het knipscherm te verlaten =================
+   (2026-09-02, voorstel Bram) De foto blijft exact staan: geen nieuwe vakmaat, geen herbouw, geen
+   textuur-upload. Alleen de gereedschapskaart maakt plaats voor de veldenkaart, die van onderen
+   omhoog schuift. Daarom kan deze overgang niet meer haperen: er is niets zwaars meer te doen.
+   De veldenkaart en de knoppenbalk zijn twee losse elementen die als EEN kaart ogen: de bovenste
+   heeft alleen bovenhoeken en geen onderrand, de onderste andersom. De hoogte van de balk komt via
+   --voet-h binnen (in toonGegevens gemeten), want die verschilt per taal en tekstgrootte.
+   De reviewfase hieronder blijft bestaan als terugval wanneer KNIP_FULLSCREEN uit staat; in de
+   normale flow wordt die niet meer bereikt. */
+html.knipfull .cutmodal.cm-fullcut.cm-gegevens .cut-tools,
+html.knipfull .cutmodal.cm-fullcut.cm-gegevens #cmHint,
+html.knipfull .cutmodal.cm-fullcut.cm-gegevens #cmWandModus,
+html.knipfull .cutmodal.cm-fullcut.cm-gegevens #cmGumModus,
+html.knipfull .cutmodal.cm-fullcut.cm-gegevens #cmGumGrootte,
+html.knipfull .cutmodal.cm-fullcut.cm-gegevens .cm-volgende{display:none!important;}
+/* niet meer in de foto tekenen terwijl je typt */
+html.knipfull .cutmodal.cm-fullcut.cm-gegevens .cm-prev{pointer-events:none;}
+/* de bewerkknop neemt de plek van de checkmark over */
+html.knipfull .cutmodal.cm-fullcut.cm-gegevens .cm-bewerkbtn{display:inline-flex;align-items:center;justify-content:center;
+  position:absolute;z-index:8;top:calc(10px + env(safe-area-inset-top,0px));right:calc(10px + env(safe-area-inset-right,0px));
+  pointer-events:auto;width:44px;height:44px;min-height:44px;padding:0;border-radius:50%;
+  border:1px solid var(--rand);color:var(--tekst);cursor:pointer;
+  background:var(--kaart);background:color-mix(in srgb, var(--kaart) 88%, transparent);
+  -webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);box-shadow:0 8px 22px rgba(0,0,0,.22);}
+html.knipfull .cutmodal.cm-fullcut.cm-gegevens .cm-bewerkbtn .ik{width:22px;height:22px;}
+html.knipfull .cutmodal.cm-fullcut.cm-gegevens .cm-bewerkbtn span{position:absolute;width:1px;height:1px;padding:0;margin:-1px;
+  overflow:hidden;clip-path:inset(50%);white-space:nowrap;border:0;}
+/* veldenkaart: zwevend onderin, op dezelfde marges als de gereedschapsbalk */
+html.knipfull .cutmodal.cm-fullcut.cm-gegevens .cm-veldenkaart{display:flex;flex-direction:column;gap:10px;
+  position:absolute;z-index:7;
+  left:calc(8px + env(safe-area-inset-left,0px));right:calc(8px + env(safe-area-inset-right,0px));
+  bottom:calc(var(--voet-h, 64px) + 8px + env(safe-area-inset-bottom,0px));
+  max-width:560px;margin-inline:auto;padding:10px 11px;
+  border:1px solid var(--rand);border-bottom:none;border-radius:var(--r-md) var(--r-md) 0 0;
+  background:var(--kaart);background:color-mix(in srgb, var(--kaart) 90%, transparent);
+  -webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);box-shadow:0 8px 22px rgba(0,0,0,.22);}
+html.knipfull .cutmodal.cm-fullcut.cm-gegevens .cm-veldenkaart #cmNaam{display:block;width:auto;margin:0;}
+html.knipfull .cutmodal.cm-fullcut.cm-gegevens .cm-veldenkaart #cmInfo,
+html.knipfull .cutmodal.cm-fullcut.cm-gegevens .cm-veldenkaart .cm-choose-rij{margin:0;}
+/* knoppenbalk sluit er naadloos op aan */
+html.knipfull .cutmodal.cm-fullcut.cm-gegevens .cm-foot{display:flex;position:absolute;z-index:7;
+  left:calc(8px + env(safe-area-inset-left,0px));right:calc(8px + env(safe-area-inset-right,0px));
+  bottom:calc(8px + env(safe-area-inset-bottom,0px));max-width:560px;margin-inline:auto;
+  border:1px solid var(--rand);border-top:1px solid var(--rand);border-radius:0 0 var(--r-md) var(--r-md);
+  background:var(--kaart);background:color-mix(in srgb, var(--kaart) 90%, transparent);
+  -webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);box-shadow:0 8px 22px rgba(0,0,0,.22);}
+/* Beide schuiven met dezelfde afstand omhoog, zodat de naad tussen de twee heel blijft. */
+@media (prefers-reduced-motion:no-preference){
+  html.knipfull .cutmodal.cm-fullcut.cm-gegevens.cm-inkomend .cm-veldenkaart,
+  html.knipfull .cutmodal.cm-fullcut.cm-gegevens.cm-inkomend .cm-foot{animation:cmKaartOmhoog .28s cubic-bezier(.22,.61,.36,1);}
+  html.knipfull .cutmodal.cm-fullcut.cm-gegevens.cm-inkomend .cm-bewerkbtn{animation:cmVeldenIn .2s ease .1s;}
+}
+@keyframes cmKaartOmhoog{from{opacity:0;transform:translateY(120px)}to{opacity:1;transform:none}}
 /* De velden krijgen dezelfde behandeling als de gereedschapsbalk in de knipfase: een crème
    kaartje met rand, blur en schaduw, in plaats van losse velden op de kale achtergrond. Dat
    was het laatste dat de twee fases uit elkaar trok. De wrapper staat standaard op
@@ -7568,7 +7626,7 @@ function createTattoo(overrides = {}) {
    ============================================================ */
 // App-versie (semver, handmatig ophogen bij een release). Bij een bump ook de
 // CACHE-naam in sw.js meebumpen, zodat clients de nieuwe build ophalen.
-const APP_VERSIE = '0.3.18';
+const APP_VERSIE = '0.3.20';
 
 /* Dev-haken die de CLOUD raken hangen alleen op een ontwikkelmachine aan window. Ze zijn geen
    lek op zichzelf (zonder XSS roept niemand ze aan, en CSP + esc() houden XSS tegen), maar ze
@@ -15311,22 +15369,37 @@ async function verwijderVoorbeelden() {
      pauze is wat de overgang leesbaar maakt - de balk verdwijnt, en in de ruimte die vrijkomt
      schuiven de velden omhoog. Zonder pauze gebeurt alles op hetzelfde frame en zie je een
      sprong. Bij 'beweging beperken' slaan we de pauze over en schakelen we meteen. */
+  /* De gegevens-fase aanzetten. De foto blijft staan zoals hij staat; we hertekenen alleen even
+     zodat de gedimde omgeving wegvalt. De hoogte van de knoppenbalk gaat als variabele mee, zodat
+     de veldenkaart er precies bovenop landt (die hoogte verschilt per taal en tekstgrootte). */
+  function toonGegevens(){
+    cutModal.classList.add('cm-gegevens');
+    const voet = cutModal.querySelector('.cm-foot');
+    if(voet){ const h = Math.round(voet.getBoundingClientRect().height); if(h) cutModal.style.setProperty('--voet-h', h+'px'); }
+    if(origImg){ drawCutPreview(); drawLasso(); }
+  }
   let naarReviewBezig=false;
   function naarReview(){
     if(naarReviewBezig) return;
     const stil = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if(stil || !document.documentElement.classList.contains('knipfull')){ zetFullcut(false); return; }
+    if(!document.documentElement.classList.contains('knipfull')){ zetFullcut(false); return; }   // terugval-layout
+    if(stil){ toonGegevens(); return; }
     naarReviewBezig=true;
     cutModal.classList.add('cm-naarreview');
     setTimeout(()=>{
       cutModal.classList.remove('cm-naarreview');
-      zetFullcut(false);   // zwaar: layoutwissel + canvas opnieuw tekenen
+      toonGegevens();
       // Pas STARTEN als dat werk klaar is. Deden we het in hetzelfde frame, dan viel het begin
       // van de animatie samen met het hertekenen en zag je de eerste frames overslaan - dat is
       // het haperen. Twee frames wachten: eentje voor de layout, eentje voor de eerste paint.
+      naarReviewBezig=false;   // de guard dekt alleen de pauze hierboven, niet de animatie
+      // Animatie starten zodra het tekenwerk klaar is. Vuurt rAF niet (app naar de achtergrond,
+      // iOS pauzeert 'm dan), dan komt cm-inkomend er simpelweg niet op: geen animatie, maar
+      // alles staat gewoon goed. Eerder hing het vrijgeven van de guard hieraan vast, waardoor
+      // de checkmark daarna dood was.
       requestAnimationFrame(()=>requestAnimationFrame(()=>{
         cutModal.classList.add('cm-inkomend');
-        setTimeout(()=>{ cutModal.classList.remove('cm-inkomend'); naarReviewBezig=false; }, 340);
+        setTimeout(()=>cutModal.classList.remove('cm-inkomend'), 340);
       }));
     }, 130);
   }
@@ -15336,11 +15409,14 @@ async function verwijderVoorbeelden() {
     cutModal.classList.toggle('cm-fullcut', wil);
     // Review-fase = uit fullscreen (wil=false) naar de details/review-kaart, met foto en modal open.
     cutModal.classList.toggle('cm-review', document.documentElement.classList.contains('knipfull') && !wil && cutModal.classList.contains('on') && !!origImg);
-    // Herbouw ALLEEN bij de ✓-overgang (fullscreen -> details, aan=false, modal nog in beeld): daar
-    // verandert de canvas-maat fors en rebuildt niemand anders. Bij de show-overgang (-> fullscreen)
-    // doet de foto-loader zelf de rebuild (ook nodig als KNIP_FULLSCREEN uit staat) -> hier niet,
-    // anders dubbel werk. Bij sluiten ('on' al weg) evenmin: geen rebuild op een onzichtbare modal.
-    if(!aan && origImg && cutModal.classList.contains('on')){ rebuildBase(); updateCutout(); drawLasso(); }
+    // Bij de ✓-overgang alleen HERTEKENEN, niet herberekenen. Er verandert hier niets aan de
+    // uitsnede zelf, alleen de maat van het vak eromheen. rebuildBase() bouwt de basis op volle
+    // resolutie opnieuw op en updateCutout() maakt daarbovenop een nieuwe THREE-textuur: dat
+    // blokkeerde de hoofdthread precies wanneer de animatie moest beginnen, en dat is het
+    // haperen dat Bram voelde. laatsteUitsnede en imgTexture zijn al bij, want updateCutout
+    // draait na elke bewerking (pointerup, wiel, gum, toverstaf, reset).
+    // Vergelijk fitCutModalVV, dat bij rotatie/toetsenbord om dezelfde reden alleen hertekent.
+    if(!aan && origImg && cutModal.classList.contains('on')){ drawCutPreview(); drawLasso(); }
     stapelFullcutOverlays();
     fitCutModalVV();
   }
@@ -15357,7 +15433,7 @@ async function verwijderVoorbeelden() {
   // Toon de uitsnede-instellingen (preview, sliders, achtergrond) pas na een foto
   function toonCutInstellingen(b){
     const s=document.getElementById("cmSettings"); if(s) s.hidden=!b;
-    if(!b) cutModal.classList.remove("cm-review");   // fotokeuze/sluiten: nooit in review-stand
+    if(!b) cutModal.classList.remove("cm-review","cm-gegevens");   // fotokeuze/sluiten: nooit in review- of gegevens-stand
     { const bb=document.getElementById("cmBewerkBadge"); if(bb) bb.hidden=!(b && (pendingEdit||pendingEdit2D)); }   // 'Bewerken'-badge: alleen in de knipfase van een bewerk-flow
     zetFullcut(b);   // foto in beeld = schermvullend knippen (vlag-afhankelijk); 'Volgende' onthult naam/details
     if(b){ const adv=document.getElementById("cmAdvTools"), tt=document.getElementById("cmToolsToggle");
@@ -15462,7 +15538,7 @@ async function verwijderVoorbeelden() {
     } finally { annuleerBezig=false; }
   }
   function closeCutModal(){ cutHistoryOpruimen();
-    resetSnapshot=null; laatsteActie=null; cutModal.classList.remove("on"); pendingPlace=null; pendingEdit=null; pendingPlace2D=null; pendingNew=null; pendingEdit2D=null; toonCutInstellingen(false); toonInfo(false);
+    resetSnapshot=null; laatsteActie=null; cutModal.classList.remove("on","cm-gegevens","cm-inkomend","cm-naarreview"); pendingPlace=null; pendingEdit=null; pendingPlace2D=null; pendingNew=null; pendingEdit2D=null; toonCutInstellingen(false); toonInfo(false);
     plaatsHerhaal=false; window.__tattiesHerhaalSrc=null; herhaalTeller=1; vorigeLassos=[]; addDoel='3d';   // D6(a): herhaal-state opruimen + doel terug naar default (geen stale vlag/lasso/doel)
     if(imgTexture && imgTexture.dispose){ imgTexture.dispose(); } imgTexture=null;   // niet-geplaatste textuur vrijgeven (geen lek)
     cutPointers.clear(); pinch=null; drawingFree=false; gumStroke=null; lassoDragIdx=-1; clearTimeout(wheelEind);
@@ -15667,15 +15743,18 @@ async function verwijderVoorbeelden() {
     const cv=cutCanvas; cv.width=cutPrev.clientWidth; cv.height=cutPrev.clientHeight;
     const ctx=cv.getContext("2d"); ctx.clearRect(0,0,cv.width,cv.height);
     const r=viewRect(cv.width,cv.height,baseCanvas.width,baseCanvas.height);
+    // In de gegevens-fase valt de context weg: alleen je uitsnede blijft staan, op exact dezelfde
+    // plek en schaal. Dat is het 'dit is 'm'-moment, en het kost een enkele drawImage.
+    const gegevensFase = cutModal.classList.contains("cm-gegevens");
     if(lassoPts.length>=3){
-      ctx.globalAlpha=0.35; ctx.drawImage(baseCanvas, r.left,r.top,r.w,r.h); ctx.globalAlpha=1;
+      if(!gegevensFase){ ctx.globalAlpha=0.35; ctx.drawImage(baseCanvas, r.left,r.top,r.w,r.h); ctx.globalAlpha=1; }
       ctx.drawImage(shown, r.left,r.top,r.w,r.h);
     } else {
       ctx.drawImage(baseCanvas, r.left,r.top,r.w,r.h);
     }
     // Gum-modus: weggeveegde pixels zijn transparant -> op een donker thema/donkere foto onzichtbaar.
     // Markeer de 'weg'-streken met een lichte rode tint zodat je thema-onafhankelijk ziet wat weg is.
-    if(gumMode && eraseStrokes.length){
+    if(gumMode && eraseStrokes.length && !gegevensFase){
       const minWH=Math.min(r.w,r.h);
       ctx.save(); ctx.globalAlpha=0.38; ctx.strokeStyle='#ff5a5a'; ctx.fillStyle='#ff5a5a'; ctx.lineCap='round'; ctx.lineJoin='round';
       for(const st of eraseStrokes){
@@ -15711,7 +15790,7 @@ async function verwijderVoorbeelden() {
   function drawLasso(){
     const cv=lassoCanvas; cv.width=cutPrev.clientWidth; cv.height=cutPrev.clientHeight;
     const ctx=cv.getContext("2d"); ctx.clearRect(0,0,cv.width,cv.height);
-    if(!origImg || cutModal.classList.contains("cm-review")) return;   // review-fase: geen lasso-punten tonen
+    if(!origImg || cutModal.classList.contains("cm-review") || cutModal.classList.contains("cm-gegevens")) return;   // review/gegevens: geen lasso-punten tonen
     const r=viewRect(cv.width,cv.height,beeldDims().w,beeldDims().h);
     // D6(a) verbetering 3: eerder geknipte uitsnedes uit dezelfde foto vaag tonen (alleen bij gelijke oriëntatie)
     if(vorigeLassos && vorigeLassos.length){
@@ -15774,8 +15853,10 @@ async function verwijderVoorbeelden() {
         if(!(lassoPts.length>=3 || wandSeeds.length || eraseStrokes.length || aiMask)) toast(tr('ui.geen_uitsnede_hint'));
         naarReview();
       }; }   // fase 2: knippen klaar -> review-scherm met naam/details
-    { const bb=document.getElementById("cmBewerkBtn"); if(bb) bb.onclick=()=>{   // review -> terug naar de fullscreen-editor
-        zetFullcut(true); if(origImg){ rebuildBase(); updateCutout(); drawLasso(); }
+    { const bb=document.getElementById("cmBewerkBtn"); if(bb) bb.onclick=()=>{   // gegevens -> terug naar knippen
+        cutModal.classList.remove('cm-gegevens');
+        zetFullcut(true);   // no-op in de nieuwe flow (we staan al in de knipfase); nodig voor de terugval
+        if(origImg){ drawCutPreview(); drawLasso(); }   // alleen hertekenen: de uitsnede verandert niet
       }; }
     window.addEventListener('popstate', ()=>{   // hardware/terug-knop sluit de modal (met bevestiging) i.p.v. de app te verlaten
       if(cutModal.classList.contains('on')){
