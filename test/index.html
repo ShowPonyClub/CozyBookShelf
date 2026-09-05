@@ -1430,13 +1430,15 @@ html.knipfull .cutmodal.cm-fullcut.cm-gegevens #cmPlaceMeer{margin:0;padding:2px
   html.knipfull .cutmodal.cm-fullcut.cm-gegevens .cm-prev{transition:height .28s cubic-bezier(.22,.61,.36,1);}
   html.knipfull .cutmodal.cm-fullcut.cm-gegevens .cutcv,
   html.knipfull .cutmodal.cm-fullcut.cm-gegevens .lassocv{transition:transform .28s cubic-bezier(.22,.61,.36,1);}
+  /* TIJDELIJK UIT (verzoek Bram, 2026-09-04): het inschuiven van de hint bovenin en van de
+     veldenkaart onderin leidde af tijdens het testen. De krimp van de foto hierboven blijft,
+     want die laat zien wat er gebeurt. Terugzetten = de drie regels hieronder uitcommentarieren
+     ongedaan maken; de keyframes cmKaartOmhoog / cmHintIn staan er nog voor.
   html.knipfull .cutmodal.cm-fullcut.cm-gegevens.cm-inkomend .cm-veldenkaart,
   html.knipfull .cutmodal.cm-fullcut.cm-gegevens.cm-inkomend .cm-foot{animation:cmKaartOmhoog .28s cubic-bezier(.22,.61,.36,1);}
   html.knipfull .cutmodal.cm-fullcut.cm-gegevens.cm-inkomend .cm-bewerkbtn{animation:cmVeldenIn .2s ease .1s;}
-  /* Eigen keyframes: de hint staat gecentreerd met translateX(-50%), en cmVeldenIn zou die
-     verschuiving overschrijven. Dan schuift de pil tijdens de animatie een halve breedte naar
-     rechts en springt hij aan het eind terug. */
   html.knipfull .cutmodal.cm-fullcut.cm-gegevens.cm-inkomend #cmGegevensHint{animation:cmHintIn .2s ease .1s;}
+  */
 }
 /* 'Andere foto' is een zeldzame actie die alleen bij bewerken bestaat. Als omlijnde pil midden
    op een eigen regel trok hij evenveel aandacht als 'Meer details' en brak hij het links-rechts
@@ -7724,7 +7726,7 @@ function createTattoo(overrides = {}) {
    ============================================================ */
 // App-versie (semver, handmatig ophogen bij een release). Bij een bump ook de
 // CACHE-naam in sw.js meebumpen, zodat clients de nieuwe build ophalen.
-const APP_VERSIE = '0.3.28';
+const APP_VERSIE = '0.3.29';
 
 /* Dev-haken die de CLOUD raken hangen alleen op een ontwikkelmachine aan window. Ze zijn geen
    lek op zichzelf (zonder XSS roept niemand ze aan, en CSP + esc() houden XSS tegen), maar ze
