@@ -1218,7 +1218,11 @@ html.knipfull .cutmodal.cm-fullcut #cmGumGrootte{position:absolute;top:calc(118p
   width:min(320px,82%);padding:8px 12px;border-radius:var(--r-md);border:1px solid var(--rand);
   background:var(--kaart);background:color-mix(in srgb, var(--kaart) 90%, transparent);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);}
 /* tools onderop de foto, met safe-area */
-html.knipfull .cutmodal.cm-fullcut .cut-tools{bottom:calc(10px + env(safe-area-inset-bottom,0px));}
+/* Geen safe-area meer in deze marge: sinds de tabbalk onderaan staat, vangt DIE de home-indicator
+   al op (zie .cm-tabs). De inset hier bovenop tilde de gereedschapsbalk op een iPhone ~34px hoger
+   dan de veldenkaart in de gegevensstand, terwijl die twee juist op dezelfde lijn horen te
+   eindigen. 10px = exact de ondermarge van de veldenkaart. */
+html.knipfull .cutmodal.cm-fullcut .cut-tools{bottom:10px;}
 /* de rest van de kaart verdwijnt in deze fase */
 /* :not(.cm-gegevens) - in de gegevens-fase komen deze juist terug. Liever de verbergregel
    uitscopen dan er een tweede !important overheen leggen: anders zou die ook de inline
@@ -7733,7 +7737,7 @@ function createTattoo(overrides = {}) {
    ============================================================ */
 // App-versie (semver, handmatig ophogen bij een release). Bij een bump ook de
 // CACHE-naam in sw.js meebumpen, zodat clients de nieuwe build ophalen.
-const APP_VERSIE = '0.3.30';
+const APP_VERSIE = '0.3.31';
 
 /* Dev-haken die de CLOUD raken hangen alleen op een ontwikkelmachine aan window. Ze zijn geen
    lek op zichzelf (zonder XSS roept niemand ze aan, en CSP + esc() houden XSS tegen), maar ze
