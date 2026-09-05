@@ -1186,7 +1186,7 @@ html.knipzweef .cutmodal.cm-fullcut .cut-tools{position:absolute;z-index:6;
   left:calc(8px + env(safe-area-inset-left,0px));right:calc(8px + env(safe-area-inset-right,0px));bottom:8px;
   max-width:560px;margin-inline:auto;   /* landscape: gecentreerde balk i.p.v. schermbrede lege balk; safe-area tegen de notch */
   touch-action:none;   /* balk vangt geen scroll/systeemgebaar op; knoppen blijven tikbaar */
-  padding:7px 9px;border:1px solid var(--rand);border-radius:var(--r-md);
+  padding:10px 11px;border:1px solid var(--rand);border-radius:var(--r-md);   /* zelfde binnenmarge als de veldenkaart */
   background:var(--kaart);background:color-mix(in srgb, var(--kaart) 90%, transparent);
   -webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);
   box-shadow:0 8px 22px rgba(0,0,0,.22);}
@@ -1419,6 +1419,23 @@ html.knipfull .cutmodal.cm-fullcut.cm-gegevens .cm-veldenkaart{display:flex;flex
   padding:10px 11px;border:1px solid var(--rand);border-radius:var(--r-md);
   background:var(--kaart);background:color-mix(in srgb, var(--kaart) 90%, transparent);
   -webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);box-shadow:0 8px 22px rgba(0,0,0,.22);}
+/* De kaart is even hoog als de gereedschapsbalk in de knipstand (gemeten bij de wissel, komt
+   binnen als --velden-h), zodat de twee tabbladen niet van hoogte verspringen. Heeft de inhoud
+   meer nodig - 'Meer details' open - dan groeit de kaart daar gewoon overheen. */
+html.knipfull .cutmodal.cm-fullcut.cm-gegevens .cm-veldenkaart{min-height:var(--velden-h,0px);}
+/* Zelfde scheidingslijn als in de gereedschapsbalk (.cm-advrow): boven de secundaire acties,
+   met dezelfde 8px lucht erboven en eronder. */
+.cutmodal .cm-links{display:contents;}
+html.knipfull .cutmodal.cm-fullcut.cm-gegevens .cm-links{display:flex;flex-wrap:wrap;align-items:center;gap:8px;
+  margin-top:8px;padding-top:8px;border-top:1px solid var(--rand);}
+html.knipfull .cutmodal.cm-fullcut.cm-gegevens .cm-links .cm-choose-rij,
+html.knipfull .cutmodal.cm-fullcut.cm-gegevens .cm-links .cm-meer-wrap{display:flex;flex-direction:row;align-items:center;margin:0;}
+/* De kop, de uitleg, de camera-knop en 'geen foto' horen bij de fotokeuze-stand; hier staat
+   alleen 'Andere foto' in de rij. */
+html.knipfull .cutmodal.cm-fullcut.cm-gegevens .cm-links .cm-kies-kop,
+html.knipfull .cutmodal.cm-fullcut.cm-gegevens .cm-links .cm-kies-sub,
+html.knipfull .cutmodal.cm-fullcut.cm-gegevens .cm-links .cm-choose-cam,
+html.knipfull .cutmodal.cm-fullcut.cm-gegevens .cm-links .cm-geenfoto{display:none;}
 html.knipfull .cutmodal.cm-fullcut.cm-gegevens .cm-veldenkaart #cmNaam{display:block;width:auto;margin:0;}
 html.knipfull .cutmodal.cm-fullcut.cm-gegevens .cm-veldenkaart #cmInfo,
 html.knipfull .cutmodal.cm-fullcut.cm-gegevens .cm-veldenkaart .cm-choose-rij{margin:0;}
@@ -1426,7 +1443,6 @@ html.knipfull .cutmodal.cm-fullcut.cm-gegevens .cm-veldenkaart .cm-choose-rij{ma
 /* 'Nog een' hoort bij de gegevens, niet bij een knoppenbalk: als tekstlink onderin de kaart,
    dezelfde behandeling als 'Andere foto'. De uitleg zat in een los info-rondje; die staat nu op
    de link zelf (title/aria), zodat er onderin de kaart geen tweede knopje bij komt. */
-html.knipfull .cutmodal.cm-fullcut.cm-gegevens .cm-meer-wrap{display:flex!important;align-items:center;}
 html.knipfull .cutmodal.cm-fullcut.cm-gegevens #cmMeerInfo,
 html.knipfull .cutmodal.cm-fullcut.cm-gegevens #cmMeerTip{display:none!important;}
 html.knipfull .cutmodal.cm-fullcut.cm-gegevens #cmPlaceMeer{margin:0;padding:2px 0;min-height:0;
@@ -1451,15 +1467,15 @@ html.knipfull .cutmodal.cm-fullcut.cm-gegevens #cmPlaceMeer{margin:0;padding:2px
   html.knipfull .cutmodal.cm-fullcut.cm-gegevens.cm-inkomend #cmGegevensHint{animation:cmHintIn .2s ease .1s;}
   */
 }
-/* 'Andere foto' is een zeldzame actie die alleen bij bewerken bestaat. Als omlijnde pil midden
-   op een eigen regel trok hij evenveel aandacht als 'Meer details' en brak hij het links-rechts
-   ritme van de regel erboven. Nu een subtiele tekstlink links uitgelijnd, dezelfde behandeling
-   die 'Reset uitsnede' in de gereedschapsbalk krijgt. */
-html.knipfull .cutmodal.cm-fullcut.cm-gegevens .cm-choose-rij{align-items:flex-start;}
-html.knipfull .cutmodal.cm-fullcut.cm-gegevens .cm-choose{align-self:flex-start;margin:0;padding:2px 0;
-  min-height:0;background:transparent;border:0;border-radius:0;color:var(--gedempt);
-  font-size:var(--fs-xs);text-decoration:underline;gap:5px;}
-html.knipfull .cutmodal.cm-fullcut.cm-gegevens .cm-choose .ik{width:14px;height:14px;}
+/* 'Andere foto' en '+ Nog een' krijgen exact de pil van de gereedschapsknoppen (.cut-tools
+   .linkbtn): zelfde vulling, rand, ronding, tekstgrootte en tikdoel. Ze stonden hier als
+   onderstreepte tekstlinks, waardoor de onderste rij van de twee kaarten niet op elkaar leek. */
+html.knipfull .cutmodal.cm-fullcut.cm-gegevens .cm-choose,
+html.knipfull .cutmodal.cm-fullcut.cm-gegevens #cmPlaceMeer{display:inline-flex;align-items:center;gap:5px;
+  margin:0;padding:9px 13px;min-height:44px;box-shadow:none;
+  background:var(--veldbg);border:1px solid var(--rand);border-radius:999px;color:var(--tekst);
+  font-size:var(--fs-sm);font-weight:600;text-decoration:none;}
+html.knipfull .cutmodal.cm-fullcut.cm-gegevens .cm-choose .ik{width:18px;height:18px;}
 @keyframes cmKaartOmhoog{from{opacity:0;transform:translateY(120px)}to{opacity:1;transform:none}}
 @keyframes cmHintIn{from{opacity:0;transform:translateX(-50%) translateY(16px)}to{opacity:1;transform:translateX(-50%)}}
 /* De velden krijgen dezelfde behandeling als de gereedschapsbalk in de knipfase: een crème
@@ -1502,7 +1518,10 @@ html.knipfull .cutmodal.cm-review .cm-bewerkbtn span{position:absolute;width:1px
 .cutmodal .cut-tools .cm-toolstoggle{gap:5px;}
 .cutmodal .cut-tools .cm-toolstoggle .tt-lbl{display:inline;font-size:.82rem;font-weight:600;line-height:1;}
 .cutmodal .cut-tools .cm-toolstoggle .ik-chev{width:13px;height:13px;transition:transform .18s;}
-.cutmodal .cut-tools .cm-toolstoggle[aria-expanded="true"]{background:var(--accent);border-color:var(--accent);color:var(--op-accent);}
+/* Open/dicht is geen keuze maar een stand: alleen rand en tekst in accent, geen vulling. Zo
+   betekent een paars vlak in dit scherm consequent 'dit heb jij gekozen' (Gezet/Wishlist, de
+   actieve tab) en niet 'dit staat open'. */
+.cutmodal .cut-tools .cm-toolstoggle[aria-expanded="true"]{background:var(--veldbg);border-color:var(--accent);color:var(--accent);}
 .cutmodal .cut-tools .cm-toolstoggle[aria-expanded="true"] .ik-chev{transform:rotate(180deg);}
 /* Links uitlijnen, niet centreren: de vijf tools wrappen naar 3 + 2 en met
    justify-content:center zweefde die tweede rij in het midden onder de eerste.
@@ -2039,6 +2058,7 @@ form label{text-transform:none;letter-spacing:.005em;font-size:.8rem;color:var(-
               <label class="cm-veld cm-accent-veld"><span class="cm-accent-tekst"><span data-i18n="form.accentkleur">Accentkleur van markering</span><small class="veld-hint" data-i18n="form.accentuitleg">Gebruikt als je geen tattoo-afbeelding toevoegt</small></span><input id="cmAccent" type="color" value="#8E71F0" style="width:52px;height:38px;padding:3px;border-radius:var(--r-md);cursor:pointer;flex:none"></label>
             </div>
           </div>
+          <div class="cm-links">
           <div class="cm-choose-rij">
             <!-- Kop + context alleen zichtbaar in de compacte keuzestand (FLOW-2). LET OP: de
                  'blijft op dit toestel'-zin (ui.kies_sub) conditioneel maken zodra Magic cut (AI) user-facing live gaat. -->
@@ -2053,6 +2073,7 @@ form label{text-transform:none;letter-spacing:.005em;font-size:.8rem;color:var(-
             <button id="cmPlaceMeer" class="btn" data-i18n="ui.nog_een" data-i18n-title="ui.nog_een_uitleg" title="Plaats deze en knip daarna nog een tattoo uit dezelfde foto">+ Nog een</button>
             <button type="button" id="cmMeerInfo" class="cm-meer-info" aria-expanded="false" data-i18n-aria="ui.nog_een_uitleg" data-i18n-title="ui.nog_een_uitleg" aria-label="Wat doet '+ Nog een'?"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5"/><path d="M12 7.6h.01"/></svg></button>
             <div id="cmMeerTip" class="cm-meer-tip" hidden role="status" data-i18n="ui.nog_een_uitleg">Plaats deze en knip daarna nog een tattoo uit dezelfde foto</div>
+          </div>
           </div>
           </div>
         </div>
@@ -7737,7 +7758,7 @@ function createTattoo(overrides = {}) {
    ============================================================ */
 // App-versie (semver, handmatig ophogen bij een release). Bij een bump ook de
 // CACHE-naam in sw.js meebumpen, zodat clients de nieuwe build ophalen.
-const APP_VERSIE = '0.3.31';
+const APP_VERSIE = '0.3.33';
 
 /* Dev-haken die de CLOUD raken hangen alleen op een ontwikkelmachine aan window. Ze zijn geen
    lek op zichzelf (zonder XSS roept niemand ze aan, en CSP + esc() houden XSS tegen), maar ze
@@ -15509,7 +15530,7 @@ async function verwijderVoorbeelden() {
       if(ti){ ti.classList.toggle('actief', !!aan); ti.setAttribute('aria-pressed', aan?'true':'false'); } }
     if(!aan){   // terug naar knippen: vak en canvas weer 1:1, dus alle strook-vars weg
       prevBevroren=null; cutModal.classList.remove('cm-strook-krap');
-      ['--strook-h','--prev-w','--prev-h','--prev-s','--prev-tx','--prev-ty'].forEach(v=>cutModal.style.removeProperty(v));
+      ['--strook-h','--prev-w','--prev-h','--prev-s','--prev-tx','--prev-ty','--velden-h'].forEach(v=>cutModal.style.removeProperty(v));
       if(cutPrev) cutPrev.style.height='';
     }
   }
@@ -15525,7 +15546,8 @@ async function verwijderVoorbeelden() {
     // foto groot; klap je 'Meer details' open, dan krimpt hij tot zijn minimum en scrollen de
     // velden. Zonder dit stond er onder een half ingevuld formulier een scherm vol lege ruimte.
     const kaart=cutModal.querySelector('.cm-veldenkaart');
-    const wens=((kaart&&kaart.scrollHeight)||0)+20;   // +20: de marges boven en onder plus de randen
+    const minVeld=parseInt(cutModal.style.getPropertyValue('--velden-h'))||0;
+    const wens=Math.max((kaart&&kaart.scrollHeight)||0, minVeld)+20;   // +20: marges boven en onder plus de randen
     // Bovengrens ruim (0.8): de velden nemen precies wat ze nodig hebben en de foto slokt de
     // rest op. Met een krappere grens (0.55 was het eerst) bleef het verschil als een leeg vlak
     // tussen de laatste veldregel en de knoppenbalk staan.
@@ -15579,6 +15601,10 @@ async function verwijderVoorbeelden() {
   function toonGegevens(){
     // Maat bevriezen VOOR de fasewissel: daarna is het vak een strook en zou het canvas
     // opnieuw opgemeten worden - precies wat we niet willen.
+    // Hoogte van de gereedschapsbalk overnemen: die staat er nu nog, straks niet meer.
+    { const tb=cutModal.querySelector('.cut-tools');
+      const th=tb?Math.round(tb.getBoundingClientRect().height):0;
+      if(th) cutModal.style.setProperty('--velden-h', th+'px'); }
     if(cutPrev){ const r=cutPrev.getBoundingClientRect();
       prevBevroren={w:Math.round(r.width),h:Math.round(r.height)};
       cutPrev.style.height=prevBevroren.h+'px';   // startwaarde, anders is er niets om vanaf te krimpen
