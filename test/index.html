@@ -126,6 +126,7 @@
   /* Statuskleuren: één tint per betekenis */
   --op-accent:#F0EDE8;   /* tekst/icoon op een accent-vlak (warm wit, nooit puur #fff) */
   --gevaar:#A8341A;      /* destructief (reset/verwijderen) */
+  --gevaar-tekst:#8F2A14; /* dezelfde rol als tekst: donkerder op licht, lichter op donker (zie het dark-blok) */
   --invalid:#D14343;     /* ongeldige invoer */
   --succes:#5FBE86;      /* bevestiging/voltooid (licht, thema-onafhankelijk) */
   --succes-diep:#227A3E; /* diepe succesgroen voor gevulde knoppen: donker genoeg voor --op-accent-tekst, in beide thema's gelijk */
@@ -900,6 +901,7 @@ form label,
   --veldbg:#201C15;        /* invoervelden */
   --rand:#3A352B;          /* randen, zichtbaar op donker */
   --gedempt:#9E9382;
+  --gevaar-tekst:#F0937C;   /* op de donkere kaart haalde #A8341A maar 2,39:1 */
   --op-grond:#9E9382;   /* donker thema: --gedempt haalt hier al 6,02:1 */       /* gedempte/secundaire tekst */
   --raster:#322C21;        /* rasterlijnen op het papier */
   --inktblauw:#3B5488;     /* helderder navy zodat selectie opvalt */
@@ -1084,7 +1086,7 @@ form label,
 .cutmodal .cm-meer-pill{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--rand);border-radius:999px;
   padding:6px 16px;min-height:38px;background:var(--veldbg);color:var(--gedempt);font-family:inherit;font-size:.86rem;
   font-weight:600;letter-spacing:.02em;white-space:nowrap;cursor:pointer;}
-.cutmodal .cm-meer-pill[aria-expanded="true"]{background:var(--accent);border-color:var(--accent);color:var(--op-accent);}
+.cutmodal .cm-meer-pill[aria-expanded="true"]{background:var(--accent-vlak);border-color:var(--accent-vlak);color:var(--op-accent);}
 .cutmodal .cm-meer-pill:active{transform:scale(.97);}
 /* 'Other photo'/'Add tattoo'-knop (#cmChoose): in de volle bewerkmodus ONDERAAN (onder de bewerk-knoppen,
    zodat die meteen in beeld staan); in de compacte keuzestand bovenaan als grote hoofdknop. */
@@ -1367,8 +1369,11 @@ html.knipfull .cutmodal.cm-fullcut.cm-gegevens #cmWandModus,
 html.knipfull .cutmodal.cm-fullcut.cm-gegevens #cmGumModus,
 html.knipfull .cutmodal.cm-fullcut.cm-gegevens #cmGumGrootte,
 html.knipfull .cutmodal.cm-fullcut.cm-gegevens .cm-volgende{display:none!important;}
-/* niet meer in de foto tekenen terwijl je typt */
-html.knipfull .cutmodal.cm-fullcut.cm-gegevens .cm-prev{pointer-events:none;}
+/* In deze stand teken je niet in de foto; een tik brengt je terug naar het knippen. Dat is het
+   natuurlijke gebaar voor 'ik wil dit bijknippen' - de tabbalk blijft de expliciete weg. */
+html.knipfull .cutmodal.cm-fullcut.cm-gegevens .cm-prev,
+html.knipfull .cutmodal.cm-fullcut.cm-gegevens .cm-prev .cutcv,
+html.knipfull .cutmodal.cm-fullcut.cm-gegevens .cm-prev .lassocv{cursor:pointer;}
 /* Zelfde hint-pil als bij het knippen, zodat de bovenkant van het scherm dezelfde taal spreekt:
    daar staat wat je moet doen, hier ook. Buiten deze fase blijft hij verborgen via [hidden]. */
 html.knipfull .cutmodal.cm-fullcut.cm-gegevens #cmGegevensHint{display:block;position:absolute;
@@ -1437,6 +1442,8 @@ html.knipfull .cutmodal.cm-fullcut.cm-gegevens .cm-links .cm-kies-sub,
 html.knipfull .cutmodal.cm-fullcut.cm-gegevens .cm-links .cm-choose-cam,
 html.knipfull .cutmodal.cm-fullcut.cm-gegevens .cm-links .cm-geenfoto{display:none;}
 html.knipfull .cutmodal.cm-fullcut.cm-gegevens .cm-veldenkaart #cmNaam{display:block;width:auto;margin:0;}
+/* De naam is verplicht; aria-invalid werd al gezet maar was nergens te zien. */
+.cutmodal #cmNaam[aria-invalid="true"]{border-color:var(--gevaar-tekst);}
 html.knipfull .cutmodal.cm-fullcut.cm-gegevens .cm-veldenkaart #cmInfo,
 html.knipfull .cutmodal.cm-fullcut.cm-gegevens .cm-veldenkaart .cm-choose-rij{margin:0;}
 /* knoppenbalk: vast onderaan, buiten de scroll, met ruimte voor de home-indicator */
@@ -1521,7 +1528,7 @@ html.knipfull .cutmodal.cm-review .cm-bewerkbtn span{position:absolute;width:1px
 /* Open/dicht is geen keuze maar een stand: alleen rand en tekst in accent, geen vulling. Zo
    betekent een paars vlak in dit scherm consequent 'dit heb jij gekozen' (Gezet/Wishlist, de
    actieve tab) en niet 'dit staat open'. */
-.cutmodal .cut-tools .cm-toolstoggle[aria-expanded="true"]{background:var(--veldbg);border-color:var(--accent);color:var(--accent);}
+.cutmodal .cut-tools .cm-toolstoggle[aria-expanded="true"]{background:var(--veldbg);border-color:var(--accent-diep);color:var(--accent-diep);}
 .cutmodal .cut-tools .cm-toolstoggle[aria-expanded="true"] .ik-chev{transform:rotate(180deg);}
 /* Links uitlijnen, niet centreren: de vijf tools wrappen naar 3 + 2 en met
    justify-content:center zweefde die tweede rij in het midden onder de eerste.
@@ -1531,12 +1538,14 @@ html.knipfull .cutmodal.cm-review .cm-bewerkbtn span{position:absolute;width:1px
 /* Reset uitsnede: destructief + zeldzaam -> als subtiele tekstlink ONDER de balk (geen mis-tap naast de tools) */
 .cutmodal .cm-resetrij{display:flex;justify-content:center;margin-top:8px;}
 .cutmodal .cm-resetlink{display:inline-flex;align-items:center;gap:6px;background:transparent;border:0;cursor:pointer;
-  color:var(--gevaar);font-size:var(--fs-sm);font-weight:600;font-family:inherit;padding:6px 12px;border-radius:var(--r-sm);}
+  color:var(--gevaar-tekst);font-size:var(--fs-sm);font-weight:600;font-family:inherit;padding:6px 12px;border-radius:var(--r-sm);}
 .cutmodal .cm-resetlink .ik{width:15px;height:15px;stroke:currentColor;fill:none;}
 .cutmodal .cm-resetlink:hover{background:rgba(168,52,26,.08);}
 .cutmodal .cm-resetlink:active{transform:scale(.97);}
 .cutmodal .cut-tools .ct-resetwrap{flex:none;display:flex;justify-content:center;min-width:0;}
-.cutmodal .cut-tools .cm-reseticon{border:1px solid rgba(168,52,26,.4);background:rgba(168,52,26,.08);border-radius:999px;color:var(--gevaar);padding:9px 13px;min-height:44px;gap:5px;font-size:var(--fs-sm);font-weight:600;}
+/* Tekst en rand via --gevaar-tekst (thema-afhankelijk): het vaste #A8341A haalde op de donkere
+   kaart 2,39:1. De vulling blijft dezelfde lichte waas, die draagt geen betekenis. */
+.cutmodal .cut-tools .cm-reseticon{border:1px solid rgba(168,52,26,.4);background:rgba(168,52,26,.08);border-radius:999px;color:var(--gevaar-tekst);padding:9px 13px;min-height:44px;gap:5px;font-size:var(--fs-sm);font-weight:600;}
 .cutmodal .cut-tools .cm-reseticon:hover{border-color:var(--gevaar);background:rgba(168,52,26,.14);}
 .cutmodal .cut-tools .cm-undobtn .tt-lbl{display:inline;font-size:.82rem;font-weight:600;line-height:1;}
 @keyframes cmUndoPuls{0%{box-shadow:0 0 0 0 rgba(142,113,240,.55)}100%{box-shadow:0 0 0 12px rgba(142,113,240,0)}}
@@ -2080,11 +2089,11 @@ form label{text-transform:none;letter-spacing:.005em;font-size:.8rem;color:var(-
         <div class="cm-foot">
           <button id="cmPlace" class="btn cm-place" data-i18n="ui.plaatsen">Plaatsen</button>
         </div>
+        <button type="button" id="cmOpslaan" class="cm-opslaan" data-i18n-aria="ui.opslaan" data-i18n-title="ui.opslaan" aria-label="Opslaan" title="Opslaan"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12l5 5L20 6"/></svg></button>
         <div class="cm-tabs" role="group" data-i18n-aria="ui.tabs_aria" aria-label="Stap">
           <button type="button" id="cmTabKnip" class="cm-tab actief" aria-pressed="true"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><circle cx="6" cy="6" r="2.6"/><circle cx="6" cy="18" r="2.6"/><path d="M8.1 7.4L20 18"/><path d="M8.1 16.6L20 6"/></svg><span data-i18n="ui.tab_knippen">Uitknippen</span></button>
           <button type="button" id="cmTabInfo" class="cm-tab" aria-pressed="false"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 7h14"/><path d="M5 12h14"/><path d="M5 17h8"/></svg><span data-i18n="ui.tab_gegevens">Gegevens</span></button>
         </div>
-        <button type="button" id="cmOpslaan" class="cm-opslaan" data-i18n-aria="ui.opslaan" data-i18n-title="ui.opslaan" aria-label="Opslaan" title="Opslaan"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12l5 5L20 6"/></svg></button>
         <button id="cmVolgende" class="cm-volgende" data-i18n-aria="ui.volgende" data-i18n-title="ui.volgende" aria-label="Volgende" title="Volgende"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12l5 5L20 6"/></svg><span class="cv-lbl" data-i18n="ui.volgende">Volgende</span></button>
       </div>
     </div>
@@ -7758,7 +7767,7 @@ function createTattoo(overrides = {}) {
    ============================================================ */
 // App-versie (semver, handmatig ophogen bij een release). Bij een bump ook de
 // CACHE-naam in sw.js meebumpen, zodat clients de nieuwe build ophalen.
-const APP_VERSIE = '0.3.35';
+const APP_VERSIE = '0.3.36';
 
 /* Dev-haken die de CLOUD raken hangen alleen op een ontwikkelmachine aan window. Ze zijn geen
    lek op zichzelf (zonder XSS roept niemand ze aan, en CSP + esc() houden XSS tegen), maar ze
@@ -15523,6 +15532,7 @@ async function verwijderVoorbeelden() {
   let faseTicket=0;
   function zetGegevensFase(aan){
     faseTicket++;
+    if(!aan){ const k=cutModal.querySelector('.cm-veldenkaart'); if(k) veldenScroll=k.scrollTop; }   // nog meten nu de kaart bestaat
     cutModal.classList.toggle('cm-gegevens', !!aan);
     const gh=document.getElementById('cmGegevensHint'); if(gh) gh.hidden=!aan;
     { const tk=document.getElementById('cmTabKnip'), ti=document.getElementById('cmTabInfo');
@@ -15605,7 +15615,7 @@ async function verwijderVoorbeelden() {
   }
   // De velden groeien en krimpen (Meer details, een langere naam, een andere taal): dan moet de
   // strook mee. Een ResizeObserver op het detailblok is genoeg; de knop zelf hoeft niets te weten.
-  let strookRO=null;
+  let strookRO=null, veldenScroll=0;
   function volgVelden(){
     if(strookRO || typeof ResizeObserver==='undefined') return;
     const info=document.getElementById('cmInfo'); if(!info) return;
@@ -15629,6 +15639,7 @@ async function verwijderVoorbeelden() {
     { const op=document.getElementById('cmOpslaan'); const lbl=cmPlaceBtn&&cmPlaceBtn.textContent&&cmPlaceBtn.textContent.trim();
       if(op&&lbl){ op.setAttribute('aria-label',lbl); op.setAttribute('title',lbl); } }
     zetFotoStrook(); volgVelden();
+    { const k=cutModal.querySelector('.cm-veldenkaart'); if(k) k.scrollTop=veldenScroll; }
     if(origImg){ drawCutPreview(); drawLasso(); }
     // Startwaarde vastleggen met een geforceerde reflow, dan de inline hoogte loslaten: de
     // computed hoogte gaat van 'volle foto' naar de strook en de krimp loopt als transitie.
@@ -15692,6 +15703,7 @@ async function verwijderVoorbeelden() {
   }
   // Toon de uitsnede-instellingen (preview, sliders, achtergrond) pas na een foto
   function toonCutInstellingen(b){
+    if(!b) veldenScroll=0;   // nieuwe sessie: de velden weer bovenaan
     const s=document.getElementById("cmSettings"); if(s) s.hidden=!b;
     if(!b){ cutModal.classList.remove("cm-review"); zetGegevensFase(false); }   // fotokeuze/sluiten: nooit in review- of gegevens-stand
     { const bb=document.getElementById("cmBewerkBadge"); if(bb) bb.hidden=!(b && (pendingEdit||pendingEdit2D)); }   // 'Bewerken'-badge: alleen in de knipfase van een bewerk-flow
@@ -16128,6 +16140,13 @@ async function verwijderVoorbeelden() {
         if(origImg){ drawCutPreview(); drawLasso(); }
       }; }
     { const op=document.getElementById("cmOpslaan"); if(op) op.onclick=()=>{ if(cmPlaceBtn) cmPlaceBtn.click(); }; }
+    // Enter in het naamveld doet hetzelfde als de knop rechtsboven: anders levert de
+    // return-toets op het toetsenbord niets op terwijl er maar een veld is.
+    { const nm=document.getElementById("cmNaam"); if(nm) nm.addEventListener('keydown',e=>{
+        if(e.key!=='Enter') return;
+        e.preventDefault();
+        if(cutModal.classList.contains('cm-gegevens') && cmPlaceBtn) cmPlaceBtn.click();
+      }); }
     { const ti=document.getElementById("cmTabInfo"); if(ti) ti.onclick=()=>{
         if(cutModal.classList.contains('cm-gegevens')) return;
         naarReview();
@@ -16320,6 +16339,8 @@ async function verwijderVoorbeelden() {
 
     cutPrev.addEventListener("dragstart",e=>e.preventDefault());
     cutPrev.addEventListener("pointerdown",e=>{
+      if(cutModal.classList.contains('cm-gegevens')){   // strook in de gegevensstand: tik = bijknippen
+        e.preventDefault(); const tk=document.getElementById('cmTabKnip'); if(tk) tk.click(); return; }
       if(!origImg)return;
       e.preventDefault();
       if(bgPickMode){                       // pipet: kleur kiezen i.p.v. lasso tekenen
