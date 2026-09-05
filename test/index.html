@@ -1420,6 +1420,10 @@ html.knipfull .cutmodal.cm-fullcut.cm-gegevens .lassocv{inset:auto;top:0;left:0;
    dezelfde taal - eerder was dit een schermbreed blok met een streep erboven. */
 html.knipfull .cutmodal.cm-fullcut.cm-gegevens .cm-veldenkaart{display:flex;flex-direction:column;gap:10px;
   flex:1 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;
+  /* Expliciet dicht in de breedte: een verticale scroller zet overflow-x automatisch op 'auto'
+     in plaats van 'visible', en op iOS voelt dat als een kaart die je opzij kunt trekken. Er
+     valt niets buiten (scrollWidth = clientWidth), dus hier gaat niets verloren. */
+  overflow-x:hidden;
   width:min(560px, calc(100% - 16px));margin:8px auto 10px;   /* 10 onder = exact de onderrand van de gereedschapsbalk */
   padding:10px 11px;border:1px solid var(--rand);border-radius:var(--r-md);
   background:var(--kaart);background:color-mix(in srgb, var(--kaart) 90%, transparent);
@@ -7767,7 +7771,7 @@ function createTattoo(overrides = {}) {
    ============================================================ */
 // App-versie (semver, handmatig ophogen bij een release). Bij een bump ook de
 // CACHE-naam in sw.js meebumpen, zodat clients de nieuwe build ophalen.
-const APP_VERSIE = '0.3.36';
+const APP_VERSIE = '0.3.37';
 
 /* Dev-haken die de CLOUD raken hangen alleen op een ontwikkelmachine aan window. Ze zijn geen
    lek op zichzelf (zonder XSS roept niemand ze aan, en CSP + esc() houden XSS tegen), maar ze
