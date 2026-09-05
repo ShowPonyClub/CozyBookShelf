@@ -1374,7 +1374,7 @@ html.knipfull .cutmodal.cm-fullcut.cm-gegevens .cm-prev{pointer-events:none;}
 html.knipfull .cutmodal.cm-fullcut.cm-gegevens #cmGegevensHint{display:block;position:absolute;
   top:calc(16px + env(safe-area-inset-top,0px));left:50%;transform:translateX(-50%);z-index:7;
   pointer-events:none;max-width:calc(100% - 128px);text-align:center;margin:0;padding:9px 14px;
-  border-radius:999px;border:1px solid var(--rand);font-size:var(--fs-sm);color:var(--tekst);
+  border-radius:999px;border:1px solid var(--rand);font-size:var(--fs-sm);   /* kleur komt van .hintline: dezelfde gedempte tint als de knip-hint */
   background:var(--kaart);background:color-mix(in srgb, var(--kaart) 90%, transparent);
   -webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);box-shadow:0 8px 22px rgba(0,0,0,.22);}
 /* De uitklap-knop hoort bij de foto-strook, niet bij de bovenrand van het scherm: hij staat
@@ -7758,7 +7758,7 @@ function createTattoo(overrides = {}) {
    ============================================================ */
 // App-versie (semver, handmatig ophogen bij een release). Bij een bump ook de
 // CACHE-naam in sw.js meebumpen, zodat clients de nieuwe build ophalen.
-const APP_VERSIE = '0.3.33';
+const APP_VERSIE = '0.3.35';
 
 /* Dev-haken die de CLOUD raken hangen alleen op een ontwikkelmachine aan window. Ze zijn geen
    lek op zichzelf (zonder XSS roept niemand ze aan, en CSP + esc() houden XSS tegen), maar ze
@@ -15538,6 +15538,20 @@ async function verwijderVoorbeelden() {
      verloren in het midden), maar de UITSNEDE zelf: bereken waar die in het bevroren vak ligt
      en leg hem gecentreerd in de strook. Boven blijft ruimte voor de hint-pil en de x, rechts
      voor de uitklap-knop. Nooit vergroten (s<=1): opblazen geeft alleen onscherpte. */
+  /* Hoe hoog wil de inhoud van de kaart zijn? NIET scrollHeight: die is nooit kleiner dan de
+     kaart zelf, dus zodra de kaart een keer groot was (Meer details open) bleef de meting groot
+     en klapte de foto na het dichtklappen niet meer terug. Meten van de bovenkant van het
+     eerste kind tot de onderkant van het laatste werkt in beide richtingen, ook als de kaart
+     op dat moment gescrold is. */
+  function inhoudHoogte(el){
+    const kids=[...el.children].filter(k=>k.getClientRects().length);
+    if(!kids.length) return 0;
+    let top=Infinity, bot=-Infinity;
+    for(const k of kids){ const r=k.getBoundingClientRect(); top=Math.min(top,r.top); bot=Math.max(bot,r.bottom); }
+    const cs=getComputedStyle(el);
+    const rand=parseFloat(cs.paddingTop)+parseFloat(cs.paddingBottom)+parseFloat(cs.borderTopWidth)+parseFloat(cs.borderBottomWidth);
+    return Math.round(bot-top+rand);
+  }
   function zetFotoStrook(){
     if(!cutModal.classList.contains('cm-gegevens') || !prevBevroren || !cutPrev) return;
     const host=cutModal.querySelector('.cm-body');
@@ -15547,7 +15561,7 @@ async function verwijderVoorbeelden() {
     // velden. Zonder dit stond er onder een half ingevuld formulier een scherm vol lege ruimte.
     const kaart=cutModal.querySelector('.cm-veldenkaart');
     const minVeld=parseInt(cutModal.style.getPropertyValue('--velden-h'))||0;
-    const wens=Math.max((kaart&&kaart.scrollHeight)||0, minVeld)+20;   // +20: marges boven en onder plus de randen
+    const wens=Math.max(kaart?inhoudHoogte(kaart):0, minVeld)+20;   // +20: marges boven en onder plus de randen
     // Bovengrens ruim (0.8): de velden nemen precies wat ze nodig hebben en de foto slokt de
     // rest op. Met een krappere grens (0.55 was het eerst) bleef het verschil als een leeg vlak
     // tussen de laatste veldregel en de knoppenbalk staan.
