@@ -316,7 +316,7 @@ main > section{animation:opkomen .3s ease both}
 .cutmodal .cm-naam-rij{display:flex;align-items:center;gap:8px}
 .cutmodal .cm-naam-rij input{flex:1;min-width:0}
 .cutmodal .cm-status{width:auto;flex:none}
-.cutmodal .cm-status button{flex:none;min-height:38px;padding:6px 11px;font-size:.74rem}
+.cutmodal .cm-status button{flex:none;min-height:44px;padding:6px 11px;font-size:.74rem}   /* 38 was onder het tikdoel van 44 */
 /* Continuatie-badge: 'volgende uitsnede uit deze foto' (D6a verbetering 1/2) */
 .cutmodal .cm-herhaal-badge{display:flex;align-items:center;gap:6px;font-size:var(--fs-sm);font-weight:600;color:var(--accent);
   background:rgba(142,113,240,.12);border:1px solid rgba(142,113,240,.32);border-radius:var(--r-sm);padding:6px 10px;margin:0 0 8px}
@@ -1084,7 +1084,7 @@ form label,
 .cutmodal .cm-onderrij{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:2px;}
 /* 'Meer details' = pill in dezelfde stijl als de Gezet/Wishlist-toggle: licht (dicht) -> accent-vulling (open) */
 .cutmodal .cm-meer-pill{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--rand);border-radius:999px;
-  padding:6px 16px;min-height:38px;background:var(--veldbg);color:var(--gedempt);font-family:inherit;font-size:.86rem;
+  padding:6px 16px;min-height:44px;background:var(--veldbg);color:var(--gedempt);font-family:inherit;font-size:.86rem;   /* 38 was onder het tikdoel van 44 */
   font-weight:600;letter-spacing:.02em;white-space:nowrap;cursor:pointer;}
 .cutmodal .cm-meer-pill[aria-expanded="true"]{background:var(--accent-vlak);border-color:var(--accent-vlak);color:var(--op-accent);}
 .cutmodal .cm-meer-pill:active{transform:scale(.97);}
@@ -1406,7 +1406,10 @@ html.knipfull .cutmodal.cm-fullcut.cm-gegevens .cm-bewerkbtn span{position:absol
    (--prev-w/--prev-h) en verhuist met een transform de strook in. Geen nieuwe bitmap, geen
    herbouw, geen textuur-upload - dezelfde afspraak als v0.3.19, alleen krimpt de foto nu
    zichtbaar mee. zetFotoStrook() rekent de vars uit (strookhoogte, schaal, verschuiving). */
-html.knipfull .cutmodal.cm-fullcut.cm-gegevens.cm-strook-krap #cmGegevensHint{display:none;}
+/* Staat de naam er eenmaal, dan heeft de instructie zijn werk gedaan en mag de foto die ruimte
+   hebben. Bij bewerken (naam is al ingevuld) verschijnt hij dus meteen niet. */
+html.knipfull .cutmodal.cm-fullcut.cm-gegevens.cm-strook-krap #cmGegevensHint,
+html.knipfull .cutmodal.cm-fullcut.cm-gegevens.cm-naam-ingevuld #cmGegevensHint{display:none;}
 html.knipfull .cutmodal.cm-fullcut.cm-gegevens #cmSettings{flex:0 0 auto;}
 html.knipfull .cutmodal.cm-fullcut.cm-gegevens .cm-prev{flex:0 0 auto;height:var(--strook-h,34%);
   min-height:0;max-height:none;overflow:hidden;}
@@ -7771,7 +7774,7 @@ function createTattoo(overrides = {}) {
    ============================================================ */
 // App-versie (semver, handmatig ophogen bij een release). Bij een bump ook de
 // CACHE-naam in sw.js meebumpen, zodat clients de nieuwe build ophalen.
-const APP_VERSIE = '0.3.37';
+const APP_VERSIE = '0.3.38';
 
 /* Dev-haken die de CLOUD raken hangen alleen op een ontwikkelmachine aan window. Ze zijn geen
    lek op zichzelf (zonder XSS roept niemand ze aan, en CSP + esc() houden XSS tegen), maar ze
@@ -15543,7 +15546,7 @@ async function verwijderVoorbeelden() {
       if(tk){ tk.classList.toggle('actief', !aan); tk.setAttribute('aria-pressed', aan?'false':'true'); }
       if(ti){ ti.classList.toggle('actief', !!aan); ti.setAttribute('aria-pressed', aan?'true':'false'); } }
     if(!aan){   // terug naar knippen: vak en canvas weer 1:1, dus alle strook-vars weg
-      prevBevroren=null; cutModal.classList.remove('cm-strook-krap');
+      prevBevroren=null; cutModal.classList.remove('cm-strook-krap','cm-naam-ingevuld');
       ['--strook-h','--prev-w','--prev-h','--prev-s','--prev-tx','--prev-ty','--velden-h'].forEach(v=>cutModal.style.removeProperty(v));
       if(cutPrev) cutPrev.style.height='';
     }
@@ -15597,8 +15600,9 @@ async function verwijderVoorbeelden() {
     // hint helpt bij het begin, maar wie de details openklapt is allang bezig - en met de pil
     // erboven bleef er van de foto een postzegel over.
     const krap=H<210; cutModal.classList.toggle('cm-strook-krap', krap);
+    const hintWeg=krap||cutModal.classList.contains('cm-naam-ingevuld');   // dan is de bovenrand vrij
     // Links en rechts even breed, anders staat de uitsnede zichtbaar uit het midden.
-    const links=16, rechts=16, boven=krap?10:62, onder=10;   // boven: ruimte voor de hint-pil en de x
+    const links=16, rechts=16, boven=hintWeg?10:62, onder=10;   // boven: ruimte voor de hint-pil en de x
     const vw=Math.max(40,W-links-rechts), vh=Math.max(40,H-boven-onder);
     const sc=Math.min(vw/bw, vh/bh, 1);
     /* Niet klakkeloos centreren: de tattoo hoort te blijven staan waar hij in de knipstand stond
@@ -15626,6 +15630,13 @@ async function verwijderVoorbeelden() {
     strookRO=new ResizeObserver(()=>{ if(cutModal.classList.contains('cm-gegevens')) zetFotoStrook(); });
     strookRO.observe(info);
   }
+  // De hint bovenin hoort bij een leeg naamveld; zodra er iets staat mag hij weg (en krijgt de
+  // foto de vrijgekomen strookruimte, vandaar de herberekening).
+  function zetNaamStand(){
+    const nm=document.getElementById('cmNaam');
+    cutModal.classList.toggle('cm-naam-ingevuld', !!(nm && nm.value.trim()));
+    zetFotoStrook();
+  }
   function toonGegevens(){
     // Maat bevriezen VOOR de fasewissel: daarna is het vak een strook en zou het canvas
     // opnieuw opgemeten worden - precies wat we niet willen.
@@ -15642,7 +15653,7 @@ async function verwijderVoorbeelden() {
     // dat label, zodat schermlezer en tooltip zeggen wat er echt gebeurt.
     { const op=document.getElementById('cmOpslaan'); const lbl=cmPlaceBtn&&cmPlaceBtn.textContent&&cmPlaceBtn.textContent.trim();
       if(op&&lbl){ op.setAttribute('aria-label',lbl); op.setAttribute('title',lbl); } }
-    zetFotoStrook(); volgVelden();
+    zetNaamStand(); volgVelden();
     { const k=cutModal.querySelector('.cm-veldenkaart'); if(k) k.scrollTop=veldenScroll; }
     if(origImg){ drawCutPreview(); drawLasso(); }
     // Startwaarde vastleggen met een geforceerde reflow, dan de inline hoogte loslaten: de
@@ -16146,6 +16157,9 @@ async function verwijderVoorbeelden() {
     { const op=document.getElementById("cmOpslaan"); if(op) op.onclick=()=>{ if(cmPlaceBtn) cmPlaceBtn.click(); }; }
     // Enter in het naamveld doet hetzelfde als de knop rechtsboven: anders levert de
     // return-toets op het toetsenbord niets op terwijl er maar een veld is.
+    { const nm=document.getElementById("cmNaam"); if(nm) nm.addEventListener('input',()=>{
+        if(cutModal.classList.contains('cm-gegevens')) zetNaamStand();
+      }); }
     { const nm=document.getElementById("cmNaam"); if(nm) nm.addEventListener('keydown',e=>{
         if(e.key!=='Enter') return;
         e.preventDefault();
