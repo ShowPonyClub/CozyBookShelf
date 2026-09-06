@@ -1465,6 +1465,12 @@ html.knipfull .cutmodal.cm-fullcut.cm-gegevens #cmPlaceMeer{margin:0;padding:2px
 /* De krimp zit op het canvas (transform = compositor-werk) en op de hoogte van de strook. De
    velden komen van onderen mee omhoog, zoals ze dat als zwevende kaart ook deden. */
 @media (prefers-reduced-motion:no-preference){
+  /* Wat er van de overgang OVER is (2026-09-06): alleen de nieuwe inhoud komt op, zonder
+     beweging. Geen schuiven, geen krimp-transitie, geen wachttijd - dat was precies wat
+     afleidde. Een pure opacity-animatie is compositor-werk, dus ze kan niet haperen op het
+     tekenwerk dat in hetzelfde frame gebeurt. */
+  html.knipfull .cutmodal.cm-fullcut.cm-gegevens.cm-zachtin .cm-veldenkaart,
+  html.knipfull .cutmodal.cm-fullcut.cm-gegevens.cm-zachtin #cmGegevensHint{animation:cmZachtIn .18s ease both;}
   /* TIJDELIJK UIT (verzoek Bram, 2026-09-04): de krimpende strook duwde de veldenkaart eronder
      omhoog - dat was het schuiven ONDERIN. Zonder deze twee staat alles meteen op zijn plek.
   html.knipfull .cutmodal.cm-fullcut.cm-gegevens .cm-prev{transition:height .28s cubic-bezier(.22,.61,.36,1);}
@@ -1481,6 +1487,7 @@ html.knipfull .cutmodal.cm-fullcut.cm-gegevens #cmPlaceMeer{margin:0;padding:2px
   html.knipfull .cutmodal.cm-fullcut.cm-gegevens.cm-inkomend #cmGegevensHint{animation:cmHintIn .2s ease .1s;}
   */
 }
+@keyframes cmZachtIn{from{opacity:0}to{opacity:1}}
 /* 'Andere foto' en '+ Nog een' krijgen exact de pil van de gereedschapsknoppen (.cut-tools
    .linkbtn): zelfde vulling, rand, ronding, tekstgrootte en tikdoel. Ze stonden hier als
    onderstreepte tekstlinks, waardoor de onderste rij van de twee kaarten niet op elkaar leek. */
@@ -7774,7 +7781,7 @@ function createTattoo(overrides = {}) {
    ============================================================ */
 // App-versie (semver, handmatig ophogen bij een release). Bij een bump ook de
 // CACHE-naam in sw.js meebumpen, zodat clients de nieuwe build ophalen.
-const APP_VERSIE = '0.3.38';
+const APP_VERSIE = '0.3.39';
 
 /* Dev-haken die de CLOUD raken hangen alleen op een ontwikkelmachine aan window. Ze zijn geen
    lek op zichzelf (zonder XSS roept niemand ze aan, en CSP + esc() houden XSS tegen), maar ze
@@ -7851,9 +7858,10 @@ if (KNIP_ZWEEF_TOOLS && document.documentElement) document.documentElement.class
    een server gaat en dat er niets met derden wordt gedeeld. AANZETTEN = true, maar pas na
    die gate. De hele code eromheen blijft staan en werkt. */
 const MAGIC_CUT_AAN = false;
-// TIJDELIJK op false (verzoek Bram, 2026-09-04): de fasewissel knippen->gegevens gebeurt zonder
-// beweging en zonder wachttijd. Op true zet de checkmark eerst de gereedschapsbalk weg en schuift
-// daarna de rest in; de bijbehorende CSS staat uitgecommentarieerd in het animatieblok.
+// De ZWARE fasewissel (balk weg, uitsnede omhoog, alles schuift mee) blijft uit: die leidde af
+// tijdens het testen. Wat er wel is, is een zachte fade van alleen de nieuwe inhoud - zie
+// zachtIn() en de cm-zachtin-regels in de CSS; die staat los van deze vlag. Op true komt de oude
+// overgang terug, inclusief de 130ms pauze; de bijbehorende CSS staat uitgecommentarieerd.
 const KNIP_FASE_ANIMATIE = false;
 const KNIP_FULLSCREEN = true;   // FASE-2-EXPERIMENT: knip-stap schermvullend op donker (iOS-fotokiezer-gevoel); naam/details volgen na 'Volgende'. TERUGDRAAIEN = false.
 if (KNIP_FULLSCREEN && document.documentElement) document.documentElement.classList.add('knipfull');
@@ -15662,12 +15670,22 @@ async function verwijderVoorbeelden() {
     // achtergrond gaat, en dan zou de inline hoogte blijven staan en de velden buiten beeld.
     if(cutPrev){ void cutPrev.offsetHeight; cutPrev.style.height=''; }
   }
+  // Zachte fade van de nieuwe inhoud (veldenkaart + hint) bij de wissel naar de gegevensstand.
+  // Dit is wat er van de overgang overblijft: geen beweging, geen wachttijd. Eerst weghalen en
+  // een reflow forceren, anders herstart de animatie niet als je snel heen en weer tikt.
+  let zachtTimer=0;
+  function zachtIn(){
+    cutModal.classList.remove('cm-zachtin'); void cutModal.offsetHeight;
+    cutModal.classList.add('cm-zachtin');
+    clearTimeout(zachtTimer);
+    zachtTimer=setTimeout(()=>cutModal.classList.remove('cm-zachtin'), 260);
+  }
   let naarReviewBezig=false;
   function naarReview(){
     if(naarReviewBezig) return;
     const stil = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     if(!document.documentElement.classList.contains('knipfull')){ zetFullcut(false); return; }   // terugval-layout
-    if(stil || !KNIP_FASE_ANIMATIE){ toonGegevens(); return; }
+    if(stil || !KNIP_FASE_ANIMATIE){ toonGegevens(); if(!stil) zachtIn(); return; }
     naarReviewBezig=true;
     const mijnTicket=faseTicket;
     cutModal.classList.add('cm-naarreview');
@@ -15828,7 +15846,7 @@ async function verwijderVoorbeelden() {
     } finally { annuleerBezig=false; }
   }
   function closeCutModal(){ cutHistoryOpruimen();
-    resetSnapshot=null; laatsteActie=null; cutModal.classList.remove("on","cm-inkomend","cm-naarreview"); zetGegevensFase(false); pendingPlace=null; pendingEdit=null; pendingPlace2D=null; pendingNew=null; pendingEdit2D=null; toonCutInstellingen(false); toonInfo(false);
+    resetSnapshot=null; laatsteActie=null; cutModal.classList.remove("on","cm-inkomend","cm-naarreview","cm-zachtin"); zetGegevensFase(false); pendingPlace=null; pendingEdit=null; pendingPlace2D=null; pendingNew=null; pendingEdit2D=null; toonCutInstellingen(false); toonInfo(false);
     plaatsHerhaal=false; window.__tattiesHerhaalSrc=null; herhaalTeller=1; vorigeLassos=[]; addDoel='3d';   // D6(a): herhaal-state opruimen + doel terug naar default (geen stale vlag/lasso/doel)
     if(imgTexture && imgTexture.dispose){ imgTexture.dispose(); } imgTexture=null;   // niet-geplaatste textuur vrijgeven (geen lek)
     cutPointers.clear(); pinch=null; drawingFree=false; gumStroke=null; lassoDragIdx=-1; clearTimeout(wheelEind);
