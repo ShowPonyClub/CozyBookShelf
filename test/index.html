@@ -8,12 +8,53 @@
      De échte winst: connect-src/img-src 'self' blokkeren exfiltratie/beacons naar externe servers;
      geen 'unsafe-eval'. data:/blob: zijn nodig voor inline fonts, foto-dataURLs en Three.js-textures.
      Uitzondering (opt-in cloud-sync): connect-src staat alléén het eigen Supabase-project toe
-     (auth/REST/storage via https, realtime via wss). Verder blijft alles dichtgetimmerd. -->
+     (auth/REST/storage via https, realtime via wss). Verder blijft alles dichtgetimmerd.
+     LET OP - frame-ancestors doet hier NIETS: browsers negeren die directive in een <meta>
+     (alleen een echte HTTP-header telt, en die kan GitHub Pages niet zetten; de console meldt
+     dat ook). Hij blijft staan voor het geval de app ooit achter een host met headers komt.
+     De werkende bescherming tegen clickjacking staat in het eerste inline script hieronder. -->
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src data:; connect-src 'self' https://uhrbvwwiovefrpscgweo.supabase.co wss://uhrbvwwiovefrpscgweo.supabase.co; worker-src 'self' blob:; manifest-src data:; base-uri 'none'; form-action 'none'; frame-ancestors 'none'">
 <title>Tatties</title>
 
 <!-- Thema zo vroeg mogelijk zetten (voorkomt een lichte flits bij donker thema) -->
 <script>
+  /* Clickjacking: `frame-ancestors` in een <meta> wordt door browsers genegeerd (alleen een
+     echte HTTP-header telt, en die kan GitHub Pages niet zetten). Dus verdedigen we ons zelf
+     zodra een VREEMDE origin ons inbedt. Same-origin inbedding blijft toegestaan: een eigen
+     preview of testpagina moet gewoon blijven werken; cross-origin gooit de origin-check een
+     SecurityError, en juist dan grijpen we in.
+     TWEE stappen, want alleen wegnavigeren is niet genoeg: browsers blokkeren top-navigatie
+     vanuit een cross-origin frame zonder dat de gebruiker iets heeft aangeraakt. Die poging
+     doen we wel (hij slaagt vaak), maar we maken de app daarnaast onbruikbaar in het frame.
+     Dat werkt altijd, en zonder klikbare app valt er niets te kapen. Deze code draait vóór
+     de i18n-tabellen bestaan, vandaar de vaste tweetalige regel. */
+  (function () {
+    try {
+      if (window.top === window.self) return;
+      var zelfde = false;
+      try { zelfde = window.top.location.origin === window.self.location.origin; } catch (e) { zelfde = false; }
+      if (zelfde) return;
+      var hier = window.self.location.href;
+      try { window.top.location = hier; } catch (e) { /* geblokkeerd: stap 2 vangt het op */ }
+      document.documentElement.setAttribute('data-ingekaderd', '1');
+      var toon = function () {
+        try {
+          document.body.innerHTML = '';
+          var d = document.createElement('div');
+          d.setAttribute('style', 'font:16px/1.5 system-ui,sans-serif;padding:24px;text-align:center;color:#221A12;background:#F8F2E7;min-height:100vh');
+          var p = document.createElement('p');
+          p.textContent = 'Tatties kan niet in een andere website worden getoond. / Tatties cannot be displayed inside another website.';
+          var a = document.createElement('a');
+          a.href = hier; a.target = '_top'; a.rel = 'noopener';
+          a.textContent = 'Tatties openen / Open Tatties';
+          a.setAttribute('style', 'display:inline-block;margin-top:12px;color:#6A4BD4;font-weight:600');
+          d.appendChild(p); d.appendChild(a); document.body.appendChild(d);
+        } catch (e) { /* dan blijft alleen de lege body over, ook goed */ }
+      };
+      if (document.body) toon();
+      else document.addEventListener('DOMContentLoaded', toon, { once: true });
+    } catch (e) { /* niets te doen */ }
+  })();
   (function () {
     try {
       var voorkeur = localStorage.getItem('tatties-thema') || 'auto';
@@ -463,6 +504,9 @@ main > section{animation:opkomen .3s ease both}
 
 /* ---- Detail ---- */
 .detail-top{display:flex;align-items:center;gap:8px;margin-bottom:14px}
+/* Verwijderen zat 8px van bewerken af: twee tikdoelen van 44px naast elkaar, waarvan er een
+   onomkeerbaar aanvoelt. Extra lucht ervoor, zoals de bewerkbalk dat ook doet met .eb-del. */
+.detail-top .knop-gevaar{margin-left:12px}
 /* ---- Legal (Terms / Privacy) ---- */
 .legal-body{padding:16px 16px 60px;max-width:600px;margin:0 auto}
 .legal-body h3{font-size:.93rem;font-weight:700;margin:22px 0 5px;color:var(--tekst)}
@@ -736,7 +780,7 @@ input[type=range]:focus{box-shadow:none;border:none}
   max-width:90vw;text-align:left;box-shadow:0 10px 30px rgba(34,26,18,.35);
 }
 #toast.zichtbaar{opacity:1;transform:translateX(-50%) translateY(0)}
-#toast.met-actie{pointer-events:auto;display:flex;align-items:center;gap:14px}
+#toast.met-actie{pointer-events:auto;display:flex;align-items:center;gap:12px;padding:4px 8px 4px 16px}
 /* Sync-indicator: klein pilletje bovenin (spinner 'Synchroniseren…' -> ✓ 'Bijgewerkt') */
 #sync-ind{position:fixed;left:50%;top:max(64px,calc(env(safe-area-inset-top) + 60px));transform:translateX(-50%);z-index:55;
   display:inline-flex;align-items:center;gap:8px;background:#2A2118;color:var(--op-accent);border:1px solid var(--rand);
@@ -748,8 +792,12 @@ input[type=range]:focus{box-shadow:none;border:none}
 #sync-ind.klaar .si-vink{display:inline;}
 #sync-ind.klaar{border-color:rgba(94,201,140,.5);}
 .toast-knop{
-  min-height:0;padding:4px 2px;color:#F2A285;font-weight:800;
+  /* De knop die een verwijdering terugdraait mag niet zelf een mistap uitlokken: 44px conform
+     de huisstijl (stond op 24). De melding dooft na een paar seconden, dus dit is precies het
+     moment waarop mikken moeilijk is. */
+  min-height:44px;padding:4px 10px;color:#F2A285;font-weight:800;
   font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;white-space:nowrap;
+  display:inline-flex;align-items:center;
 }
 .hint-stap{font-size:.92rem;margin:7px 0;line-height:1.45}
 [hidden]{display:none !important}
@@ -1583,6 +1631,15 @@ html.knipfull .cutmodal.cm-review .cm-bewerkbtn span{position:absolute;width:1px
 /* Plaats-hint: pulserende tik-indicator midden op het model/de kaart tijdens plaatsen */
 #plaats-hint{position:fixed;left:50%;top:46%;transform:translate(-50%,-50%);z-index:40;pointer-events:none;display:flex;flex-direction:column;align-items:center;gap:14px}
 #plaats-hint[hidden]{display:none}
+/* De hint zelf laat tikken door naar het model (pointer-events:none hierboven); de
+   annuleerknop moet ze juist opvangen, vandaar auto. Zonder zichtbare uitweg was de
+   plaatsmodus alleen te verlaten via de kopbalk of de + - en die + gooide het knipwerk weg. */
+#plaats-annuleer{pointer-events:auto;min-height:44px;padding:0 20px;border-radius:999px;
+  background:var(--kaart);color:var(--tekst);border:1px solid var(--rand);
+  font-family:inherit;font-size:var(--fs-sm);font-weight:600;line-height:1;cursor:pointer;
+  box-shadow:0 2px 10px rgba(0,0,0,.25)}
+#plaats-annuleer:hover{border-color:var(--accent)}
+#plaats-annuleer:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .ph-ring{width:30px;height:30px;border-radius:50%;background:var(--accent);animation:phpuls 1.5s ease-out infinite}
 .ph-tekst{background:rgba(20,16,10,.74);color:#fff;font-size:var(--fs-sm);font-weight:600;padding:7px 14px;border-radius:999px;white-space:nowrap;box-shadow:0 2px 10px rgba(0,0,0,.3)}
 @keyframes phpuls{0%{box-shadow:0 0 0 0 rgba(142,113,240,.55)}70%{box-shadow:0 0 0 26px rgba(142,113,240,0)}100%{box-shadow:0 0 0 0 rgba(142,113,240,0)}}
@@ -2299,9 +2356,10 @@ form label{text-transform:none;letter-spacing:.005em;font-size:.8rem;color:var(-
 </div>
 
 <!-- Plaats-hint: verschijnt op het model/de kaart tijdens het plaatsen van een nieuwe tattoo -->
-<div id="plaats-hint" hidden aria-hidden="true">
-  <span class="ph-ring"></span>
-  <span class="ph-tekst" data-i18n="ui.plaats_hint">Tap on the body to place the tattoo</span>
+<div id="plaats-hint" hidden>
+  <span class="ph-ring" aria-hidden="true"></span>
+  <span class="ph-tekst" aria-hidden="true" data-i18n="ui.plaats_hint">Tap on the body to place the tattoo</span>
+  <button type="button" id="plaats-annuleer" data-i18n="form.annuleren" data-i18n-aria="form.annuleren" data-i18n-title="form.annuleren" aria-label="Annuleren" title="Annuleren">Annuleren</button>
 </div>
 <!-- A11Y-4: plaatsen zonder aanwijzen (TalkBack/VoiceOver/toetsenbord). Visueel verborgen
      tot het focus krijgt (skip-link-patroon); alleen actief tijdens de plaats-modus. -->
@@ -7401,14 +7459,14 @@ const I18N = {
     'toast.geplaatst':'Geplaatst op het gekozen lichaamsdeel - tik op de kaart om te verschuiven','toast.kieslichaamsdeel':'Kies eerst een lichaamsdeel, of tik op de kaart om te plaatsen',
     'toast.afbmislukt':'Afbeelding maken lukte niet','toast.kaartopgeslagen':'Kaart opgeslagen als afbeelding',
     'toast.vastgezet':'Tattoo vastgezet','toast.ontgrendeld':'Tattoo ontgrendeld',
-    'toast.wensverwijderd':'Wens verwijderd','toast.tattooverwijderd':'Tattoo verwijderd','toast.ongedaan':'Ongedaan maken',
+    'toast.wensverwijderd':'Wens verwijderd','toast.tattooverwijderd':'Tattoo verwijderd','toast.ongedaan':'Ongedaan maken','toast.tattooweg':'Deze tattoo bestaat niet meer','toast.datumtoekomst':'Kies een datum van vandaag of eerder',
     'toast.sessieverwijderd':'Sessie verwijderd','toast.touchupverwijderd':'Touch-up verwijderd','toast.taakverwijderd':'Taak verwijderd',
     'toast.teruggezet':'"{naam}" teruggezet','confirm.verwijder':'"{naam}" verwijderen?',
     'toast.kiessessiedatum':'Kies eerst een sessiedatum','toast.sessietoegevoegd':'Sessie toegevoegd',
     'toast.kiestouchupdatum':'Kies eerst een touch-up datum','toast.touchuptoegevoegd':'Touch-up toegevoegd',
     'toast.gemarkeerdgeheeld':'Gemarkeerd als geheeld','toast.typtaak':'Typ eerst een taak',
     'toast.standaardtoegevoegd':'Standaardlijst toegevoegd','toast.uitsnedemislukt':'Uitsnede maken lukte niet',
-    'toast.fotoleesfout':'Foto kon niet worden gelezen','toast.geenuitsnede':'Nog geen bruikbare uitsnede - pas de gevoeligheid aan',
+    'toast.fotoleesfout':'Foto kon niet worden gelezen','toast.geenuitsnede':'Nog geen bruikbare uitsnede - trek een lijn helemaal rond de tattoo',
     'toast.rotatierecht':'Rotatie teruggezet op recht','toast.eenfotoleesfout':'Een foto kon niet worden gelezen',
     'toast.tipschaar':'Tip: tik op het schaartje bij een foto om hem uit te knippen voor op het model',
     'toast.wijzigingenopgeslagen':'Wijzigingen opgeslagen',
@@ -7590,14 +7648,14 @@ const I18N = {
     'toast.geplaatst':'Placed on the chosen body part - tap the map to move it','toast.kieslichaamsdeel':'Pick a body part first, or tap the map to place it',
     'toast.afbmislukt':"Couldn't create the image",'toast.kaartopgeslagen':'Map saved as image',
     'toast.vastgezet':'Tattoo pinned','toast.ontgrendeld':'Tattoo unlocked',
-    'toast.wensverwijderd':'Wish deleted','toast.tattooverwijderd':'Tattoo deleted','toast.ongedaan':'Undo',
+    'toast.wensverwijderd':'Wish deleted','toast.tattooverwijderd':'Tattoo deleted','toast.ongedaan':'Undo','toast.tattooweg':'This tattoo no longer exists','toast.datumtoekomst':'Pick a date of today or earlier',
     'toast.sessieverwijderd':'Session removed','toast.touchupverwijderd':'Touch-up removed','toast.taakverwijderd':'Task removed',
     'toast.teruggezet':'"{naam}" restored','confirm.verwijder':'Delete "{naam}"?',
     'toast.kiessessiedatum':'Pick a session date first','toast.sessietoegevoegd':'Session added',
     'toast.kiestouchupdatum':'Pick a touch-up date first','toast.touchuptoegevoegd':'Touch-up added',
     'toast.gemarkeerdgeheeld':'Marked as healed','toast.typtaak':'Type a task first',
     'toast.standaardtoegevoegd':'Default list added','toast.uitsnedemislukt':"Couldn't create the cut-out",
-    'toast.fotoleesfout':"Couldn't read the photo",'toast.geenuitsnede':'No usable cut-out yet - adjust the sensitivity',
+    'toast.fotoleesfout':"Couldn't read the photo",'toast.geenuitsnede':'No usable cut-out yet - draw a line all the way around the tattoo',
     'toast.rotatierecht':'Rotation reset to straight','toast.eenfotoleesfout':"One photo couldn't be read",
     'toast.tipschaar':'Tip: tap the scissors on a photo to cut it out for the model',
     'toast.wijzigingenopgeslagen':'Changes saved',
@@ -7781,7 +7839,7 @@ function createTattoo(overrides = {}) {
    ============================================================ */
 // App-versie (semver, handmatig ophogen bij een release). Bij een bump ook de
 // CACHE-naam in sw.js meebumpen, zodat clients de nieuwe build ophalen.
-const APP_VERSIE = '0.3.39';
+const APP_VERSIE = '0.3.40';
 
 /* Dev-haken die de CLOUD raken hangen alleen op een ontwikkelmachine aan window. Ze zijn geen
    lek op zichzelf (zonder XSS roept niemand ze aan, en CSP + esc() houden XSS tegen), maar ze
@@ -7968,7 +8026,7 @@ async function alleSyncMeta() {
 
 /* Merge-schrijf: alleen de meegegeven velden veranderen. Nooit fataal - de
    sync-administratie mag een gebruikersactie niet laten mislukken. */
-async function zetSyncMeta(id, velden) {
+async function zetSyncMeta(id, velden, poging2 = false) {
   if (!id) return null;
   const meta = Object.assign((await leesSyncMeta(id)) || leegSyncMeta(id), velden, { id });
   if (!dbBeschikbaar) { _syncMetaFallback()[id] = meta; _syncMetaFallbackSchrijf(); return meta; }
@@ -7982,7 +8040,16 @@ async function zetSyncMeta(id, velden) {
       tx.onerror = () => reject(tx.error);
       tx.onabort = () => reject(tx.error || new Error('sync-meta-transactie afgebroken'));
     });
-  } catch (e) { console.error('sync-meta schrijven mislukt', e); }
+  } catch (e) {
+    // Deze administratie mag geen gebruikersactie laten mislukken, maar stil verloren gaan
+    // mag ze evenmin: aan de dirty-vlag hangt of een wijziging ooit omhoog gaat. Zonder
+    // vlag blijft het record lokaal staan en ziet de cloud de bewerking nooit. Dus dezelfde
+    // behandeling als de records: eenmaal opnieuw verbinden, en anders de vlag in de
+    // geheugen-administratie zetten zodat de volgende sync 'm alsnog oppikt.
+    if (!poging2 && await dbOpnieuwVerbinden()) return zetSyncMeta(id, velden, true);
+    console.error('sync-meta schrijven mislukt', e);
+    _syncMetaFallback()[id] = meta; _syncMetaFallbackSchrijf();
+  }
   return meta;
 }
 
@@ -8477,6 +8544,20 @@ function hardRecord(record) {
     else delete record.thumb;
   }
   // Getalvelden clampen (corrupte/out-of-range waarden afvangen)
+  // Tekstvelden knippen op dezelfde grenzen die de formulieren via maxlength hanteren. Via de
+  // UI kan het niet te lang worden, maar een backup of een gesynct record wel: een naam van
+  // 20.000 tekens rekt de kaart in de collectie uit en vult onnodig geheugen. Geen
+  // beveiligingskwestie (escapen gebeurt overal), wel een die de grens omzeilt.
+  { const knip = (s, n) => String(s ?? '').slice(0, n);
+    record.naam = knip(record.naam, 80);
+    record.artiest = knip(record.artiest, 120);
+    record.studio = knip(record.studio, 120);
+    record.stijl = knip(record.stijl, 120);
+    record.notities = knip(record.notities, 2000);
+    record.nazorg = knip(record.nazorg, 2000);
+    // Een record zonder naam levert een kaart met een lege titel en een lege thumb-letter:
+    // zichtbaar maar niet te benoemen. De import filtert die er al uit, sync niet.
+    if (!record.naam.trim()) record.naam = tr('woord.tattoo'); }
   record.pijn = Math.min(5, Math.max(0, parseInt(record.pijn, 10) || 0));
   record.kosten = Math.min(1000000, Math.max(0, parseFloat(record.kosten) || 0));
   record.zituren = Math.min(100000, Math.max(0, parseFloat(record.zituren) || 0));
@@ -8926,6 +9007,11 @@ function planAutoSync() {
   }, 2500);
 }
 devHaak('__tattiesPlanAutoSync', planAutoSync);   // dev/test-haak
+/* De auto-sync slaat over als het toestel offline is, maar wachtte daarna op de volgende
+   wijziging of een handmatige tik. Wie in de metro een tattoo toevoegt, synchroniseerde dus
+   pas veel later. Het 'online'-signaal plant gewoon een nieuwe ronde; de debounce erin zorgt
+   dat een flakkerende verbinding geen reeks pogingen oplevert. */
+window.addEventListener('online', () => { try { planAutoSync(); } catch (e) { /* geen sync actief */ } });
 
 /* Fallback-opslag voor omgevingen waar IndexedDB geblokkeerd is
    (bijv. sommige voorbeeldweergaven of privé-vensters). We vallen
@@ -8948,8 +9034,67 @@ function fallbackLees() {
   return geheugenStore;
 }
 function fallbackSchrijf() {
-  try { localStorage.setItem(FALLBACK_SLEUTEL, JSON.stringify(geheugenStore)); }
+  try {
+    // Nooit een LEGE lijst over een gevulde noodopslag schrijven. Bij een omschakeling is
+    // geheugenStore leeg omdat de records in IndexedDB staan, niet omdat de gebruiker niets
+    // heeft - zonder deze guard wist de eerste schrijfactie na een storing de noodopslag.
+    if (!geheugenStore.length) {
+      const bestaand = localStorage.getItem(FALLBACK_SLEUTEL);
+      if (bestaand && bestaand !== '[]') return;
+    }
+    localStorage.setItem(FALLBACK_SLEUTEL, JSON.stringify(geheugenStore));
+  }
   catch { /* alleen geheugen */ }
+}
+
+/* Een mislukte transactie betekent NIET dat IndexedDB onbruikbaar is. Een verbinding kan
+   gesloten zijn (db.onversionchange zodra een tweede tab de database opent, of geheugendruk
+   op iOS) terwijl de database zelf prima werkt. De juiste reactie is dan: opnieuw verbinden
+   en het nog een keer proberen. Ging de app hier meteen naar de noodopslag, dan las ze verder
+   uit een LEGE localStorage-store en leek de hele collectie verdwenen; alles wat daarna werd
+   opgeslagen belandde bovendien in een spoor dat na een herstart nooit meer gelezen werd.
+   Pas als het OPENEN zelf faalt, is IndexedDB echt onbruikbaar (privemodus) en is de
+   noodopslag terecht. Geeft true als er een verse verbinding staat. */
+async function dbOpnieuwVerbinden() {
+  _dbPromise = null;
+  try { await openDB(); return true; }
+  catch { return false; }
+}
+
+/* Bij de start: alles terugzetten wat in de noodopslag staat maar niet (of ouder) in
+   IndexedDB. Zonder deze stap is elke bewerking uit een noodopslag-sessie na een herstart
+   onzichtbaar - de app leest dan weer uitsluitend IndexedDB, terwijl het record in
+   localStorage blijft staan. Dezelfde regel als de cloud-sync: de hoogste updatedAt wint.
+   Een verwijdering telt daarin gewoon mee, dus een tombstone met een nieuwere tijd
+   overschrijft een oudere versie en komt weggegooid werk NIET terug.
+   Stil: dit hoort te voelen als 'er is niets gebeurd', niet als een melding. */
+async function herstelUitNoodopslag() {
+  if (!dbBeschikbaar) return 0;                    // we draaien nu zelf op de noodopslag
+  let lijst = null;
+  try {
+    const ruw = localStorage.getItem(FALLBACK_SLEUTEL);
+    if (!ruw) return 0;
+    lijst = JSON.parse(ruw);
+  } catch { return 0; }                            // geen/onleesbare noodopslag: niets te doen
+  if (!Array.isArray(lijst) || !lijst.length) return 0;
+  let terug = 0;
+  try {
+    const inDb = new Map();
+    for (const t of await getAllTattoos()) if (t && t.id != null) inDb.set(String(t.id), t);
+    if (!dbBeschikbaar) return 0;                  // tijdens het lezen alsnog omgevallen
+    for (const t of lijst) {
+      if (!t || typeof t !== 'object' || t.id == null) continue;
+      const oud = inDb.get(String(t.id));
+      if (oud && (Number(oud.updatedAt) || 0) >= (Number(t.updatedAt) || 0)) continue;
+      await saveTattoo(t, true);                   // behoudTijd: eigen tijdstempel bewaren
+      terug++;
+    }
+  } catch (e) { console.error('noodopslag samenvoegen', e); return 0; }   // sleutel bewaren
+  if (!dbBeschikbaar) return 0;                    // niet opruimen als we alsnog omvielen
+  try { localStorage.removeItem(FALLBACK_SLEUTEL); } catch { /* niet erg */ }
+  geheugenStore = [];
+  if (terug) console.info('Noodopslag samengevoegd:', terug, 'record(s) teruggezet');
+  return terug;
 }
 
 function openDB() {
@@ -9048,7 +9193,7 @@ function _hardSyncVelden(lijst) {
   return lijst;
 }
 
-async function getAllTattoos() {
+async function getAllTattoos(poging2 = false) {
   if (!dbBeschikbaar) return _hardSyncVelden([...fallbackLees()]);
   try {
     const db = await openDB();
@@ -9058,6 +9203,7 @@ async function getAllTattoos() {
       rq.onerror = () => reject(rq.error);
     });
   } catch {
+    if (!poging2 && await dbOpnieuwVerbinden()) return getAllTattoos(true);
     dbBeschikbaar = false; meldFallback();
     return _hardSyncVelden([...fallbackLees()]);
   }
@@ -9126,7 +9272,7 @@ function migreerRecord(t) {
   if (!Array.isArray(t.touchUps)) { t.touchUps = []; gewijzigd = true; }
   return gewijzigd;
 }
-async function laadLichteTattoos() {
+async function laadLichteTattoos(poging2 = false) {
   if (!dbBeschikbaar) {
     // Fallback-modus (localStorage): alles staat toch al vol in RAM - niet strippen.
     const alles = await getAllTattoos();
@@ -9156,6 +9302,7 @@ async function laadLichteTattoos() {
     }
     return uit;
   } catch {
+    if (!poging2 && await dbOpnieuwVerbinden()) return laadLichteTattoos(true);
     dbBeschikbaar = false; meldFallback();
     return _hardSyncVelden([...fallbackLees()]);
   }
@@ -9164,7 +9311,7 @@ async function laadLichteTattoos() {
 /* behoudTijd: bewaar een al aanwezige updatedAt (bv. import van een backup),
    zodat sync-tijdstempels niet verloren gaan. Standaard stempelt elke save 'nu'
    - dat is "updatedAt gezet bij elke wijziging". saveTattoo is het enige schrijfpunt. */
-async function saveTattoo(tattoo, behoudTijd = false) {
+async function saveTattoo(tattoo, behoudTijd = false, poging2 = false) {
   if (!(behoudTijd && Number.isFinite(tattoo.updatedAt))) tattoo.updatedAt = Date.now();
   if (typeof tattoo.deleted !== 'boolean') tattoo.deleted = false;
   await stempelDirty(tattoo.id);   // sync-administratie: lokaal gewijzigd sinds de laatst geziene cloudversie
@@ -9219,8 +9366,9 @@ async function saveTattoo(tattoo, behoudTijd = false) {
     if (e && (e.name === 'QuotaExceededError' || /quota/i.test(e.message || ''))) {
       throw new Error(tr('toast.opslagvol'));   // gelokaliseerd: bereikt de gebruiker via toast(opslaanmislukt + message)
     }
+    if (!poging2 && await dbOpnieuwVerbinden()) return saveTattoo(tattoo, behoudTijd, true);
     dbBeschikbaar = false; meldFallback();
-    return saveTattoo(tattoo, behoudTijd);
+    return saveTattoo(tattoo, behoudTijd, true);
   }
 }
 
@@ -9229,7 +9377,7 @@ async function saveTattoo(tattoo, behoudTijd = false) {
    (herlaad/restore3D), dus voor de gebruiker is het gewoon verdwenen, maar
    andere apparaten kunnen de verwijdering later via sync zien. Echt wissen
    alleen via hardDeleteTattoo (interne testdata). */
-async function deleteTattoo(id) {
+async function deleteTattoo(id, poging2 = false) {
   await stempelDirty(id);   // een verwijdering is ook een wijziging die omhoog moet
   if (typeof planAutoSync === 'function') planAutoSync();   // verwijdering -> debounced auto-sync (indien ingelogd)
   if (!dbBeschikbaar) {
@@ -9255,14 +9403,15 @@ async function deleteTattoo(id) {
       tx.onabort = () => reject(tx.error || new Error('verwijder-transactie afgebroken'));
     });
   } catch {
+    if (!poging2 && await dbOpnieuwVerbinden()) return deleteTattoo(id, true);
     dbBeschikbaar = false; meldFallback();
-    return deleteTattoo(id);
+    return deleteTattoo(id, true);
   }
 }
 
 /* Hard-delete: record écht uit de opslag verwijderen. Alleen voor interne
    testdata (voorbeeld-records) - NOOIT voor gebruikersacties (zie deleteTattoo). */
-async function hardDeleteTattoo(id) {
+async function hardDeleteTattoo(id, poging2 = false) {
   wisSyncMeta(id).catch(() => {});   // record is echt weg: geen sync-administratie meer nodig
   if (!dbBeschikbaar) {
     fallbackLees();
@@ -9278,8 +9427,9 @@ async function hardDeleteTattoo(id) {
       rq.onerror = () => reject(rq.error);
     });
   } catch {
+    if (!poging2 && await dbOpnieuwVerbinden()) return hardDeleteTattoo(id, true);
     dbBeschikbaar = false; meldFallback();
-    return hardDeleteTattoo(id);
+    return hardDeleteTattoo(id, true);
   }
 }
 
@@ -9445,6 +9595,12 @@ function druppelIcoon(vol) {
   return `<svg class="druppel-ic${vol ? ' vol' : ''}" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3s-6 7-6 11a6 6 0 0 0 12 0c0-4-6-11-6-11z"/></svg>`;
 }
 /* Pijnscore als 5 rode druppels (n gevuld). Lege score → lege string. */
+/* Vandaag als YYYY-MM-DD in de LOKALE tijdzone. toISOString() zou UTC geven en dan is de
+   grens er in westelijke tijdzones een dag naast. Gebruikt als max op datumvelden. */
+function vandaagISO() {
+  const d = new Date();
+  return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
+}
 function pijnSterren(n, klein) {
   n = Math.max(0, Math.min(5, Number(n) || 0));
   if (!n) return '';
@@ -9609,6 +9765,11 @@ function toonView(naam) {
   { const _zb = $('.zijde-balk'); if (_zb) _zb.style.display = ''; }
   if (naam !== 'home' && editMarker2D) { const _e2 = $('#editbar2d'); if (_e2) _e2.classList.remove('on'); editMarker2D = null; }
   if (naam === 'start' && typeof renderStart === 'function') renderStart();
+  // De collectielijst wordt opgebouwd uit `tattoos`, maar niet elke wijziging loopt via
+  // herlaad(): de 3D-plaatsflow werkt de lijst bewust licht bij (push + renderMarkers) om
+  // een volledige herlaad te vermijden. Zonder deze render stond een verse tattoo niet in de
+  // collectie en zei het scherm "je hebt er nog geen", terwijl hij wel op het model stond.
+  if (naam === 'collectie' && typeof renderLijst === 'function') renderLijst();
   // De 3D-stage wordt los van toonView beheerd; verberg hem bij elke host-view
   const _v3d = document.getElementById('view-3d');
   if (_v3d) _v3d.classList.add('verborgen');
@@ -9618,15 +9779,46 @@ function toonView(naam) {
   window.scrollTo(0, 0);
 }
 // Plaats-hint: scroll het model/de kaart in beeld + toon de pulserende tik-indicator (tijdens plaatsen van een nieuwe tattoo)
+/* De +-knop hoort niet bij een lopende plaatsing. Bleef hij staan, dan startte een tik erop
+   een nieuwe foto-keuze en verdween de uitsnede die de gebruiker net had gemaakt: naam,
+   lasso en instellingen weg, zonder waarschuwing en zonder dat er iets was opgeslagen.
+   Zelfde behandeling als in de bewerkmodus, die de + al verbergt. */
+function _plaatsPlusZichtbaar(zichtbaar) {
+  for (const id of ['fab', 't3d-add']) {
+    const k = document.getElementById(id);
+    if (k) k.style.display = zichtbaar ? '' : 'none';
+  }
+}
+/* Tijdens het plaatsen is er maar één opdracht, en die staat in de plaatshint zelf. De vaste
+   navigatiehint zegt daar iets anders ("tik op een arm of been" zoomt in) en de lege-staat-hint
+   zegt "tik op + om er een toe te voegen" terwijl je daar al middenin zit. Drie instructies
+   tegelijk, waarvan twee over een andere taak: die twee gaan even weg. */
+function _plaatsNevenHints(zichtbaar) {
+  const h = document.getElementById('hint');
+  if (h) h.style.display = zichtbaar ? '' : 'none';
+  const lh = document.getElementById('lege-hint-3d');
+  if (lh) { if (!zichtbaar) lh.hidden = true; else if (typeof updateLegeHint === 'function') updateLegeHint(); }
+}
 window.__plaatsHintAan = function () {
   window.scrollTo(0, 0);   // model/kaart + 'klik om te plaatsen'-banner in beeld brengen
   const h = document.getElementById('plaats-hint'); if (h) h.hidden = false;
   const a = document.getElementById('plaats-a11y'); if (a) { vulPlaatsA11yZones(); a.hidden = false; }   // A11Y-4: toegankelijk alternatief beschikbaar maken
+  _plaatsPlusZichtbaar(false);
+  _plaatsNevenHints(false);
 };
 window.__plaatsHintUit = function () {
   const h = document.getElementById('plaats-hint'); if (h) h.hidden = true;
   const a = document.getElementById('plaats-a11y'); if (a) a.hidden = true;
+  _plaatsPlusZichtbaar(true);
+  _plaatsNevenHints(true);
 };
+/* Zichtbaar annuleren. __tattiesCancelPlaats (uit de 3D-module) breekt zowel de 3D- als de
+   2D-plaatsstand af en zet de hint uit, waarmee de + vanzelf terugkomt. */
+{ const _pa = document.getElementById('plaats-annuleer');
+  if (_pa) _pa.addEventListener('click', () => {
+    if (typeof window.__tattiesCancelPlaats === 'function') window.__tattiesCancelPlaats();
+    else if (window.__plaatsHintUit) window.__plaatsHintUit();   // terugval: hint weg, + terug
+  }); }
 /* A11Y-4: zone-keuzelijst vullen (labels via i18n, dus bij elke show verversen). */
 function vulPlaatsA11yZones() {
   const sel = document.getElementById('plaats-a11y-zone');
@@ -10307,10 +10499,14 @@ window.__tattiesEditLegend = function(ebSel){
 /* Verwijderen vanuit een bewerkbalk. Bevestiging en uitvoering staan los, zodat een
    annulering je gewoon in de bewerkmodus laat staan (pas na 'ja' verlaten we die).
    Zelfde gedrag als de prullenbak op de detailpagina: soft-delete + ongedaan-maken. */
-async function bevestigVerwijderen(){
+/* Met naam als die er is: bij meerdere tattoos wil je zien wélke je weggooit. De sleutel
+   confirm.verwijder stond al in beide tabellen maar werd nergens gebruikt. */
+async function bevestigVerwijderen(naam){
+  const schoon = String(naam ?? '').trim();
+  const vraag = schoon ? tr('confirm.verwijder').replace('{naam}', schoon) : tr('ui.verwijder_bevestig');
   return (typeof window.__tattiesConfirm === 'function')
-    ? await window.__tattiesConfirm(tr('ui.verwijder_bevestig'))
-    : window.confirm(tr('ui.verwijder_bevestig'));
+    ? await window.__tattiesConfirm(vraag)
+    : window.confirm(vraag);
 }
 async function verwijderMetUndo(t){
   if(!t) return;
@@ -10323,7 +10519,11 @@ async function verwijderMetUndo(t){
   toastMetActie(t.status === 'wens' ? tr('toast.wensverwijderd') : tr('toast.tattooverwijderd'),
                 tr('toast.ongedaan'), async () => {
     kopie.deleted = false;   // ongedaan maken = tombstone opheffen
-    await saveTattoo(kopie);
+    // De ergste van de vier: mislukt dit, dan meldde de app "teruggezet" terwijl de tattoo
+    // definitief weg was, en de ongedaan-knop is dan al verdwenen.
+    try { await saveTattoo(kopie); }
+    catch (e) { console.error(e);
+      toast(tr('toast.opslaanmislukt') + (e && e.message ? e.message : tr('ui.fout'))); return; }
     await herlaad();
     if (typeof window.__tatties3DHerstel === 'function') window.__tatties3DHerstel(kopie.id);
     toast(tr('toast.teruggezet').replace('{naam}', kopie.naam));
@@ -10340,7 +10540,7 @@ async function edit2DActie(a){
     if(((t.kunst3d&&t.kunst3d.srcUrl)||(t.kunst&&t.kunst.src)) && typeof window.__tattiesRecrop2D === 'function'){ window.__tattiesRecrop2D(t); }   // zelfde overzicht als toevoegen
     else { await exitEdit2D(); openFormulier(id); }                                                                      // terugval: geen bewaarde foto
     return; }
-  if(a === 'del'){ if(!(await bevestigVerwijderen())) return; await exitEdit2D(); await verwijderMetUndo(t); return; }
+  if(a === 'del'){ if(!(await bevestigVerwijderen(t && t.naam))) return; await exitEdit2D(); await verwijderMetUndo(t); return; }
   if(a === 'done'){ const s=window.__tattiesHerhaalSrc; window.__tattiesHerhaalSrc=null; await exitEdit2D(); if(s && typeof window.__tattiesNogEenUitFoto==='function') window.__tattiesNogEenUitFoto(s); return; }   // D6(a): na ✓ volgende uitsnede
   if(a === 'lock'){ t.vergrendeld = !t.vergrendeld; setLockUI2D(); renderMarkers();
     try{ await saveTattoo(t); }catch(e){ console.error(e); }
@@ -10544,7 +10744,9 @@ function initKaartGebaren() {
       if (pre && editMarker2D === t.id) { editHist2D.push(pre); if(editHist2D.length>60) editHist2D.shift(); }   // schaal/draai in undo opnemen
       kaartInteractie.blokkeerKlikTot = Date.now() + 400;
       syncKunstNaar3D(t);
-      await saveTattoo(t);
+      try { await saveTattoo(t); }
+      catch (e) { console.error(e); renderMarkers();
+        toast(tr('toast.opslaanmislukt') + (e && e.message ? e.message : tr('ui.fout'))); return; }
       renderMarkers();
       toast(tr('toast.grootterot'));
       return;
@@ -10627,7 +10829,9 @@ function initKaartGebaren() {
             } catch (e) { /* off-body -> 3D-plek ongewijzigd */ }
           }
         }
-        await saveTattoo(t);
+        try { await saveTattoo(t); }
+        catch (e) { console.error(e); renderMarkers();
+          toast(tr('toast.opslaanmislukt') + (e && e.message ? e.message : tr('ui.fout'))); return; }
         renderMarkers();
         toast(tr('toast.plekbij'));
       }
@@ -10873,12 +11077,16 @@ async function openDetail(id, tab = 'info', retour) {
   // Licht record eerst opwaarderen (foto's + uitsnede uit de DB), anders toont de
   // detailpagina lege beelden. In place: closures/markers houden dezelfde referentie.
   await volledigInRam(id);
-  renderDetail();
+  if (!renderDetail()) { toast(tr('toast.tattooweg')); return; }   // record is weg: renderDetail navigeerde al
   toonView('detail');
 }
 // Terug vanaf de detailpagina naar de herkomst (3D via de 3D-knop, anders gewone view)
 function detailTerug() {
   if (detailRetour === '3d') { const b = $('#btn-3d'); if (b) b.click(); else toonView('home'); }
+  // Statistieken opnieuw opbouwen i.p.v. alleen tonen: er kan op de detailpagina iets zijn
+  // gewijzigd of verwijderd, en openStats() rekent zelf de cijfers uit (die functie eindigt
+  // op toonView('stats'), dus dit mag niet in toonView zelf - dat zou recursie geven).
+  else if (detailRetour === 'stats' && typeof openStats === 'function') openStats();
   else toonView(detailRetour || 'home');
 }
 
@@ -10915,10 +11123,13 @@ async function verwijderSubItem(t, veld, idx, toastKey) {
   });
 }
 
+/* Geeft false als het record er niet (meer) is; openDetail mag de detailweergave dan niet
+   tonen. Deed hij dat wel, dan zette toonView('detail') de terugval naar het startscherm
+   weer om en bleef de gebruiker op een volledig leeg scherm achter, zonder terugknop. */
 function renderDetail() {
   const t = tattoos.find(x => x.id === detailId);
   const view = $('#view-detail');
-  if (!t) { toonView('home'); return; }
+  if (!t) { toonView('home'); return false; }
 
   const fotos = (t.fotos && t.fotos.length) ? t.fotos : (t.foto ? [t.foto] : []);
   const isWens = t.status === 'wens';
@@ -10972,7 +11183,7 @@ function renderDetail() {
       <p class="sectiekop">${tr('sessie.totaal').replace('{u}', totaalSessieUren + ' ' + tr('eenheid.uur'))}</p>
       ${sessieItems || '<p class="gedempt">' + tr('sessie.geen') + '</p>'}
       <div class="inline-form">
-        <input type="date" id="ns-datum" aria-label="${tr('aria.sessiedatum')}">
+        <input type="date" id="ns-datum" max="${vandaagISO()}" aria-label="${tr('aria.sessiedatum')}">
         <input type="number" id="ns-duur" min="0" max="100000" step="0.5" placeholder="${tr('sessie.duurph')}" aria-label="${tr('aria.duururen')}">
         <input type="text" id="ns-notities" class="breed" maxlength="500" placeholder="${tr('woord.notitiesopt')}">
         <button class="knop-sec breed" id="ns-toevoegen">${tr('sessie.toevoegen')}</button>
@@ -10981,7 +11192,7 @@ function renderDetail() {
       <p class="sectiekop">${tr('sessie.touchups')}</p>
       ${touchUpItems || '<p class="gedempt">' + tr('sessie.geentouchups') + '</p>'}
       <div class="inline-form">
-        <input type="date" id="nt-datum" class="breed" aria-label="${tr('aria.touchupdatum')}">
+        <input type="date" id="nt-datum" class="breed" max="${vandaagISO()}" aria-label="${tr('aria.touchupdatum')}">
         <input type="text" id="nt-notities" class="breed" maxlength="500" placeholder="${tr('woord.notitiesopt')}">
         <button class="knop-sec breed" id="nt-toevoegen">${tr('sessie.touchuptoevoegen')}</button>
       </div>`;
@@ -11047,7 +11258,12 @@ function renderDetail() {
   $('#d-terug').addEventListener('click', detailTerug);
   $('#d-slot').addEventListener('click', async () => {
     t.vergrendeld = !t.vergrendeld;
-    await saveTattoo(t);
+    // Melden dat het vastgezet is terwijl het opslaan faalde, is erger dan geen melding:
+    // de gebruiker gaat er dan van uit dat het bewaard is. Zelfde patroon als
+    // bewaarEnVerversDetail, dat dit al goed doet.
+    try { await saveTattoo(t); }
+    catch (e) { t.vergrendeld = !t.vergrendeld;   // stand terugdraaien, anders liegt het scherm
+      renderDetail(); toast(tr('toast.opslaanmislukt') + (e && e.message ? e.message : tr('ui.fout'))); return; }
     renderMarkers();
     renderDetail();
     toast(t.vergrendeld ? tr('toast.vastgezet') : tr('toast.ontgrendeld'));
@@ -11058,7 +11274,7 @@ function renderDetail() {
   });
   $('#d-verwijder').addEventListener('click', async (e) => {
     const btn = e.currentTarget; if (btn.disabled) return; btn.disabled = true;   // dubbelklik-race voorkomen
-    if (!(await bevestigVerwijderen())) { btn.disabled = false; return; }   // geannuleerd: knop weer vrijgeven
+    if (!(await bevestigVerwijderen(t && t.naam))) { btn.disabled = false; return; }   // geannuleerd: knop weer vrijgeven
     await verwijderMetUndo(t);   // zelfde bron als de bewerkbalken
     detailTerug();
   });
@@ -11078,6 +11294,7 @@ function renderDetail() {
       const datum = $('#ns-datum').value;
       const duur = Math.max(0, Math.min(100000, parseFloat($('#ns-duur').value) || 0));   // clamp: geen negatieve/absurde uren
       if (!datum) { toast(tr('toast.kiessessiedatum')); return; }
+      if (datum > vandaagISO()) { toast(tr('toast.datumtoekomst')); return; }   // een sessie die nog moet komen is geen sessie
       knop.disabled = true;                 // disable pas ná validatie; de re-render vervangt de knop
       t.sessies = t.sessies || [];
       t.sessies.push(createSessie(datum, duur, $('#ns-notities').value.trim()));
@@ -11089,6 +11306,7 @@ function renderDetail() {
       if (knop.disabled) return;            // dubbelklik-race voorkomen (geen dubbele touch-up)
       const datum = $('#nt-datum').value;
       if (!datum) { toast(tr('toast.kiestouchupdatum')); return; }
+      if (datum > vandaagISO()) { toast(tr('toast.datumtoekomst')); return; }
       knop.disabled = true;
       t.touchUps = t.touchUps || [];
       t.touchUps.push(createTouchUp(datum, $('#nt-notities').value.trim()));
@@ -11148,6 +11366,7 @@ function renderDetail() {
       b.addEventListener('click', () => verwijderSubItem(t, 'nazorgTaken', Number(b.dataset.delTaak), 'toast.taakverwijderd'))
     );
   }
+  return true;
 }
 
 /* ============================================================
@@ -12091,6 +12310,11 @@ $('#import-file').addEventListener('change', async (e) => {
 // bij daadwerkelijk tonen, en met open onboarding uitstellen tot rondOnboardingAf().
 let persistMeldingUitgesteld = false;
 function toonPersistMelding() {
+  // Niet als eerste indruk. Bij een lege collectie valt er nog niets te verliezen, de melding
+  // viel dan boven op de 'nog geen tattoos'-hint, en "de browser garandeert je opslag niet" is
+  // een rare openingszin voor een app die belooft dat alles op je toestel blijft. Vlag pas
+  // zetten als we 'm echt tonen, dus een volgende keer komt hij alsnog.
+  if (!(typeof tattoos !== 'undefined' && tattoos && tattoos.length)) return;
   try {
     if (localStorage.getItem('tatties-persist-melding')) return;
     localStorage.setItem('tatties-persist-melding', '1');
@@ -12941,6 +13165,7 @@ async function verwijderVoorbeelden() {
   $('#sorteer').addEventListener('change', (e) => { sorteer = e.target.value; renderLijst(); });
   tekenSilhouet();
   await migreerOudeDatabase();
+  await herstelUitNoodopslag();   // bewerkingen uit een noodopslag-sessie terug in de database
   // Eigenaar van de collectie vroeg inlezen: de startscherm-rij hangt ervan af, en de
   // eigenaarscontrole bij het inloggen mag niet op een leeg geheugen beslissen.
   try { const em = await leesSyncMeta(SYNC_EIGENAAR_ID); collectieEigenaar = (em && em.ownerId) || null; }
@@ -13315,7 +13540,10 @@ async function verwijderVoorbeelden() {
       loader.parse(b64ToBuffer(b64),"",gltf=>{
         if(token!==loadToken) return;            // verouderd: er is intussen iets anders gekozen
         setModel(gltf.scene||gltf.scenes[0]);
-        toast(tr('ui.klaar_dubbeltik'));
+        // Bij een lege collectie staat de 'nog geen tattoos - tik op +'-hint al in beeld. Deze
+        // melding wijst dan naar een tweede route (dubbeltikken) en dat maakt de eerste keer
+        // alleen maar onduidelijker. Met tattoos erin is het gewoon nuttige informatie.
+        if(typeof tattoos!=="undefined" && tattoos && tattoos.length) toast(tr('ui.klaar_dubbeltik'));
         // Ortho-data (cal/masker/zones) VÓÓR het herstel publiceren: 2D-only tattoos leiden hun
         // 3D-plek af via de host-2D-positie (basisPos2D), die window.Ortho2D nodig heeft.
         try{ publishOrtho2D(); }catch(e){ console.error(e); }
@@ -14789,7 +15017,11 @@ async function verwijderVoorbeelden() {
     const h=document.getElementById("hint"); if(h)h.style.display="none";
     setLockUI(); setBlendUI(); showSel(true);
     resize();   // render boven de gedockte balk laten passen
-    toast(tr('ui.aanpas_hint'));
+    // De balk heeft zelf een hint (.eb-hint), maar alleen op touch; op desktop staat die op
+    // display:none en gelden de tooltips. Alleen daar is deze melding nog nodig - anders
+    // stonden er twee regels tegelijk die hetzelfde zeggen in andere woorden.
+    { const coarse = window.matchMedia && window.matchMedia('(pointer:coarse)').matches;
+      if (!coarse) toast(tr('ui.aanpas_hint')); }
   }
   function exitEditDecal(){
     const m=editDecal; editDecal=null; showSel(false);
@@ -15129,7 +15361,7 @@ async function verwijderVoorbeelden() {
         else { exitEditDecal(); if(rec&&typeof openFormulier==="function") openFormulier(rec.id); }     // terugval: geen bewaarde foto
         return; }
       if(a==="del"){ const rec=editDecal&&editDecal.rec; if(!rec) return;
-        if(!(await bevestigVerwijderen())) return;
+        if(!(await bevestigVerwijderen(rec && rec.naam))) return;
         exitEditDecal(); await verwijderMetUndo(rec); return; }
       if(a==="done"){ exitEditDecal(); if(window.__tattiesHerhaalSrc){ const s=window.__tattiesHerhaalSrc; window.__tattiesHerhaalSrc=null; openCutModalAddMetFoto(s,'3d'); } return; }   // D6(a): na ✓ volgende uitsnede
       if(a==="undo"){ undoEdit(); return; }
@@ -16331,7 +16563,10 @@ async function verwijderVoorbeelden() {
       const f=input.files[0]; input.value=""; if(!f)return;
       if(!/^image\//.test(f.type||"")){ toast(tr('ui.geen_afbeelding')); return; }
       if(f.size>FOTO_MAX_BYTES){ toast(tr('ui.foto_te_groot')); return; }
-      const klaar=(image)=>{ herhaalTeller=1; vorigeLassos=[]; { const hb=document.getElementById("cmHerhaalBadge"); if(hb) hb.hidden=true; } zetCutFoto(image); toast(tr('ui.teken_lijn')); };   // verse foto = nieuwe sessie
+      // Niet ui.teken_lijn: die tekst noemt de gevoeligheidsschuif, en die hoort bij het
+      // (verborgen) huid-weghalen. Zelfde keuze als zetSnijModusUI voor de vaste hint eronder,
+      // zodat de melding en de hint hetzelfde zeggen.
+      const klaar=(image)=>{ herhaalTeller=1; vorigeLassos=[]; { const hb=document.getElementById("cmHerhaalBadge"); if(hb) hb.hidden=true; } zetCutFoto(image); toast(tr(MAGIC_CUT_AAN?'ui.cut_hint_vrij':'ui.cut_hint_vrij_zonder')); };   // verse foto = nieuwe sessie
       const rd=new FileReader();
       rd.onerror=()=>toast(tr('ui.foto_mislukt'));
       rd.onload=ev=>{ const im=new Image(); im.onerror=()=>toast(tr('ui.foto_mislukt'));
@@ -16609,7 +16844,14 @@ async function verwijderVoorbeelden() {
         if(typeof renderMarkers==="function"){ try{renderMarkers();}catch(_){} }
         enterEditDecal(m);   // direct in aanpasmodus: meteen schalen/verplaatsen/roteren
         pasBlendOpNieuw(m);   // auto-blend meteen tonen
-      }catch(err){ console.error(err); toast(tr('toast.opslaanmislukt')+(err&&err.message?err.message:tr('ui.fout'))); }
+      }catch(err){
+        // De decal hangt al in de scene (makeImage doet body.add) maar er is nog geen record
+        // en geen marker: zonder opruimen blijft er een tattoo op het lichaam staan die niet
+        // aan te tikken, te bewerken of te verwijderen is, en die na een herstart weg is.
+        try{ if(obj && obj.parent) obj.parent.remove(obj);
+             if(obj && obj.geometry && obj.geometry.dispose) obj.geometry.dispose(); }catch(_){}
+        console.error(err); toast(tr('toast.opslaanmislukt')+(err&&err.message?err.message:tr('ui.fout')));
+      }
       } finally { cutBezig=false; }
     };
   }
