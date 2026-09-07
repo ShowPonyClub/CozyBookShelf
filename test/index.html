@@ -7311,7 +7311,7 @@ const I18N = {
     'hint.begrepen':'Begrepen',
     'onb.titel':'Welkom bij Tatties','onb.sub':'Kies je lichaam en huidskleur om te beginnen.','onb.start':'Aan de slag',
     'onb.volgende':'Volgende','onb.terug':'Terug','onb.overslaan':'Overslaan','onb.opnieuw':'Introductie opnieuw','onb.stap2_titel':'Je eerste tattoo toevoegen',
-    'onb.stap2_sub':'Tik straks rechtsonder op de knop met de + om een foto te kiezen, uit te snijden en op het model te plaatsen.',
+    'onb.stap2_sub':'Tik straks op "+ Nieuwe tattoo" om een foto te kiezen, uit te snijden en op het model te plaatsen.',
     'sv.collectie':'Collectie','sv.wishlist':'Wishlist',
     'uitleg.titel3d':'Zo werkt de 3D-weergave',
     'uitleg.3d1':'<strong>Model kiezen:</strong> stel man of vrouw en je huidskleur in via Instellingen (tandwiel rechtsboven).',
@@ -7376,7 +7376,7 @@ const I18N = {
     'ui.aanpas_hint':'Aanpassen: sleep om te verplaatsen · scroll/knijp om te schalen',
     'ui.tattoo_verwijderd':'Tattoo verwijderd','ui.vergrendeld':'Tattoo vergrendeld','ui.ontgrendeld':'Tattoo ontgrendeld',
     'ui.geen_foto_bewaard':'Geen originele foto bewaard voor deze tattoo','ui.pas_aan_sla_op':'Pas de uitsnede aan en sla op',
-    'ui.foto_niet_geladen':'Kon de foto niet laden','ui.teken_lijn':'Teken een lijn rond de tattoo en stel de gevoeligheid in',
+    'ui.foto_niet_geladen':'Kon de foto niet laden','ui.knip_terug_vraag':'Je was een tattoo aan het uitsnijden. Verdergaan waar je gebleven was?','ui.knip_terug_ja':'Verdergaan','ui.knip_terug_klaar':'Je uitsnede staat er weer','ui.teken_lijn':'Teken een lijn rond de tattoo en stel de gevoeligheid in',
     'ui.geen_afbeelding':'Kies een afbeelding (geen ander bestandstype)','ui.foto_te_groot':'Foto te groot (max 30 MB)','ui.foto_mislukt':'Kon de foto niet verwerken',
     'ui.reset':'Reset','ui.knop_uitleg':'Wat doen de knoppen?','ui.info':'Info','ui.gereedschap':'Gereedschap',
     'inst.vorm.binnenkort':'Binnenkort','ui.bouw2d_kop':'Nog in aanbouw','ui.bouw2d_sub':'Gebruik zolang het 3D-model.',
@@ -7500,7 +7500,7 @@ const I18N = {
     'hint.begrepen':'Got it',
     'onb.titel':'Welcome to Tatties','onb.sub':'Pick your body and skin tone to get started.','onb.start':'Get started',
     'onb.volgende':'Next','onb.terug':'Back','onb.overslaan':'Skip','onb.opnieuw':'Replay intro','onb.stap2_titel':'Add your first tattoo',
-    'onb.stap2_sub':'Next, tap the + button at the bottom right to pick a photo, cut it out and place it on the model.',
+    'onb.stap2_sub':'Next, tap "+ New tattoo" to pick a photo, cut it out and place it on the model.',
     'sv.collectie':'Collection','sv.wishlist':'Wishlist',
     'uitleg.titel3d':'How the 3D view works',
     'uitleg.3d1':'<strong>Pick a model:</strong> set male or female and your skin tone via Settings (gear, top right).',
@@ -7565,7 +7565,7 @@ const I18N = {
     'ui.aanpas_hint':'Editing: drag to move · scroll/pinch to scale',
     'ui.tattoo_verwijderd':'Tattoo deleted','ui.vergrendeld':'Tattoo locked','ui.ontgrendeld':'Tattoo unlocked',
     'ui.geen_foto_bewaard':'No original photo saved for this tattoo','ui.pas_aan_sla_op':'Adjust the cut-out and save',
-    'ui.foto_niet_geladen':'Could not load the photo','ui.teken_lijn':'Draw a line around the tattoo and set the sensitivity',
+    'ui.foto_niet_geladen':'Could not load the photo','ui.knip_terug_vraag':'You were cutting out a tattoo. Carry on where you left off?','ui.knip_terug_ja':'Carry on','ui.knip_terug_klaar':'Your cut-out is back','ui.teken_lijn':'Draw a line around the tattoo and set the sensitivity',
     'ui.geen_afbeelding':'Please choose an image (not another file type)','ui.foto_te_groot':'Photo too large (max 30 MB)','ui.foto_mislukt':'Could not process the photo',
     'ui.reset':'Reset','ui.knop_uitleg':'What do the buttons do?','ui.info':'Info','ui.gereedschap':'Tools',
     'inst.vorm.binnenkort':'Coming soon','ui.bouw2d_kop':'Under construction','ui.bouw2d_sub':'Use the 3D model for now.',
@@ -7626,7 +7626,7 @@ const I18N = {
     'nazorg.taakph':'New task…','nazorg.taak':'＋ Task','nazorg.standaard':'Default list',
     'nazorg.instructies':"Artist's instructions",'nazorg.geeninstr':'No aftercare notes. Add them via Edit.',
     'form.titelbewerk':'Edit tattoo','form.titelwens':'New wish','form.titelnieuw':'New tattoo',
-    'form.type':'Type','form.gezet':'Done','form.wishlist':'Wishlist','form.naam':'Name','form.datum':'Date',
+    'form.type':'Type','form.gezet':'On my skin','form.wishlist':'Wishlist','form.naam':'Name','form.datum':'Date',
     'form.geplandedatum':'Planned date','form.lichaamsdeel':'Body part','form.kies':'Choose…',
     'form.fout':'Please fill in the required fields.','form.artiest':'Artist','form.studio':'Studio','form.stijl':'Style',
     'form.geenstijl':'None / unknown','form.kosten':'Cost','form.budget':'Budget','form.zituren':'Sitting hours','form.pijn':'Pain score (1-5)','form.geenpijn':'None / unknown',
@@ -7839,7 +7839,7 @@ function createTattoo(overrides = {}) {
    ============================================================ */
 // App-versie (semver, handmatig ophogen bij een release). Bij een bump ook de
 // CACHE-naam in sw.js meebumpen, zodat clients de nieuwe build ophalen.
-const APP_VERSIE = '0.3.40';
+const APP_VERSIE = '0.3.41';
 
 /* Dev-haken die de CLOUD raken hangen alleen op een ontwikkelmachine aan window. Ze zijn geen
    lek op zichzelf (zonder XSS roept niemand ze aan, en CSP + esc() houden XSS tegen), maar ze
@@ -9816,6 +9816,7 @@ window.__plaatsHintUit = function () {
    2D-plaatsstand af en zet de hint uit, waarmee de + vanzelf terugkomt. */
 { const _pa = document.getElementById('plaats-annuleer');
   if (_pa) _pa.addEventListener('click', () => {
+    if (typeof window.__tattiesWisKnipStaat === 'function') window.__tattiesWisKnipStaat();   // echt afgebroken
     if (typeof window.__tattiesCancelPlaats === 'function') window.__tattiesCancelPlaats();
     else if (window.__plaatsHintUit) window.__plaatsHintUit();   // terugval: hint weg, + terug
   }); }
@@ -12399,6 +12400,11 @@ function rondOnboardingAf() {
   const ov = document.getElementById('onboarding');
   if (ov) ov.hidden = true;
   laagSluitHistory('onboarding');                    // no-op als 'terug' de entry al consumeerde
+  // Op het startscherm landen, niet in de 3D-weergave. Daar staat de grote CTA met een label,
+  // naast de mini-stats, de tegels en de regel dat alles op dit toestel blijft. Wie meteen het
+  // model in wordt gestuurd, krijgt juist het scherm met de meeste instructies en de minste
+  // oriëntatie, en ziet het startscherm pas na een herstart.
+  if (typeof toonView === 'function') toonView('start');
   if (persistMeldingUitgesteld) { persistMeldingUitgesteld = false; setTimeout(toonPersistMelding, 1200); }   // ONB-2
   // De zichtbare '+ tattoo toevoegen'-knop even highlighten zodat de vervolgactie opvalt.
   // Welke knop zichtbaar is hangt van de view af (kaart = #fab, startscherm = #start-nieuw, 3D = #t3d-add).
@@ -13179,6 +13185,16 @@ async function verwijderVoorbeelden() {
   toonView('home');
   toonOnboarding();
   purgeTombstones();   // oude soft-delete-tombstones opruimen (niet-blokkerend)
+  /* Lag er nog een halve uitsnede? Vraag of we verdergaan. Niet tijdens de onboarding: die
+     overlay ligt erboven en de vraag zou erachter verdwijnen (zelfde val als de
+     opslagmelding, ONB-2). De 3D-module publiceert de haak bij het laden, dus even wachten. */
+  setTimeout(() => {
+    const ov = document.getElementById('onboarding');
+    if (ov && !ov.hidden) return;                                  // eerste keer: niet storen
+    if (typeof window.__tattiesKnipStaatTerug === 'function') {
+      window.__tattiesKnipStaatTerug().catch(() => {});
+    }
+  }, 1500);
 })();
 
 /* ============================================================
@@ -15704,11 +15720,16 @@ async function verwijderVoorbeelden() {
   function verbergBanner(){ const b=document.getElementById("t3d-banner"); if(b) b.hidden=true; }
   // Plaats-modus (3D + 2D) volledig annuleren -> geen 'vastgelopen' plaatsstand na wegnavigeren.
   function cancelPlaatsModus(){
+    // Bewust GEEN wisKnipStaat() hier: toonView roept deze functie bij elke view-wissel aan,
+    // en wegnavigeren midden in het plaatsen is een onderbreking, geen afbreking. De
+    // tussenstand wissen doen de plekken waar de gebruiker het echt afsluit: de
+    // Annuleren-knop, het kruisje in de modal, en een geslaagde plaatsing.
     plaatsModus=false; plaatsData=null; verbergBanner();   // 3D-plaatsstand (IIFE-lokaal)
     if(typeof window.__tattiesCancelPlaats2D==='function') window.__tattiesCancelPlaats2D();   // 2D-plaatsstand (host-scope)
     if(window.__plaatsHintUit) window.__plaatsHintUit();
   }
   window.__tattiesCancelPlaats=cancelPlaatsModus;
+  window.__tattiesWisKnipStaat=wisKnipStaat;   // host: bij een echt afgebroken plaatsing
   // Dev-hook (tests/preview): kijk in de knip-state zonder de IIFE te openen.
   // Optioneel: geef een masker-dataURL mee om het Magic cut-pad te testen zonder server.
   window.__tattiesCutDbg=(testMask)=>{
@@ -16077,7 +16098,7 @@ async function verwijderVoorbeelden() {
       closeCutModal();
     } finally { annuleerBezig=false; }
   }
-  function closeCutModal(){ cutHistoryOpruimen();
+  function closeCutModal(){ cutHistoryOpruimen(); wisKnipStaat();   // bewust gesloten: geen halve uitsnede bewaren
     resetSnapshot=null; laatsteActie=null; cutModal.classList.remove("on","cm-inkomend","cm-naarreview","cm-zachtin"); zetGegevensFase(false); pendingPlace=null; pendingEdit=null; pendingPlace2D=null; pendingNew=null; pendingEdit2D=null; toonCutInstellingen(false); toonInfo(false);
     plaatsHerhaal=false; window.__tattiesHerhaalSrc=null; herhaalTeller=1; vorigeLassos=[]; addDoel='3d';   // D6(a): herhaal-state opruimen + doel terug naar default (geen stale vlag/lasso/doel)
     if(imgTexture && imgTexture.dispose){ imgTexture.dispose(); } imgTexture=null;   // niet-geplaatste textuur vrijgeven (geen lek)
@@ -16204,6 +16225,85 @@ async function verwijderVoorbeelden() {
   function rebuildBase(){ baseCanvas = origImg ? buildFullCanvas() : null; }
   // Het uitsnede-recept (srcUrl + lasso/wand/gum/transform) zoals nu in de modal -> kunst3d.
   // Eén bron voor alle plaats-/bewerk-/opslagpunten, zodat 'erase' nooit ergens vergeten wordt.
+  /* ---- Knipstaat bewaren over een herstart heen ----
+     Het uitsnijden is het meeste werk in de app en leefde alleen in het geheugen: verversen,
+     of iOS dat de tab weggooit terwijl je in je fotobibliotheek kijkt, en je begint opnieuw.
+     Het recept is al serialiseerbaar (bouwKunst3d levert lasso, wand en erase als arrays plus
+     de bron als dataURL), dus we leggen dat samen met de ingevulde velden in sessionStorage.
+     Bewust sessionStorage en niet localStorage: dit is een halve handeling, geen bewaard werk;
+     sluit je het tabblad bewust, dan hoort het weg te zijn.
+     Alleen de TOEVOEGflow. Bewerken van een bestaand record hoeft niet: dat record staat in de
+     database en is gewoon opnieuw te openen. */
+  const KNIP_STAAT_SLEUTEL = 'tatties-knip-bezig';
+  const KNIP_STAAT_MAX = 4 * 1024 * 1024;   // ruim onder de sessionStorage-limiet; grotere foto's slaan we over
+  let knipBewaarTimer = 0;
+  function wisKnipStaat(){
+    clearTimeout(knipBewaarTimer);
+    try { sessionStorage.removeItem(KNIP_STAAT_SLEUTEL); } catch (e) { /* geen opslag */ }
+  }
+  function bewaarKnipStaatNu(){
+    // Alleen een nieuwe tattoo die nog niet geplaatst is, en alleen als er echt werk ligt.
+    if(!(pendingNew || pendingPlace) || pendingEdit || pendingEdit2D || pendingPlace2D) return;
+    if(!origImg || !cutHeeftWerk()) { wisKnipStaat(); return; }
+    try{
+      const d = leesModalDetails();
+      const staat = { v:1, doel:addDoel, kunst:bouwKunst3d(), naam:d.naam, info:d.info, status:d.status,
+                      gegevensFase: cutModal.classList.contains('cm-gegevens'), tijd: Date.now() };
+      const json = JSON.stringify(staat);
+      if(json.length > KNIP_STAAT_MAX){ wisKnipStaat(); return; }   // te grote foto: liever niets dan een half record
+      sessionStorage.setItem(KNIP_STAAT_SLEUTEL, json);
+    }catch(e){ /* quota of geen opslag: dan gewoon niet bewaren */ }
+  }
+  function planKnipBewaren(){ clearTimeout(knipBewaarTimer); knipBewaarTimer=setTimeout(bewaarKnipStaatNu, 700); }
+  /* Bij het opstarten: is er een halve uitsnede blijven staan, vraag dan of we verdergaan.
+     Nooit ongevraagd de modal openen - dat zou een gebruiker die iets anders wil doen overvallen. */
+  async function vraagKnipStaatTerug(){
+    let staat=null;
+    try{
+      const ruw = sessionStorage.getItem(KNIP_STAAT_SLEUTEL);
+      if(!ruw) return false;
+      staat = JSON.parse(ruw);
+    }catch(e){ wisKnipStaat(); return false; }
+    if(!staat || staat.v!==1 || !staat.kunst || !staat.kunst.srcUrl){ wisKnipStaat(); return false; }
+    const ok = (typeof window.__tattiesConfirm === 'function')
+      ? await window.__tattiesConfirm(tr('ui.knip_terug_vraag'), tr('ui.knip_terug_ja'))
+      : window.confirm(tr('ui.knip_terug_vraag'));
+    if(!ok){ wisKnipStaat(); return false; }
+    openCutModalUitStaat(staat);
+    return true;
+  }
+  window.__tattiesKnipStaatTerug = vraagKnipStaatTerug;
+  /* Zet de editor terug in de stand van vlak voor de onderbreking. Zelfde stappen als
+     openCutModalForEdit, maar met een los recept in plaats van een bestaand record. */
+  function openCutModalUitStaat(staat){
+    const k = staat.kunst;
+    openCutModalAdd(staat.doel || '3d');            // schone toevoegflow-state als basis
+    flipH=!!k.flipH; zetSpiegelUI();
+    rot90=k.rot90||0;
+    wandSeeds=(k.wand||[]).slice(); wandKeep=!!k.wandKeep; zetWandUI();
+    eraseStrokes=(k.erase||[]).map(s=>({pts:(s.pts||[]).slice(), r:s.r, mode:s.mode})); zetGumUI();
+    aiMask=k.aiMask||null; aiMaskImg=null;
+    if(aiMask){ const ai=new Image(); ai.onload=()=>{ aiMaskImg=ai; if(origImg){ rebuildBase(); updateCutout(); } }; ai.src=aiMask; }
+    bgRemove.checked=(k.bg!==false);
+    if(k.thresh!=null) cutThresh.value=k.thresh;
+    if(cutSpread) cutSpread.value=(k.spread!=null?k.spread:55);
+    setBgPick(k.bgColor ? {r:k.bgColor.r,g:k.bgColor.g,b:k.bgColor.b} : null);
+    const im=new Image();
+    im.onload=()=>{
+      origImg=im; lassoPts=(k.lasso||[]).slice();
+      toonCutInstellingen(true); rebuildBase(); updateCutout(); drawLasso();
+      vulModalDetails({ naam:staat.naam||'', artiest:(staat.info||{}).artiest, studio:(staat.info||{}).studio,
+                        stijl:(staat.info||{}).stijl, kosten:(staat.info||{}).kosten, pijn:(staat.info||{}).pijn,
+                        datum:(staat.info||{}).datum, zituren:(staat.info||{}).zituren,
+                        accentkleur:(staat.info||{}).accentkleur, notities:(staat.info||{}).notities,
+                        status:staat.status||'gezet' });
+      toonInfo(!!staat.gegevensFase);
+      if(staat.gegevensFase && typeof naarReview==='function') naarReview();
+      toast(tr('ui.knip_terug_klaar'));
+    };
+    im.onerror=()=>{ toast(tr('ui.foto_niet_geladen')); wisKnipStaat(); closeCutModal(); };
+    im.src=k.srcUrl;
+  }
   function bouwKunst3d(){
     return { srcUrl:(origImg?origImg.src:null), lasso:lassoPts.slice(), thresh:+cutThresh.value,
       spread:(cutSpread?+cutSpread.value:55), bgColor:(bgPick?{r:bgPick.r,g:bgPick.g,b:bgPick.b}:null),
@@ -16308,6 +16408,7 @@ async function verwijderVoorbeelden() {
   }
   function updateCutout(){
     if(!origImg) return;
+    planKnipBewaren();   // lasso/toverstaf/gum gewijzigd: staat vers houden voor een herstart
     if(!baseCanvas) rebuildBase();
     const shown=clippedCanvas(); if(!shown) return;
     // Uitsnede bijsnijden tot de lasso-bbox = de geïsoleerde tattoo (ook de decal-textuur).
@@ -16407,7 +16508,7 @@ async function verwijderVoorbeelden() {
     { const op=document.getElementById("cmOpslaan"); if(op) op.onclick=()=>{ if(cmPlaceBtn) cmPlaceBtn.click(); }; }
     // Enter in het naamveld doet hetzelfde als de knop rechtsboven: anders levert de
     // return-toets op het toetsenbord niets op terwijl er maar een veld is.
-    { const nm=document.getElementById("cmNaam"); if(nm) nm.addEventListener('input',()=>{
+    { const nm=document.getElementById("cmNaam"); if(nm) nm.addEventListener('input',()=>{ planKnipBewaren();
         if(cutModal.classList.contains('cm-gegevens')) zetNaamStand();
       }); }
     { const nm=document.getElementById("cmNaam"); if(nm) nm.addEventListener('keydown',e=>{
@@ -16840,6 +16941,7 @@ async function verwijderVoorbeelden() {
         const m={ id:rec.id, rec, obj, point:pp.point.clone(), normal:pp.normal.clone(), mesh:pp.mesh,
           tri:(pp.tri>=0?pp.tri:((rec.positie3d&&rec.positie3d.bind)?rec.positie3d.bind.tri:-1)), rot, size, tex:imgTexture };
         markers.push(m); onthoudFp(m);
+        wisKnipStaat();   // geplaatst en opgeslagen: de tussenstand is niet meer nodig
         imgTexture=null;   // marker bezit de textuur nu; voorkom dispose door volgende updateCutout
         if(typeof renderMarkers==="function"){ try{renderMarkers();}catch(_){} }
         enterEditDecal(m);   // direct in aanpasmodus: meteen schalen/verplaatsen/roteren
