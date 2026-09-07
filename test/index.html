@@ -7433,7 +7433,7 @@ const I18N = {
     'nazorg.wens':'Deze tattoo staat nog op je wishlist - nazorg wordt relevant zodra hij gezet is.',
     'nazorg.resterend':'Nog ±{n} {dag} herstel (richtlijn {richtlijn} dagen)',
     'nazorg.voorbij':'De richtlijn van {richtlijn} dagen is voorbij - ziet alles er goed uit? Markeer als geheeld.',
-    'nazorg.markeer':'Markeer als geheeld','nazorg.checklist':'Nazorg-checklist','nazorg.geentaken':'Nog geen taken op de checklist.',
+    'nazorg.markeer':'Markeer als geheeld','nazorg.geen_datum':'Vul de datum in waarop deze tattoo gezet is, dan zie je hier hoe lang je nog moet verzorgen.','nazorg.checklist':'Nazorg-checklist','nazorg.geentaken':'Nog geen taken op de checklist.',
     'nazorg.taakph':'Nieuwe taak…','nazorg.taak':'＋ Taak','nazorg.standaard':'Standaardlijst',
     'nazorg.instructies':'Instructies van de artiest','nazorg.geeninstr':'Geen nazorgnotities. Voeg ze toe via Bewerken.',
     'form.titelbewerk':'Tattoo bewerken','form.titelwens':'Nieuwe wens','form.titelnieuw':'Nieuwe tattoo',
@@ -7622,7 +7622,7 @@ const I18N = {
     'nazorg.wens':"This tattoo is still on your wishlist - aftercare becomes relevant once it's done.",
     'nazorg.resterend':'~{n} {dag} of healing left (guideline {richtlijn} days)',
     'nazorg.voorbij':'The {richtlijn}-day guideline has passed - does everything look good? Mark as healed.',
-    'nazorg.markeer':'Mark as healed','nazorg.checklist':'Aftercare checklist','nazorg.geentaken':'No tasks on the checklist yet.',
+    'nazorg.markeer':'Mark as healed','nazorg.geen_datum':'Add the date this tattoo was done and you will see how long the aftercare still runs.','nazorg.checklist':'Aftercare checklist','nazorg.geentaken':'No tasks on the checklist yet.',
     'nazorg.taakph':'New task…','nazorg.taak':'＋ Task','nazorg.standaard':'Default list',
     'nazorg.instructies':"Artist's instructions",'nazorg.geeninstr':'No aftercare notes. Add them via Edit.',
     'form.titelbewerk':'Edit tattoo','form.titelwens':'New wish','form.titelnieuw':'New tattoo',
@@ -7839,7 +7839,7 @@ function createTattoo(overrides = {}) {
    ============================================================ */
 // App-versie (semver, handmatig ophogen bij een release). Bij een bump ook de
 // CACHE-naam in sw.js meebumpen, zodat clients de nieuwe build ophalen.
-const APP_VERSIE = '0.3.41';
+const APP_VERSIE = '0.3.42';
 
 /* Dev-haken die de CLOUD raken hangen alleen op een ontwikkelmachine aan window. Ze zijn geen
    lek op zichzelf (zonder XSS roept niemand ze aan, en CSP + esc() houden XSS tegen), maar ze
@@ -9601,6 +9601,16 @@ function vandaagISO() {
   const d = new Date();
   return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
 }
+/* Wat weten we over de heling? 'geheeld' als de gebruiker dat zelf heeft aangegeven,
+   'herstellende' als er een zetdatum is waaruit dat volgt, en anders NIETS. Zonder datum en
+   zonder markering wist de app het niet, maar toonde ze toch "Herstellende" - bij een tattoo
+   van tien jaar oud las dat als een bewering over iemands lichaam, inclusief de nazorg die
+   daarbij hoort. Liever een leeg veld dan een verzonnen feit. */
+function helingsStand(t) {
+  if (!t || t.status === 'wens') return null;
+  if (t.geheeld) return 'geheeld';
+  return t.datum ? 'herstellende' : null;
+}
 function pijnSterren(n, klein) {
   n = Math.max(0, Math.min(5, Number(n) || 0));
   if (!n) return '';
@@ -11046,9 +11056,10 @@ function renderLijst() {
     const galerijFoto = hoofdFoto(t);
     const kunstFoto = (!galerijFoto && t.kunst && t.kunst.src) ? t.kunst.src : null;
     const foto = lijstThumbSrc(t);   // kleine lijst-thumb (zelfde bron-voorrang); vol als terugval
+    const stand = helingsStand(t);
     const badge = t.status === 'wens'
       ? '<span class="badge wens">' + tr('badge.wishlist') + '</span>'
-      : `<span class="badge ${t.geheeld ? 'geheeld' : 'herstellende'}">${t.geheeld ? tr('badge.geheeld') : tr('badge.herstellende')}</span>`;
+      : (stand ? `<span class="badge ${stand}">${tr(stand === 'geheeld' ? 'badge.geheeld' : 'badge.herstellende')}</span>` : '');
     return `
     <button class="tcard" data-id="${esc(t.id)}" style="--acc:${esc(t.accentkleur || '#8E71F0')}">
       <span class="thumb${kunstFoto ? ' thumb-kunst' : ''}">${foto ? `<img src="${esc(foto)}" alt="">` : esc((String(t.naam ?? '') || '?').charAt(0).toUpperCase())}</span>
@@ -11150,7 +11161,9 @@ function renderDetail() {
       { l: tr('detail.kosten'), v: t.kosten ? euro.format(t.kosten) + (isWens ? ' (' + tr('woord.budget') + ')' : '') : '', leeg: !t.kosten },
       { l: tr('detail.zituren'), v: zituU ? zituU + ' ' + tr('eenheid.uur') : '', leeg: !zituU },
       { l: tr('detail.pijn'), v: pijnSterren(t.pijn), leeg: !t.pijn },
-      { l: tr('detail.status'), v: isWens ? tr('badge.wishlist') : (t.geheeld ? tr('badge.geheeld') : tr('badge.herstellende')), leeg: false },
+      { l: tr('detail.status'),
+        v: isWens ? tr('badge.wishlist') : (helingsStand(t) === 'geheeld' ? tr('badge.geheeld') : tr('badge.herstellende')),
+        leeg: !isWens && !helingsStand(t) },
       { l: tr('detail.accentkleur'), v: `<span style="display:inline-block;width:18px;height:18px;border-radius:5px;background:${esc(t.accentkleur)};vertical-align:middle"></span>`, leeg: false },
     ];
     const rijenHtml = rijen.map(r => `<div class="veldrij${r.leeg ? ' leeg-veld' : ''}"><dt>${r.l}</dt><dd>${r.leeg ? '-' : r.v}</dd></div>`).join('');
@@ -11213,7 +11226,9 @@ function renderDetail() {
           ? `<span class="aftel">${tr('nazorg.resterend').replace('{n}', rest).replace('{dag}', rest === 1 ? tr('woord.dag') : tr('woord.dagen')).replace('{richtlijn}', HERSTEL_DAGEN)}</span>`
           : `<p>${tr('nazorg.voorbij').replace('{richtlijn}', HERSTEL_DAGEN)}</p>`;
       } else {
-        statusBlok = '<p>' + tr('badge.herstellende') + '</p>';
+        // Geen datum: dan is er niets af te leiden. Vraag erom in plaats van 'Herstellende'
+        // te tonen; met een datum vult de aftelling zich vanzelf.
+        statusBlok = '<p class="gedempt">' + tr('nazorg.geen_datum') + '</p>';
       }
       const taken = (t.nazorgTaken || []).map((taak, i) => `
         <div class="taak">
