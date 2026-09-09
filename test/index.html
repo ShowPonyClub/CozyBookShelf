@@ -7839,7 +7839,7 @@ function createTattoo(overrides = {}) {
    ============================================================ */
 // App-versie (semver, handmatig ophogen bij een release). Bij een bump ook de
 // CACHE-naam in sw.js meebumpen, zodat clients de nieuwe build ophalen.
-const APP_VERSIE = '0.3.42';
+const APP_VERSIE = '0.3.43';
 
 /* Dev-haken die de CLOUD raken hangen alleen op een ontwikkelmachine aan window. Ze zijn geen
    lek op zichzelf (zonder XSS roept niemand ze aan, en CSP + esc() houden XSS tegen), maar ze
@@ -9147,10 +9147,55 @@ function openOudeDB() {
   });
 }
 
+/* Bestaat de oude database überhaupt? indexedDB.open() MAAKT er anders een aan, dus zonder
+   deze vraag legt elke verse installatie een lege 'tattoostics' aan die daarna voorgoed
+   blijft staan. databases() ontbreekt in oudere browsers; dan weten we het niet en doen we
+   het oude gedrag (openen, en achteraf opruimen). */
+async function oudeDatabaseBestaat() {
+  if (!indexedDB.databases) return null;               // niet te bepalen
+  try {
+    const lijst = await indexedDB.databases();
+    if (!Array.isArray(lijst)) return null;
+    return lijst.some((d) => d && d.name === OUD_DB_NAAM);
+  } catch { return null; }
+}
+
+/* De oude database heeft na het overzetten geen functie meer. Laten staan kost ruimte in
+   het opslagbudget dat de browser aan deze app toekent - op iOS is dat budget krap en telt
+   een verweesde database gewoon mee. Alleen aanroepen als de records aantoonbaar zijn
+   weggeschreven (de put-transactie is pas 'oncomplete' als dat gelukt is).
+   Blijft hij geblokkeerd door een tweede tab, dan proberen we het een volgende start weer. */
+function wisOudeDatabase() {
+  return new Promise((resolve) => {
+    let req;
+    try { req = indexedDB.deleteDatabase(OUD_DB_NAAM); }
+    catch { resolve(false); return; }
+    req.onsuccess = () => resolve(true);
+    req.onerror = () => resolve(false);
+    req.onblocked = () => resolve(false);   // andere tab houdt 'm open: geen drama, later opnieuw
+  });
+}
+
 async function migreerOudeDatabase() {
   if (!dbBeschikbaar) return;
-  try { if (localStorage.getItem('tatties-db-gemigreerd') === '1') return; }
-  catch { /* zonder vlag draaien we de migratie hooguit nogmaals - onschadelijk */ }
+  let alGemigreerd = false, alOpgeruimd = false;
+  try {
+    alGemigreerd = localStorage.getItem('tatties-db-gemigreerd') === '1';
+    alOpgeruimd = localStorage.getItem('tatties-oude-db-weg') === '1';
+  } catch { /* zonder vlaggen draaien we de migratie hooguit nogmaals - onschadelijk */ }
+  if (alGemigreerd && alOpgeruimd) return;   // overgezet en opgeruimd: niets te doen
+  // Niets te migreren en niets aan te maken: als de oude database er niet is, houden we het
+  // daarbij. Anders zou open() hem alsnog aanmaken, en elke verse installatie hield dan een
+  // lege 'tattoostics' over die daarna voorgoed bleef staan.
+  if ((await oudeDatabaseBestaat()) === false) {
+    try { localStorage.setItem('tatties-db-gemigreerd', '1'); localStorage.setItem('tatties-oude-db-weg', '1'); }
+    catch { /* geen vlag-opslag */ }
+    return;
+  }
+  // Bestaat ze nog (of weten we het niet), dan lopen we de overzetting hieronder gewoon
+  // opnieuw. Die is idempotent - put() gaat op id - en dat is veiliger dan afgaan op de
+  // migratievlag: die kan van een oudere versie komen met andere logica, en dan zouden we
+  // een database wissen waar nog iets in staat.
   try {
     const oud = await openOudeDB();
     if (oud) {
@@ -9177,6 +9222,10 @@ async function migreerOudeDatabase() {
       // geblokkeerde/mislukte open (oud === null) proberen we het later opnieuw, zodat
       // data uit de oude database niet permanent ongemigreerd blijft.
       try { localStorage.setItem('tatties-db-gemigreerd', '1'); } catch { /* geen vlag-opslag */ }
+      // Overgezet en gesloten: nu mag de oude weg.
+      if (await wisOudeDatabase()) {
+        try { localStorage.setItem('tatties-oude-db-weg', '1'); } catch { /* geen vlag-opslag */ }
+      }
     }
   } catch { /* migratie is niet kritiek: de app werkt gewoon met de nieuwe (lege) database */ }
 }
