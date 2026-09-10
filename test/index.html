@@ -606,6 +606,10 @@ dl.toon-leeg .veldrij.leeg-veld{display:flex}
 .start-cta:hover{filter:brightness(1.05)}
 .start-stats{display:flex;gap:10px}
 .start-stat{flex:1;background:var(--kaart);border:1px solid var(--rand);border-radius:var(--radius);padding:14px 8px;text-align:center}
+/* Blijft er na het weglaten van nulwaarden maar een tegel over, dan hoort die niet over de
+   volle breedte uit te rekken; dat leest als een banner in plaats van als een cijfer. */
+.start-stats.weinig{justify-content:center}
+.start-stats.weinig .start-stat{flex:0 1 170px}
 .start-stat-getal{display:block;font-size:1.3rem;font-weight:800;color:var(--accent-diep)}
 .start-stat-label{display:block;font-size:.72rem;text-transform:uppercase;letter-spacing:.06em;color:var(--gedempt);margin-top:4px}
 .start-leeg{margin:0;color:var(--gedempt);text-align:center;padding:8px 0}
@@ -1688,9 +1692,35 @@ html.knipfull .cutmodal.cm-review .cm-bewerkbtn span{position:absolute;width:1px
    rijen even breed zijn, kan het geheel gewoon gecentreerd staan.
    flex:1 laat het raster de ruimte naast het label vullen; zonder dat duwt de
    space-between van .inst-rij het smalle raster helemaal naar rechts. */
-.tint-swatches{flex:1;display:grid;grid-template-columns:repeat(4,auto);gap:8px;justify-content:center}
-.tint-swatch{width:30px;height:30px;border-radius:50%;border:2px solid transparent;cursor:pointer;padding:0;box-shadow:0 0 0 1px rgba(0,0,0,.18) inset}
-.tint-swatch.actief{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent)}
+/* Huidtint als schuif. Acht vaste stalen lieten mensen kiezen uit acht hokjes; het verloop
+   ertussen bestond al in code (tintBijFractie) maar was niet te bereiken. De baan toont het
+   hele bereik, de duim draagt de gekozen kleur. */
+.tint-schuif{flex:1;display:flex;align-items:center;min-width:0}
+.tint-schuif input[type=range]{
+  -webkit-appearance:none;appearance:none;
+  width:100%;min-height:44px;height:44px;padding:0;margin:0;
+  background:transparent;border:0;box-shadow:none;cursor:pointer;
+}
+.tint-schuif input[type=range]:focus{outline:none;box-shadow:none;border:0}
+.tint-schuif input[type=range]:focus-visible::-webkit-slider-thumb{box-shadow:0 0 0 3px rgba(var(--accent-rgb),.5)}
+.tint-schuif input[type=range]:focus-visible::-moz-range-thumb{box-shadow:0 0 0 3px rgba(var(--accent-rgb),.5)}
+.tint-schuif input[type=range]::-webkit-slider-runnable-track{
+  height:14px;border-radius:999px;background:var(--tint-baan);border:1px solid rgba(0,0,0,.22);
+}
+.tint-schuif input[type=range]::-moz-range-track{
+  height:14px;border-radius:999px;background:var(--tint-baan);border:1px solid rgba(0,0,0,.22);
+}
+.tint-schuif input[type=range]::-webkit-slider-thumb{
+  -webkit-appearance:none;appearance:none;
+  width:30px;height:30px;border-radius:50%;margin-top:-9px;
+  background:var(--tint-duim);border:2px solid var(--kaart);
+  box-shadow:0 0 0 1px rgba(0,0,0,.3), 0 2px 6px rgba(0,0,0,.32);
+}
+.tint-schuif input[type=range]::-moz-range-thumb{
+  width:30px;height:30px;border-radius:50%;
+  background:var(--tint-duim);border:2px solid var(--kaart);
+  box-shadow:0 0 0 1px rgba(0,0,0,.3), 0 2px 6px rgba(0,0,0,.32);
+}
 /* ---- opstartscherm (eerste keer) ---- */
 /* Zelfde warme gradient als de app-body (de vlakke --bg matchte niet met de app erachter) */
 .onboarding{position:fixed;inset:0;z-index:100000;
@@ -1941,13 +1971,12 @@ form label{text-transform:none;letter-spacing:.005em;font-size:.8rem;color:var(-
 
     <div id="tattoo-list"></div>
 
+    <!-- Back-up (export/import) staat in Instellingen, bij Account: dat zijn samen de
+         twee manieren om je collectie veilig te stellen. Hier blijft alleen het delen
+         van de kaart als afbeelding, want dat hoort bij je collectie zelf. -->
     <div class="backup-row">
-      <button class="knop-sec" id="btn-export"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v10M8 10l4 4 4-4"/><path d="M5 19h14"/></svg><span data-i18n="btn.export">Exporteren</span></button>
-      <button class="knop-sec" id="btn-import"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 18V8M8 12l4-4 4 4"/><path d="M5 20h14"/></svg><span data-i18n="btn.import">Importeren</span></button>
       <button class="knop-sec" id="btn-kaart-export"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5" width="16" height="14" rx="2"/><circle cx="9" cy="10" r="1.5"/><path d="M5 18l4.5-4.5 3 3 3-3L19 17"/></svg><span data-i18n="btn.png">Kaart als PNG</span></button>
-      <input type="file" id="import-file" accept="application/json,.json" hidden>
     </div>
-    <p id="opslag-info" class="gedempt" style="font-size:.78rem;text-align:center;margin-top:10px"></p>
   </section>
 
   <!-- ===================== STATISTIEKEN ===================== -->
@@ -2263,6 +2292,16 @@ form label{text-transform:none;letter-spacing:.005em;font-size:.8rem;color:var(-
       </span>
       <span class="inst-link-pijl" aria-hidden="true">&rsaquo;</span>
     </button>
+  </div>
+
+  <p class="inst-groepkop" data-i18n="inst.groep_backup">Back-up</p>
+  <div class="paneel inst-kaart">
+    <div class="backup-row">
+      <button class="knop-sec" id="btn-export"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v10M8 10l4 4 4-4"/><path d="M5 19h14"/></svg><span data-i18n="btn.export">Exporteren</span></button>
+      <button class="knop-sec" id="btn-import"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 18V8M8 12l4-4 4 4"/><path d="M5 20h14"/></svg><span data-i18n="btn.import">Importeren</span></button>
+      <input type="file" id="import-file" accept="application/json,.json" hidden>
+    </div>
+    <p id="opslag-info" class="gedempt" style="font-size:.78rem;text-align:center;margin-top:10px"></p>
   </div>
 
   <p class="inst-groepkop" data-i18n="inst.groep_verbeteren">Tatties verbeteren</p>
@@ -7395,7 +7434,7 @@ const I18N = {
     'btn.export':'Exporteren','btn.import':'Importeren','btn.png':'Kaart als PNG',
     'install.tekst':'Zet Tatties op je beginscherm voor offline gebruik','install.knop':'Installeren','install.opbeginscherm':'Op beginscherm zetten','install.algeinstalleerd':'Al geïnstalleerd','install.handmatig':'Installeren kan via het menu van je browser.',
     'install.ios':'Tik op de <b>Deel</b>-knop en kies <b>Zet op beginscherm</b>.','install.ios_kop':'Op iPhone of iPad',
-    'inst.titel':'Instellingen','inst.tab_lichaam':'Lichaam','inst.tab_app':'App','inst.groep_lichaam':'Je lichaam','inst.groep_voorkeuren':'Voorkeuren','inst.groep_account':'Account','inst.groep_app':'App & info','inst.geslacht':'Lichaam','inst.man':'Mannelijk','inst.vrouw':'Vrouwelijk','inst.huid':'Huidskleur','inst.taal':'Taal',
+    'inst.titel':'Instellingen','inst.tab_lichaam':'Lichaam','inst.tab_app':'App','inst.groep_lichaam':'Je lichaam','inst.groep_voorkeuren':'Voorkeuren','inst.groep_account':'Account','inst.groep_backup':'Back-up','inst.groep_app':'App & info','inst.geslacht':'Lichaam','inst.man':'Mannelijk','inst.vrouw':'Vrouwelijk','inst.huid':'Huidskleur','inst.taal':'Taal',
     'inst.groep_verbeteren':'Tatties verbeteren','inst.gebruik_delen':'Anoniem gebruik delen','inst.aan':'Aan','inst.uit':'Uit',
     'inst.gebruik_delen_uitleg':'Staat uit. Zet je \'m aan, dan stuurt de app hooguit \u00e9\u00e9n keer per dag: een willekeurig nummer, de datum, de app-versie, of je de 3D-weergave gebruikt en ongeveer hoeveel tattoos je hebt. Geen naam, geen foto\'s, geen account, geen klikgedrag - alleen om te zien of mensen terugkomen.',
     'ui.pose_arm':'Armen wijd','ui.pose_kort':'Armen',
@@ -7478,7 +7517,7 @@ const I18N = {
     'toast.importmislukt':'Import mislukt: dit is geen geldig Tatties-back-upbestand','toast.import_te_groot':'Bestand te groot om te importeren (max 200 MB)','toast.opslagvol':'De opslag is vol - exporteer een back-up en verwijder wat foto\'s','toast.kosten_ongeldig':'Kosten niet herkend - typ alleen cijfers, bijvoorbeeld 12,50','confirm.import':'Importeren voegt {n} nieuwe toe en overschrijft {m} bestaande tattoo{s}. Doorgaan?','confirm.import_ja':'Importeren','toast.importgeannuleerd':'Import geannuleerd',
     'toast.persist':'Let op: de browser garandeert je opslag niet - maak regelmatig een back-up',
     'toast.opbeginscherm':'Tatties staat op je beginscherm','toast.ladenmislukt':'Laden van gegevens mislukt: ',
-    'opslag.gebruik':'Opslag: {mb} MB in gebruik','opslag.van':'van ±{mb} MB','opslag.bijnavol':'· bijna vol - exporteer een back-up!'
+    'opslag.gebruik':'Je collectie neemt {maat} in beslag','opslag.van':'van de ±{maat} op dit toestel.','opslag.bijnavol':'Bijna vol - exporteer een back-up.'
   },
   en: {
     'aria.instellingen':'Settings','aria.collectie':'Collection and wishlist','aria.stats':'Statistics',
@@ -7584,7 +7623,7 @@ const I18N = {
     'btn.export':'Export','btn.import':'Import','btn.png':'Map as PNG',
     'install.tekst':'Add Tatties to your home screen for offline use','install.knop':'Install','install.opbeginscherm':'Add to home screen','install.algeinstalleerd':'Already installed','install.handmatig':'Install via your browser menu.',
     'install.ios':'Tap the <b>Share</b> button, then choose <b>Add to Home Screen</b>.','install.ios_kop':'On iPhone or iPad',
-    'inst.titel':'Settings','inst.tab_lichaam':'Body','inst.tab_app':'App','inst.groep_lichaam':'Your body','inst.groep_voorkeuren':'Preferences','inst.groep_account':'Account','inst.groep_app':'App & info','inst.geslacht':'Body','inst.man':'Masculine','inst.vrouw':'Feminine','inst.huid':'Skin tone','inst.taal':'Language',
+    'inst.titel':'Settings','inst.tab_lichaam':'Body','inst.tab_app':'App','inst.groep_lichaam':'Your body','inst.groep_voorkeuren':'Preferences','inst.groep_account':'Account','inst.groep_backup':'Backup','inst.groep_app':'App & info','inst.geslacht':'Body','inst.man':'Masculine','inst.vrouw':'Feminine','inst.huid':'Skin tone','inst.taal':'Language',
     'inst.groep_verbeteren':'Help improve Tatties','inst.gebruik_delen':'Share anonymous usage','inst.aan':'On','inst.uit':'Off',
     'inst.gebruik_delen_uitleg':'Off by default. Turn it on and the app sends at most once a day: a random number, the date, the app version, whether you use the 3D view and roughly how many tattoos you have. No name, no photos, no account, no click tracking - only to see whether people come back.',
     'ui.pose_arm':'Arms out','ui.pose_kort':'Arms',
@@ -7667,7 +7706,7 @@ const I18N = {
     'toast.importmislukt':"Import failed: this isn't a valid Tatties backup file",'toast.import_te_groot':'File too large to import (max 200 MB)','toast.opslagvol':'Storage is full - export a backup and remove some photos','toast.kosten_ongeldig':'Cost not recognised - type numbers only, for example 12.50','confirm.import':'Importing adds {n} new and overwrites {m} existing tattoo{s}. Continue?','confirm.import_ja':'Import','toast.importgeannuleerd':'Import cancelled',
     'toast.persist':"Note: the browser doesn't guarantee your storage - back up regularly",
     'toast.opbeginscherm':'Tatties is on your home screen','toast.ladenmislukt':'Loading data failed: ',
-    'opslag.gebruik':'Storage: {mb} MB in use','opslag.van':'of ~{mb} MB','opslag.bijnavol':'· almost full - export a backup!'
+    'opslag.gebruik':'Your collection takes up {maat}','opslag.van':'of the ~{maat} on this device.','opslag.bijnavol':'Almost full - export a backup.'
   }
 };
 function tr(k){
@@ -7839,7 +7878,7 @@ function createTattoo(overrides = {}) {
    ============================================================ */
 // App-versie (semver, handmatig ophogen bij een release). Bij een bump ook de
 // CACHE-naam in sw.js meebumpen, zodat clients de nieuwe build ophalen.
-const APP_VERSIE = '0.3.43';
+const APP_VERSIE = '0.3.44';
 
 /* Dev-haken die de CLOUD raken hangen alleen op een ontwikkelmachine aan window. Ze zijn geen
    lek op zichzelf (zonder XSS roept niemand ze aan, en CSP + esc() houden XSS tegen), maar ze
@@ -9959,11 +9998,15 @@ function renderStart() {
   const totUren = gezet.reduce((s, t) =>
     s + Math.max(Number(t.zituren) || 0, (t.sessies || []).reduce((a, x) => a + (Number(x.duurUren) || 0), 0)), 0);
   const totKosten = gezet.reduce((s, t) => s + (Number(t.kosten) || 0), 0);
+  // Alleen cijfers tonen die iets zeggen. "0 h" en "EUR 0,00" vullen wel de rij maar dragen
+  // niets bij: wie nog geen uren of bedragen heeft ingevuld, leest daar geen feit maar een
+  // gat. Het aantal blijft altijd staan (de lege staat is hierboven al afgevangen).
   const cellen = [
     { g: tattoos.length, l: tr('start.stat_aantal') },
-    { g: ziturenLabel(totUren), l: tr('stats.zituren'), id: 'home-zituren', titel: tr('stats.wissel_eenheid') },
-    { g: euro.format(totKosten), l: tr('stats.uitgegeven') },
-  ];
+    { g: ziturenLabel(totUren), l: tr('stats.zituren'), id: 'home-zituren', titel: tr('stats.wissel_eenheid'), toon: totUren > 0 },
+    { g: euro.format(totKosten), l: tr('stats.uitgegeven'), toon: totKosten > 0 },
+  ].filter(s => s.toon !== false);
+  statsEl.classList.toggle('weinig', cellen.length < 3);
   statsEl.innerHTML = cellen.map(s => {
     const getal = s.id
       ? `<span class="start-stat-getal klikbaar" id="${s.id}" role="button" tabindex="0" title="${esc(s.titel || '')}" aria-label="${esc(s.titel || '')}">${esc(String(s.g))}</span>`
@@ -10014,6 +10057,16 @@ async function purgeTombstones(maxDagen = 30) {
   } catch (e) { console.error('tombstone-purge mislukt', e); }
 }
 
+/* Bytes als leesbare maat: boven de gigabyte niet doorgaan met viercijferige MB's
+   ("2662,4 MB" leest als een meting, "2,6 GB" als een hoeveelheid). Decimaalteken volgt
+   de taal. */
+function maatLabel(bytes) {
+  const mb = bytes / 1048576;
+  const groot = mb >= 1024;
+  const waarde = groot ? mb / 1024 : mb;
+  const cijfer = waarde.toLocaleString(taal === 'en' ? 'en-GB' : 'nl-NL', { maximumFractionDigits: 1 });
+  return cijfer + (groot ? ' GB' : ' MB');
+}
 /* Opslaggebruik tonen en waarschuwen als het vol raakt */
 async function toonOpslagInfo() {
   const el = $('#opslag-info');
@@ -10021,10 +10074,13 @@ async function toonOpslagInfo() {
   if (!(navigator.storage && navigator.storage.estimate)) { el.textContent = ''; return; }
   try {
     const { usage = 0, quota = 0 } = await navigator.storage.estimate();
-    let tekst = tr('opslag.gebruik').replace('{mb}', (usage / 1048576).toFixed(1));
-    if (quota) {
-      tekst += ' ' + tr('opslag.van').replace('{mb}', Math.round(quota / 1048576));
-      if (usage / quota > 0.8) tekst += ' ' + tr('opslag.bijnavol');
+    // Hoeveel van het toestelbudget vol is, is geen vraag die iemand zich stelt: "4,2 MB van
+    // 2984 MB" leest als systeeminformatie. Wat telt is hoeveel jouw collectie kost, en of er
+    // iets moet gebeuren. Het budget noemen we dus alleen als het knelt.
+    let tekst = tr('opslag.gebruik').replace('{maat}', maatLabel(usage));
+    if (quota && usage / quota > 0.8) {
+      tekst += ' ' + tr('opslag.van').replace('{maat}', maatLabel(quota))
+             + ' ' + tr('opslag.bijnavol');
     }
     el.textContent = tekst;
   } catch { el.textContent = ''; }
@@ -10086,9 +10142,13 @@ function tintBijFractie(t) {
   return _hslNaarHex(h, s, l);
 }
 // Dichtstbijzijnde fractie voor een hex (om de slider-stand te bepalen)
-// Slider-curve: het bleke/witte begin krijgt minder reisweg, zodat de slider
-// snel echte huidskleur bereikt. s = sliderstand (0..1), t = palet-fractie.
-const TINT_CURVE = 0.5;
+// Slider-curve: s = sliderstand (0..1), t = palet-fractie.
+// Stond op 0.5 om "snel voorbij het bleke begin" te komen. Dat was te verdedigen zolang je
+// uit acht vaste stalen koos, maar als schuif werkt het averechts: de vier lichtste tinten
+// zaten samen in de eerste 18% van de baan en waren niet meer fijn af te stellen, terwijl de
+// donkere helft 82% kreeg. Lineair geeft elke tint evenveel reisweg. De curve-functies
+// blijven staan voor als er ooit toch gekromd moet worden.
+const TINT_CURVE = 1;
 function sliderNaarFractie(s){ return Math.pow(Math.max(0, Math.min(1, s)), TINT_CURVE); }
 function fractieNaarSlider(t){ return Math.pow(Math.max(0, Math.min(1, t)), 1 / TINT_CURVE); }
 function fractieBijTint(hex) {
@@ -10113,18 +10173,33 @@ function zetTint(hex) {
   if (_tintRAF) cancelAnimationFrame(_tintRAF);
   _tintRAF = requestAnimationFrame(() => { _tintRAF = 0; tekenSilhouet(); renderBodyMap(); });
 }
+/* Kleurverloop voor de baan. De stops volgen dezelfde curve als de schuif (sliderNaarFractie),
+   zodat de kleur onder de duim ook echt de kleur is die je krijgt. */
+function tintBaanVerloop() {
+  const stops = [];
+  for (let i = 0; i <= 12; i++) {
+    const p = i / 12;
+    stops.push(tintBijFractie(sliderNaarFractie(p)) + ' ' + Math.round(p * 100) + '%');
+  }
+  return 'linear-gradient(90deg,' + stops.join(',') + ')';
+}
 function tekenHuidkiezer(container) {
   if (!container) return;
-  const swatches = HUIDTINTEN.map((c, i) =>
-    `<button type="button" class="tint-swatch" data-tint="${c}" style="background:${c}" aria-label="${esc(tr('inst.huid'))} ${i + 1}/${HUIDTINTEN.length}"></button>`).join('');
-  container.innerHTML = `<div class="tint-swatches">${swatches}</div>`;
-  const markActief = () => container.querySelectorAll('.tint-swatch').forEach(b => {
-    const aan = b.dataset.tint.toLowerCase() === huidtint.toLowerCase();
-    b.classList.toggle('actief', aan); b.setAttribute('aria-pressed', String(aan));   // ONB-4: selectie ook hoorbaar voor screenreaders
+  const stand = Math.round(fractieNaarSlider(fractieBijTint(huidtint)) * 100);
+  container.innerHTML = '<div class="tint-schuif">'
+    + '<input type="range" id="tint-range" min="0" max="100" step="1" value="' + stand + '"'
+    + ' aria-label="' + esc(tr('inst.huid')) + '"></div>';
+  const schuif = container.querySelector('#tint-range');
+  if (!schuif) return;
+  container.style.setProperty('--tint-baan', tintBaanVerloop());
+  const toonDuim = () => container.style.setProperty('--tint-duim', huidtint);
+  toonDuim();
+  // 'input' vuurt tijdens het slepen; zetTint bundelt de zware hertekening zelf per frame,
+  // dus de kleur volgt de vinger zonder dat het silhouet erachteraan hobbelt.
+  schuif.addEventListener('input', () => {
+    zetTint(tintBijFractie(sliderNaarFractie(schuif.value / 100)));
+    toonDuim();
   });
-  container.querySelectorAll('.tint-swatch').forEach(b =>
-    b.addEventListener('click', () => { zetTint(b.dataset.tint); markActief(); }));
-  markActief();
 }
 function tekenTinten() { tekenHuidkiezer($('#tint-rij')); }
 
