@@ -431,7 +431,7 @@ main > section{animation:opkomen .3s ease both}
 .tcard{
   display:flex;gap:12px;align-items:flex-start;width:100%;text-align:left;
   background:var(--kaart);border:1px solid var(--rand);border-radius:var(--radius);
-  padding:12px;border-left:3px solid var(--acc,var(--accent));
+  padding:12px;
   box-shadow:0 1px 3px rgba(34,26,18,.06);
   transition:transform .06s ease, border-color .12s ease;
 }
@@ -7878,7 +7878,7 @@ function createTattoo(overrides = {}) {
    ============================================================ */
 // App-versie (semver, handmatig ophogen bij een release). Bij een bump ook de
 // CACHE-naam in sw.js meebumpen, zodat clients de nieuwe build ophalen.
-const APP_VERSIE = '0.3.44';
+const APP_VERSIE = '0.3.45';
 
 /* Dev-haken die de CLOUD raken hangen alleen op een ontwikkelmachine aan window. Ze zijn geen
    lek op zichzelf (zonder XSS roept niemand ze aan, en CSP + esc() houden XSS tegen), maar ze
@@ -8602,7 +8602,8 @@ function hardRecord(record) {
   record.zituren = Math.min(100000, Math.max(0, parseFloat(record.zituren) || 0));
   record.opacity = isFinite(+record.opacity) ? Math.max(0.2, Math.min(1, +record.opacity)) : 1;
   record.stapel = parseInt(record.stapel, 10) || 0;
-  // accentkleur gaat in een CSS style-context (style="--acc:..."); esc() stopt daar wel
+  // accentkleur gaat in een CSS style-context (het kleurvierkantje op de detailpagina en de
+  // markering op de lichaamskaart); esc() stopt daar wel
   // attribuut-breakout maar geen CSS-declaraties. Klem tot een veilige hex-kleur (de UI
   // levert altijd #rrggbb via <input type=color>; alleen import/sync kan iets anders bevatten).
   if (typeof record.accentkleur !== 'string' || !/^#[0-9a-f]{3,8}$/i.test(record.accentkleur.trim())) record.accentkleur = '#8E71F0';
@@ -11185,7 +11186,7 @@ function renderLijst() {
       ? '<span class="badge wens">' + tr('badge.wishlist') + '</span>'
       : (stand ? `<span class="badge ${stand}">${tr(stand === 'geheeld' ? 'badge.geheeld' : 'badge.herstellende')}</span>` : '');
     return `
-    <button class="tcard" data-id="${esc(t.id)}" style="--acc:${esc(t.accentkleur || '#8E71F0')}">
+    <button class="tcard" data-id="${esc(t.id)}">
       <span class="thumb${kunstFoto ? ' thumb-kunst' : ''}">${foto ? `<img src="${esc(foto)}" alt="">` : esc((String(t.naam ?? '') || '?').charAt(0).toUpperCase())}</span>
       <span class="info">
         <h3>${esc(t.naam)}</h3>
