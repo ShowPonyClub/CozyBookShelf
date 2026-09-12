@@ -7,18 +7,18 @@
 <meta name="color-scheme" content="light dark">
 <meta name="theme-color" content="#EFE4D0" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#181511" media="(prefers-color-scheme: dark)">
-<title>tatties - plan your next tattoo</title>
-<meta name="description" content="tatties lets you plan your next tattoo on a body map and keep a private log of the ink you already have. Local-first and private: no body scan, no account needed - everything stays on your device unless you turn on optional sync. In private beta.">
-<meta property="og:title" content="tatties - plan your next tattoo">
+<title>Tatties - plan your next tattoo</title>
+<meta name="description" content="Tatties lets you plan your next tattoo on a body map and keep a private log of the ink you already have. Local-first and private: no body scan, no account needed - everything stays on your device unless you turn on optional sync. In private beta.">
+<meta property="og:title" content="Tatties - plan your next tattoo">
 <meta property="og:description" content="Plan your next tattoo on a 3D body - then log the ink you already have. Private by design. In private beta.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://tatties.app">
 <meta property="og:image" content="https://www.tatties.app/img/og-image.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="tatties - plan your next tattoo">
+<meta property="og:image:alt" content="Tatties - plan your next tattoo">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="tatties - plan your next tattoo">
+<meta name="twitter:title" content="Tatties - plan your next tattoo">
 <meta name="twitter:description" content="Plan your next tattoo on a 3D body - then log the ink you already have. Private by design. In private beta.">
 <meta name="twitter:image" content="https://www.tatties.app/img/og-image.png">
 <link rel="preload" as="font" type="font/woff2" href="fonts/recoleta-semibold.woff2" crossorigin>
@@ -277,7 +277,7 @@
     try{
       if(APPS_SCRIPT_URL){var ad=new URLSearchParams();ad.append('email',v);ad.append('bron','landingspagina');await fetch(APPS_SCRIPT_URL,{method:'POST',mode:'no-cors',body:ad});}
       else if(FORMSPREE_ENDPOINT){var fd=new FormData();fd.append('email',v);
-        fd.append('_subject','New tatties waitlist signup');fd.append('_captcha','false');fd.append('_template','table');
+        fd.append('_subject','New Tatties waitlist signup');fd.append('_captcha','false');fd.append('_template','table');
         var res=await fetch(FORMSPREE_ENDPOINT,{method:'POST',headers:{'Accept':'application/json'},body:fd});
         if(!res.ok)throw new Error('failed');
       }else{var list=JSON.parse(localStorage.getItem('tatties_waitlist')||'[]');
