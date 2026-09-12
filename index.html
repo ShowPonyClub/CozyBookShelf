@@ -298,7 +298,7 @@
   var scrolling=false,scrollT,lastT=0;
   var fades=[], fadeIdx=0;
   var TEX={}; function getTex(k){if(!TEX[k]){var t=texLoader.load(CFG.tat[k]);t.anisotropy=8;t.encoding=THREE.sRGBEncoding;TEX[k]=t;}return TEX[k];}
-  function decalMat(k){return new THREE.MeshStandardMaterial({map:getTex(k),transparent:true,opacity:0,alphaTest:0.2,roughness:0.72,metalness:0,polygonOffset:true,polygonOffsetFactor:-4,depthWrite:false});}
+  function decalMat(k){return new THREE.MeshBasicMaterial({map:getTex(k),transparent:true,opacity:0,premultipliedAlpha:true,blending:THREE.CustomBlending,blendEquation:THREE.AddEquation,blendSrc:THREE.DstColorFactor,blendDst:THREE.OneMinusSrcAlphaFactor,polygonOffset:true,polygonOffsetFactor:-4,depthWrite:false});}
   var ray=new THREE.Raycaster(), dummy=new THREE.Object3D();
   function placeDecal(G,meshes,it){
     ray.set(new THREE.Vector3(it.x,it.y,3),new THREE.Vector3(0,0,-1));
