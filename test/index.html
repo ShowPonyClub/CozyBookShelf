@@ -69,8 +69,12 @@
 <!-- ============================================================
      STAP 8 - PWA: metatags + inline Web App Manifest (data-URL)
      ============================================================ -->
-<meta name="theme-color" content="#EFE4D0" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#181511" media="(prefers-color-scheme: dark)">
+<!-- Een theme-color, door JS gelijkgehouden met data-theme (zetThemaKleur). iOS gebruikt in de
+     standalone-app alleen de eerste theme-color en negeert 'media', en de thema-keuze in de app
+     (licht/donker) wijkt bovendien van het systeem af; twee media-meta's gaven zo een papieren
+     statusbalk boven een donkere app. -->
+<meta name="theme-color" id="thema-kleur" content="#EFE4D0">
+<script>(function(){try{var m=document.getElementById('thema-kleur');if(m)m.content=document.documentElement.getAttribute('data-theme')==='dark'?'#181511':'#EFE4D0';}catch(e){}})();</script>
 <meta name="color-scheme" content="light dark"><!-- declareert eigen licht+donker-support: voorkomt dat Samsung Internet 'force dark' de app algoritmisch inverteert -->
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -95,8 +99,8 @@
     start_url: '.',
     scope: '.',
     display: 'standalone',
-    background_color: '#EFE4D0',
-    theme_color: '#EFE4D0',
+    background_color: document.documentElement.getAttribute('data-theme') === 'dark' ? '#181511' : '#EFE4D0',
+    theme_color: document.documentElement.getAttribute('data-theme') === 'dark' ? '#181511' : '#EFE4D0',
     icons: [
       { src: ICON_PNG_192, sizes: '192x192', type: 'image/png', purpose: 'any' },
       { src: ICON_PNG_512, sizes: '512x512', type: 'image/png', purpose: 'any' },
@@ -7813,6 +7817,13 @@ function pasThemaToe() {
   const donker = themaVoorkeur === 'donker' ||
     (themaVoorkeur === 'auto' && _systeemDonker && _systeemDonker.matches);
   document.documentElement.setAttribute('data-theme', donker ? 'dark' : 'light');
+  zetThemaKleur(donker);
+}
+
+/* Statusbalk/adresbalk-kleur meesturen met het thema (iOS standalone, Android Chrome) */
+function zetThemaKleur(donker) {
+  const m = document.getElementById('thema-kleur');
+  if (m) m.content = donker ? '#181511' : '#EFE4D0';
 }
 
 function pasThema(keuze) {
@@ -7919,7 +7930,7 @@ function createTattoo(overrides = {}) {
    ============================================================ */
 // App-versie (semver, handmatig ophogen bij een release). Bij een bump ook de
 // CACHE-naam in sw.js meebumpen, zodat clients de nieuwe build ophalen.
-const APP_VERSIE = '0.3.47';
+const APP_VERSIE = '0.3.48';
 
 /* Dev-haken die de CLOUD raken hangen alleen op een ontwikkelmachine aan window. Ze zijn geen
    lek op zichzelf (zonder XSS roept niemand ze aan, en CSP + esc() houden XSS tegen), maar ze
