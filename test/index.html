@@ -7930,7 +7930,7 @@ function createTattoo(overrides = {}) {
    ============================================================ */
 // App-versie (semver, handmatig ophogen bij een release). Bij een bump ook de
 // CACHE-naam in sw.js meebumpen, zodat clients de nieuwe build ophalen.
-const APP_VERSIE = '0.3.51';
+const APP_VERSIE = '0.3.52';
 
 /* Dev-haken die de CLOUD raken hangen alleen op een ontwikkelmachine aan window. Ze zijn geen
    lek op zichzelf (zonder XSS roept niemand ze aan, en CSP + esc() houden XSS tegen), maar ze
@@ -15231,6 +15231,7 @@ async function verwijderVoorbeelden() {
     if(!m || !(recMul(m.rec)||recInkt(m.rec)) || !(m.rec.kunst3d && m.rec.kunst3d.srcUrl)) return;
     rebuildTextureFromKunst(m.rec.kunst3d).then(tex=>{ if(!tex) return;
       if(m.tex && m.tex!==tex && m.tex.dispose) m.tex.dispose(); m.tex=tex; rebuildMarker(m); setBlendUI();
+      persistEdit(m);   // opgeloste blend (inkt-auto -> zwart/kleur) + 2D-PNG uit de nieuwe textuur (sync2D) opslaan
     }).catch(()=>{});
   }
   function enterEditDecal(m){
@@ -15824,6 +15825,27 @@ async function verwijderVoorbeelden() {
   // flip als buildCleanCanvas. Helderheid -> alpha, zodat de zachte maskerranden
   // (anti-alias van het model) behouden blijven. Cache per orientatie+maat: rebuilds
   // draaien ook tijdens slider-sleep, en de pixel-pass is te duur om te herhalen.
+  // Bounding-box van de lasso in BRON-orientatie (pixels van een PWxPH-bron), of null zonder lasso.
+  // Lasso-punten zijn genormaliseerd op de basis-canvas (na rot90/flipH); hier draaien we die transformatie terug.
+  function lassoBronBox(PW, PH){
+    if(!lassoPts || lassoPts.length<3) return null;
+    const R=((rot90||0)%4+4)%4, odd=(R&1)===1;
+    let u0=1,v0=1,u1=0,v1=0;
+    for(const pt of lassoPts){
+      // basis-coordinaat gecentreerd, in eenheden van de bron (odd: basis-breedte = bron-hoogte)
+      let x=(pt.nx-0.5)*(odd?PH:PW), y=(pt.ny-0.5)*(odd?PW:PH);
+      // rotatie terugdraaien (basis = bron gedraaid over R*90 graden met de klok mee)
+      for(let i=0;i<R;i++){ const t=x; x=y; y=-t; }
+      if(flipH) x=-x;
+      const u=x/PW+0.5, v=y/PH+0.5;
+      u0=Math.min(u0,u); v0=Math.min(v0,v); u1=Math.max(u1,u); v1=Math.max(v1,v);
+    }
+    const mw=Math.max(24,(u1-u0)*PW*0.15), mh=Math.max(24,(v1-v0)*PH*0.15);
+    const x=Math.max(0,Math.floor(u0*PW-mw)), y=Math.max(0,Math.floor(v0*PH-mh));
+    const w=Math.min(PW-x,Math.ceil((u1-u0)*PW+2*mw)), hh=Math.min(PH-y,Math.ceil((v1-v0)*PH+2*mh));
+    if(w<32||hh<32) return null;
+    return {x, y, w, h:hh};
+  }
   function applyAiMask(x, W, H, maskImg, rot, flip){
     if(!maskImg || !maskImg.naturalWidth) return;
     const R=((rot||0)%4+4)%4;
@@ -16455,7 +16477,8 @@ async function verwijderVoorbeelden() {
       const dL=li[0]-lh[0], da=li[1]-lh[1], db=li[2]-lh[2];
       const dE=Math.sqrt(dL*dL+da*da+db*db), dC=Math.sqrt(da*da+db*db);
       RL[i]=rl; DE[i]=dE;
-      if(rl<0.8 || dE>12){ kandN++; if(dC>14) kleurN++; } }
+      // bijna-zwarte pixels hebben geen betrouwbare tint (zwarte inkt mist alleen de huid-tint): pas vanaf L>30 laten meetellen als kleur
+      if(rl<0.8 || dE>12){ kandN++; if(dC>14 && li[0]>30) kleurN++; } }
     if(modus==='auto') modus = (kandN>50 && kleurN/kandN>=0.10) ? 'kleur' : 'zwart';
     if(modus==='zwart'){
       for(let i=0;i<N;i++){ const o=i*4; if(p[o+3]<16){ p[o+3]=0; continue; }
@@ -16476,6 +16499,14 @@ async function verwijderVoorbeelden() {
   }
   // Blend-waarde van een record lezen: 'zwart' | 'kleur' | 'auto' bij een inkt-matte, anders null
   function blendInkt(b){ return (typeof b==='string' && b.indexOf('inkt-')===0) ? b.slice(5) : null; }
+  // Uitsnede-canvas voor opslag/plaatsing: inkt-matte toepassen als het recept dat vraagt ('auto' wordt hier
+  // zwart/kleur en onthouden in inktAuto). Werkt op een kopie; geeft het origineel terug als er geen matte is.
+  function matteVoorOpslag(cv, k){
+    const ik=k && blendInkt(k.blend); if(!cv || !ik) return cv;
+    const c=document.createElement('canvas'); c.width=cv.width; c.height=cv.height; c.getContext('2d').drawImage(cv,0,0);
+    const md=inktMatte(c, ik); k.blend = md ? ('inkt-'+md) : 'normaal'; if(md && ik==='auto') k.inktAuto=md;
+    return md ? c : cv;
+  }
 
   function normalizeSkinTone(canvas){
     const W=canvas.width, H=canvas.height; if(!W||!H) return;
@@ -16634,19 +16665,11 @@ async function verwijderVoorbeelden() {
   function blendVoorOpslag(){
     if(pendingEdit2D) return (pendingEdit2D.kunst3d&&pendingEdit2D.kunst3d.blend)||'normaal';
     if(pendingEdit) return (pendingEdit.rec&&pendingEdit.rec.kunst3d&&pendingEdit.rec.kunst3d.blend)||'normaal';
-    return inktSuggestie() ? 'inkt-auto' : (autoBlendSuggestie() ? 'multiply' : 'normaal');
-  }
-  // Inkt-matte voorstellen als de uitsnede vooral huid met inkt is (veel lichte pixels); de matte kiest zelf zwart/kleur.
-  function inktSuggestie(){
-    try{
-      const src=clippedCanvas(); if(!src||!src.width) return false;
-      const W=Math.min(160, src.width), H=Math.max(1,Math.round(src.height*(W/src.width)));
-      const c=document.createElement('canvas'); c.width=W; c.height=H;
-      const x=c.getContext('2d',{willReadFrequently:true}); x.drawImage(src,0,0,W,H);
-      const p=x.getImageData(0,0,W,H).data, N=W*H; let opaq=0, licht=0;
-      for(let i=0;i<N;i++){ const o=i*4; if(p[o+3]<16) continue; opaq++; if(0.299*p[o]+0.587*p[o+1]+0.114*p[o+2]>150) licht++; }
-      return opaq>=50 && licht/opaq>0.45;
-    }catch(e){ return false; }
+    // Nieuwe tattoo: altijd de inkt-matte proberen. inktMatte beslist zelf of het kan (geen huid gevonden,
+    // bv. een donkere achtergrond -> null -> 'normaal' in matteVoorOpslag), en een tik op de knop zet
+    // 'm terug op 'Met huid'. De oude lichte-huid-drempel (inktSuggestie) sloeg op donkere of
+    // onderbelichte huid niet aan terwijl de matte daar prima werkt (relatief aan de huid).
+    return 'inkt-auto';
   }
   // Voorzichtige heuristiek: alleen "in huid blenden" voorstellen als de uitsnede er duidelijk
   // uitziet als zwart/grijze inkt op lichte huid. Veel lichte huid-pixels + genoeg donkere inkt
@@ -16927,7 +16950,15 @@ async function verwijderVoorbeelden() {
           const PW=Math.max(1,Math.round(origImg.naturalWidth*sc)), PH=Math.max(1,Math.round(origImg.naturalHeight*sc));
           const pc=document.createElement('canvas'); pc.width=PW; pc.height=PH;
           pc.getContext('2d').drawImage(origImg,0,0,PW,PH);
-          const { data, error } = await sb.functions.invoke('magic-cut', { body:{ image: pc.toDataURL('image/jpeg',0.85) } });
+          // Lasso als hint: staat er een ruwe lijn, stuur dan alleen dat stuk (+15% marge) van de foto. Het model
+          // is tekst-gestuurd (geen box-prompt), dus croppen is de manier om te zeggen 'hier'; het masker komt
+          // straks terug in een zwart vol-formaat masker, zodat aiMask/applyAiMask niets merken. Lost de
+          // meerdelige missers op (schild, sugar skull, tekst) zonder ander model.
+          const crop=lassoBronBox(PW,PH);
+          let stuur=pc;
+          if(crop){ stuur=document.createElement('canvas'); stuur.width=crop.w; stuur.height=crop.h;
+            stuur.getContext('2d').drawImage(pc, crop.x,crop.y,crop.w,crop.h, 0,0,crop.w,crop.h); }
+          const { data, error } = await sb.functions.invoke('magic-cut', { body:{ image: stuur.toDataURL('image/jpeg',0.85) } });
           if(error || !(data && data.mask)){
             let code=null;
             try{ if(error && error.context && error.context.json){ const b=await error.context.json(); code=b && b.error; } }catch(e){}
@@ -16945,8 +16976,12 @@ async function verwijderVoorbeelden() {
             const mp=mx.getImageData(0,0,mw,mh).data; let wit=0;
             for(let i=0;i<mp.length;i+=4){ if(mp[i]>128){ wit=1; break; } }
             if(!wit){ window.toast(tr('ui.magic_geen')); return; }
-            aiMask=data.mask; aiMaskImg=mi;
-            rebuildBase(); drawLasso(); updateCutout();
+            if(crop){   // masker van de crop terugzetten in een zwart vol-formaat masker (bron-orientatie)
+              const fm=document.createElement('canvas'); fm.width=PW; fm.height=PH; const fx2=fm.getContext('2d');
+              fx2.fillStyle='#000'; fx2.fillRect(0,0,PW,PH); fx2.drawImage(mi, crop.x,crop.y,crop.w,crop.h);
+              const fi=new Image(); fi.onload=()=>{ aiMask=fm.toDataURL('image/png'); aiMaskImg=fi; rebuildBase(); drawLasso(); updateCutout(); };
+              fi.src=fm.toDataURL('image/png');
+            } else { aiMask=data.mask; aiMaskImg=mi; rebuildBase(); drawLasso(); updateCutout(); }
             { const h=document.getElementById('cmHint'); if(h) h.textContent=tr('ui.cut_hint_ai'); }   // hint niet meer "teken een lijn"
             window.toast(tr('ui.magic_klaar')+((data.gebruikt!=null&&data.limiet!=null)?' ('+data.gebruikt+'/'+data.limiet+')':''));
           };
@@ -17166,12 +17201,13 @@ async function verwijderVoorbeelden() {
           if(naamEl){ naamEl.setAttribute('aria-invalid','true'); naamEl.focus(); naamEl.addEventListener('input',()=>naamEl.removeAttribute('aria-invalid'),{once:true}); }
           return; }
         cutModal.classList.remove("on"); cutHistoryOpruimen(); pendingEdit2D=null;
-        const cv=imgTexture.image; const src=canvasToPNG(cv,700);
+        const k3=bouwKunst3d();
+        const cv=matteVoorOpslag(imgTexture.image, k3); const src=canvasToPNG(cv,700);   // 2D-PNG met dezelfde inkt-matte als 3D
         const aspect=(cv&&cv.width)?(cv.height/cv.width):1;
         if(imgTexture && imgTexture.dispose) imgTexture.dispose(); imgTexture=null;
         Object.assign(rec,{ naam, artiest:info.artiest, studio:info.studio, stijl:info.stijl, kosten:info.kosten, pijn:info.pijn, datum:info.datum, zituren:info.zituren, accentkleur:info.accentkleur, notities:info.notities, status });
         rec.kunst=rec.kunst||{}; rec.kunst.src=src; rec.kunst.aspect=aspect;
-        rec.kunst3d=bouwKunst3d();
+        rec.kunst3d=k3;
         try{ await saveTattoo(rec); }catch(e){ console.error(e); toast(tr('toast.opslaanmislukt')+(e&&e.message?e.message:tr('ui.fout'))); }
         if(typeof tattoos!=="undefined"&&Array.isArray(tattoos)){ const j=tattoos.findIndex(x=>x.id===rec.id); if(j>=0)tattoos[j]=rec; }
         if(typeof renderMarkers==="function"){ try{renderMarkers();}catch(_){} }
@@ -17195,6 +17231,9 @@ async function verwijderVoorbeelden() {
         const herhaal=plaatsHerhaal; plaatsHerhaal=false;   // D6(a): na plaatsen cut heropenen met dezelfde foto?
         if(herhaal && lassoPts.length>=3) vorigeLassos.push({pts:lassoPts.slice(), rot90, flipH});   // verb.3: vorige uitsnede onthouden
         const kunst3d=bouwKunst3d();
+        const cvM=matteVoorOpslag(imgTexture.image, kunst3d);   // inkt-matte meteen bij opslag: 2D-PNG en de plaatsingstextuur tonen wat je krijgt
+        if(cvM!==imgTexture.image){ const t=new THREE.CanvasTexture(cvM); t.encoding=THREE.sRGBEncoding; t.anisotropy=maxAniso(); t.needsUpdate=true;
+          if(imgTexture.dispose) imgTexture.dispose(); imgTexture=t; }
         if(addDoel==='2d'){
           const cv=imgTexture.image; const src=canvasToPNG(cv,700);
           const aspect=(cv&&cv.width)?(cv.height/cv.width):1;
@@ -17211,7 +17250,8 @@ async function verwijderVoorbeelden() {
       }
       if(pendingPlace2D){
         const pp=pendingPlace2D; cutModal.classList.remove("on"); cutHistoryOpruimen(); pendingPlace2D=null;
-        const cv=imgTexture.image;
+        const k3=bouwKunst3d();
+        const cv=matteVoorOpslag(imgTexture.image, k3);
         const src=canvasToPNG(cv,700);
         const aspect=(cv&&cv.width)?(cv.height/cv.width):1;
         try{
@@ -17219,7 +17259,7 @@ async function verwijderVoorbeelden() {
             naam:"Tattoo", status:"gezet", zijde:pp.side, lichaamsdeel:pp.zone,
             positie:{x:pp.x,y:pp.y},
             kunst:{ src, schaal:24, aspect, rotatie:0 },
-            kunst3d:bouwKunst3d()
+            kunst3d:k3
           });
           await saveTattoo(rec);
           if(typeof tattoos!=="undefined" && Array.isArray(tattoos)) tattoos.push(rec);
