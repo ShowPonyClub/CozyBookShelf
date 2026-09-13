@@ -1051,7 +1051,7 @@ form label,
    De vh/svh-regels blijven de terugval zolang die pin er nog niet is. */
 #stage{position:relative;width:100%;height:72vh;height:72svh;height:var(--stage-h,72svh);
   min-height:420px;touch-action:none;cursor:grab;
-  background:#0e1116;border-radius:var(--r-lg);overflow:hidden;}
+  background:#403a34;border-radius:var(--r-lg);overflow:hidden;}   /* = scene.background: als de bewerkbalk dockt krimpt het canvas en wordt de stage-grond zichtbaar, dus dezelfde warme studio-tint (was koud zwart #0e1116) */
 #stage:active{cursor:grabbing;}
 #stage canvas{display:block;}
 #view-3d #hint{margin:2px 0 0;background:var(--veldbg);border:1px solid var(--rand);
@@ -2089,7 +2089,7 @@ form label{text-transform:none;letter-spacing:.005em;font-size:.8rem;color:var(-
           <button type="button" class="eb-scarot" data-act="rot+" data-i18n-title="ui.rechts_draaien" data-i18n-aria="ui.rechts_draaien" title="Rechtsom draaien" aria-label="Rechtsom draaien"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.3-5.6"/><path d="M21 4v4h-4"/></svg></button>                    <button type="button" data-act="done" class="eb-af" data-i18n-title="ui.klaar" data-i18n-aria="ui.klaar" title="Klaar" aria-label="Klaar"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12l5 5L20 6"/></svg></button>
           <button type="button" data-act="del" class="eb-del" data-i18n-title="aria.verwijderen" data-i18n-aria="aria.verwijderen" title="Verwijderen" aria-label="Verwijderen"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M9 7V5h6v2M7 7l1 13h8l1-13"/><path d="M10 11v5M14 11v5"/></svg></button>
         </div>
-        <button type="button" data-act="blend" class="eb-blend" data-i18n-title="ui.huidblend" data-i18n-aria="ui.huidblend" title="In huid blenden" aria-label="In huid blenden"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="12" r="6"/><circle cx="15" cy="12" r="6"/></svg><span data-i18n="ui.huidblend_kort">In huid</span></button>
+        <button type="button" data-act="blend" class="eb-blend" data-i18n-title="ui.huidblend" data-i18n-aria="ui.huidblend" title="Alleen de inkt of met huid" aria-label="Alleen de inkt of met huid"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="12" r="6"/><circle cx="15" cy="12" r="6"/></svg><span data-i18n="ui.eb_met_huid">Met huid</span></button>
         <div class="eb-opacity"><span class="eb-op-label" data-i18n="ui.opaciteit">Opaciteit</span><input id="eb3d-opacity" type="range" min="20" max="100" value="100" class="slider" data-i18n-aria="ui.opaciteit" aria-label="Opaciteit"></div>
         <div class="eb-hint" data-i18n="ui.eb_hint">Sleep = verplaatsen &middot; knijp = schalen &middot; knijp-draai = roteren</div>
       </div>
@@ -7442,7 +7442,7 @@ const I18N = {
     'ui.achtergrondkleur':'Achtergrondkleur kiezen','ui.auto':'Auto',
     'ui.tattoo_toevoegen':'Tattoo toevoegen','ui.tattoo_aanpassen':'Tattoo aanpassen','ui.bewerken':'Bewerken',
     'ui.beginstand':'Beginstand','ui.laden':'Laden…','ui.vergrendelen':'Vergrendelen','ui.verwijderen':'Verwijderen',
-    'ui.huidblend':'In huid blenden','ui.huidblend_kort':'In huid','ui.blend_aan':'In huid geblend','ui.blend_uit':'Met huid, zoals de foto','ui.inkt_zwart':'Alleen de inkt, zwart','ui.inkt_kleur':'Alleen de inkt, in kleur',
+    'ui.huidblend':'Alleen de inkt of met huid','ui.huidblend_kort':'In huid','ui.eb_met_huid':'Met huid','ui.eb_inkt':'Inkt','ui.eb_inkt_zwart':'Inkt: zwart','ui.eb_inkt_kleur':'Inkt: kleur','ui.blend_aan':'In huid geblend','ui.blend_uit':'Met huid, zoals de foto','ui.inkt_zwart':'Alleen de inkt, zwart','ui.inkt_kleur':'Alleen de inkt, in kleur',
     'ui.aanpassen_bijknippen':'Aanpassen','ui.klaar':'Klaar','ui.kleiner':'Kleiner','ui.groter':'Groter','ui.sluiten_bevestig':'Uitsnede weggooien? Je niet-opgeslagen werk gaat verloren.','ui.sluiten_ja':'Weggooien',
     'ui.links_draaien':'Linksom draaien','ui.rechts_draaien':'Rechtsom draaien',
     'ui.eb_hint':'Sleep = verplaatsen · knijp = schalen · knijp-draai = roteren',
@@ -7631,7 +7631,7 @@ const I18N = {
     'ui.achtergrondkleur':'Pick background colour','ui.auto':'Auto',
     'ui.tattoo_toevoegen':'Add tattoo','ui.tattoo_aanpassen':'Edit tattoo','ui.bewerken':'Editing',
     'ui.beginstand':'Reset view','ui.laden':'Loading…','ui.vergrendelen':'Lock','ui.verwijderen':'Delete',
-    'ui.huidblend':'Blend into skin','ui.huidblend_kort':'In skin','ui.blend_aan':'Blended into skin','ui.blend_uit':'With skin, as photographed','ui.inkt_zwart':'Ink only, black','ui.inkt_kleur':'Ink only, in colour',
+    'ui.huidblend':'Ink only or with skin','ui.huidblend_kort':'In skin','ui.eb_met_huid':'With skin','ui.eb_inkt':'Ink','ui.eb_inkt_zwart':'Ink: black','ui.eb_inkt_kleur':'Ink: colour','ui.blend_aan':'Blended into skin','ui.blend_uit':'With skin, as photographed','ui.inkt_zwart':'Ink only, black','ui.inkt_kleur':'Ink only, in colour',
     'ui.aanpassen_bijknippen':'Edit','ui.klaar':'Done','ui.kleiner':'Smaller','ui.groter':'Bigger','ui.sluiten_bevestig':'Discard your cut-out? Unsaved work will be lost.','ui.sluiten_ja':'Discard',
     'ui.links_draaien':'Rotate left','ui.rechts_draaien':'Rotate right',
     'ui.eb_hint':'Drag = move · pinch = scale · pinch-twist = rotate',
@@ -7930,7 +7930,7 @@ function createTattoo(overrides = {}) {
    ============================================================ */
 // App-versie (semver, handmatig ophogen bij een release). Bij een bump ook de
 // CACHE-naam in sw.js meebumpen, zodat clients de nieuwe build ophalen.
-const APP_VERSIE = '0.3.50';
+const APP_VERSIE = '0.3.51';
 
 /* Dev-haken die de CLOUD raken hangen alleen op een ontwikkelmachine aan window. Ze zijn geen
    lek op zichzelf (zonder XSS roept niemand ze aan, en CSP + esc() houden XSS tegen), maar ze
@@ -15571,7 +15571,9 @@ async function verwijderVoorbeelden() {
   function setBlendUI(){
     const eb=document.getElementById("editbar"); if(!eb) return;
     const bb=eb.querySelector('[data-act="blend"]'); if(!bb) return;
-    const rec=editDecal&&editDecal.rec; bb.classList.toggle("on", recMul(rec)||!!recInkt(rec));
+    const rec=editDecal&&editDecal.rec, ik=recInkt(rec); bb.classList.toggle("on", recMul(rec)||!!ik);
+    // Knoptekst = de actieve stand, zodat je niet op de toast hoeft te wachten
+    const sp=bb.querySelector("span"); if(sp) sp.textContent = ik==="zwart"?tr("ui.eb_inkt_zwart"):ik==="kleur"?tr("ui.eb_inkt_kleur"):ik?tr("ui.eb_inkt"):recMul(rec)?tr("ui.huidblend_kort"):tr("ui.eb_met_huid");
   }
   function bindEditUI(){
     const eb=document.getElementById("editbar"); if(!eb) return;
