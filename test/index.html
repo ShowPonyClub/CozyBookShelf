@@ -7930,7 +7930,7 @@ function createTattoo(overrides = {}) {
    ============================================================ */
 // App-versie (semver, handmatig ophogen bij een release). Bij een bump ook de
 // CACHE-naam in sw.js meebumpen, zodat clients de nieuwe build ophalen.
-const APP_VERSIE = '0.3.49';
+const APP_VERSIE = '0.3.50';
 
 /* Dev-haken die de CLOUD raken hangen alleen op een ontwikkelmachine aan window. Ze zijn geen
    lek op zichzelf (zonder XSS roept niemand ze aan, en CSP + esc() houden XSS tegen), maar ze
@@ -16754,6 +16754,10 @@ async function verwijderVoorbeelden() {
     if(imgTexture && imgTexture.dispose) imgTexture.dispose();   // vorige tussentijdse textuur vrijgeven
     imgTexture=new THREE.CanvasTexture(texCanvas); imgTexture.encoding=THREE.sRGBEncoding; imgTexture.anisotropy=maxAniso(); imgTexture.needsUpdate=true;
   }
+  // Canvas kent geen CSS-variabelen: een fillStyle met var(--...) is ongeldig en laat de vorige kleur
+  // (standaard zwart) staan, waardoor de lasso als een zwart vlak werd gevuld (v0.3.47-v0.3.49). Lees de
+  // token dus uit de computed style.
+  function accentRgb(){ try{ return (getComputedStyle(document.documentElement).getPropertyValue('--accent-rgb')||'').trim() || '34,26,18'; }catch(e){ return '34,26,18'; } }
   function drawLasso(){
     const vak=prevVak(); const cv=lassoCanvas; cv.width=vak.w; cv.height=vak.h;
     const ctx=cv.getContext("2d"); ctx.clearRect(0,0,cv.width,cv.height);
@@ -16764,8 +16768,8 @@ async function verwijderVoorbeelden() {
       vorigeLassos.forEach(v=>{ if(!v||!v.pts||v.pts.length<3) return;
         if((v.rot90||0)!==(rot90||0) || !!v.flipH!==!!flipH) return;
         ctx.beginPath(); v.pts.forEach((p,i)=>{ const X=r.left+p.nx*r.w, Y=r.top+p.ny*r.h; i?ctx.lineTo(X,Y):ctx.moveTo(X,Y); });
-        ctx.closePath(); ctx.fillStyle="rgba(var(--accent-rgb),.07)"; ctx.fill();
-        ctx.save(); ctx.setLineDash([5,4]); ctx.lineWidth=1.5; ctx.strokeStyle="rgba(var(--accent-rgb),.5)"; ctx.stroke(); ctx.restore(); });
+        ctx.closePath(); ctx.fillStyle="rgba("+accentRgb()+",.07)"; ctx.fill();
+        ctx.save(); ctx.setLineDash([5,4]); ctx.lineWidth=1.5; ctx.strokeStyle="rgba("+accentRgb()+",.5)"; ctx.stroke(); ctx.restore(); });
     }
     if(gumMode && gumStroke && gumStroke.pts.length){   // gum: kwastring op het laatste punt (toont de grootte)
       const lp=gumStroke.pts[gumStroke.pts.length-1];
@@ -16777,7 +16781,7 @@ async function verwijderVoorbeelden() {
     if(lassoPts.length<1) return;
     ctx.beginPath();
     lassoPts.forEach((p,i)=>{ const X=r.left+p.nx*r.w, Y=r.top+p.ny*r.h; i?ctx.lineTo(X,Y):ctx.moveTo(X,Y); });
-    if(lassoPts.length>=3){ ctx.closePath(); ctx.fillStyle="rgba(var(--accent-rgb),.14)"; ctx.fill(); }
+    if(lassoPts.length>=3){ ctx.closePath(); ctx.fillStyle="rgba("+accentRgb()+",.14)"; ctx.fill(); }
     ctx.lineWidth=2; ctx.lineJoin="round"; ctx.strokeStyle="#CE2727"; ctx.stroke();
     // sleep-handles op elk punt
     lassoPts.forEach((p,i)=>{ const X=r.left+p.nx*r.w, Y=r.top+p.ny*r.h;
