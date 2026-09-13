@@ -7442,7 +7442,7 @@ const I18N = {
     'ui.achtergrondkleur':'Achtergrondkleur kiezen','ui.auto':'Auto',
     'ui.tattoo_toevoegen':'Tattoo toevoegen','ui.tattoo_aanpassen':'Tattoo aanpassen','ui.bewerken':'Bewerken',
     'ui.beginstand':'Beginstand','ui.laden':'Laden…','ui.vergrendelen':'Vergrendelen','ui.verwijderen':'Verwijderen',
-    'ui.huidblend':'In huid blenden','ui.huidblend_kort':'In huid','ui.blend_aan':'In huid geblend','ui.blend_uit':'Normale weergave',
+    'ui.huidblend':'In huid blenden','ui.huidblend_kort':'In huid','ui.blend_aan':'In huid geblend','ui.blend_uit':'Met huid, zoals de foto','ui.inkt_zwart':'Alleen de inkt, zwart','ui.inkt_kleur':'Alleen de inkt, in kleur',
     'ui.aanpassen_bijknippen':'Aanpassen','ui.klaar':'Klaar','ui.kleiner':'Kleiner','ui.groter':'Groter','ui.sluiten_bevestig':'Uitsnede weggooien? Je niet-opgeslagen werk gaat verloren.','ui.sluiten_ja':'Weggooien',
     'ui.links_draaien':'Linksom draaien','ui.rechts_draaien':'Rechtsom draaien',
     'ui.eb_hint':'Sleep = verplaatsen · knijp = schalen · knijp-draai = roteren',
@@ -7631,7 +7631,7 @@ const I18N = {
     'ui.achtergrondkleur':'Pick background colour','ui.auto':'Auto',
     'ui.tattoo_toevoegen':'Add tattoo','ui.tattoo_aanpassen':'Edit tattoo','ui.bewerken':'Editing',
     'ui.beginstand':'Reset view','ui.laden':'Loading…','ui.vergrendelen':'Lock','ui.verwijderen':'Delete',
-    'ui.huidblend':'Blend into skin','ui.huidblend_kort':'In skin','ui.blend_aan':'Blended into skin','ui.blend_uit':'Normal view',
+    'ui.huidblend':'Blend into skin','ui.huidblend_kort':'In skin','ui.blend_aan':'Blended into skin','ui.blend_uit':'With skin, as photographed','ui.inkt_zwart':'Ink only, black','ui.inkt_kleur':'Ink only, in colour',
     'ui.aanpassen_bijknippen':'Edit','ui.klaar':'Done','ui.kleiner':'Smaller','ui.groter':'Bigger','ui.sluiten_bevestig':'Discard your cut-out? Unsaved work will be lost.','ui.sluiten_ja':'Discard',
     'ui.links_draaien':'Rotate left','ui.rechts_draaien':'Rotate right',
     'ui.eb_hint':'Drag = move · pinch = scale · pinch-twist = rotate',
@@ -7930,7 +7930,7 @@ function createTattoo(overrides = {}) {
    ============================================================ */
 // App-versie (semver, handmatig ophogen bij een release). Bij een bump ook de
 // CACHE-naam in sw.js meebumpen, zodat clients de nieuwe build ophalen.
-const APP_VERSIE = '0.3.48';
+const APP_VERSIE = '0.3.49';
 
 /* Dev-haken die de CLOUD raken hangen alleen op een ontwikkelmachine aan window. Ze zijn geen
    lek op zichzelf (zonder XSS roept niemand ze aan, en CSP + esc() houden XSS tegen), maar ze
@@ -15195,6 +15195,7 @@ async function verwijderVoorbeelden() {
   /* ---- aanpas-modus voor een geplaatste tattoo ---- */
   // Staat deze tattoo op multiply-blend ("in huid blenden")?
   function recMul(rec){ return !!(rec && rec.kunst3d && rec.kunst3d.blend==='multiply'); }
+  function recInkt(rec){ return blendInkt(rec && rec.kunst3d && rec.kunst3d.blend); }   // 'zwart'|'kleur'|'auto'|null
   /* Vingerafdruk van alles waar de DECAL van afhangt: de uitsnede-instellingen, de plek en
      de weergave. Wijzigt die, dan moet de decal opnieuw gebouwd worden. De bronfoto zelf is
      base64 en dus groot - daarvan nemen we lengte + een stukje, net als de lijst-thumb.
@@ -15227,7 +15228,7 @@ async function verwijderVoorbeelden() {
   // dus herbouw de textuur via kunst3d (witbalans) en herteken met multiply zodat het blend-effect
   // meteen zichtbaar is (i.p.v. pas na herladen).
   function pasBlendOpNieuw(m){
-    if(!m || !recMul(m.rec) || !(m.rec.kunst3d && m.rec.kunst3d.srcUrl)) return;
+    if(!m || !(recMul(m.rec)||recInkt(m.rec)) || !(m.rec.kunst3d && m.rec.kunst3d.srcUrl)) return;
     rebuildTextureFromKunst(m.rec.kunst3d).then(tex=>{ if(!tex) return;
       if(m.tex && m.tex!==tex && m.tex.dispose) m.tex.dispose(); m.tex=tex; rebuildMarker(m); setBlendUI();
     }).catch(()=>{});
@@ -15570,7 +15571,7 @@ async function verwijderVoorbeelden() {
   function setBlendUI(){
     const eb=document.getElementById("editbar"); if(!eb) return;
     const bb=eb.querySelector('[data-act="blend"]'); if(!bb) return;
-    bb.classList.toggle("on", recMul(editDecal&&editDecal.rec));
+    const rec=editDecal&&editDecal.rec; bb.classList.toggle("on", recMul(rec)||!!recInkt(rec));
   }
   function bindEditUI(){
     const eb=document.getElementById("editbar"); if(!eb) return;
@@ -15591,9 +15592,15 @@ async function verwijderVoorbeelden() {
       if(a==="lock"){ if(editDecal){ editDecal.locked=!editDecal.locked; setLockUI();
         toast(editDecal.locked?tr('ui.vergrendeld'):tr('ui.ontgrendeld')); persistEdit(editDecal); } return; }
       if(a==="blend"){ const m=editDecal; const rec=m&&m.rec; if(rec){ rec.kunst3d=rec.kunst3d||{};
-        rec.kunst3d.blend = (rec.kunst3d.blend==='multiply') ? 'normaal' : 'multiply';
+        if(rec.__licht && typeof volledigInRam==="function") await volledigInRam(rec.id);   // licht record: bronfoto erbij, anders valt de matte terug op alleen de blend-modus
+        { const b=rec.kunst3d.blend||'normaal', ik=blendInkt(b);
+          // Cyclus: met huid -> inkt (auto: zwart of kleur) -> de andere inktvariant -> met huid.
+          // Oude 'multiply'-records stappen hier ook in; multiply zelf blijft alleen als opgeslagen waarde bestaan.
+          if(!ik) rec.kunst3d.blend='inkt-auto';
+          else if(rec.kunst3d.inktAuto && ik===rec.kunst3d.inktAuto) rec.kunst3d.blend = (ik==='zwart') ? 'inkt-kleur' : 'inkt-zwart';
+          else rec.kunst3d.blend='normaal'; }
         // textuur hangt nu van de blend-modus af (witbalans bij multiply) -> opnieuw bouwen
-        const klaar=()=>{ if(m!==editDecal) return; rebuildMarker(m); setBlendUI(); toast(recMul(rec)?tr('ui.blend_aan'):tr('ui.blend_uit')); persistEdit(m); };
+        const klaar=()=>{ if(m!==editDecal) return; rebuildMarker(m); setBlendUI(); toast(recInkt(rec)==='zwart'?tr('ui.inkt_zwart'):recInkt(rec)==='kleur'?tr('ui.inkt_kleur'):recMul(rec)?tr('ui.blend_aan'):tr('ui.blend_uit')); persistEdit(m); };
         if(rec.kunst3d.srcUrl){ rebuildTextureFromKunst(rec.kunst3d).then(tex=>{ if(m!==editDecal){ if(tex&&tex.dispose)tex.dispose(); return; } const oud=m.tex; m.tex=tex; klaar(); if(oud&&oud.dispose)oud.dispose(); }).catch(klaar); }
         else klaar();   // terugval: geen bronfoto -> alleen blend-modus wisselen
       } return; }
@@ -16368,6 +16375,106 @@ async function verwijderVoorbeelden() {
   // relatieve kleur houdt. Zo verdwijnt de huid bij multiply (×wit = ongewijzigd) en tint de
   // foto-huid het model niet meer. Werkt op de zichtbare (al uitgesneden) canvas; transparante
   // pixels tellen niet mee voor de schatting en worden niet aangeraakt.
+
+  // ---- Inkt-matte (2026-09-13): inkt van huid scheiden binnen de uitsnede, zonder model ----
+  // Een foto van een tattoo is grofweg huid x inkt. Schat de huid lokaal (gewogen vervaging van de
+  // niet-inkt-pixels), deel de foto erdoor (huid ~ 1, inkt lager) en maak daar een alpha van.
+  // 'zwart': alpha uit de helderheid, kleur = inkt.  'kleur': alpha uit de Lab-afstand tot de huid,
+  // kleur ontmengd.  'auto': classificatie op het aandeel inkt-pixels met een andere tint dan de huid
+  // (>= 10% = kleur; drempel getuned op 311 foto's met grondwaarheid). Geeft de gebruikte modus terug,
+  // of null (canvas onaangeraakt) als er te weinig huid is om op te vertrouwen.
+  function boxBlur3(src, w, h, r){
+    let a=src, b=new Float32Array(w*h), c=null;
+    for(let pass=0; pass<3; pass++){
+      for(let y=0;y<h;y++){ const row=y*w; let sum=0;
+        for(let x=-r;x<=r;x++) sum+=a[row+Math.min(w-1,Math.max(0,x))];
+        for(let x=0;x<w;x++){ b[row+x]=sum/(2*r+1); sum+=a[row+Math.min(w-1,x+r+1)]-a[row+Math.max(0,x-r)]; } }
+      c=(pass===0)?new Float32Array(w*h):a;
+      for(let x=0;x<w;x++){ let sum=0;
+        for(let y=-r;y<=r;y++) sum+=b[Math.min(h-1,Math.max(0,y))*w+x];
+        for(let y=0;y<h;y++){ c[y*w+x]=sum/(2*r+1); sum+=b[Math.min(h-1,y+r+1)*w+x]-b[Math.max(0,y-r)*w+x]; } }
+      a=c;
+    }
+    return a;
+  }
+  const _LIN=(()=>{ const t=new Float32Array(256); for(let i=0;i<256;i++){ const c=i/255; t[i]=c<=0.04045?c/12.92:Math.pow((c+0.055)/1.055,2.4); } return t; })();
+  function _lab(r,g,b,out){
+    const R=_LIN[r],G=_LIN[g],B=_LIN[b];
+    let X=(0.4124*R+0.3576*G+0.1805*B)/0.95047, Y=0.2126*R+0.7152*G+0.0722*B, Z=(0.0193*R+0.1192*G+0.9505*B)/1.08883;
+    X=X>0.008856?Math.cbrt(X):7.787*X+16/116; Y=Y>0.008856?Math.cbrt(Y):7.787*Y+16/116; Z=Z>0.008856?Math.cbrt(Z):7.787*Z+16/116;
+    out[0]=116*Y-16; out[1]=500*(X-Y); out[2]=200*(Y-Z);
+  }
+  function inktMatte(canvas, modus){
+    const W=canvas.width, H=canvas.height; if(!W||!H) return null;
+    const x=canvas.getContext('2d',{willReadFrequently:true});
+    const d=x.getImageData(0,0,W,H), p=d.data, N=W*H;
+    let minx=W,miny=H,maxx=-1,maxy=-1,nOp=0;
+    for(let i=0;i<N;i++){ if(p[i*4+3]<16) continue; nOp++; const X=i%W, Y=(i/W)|0; if(X<minx)minx=X; if(X>maxx)maxx=X; if(Y<miny)miny=Y; if(Y>maxy)maxy=Y; }
+    if(nOp<200) return null;
+    const rad=Math.max(6, Math.hypot(maxx-minx,maxy-miny)/14);
+    // lokale huid op verkleinde schaal
+    const s=Math.min(1, 400/Math.max(W,H)), w2=Math.max(1,Math.round(W*s)), h2=Math.max(1,Math.round(H*s));
+    const sc=document.createElement('canvas'); sc.width=w2; sc.height=h2;
+    const sx=sc.getContext('2d',{willReadFrequently:true}); sx.drawImage(canvas,0,0,w2,h2);
+    const q=sx.getImageData(0,0,w2,h2).data, n2=w2*h2;
+    const lum=new Float32Array(n2), hist=new Uint32Array(256); let cnt=0;
+    for(let i=0;i<n2;i++){ const o=i*4; if(q[o+3]<16){ lum[i]=-1; continue; } const L=0.299*q[o]+0.587*q[o+1]+0.114*q[o+2]; lum[i]=L; hist[L|0]++; cnt++; }
+    if(cnt<50) return null;
+    let acc=0, dr=0; for(let L=0;L<256;L++){ acc+=hist[L]; if(acc>=cnt*0.55){ dr=L; break; } }
+    const wgt=new Float32Array(n2);
+    for(let i=0;i<n2;i++) wgt[i]=lum[i]<0?0:Math.max(0,Math.min(1,(lum[i]-dr*0.85)/(dr*0.15+1e-6)));
+    const r2=Math.max(2,Math.round(rad*s));
+    const R=new Float32Array(n2),G=new Float32Array(n2),B=new Float32Array(n2);
+    let hr=null,hg=null,hb=null,hw=null, gr=200,gg=165,gb=140;
+    for(let it=0;it<2;it++){
+      for(let i=0;i<n2;i++){ const o=i*4, wv=wgt[i]; R[i]=q[o]*wv; G[i]=q[o+1]*wv; B[i]=q[o+2]*wv; }
+      hr=boxBlur3(R,w2,h2,r2); hg=boxBlur3(G,w2,h2,r2); hb=boxBlur3(B,w2,h2,r2); hw=boxBlur3(wgt,w2,h2,r2);
+      let sr=0,sg=0,sb=0,sn=0;
+      for(let i=0;i<n2;i++){ if(wgt[i]>0.5){ const o=i*4; sr+=q[o]; sg+=q[o+1]; sb+=q[o+2]; sn++; } }
+      if(sn){ gr=sr/sn; gg=sg/sn; gb=sb/sn; }
+      for(let i=0;i<n2;i++){ if(lum[i]<0){ wgt[i]=0; continue; } const den=hw[i], o=i*4;
+        const kr=den>0.02?hr[i]/den:gr, kg=den>0.02?hg[i]/den:gg, kb=den>0.02?hb[i]/den:gb;
+        const rl=0.299*q[o]/Math.max(kr,1)+0.587*q[o+1]/Math.max(kg,1)+0.114*q[o+2]/Math.max(kb,1);
+        wgt[i]=Math.max(0,Math.min(1,(rl-0.72)/0.2)); }
+    }
+    if(0.299*gr+0.587*gg+0.114*gb<60) return null;   // geen huid maar bv. een donkere achtergrond: niet aan beginnen
+    const hs=new ImageData(w2,h2);
+    for(let i=0;i<n2;i++){ const den=hw[i], o=i*4; hs.data[o]=den>0.02?hr[i]/den:gr; hs.data[o+1]=den>0.02?hg[i]/den:gg; hs.data[o+2]=den>0.02?hb[i]/den:gb; hs.data[o+3]=255; }
+    sx.putImageData(hs,0,0);
+    const hc=document.createElement('canvas'); hc.width=W; hc.height=H;
+    const hx=hc.getContext('2d',{willReadFrequently:true}); hx.imageSmoothingEnabled=true; hx.drawImage(sc,0,0,W,H);
+    const hd=hx.getImageData(0,0,W,H).data;
+    // per pixel: ratio-helderheid, Lab-afstand (dE) en tintverschil (dC)
+    const RL=new Float32Array(N), DE=new Float32Array(N); const li=[0,0,0], lh=[0,0,0];
+    let kandN=0, kleurN=0;
+    for(let i=0;i<N;i++){ const o=i*4; if(p[o+3]<16){ RL[i]=1; DE[i]=0; continue; }
+      const rl=0.299*p[o]/Math.max(hd[o],1)+0.587*p[o+1]/Math.max(hd[o+1],1)+0.114*p[o+2]/Math.max(hd[o+2],1);
+      _lab(p[o],p[o+1],p[o+2],li); _lab(hd[o],hd[o+1],hd[o+2],lh);
+      const dL=li[0]-lh[0], da=li[1]-lh[1], db=li[2]-lh[2];
+      const dE=Math.sqrt(dL*dL+da*da+db*db), dC=Math.sqrt(da*da+db*db);
+      RL[i]=rl; DE[i]=dE;
+      if(rl<0.8 || dE>12){ kandN++; if(dC>14) kleurN++; } }
+    if(modus==='auto') modus = (kandN>50 && kleurN/kandN>=0.10) ? 'kleur' : 'zwart';
+    if(modus==='zwart'){
+      for(let i=0;i<N;i++){ const o=i*4; if(p[o+3]<16){ p[o+3]=0; continue; }
+        let a=Math.max(0,Math.min(1,(0.92-RL[i])/0.64)); a=Math.pow(a,1.15)*1.1-0.04; a=Math.max(0,Math.min(1,a));
+        p[o]=33; p[o+1]=26; p[o+2]=23; p[o+3]=Math.round(a*p[o+3]); }
+    } else {
+      for(let i=0;i<N;i++){ const o=i*4; if(p[o+3]<16){ p[o+3]=0; continue; }
+        let a=Math.max(0,Math.min(1,(DE[i]-7)/19)); a=Math.max(0,Math.min(1,a*1.1-0.04));
+        const a3=Math.max(a,0.15);
+        // ontmengen: pixel = a*inkt + (1-a)*huid; inkt kan niet lichter zijn dan de foto (geen lichte halo's)
+        p[o]=Math.min(p[o],Math.max(0,Math.min(255,(p[o]-(1-a3)*hd[o])/a3)));
+        p[o+1]=Math.min(p[o+1],Math.max(0,Math.min(255,(p[o+1]-(1-a3)*hd[o+1])/a3)));
+        p[o+2]=Math.min(p[o+2],Math.max(0,Math.min(255,(p[o+2]-(1-a3)*hd[o+2])/a3)));
+        p[o+3]=Math.round(a*p[o+3]); }
+    }
+    x.putImageData(d,0,0);
+    return modus;
+  }
+  // Blend-waarde van een record lezen: 'zwart' | 'kleur' | 'auto' bij een inkt-matte, anders null
+  function blendInkt(b){ return (typeof b==='string' && b.indexOf('inkt-')===0) ? b.slice(5) : null; }
+
   function normalizeSkinTone(canvas){
     const W=canvas.width, H=canvas.height; if(!W||!H) return;
     const x=canvas.getContext('2d',{willReadFrequently:true});
@@ -16525,7 +16632,19 @@ async function verwijderVoorbeelden() {
   function blendVoorOpslag(){
     if(pendingEdit2D) return (pendingEdit2D.kunst3d&&pendingEdit2D.kunst3d.blend)||'normaal';
     if(pendingEdit) return (pendingEdit.rec&&pendingEdit.rec.kunst3d&&pendingEdit.rec.kunst3d.blend)||'normaal';
-    return autoBlendSuggestie() ? 'multiply' : 'normaal';
+    return inktSuggestie() ? 'inkt-auto' : (autoBlendSuggestie() ? 'multiply' : 'normaal');
+  }
+  // Inkt-matte voorstellen als de uitsnede vooral huid met inkt is (veel lichte pixels); de matte kiest zelf zwart/kleur.
+  function inktSuggestie(){
+    try{
+      const src=clippedCanvas(); if(!src||!src.width) return false;
+      const W=Math.min(160, src.width), H=Math.max(1,Math.round(src.height*(W/src.width)));
+      const c=document.createElement('canvas'); c.width=W; c.height=H;
+      const x=c.getContext('2d',{willReadFrequently:true}); x.drawImage(src,0,0,W,H);
+      const p=x.getImageData(0,0,W,H).data, N=W*H; let opaq=0, licht=0;
+      for(let i=0;i<N;i++){ const o=i*4; if(p[o+3]<16) continue; opaq++; if(0.299*p[o]+0.587*p[o+1]+0.114*p[o+2]>150) licht++; }
+      return opaq>=50 && licht/opaq>0.45;
+    }catch(e){ return false; }
   }
   // Voorzichtige heuristiek: alleen "in huid blenden" voorstellen als de uitsnede er duidelijk
   // uitziet als zwart/grijze inkt op lichte huid. Veel lichte huid-pixels + genoeg donkere inkt
@@ -17215,6 +17334,8 @@ async function verwijderVoorbeelden() {
           cc.getContext("2d").drawImage(sc, sx,sy,sw,sh, 0,0,sw,sh); shown=cc;
         }
         if(k.blend==='multiply') normalizeSkinTone(shown);   // slice 2: huid -> wit zodat multiply de huid laat verdwijnen
+        else if(blendInkt(k.blend)){ const wasAuto=blendInkt(k.blend)==='auto'; const md=inktMatte(shown, blendInkt(k.blend));   // inkt-matte; 'auto' wordt hier zwart/kleur
+          k.blend = md ? ('inkt-'+md) : 'normaal'; if(md && wasAuto) k.inktAuto=md; }   // onthoud de automatische keuze voor de knop-cyclus
         const tex=new THREE.CanvasTexture(shown); tex.encoding=THREE.sRGBEncoding; tex.anisotropy=maxAniso(); tex.needsUpdate=true; resolve(tex);
         }catch(e){ reject(e); } };
         if(k.aiMask){ const mim=new Image(); mim.onload=()=>verder(mim); mim.onerror=()=>verder(null); mim.src=k.aiMask; }
@@ -17439,7 +17560,7 @@ async function verwijderVoorbeelden() {
   window.__tattiesSetSkin3D = setSkin3D;
   window.__tatties3DPauze = function(){ actief3D=false; };   // renderlus pauzeren als een host-view wordt getoond
   // Dev-haakje (preview/console): decal-culling direct kunnen meten zonder UI-flow. Geen product-pad.
-  window.__tattiesDecalDbg = { faceGridFor, connectedDecalGeo, localDecalGeo, meshAtPoint, sceneRef:()=>scene, modelRef:()=>modelRoot,
+  window.__tattiesDecalDbg = { inktMatte, enterEditDecal, faceGridFor, connectedDecalGeo, localDecalGeo, meshAtPoint, sceneRef:()=>scene, modelRef:()=>modelRoot,
     stateRef:()=>({ inited, currentGender, meldAndereModel, actief3D, plaatsModus, plaatsDataAan: !!plaatsData, plaatsTex: !!(plaatsData && plaatsData.tex) }),
     cameraRef:()=>camera, rendererRef:()=>renderer,   // schaal-/fov-metingen (zie resize)
     bindDbg:{ maakBind, uitBind, triBijPunt, triAantal, triWereld, surfaceAt, markersRef:()=>markers },
