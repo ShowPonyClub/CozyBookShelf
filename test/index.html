@@ -836,7 +836,7 @@ input[type=range]:focus{box-shadow:none;border:none}
 
 /* ---- Instellingen-paneel ---- */
 #inst-overlay{
-  position:fixed;inset:0;z-index:40;
+  position:fixed;inset:0;z-index:40;overflow:hidden;   /* paneel zit erin; weggeschoven mag het de pagina niet langer maken (2026-09-14) */
   background:rgba(34,26,18,.35);backdrop-filter:blur(2px);
   opacity:0;pointer-events:none;transition:opacity .25s ease;
 }
@@ -1049,18 +1049,39 @@ form label,
    svh dekt de adresbalk af maar niet elke extra balk, dus JS pint de gemeten hoogte eenmalig vast
    in --stage-h (zie pinStageHoogte) en meet alleen opnieuw bij een echte breedtewissel (rotatie).
    De vh/svh-regels blijven de terugval zolang die pin er nog niet is. */
-#stage{position:relative;width:100%;height:72vh;height:72svh;height:var(--stage-h,72svh);
-  min-height:420px;touch-action:none;cursor:grab;
+#stage{position:relative;width:100%;height:72vh;height:72svh;height:var(--stage-h,72svh);   /* --stage-h = schermhoogte min de kop (JS, pinStageHoogte) */
+  min-height:380px;touch-action:none;cursor:grab;
   background:#403a34;border-radius:var(--r-lg);overflow:hidden;}   /* = scene.background: als de bewerkbalk dockt krimpt het canvas en wordt de stage-grond zichtbaar, dus dezelfde warme studio-tint (was koud zwart #0e1116) */
 #stage:active{cursor:grabbing;}
 #stage canvas{display:block;}
-#view-3d #hint{margin:2px 0 0;background:var(--veldbg);border:1px solid var(--rand);
-  color:var(--gedempt);font-size:var(--fs-sm);padding:8px 12px;border-radius:var(--r-md);text-align:center;}
+/* Hint als overlay onderin het venster (links van de +), alleen zichtbaar met .on: eenmalig bij de eerste 3D-opening
+   (vervaagt na een paar seconden) en zolang een ledemaat los staat. */
+#view-3d #hint{position:absolute;left:12px;right:74px;bottom:14px;z-index:5;margin:0;background:var(--kaart);border:1px solid var(--rand);
+  color:var(--tekst);font-size:var(--fs-sm);padding:8px 12px;border-radius:var(--r-md);text-align:center;box-shadow:0 4px 14px rgba(0,0,0,.22);
+  opacity:0;visibility:hidden;pointer-events:none;transition:opacity .5s ease,visibility .5s;}
+#view-3d #hint.on{opacity:1;visibility:visible;}
+/* Knoppen als overlay bovenin het venster: links de standen (Wishlist, Armen, Heel lichaam), rechts uitleg + reset. */
+.stage-knoppen{position:absolute;top:10px;left:10px;right:10px;z-index:6;display:flex;justify-content:space-between;align-items:flex-start;gap:8px;pointer-events:none;}
+.stage-knoppen .sk-links,.stage-knoppen .sk-rechts{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.stage-knoppen .sk-rechts{justify-content:flex-end;}
+.stage-knoppen button{pointer-events:auto;box-shadow:0 4px 14px rgba(0,0,0,.22);}
+.stage-knoppen .gepland-toggle{background:var(--kaart);}
+.stage-knoppen #t3d-reset,.stage-knoppen #t3d-info{position:static;top:auto;right:auto;width:44px;height:44px;border-radius:50%;flex:none;
+  background:var(--kaart);border:1px solid var(--rand);color:var(--tekst);cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:inherit;}
+.stage-knoppen #t3d-info:hover,.stage-knoppen #t3d-reset:hover{border-color:var(--accent);}
+.stage-knoppen #t3d-info .ik{width:22px;height:22px;}
+/* Uitleg-paneel: zelfde sheet als Instellingen (greep, kop, van onderen omhoog) */
+.sheet-overlay{position:fixed;inset:0;z-index:40;overflow:hidden;background:rgba(34,26,18,.35);backdrop-filter:blur(2px);opacity:0;pointer-events:none;transition:opacity .25s ease;}   /* overflow:hidden: het weggeschoven paneel mag de pagina niet langer maken */
+.sheet-overlay.open{opacity:1;pointer-events:auto;}
+.sheet-paneel{position:fixed;bottom:0;left:0;right:0;z-index:41;max-width:560px;margin:0 auto;max-height:88vh;overflow-y:auto;-webkit-overflow-scrolling:touch;
+  background:var(--kaart);border-radius:var(--r-lg) 20px 0 0;border-top:1px solid var(--rand);padding:0 0 env(safe-area-inset-bottom,16px);
+  box-shadow:0 -4px 24px rgba(34,26,18,.14);transform:translateY(100%);transition:transform .28s cubic-bezier(.32,1,.28,1);}
+.sheet-paneel.open{transform:translateY(0);}
+[data-theme="dark"] .sheet-overlay{background:rgba(0,0,0,.5);}
 /* Op een kort scherm viel de hintregel half onder de vouw (gemeten op 320x640: de onderste 34px).
    Het veld iets korter maken scheelt genoeg en houdt het model nog ruim in beeld. */
 @media (max-height:700px){ #stage{height:66vh;height:66svh;height:var(--stage-h,66svh);min-height:380px} }
-#t3d-uitleg{background:var(--veldbg);border:1px solid var(--rand);border-radius:var(--r-md);padding:12px 14px;color:var(--gedempt);}
-#t3d-uitleg .t3d-u-titel{font-size:var(--fs-sm);font-weight:600;color:var(--tekst);margin:0 0 8px;}
+#t3d-uitleg{padding:4px 16px 16px;color:var(--gedempt);}
 #t3d-uitleg ol{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px;font-size:var(--fs-sm);line-height:1.45;}
 #t3d-uitleg strong{color:var(--tekst);}
 /* 2D-handleiding onder de plattegrond - zelfde opzet als 3D, maar met thema-kleuren */
@@ -1068,7 +1089,7 @@ form label,
 #t2d-uitleg .t2d-u-titel{font-size:var(--fs-sm);font-weight:600;color:var(--tekst);margin:0 0 8px;}
 #t2d-uitleg ol{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px;font-size:var(--fs-sm);line-height:1.45;}
 #t2d-uitleg strong{color:var(--tekst);}
-#t3d-toast{position:absolute;left:50%;top:14px;transform:translateX(-50%);
+#t3d-toast{position:absolute;left:50%;top:64px;transform:translateX(-50%);   /* onder de overlay-knoppen (2026-09-14) */
   background:rgba(14,17,22,.92);border:1px solid #262d38;color:#e8eaed;font-size:var(--fs-sm);
   padding:8px 14px;border-radius:var(--r-sm);opacity:0;transition:opacity .3s;pointer-events:none;max-width:80%;text-align:center;z-index:4;}
 .t3d-tools{display:flex;align-items:center;gap:10px;padding:2px 2px 6px;}
@@ -1676,7 +1697,7 @@ html.knipfull .cutmodal.cm-review .cm-bewerkbtn span{position:absolute;width:1px
   font-size:28px;line-height:1;cursor:pointer;}
 #t3d-add:active{transform:scale(.97)}
 #t3d-add[hidden]{display:none;}
-#t3d-banner,#t2d-banner{position:absolute;left:50%;top:14px;transform:translateX(-50%);z-index:7;max-width:90%;
+#t3d-banner,#t2d-banner{position:absolute;left:50%;top:64px;transform:translateX(-50%);z-index:7;max-width:90%;   /* onder de overlay-knoppen */
   background:var(--accent);color:var(--op-inkt);font-size:var(--fs-sm);font-weight:600;padding:8px 14px;border-radius:999px;
   box-shadow:0 2px 10px rgba(0,0,0,.3);text-align:center;}
 #t3d-banner[hidden],#t2d-banner[hidden]{display:none;}
@@ -2060,7 +2081,10 @@ form label{text-transform:none;letter-spacing:.005em;font-size:.8rem;color:var(-
   </section>
   <!-- ===================== 3D-WEERGAVE ===================== -->
   <section id="view-3d" class="verborgen">
-    <div class="canvas-balk">
+    <div id="stage" role="group" data-i18n-aria="ui.stage_aria" aria-label="3D-lichaamsmodel; gebruik de 2D-knop bovenaan voor de toegankelijke platte kaart">
+      <!-- Knoppen als overlay in het venster (2026-09-14): het model krijgt de ruimte van de oude balk erboven -->
+      <div class="stage-knoppen">
+        <div class="sk-links">
       <button type="button" id="toon-gepland-3d" class="gepland-toggle" aria-pressed="false" data-i18n-aria="ui.toon_gepland" aria-label="Geplande tattoos tonen">
         <svg viewBox="0 0 24 24" class="ik" aria-hidden="true" style="width:15px;height:15px"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>
         <span data-i18n="ui.gepland">Gepland</span>
@@ -2073,14 +2097,19 @@ form label{text-transform:none;letter-spacing:.005em;font-size:.8rem;color:var(-
         <svg viewBox="0 0 24 24" class="ik" aria-hidden="true" style="width:15px;height:15px"><circle cx="12" cy="4.6" r="2"/><path d="M12 7v7"/><path d="M5 9.5h14"/><path d="M9 21l3-7 3 7"/></svg>
         <span data-i18n="ui.heel_kort">Heel lichaam</span>
       </button>
-      <button type="button" id="t3d-reset" data-i18n-title="ui.beginstand" data-i18n-aria="ui.beginstand" title="Beginstand" aria-label="Beginstand"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12a8 8 0 1 0 2.3-5.6"/><path d="M3 4v4h4"/></svg></button>
-    </div>
-    <div id="stage" role="img" data-i18n-aria="ui.stage_aria" aria-label="3D-lichaamsmodel; gebruik de 2D-knop bovenaan voor de toegankelijke platte kaart">
+        </div>
+        <div class="sk-rechts">
+          <button type="button" id="t3d-info" data-i18n-title="ui.uitleg_knop" data-i18n-aria="ui.uitleg_knop" title="Uitleg" aria-label="Uitleg"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5"/><path d="M12 7.6h.01"/></svg></button>
+          <button type="button" id="t3d-reset" data-i18n-title="ui.beginstand" data-i18n-aria="ui.beginstand" title="Beginstand" aria-label="Beginstand"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12a8 8 0 1 0 2.3-5.6"/><path d="M3 4v4h4"/></svg></button>
+        </div>
+      </div>
       <div id="t3d-toast"></div>
       <div id="t3d-banner" hidden></div>
       <div id="lege-hint-3d" class="lege-hint" data-i18n="ui.lege_cta" hidden>Nog geen tattoos - tik op + om er een toe te voegen</div>
       <button id="t3d-add" data-i18n-aria="fab.nieuw" data-i18n-title="fab.nieuw" aria-label="Nieuwe tattoo" title="Nieuwe tattoo">+</button>
       <div id="t3d-loading"><div class="t3d-spin"></div><span data-i18n="ui.laden">Laden&#8230;</span></div>
+      <!-- Hintregel: eenmalig zichtbaar bij de eerste 3D-opening (vervaagt), en zolang een ledemaat los staat -->
+      <div id="hint" data-i18n="ui.draai_hint">Sleep om te draaien &middot; dubbeltik op de huid om een tattoo te plaatsen</div>
       <!-- ENIGE BRON voor de bewerkbalk: de 2D-balk (#editbar2d) wordt bij init hieruit gekloond (dedup).
            Knop wijzigen/toevoegen? Alleen HIER. Verschil 2D: geen .eb-blend + eigen opacity-slider-id (in de kloon-code). -->
       <div id="editbar" class="t3d-editbar">
@@ -2103,10 +2132,15 @@ form label{text-transform:none;letter-spacing:.005em;font-size:.8rem;color:var(-
       </div>
     </div>
 
-    <!-- informatie & uitleg onder het 3D-model -->
-    <div id="hint" data-i18n="ui.draai_hint">Sleep om te draaien &middot; dubbeltik op de huid om een tattoo te plaatsen</div>
+    <!-- Uitleg zit achter de (i)-knop in het venster: een paneel van onderen, zoals Instellingen -->
+    <div id="t3d-uitleg-overlay" class="sheet-overlay">
+    <div id="t3d-uitleg-paneel" class="sheet-paneel" role="dialog" aria-modal="true" aria-labelledby="t3d-u-titel">
+      <div class="inst-greep"></div>
+      <div class="inst-hoofd">
+        <h2 id="t3d-u-titel" data-i18n="uitleg.titel3d">Zo werkt de 3D-weergave</h2>
+        <button type="button" class="icoonknop" id="t3d-uitleg-sluit" data-i18n-aria="aria.sluiten" data-i18n-title="aria.sluiten" aria-label="Sluiten" title="Sluiten"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+      </div>
     <div id="t3d-uitleg">
-      <p class="t3d-u-titel" data-i18n="uitleg.titel3d">Zo werkt de 3D-weergave</p>
       <ol>
         <li data-i18n-html="uitleg.3d1"><strong>Model kiezen:</strong> stel man of vrouw en je huidskleur in via Instellingen (tandwiel rechtsboven).</li>
         <li data-i18n-html="uitleg.3d2"><strong>Draaien:</strong> sleep met je vinger of muis om het model rond te draaien.</li>
@@ -2114,6 +2148,8 @@ form label{text-transform:none;letter-spacing:.005em;font-size:.8rem;color:var(-
         <li data-i18n-html="uitleg.3d4"><strong>Bewerken:</strong> dubbeltik op een geplaatste tattoo. Sleep om te verplaatsen, knijp om te schalen en te draaien. In de balk eronder zitten het potlood (opnieuw uitsnijden), het slot en de prullenbak.</li>
         <li data-i18n-html="uitleg.3d5"><strong>Wisselen:</strong> gebruik de 2D/3D-knop bovenaan voor de platte lichaamskaart.</li>
       </ol>
+    </div>
+    </div>
     </div>
 
   </section>
@@ -2257,7 +2293,7 @@ form label{text-transform:none;letter-spacing:.005em;font-size:.8rem;color:var(-
 <div id="sync-ind" hidden role="status" aria-live="polite"><span class="si-spin" aria-hidden="true"></span><span class="si-vink" aria-hidden="true">✓</span><span id="si-tekst"></span></div>
 
 <!-- ===================== INSTELLINGEN-PANEEL ===================== -->
-<div id="inst-overlay" role="presentation"></div>
+<div id="inst-overlay" role="presentation">
 <div id="inst-paneel" role="dialog" data-i18n-aria="aria.instellingen" aria-label="Instellingen" aria-modal="true">
   <div class="inst-greep"></div>
   <div class="inst-hoofd">
@@ -2388,6 +2424,7 @@ form label{text-transform:none;letter-spacing:.005em;font-size:.8rem;color:var(-
     <button type="button" class="inst-app-rij inst-wis-rij" id="inst-wis-data" data-i18n="inst.wisdata">Alle lokale data wissen</button>
   </div>
   </div><!-- /inst-pane-app -->
+</div>
 </div>
 
 <!-- Account-venster: geopend vanaf de startscherm-rij of de instellingen-link -->
@@ -7472,7 +7509,7 @@ const I18N = {
     'ui.geen_foto_bewaard':'Geen originele foto bewaard voor deze tattoo','ui.pas_aan_sla_op':'Pas de uitsnede aan en sla op',
     'ui.foto_niet_geladen':'Kon de foto niet laden','ui.knip_terug_vraag':'Je was een tattoo aan het uitsnijden. Verdergaan waar je gebleven was?','ui.knip_terug_ja':'Verdergaan','ui.knip_terug_klaar':'Je uitsnede staat er weer','ui.teken_lijn':'Teken een lijn rond de tattoo en stel de gevoeligheid in',
     'ui.geen_afbeelding':'Kies een afbeelding (geen ander bestandstype)','ui.foto_te_groot':'Foto te groot (max 30 MB)','ui.foto_mislukt':'Kon de foto niet verwerken',
-    'ui.reset':'Reset','ui.knop_uitleg':'Wat doen de knoppen?','ui.info':'Info','ui.gereedschap':'Gereedschap',
+    'ui.reset':'Reset','ui.uitleg_knop':'Uitleg','ui.knop_uitleg':'Wat doen de knoppen?','ui.info':'Info','ui.gereedschap':'Gereedschap',
     'inst.vorm.binnenkort':'Binnenkort','ui.bouw2d_kop':'Nog in aanbouw','ui.bouw2d_sub':'Gebruik zolang het 3D-model.',
     'aria.volledigoverzicht':'Volledig overzicht','aria.welkom':'Welkom',
     'ui.tik_achtergrond':'Tik op de achtergrond in de foto','ui.pipet_uit':'Pipet uit',
@@ -7661,7 +7698,7 @@ const I18N = {
     'ui.geen_foto_bewaard':'No original photo saved for this tattoo','ui.pas_aan_sla_op':'Adjust the cut-out and save',
     'ui.foto_niet_geladen':'Could not load the photo','ui.knip_terug_vraag':'You were cutting out a tattoo. Carry on where you left off?','ui.knip_terug_ja':'Carry on','ui.knip_terug_klaar':'Your cut-out is back','ui.teken_lijn':'Draw a line around the tattoo and set the sensitivity',
     'ui.geen_afbeelding':'Please choose an image (not another file type)','ui.foto_te_groot':'Photo too large (max 30 MB)','ui.foto_mislukt':'Could not process the photo',
-    'ui.reset':'Reset','ui.knop_uitleg':'What do the buttons do?','ui.info':'Info','ui.gereedschap':'Tools',
+    'ui.reset':'Reset','ui.uitleg_knop':'Help','ui.knop_uitleg':'What do the buttons do?','ui.info':'Info','ui.gereedschap':'Tools',
     'inst.vorm.binnenkort':'Coming soon','ui.bouw2d_kop':'Under construction','ui.bouw2d_sub':'Use the 3D model for now.',
     'aria.volledigoverzicht':'Full overview','aria.welkom':'Welcome',
     'ui.tik_achtergrond':'Tap the background in the photo','ui.pipet_uit':'Eyedropper off',
@@ -7943,7 +7980,7 @@ function createTattoo(overrides = {}) {
    ============================================================ */
 // App-versie (semver, handmatig ophogen bij een release). Bij een bump ook de
 // CACHE-naam in sw.js meebumpen, zodat clients de nieuwe build ophalen.
-const APP_VERSIE = '0.3.57';
+const APP_VERSIE = '0.3.58';
 
 /* Dev-haken die de CLOUD raken hangen alleen op een ontwikkelmachine aan window. Ze zijn geen
    lek op zichzelf (zonder XSS roept niemand ze aan, en CSP + esc() houden XSS tegen), maar ze
@@ -13016,7 +13053,7 @@ async function verwijderVoorbeelden() {
       const b = e.target.closest('.start-recent-item'); if (b) openDetail(b.dataset.id);
     }); }
   $('#inst-sluit').addEventListener('click', sluitInstellingen);
-  $('#inst-overlay').addEventListener('click', sluitInstellingen);
+  $('#inst-overlay').addEventListener('click', (e) => { if (e.target === e.currentTarget) sluitInstellingen(); });   // paneel zit in de overlay: alleen de achtergrond sluit
   { const tabs = document.querySelectorAll('.inst-tab');
     tabs.forEach(tab => tab.addEventListener('click', () => {
       tabs.forEach(t => { t.classList.remove('actief'); t.setAttribute('aria-selected','false'); });
@@ -13638,17 +13675,18 @@ async function verwijderVoorbeelden() {
      opnieuw - de breedte verandert namelijk niet als zo'n balk verschijnt of verdwijnt. */
   function pinStageHoogte(){
     if(!stage) return;
-    // Alleen op touch: daar schuiven de balken. Op desktop mag het veld gewoon meegroeien met het venster.
-    if(!(window.matchMedia && window.matchMedia("(pointer:coarse)").matches)){
-      if(pinW!==-1){ stage.style.removeProperty("--stage-h"); pinW=-1; }
-      return;
-    }
+    // Venster op schermhoogte (2026-09-14): alles wat onder het scherm hangt (kop, marge) gaat eraf, zodat het model
+    // de hele rest van het scherm krijgt. Op touch alleen herijken bij een breedtewissel (rotatie), niet bij in- en
+    // uitschuivende browserbalken; op desktop bij elke resize.
+    const coarse=!!(window.matchMedia && window.matchMedia("(pointer:coarse)").matches);
     const w=stage.clientWidth;
-    if(!w || w===pinW) return;   // verborgen view (0) of dezelfde breedte: niets te herijken
+    if(!w) return;                       // verborgen view: niets te meten
+    if(coarse && w===pinW) return;
     pinW=w;
-    stage.style.removeProperty("--stage-h");   // eerst terug naar de CSS-hoogte, dan pas meten
-    const h=stage.clientHeight;
-    if(h>0) stage.style.setProperty("--stage-h", h+"px");
+    const top=stage.getBoundingClientRect().top + (window.scrollY||0);   // documentpositie, onafhankelijk van scrollstand
+    const mn=document.querySelector('main'); const onder=mn ? (parseFloat(getComputedStyle(mn).paddingBottom)||0) : 12;   // wat er onder de stage nog aan pagina hangt
+    const h=Math.max(380, Math.round(window.innerHeight - top - onder));
+    stage.style.setProperty("--stage-h", h+"px");
   }
   function resize(){ if(!renderer||!stage)return;
     pinStageHoogte();
@@ -14984,8 +15022,30 @@ async function verwijderVoorbeelden() {
     // De hintregel onder het model zegt welk deel los staat; anders zie je alleen een toast die
     // wegvalt en weet je even later niet meer waar je naar kijkt.
     const h=document.getElementById('hint');
-    if(h) h.textContent = ledeActief ? tr('lede.bezig').replace('{deel}', tr('lede.'+ledeActief.deel).toLowerCase())
-                                     : tr('ui.draai_hint');
+    if(h){ h.textContent = ledeActief ? tr('lede.bezig').replace('{deel}', tr('lede.'+ledeActief.deel).toLowerCase())
+                                      : tr('ui.draai_hint');
+      if(ledeActief){ clearTimeout(hintTimer); h.classList.add('on'); } else if(!hintTimer) h.classList.remove('on'); }
+  }
+  // Eerste 3D-opening: de bedieningshint een paar seconden tonen, daarna nooit meer (staat ook in de uitleg achter de (i)).
+  let hintTimer=0;
+  function toonDraaiHintEenmalig(){
+    let gezien=false; try{ gezien=localStorage.getItem('tatties-draaihint-gezien')==='1'; }catch(e){}
+    if(gezien || ledeActief) return;
+    const h=document.getElementById('hint'); if(!h) return;
+    try{ localStorage.setItem('tatties-draaihint-gezien','1'); }catch(e){}
+    h.classList.add('on');
+    hintTimer=setTimeout(()=>{ hintTimer=0; if(!ledeActief) h.classList.remove('on'); }, 6000);
+  }
+  function openUitleg3D(){
+    const o=document.getElementById('t3d-uitleg-overlay'), pn=document.getElementById('t3d-uitleg-paneel');
+    if(!o||!pn||pn.classList.contains('open')) return;
+    o.classList.add('open'); pn.classList.add('open'); document.body.style.overflow='hidden';
+    if(typeof laagOpenHistory==='function') laagOpenHistory('uitleg3d', sluitUitleg3D);
+  }
+  function sluitUitleg3D(){
+    const o=document.getElementById('t3d-uitleg-overlay'), pn=document.getElementById('t3d-uitleg-paneel');
+    if(o) o.classList.remove('open'); if(pn) pn.classList.remove('open'); document.body.style.overflow='';
+    if(typeof laagSluitHistory==='function') laagSluitHistory('uitleg3d');
   }
   function heelLichaam(){
     if(!ledeActief) return;
@@ -17726,6 +17786,7 @@ async function verwijderVoorbeelden() {
     renderer.setPixelRatio(Math.min(devicePixelRatio,2));
     renderer.outputEncoding=THREE.sRGBEncoding;
     stage.appendChild(renderer.domElement); el=renderer.domElement;
+    el.setAttribute('role','img'); el.setAttribute('aria-label', tr('ui.stage_aria_solo'));   // de stage zelf is een groep (knoppen erin), het canvas is het beeld
     // PLAT-3: WebGL-context-verlies (low-end/geheugendruk). three r128 herstelt GL-state
     // zelf bij 'restored'; wij pauzeren de renderlus zolang de context weg is en bieden
     // een ververs-knop aan als het herstel uitblijft (anders: permanent zwart scherm).
@@ -17751,6 +17812,9 @@ async function verwijderVoorbeelden() {
     body=new THREE.Group(); scene.add(body);
     // selectie-ring wordt on-demand als huid-decal gebouwd (buildSelRing), niet meer als platte ring vooraf
     const rb=document.getElementById("t3d-reset"); if(rb) rb.onclick=()=>{ stopIsolatie(); resetView(); };
+    { const ib=document.getElementById("t3d-info"); if(ib) ib.onclick=openUitleg3D;
+      const sb2=document.getElementById("t3d-uitleg-sluit"); if(sb2) sb2.onclick=sluitUitleg3D;
+      const ov=document.getElementById("t3d-uitleg-overlay"); if(ov) ov.addEventListener("click", e=>{ if(e.target===ov) sluitUitleg3D(); }); }
     const hb=document.getElementById("t3d-heel"); if(hb) hb.onclick=heelLichaam;
     const pb=document.getElementById("t3d-pose");
     if(pb){ if(!POSE_AAN) pb.hidden=true; else pb.onclick=()=>poseWissel(poseHoek===0); }
@@ -17809,6 +17873,7 @@ async function verwijderVoorbeelden() {
       return;
     }
     requestAnimationFrame(resize);
+    toonDraaiHintEenmalig();
   }
   function show2D(){
     actief3D=false;
