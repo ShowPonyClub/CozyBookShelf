@@ -1329,6 +1329,11 @@ html.knipfull .cutmodal.cm-fullcut:not(.cm-gegevens) #cmInfo,
 html.knipfull .cutmodal.cm-fullcut:not(.cm-gegevens) .cm-choose-rij,
 html.knipfull .cutmodal.cm-fullcut:not(.cm-gegevens) .cm-meer-wrap,
 html.knipfull .cutmodal.cm-fullcut .cm-foot{display:none!important;}   /* opslaan zit rechtsboven, niet in een balk */
+/* Gegevens-stap: de primaire actie ook als benoemde rode knop onder de velden (UX-doorloop 2026-09-14: het ✓
+   rechtsboven alleen was als icoon te onopvallend naast de grote tab-pills onderin). Tekst volgt #cmPlace. */
+.cutmodal .cm-plaats-groot{display:none;}
+html.knipfull .cutmodal.cm-fullcut.cm-gegevens .cm-plaats-groot{display:flex;width:100%;justify-content:center;margin:14px 0 4px;min-height:50px;font-size:var(--fs-md);border-radius:var(--r-md);}
+
 /* Opslaan als rond knopje rechtsboven, op precies de plek en in precies de vorm van de
    checkmark uit de knipstand (keuze Bram, 2026-09-04). Het is een doorgeefluik naar #cmPlace,
    zodat alle bestaande plaats-/bewerklogica en knoplabels ongemoeid blijven. */
@@ -1586,10 +1591,11 @@ html.knipfull .cutmodal.cm-fullcut.cm-gegevens #cmPlaceMeer{margin:0;padding:2px
    .linkbtn): zelfde vulling, rand, ronding, tekstgrootte en tikdoel. Ze stonden hier als
    onderstreepte tekstlinks, waardoor de onderste rij van de twee kaarten niet op elkaar leek. */
 html.knipfull .cutmodal.cm-fullcut.cm-gegevens .cm-choose,
+/* '+ Nog een' als tekstlink (UX-doorloop 2026-09-14): secundair naast de rode plaats-knop, niet even zwaar als de rest */
 html.knipfull .cutmodal.cm-fullcut.cm-gegevens #cmPlaceMeer{display:inline-flex;align-items:center;gap:5px;
-  margin:0;padding:9px 13px;min-height:44px;box-shadow:none;
-  background:var(--veldbg);border:1px solid var(--rand);border-radius:999px;color:var(--tekst);
-  font-size:var(--fs-sm);font-weight:600;text-decoration:none;}
+  margin:0;padding:9px 4px;min-height:44px;box-shadow:none;
+  background:transparent;border:0;border-radius:0;color:var(--gedempt);
+  font-size:var(--fs-sm);font-weight:600;text-decoration:underline;}
 html.knipfull .cutmodal.cm-fullcut.cm-gegevens .cm-choose .ik{width:18px;height:18px;}
 @keyframes cmKaartOmhoog{from{opacity:0;transform:translateY(120px)}to{opacity:1;transform:none}}
 @keyframes cmHintIn{from{opacity:0;transform:translateX(-50%) translateY(16px)}to{opacity:1;transform:translateX(-50%)}}
@@ -1861,7 +1867,7 @@ form label{text-transform:none;letter-spacing:.005em;font-size:.8rem;color:var(-
       <button class="seg-btn" id="btn-3d" data-i18n-aria="aria.3dview" data-i18n-title="aria.3dview" aria-label="3D-weergave" title="3D-weergave">3D</button>
       <button class="seg-btn" id="btn-2d" data-i18n-aria="aria.2dmap" data-i18n-title="aria.2dmap" aria-label="2D-kaart" title="2D-kaart">2D</button>
     </div>
-    <button class="icoonknop" id="btn-collectie" data-i18n-aria="aria.collectie" data-i18n-title="aria.collectie" aria-label="Collectie en wishlist" title="Collectie en wishlist"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/><circle cx="2.5" cy="6" r="0.6" fill="currentColor" stroke="none"/><circle cx="2.5" cy="12" r="0.6" fill="currentColor" stroke="none"/><circle cx="2.5" cy="18" r="0.6" fill="currentColor" stroke="none"/></svg></button>
+    <button class="icoonknop" id="btn-collectie" data-i18n-aria="aria.collectie" data-i18n-title="aria.collectie" aria-label="Collectie en wishlist" title="Collectie en wishlist"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5" width="16" height="14" rx="2"/><circle cx="9" cy="10" r="1.5"/><path d="M5 18l4.5-4.5 3 3 3-3L19 17"/></svg></button>
     <button class="icoonknop" id="btn-instellingen" data-i18n-aria="aria.instellingen" data-i18n-title="aria.instellingen" aria-label="Instellingen" title="Instellingen"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"/></svg></button>
   </div>
 </header>
@@ -2225,6 +2231,7 @@ form label{text-transform:none;letter-spacing:.005em;font-size:.8rem;color:var(-
             <!-- FLOW-1: record zonder foto -> het gewone formulier (naam + details), zonder plaatsing -->
             <button type="button" class="linkbtn cm-geenfoto" id="cmGeenFoto" data-i18n="ui.geen_foto_link">Geen foto? Alleen gegevens opslaan</button>
           </div>
+          <button type="button" id="cmPlaatsGroot" class="btn cm-place cm-plaats-groot">Op het model plaatsen</button>
           <div class="cm-meer-wrap" style="display:none">
             <button id="cmPlaceMeer" class="btn" data-i18n="ui.nog_een" data-i18n-title="ui.nog_een_uitleg" title="Plaats deze en knip daarna nog een tattoo uit dezelfde foto">+ Nog een</button>
             <button type="button" id="cmMeerInfo" class="cm-meer-info" aria-expanded="false" data-i18n-aria="ui.nog_een_uitleg" data-i18n-title="ui.nog_een_uitleg" aria-label="Wat doet '+ Nog een'?"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5"/><path d="M12 7.6h.01"/></svg></button>
@@ -7422,7 +7429,7 @@ const I18N = {
     'start.leeg_uitleg':'Zie waar je volgende tattoo past - op een 3D-lichaam. En bewaar de inkt die je al hebt.','start.privacy':'Alles blijft op dit toestel - sync is optioneel.','start.privacy_magic':'Alles blijft op dit toestel - sync en Magic cut zijn optioneel.','start.kijk3d':'Bekijk eerst het 3D-lichaam','ui.geen_foto_link':'Geen foto? Alleen gegevens opslaan','ui.gl_onbeschikbaar':'3D-weergave is niet beschikbaar op dit toestel (WebGL werkt niet).','inapp.tekst':'Je zit in de app-browser van TikTok/Instagram - je tattoos worden hier mogelijk niet bewaard. Open Tatties in Safari of Chrome.','inapp.kopieer':'Kopieer link','inapp.gekopieerd':'Link gekopieerd - plak hem in je browser','ui.gl_verloren':'De 3D-weergave is gestopt omdat je toestel geheugen tekortkwam. Ververs om verder te gaan.',
     'start.kies_titel':'Tattoo toevoegen','start.kies_3d':'Op het 3D-model','start.kies_3d_sub':'Plaats op het draaibare lichaam',
     'start.kies_2d':'Op de 2D-kaart','start.kies_2d_sub':'Plaats op de platte voor/achter-kaart','start.kies_2d_wip':'Nog in aanbouw',
-    'ui.foto_maken':'Foto maken','ui.foto_uploaden':'Foto uploaden','ui.foto_toevoegen':'Tattoo toevoegen','ui.kies_kop':'Nieuwe tattoo - kies een foto','ui.kies_sub':'Een screenshot of ontwerp kan ook. Je foto blijft op dit toestel.','ui.kies_sub_magic':'Een screenshot of ontwerp kan ook.','ui.andere_foto':'Andere foto','ui.plaatsen':'Plaatsen','ui.nog_een':'+ Nog een','ui.nog_een_uitleg':'Plaats deze en knip daarna nog een tattoo uit dezelfde foto','ui.herhaal_hint':'Plaats \'m goed en tik op ✓ - daarna knip je de volgende uit deze foto','ui.herhaal_volgende':'Knip de volgende tattoo uit dezelfde foto','ui.volgende_uitsnede':'Volgende uitsnede','ui.uit_deze_foto':'uit deze foto',
+    'ui.foto_maken':'Foto maken','ui.foto_uploaden':'Foto uploaden','ui.foto_toevoegen':'Tattoo toevoegen','ui.kies_kop':'Nieuwe tattoo - kies een foto','ui.kies_sub':'Een screenshot of ontwerp kan ook. Je foto blijft op dit toestel.','ui.kies_sub_magic':'Een screenshot of ontwerp kan ook.','ui.andere_foto':'Andere foto','ui.plaatsen':'Plaatsen','ui.plaats_op_model':'Op het model plaatsen','ui.nog_een':'+ Nog een','ui.nog_een_uitleg':'Plaats deze en knip daarna nog een tattoo uit dezelfde foto','ui.herhaal_hint':'Plaats \'m goed en tik op ✓ - daarna knip je de volgende uit deze foto','ui.herhaal_volgende':'Knip de volgende tattoo uit dezelfde foto','ui.volgende_uitsnede':'Volgende uitsnede','ui.uit_deze_foto':'uit deze foto',
     'ui.reset_uitsnede':'Reset uitsnede','ui.spiegelen':'Spiegelen','ui.achtergrond_weghalen':'Achtergrond weghalen',
     'ui.toverstaf':'Toverstaf','ui.ongedaan':'Ongedaan','ui.niets_ongedaan':'Niets om ongedaan te maken','ui.teruggezet':'Teruggezet','ui.uitsnede_gewist':'Uitsnede gewist - tik Ongedaan om terug te halen',
     'ui.tik_uitknippen':'Tik op het deel dat je wilt weghalen','ui.toverstaf_uit':'Toverstaf uit',
@@ -7611,7 +7618,7 @@ const I18N = {
     'start.leeg_uitleg':'See where your next tattoo fits - on a 3D body. And keep the ink you already have.','start.privacy':'Everything stays on this device - syncing is optional.','start.privacy_magic':'Everything stays on this device - syncing and Magic cut are optional.','start.kijk3d':'Just explore the 3D body first','ui.geen_foto_link':'No photo? Just save the details','ui.gl_onbeschikbaar':"3D view isn't available on this device (WebGL is not working).",'inapp.tekst':"You're in the TikTok/Instagram in-app browser - your tattoos may not be saved here. Open Tatties in Safari or Chrome.",'inapp.kopieer':'Copy link','inapp.gekopieerd':'Link copied - paste it in your browser','ui.gl_verloren':'The 3D view stopped because your device ran out of memory. Refresh to continue.',
     'start.kies_titel':'Add tattoo','start.kies_3d':'On the 3D model','start.kies_3d_sub':'Place on the rotatable body',
     'start.kies_2d':'On the 2D map','start.kies_2d_sub':'Place on the flat front/back map','start.kies_2d_wip':'Under construction',
-    'ui.foto_maken':'Take photo','ui.foto_uploaden':'Upload photo','ui.foto_toevoegen':'Add tattoo','ui.kies_kop':'New tattoo - pick a photo','ui.kies_sub':'A screenshot or design works too. Your photo stays on this device.','ui.kies_sub_magic':'A screenshot or design works too.','ui.andere_foto':'Different photo','ui.plaatsen':'Place','ui.nog_een':'+ Another','ui.nog_een_uitleg':'Place this one, then cut another tattoo from the same photo','ui.herhaal_hint':'Position it and tap ✓ - then cut the next one from this photo','ui.herhaal_volgende':'Cut the next tattoo from the same photo','ui.volgende_uitsnede':'Next cut-out','ui.uit_deze_foto':'from this photo',
+    'ui.foto_maken':'Take photo','ui.foto_uploaden':'Upload photo','ui.foto_toevoegen':'Add tattoo','ui.kies_kop':'New tattoo - pick a photo','ui.kies_sub':'A screenshot or design works too. Your photo stays on this device.','ui.kies_sub_magic':'A screenshot or design works too.','ui.andere_foto':'Different photo','ui.plaatsen':'Place','ui.plaats_op_model':'Place on the model','ui.nog_een':'+ Another','ui.nog_een_uitleg':'Place this one, then cut another tattoo from the same photo','ui.herhaal_hint':'Position it and tap ✓ - then cut the next one from this photo','ui.herhaal_volgende':'Cut the next tattoo from the same photo','ui.volgende_uitsnede':'Next cut-out','ui.uit_deze_foto':'from this photo',
     'ui.reset_uitsnede':'Reset cut-out','ui.spiegelen':'Mirror','ui.achtergrond_weghalen':'Remove background',
     'ui.toverstaf':'Magic wand','ui.ongedaan':'Undo','ui.niets_ongedaan':'Nothing to undo','ui.teruggezet':'Reverted','ui.uitsnede_gewist':'Cut-out cleared - tap Undo to restore',
     'ui.tik_uitknippen':'Tap the part you want to remove','ui.toverstaf_uit':'Magic wand off',
@@ -7936,7 +7943,7 @@ function createTattoo(overrides = {}) {
    ============================================================ */
 // App-versie (semver, handmatig ophogen bij een release). Bij een bump ook de
 // CACHE-naam in sw.js meebumpen, zodat clients de nieuwe build ophalen.
-const APP_VERSIE = '0.3.55';
+const APP_VERSIE = '0.3.56';
 
 /* Dev-haken die de CLOUD raken hangen alleen op een ontwikkelmachine aan window. Ze zijn geen
    lek op zichzelf (zonder XSS roept niemand ze aan, en CSP + esc() houden XSS tegen), maar ze
@@ -9835,8 +9842,9 @@ function toast(tekst) {
   toastTimer = setTimeout(() => el.classList.remove('zichtbaar'), 2600);
 }
 /* Toast met actieknop, bijv. 'Ongedaan maken' */
+let toastActieTijd = 0;
 function toastMetActie(tekst, label, fn) {
-  const el = $('#toast');
+  const el = $('#toast'); toastActieTijd = performance.now();
   el.innerHTML = '<span></span><button id="toast-actie" class="toast-knop"></button>';
   el.querySelector('span').textContent = tekst;
   const knop = $('#toast-actie');
@@ -9908,6 +9916,10 @@ function leesKostenVeld(el) {
 }
 
 function toonView(naam) {
+  // Een actie-toast (bv. 'Tattoo verwijderd - Ongedaan') hoort bij het scherm waar hij ontstond; navigeer je daarna
+  // verder, dan lag hij over velden en lijsten heen (UX-doorloop 2026-09-14). De eerste 1,5 s blijft hij staan,
+  // omdat verwijderen zelf direct terugnavigeert.
+  { const te = $('#toast'); if (te && te.classList.contains('met-actie') && performance.now() - toastActieTijd > 1500) te.classList.remove('zichtbaar', 'met-actie'); }
   // '3d' is geen host-view maar een eigen laag (de 3D-module beheert 'm). Toch moet toonView
   // 'm kennen: verschillende plekken voeren huidigeView terug in toonView (de terugknop van
   // Privacy/Terms bijvoorbeeld), en zonder deze route verbergt hij dan élke view - een leeg
@@ -11401,7 +11413,7 @@ function renderDetail() {
     paneel = isWens
       ? '<p class="gedempt">' + tr('sessie.wensuitleg') + '</p>'
       : `
-      <p class="sectiekop">${tr('sessie.totaal').replace('{u}', totaalSessieUren + ' ' + tr('eenheid.uur'))}</p>
+      <p class="sectiekop">${totaalSessieUren > 0 ? tr('sessie.totaal').replace('{u}', totaalSessieUren + ' ' + tr('eenheid.uur')) : tr('tab.sessies')}</p>
       ${sessieItems || '<p class="gedempt">' + tr('sessie.geen') + '</p>'}
       <div class="inline-form">
         <input type="date" id="ns-datum" max="${vandaagISO()}" aria-label="${tr('aria.sessiedatum')}">
@@ -11422,9 +11434,14 @@ function renderDetail() {
       paneel = '<p class="gedempt">' + tr('nazorg.wens') + '</p>';
     } else {
       const HERSTEL_DAGEN = 28;
+      // Ouder dan 90 dagen (zelfde grens als de badge): de 28-dagen-tekst en de standaard-checklist zijn dan
+      // niet meer van toepassing; alleen 'Markeer als geheeld' blijft.
+      const oud = !!t.datum && !t.geheeld && (Date.now() - new Date(t.datum + 'T00:00:00').getTime()) / 864e5 > 90;
       let statusBlok;
       if (t.geheeld) {
         statusBlok = '<p>' + tr('badge.geheeld') + '</p>';
+      } else if (oud) {
+        statusBlok = '';
       } else if (t.datum) {
         const doel = new Date(t.datum + 'T00:00:00');   // lokale middernacht (voorkomt off-by-one t.o.v. UTC)
         doel.setDate(doel.getDate() + HERSTEL_DAGEN);
@@ -11452,7 +11469,7 @@ function renderDetail() {
         <div class="inline-form">
           <input type="text" id="taak-tekst" class="breed" maxlength="200" placeholder="${tr('nazorg.taakph')}">
           <button class="knop-sec" id="taak-toevoegen">${tr('nazorg.taak')}</button>
-          <button class="knop-sec" id="taak-standaard">${tr('nazorg.standaard')}</button>
+          ${oud ? '' : `<button class="knop-sec" id="taak-standaard">${tr('nazorg.standaard')}</button>`}
         </div>
         <p class="sectiekop">${tr('nazorg.instructies')}</p>
         <p>${t.nazorg ? esc(t.nazorg).replace(/\n/g, '<br>') : '<span class="gedempt">' + tr('nazorg.geeninstr') + '</span>'}</p>`;
@@ -11565,7 +11582,7 @@ function renderDetail() {
       knop.disabled = true;
       await taakToevoegen(tekst);
     });
-    $('#taak-standaard').addEventListener('click', async () => {
+    if ($('#taak-standaard')) $('#taak-standaard').addEventListener('click', async () => {
       t.nazorgTaken = t.nazorgTaken || [];
       for (const tekst of standaardNazorg()) {
         if (!t.nazorgTaken.some(x => x.tekst === tekst)) t.nazorgTaken.push({ tekst, klaar: false });
@@ -11608,8 +11625,8 @@ async function openFormulier(id = null) {
     t.lichaamsdeel = filterZone;
     t.zijde = ZONE_ZIJDE[filterZone] || huidigeZijde;
   }
-  // Nieuwe tattoo: datum standaard op vandaag (lokale datum, niet UTC).
-  if (!id && !t.datum) {
+  // Nieuwe tattoo: datum standaard op vandaag (lokale datum, niet UTC); niet bij een wens, die is nog niet gezet.
+  if (!id && !t.datum && t.status !== 'wens') {
     const nu = new Date();
     t.datum = `${nu.getFullYear()}-${String(nu.getMonth() + 1).padStart(2, '0')}-${String(nu.getDate()).padStart(2, '0')}`;
   }
@@ -11655,7 +11672,7 @@ async function openFormulier(id = null) {
         </div>
         <button type="button" class="knop-sec" id="plek-slot" style="width:100%;margin-top:8px;gap:8px"></button>
       </div>
-      <div class="veld">
+      <div class="veld" id="kunst-blok"${zonderPlek ? ' hidden' : ''}>
         <label>${tr('form.kunstuitleg')}</label>
         <div id="kunst-start">
           <div class="rij2">
@@ -15259,6 +15276,9 @@ async function verwijderVoorbeelden() {
   }
   function enterEditDecal(m){
     editDecal=m; editHist=[];                 // verse undo-geschiedenis per bewerksessie
+    // Inzoomen op wat je bewerkt (UX-doorloop 2026-09-14): na plaatsen bleef het hele lichaam in beeld en was de
+    // nieuwe tattoo een stipje, terwijl de balk het model nog kleiner maakte. Zelfde beweging als tikken op kale huid.
+    if(m && m.point){ focusTo(m.point); radiusGoal=Math.min(radius,1.3); }
     const eb=document.getElementById("editbar"); if(eb)eb.classList.add("on");
     { const a=document.getElementById("t3d-add"); if(a) a.style.display="none"; }   // + knop weg tijdens bewerken
     const op3=document.getElementById("eb3d-opacity"); if(op3) op3.value=Math.round(((m.rec&&m.rec.opacity!=null)?m.rec.opacity:1)*100);
@@ -16174,7 +16194,9 @@ async function verwijderVoorbeelden() {
     // De knop heet niet altijd hetzelfde (Toevoegen, Plaatsen, Opslaan); het ronde knopje leent
     // dat label, zodat schermlezer en tooltip zeggen wat er echt gebeurt.
     { const op=document.getElementById('cmOpslaan'); const lbl=cmPlaceBtn&&cmPlaceBtn.textContent&&cmPlaceBtn.textContent.trim();
-      if(op&&lbl){ op.setAttribute('aria-label',lbl); op.setAttribute('title',lbl); } }
+      if(op&&lbl){ op.setAttribute('aria-label',lbl); op.setAttribute('title',lbl); }
+      // grote knop in de gegevens-stap: bewerken = 'Opslaan', nieuw = 'Op het model plaatsen'
+      const pg=document.getElementById('cmPlaatsGroot'); if(pg) pg.textContent=(pendingEdit||pendingEdit2D)?tr('form.opslaan'):tr('ui.plaats_op_model'); }
     zetNaamStand(); volgVelden();
     { const k=cutModal.querySelector('.cm-veldenkaart'); if(k) k.scrollTop=veldenScroll; }
     if(origImg){ drawCutPreview(); drawLasso(); }
@@ -16926,6 +16948,7 @@ async function verwijderVoorbeelden() {
         if(origImg){ drawCutPreview(); drawLasso(); }
       }; }
     { const op=document.getElementById("cmOpslaan"); if(op) op.onclick=()=>{ if(cmPlaceBtn) cmPlaceBtn.click(); }; }
+    { const pg=document.getElementById("cmPlaatsGroot"); if(pg) pg.onclick=()=>{ if(cmPlaceBtn) cmPlaceBtn.click(); }; }
     // Enter in het naamveld doet hetzelfde als de knop rechtsboven: anders levert de
     // return-toets op het toetsenbord niets op terwijl er maar een veld is.
     { const nm=document.getElementById("cmNaam"); if(nm) nm.addEventListener('input',()=>{ planKnipBewaren();
