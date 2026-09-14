@@ -7933,7 +7933,7 @@ function createTattoo(overrides = {}) {
    ============================================================ */
 // App-versie (semver, handmatig ophogen bij een release). Bij een bump ook de
 // CACHE-naam in sw.js meebumpen, zodat clients de nieuwe build ophalen.
-const APP_VERSIE = '0.3.53';
+const APP_VERSIE = '0.3.54';
 
 /* Dev-haken die de CLOUD raken hangen alleen op een ontwikkelmachine aan window. Ze zijn geen
    lek op zichzelf (zonder XSS roept niemand ze aan, en CSP + esc() houden XSS tegen), maar ze
@@ -16442,6 +16442,29 @@ async function verwijderVoorbeelden() {
     X=X>0.008856?Math.cbrt(X):7.787*X+16/116; Y=Y>0.008856?Math.cbrt(Y):7.787*Y+16/116; Z=Z>0.008856?Math.cbrt(Z):7.787*Z+16/116;
     out[0]=116*Y-16; out[1]=500*(X-Y); out[2]=200*(Y-Z);
   }
+  // Ruisdemping op de alpha (toestel-test 2026-09-14: poriën/sproetjes werden losse spikkels zodra de decal-alphaTest
+  // niet meer alles onder 0.5 wegsneed). Kern = blur(a, 0.8) uit de Python-proef (3-taps gaussisch [0.24,0.52,0.24],
+  // horizontaal + verticaal, vóór de drempel *1.1-0.04): een losse spikkel van 1 px met alpha 0.3 zakt naar ~0.05.
+  // DICHTHEIDSPOORT: de vervaging telt alleen waar de inkt dun gezaaid is (gemiddelde alpha in een 7x7-venster < 0.15,
+  // dus huid met een porie); waar veel inkt bij elkaar staat (lijnen, vlakken, dotwork, stippelarcering) blijft de alpha
+  // scherp. Zo kost het schoonmaken van de huid geen dotwork.
+  function ontspikkel(A, W, H){
+    const N=A.length, T=new Float32Array(N), B=new Float32Array(N), k0=0.24, k1=0.52;
+    for(let y=0;y<H;y++){ const r=y*W;
+      for(let x=0;x<W;x++){ const l=A[r+(x>0?x-1:0)], c=A[r+x], rr=A[r+(x<W-1?x+1:x)]; T[r+x]=k0*l+k1*c+k0*rr; } }
+    for(let y=0;y<H;y++){ const up=(y>0?y-1:0)*W, r=y*W, dn=(y<H-1?y+1:y)*W;
+      for(let x=0;x<W;x++){ B[r+x]=k0*T[up+x]+k1*T[r+x]+k0*T[dn+x]; } }
+    // dichtheid = box-blur (radius 3) van de oorspronkelijke alpha, via lopende sommen
+    const R=3, D=T;   // T hergebruiken als tussenbuffer
+    for(let y=0;y<H;y++){ const r=y*W; let sum=0;
+      for(let x=-R;x<=R;x++) sum+=A[r+Math.min(W-1,Math.max(0,x))];
+      for(let x=0;x<W;x++){ D[r+x]=sum/(2*R+1); sum+=A[r+Math.min(W-1,x+R+1)]-A[r+Math.max(0,x-R)]; } }
+    const C=new Float32Array(N);
+    for(let x=0;x<W;x++){ let sum=0;
+      for(let y=-R;y<=R;y++) sum+=D[Math.min(H-1,Math.max(0,y))*W+x];
+      for(let y=0;y<H;y++){ C[y*W+x]=sum/(2*R+1); sum+=D[Math.min(H-1,y+R+1)*W+x]-D[Math.max(0,y-R)*W+x]; } }
+    for(let i=0;i<N;i++){ const t=Math.max(0,Math.min(1,1-C[i]/0.15)); A[i]=A[i]*(1-t)+B[i]*t; }
+  }
   function inktMatte(canvas, modus){
     const W=canvas.width, H=canvas.height; if(!W||!H) return null;
     const x=canvas.getContext('2d',{willReadFrequently:true});
@@ -16507,12 +16530,19 @@ async function verwijderVoorbeelden() {
       let gain=1;
       if(hn>50){ let acc=0, med=0.3; for(let k=0;k<200;k++){ acc+=hst[k]; if(acc>=hn/2){ med=k/250; break; } }
         const aMed=Math.pow(Math.max(0,Math.min(1,(0.92-med)/0.64)),1.15); gain=Math.max(1,Math.min(2.5,0.6/Math.max(aMed,1e-3))); }
+      const A=new Float32Array(N);
+      for(let i=0;i<N;i++){ if(p[i*4+3]<16) continue;
+        const a=Math.max(0,Math.min(1,(0.92-RL[i])/0.64)); A[i]=Math.min(1,Math.pow(a,1.15)*gain); }
+      ontspikkel(A,W,H);
       for(let i=0;i<N;i++){ const o=i*4; if(p[o+3]<16){ p[o+3]=0; continue; }
-        let a=Math.max(0,Math.min(1,(0.92-RL[i])/0.64)); a=Math.min(1,Math.pow(a,1.15)*gain)*1.1-0.04; a=Math.max(0,Math.min(1,a));
+        const a=Math.max(0,Math.min(1,A[i]*1.1-0.04));
         p[o]=33; p[o+1]=26; p[o+2]=23; p[o+3]=Math.round(a*p[o+3]); }
     } else {
+      const A=new Float32Array(N);
+      for(let i=0;i<N;i++){ if(p[i*4+3]<16) continue; A[i]=Math.max(0,Math.min(1,(DE[i]-7)/19)); }
+      ontspikkel(A,W,H);
       for(let i=0;i<N;i++){ const o=i*4; if(p[o+3]<16){ p[o+3]=0; continue; }
-        let a=Math.max(0,Math.min(1,(DE[i]-7)/19)); a=Math.max(0,Math.min(1,a*1.1-0.04));
+        const a=Math.max(0,Math.min(1,A[i]*1.1-0.04));
         const a3=Math.max(a,0.15);
         // ontmengen: pixel = a*inkt + (1-a)*huid; inkt kan niet lichter zijn dan de foto (geen lichte halo's)
         p[o]=Math.min(p[o],Math.max(0,Math.min(255,(p[o]-(1-a3)*hd[o])/a3)));
