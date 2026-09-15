@@ -362,8 +362,7 @@ main > section{animation:opkomen .3s ease both}
 .bouw-txt span{font-size:.8rem;font-weight:600;color:var(--gedempt);font-family:var(--label-font)}
 .stat-toggle{background:none;border:0;padding:0;font:inherit;color:inherit;cursor:pointer;border-bottom:1px dotted var(--gedempt);line-height:1.1;}
 .stat-toggle:hover{color:var(--accent);border-bottom-color:var(--accent);}
-.start-stat-getal.klikbaar{cursor:pointer;display:inline-block;border-bottom:2px dotted currentColor;line-height:1.05;
-  position:relative;}
+.start-stat-getal.klikbaar{cursor:pointer;display:inline-block;position:relative;}   /* geen stippellijn meer: het tikken blijft (titel/aria zegt het), de lijn oogde als een foutje */
 /* Tikvlak vergroten zonder de opmaak te raken. Met padding + negatieve marge schoof het label in de
    tegel eronder omhoog en liep het door het getal heen; een onzichtbaar laagje eromheen niet. */
 .start-stat-getal.klikbaar::after{content:"";position:absolute;left:-10px;right:-10px;top:-12px;bottom:-12px;}
@@ -632,14 +631,15 @@ dl.toon-leeg .veldrij.leeg-veld{display:flex}
   background:var(--rood);color:var(--op-accent);border:2px solid var(--rood-diep);box-shadow:3px 3px 0 var(--rood-diep);cursor:pointer}
 .start-cta:hover,#fab:hover,#t3d-add:hover{transform:translate(1px,1px);box-shadow:2px 2px 0 var(--rood-diep)}
 .start-cta .ik{width:22px;height:22px;margin-right:8px;vertical-align:-4px;stroke-width:2.4}
-.start-stats{display:flex;gap:10px}
-.start-stat{flex:1;background:var(--kaart);border:1px solid var(--rand);border-radius:var(--radius);padding:14px 8px;text-align:center}
+.start-stats{display:flex;gap:0;background:var(--kaart);border:1px solid var(--rand);border-radius:var(--radius);padding:14px 4px}   /* een kaart, drie kolommen (2026-09-14) */
+.start-stat{flex:1;background:none;border:0;border-left:1px solid var(--rand);padding:2px 6px;text-align:center;min-width:0}
+.start-stat:first-child{border-left:0}
 /* Blijft er na het weglaten van nulwaarden maar een tegel over, dan hoort die niet over de
    volle breedte uit te rekken; dat leest als een banner in plaats van als een cijfer. */
 .start-stats.weinig{justify-content:center}
 .start-stats.weinig .start-stat{flex:0 1 170px}
-.start-stat-getal{display:block;font-size:1.3rem;font-weight:800;color:var(--accent-diep)}
-.start-stat-label{display:block;font-size:.72rem;text-transform:uppercase;letter-spacing:.06em;color:var(--gedempt);margin-top:4px}
+.start-stat-getal{display:block;font-size:clamp(1.25rem,5vw,1.6rem);line-height:1.15;font-weight:700;color:var(--accent-diep);font-family:var(--serif);white-space:nowrap}
+.start-stat-label{display:block;font-family:var(--label-font);font-size:.66rem;text-transform:uppercase;letter-spacing:.1em;color:var(--gedempt);margin-top:5px;white-space:nowrap}
 .start-leeg{margin:0;color:var(--gedempt);text-align:center;padding:8px 0}
 .start-tegels{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .start-tegel{padding:16px;font-size:.95rem;font-weight:600;background:var(--kaart);border:1px solid var(--rand);
@@ -1063,9 +1063,11 @@ form label,
 /* Knoppen als overlay bovenin het venster: links de standen (Wishlist, Armen, Heel lichaam), rechts uitleg + reset. */
 .stage-knoppen{position:absolute;top:10px;left:10px;right:10px;z-index:6;display:flex;justify-content:space-between;align-items:flex-start;gap:8px;pointer-events:none;}
 .stage-knoppen .sk-links,.stage-knoppen .sk-rechts{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
-.stage-knoppen .sk-rechts{justify-content:flex-end;}
+.stage-knoppen .sk-links{flex:1 1 auto;min-width:0;}   /* links mag wikkelen (Wishlist + Heel lichaam), rechts blijft een rij */
+.stage-knoppen .sk-rechts{justify-content:flex-end;flex:none;flex-wrap:nowrap;}
 .stage-knoppen button{pointer-events:auto;box-shadow:0 4px 14px rgba(0,0,0,.22);}
-.stage-knoppen .gepland-toggle{background:var(--kaart);}
+.stage-knoppen .gepland-toggle{background:var(--kaart);min-height:44px;padding:6px 14px;}   /* even hoog als de ronde knoppen rechts */
+.stage-knoppen #toon-gepland-3d{position:static;left:auto;top:auto;z-index:auto;}   /* de oude absolute plek (van de 2D-kaart) viel over 'Heel lichaam' heen */
 .stage-knoppen #t3d-reset,.stage-knoppen #t3d-info{position:static;top:auto;right:auto;width:44px;height:44px;border-radius:50%;flex:none;
   background:var(--kaart);border:1px solid var(--rand);color:var(--tekst);cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:inherit;}
 .stage-knoppen #t3d-info:hover,.stage-knoppen #t3d-reset:hover{border-color:var(--accent);}
@@ -7460,10 +7462,10 @@ const I18N = {
     'sub.stats':'Een overzicht van je collectie in cijfers - aantallen, kosten, stijlen en meer.',
     'feedback':'show me your tatties',
     'start.titel':'Welkom terug','start.titel_nieuw':'Welkom bij Tatties','start.tagline':'show me your tatties','start.nieuw':'Nieuwe tattoo',
-    'start.stat_aantal':'Tattoos','start.stat_zituren':'Zituren','start.leeg':'Nog geen tattoos - voeg je eerste toe.','start.recent':'Recent toegevoegd',
+    'start.stat_aantal':'Tattoos','start.stat_zituren':'Zituren','start.stat_uitgegeven':'Uitgegeven','start.leeg':'Nog geen tattoos - voeg je eerste toe.','start.recent':'Recent toegevoegd',
     'start.tegel3d':'3D-model','start.tegel2d':'2D-kaart','start.tegelcol':'Collectie','start.tegelstats':'Statistieken',
     'start.account_uit':'Inloggen om je collectie overal te zien','start.account_backup':'Zet je collectie veilig in de cloud','sync.voortgang':'{n} van {totaal} overgezet','sync.veilig':'Je collectie staat in de cloud: {n} tattoo{s} en {f} foto{fs}.','sync.grens_uitleg':'Deze collectie hoort bij een ander account. Synchroniseren staat uit, je tattoos blijven op dit toestel.','sync.grens_knop':'Deze tattoos aan dit account toevoegen','sync.grens_bevestig':'Deze tattoos aan {email} toevoegen? Ze komen dan in dat account terecht en dit is niet ongedaan te maken.','sync.grens_klaar':'Je tattoos horen nu bij dit account. Synchroniseren staat weer aan.','sync.ander_account_geblokkeerd':'Synchroniseren staat uit: deze collectie hoort bij een ander account.','start.account_in':'Gesynchroniseerd ✓',
-    'start.leeg_uitleg':'Zie waar je volgende tattoo past - op een 3D-lichaam. En bewaar de inkt die je al hebt.','start.privacy':'Alles blijft op dit toestel - sync is optioneel.','start.privacy_magic':'Alles blijft op dit toestel - sync en Magic cut zijn optioneel.','start.kijk3d':'Bekijk eerst het 3D-lichaam','ui.geen_foto_link':'Geen foto? Alleen gegevens opslaan','ui.gl_onbeschikbaar':'3D-weergave is niet beschikbaar op dit toestel (WebGL werkt niet).','inapp.tekst':'Je zit in de app-browser van TikTok/Instagram - je tattoos worden hier mogelijk niet bewaard. Open Tatties in Safari of Chrome.','inapp.kopieer':'Kopieer link','inapp.gekopieerd':'Link gekopieerd - plak hem in je browser','ui.gl_verloren':'De 3D-weergave is gestopt omdat je toestel geheugen tekortkwam. Ververs om verder te gaan.',
+    'start.leeg_uitleg':'Zie waar je volgende tattoo past op een 3D-lichaam. En bewaar de inkt die je al hebt.','start.privacy':'Alles blijft op dit toestel. Sync is optioneel.','start.privacy_magic':'Alles blijft op dit toestel. Sync en Magic cut zijn optioneel.','start.kijk3d':'Bekijk eerst het 3D-lichaam','ui.geen_foto_link':'Geen foto? Alleen gegevens opslaan','ui.gl_onbeschikbaar':'3D-weergave is niet beschikbaar op dit toestel (WebGL werkt niet).','inapp.tekst':'Je zit in de app-browser van TikTok/Instagram - je tattoos worden hier mogelijk niet bewaard. Open Tatties in Safari of Chrome.','inapp.kopieer':'Kopieer link','inapp.gekopieerd':'Link gekopieerd - plak hem in je browser','ui.gl_verloren':'De 3D-weergave is gestopt omdat je toestel geheugen tekortkwam. Ververs om verder te gaan.',
     'start.kies_titel':'Tattoo toevoegen','start.kies_3d':'Op het 3D-model','start.kies_3d_sub':'Plaats op het draaibare lichaam',
     'start.kies_2d':'Op de 2D-kaart','start.kies_2d_sub':'Plaats op de platte voor/achter-kaart','start.kies_2d_wip':'Nog in aanbouw',
     'ui.foto_maken':'Foto maken','ui.foto_uploaden':'Foto uploaden','ui.foto_toevoegen':'Tattoo toevoegen','ui.kies_kop':'Nieuwe tattoo - kies een foto','ui.kies_sub':'Een screenshot of ontwerp kan ook. Je foto blijft op dit toestel.','ui.kies_sub_magic':'Een screenshot of ontwerp kan ook.','ui.andere_foto':'Andere foto','ui.plaatsen':'Plaatsen','ui.plaats_op_model':'Op het model plaatsen','ui.nog_een':'+ Nog een','ui.nog_een_uitleg':'Plaats deze en knip daarna nog een tattoo uit dezelfde foto','ui.herhaal_hint':'Plaats \'m goed en tik op ✓ - daarna knip je de volgende uit deze foto','ui.herhaal_volgende':'Knip de volgende tattoo uit dezelfde foto','ui.volgende_uitsnede':'Volgende uitsnede','ui.uit_deze_foto':'uit deze foto',
@@ -7649,10 +7651,10 @@ const I18N = {
     'sub.stats':'An overview of your collection in numbers - counts, costs, styles and more.',
     'feedback':'show me your tatties',
     'start.titel':'Welcome back','start.titel_nieuw':'Welcome to Tatties','start.tagline':'show me your tatties','start.nieuw':'New tattoo',
-    'start.stat_aantal':'Tattoos','start.stat_zituren':'Sitting hours','start.leeg':'No tattoos yet - add your first.','start.recent':'Recently added',
+    'start.stat_aantal':'Tattoos','start.stat_zituren':'Sitting hours','start.stat_uitgegeven':'Spent','start.leeg':'No tattoos yet - add your first.','start.recent':'Recently added',
     'start.tegel3d':'3D model','start.tegel2d':'2D map','start.tegelcol':'Collection','start.tegelstats':'Statistics',
     'start.account_uit':'Sign in to see your collection anywhere','start.account_backup':'Back up your collection to the cloud','sync.voortgang':'{n} of {totaal} uploaded','sync.veilig':'Your collection is in the cloud: {n} tattoo{s} and {f} photo{fs}.','sync.grens_uitleg':'This collection belongs to a different account. Syncing is off and your tattoos stay on this device.','sync.grens_knop':'Add these tattoos to this account','sync.grens_bevestig':'Add these tattoos to {email}? They will end up in that account and this cannot be undone.','sync.grens_klaar':'Your tattoos now belong to this account. Syncing is back on.','sync.ander_account_geblokkeerd':'Syncing is off: this collection belongs to a different account.','start.account_in':'Synced ✓',
-    'start.leeg_uitleg':'See where your next tattoo fits - on a 3D body. And keep the ink you already have.','start.privacy':'Everything stays on this device - syncing is optional.','start.privacy_magic':'Everything stays on this device - syncing and Magic cut are optional.','start.kijk3d':'Just explore the 3D body first','ui.geen_foto_link':'No photo? Just save the details','ui.gl_onbeschikbaar':"3D view isn't available on this device (WebGL is not working).",'inapp.tekst':"You're in the TikTok/Instagram in-app browser - your tattoos may not be saved here. Open Tatties in Safari or Chrome.",'inapp.kopieer':'Copy link','inapp.gekopieerd':'Link copied - paste it in your browser','ui.gl_verloren':'The 3D view stopped because your device ran out of memory. Refresh to continue.',
+    'start.leeg_uitleg':'See where your next tattoo fits on a 3D body. And keep the ink you already have.','start.privacy':'Everything stays on this device. Syncing is optional.','start.privacy_magic':'Everything stays on this device. Syncing and Magic cut are optional.','start.kijk3d':'Just explore the 3D body first','ui.geen_foto_link':'No photo? Just save the details','ui.gl_onbeschikbaar':"3D view isn't available on this device (WebGL is not working).",'inapp.tekst':"You're in the TikTok/Instagram in-app browser - your tattoos may not be saved here. Open Tatties in Safari or Chrome.",'inapp.kopieer':'Copy link','inapp.gekopieerd':'Link copied - paste it in your browser','ui.gl_verloren':'The 3D view stopped because your device ran out of memory. Refresh to continue.',
     'start.kies_titel':'Add tattoo','start.kies_3d':'On the 3D model','start.kies_3d_sub':'Place on the rotatable body',
     'start.kies_2d':'On the 2D map','start.kies_2d_sub':'Place on the flat front/back map','start.kies_2d_wip':'Under construction',
     'ui.foto_maken':'Take photo','ui.foto_uploaden':'Upload photo','ui.foto_toevoegen':'Add tattoo','ui.kies_kop':'New tattoo - pick a photo','ui.kies_sub':'A screenshot or design works too. Your photo stays on this device.','ui.kies_sub_magic':'A screenshot or design works too.','ui.andere_foto':'Different photo','ui.plaatsen':'Place','ui.plaats_op_model':'Place on the model','ui.nog_een':'+ Another','ui.nog_een_uitleg':'Place this one, then cut another tattoo from the same photo','ui.herhaal_hint':'Position it and tap ✓ - then cut the next one from this photo','ui.herhaal_volgende':'Cut the next tattoo from the same photo','ui.volgende_uitsnede':'Next cut-out','ui.uit_deze_foto':'from this photo',
@@ -7980,7 +7982,7 @@ function createTattoo(overrides = {}) {
    ============================================================ */
 // App-versie (semver, handmatig ophogen bij een release). Bij een bump ook de
 // CACHE-naam in sw.js meebumpen, zodat clients de nieuwe build ophalen.
-const APP_VERSIE = '0.3.58';
+const APP_VERSIE = '0.3.59';
 
 /* Dev-haken die de CLOUD raken hangen alleen op een ontwikkelmachine aan window. Ze zijn geen
    lek op zichzelf (zonder XSS roept niemand ze aan, en CSP + esc() houden XSS tegen), maar ze
@@ -10147,7 +10149,7 @@ function renderStart() {
   const cellen = [
     { g: tattoos.length, l: tr('start.stat_aantal') },
     { g: ziturenLabel(totUren), l: tr('start.stat_zituren'), id: 'home-zituren', titel: tr('stats.wissel_eenheid'), toon: totUren > 0 },   // korte label: 'Total sitting hours' brak in drie regels
-    { g: euro.format(totKosten), l: tr('stats.uitgegeven'), toon: totKosten > 0 },
+    { g: totKosten >= 1000 ? euro.format(totKosten).replace(/[.,]\d{2}$/, '') : euro.format(totKosten), l: tr('start.stat_uitgegeven'), toon: totKosten > 0 },   // op de tegel zonder centen vanaf 1000, anders loopt het bedrag uit de kolom
   ].filter(s => s.toon !== false);
   statsEl.classList.toggle('weinig', cellen.length < 3);
   statsEl.innerHTML = cellen.map(s => {
