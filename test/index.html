@@ -515,6 +515,8 @@ main > section{animation:opkomen .3s ease both}
 .knop-sec:active{background:#efe5d2}
 .knop-sec.actief{background:var(--accent);border-color:var(--accent);color:var(--op-inkt)}
 .knop-sec.actief .ik{stroke:var(--op-inkt)}
+.detail-delen{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 0 14px;font-size:var(--fs-sm);line-height:1.35}
+.detail-delen .knop-sec{flex:none}
 .knop-gevaar{color:var(--gevaar);border-color:var(--rand)}
 #fab{
   position:absolute;right:14px;bottom:14px;z-index:6;flex:none;
@@ -2127,6 +2129,7 @@ form label{text-transform:none;letter-spacing:.005em;font-size:.8rem;color:var(-
           <button type="button" class="eb-scarot" data-act="size+" data-i18n-title="ui.groter" data-i18n-aria="ui.groter" title="Groter" aria-label="Groter"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>
           <button type="button" class="eb-scarot" data-act="rot-" data-i18n-title="ui.links_draaien" data-i18n-aria="ui.links_draaien" title="Linksom draaien" aria-label="Linksom draaien"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12a8 8 0 1 0 2.3-5.6"/><path d="M3 4v4h4"/></svg></button>
           <button type="button" class="eb-scarot" data-act="rot+" data-i18n-title="ui.rechts_draaien" data-i18n-aria="ui.rechts_draaien" title="Rechtsom draaien" aria-label="Rechtsom draaien"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.3-5.6"/><path d="M21 4v4h-4"/></svg></button>                    <button type="button" data-act="done" class="eb-af" data-i18n-title="ui.klaar" data-i18n-aria="ui.klaar" title="Klaar" aria-label="Klaar"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12l5 5L20 6"/></svg></button>
+          <button type="button" data-act="deel" class="eb-deel" data-i18n-title="ui.deel_toevoegen" data-i18n-aria="ui.deel_toevoegen" title="Deel toevoegen" aria-label="Deel toevoegen"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="11" height="11" rx="2"/><path d="M17.5 13.5v7M14 17h7"/></svg></button>
           <button type="button" data-act="del" class="eb-del" data-i18n-title="aria.verwijderen" data-i18n-aria="aria.verwijderen" title="Verwijderen" aria-label="Verwijderen"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M9 7V5h6v2M7 7l1 13h8l1-13"/><path d="M10 11v5M14 11v5"/></svg></button>
         </div>
         <button type="button" data-act="blend" class="eb-blend" data-i18n-title="ui.huidblend" data-i18n-aria="ui.huidblend" title="Alleen de inkt of met huid" aria-label="Alleen de inkt of met huid"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="12" r="6"/><circle cx="15" cy="12" r="6"/></svg><span data-i18n="ui.eb_met_huid">Met huid</span></button>
@@ -7491,6 +7494,8 @@ const I18N = {
     'ui.huidskleur_prikken':'Huidskleur prikken','ui.drempel':'Drempel - sleep tot de huid weg is','ui.tik_huid':'Tik op de huid in de foto',
     'ui.achtergrondkleur':'Achtergrondkleur kiezen','ui.auto':'Auto',
     'ui.tattoo_toevoegen':'Tattoo toevoegen','ui.tattoo_aanpassen':'Tattoo aanpassen','ui.bewerken':'Bewerken',
+    'ui.deel_toevoegen':'Deel toevoegen','ui.deel_kies_kop':'Nog een deel van {naam} - kies een foto','ui.deel_badge':'Deel van {naam}','ui.deel_geplaatst':'Deel geplaatst ✓',
+    'detail.delen':'Op het model in {n} delen','detail.delen_uitleg':'Past de tattoo niet in een foto? Voeg een deel toe.',
     'ui.beginstand':'Beginstand','ui.laden':'Laden…','ui.vergrendelen':'Vergrendelen','ui.verwijderen':'Verwijderen',
     'ui.huidblend':'Alleen de inkt of met huid','ui.huidblend_kort':'In huid','ui.eb_met_huid':'Met huid','ui.eb_inkt':'Inkt','ui.eb_inkt_zwart':'Inkt: zwart','ui.eb_inkt_kleur':'Inkt: kleur','ui.blend_aan':'In huid geblend','ui.blend_uit':'Met huid, zoals de foto','ui.inkt_zwart':'Alleen de inkt, zwart','ui.inkt_kleur':'Alleen de inkt, in kleur',
     'ui.aanpassen_bijknippen':'Aanpassen','ui.klaar':'Klaar','ui.kleiner':'Kleiner','ui.groter':'Groter','ui.sluiten_bevestig':'Uitsnede weggooien? Je niet-opgeslagen werk gaat verloren.','ui.sluiten_ja':'Weggooien',
@@ -7593,7 +7598,8 @@ const I18N = {
     'toast.geplaatst':'Geplaatst op het gekozen lichaamsdeel - tik op de kaart om te verschuiven','toast.kieslichaamsdeel':'Kies eerst een lichaamsdeel, of tik op de kaart om te plaatsen',
     'toast.afbmislukt':'Afbeelding maken lukte niet','toast.kaartopgeslagen':'Kaart opgeslagen als afbeelding',
     'toast.vastgezet':'Tattoo vastgezet','toast.ontgrendeld':'Tattoo ontgrendeld',
-    'toast.wensverwijderd':'Wens verwijderd','toast.tattooverwijderd':'Tattoo verwijderd','toast.ongedaan':'Ongedaan maken','toast.tattooweg':'Deze tattoo bestaat niet meer','toast.datumtoekomst':'Kies een datum van vandaag of eerder',
+    'toast.wensverwijderd':'Wens verwijderd','toast.tattooverwijderd':'Tattoo verwijderd','toast.ongedaan':'Ongedaan maken',
+    'toast.deelverwijderd':'Deel verwijderd','toast.deel_teruggezet':'Deel teruggezet','ui.deel_verwijder_vraag':'Dit deel van {naam} verwijderen? De andere delen blijven staan.','kaart.delen':'{n} delen','toast.tattooweg':'Deze tattoo bestaat niet meer','toast.datumtoekomst':'Kies een datum van vandaag of eerder',
     'toast.sessieverwijderd':'Sessie verwijderd','toast.touchupverwijderd':'Touch-up verwijderd','toast.taakverwijderd':'Taak verwijderd',
     'toast.teruggezet':'"{naam}" teruggezet','confirm.verwijder':'"{naam}" verwijderen?',
     'toast.kiessessiedatum':'Kies eerst een sessiedatum','toast.sessietoegevoegd':'Sessie toegevoegd',
@@ -7680,6 +7686,8 @@ const I18N = {
     'ui.huidskleur_prikken':'Pick skin colour','ui.drempel':'Threshold - drag until the skin is gone','ui.tik_huid':'Tap the skin in the photo',
     'ui.achtergrondkleur':'Pick background colour','ui.auto':'Auto',
     'ui.tattoo_toevoegen':'Add tattoo','ui.tattoo_aanpassen':'Edit tattoo','ui.bewerken':'Editing',
+    'ui.deel_toevoegen':'Add a part','ui.deel_kies_kop':'Another part of {naam} - pick a photo','ui.deel_badge':'Part of {naam}','ui.deel_geplaatst':'Part placed ✓',
+    'detail.delen':'On the model in {n} parts','detail.delen_uitleg':'Does the tattoo not fit in one photo? Add a part.',
     'ui.beginstand':'Reset view','ui.laden':'Loading…','ui.vergrendelen':'Lock','ui.verwijderen':'Delete',
     'ui.huidblend':'Ink only or with skin','ui.huidblend_kort':'In skin','ui.eb_met_huid':'With skin','ui.eb_inkt':'Ink','ui.eb_inkt_zwart':'Ink: black','ui.eb_inkt_kleur':'Ink: colour','ui.blend_aan':'Blended into skin','ui.blend_uit':'With skin, as photographed','ui.inkt_zwart':'Ink only, black','ui.inkt_kleur':'Ink only, in colour',
     'ui.aanpassen_bijknippen':'Edit','ui.klaar':'Done','ui.kleiner':'Smaller','ui.groter':'Bigger','ui.sluiten_bevestig':'Discard your cut-out? Unsaved work will be lost.','ui.sluiten_ja':'Discard',
@@ -7782,7 +7790,8 @@ const I18N = {
     'toast.geplaatst':'Placed on the chosen body part - tap the map to move it','toast.kieslichaamsdeel':'Pick a body part first, or tap the map to place it',
     'toast.afbmislukt':"Couldn't create the image",'toast.kaartopgeslagen':'Map saved as image',
     'toast.vastgezet':'Tattoo pinned','toast.ontgrendeld':'Tattoo unlocked',
-    'toast.wensverwijderd':'Wish deleted','toast.tattooverwijderd':'Tattoo deleted','toast.ongedaan':'Undo','toast.tattooweg':'This tattoo no longer exists','toast.datumtoekomst':'Pick a date of today or earlier',
+    'toast.wensverwijderd':'Wish deleted','toast.tattooverwijderd':'Tattoo deleted','toast.ongedaan':'Undo',
+    'toast.deelverwijderd':'Part deleted','toast.deel_teruggezet':'Part restored','ui.deel_verwijder_vraag':'Delete this part of {naam}? The other parts stay.','kaart.delen':'{n} parts','toast.tattooweg':'This tattoo no longer exists','toast.datumtoekomst':'Pick a date of today or earlier',
     'toast.sessieverwijderd':'Session removed','toast.touchupverwijderd':'Touch-up removed','toast.taakverwijderd':'Task removed',
     'toast.teruggezet':'"{naam}" restored','confirm.verwijder':'Delete "{naam}"?',
     'toast.kiessessiedatum':'Pick a session date first','toast.sessietoegevoegd':'Session added',
@@ -7970,6 +7979,8 @@ function createTattoo(overrides = {}) {
                              //      barycentrisch + hoek t.o.v. de driehoek); beweegt mee als het
                              //      model van vorm verandert. point/normal blijven de terugval.
     kunst3d: null,           // 3D: {srcUrl,lasso:[{nx,ny}],thresh,bg}
+    delen: [],               // extra delen van dezelfde tattoo (sleeve/wikkel): [{id, positie3d, kunst3d}];
+                             //      het EERSTE deel is het record zelf (positie3d/kunst3d hierboven)
     // Sync-velden (cloud-sync slice 1) - lokaal onzichtbaar, klaar voor latere sync.
     updatedAt: 0,            // epoch-ms van laatste wijziging; saveTattoo stempelt dit bij elke write
     deleted: false           // soft-delete/tombstone; true = verwijderd maar bewaard voor sync
@@ -7983,7 +7994,7 @@ function createTattoo(overrides = {}) {
    ============================================================ */
 // App-versie (semver, handmatig ophogen bij een release). Bij een bump ook de
 // CACHE-naam in sw.js meebumpen, zodat clients de nieuwe build ophalen.
-const APP_VERSIE = '0.3.60';
+const APP_VERSIE = '0.3.61';
 
 /* Dev-haken die de CLOUD raken hangen alleen op een ontwikkelmachine aan window. Ze zijn geen
    lek op zichzelf (zonder XSS roept niemand ze aan, en CSP + esc() houden XSS tegen), maar ze
@@ -8458,6 +8469,7 @@ function stripVoorCloud(t) {
   c.fotos = [];             // foto's volgen via Storage (slice 6)
   if (c.kunst) delete c.kunst.src;
   if (c.kunst3d) delete c.kunst3d.srcUrl;
+  for (const d of beeldDelen(c)) if (d.kunst3d) delete d.kunst3d.srcUrl;   // delen: elk zijn eigen bronfoto via Storage
   return c;
 }
 
@@ -8558,6 +8570,8 @@ function assetPaden(man) {
   const uit = [];
   for (const a of (Array.isArray(man.fotos) ? man.fotos : [])) { const p = padVanAsset(a); if (p) uit.push(p); }
   for (const k of ['kunst', 'kunst3d']) { const p = padVanAsset(man[k]); if (p) uit.push(p); }
+  const delen = (man.delen && typeof man.delen === 'object') ? man.delen : {};   // delen: {deelId: asset}
+  for (const id of Object.keys(delen)) { const p = padVanAsset(delen[id]); if (p) uit.push(p); }
   return uit;
 }
 
@@ -8590,7 +8604,7 @@ function quotaFout(e) {
   return /quota_tattoos|quota_opslag/i.test(m) || (/code: P0001/i.test(m) && /database error/i.test(m));
 }
 async function uploadBeelden(userId, t, vorig) {
-  const man = { fotos: [], kunst: null, kunst3d: null };
+  const man = { fotos: [], kunst: null, kunst3d: null, delen: {} };
   // Tweede slot op de plek waar het pad echt gebouwd wordt: hardRecord hoort dit al te hebben
   // afgevangen, dus komen we hier toch, dan is er iets grondig mis en uploaden we niets.
   if (!veiligeId(t.id)) throw new Error('onveilige record-id, upload geweigerd');
@@ -8613,6 +8627,11 @@ async function uploadBeelden(userId, t, vorig) {
   }
   if (t.kunst && t.kunst.src) man.kunst = await up(basis + '/kunst.bin', t.kunst.src, vorig && vorig.kunst);
   if (t.kunst3d && t.kunst3d.srcUrl) man.kunst3d = await up(basis + '/kunst3d.bin', t.kunst3d.srcUrl, vorig && vorig.kunst3d);
+  for (const d of beeldDelen(t)) {   // extra delen: elk zijn eigen bronfoto, pad op deel-id
+    if (!(d.kunst3d && d.kunst3d.srcUrl) || !veiligeId(d.id)) continue;
+    const a = await up(basis + '/deel-' + d.id + '.bin', d.kunst3d.srcUrl, vorig && vorig.delen && vorig.delen[d.id]);
+    if (a) man.delen[d.id] = a;
+  }
   return { man, overgeslagen };
 }
 
@@ -8636,7 +8655,8 @@ async function ruimWeesBeelden(oudMan, nieuwMan) {
 /* Heeft dit record überhaupt beelden? Gebruikt voor de backfill. */
 function heeftBeelden(t) {
   return !!(t && ((Array.isArray(t.fotos) && t.fotos.length) ||
-                  (t.kunst && t.kunst.src) || (t.kunst3d && t.kunst3d.srcUrl)));
+                  (t.kunst && t.kunst.src) || (t.kunst3d && t.kunst3d.srcUrl) ||
+                  beeldDelen(t).some(d => d.kunst3d && d.kunst3d.srcUrl)));
 }
 
 /* Download beelden volgens het manifest en vul ze in op rec (overschrijft de lokale
@@ -8665,6 +8685,10 @@ async function downloadBeelden(rec, ref) {
   }
   if (ref.kunst) { const u = await dl(ref.kunst); if (u) { rec.kunst = rec.kunst || {}; rec.kunst.src = u; } }
   if (ref.kunst3d) { const u = await dl(ref.kunst3d); if (u) { rec.kunst3d = rec.kunst3d || {}; rec.kunst3d.srcUrl = u; } }
+  if (ref.delen && typeof ref.delen === 'object') {   // delen: op deel-id koppelen
+    for (const d of beeldDelen(rec)) { const a = ref.delen[d.id]; if (!a) continue;
+      const u = await dl(a); if (u) { d.kunst3d = d.kunst3d || {}; d.kunst3d.srcUrl = u; } }
+  }
   return { compleet: gemist === 0, gemist };
 }
 
@@ -8748,6 +8772,16 @@ function hardRecord(record) {
     if (!Array.isArray(record.kunst3d.wand)) record.kunst3d.wand = [];
     if (!Array.isArray(record.kunst3d.erase)) record.kunst3d.erase = [];
   }
+  // Delen: alleen goedgevormd (veilige id, geldige 3D-plek); beelden even streng als kunst3d
+  { const ok3d = a => Array.isArray(a) && a.length === 3 && a.every(n => isFinite(n));
+    record.delen = beeldDelen(record).filter(d => veiligeId(d.id) && d.positie3d && ok3d(d.positie3d.point) && ok3d(d.positie3d.normal));
+    for (const d of record.delen) {
+      d.kunst3d = (d.kunst3d && typeof d.kunst3d === 'object') ? d.kunst3d : {};
+      if (d.kunst3d.srcUrl) { const s = veiligeBeeldSrc(d.kunst3d.srcUrl); if (s) d.kunst3d.srcUrl = s; else delete d.kunst3d.srcUrl; }
+      if (!Array.isArray(d.kunst3d.lasso)) d.kunst3d.lasso = [];
+      if (!Array.isArray(d.kunst3d.wand)) d.kunst3d.wand = [];
+      if (!Array.isArray(d.kunst3d.erase)) d.kunst3d.erase = [];
+    } }
   return record;
 }
 
@@ -8761,6 +8795,7 @@ function cloudNaarLokaal(c, l) {
     if (Array.isArray(l.fotos) && l.fotos.length) rec.fotos = l.fotos;
     if (l.kunst && l.kunst.src) { rec.kunst = rec.kunst || {}; rec.kunst.src = l.kunst.src; }
     if (l.kunst3d && l.kunst3d.srcUrl) { rec.kunst3d = rec.kunst3d || {}; rec.kunst3d.srcUrl = l.kunst3d.srcUrl; }
+    for (const d of beeldDelen(rec)) { const ld = deelBij(l, d.id); if (ld && ld.kunst3d && ld.kunst3d.srcUrl) { d.kunst3d = d.kunst3d || {}; d.kunst3d.srcUrl = ld.kunst3d.srcUrl; } }
   }
   return hardRecord(rec);   // onvertrouwde cloud-data even streng saneren als import
 }
@@ -9443,11 +9478,27 @@ async function getAllTattoos(poging2 = false) {
    eerst op met volledigInRam() - in place, zodat 3D-markers/closures dezelfde referentie
    houden. saveTattoo() heeft een merge-guard zodat een licht record nooit de beelden in
    de DB kan overschrijven, en houdt daar ook de lijst-thumb vers. */
+/* Delen (jigsaw, 2026-09-16): een tattoo die niet in een foto past, bestaat uit meerdere uitsnedes
+   onder een record. Het eerste deel is het record zelf (positie3d/kunst3d), de rest staat in `delen`
+   als {id, positie3d, kunst3d} - zo blijven bestaande records en codepaden geldig zonder migratie.
+   Elk deel heeft zijn eigen bronfoto (kunst3d.srcUrl), dus overal waar beeldvelden gestript, gemerged,
+   geupload of gesaneerd worden, lopen de delen mee. */
+function beeldDelen(t) { return (t && Array.isArray(t.delen)) ? t.delen.filter(d => d && typeof d === 'object') : []; }
+function deelBij(t, id) { return id ? (beeldDelen(t).find(d => d.id === id) || null) : null; }
+/* Ontbrekende deel-bronfoto's (licht record) uit de volle DB-kopie bijvullen, op deel-id. */
+function vulDelenUitVol(doel, vol) {
+  for (const d of beeldDelen(doel)) {
+    if (d.kunst3d && d.kunst3d.srcUrl) continue;
+    const v = deelBij(vol, d.id);
+    if (v && v.kunst3d && v.kunst3d.srcUrl) { d.kunst3d = d.kunst3d || v.kunst3d; d.kunst3d.srcUrl = v.kunst3d.srcUrl; }
+  }
+}
 function stripBeelden(t) {
   delete t.foto;
   if (Array.isArray(t.fotos) && t.fotos.length) t.fotos = [];
   if (t.kunst && t.kunst.src) delete t.kunst.src;
   if (t.kunst3d && t.kunst3d.srcUrl) delete t.kunst3d.srcUrl;
+  for (const d of beeldDelen(t)) if (d.kunst3d && d.kunst3d.srcUrl) delete d.kunst3d.srcUrl;
   // Bewust ENUMERABLE: zo overleeft de marker ook JSON-/structured-clones (bv. de
   // undo-snapshot bij verwijderen) en beschermt de merge-guard élke kloon-flow.
   // saveTattoo/export/stripVoorCloud strippen 'm aan de uitgangs-grenzen weer weg.
@@ -9476,6 +9527,7 @@ async function volledigInRam(id) {
     if (!t.foto && vol.foto) t.foto = vol.foto;
     if (vol.kunst && vol.kunst.src && (!t.kunst || !t.kunst.src)) { t.kunst = t.kunst || vol.kunst; t.kunst.src = vol.kunst.src; }
     if (vol.kunst3d && vol.kunst3d.srcUrl && (!t.kunst3d || !t.kunst3d.srcUrl)) { t.kunst3d = t.kunst3d || vol.kunst3d; t.kunst3d.srcUrl = vol.kunst3d.srcUrl; }
+    vulDelenUitVol(t, vol);
   }
   delete t.__licht;
   return t;
@@ -9550,6 +9602,7 @@ async function saveTattoo(tattoo, behoudTijd = false, poging2 = false) {
         if (!tattoo.foto && vol.foto) tattoo.foto = vol.foto;
         if (vol.kunst && vol.kunst.src && (!tattoo.kunst || !tattoo.kunst.src)) { tattoo.kunst = tattoo.kunst || vol.kunst; tattoo.kunst.src = vol.kunst.src; }
         if (vol.kunst3d && vol.kunst3d.srcUrl && (!tattoo.kunst3d || !tattoo.kunst3d.srcUrl)) { tattoo.kunst3d = tattoo.kunst3d || vol.kunst3d; tattoo.kunst3d.srcUrl = vol.kunst3d.srcUrl; }
+        vulDelenUitVol(tattoo, vol);
       }
     } catch (e) { console.error('merge-guard', e); }
   }
@@ -11335,7 +11388,7 @@ function renderLijst() {
       <span class="thumb${kunstFoto ? ' thumb-kunst' : ''}">${foto ? `<img src="${esc(foto)}" alt="">` : ICONEN.galerij}</span>
       <span class="info">
         <h3>${esc(t.naam)}</h3>
-        <p>${[zoneLabel(t.lichaamsdeel), t.artiest].filter(Boolean).map(esc).join(' · ')}</p>
+        <p>${[zoneLabel(t.lichaamsdeel), t.artiest, (beeldDelen(t).length ? tr('kaart.delen').replace('{n}', 1 + beeldDelen(t).length) : '')].filter(Boolean).map(esc).join(' · ')}</p>
         ${t.datum ? `<p class="kaart-datum">${fmtDatum(t.datum)}</p>` : ''}
         <p class="kosten">${t.kosten ? euro.format(t.kosten) : ''}</p>
         ${t.pijn ? `<p class="kaart-pijn">${pijnSterren(t.pijn, true)}</p>` : ''}
@@ -11440,7 +11493,12 @@ function renderDetail() {
     const rijenHtml = rijen.map(r => `<div class="veldrij${r.leeg ? ' leeg-veld' : ''}"><dt>${r.l}</dt><dd>${r.leeg ? '-' : r.v}</dd></div>`).join('');
     const notitieHtml = t.notities ? `<div class="veldrij"><dt>${tr('detail.notities')}</dt><dd>${esc(t.notities).replace(/\n/g, '<br>')}</dd></div>` : '';
     const heeftLege = rijen.some(r => r.leeg);
-    paneel = `
+    // Delen (jigsaw): alleen bij een tattoo die op het model staat. Eerste deel = het record zelf.
+    const nDelen = 1 + beeldDelen(t).length;
+    const delenHtml = (t.positie3d && t.positie3d.point)
+      ? `<div class="detail-delen"><span class="gedempt">${nDelen > 1 ? tr('detail.delen').replace('{n}', nDelen) : tr('detail.delen_uitleg')}</span><button type="button" class="knop-sec" id="d-deel">${tr('ui.deel_toevoegen')}</button></div>`
+      : '';
+    paneel = `${delenHtml}
       <dl${detailToonExtra ? ' class="toon-leeg"' : ''}>${rijenHtml}${notitieHtml}</dl>
       ${heeftLege ? `<button type="button" class="linkbtn" id="d-extra">${detailToonExtra ? tr('detail.extra_verbergen') : tr('detail.extra_tonen')}</button>` : ''}`;
   } else if (detailTab === 'sessies') {
@@ -11564,6 +11622,11 @@ function renderDetail() {
     if (((t.kunst3d&&t.kunst3d.srcUrl)||(t.kunst&&t.kunst.src)) && typeof window.__tattiesRecrop2D === 'function') window.__tattiesRecrop2D(t);   // zelfde overzicht als toevoegen
     else openFormulier(t.id);                                                                                            // terugval: geen bewaarde foto
   });
+  { const dd = $('#d-deel'); if (dd) dd.addEventListener('click', () => {   // extra deel: naar 3D, dan de knipmodal in deel-stand
+      if (window.__tatties3DKapot) { toast(tr('ui.zonder3d_formulier')); return; }
+      $('#btn-3d').click();
+      setTimeout(() => { if (typeof window.__tattiesDeelToevoegen === 'function') window.__tattiesDeelToevoegen(t); }, 60);
+    }); }
   $('#d-verwijder').addEventListener('click', async (e) => {
     const btn = e.currentTarget; if (btn.disabled) return; btn.disabled = true;   // dubbelklik-race voorkomen
     if (!(await bevestigVerwijderen(t && t.naam))) { btn.disabled = false; return; }   // geannuleerd: knop weer vrijgeven
@@ -12959,6 +13022,7 @@ async function verwijderVoorbeelden() {
       const kloon = bron.cloneNode(true);
       kloon.id = 'editbar2d';
       const blend = kloon.querySelector('.eb-blend'); if (blend) blend.remove();   // 2D heeft geen in-huid-blend
+      const deel = kloon.querySelector('.eb-deel'); if (deel) deel.remove();       // delen plaats je op het model, niet op de kaart
       const op = kloon.querySelector('input[type="range"]'); if (op) op.id = 'eb2d-opacity';
       slot.replaceWith(kloon);
     } }
@@ -14320,7 +14384,7 @@ async function verwijderVoorbeelden() {
   async function poseDecalsBij(){
     let i=0;
     for(const m of markers.slice()){
-      const P=m.rec && m.rec.positie3d;
+      const P=deelVan(m) && deelVan(m).positie3d;
       const ub=(P&&P.bind) ? uitBind(m.mesh||pickMeshes[0], P.bind) : null;
       if(ub){ m.point=ub.point; m.normal=ub.normal; m.rot=ub.rot; }
       try{ rebuildMarker(m); }catch(e){ console.error("decal na houdingswissel mislukt",e); }
@@ -15285,6 +15349,28 @@ async function verwijderVoorbeelden() {
     const obj=makeImage(s.point,s.normal,rot,size,d.tex,s.mesh);
     if(!obj){ toast(tr('ui.plaatsen_mislukt')); return; }
     const nz=nearestZone(s.point);
+    if(d.deelVoor){   // extra deel van een bestaande tattoo (jigsaw): geen nieuw record, een deel erbij
+      const rec=(typeof tattoos!=="undefined" && Array.isArray(tattoos)) ? (tattoos.find(x=>x.id===d.deelVoor.id)||d.deelVoor) : d.deelVoor;
+      const deel={ id:nieuweId(), positie3d:{ point:[s.point.x,s.point.y,s.point.z], normal:[s.normal.x,s.normal.y,s.normal.z],
+                   rot, size, gender:currentGender, preset:presetId(), zone:nz.zone, side:nz.side }, kunst3d:d.kunst3d };
+      zetBind(deel.positie3d, s.mesh, s.point, s.normal, rot, (s.tri>=0?s.tri:-1));
+      if(poseHoek!==0 && deel.positie3d.bind){ const r=uitBind(s.mesh, deel.positie3d.bind, true);
+        if(r){ deel.positie3d.point=[r.point.x,r.point.y,r.point.z]; deel.positie3d.normal=[r.normal.x,r.normal.y,r.normal.z]; deel.positie3d.rot=r.rot||0; } }
+      if(!Array.isArray(rec.delen)) rec.delen=[];
+      rec.delen.push(deel);
+      try{ await saveTattoo(rec); }catch(e){ console.error(e); toast(tr('toast.opslaanmislukt')+(e&&e.message?e.message:tr('ui.fout'))); }
+      const m={ id:rec.id, rec, deel, obj, point:s.point.clone(), normal:s.normal.clone(), mesh:s.mesh,
+        tri:(s.tri>=0?s.tri:(deel.positie3d.bind?deel.positie3d.bind.tri:-1)), rot, size, tex:d.tex };
+      zetDecalOpacity(obj, rec.opacity);
+      markers.push(m); onthoudFp(m);
+      if(ledeActief) ledeDecalSplits(m);
+      plaatsData=null; plaatsModus=false; verbergBanner(); if(window.__plaatsHintUit) window.__plaatsHintUit();
+      if(typeof renderMarkers==="function"){ try{renderMarkers();}catch(_){} }
+      toast(tr('ui.deel_geplaatst')); enterEditDecal(m); pasBlendOpNieuw(m);
+      if(rec.status==='wens' && typeof window.__tattiesNaStatus==='function') window.__tattiesNaStatus('wens');
+      if(typeof window.__tattiesNaBewerk==="function") window.__tattiesNaBewerk(rec.id);   // detailpagina: telling bijwerken
+      return;
+    }
     const rec=createTattoo(Object.assign({ naam:d.naam, status:(d.status||"gezet"), zijde:nz.side, lichaamsdeel:nz.zone,
       positie3d:{ point:[s.point.x,s.point.y,s.point.z], normal:[s.normal.x,s.normal.y,s.normal.z],
                   rot, size, gender:currentGender, preset:presetId(), zone:nz.zone, side:nz.side },
@@ -15311,6 +15397,10 @@ async function verwijderVoorbeelden() {
   }
 
   /* ---- aanpas-modus voor een geplaatste tattoo ---- */
+  /* Delen (jigsaw): een marker hoort bij een record (m.rec: naam, dekking, status, stapel) en bij een DEEL
+     daarvan (m.deel: eigen plek + uitsnede), of bij het record zelf als eerste deel. deelVan geeft het
+     object dat positie3d/kunst3d draagt; recMul/recInkt werken daar ook op. */
+  function deelVan(m){ return (m && m.deel) ? m.deel : (m && m.rec); }
   // Staat deze tattoo op multiply-blend ("in huid blenden")?
   function recMul(rec){ return !!(rec && rec.kunst3d && rec.kunst3d.blend==='multiply'); }
   function recInkt(rec){ return blendInkt(rec && rec.kunst3d && rec.kunst3d.blend); }   // 'zwart'|'kleur'|'auto'|null
@@ -15319,24 +15409,25 @@ async function verwijderVoorbeelden() {
      base64 en dus groot - daarvan nemen we lengte + een stukje, net als de lijst-thumb.
      Bewust NIET meegenomen: naam, notities en andere velden die de decal niet tekenen; die
      komen mee via het her-koppelen van `rec` en kosten geen rebuild. */
-  function decalVingerafdruk(rec){
+  function decalVingerafdruk(rec, deel){
     if(!rec) return '';
     try{
-      const k = Object.assign({}, rec.kunst3d);
-      const src = k.srcUrl || (rec.kunst && rec.kunst.src) || '';
+      const D = deel || rec;   // deel: eigen uitsnede en plek; de weergave-velden komen van het record
+      const k = Object.assign({}, D.kunst3d);
+      const src = k.srcUrl || (!deel && rec.kunst && rec.kunst.src) || '';
       delete k.srcUrl;
-      return (src ? src.length + ':' + src.slice(30, 62) : '') + '|' + JSON.stringify(k)
-        + '|' + JSON.stringify(rec.positie3d || null)
+      return (deel ? deel.id + '|' : '') + (src ? src.length + ':' + src.slice(30, 62) : '') + '|' + JSON.stringify(k)
+        + '|' + JSON.stringify(D.positie3d || null)
         + '|' + rec.opacity + '|' + (rec.status || '') + '|' + (rec.stapel || 0);
     }catch(e){ return '?'; }   // onserialiseerbaar record: geen rebuild uitlokken
   }
-  function onthoudFp(m){ if(m) m._fp = decalVingerafdruk(m.rec); }
+  function onthoudFp(m){ if(m) m._fp = decalVingerafdruk(m.rec, m.deel); }
   function rebuildMarker(m){
     ledeDecalTerug(m);   // eventuele splitsing over de knip eerst terugdraaien
     if(m.obj){ body.remove(m.obj);
       if(m.obj.geometry)m.obj.geometry.dispose();
       if(m.obj.material&&m.obj.material.dispose)m.obj.material.dispose(); }
-    m.obj=makeImage(m.point,m.normal,m.rot||0,m.size||0.09,m.tex,m.mesh||pickMeshes[0],recMul(m.rec));
+    m.obj=makeImage(m.point,m.normal,m.rot||0,m.size||0.09,m.tex,m.mesh||pickMeshes[0],recMul(deelVan(m)));
     if(m.obj) m.obj.renderOrder=(m.rec&&m.rec.stapel)||0;   // stapelvolgorde bij overlap
     zetDecalOpacity(m.obj, m.rec && m.rec.opacity);
     if(ledeActief){ if(ledeActief.decalOp.has(m)) ledeActief.decalOp.delete(m); ledeDecalSplits(m); }
@@ -15346,8 +15437,9 @@ async function verwijderVoorbeelden() {
   // dus herbouw de textuur via kunst3d (witbalans) en herteken met multiply zodat het blend-effect
   // meteen zichtbaar is (i.p.v. pas na herladen).
   function pasBlendOpNieuw(m){
-    if(!m || !(recMul(m.rec)||recInkt(m.rec)) || !(m.rec.kunst3d && m.rec.kunst3d.srcUrl)) return;
-    rebuildTextureFromKunst(m.rec.kunst3d).then(tex=>{ if(!tex) return;
+    const D=deelVan(m);
+    if(!m || !(recMul(D)||recInkt(D)) || !(D.kunst3d && D.kunst3d.srcUrl)) return;
+    rebuildTextureFromKunst(D.kunst3d).then(tex=>{ if(!tex) return;
       if(m.tex && m.tex!==tex && m.tex.dispose) m.tex.dispose(); m.tex=tex; rebuildMarker(m); setBlendUI();
       persistEdit(m);   // opgeloste blend (inkt-auto -> zwart/kleur) + 2D-PNG uit de nieuwe textuur (sync2D) opslaan
     }).catch(()=>{});
@@ -15646,7 +15738,7 @@ async function verwijderVoorbeelden() {
   }
   function persistEdit(m){
     if(!m||!m.rec) return;
-    const P=m.rec.positie3d||(m.rec.positie3d={});
+    const D=deelVan(m); const P=D.positie3d||(D.positie3d={});
     const mesh=m.mesh||pickMeshes[0];
     zetBind(P, mesh, m.point, m.normal, m.rot||0, (m.tri>=0?m.tri:-1));
     // Opslaan gebeurt ALTIJD in de rusthouding: dat punt voedt de 2D-kaart, de zone-indeling en de
@@ -15656,11 +15748,34 @@ async function verwijderVoorbeelden() {
     P.point=[r.point.x,r.point.y,r.point.z];
     P.normal=[r.normal.x,r.normal.y,r.normal.z];
     P.rot=r.rot||0; P.size=m.size||0.09; P.locked=!!m.locked; P.gender=currentGender; P.preset=presetId(); P.zone=nz.zone; P.side=nz.side;
-    m.rec.zijde=nz.side; m.rec.lichaamsdeel=nz.zone;
-    sync2D(m.rec, r.point, nz.side, r.rot||0, m.size, m.tex);
+    if(!m.deel){   // zone en 2D-kaart volgen alleen het eerste deel (een marker per record op de kaart)
+      m.rec.zijde=nz.side; m.rec.lichaamsdeel=nz.zone;
+      sync2D(m.rec, r.point, nz.side, r.rot||0, m.size, m.tex); }
     clearTimeout(m._persistT);   // per-marker timer: alleen deze tattoo's eigen save herplannen
     m._persistT=setTimeout(async()=>{ try{ await saveTattoo(m.rec); if(typeof tattoos!=="undefined"&&Array.isArray(tattoos)){ const j=tattoos.findIndex(t=>t.id===m.rec.id); if(j>=0)tattoos[j]=m.rec; } onthoudFp(m);   /* eigen wijziging: decal is al bij, geen rebuild nodig bij de volgende herlaad */
       if(typeof renderMarkers==="function"){ try{renderMarkers();}catch(_){} } }catch(e){ console.error(e); } },300);
+  }
+  /* Een extra deel verwijderen (het eerste deel is het record zelf en loopt via verwijderMetUndo). Eerst het record
+     vol in RAM: de deel-bronfoto moet in het deel-object zitten, anders is hij na 'ongedaan maken' weg (de DB heeft het
+     deel dan al niet meer, dus de merge-guard kan hem niet terughalen). */
+  async function verwijderDeel(m){
+    const rec=m&&m.rec, deel=m&&m.deel; if(!rec||!deel) return;
+    if(typeof volledigInRam==="function") await volledigInRam(rec.id);
+    const i=(rec.delen||[]).findIndex(d=>d.id===deel.id);
+    if(i>=0) rec.delen.splice(i,1);
+    exitEditUI(); verwijderMarker(m);   // UI dicht ZONDER persistEdit: het deel bestaat niet meer
+    try{ await saveTattoo(rec); }catch(e){ console.error(e); toast(tr('toast.opslaanmislukt')+(e&&e.message?e.message:tr('ui.fout'))); return; }
+    if(typeof renderMarkers==="function"){ try{renderMarkers();}catch(_){} }
+    if(typeof window.__tattiesNaBewerk==="function") window.__tattiesNaBewerk(rec.id);   // detailpagina: telling bijwerken
+    toastMetActie(tr('toast.deelverwijderd'), tr('toast.ongedaan'), async()=>{
+      if(!Array.isArray(rec.delen)) rec.delen=[];
+      if(!rec.delen.some(d=>d.id===deel.id)) rec.delen.push(deel);
+      try{ await saveTattoo(rec); }catch(e){ console.error(e); toast(tr('toast.opslaanmislukt')+(e&&e.message?e.message:tr('ui.fout'))); return; }
+      try{ await herstelDeel(rec, deel); }catch(e){ console.error(e); }
+      if(typeof renderMarkers==="function"){ try{renderMarkers();}catch(_){} }
+      if(typeof window.__tattiesNaBewerk==="function") window.__tattiesNaBewerk(rec.id);
+      toast(tr('toast.deel_teruggezet'));
+    });
   }
   function askConfirm(msg, jaLabel){
     return new Promise(res=>{
@@ -15705,18 +15820,26 @@ async function verwijderVoorbeelden() {
       if(a==="info"){ const rec=editDecal&&editDecal.rec; exitEditDecal(); if(rec&&typeof openDetail==="function") openDetail(rec.id, 'info', '3d'); return; }
       if(a==="edit"){ const rec=editDecal&&editDecal.rec;
         if(rec && typeof volledigInRam==="function") await volledigInRam(rec.id);   // licht record: beelden erbij vóór de heeft-foto-check
-        if(editDecal && rec && ((rec.kunst3d&&rec.kunst3d.srcUrl)||(rec.kunst&&rec.kunst.src))){ openCutModalForEdit(editDecal); }   // zelfde overzicht als toevoegen
+        const D=deelVan(editDecal);
+        if(editDecal && rec && ((D.kunst3d&&D.kunst3d.srcUrl)||(!editDecal.deel&&rec.kunst&&rec.kunst.src))){ openCutModalForEdit(editDecal); }   // zelfde overzicht als toevoegen
         else { exitEditDecal(); if(rec&&typeof openFormulier==="function") openFormulier(rec.id); }     // terugval: geen bewaarde foto
         return; }
-      if(a==="del"){ const rec=editDecal&&editDecal.rec; if(!rec) return;
+      if(a==="deel"){ const rec=editDecal&&editDecal.rec; if(!rec) return;   // nog een deel van deze tattoo: zelfde flow als vanaf de detailpagina
+        exitEditDecal(); openCutModalAdd('3d', rec); return; }
+      if(a==="del"){ const m=editDecal; const rec=m&&m.rec; if(!rec) return;
+        if(m.deel){   // een extra deel: alleen dat deel weg, het record en de andere delen blijven
+          const vraag=tr('ui.deel_verwijder_vraag').replace('{naam}', String(rec.naam||'').trim());
+          const ok=(typeof window.__tattiesConfirm==='function') ? await window.__tattiesConfirm(vraag) : window.confirm(vraag);
+          if(!ok) return;
+          await verwijderDeel(m); return; }
         if(!(await bevestigVerwijderen(rec && rec.naam))) return;
         exitEditDecal(); await verwijderMetUndo(rec); return; }
       if(a==="done"){ exitEditDecal(); if(window.__tattiesHerhaalSrc){ const s=window.__tattiesHerhaalSrc; window.__tattiesHerhaalSrc=null; openCutModalAddMetFoto(s,'3d'); } return; }   // D6(a): na ✓ volgende uitsnede
       if(a==="undo"){ undoEdit(); return; }
       if(a==="lock"){ if(editDecal){ editDecal.locked=!editDecal.locked; setLockUI();
         toast(editDecal.locked?tr('ui.vergrendeld'):tr('ui.ontgrendeld')); persistEdit(editDecal); } return; }
-      if(a==="blend"){ const m=editDecal; const rec=m&&m.rec; if(rec){ rec.kunst3d=rec.kunst3d||{};
-        if(rec.__licht && typeof volledigInRam==="function") await volledigInRam(rec.id);   // licht record: bronfoto erbij, anders valt de matte terug op alleen de blend-modus
+      if(a==="blend"){ const m=editDecal; const rec=m&&deelVan(m); if(rec){ rec.kunst3d=rec.kunst3d||{};   // bij een deel: dat deel
+        if(m.rec.__licht && typeof volledigInRam==="function") await volledigInRam(m.rec.id);   // licht record: bronfoto erbij, anders valt de matte terug op alleen de blend-modus
         { const b=rec.kunst3d.blend||'normaal', ik=blendInkt(b);
           // Cyclus: met huid -> inkt (auto: zwart of kleur) -> de andere inktvariant -> met huid.
           // Oude 'multiply'-records stappen hier ook in; multiply zelf blijft alleen als opgeslagen waarde bestaan.
@@ -15736,7 +15859,7 @@ async function verwijderVoorbeelden() {
     { const op3=document.getElementById("eb3d-opacity"); if(op3) op3.addEventListener("input",()=>{
         if(!editDecal) return;
         const v=Math.max(0.2, Math.min(1,(+op3.value||100)/100));
-        zetDecalOpacity(editDecal.obj, v);
+        markers.forEach(x=>{ if(x.id===editDecal.id && x.obj) zetDecalOpacity(x.obj, v); });   // dekking is per record: alle delen mee
         if(editDecal.rec) editDecal.rec.opacity=v;
         clearTimeout(op3._sv); op3._sv=setTimeout(()=>{ persistEdit(editDecal); },250);
       }); }
@@ -16033,6 +16156,17 @@ async function verwijderVoorbeelden() {
   }
   let pendingPlace=null, pendingEdit=null, pendingPlace2D=null, pendingEdit2D=null;
   let pendingNew=null, plaatsModus=false, plaatsData=null, addDoel='3d';   // nieuwe toevoeg-flow (via +); doel = '2d' of '3d'
+  let deelVoor=null;   // jigsaw: record waar de nieuwe uitsnede als extra deel bij hoort (null = gewone nieuwe tattoo)
+  /* Deel-stand van de knipmodal: kop en badge noemen de tattoo, de vink plaatst meteen (geen naam/gegevens:
+     die horen bij het record), '+ Nog een' en 'Geen foto?' blijven weg. Met deelVoor=null herstelt alles. */
+  function zetDeelUI(){
+    const naam=deelVoor ? (deelVoor.naam||'') : '';
+    const kop=cutModal.querySelector('.cm-kies-kop'); if(kop) kop.textContent = deelVoor ? tr('ui.deel_kies_kop').replace('{naam}', naam) : tr('ui.kies_kop');
+    const vb=document.getElementById('cmVolgende');
+    if(vb){ const l=deelVoor?tr('ui.plaats_op_model'):tr('ui.volgende'); const s=vb.querySelector('.cv-lbl'); if(s) s.textContent=l; vb.setAttribute('aria-label',l); vb.title=l; }
+    const hb=document.getElementById('cmHerhaalBadge'); if(hb && deelVoor){ hb.textContent=tr('ui.deel_badge').replace('{naam}', naam); hb.hidden=false; }
+    const gf=document.getElementById('cmGeenFoto'); if(gf) gf.hidden=!!deelVoor;
+  }
   let plaatsHerhaal=false;   // 'Nog een uit deze foto': na plaatsen de cut-modal heropenen met dezelfde foto
   let herhaalTeller=1;       // hoeveelste uitsnede uit dezelfde bronfoto (1 = eerste; badge toont vanaf 2)
   let vorigeLassos=[];       // {pts,rot90,flipH} van eerder geknipte tattoos uit dezelfde foto (vaag tonen)
@@ -16111,7 +16245,7 @@ async function verwijderVoorbeelden() {
     flipH=false; zetSpiegelUI(); bgPickMode=false; setBgPick(null); if(bgPickBtn)bgPickBtn.classList.remove("on");
     cutModus='vrij'; zetSnijModusUI();
     resetZoom(); rot90=0; toonCutInstellingen(true); rebuildBase(); updateCutout();
-    if(pendingNew) toonInfo(true);
+    if(pendingNew && !deelVoor) toonInfo(true);   // een deel heeft geen eigen naam/gegevens
   }
   // D6(a): de cut-modal als nieuwe toevoeging openen met een al bestaande bronfoto (srcUrl) -> nog een uitsnede.
   function openCutModalAddMetFoto(srcUrl, doel){
@@ -16127,8 +16261,8 @@ async function verwijderVoorbeelden() {
     im.src=srcUrl;
   }
   window.__tattiesNogEenUitFoto=(src)=>openCutModalAddMetFoto(src,'2d');   // host (2D-plaatsen) roept dit aan
-  function openCutModalAdd(doel){
-    addDoel = doel || '3d';
+  function openCutModalAdd(doel, voorDeel){
+    addDoel = doel || '3d'; deelVoor = voorDeel || null;
     pendingNew=true; pendingPlace=null; pendingEdit=null; pendingPlace2D=null; plaatsHerhaal=false; window.__tattiesHerhaalSrc=null;
     origImg=null; lassoPts=[]; imgTexture=null; baseCanvas=null; flipH=false; zetSpiegelUI();
     wandSeeds=[]; wandKeep=false; wandMode=false; zetWandUI(); lassoDragIdx=-1; cutModus='vrij'; drawingFree=false; zetSnijModusUI(); resetZoom(); rot90=0; huidMethode='kleur'; if(bgRemove) bgRemove.checked=false;
@@ -16136,11 +16270,12 @@ async function verwijderVoorbeelden() {
     aiMask=null; aiMaskImg=null;
     bgPickMode=false; setBgPick(null); if(bgPickBtn)bgPickBtn.classList.remove("on");
     if(cutSpread) cutSpread.value=55;
-    cmTitle.textContent=tr('ui.tattoo_toevoegen'); cmPlaceBtn.textContent=tr('ui.toevoegen');
-    resetInfo(); toonInfo(false);
+    cmTitle.textContent=deelVoor?tr('ui.deel_toevoegen'):tr('ui.tattoo_toevoegen'); cmPlaceBtn.textContent=deelVoor?tr('ui.plaatsen'):tr('ui.toevoegen');
+    resetInfo(); toonInfo(false); zetDeelUI();   // na resetInfo: die verbergt de badge
     cutModal.classList.add("on"); cutOpenHistory(); toonCutInstellingen(false);
     drawPreview(null); drawLasso();
   }
+  window.__tattiesDeelToevoegen=(rec)=>{ if(rec) openCutModalAdd('3d', rec); };   // detailpagina: extra deel van deze tattoo
 
   // FASE-2: schermvullende knip-fase aan/uit (class op de modal).
   /* Checkmark: eerst de gereedschapsbalk laten vertrekken, dan pas van fase wisselen. Die korte
@@ -16361,7 +16496,7 @@ async function verwijderVoorbeelden() {
            let open=true; try{ open = localStorage.getItem('tatties-kniptools-open') !== '0'; }catch(e){}
            if(adv) adv.hidden=!open; if(tt) tt.setAttribute("aria-expanded", open?"true":"false"); }
     if(cmPlaceBtn) cmPlaceBtn.style.display=b?"":"none";
-    { const meerW=document.querySelector(".cm-meer-wrap"); if(meerW) meerW.style.display=(b&&pendingNew)?"":"none"; }   // '+ Nog een' (incl. info-knopje) alleen bij toevoegen
+    { const meerW=document.querySelector(".cm-meer-wrap"); if(meerW) meerW.style.display=(b&&pendingNew&&!deelVoor)?"":"none"; }   // '+ Nog een' (incl. info-knopje) alleen bij toevoegen, niet bij een deel
     cutModal.classList.toggle("cm-compact", !b);
     const kies=document.getElementById("cmChoose"); const kt=kies&&kies.querySelector("span");
     if(kt) kt.textContent = b ? tr('ui.andere_foto') : tr(IS_IOS ? 'ui.foto_toevoegen' : 'ui.foto_uploaden');   // iOS: camera-knop weg -> generiek 'foto toevoegen' (OS-menu biedt camera); Android: 'upload' naast de camera-knop
@@ -16396,8 +16531,8 @@ async function verwijderVoorbeelden() {
   }
   // Heropen het uitsnede-scherm voor een bestaande tattoo (bijknippen + achtergrond)
   function openCutModalForEdit(m){
-    const rec = m && m.rec; let k = rec && rec.kunst3d;
-    if(!k || !k.srcUrl){ k = (rec && rec.kunst && rec.kunst.src) ? { srcUrl:rec.kunst.src, bg:false, lasso:[], wand:[] } : null; }   // terugval: 2D-uitsnede als bron
+    const rec = m && m.rec; let k = m && deelVan(m).kunst3d;   // bij een deel: de uitsnede van dat deel
+    if(!k || !k.srcUrl){ k = (rec && !m.deel && rec.kunst && rec.kunst.src) ? { srcUrl:rec.kunst.src, bg:false, lasso:[], wand:[] } : null; }   // terugval: 2D-uitsnede als bron
     if(!k || !k.srcUrl){ toast(tr('ui.geen_foto_bewaard')); return; }
     pendingPlace=null; pendingEdit=m; pendingPlace2D=null; pendingNew=null; pendingEdit2D=null;
     plaatsHerhaal=false; window.__tattiesHerhaalSrc=null; herhaalTeller=1; vorigeLassos=[];   // bewerken: geen herhaal-state/vage lasso
@@ -16462,6 +16597,7 @@ async function verwijderVoorbeelden() {
   function closeCutModal(){ cutHistoryOpruimen(); wisKnipStaat();   // bewust gesloten: geen halve uitsnede bewaren
     resetSnapshot=null; laatsteActie=null; cutModal.classList.remove("on","cm-inkomend","cm-naarreview","cm-zachtin"); zetGegevensFase(false); pendingPlace=null; pendingEdit=null; pendingPlace2D=null; pendingNew=null; pendingEdit2D=null; toonCutInstellingen(false); toonInfo(false);
     plaatsHerhaal=false; window.__tattiesHerhaalSrc=null; herhaalTeller=1; vorigeLassos=[]; addDoel='3d';   // D6(a): herhaal-state opruimen + doel terug naar default (geen stale vlag/lasso/doel)
+    deelVoor=null; zetDeelUI();
     if(imgTexture && imgTexture.dispose){ imgTexture.dispose(); } imgTexture=null;   // niet-geplaatste textuur vrijgeven (geen lek)
     cutPointers.clear(); pinch=null; drawingFree=false; gumStroke=null; lassoDragIdx=-1; clearTimeout(wheelEind);
   }
@@ -16756,6 +16892,7 @@ async function verwijderVoorbeelden() {
   function bewaarKnipStaatNu(){
     // Alleen een nieuwe tattoo die nog niet geplaatst is, en alleen als er echt werk ligt.
     if(!(pendingNew || pendingPlace) || pendingEdit || pendingEdit2D || pendingPlace2D) return;
+    if(deelVoor) return;   // een deel hoort bij een record; die koppeling overleeft een herstart niet, dus niet bewaren
     if(!origImg || !cutHeeftWerk()) { wisKnipStaat(); return; }
     try{
       const d = leesModalDetails();
@@ -16829,7 +16966,7 @@ async function verwijderVoorbeelden() {
   // ongevraagd aan/uit zetten); bij een NIEUWE tattoo de voorzichtige auto-stand.
   function blendVoorOpslag(){
     if(pendingEdit2D) return (pendingEdit2D.kunst3d&&pendingEdit2D.kunst3d.blend)||'normaal';
-    if(pendingEdit) return (pendingEdit.rec&&pendingEdit.rec.kunst3d&&pendingEdit.rec.kunst3d.blend)||'normaal';
+    if(pendingEdit){ const D=deelVan(pendingEdit); return (D&&D.kunst3d&&D.kunst3d.blend)||'normaal'; }
     // Nieuwe tattoo: altijd de inkt-matte proberen. inktMatte beslist zelf of het kan (geen huid gevonden,
     // bv. een donkere achtergrond -> null -> 'normaal' in matteVoorOpslag), en een tik op de knop zet
     // 'm terug op 'Met huid'. De oude lichte-huid-drempel (inktSuggestie) sloeg op donkere of
@@ -17012,6 +17149,7 @@ async function verwijderVoorbeelden() {
     { const vb=document.getElementById("cmVolgende"); if(vb) vb.onclick=()=>{
         // Niets geknipt (geen lasso/toverstaf/gum) -> hele foto wordt de decal: even melden, niet blokkeren
         if(!(lassoPts.length>=3 || wandSeeds.length || eraseStrokes.length || aiMask)) toast(tr('ui.geen_uitsnede_hint'));
+        if(deelVoor){ if(cmPlaceBtn) cmPlaceBtn.click(); return; }   // deel: geen gegevens-stap, meteen plaatsen
         naarReview();
       }; }   // fase 2: knippen klaar -> review-scherm met naam/details
     // Tabbalk: dezelfde twee overgangen als de checkmark en de oude chevron, nu als vaste keuze.
@@ -17387,7 +17525,8 @@ async function verwijderVoorbeelden() {
         return;
       }
       if(pendingNew){
-        const {naam,info,status}=leesModalDetails();
+        const deel=deelVoor;   // jigsaw: extra deel -> naam en status van het bestaande record, geen invoer
+        const {naam,info,status}= deel ? { naam:(deel.naam||'Tattoo'), info:{}, status:(deel.status||'gezet') } : leesModalDetails();
         if(!naam){ const naamEl=document.getElementById("cmNaam"); toast(tr('ui.naam_verplicht'));
           if(naamEl){ naamEl.setAttribute('aria-invalid','true'); naamEl.focus();
             naamEl.addEventListener('input',()=>naamEl.removeAttribute('aria-invalid'),{once:true}); }
@@ -17406,9 +17545,10 @@ async function verwijderVoorbeelden() {
           if(typeof window.__tattiesStartPlaats2D==='function') window.__tattiesStartPlaats2D({ naam, info, kunst3d, src, aspect, status, herhaal });
           return;
         }
-        plaatsData={ tex:imgTexture, naam, info, kunst3d, status, herhaal };
+        plaatsData={ tex:imgTexture, naam, info, kunst3d, status, herhaal, deelVoor:deel };
         imgTexture=null;   // eigendom gaat naar plaatsData; geen dispose
         cutModal.classList.remove("on"); cutHistoryOpruimen(); pendingNew=null; toonCutInstellingen(false); toonInfo(false);
+        deelVoor=null; zetDeelUI();   // deel-stand van de modal opruimen (plaatsData weet zelf nog bij welk record)
         plaatsModus=true; if(window.__plaatsHintAan) window.__plaatsHintAan();   // banner weg: de 'tik om te plaatsen'-hint op het lichaam volstaat
         return;
       }
@@ -17445,7 +17585,7 @@ async function verwijderVoorbeelden() {
         m.tex=imgTexture; rebuildMarker(m);
         if(m.rec){
           Object.assign(m.rec,{ naam, artiest:info.artiest, studio:info.studio, stijl:info.stijl, kosten:info.kosten, pijn:info.pijn, datum:info.datum, zituren:info.zituren, accentkleur:info.accentkleur, notities:info.notities, status });
-          m.rec.kunst3d=bouwKunst3d();
+          deelVan(m).kunst3d=bouwKunst3d();   // bij een deel: alleen de uitsnede van dat deel
           try{ await saveTattoo(m.rec); toast(tr('ui.tattoo_bijgewerkt')); }
           catch(err){ console.error(err); toast(tr('toast.opslaanmislukt')+(err&&err.message?err.message:tr('ui.fout'))); }
           pasBlendOpNieuw(m);   // recrop met blend aan: genormaliseerde (witbalans) textuur opnieuw opbouwen (no-op als blend uit)
@@ -17569,19 +17709,31 @@ async function verwijderVoorbeelden() {
     }catch(e){ /* val terug */ }
     return pickMeshes[0];
   }
-  // Eén tattoo als 3D-decal (her)plaatsen. Dedup-guard: bestaat er al een marker met dit id, dan niets doen
-  // (zo is restore3D/herstel idempotent en krijg je geen dubbele decals).
+  // Eén tattoo als 3D-decal(s) (her)plaatsen: het record zelf (eerste deel) plus de extra delen (jigsaw).
   async function herstelEen(t, token){
-    if(!t || markers.some(m=>m.id===t.id)) return false;
-    let P=t&&t.positie3d;
+    if(!t) return false;
+    let ok=await herstelDeel(t, null, token);
+    for(const d of beeldDelen(t)){   // extra delen: elk zijn eigen plek en uitsnede onder hetzelfde record
+      if(token!==undefined && token!==loadToken) break;
+      try{ if(await herstelDeel(t, d, token)) ok=true; }catch(e){ console.error(e); }
+    }
+    return ok;
+  }
+  // Eén deel als decal (her)plaatsen; deel=null is het record zelf. Dedup-guard: bestaat er al een marker
+  // voor dit record+deel, dan niets doen (zo is restore3D/herstel idempotent en krijg je geen dubbele decals).
+  async function herstelDeel(t, deel, token){
+    const deelId=deel?deel.id:null;
+    if(!t || markers.some(m=>m.id===t.id && (m.deel?m.deel.id:null)===deelId)) return false;
+    const D=deel||t;   // drager van positie3d/kunst3d
+    let P=D.positie3d;
     // Andere preset (lichaamsvorm) dan waarvoor het 3D-punt is opgeslagen -> herleiden uit de 2D-referentie.
     if(P&&P.point&&P.preset&&P.preset!==presetId()) P=null;
-    if(!P||!P.point){ P=afleid3DUitZone(t); if(P) P.preset=presetId(); }
-    const eigenP=(P===(t&&t.positie3d));   // alleen een ECHT opgeslagen plek migreren, geen afgeleide
+    if(!P||!P.point){ if(deel) return false; P=afleid3DUitZone(t); if(P) P.preset=presetId(); }   // een deel heeft altijd een echte plek
+    const eigenP=(P===D.positie3d);   // alleen een ECHT opgeslagen plek migreren, geen afgeleide
     if(!P||!P.point) return false;
     if((P.gender||"man")!==currentGender) return false;    // alleen tattoos van dit model
-    const k3 = (t.kunst3d && t.kunst3d.srcUrl) ? t.kunst3d
-             : (t.kunst && t.kunst.src ? { srcUrl:t.kunst.src, bg:false, lasso:[], wand:[] } : null);   // fallback: 2D-uitsnede als 3D-textuur
+    const k3 = (D.kunst3d && D.kunst3d.srcUrl) ? D.kunst3d
+             : (!deel && t.kunst && t.kunst.src ? { srcUrl:t.kunst.src, bg:false, lasso:[], wand:[] } : null);   // fallback: 2D-uitsnede als 3D-textuur
     let tex=null;
     try{ tex=await rebuildTextureFromKunst(k3); }catch(e){ console.error("herstel-textuur mislukt",e); }
     if(token!==undefined && token!==loadToken) return false;
@@ -17605,7 +17757,7 @@ async function verwijderVoorbeelden() {
       // gezocht, en met gedraaide armen hoort een rustpose-punt daar niet meer bij.
       bindNieuw=zetBind(P, mesh, point, normal, rot, -1);
     }
-    const obj=makeImage(point,normal,rot,P.size||0.09,tex,mesh,recMul(t));
+    const obj=makeImage(point,normal,rot,P.size||0.09,tex,mesh,recMul(D));
     if(!obj) return false;
     obj.renderOrder=(t.stapel)||0;
     const _wens=(t.status==='wens');
@@ -17614,18 +17766,19 @@ async function verwijderVoorbeelden() {
     // Eén bron van waarheid: koppel de marker aan het host-`tattoos`-object (niet de DB-kopie `t`),
     // zodat 2D-bewerkingen (slepen) en 3D-`persistEdit` op hetzelfde record werken en niet uiteenlopen.
     const recRef=(typeof tattoos!=="undefined" && Array.isArray(tattoos)) ? (tattoos.find(x=>x.id===t.id)||t) : t;
-    const _m={ id:t.id, rec:recRef, obj, point:point.clone(), normal:normal.clone(),
+    const deelRef=deel ? (deelBij(recRef, deel.id)||deel) : null;   // idem voor het deel: het object in het host-record
+    const _m={ id:t.id, rec:recRef, deel:deelRef, obj, point:point.clone(), normal:normal.clone(),
       mesh, tri:(P.bind&&P.bind.tri>=0?P.bind.tri:-1), rot, size:P.size||0.09, locked:!!P.locked, tex };
     markers.push(_m);
     if(ledeActief) ledeDecalSplits(_m);   // herstel tijdens een isolatie: meteen mee dimmen/splitsen
     // Ouder record: 2D-velden bijvullen. Check op de VOLLE DB-kopie `t` - het in-RAM
     // record (recRef) is licht (kunst.src gestript), anders zou dit elke 3D-load voor
     // álle tattoos draaien en schrijven.
-    const magSync=(!t.positie || !t.kunst || !t.kunst.src);
+    const magSync=!deel && (!t.positie || !t.kunst || !t.kunst.src);   // 2D-kaart volgt alleen het eerste deel
     // De 2D-kaart hoort altijd de rusthouding te tonen, ook als de armen nu wijd staan.
     const rustPt=(ubRust?ubRust.point:point), rustRot=(ubRust?ubRust.rot:rot);
     if(magSync) sync2D(recRef, rustPt, P.side||"voor", rustRot, P.size||0.09, tex);
-    if(bindNieuw && recRef.positie3d && recRef.positie3d!==P) recRef.positie3d.bind=bindNieuw;
+    { const DR=deelRef||recRef; if(bindNieuw && DR.positie3d && DR.positie3d!==P) DR.positie3d.bind=bindNieuw; }
     if(magSync || bindNieuw){ try{ await saveTattoo(recRef); }catch(e){ console.error(e); } }
     // Vingerafdruk PAS hier: hierboven worden positie3d/2D-velden nog bijgevuld, en met een
     // te vroeg genomen afdruk zou de eerstvolgende herlaad de decal onnodig herbouwen.
@@ -17679,12 +17832,15 @@ async function verwijderVoorbeelden() {
     }
   }
   // Eén 3D-decal verwijderen (na verwijderen van een tattoo via detail/2D); host roept dit aan.
-  window.__tatties3DVerwijder = function(id){
-    const m = markers.find(x=>x.id===id); if(!m) return false;
+  function verwijderMarker(m){
     if(editDecal===m){ editDecal=null; showSel(false);   // m._persistT wordt in disposeMarker geclear'd
       const eb=document.getElementById("editbar"); if(eb)eb.classList.remove("on");
       const h=document.getElementById("hint"); if(h)h.style.display=""; }
     disposeMarker(m); const i=markers.indexOf(m); if(i>=0) markers.splice(i,1);
+  }
+  window.__tatties3DVerwijder = function(id){
+    const lijst = markers.filter(x=>x.id===id); if(!lijst.length) return false;
+    for(const m of lijst) verwijderMarker(m);   // een record kan meerdere decals hebben (delen): allemaal weg
     if(typeof renderMarkers==="function"){ try{renderMarkers();}catch(_){} }
     return true;
   };
@@ -17712,12 +17868,14 @@ async function verwijderVoorbeelden() {
         if(!vers){ window.__tatties3DVerwijder(m.id); continue; }   // weg/gewist -> decal verwijderen
         // Is de tekening/plek/weergave veranderd (bv. een conflict die van de andere kant
         // binnenkwam), dan moet de decal opnieuw: restore3D bouwt 'm hieronder terug.
-        const fp=decalVingerafdruk(vers);
-        if(m._fp!==undefined && m._fp!==fp){ window.__tatties3DVerwijder(m.id); continue; }
+        const deelVers = m.deel ? deelBij(vers, m.deel.id) : null;
+        if(m.deel && !deelVers){ verwijderMarker(m); continue; }   // dit deel is uit het record verdwenen
+        const fp=decalVingerafdruk(vers, deelVers);
+        if(m._fp!==undefined && m._fp!==fp){ verwijderMarker(m); continue; }   // per marker, niet het hele record
         // Altijd HER-KOPPELEN. herlaad() bouwt de tattoos-lijst met verse objecten op, dus
         // zonder dit blijft de marker naar een losgeraakt record wijzen - en schrijft
         // persistEdit dat verouderde record zo weer over de binnengekomen versie heen.
-        m.rec=vers; m._fp=fp;
+        m.rec=vers; if(m.deel) m.deel=deelVers; m._fp=fp;
       }
       await restore3D(loadToken);                                                                   // nieuwe + opnieuw te bouwen decals
     }catch(e){ console.error("3D-herlaad",e); }
@@ -17774,7 +17932,9 @@ async function verwijderVoorbeelden() {
     stateRef:()=>({ inited, currentGender, meldAndereModel, actief3D, plaatsModus, plaatsDataAan: !!plaatsData, plaatsTex: !!(plaatsData && plaatsData.tex) }),
     cameraRef:()=>camera, rendererRef:()=>renderer,   // schaal-/fov-metingen (zie resize)
     bindDbg:{ maakBind, uitBind, triBijPunt, triAantal, triWereld, surfaceAt, markersRef:()=>markers },
-    addMetFoto:(src)=>openCutModalAddMetFoto(src,'3d') };
+    addMetFoto:(src)=>openCutModalAddMetFoto(src,'3d'),
+    zetFotoDbg:(src)=>new Promise((res,rej)=>{ const im=new Image(); im.onload=()=>{ zetCutFoto(im); res(true); }; im.onerror=rej; im.src=src; }),   // foto in de al open modal (deel-stand blijft)
+    editDecal:()=>editDecal };
 
   /* ---- lazy init ---- */
   function initEngine(){
