@@ -1588,7 +1588,8 @@ html.knipfull .cutmodal.cm-fullcut.cm-gegevens .cm-veldenkaart .cm-choose-rij{ma
    de link zelf (title/aria), zodat er onderin de kaart geen tweede knopje bij komt. */
 html.knipfull .cutmodal.cm-fullcut.cm-gegevens #cmMeerInfo,
 html.knipfull .cutmodal.cm-fullcut.cm-gegevens #cmMeerTip{display:none!important;}
-html.knipfull .cutmodal.cm-fullcut.cm-gegevens #cmPlaceMeer{margin:0;padding:2px 0;min-height:0;
+html.knipfull .cutmodal.cm-fullcut.cm-gegevens #cmPlaceMeer,
+html.knipfull .cutmodal.cm-fullcut.cm-gegevens #cmPlaceDeel{margin:0;padding:2px 0;min-height:0;
   background:transparent;border:0;border-radius:0;color:var(--gedempt);
   font-size:var(--fs-xs);font-weight:600;text-decoration:underline;box-shadow:none;}
 /* De krimp zit op het canvas (transform = compositor-werk) en op de hoogte van de strook. De
@@ -2129,7 +2130,6 @@ form label{text-transform:none;letter-spacing:.005em;font-size:.8rem;color:var(-
           <button type="button" class="eb-scarot" data-act="size+" data-i18n-title="ui.groter" data-i18n-aria="ui.groter" title="Groter" aria-label="Groter"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>
           <button type="button" class="eb-scarot" data-act="rot-" data-i18n-title="ui.links_draaien" data-i18n-aria="ui.links_draaien" title="Linksom draaien" aria-label="Linksom draaien"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12a8 8 0 1 0 2.3-5.6"/><path d="M3 4v4h4"/></svg></button>
           <button type="button" class="eb-scarot" data-act="rot+" data-i18n-title="ui.rechts_draaien" data-i18n-aria="ui.rechts_draaien" title="Rechtsom draaien" aria-label="Rechtsom draaien"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.3-5.6"/><path d="M21 4v4h-4"/></svg></button>                    <button type="button" data-act="done" class="eb-af" data-i18n-title="ui.klaar" data-i18n-aria="ui.klaar" title="Klaar" aria-label="Klaar"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12l5 5L20 6"/></svg></button>
-          <button type="button" data-act="deel" class="eb-deel" data-i18n-title="ui.deel_toevoegen" data-i18n-aria="ui.deel_toevoegen" title="Deel toevoegen" aria-label="Deel toevoegen"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="11" height="11" rx="2"/><path d="M17.5 13.5v7M14 17h7"/></svg></button>
           <button type="button" data-act="del" class="eb-del" data-i18n-title="aria.verwijderen" data-i18n-aria="aria.verwijderen" title="Verwijderen" aria-label="Verwijderen"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M9 7V5h6v2M7 7l1 13h8l1-13"/><path d="M10 11v5M14 11v5"/></svg></button>
         </div>
         <button type="button" data-act="blend" class="eb-blend" data-i18n-title="ui.huidblend" data-i18n-aria="ui.huidblend" title="Alleen de inkt of met huid" aria-label="Alleen de inkt of met huid"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="12" r="6"/><circle cx="15" cy="12" r="6"/></svg><span data-i18n="ui.eb_met_huid">Met huid</span></button>
@@ -2276,6 +2276,7 @@ form label{text-transform:none;letter-spacing:.005em;font-size:.8rem;color:var(-
           <button type="button" id="cmPlaatsGroot" class="btn cm-place cm-plaats-groot">Op het model plaatsen</button>
           <div class="cm-meer-wrap" style="display:none">
             <button id="cmPlaceMeer" class="btn" data-i18n="ui.nog_een" data-i18n-title="ui.nog_een_uitleg" title="Plaats deze en knip daarna nog een tattoo uit dezelfde foto">+ Nog een</button>
+            <button id="cmPlaceDeel" class="btn" data-i18n="ui.nog_een_deel" data-i18n-title="ui.nog_een_deel_uitleg" title="Past de tattoo niet in een foto? Plaats dit deel en kies daarna de foto van het volgende deel">+ Nog een deel</button>
             <button type="button" id="cmMeerInfo" class="cm-meer-info" aria-expanded="false" data-i18n-aria="ui.nog_een_uitleg" data-i18n-title="ui.nog_een_uitleg" aria-label="Wat doet '+ Nog een'?"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5"/><path d="M12 7.6h.01"/></svg></button>
             <div id="cmMeerTip" class="cm-meer-tip" hidden role="status" data-i18n="ui.nog_een_uitleg">Plaats deze en knip daarna nog een tattoo uit dezelfde foto</div>
           </div>
@@ -7494,6 +7495,7 @@ const I18N = {
     'ui.huidskleur_prikken':'Huidskleur prikken','ui.drempel':'Drempel - sleep tot de huid weg is','ui.tik_huid':'Tik op de huid in de foto',
     'ui.achtergrondkleur':'Achtergrondkleur kiezen','ui.auto':'Auto',
     'ui.tattoo_toevoegen':'Tattoo toevoegen','ui.tattoo_aanpassen':'Tattoo aanpassen','ui.bewerken':'Bewerken',
+    'ui.nog_een_deel':'+ Nog een deel','ui.nog_een_deel_uitleg':'Past de tattoo niet in een foto? Plaats dit deel en kies daarna de foto van het volgende deel','ui.deel_ketting_hint':'Plaats dit deel en tik op ✓ - daarna kies je de foto van het volgende deel','ui.deel_nog_een':'Nog een deel',
     'ui.deel_toevoegen':'Deel toevoegen','ui.deel_kies_kop':'Nog een deel van {naam} - kies een foto','ui.deel_badge':'Deel van {naam}','ui.deel_geplaatst':'Deel geplaatst ✓',
     'detail.delen':'Op het model in {n} delen','detail.delen_uitleg':'Past de tattoo niet in een foto? Voeg een deel toe.',
     'ui.beginstand':'Beginstand','ui.laden':'Laden…','ui.vergrendelen':'Vergrendelen','ui.verwijderen':'Verwijderen',
@@ -7686,6 +7688,7 @@ const I18N = {
     'ui.huidskleur_prikken':'Pick skin colour','ui.drempel':'Threshold - drag until the skin is gone','ui.tik_huid':'Tap the skin in the photo',
     'ui.achtergrondkleur':'Pick background colour','ui.auto':'Auto',
     'ui.tattoo_toevoegen':'Add tattoo','ui.tattoo_aanpassen':'Edit tattoo','ui.bewerken':'Editing',
+    'ui.nog_een_deel':'+ Another part','ui.nog_een_deel_uitleg':'Does the tattoo not fit in one photo? Place this part, then pick the photo of the next part','ui.deel_ketting_hint':'Position this part and tap ✓ - then pick the photo of the next part','ui.deel_nog_een':'Another part',
     'ui.deel_toevoegen':'Add a part','ui.deel_kies_kop':'Another part of {naam} - pick a photo','ui.deel_badge':'Part of {naam}','ui.deel_geplaatst':'Part placed ✓',
     'detail.delen':'On the model in {n} parts','detail.delen_uitleg':'Does the tattoo not fit in one photo? Add a part.',
     'ui.beginstand':'Reset view','ui.laden':'Loading…','ui.vergrendelen':'Lock','ui.verwijderen':'Delete',
@@ -7994,7 +7997,7 @@ function createTattoo(overrides = {}) {
    ============================================================ */
 // App-versie (semver, handmatig ophogen bij een release). Bij een bump ook de
 // CACHE-naam in sw.js meebumpen, zodat clients de nieuwe build ophalen.
-const APP_VERSIE = '0.3.61';
+const APP_VERSIE = '0.3.62';
 
 /* Dev-haken die de CLOUD raken hangen alleen op een ontwikkelmachine aan window. Ze zijn geen
    lek op zichzelf (zonder XSS roept niemand ze aan, en CSP + esc() houden XSS tegen), maar ze
@@ -13022,7 +13025,6 @@ async function verwijderVoorbeelden() {
       const kloon = bron.cloneNode(true);
       kloon.id = 'editbar2d';
       const blend = kloon.querySelector('.eb-blend'); if (blend) blend.remove();   // 2D heeft geen in-huid-blend
-      const deel = kloon.querySelector('.eb-deel'); if (deel) deel.remove();       // delen plaats je op het model, niet op de kaart
       const op = kloon.querySelector('input[type="range"]'); if (op) op.id = 'eb2d-opacity';
       slot.replaceWith(kloon);
     } }
@@ -15366,7 +15368,8 @@ async function verwijderVoorbeelden() {
       if(ledeActief) ledeDecalSplits(m);
       plaatsData=null; plaatsModus=false; verbergBanner(); if(window.__plaatsHintUit) window.__plaatsHintUit();
       if(typeof renderMarkers==="function"){ try{renderMarkers();}catch(_){} }
-      toast(tr('ui.deel_geplaatst')); enterEditDecal(m); pasBlendOpNieuw(m);
+      enterEditDecal(m); pasBlendOpNieuw(m);
+      toastMetActie(tr('ui.deel_geplaatst'), tr('ui.deel_nog_een'), ()=>{ if(editDecal===m) exitEditDecal(); openCutModalAdd('3d', rec); });   // doorketenen: deel 3, 4, ...
       if(rec.status==='wens' && typeof window.__tattiesNaStatus==='function') window.__tattiesNaStatus('wens');
       if(typeof window.__tattiesNaBewerk==="function") window.__tattiesNaBewerk(rec.id);   // detailpagina: telling bijwerken
       return;
@@ -15394,7 +15397,9 @@ async function verwijderVoorbeelden() {
     toast(tr('ui.tattoo_geplaatst')); enterEditDecal(m); pasBlendOpNieuw(m);   // auto-blend meteen tonen
     if(rec.status==='wens' && typeof window.__tattiesNaStatus==='function') window.__tattiesNaStatus('wens');   // wens: 'geplande tonen' aan + dimmen
     if(d.herhaal && rec.kunst3d && rec.kunst3d.srcUrl){ window.__tattiesHerhaalSrc=rec.kunst3d.srcUrl; toast(tr('ui.herhaal_hint')); }   // D6(a): pas bij ✓ heropenen met dezelfde foto
+    if(d.ketting){ volgendDeelVan=rec; toast(tr('ui.deel_ketting_hint')); }   // '+ Nog een deel': pas bij ✓ de deel-stand openen
   }
+  let volgendDeelVan=null;   // record waarvoor na ✓ de knipmodal in deel-stand opent (ketting van delen)
 
   /* ---- aanpas-modus voor een geplaatste tattoo ---- */
   /* Delen (jigsaw): een marker hoort bij een record (m.rec: naam, dekking, status, stapel) en bij een DEEL
@@ -15824,8 +15829,6 @@ async function verwijderVoorbeelden() {
         if(editDecal && rec && ((D.kunst3d&&D.kunst3d.srcUrl)||(!editDecal.deel&&rec.kunst&&rec.kunst.src))){ openCutModalForEdit(editDecal); }   // zelfde overzicht als toevoegen
         else { exitEditDecal(); if(rec&&typeof openFormulier==="function") openFormulier(rec.id); }     // terugval: geen bewaarde foto
         return; }
-      if(a==="deel"){ const rec=editDecal&&editDecal.rec; if(!rec) return;   // nog een deel van deze tattoo: zelfde flow als vanaf de detailpagina
-        exitEditDecal(); openCutModalAdd('3d', rec); return; }
       if(a==="del"){ const m=editDecal; const rec=m&&m.rec; if(!rec) return;
         if(m.deel){   // een extra deel: alleen dat deel weg, het record en de andere delen blijven
           const vraag=tr('ui.deel_verwijder_vraag').replace('{naam}', String(rec.naam||'').trim());
@@ -15834,7 +15837,9 @@ async function verwijderVoorbeelden() {
           await verwijderDeel(m); return; }
         if(!(await bevestigVerwijderen(rec && rec.naam))) return;
         exitEditDecal(); await verwijderMetUndo(rec); return; }
-      if(a==="done"){ exitEditDecal(); if(window.__tattiesHerhaalSrc){ const s=window.__tattiesHerhaalSrc; window.__tattiesHerhaalSrc=null; openCutModalAddMetFoto(s,'3d'); } return; }   // D6(a): na ✓ volgende uitsnede
+      if(a==="done"){ exitEditDecal(); if(window.__tattiesHerhaalSrc){ const s=window.__tattiesHerhaalSrc; window.__tattiesHerhaalSrc=null; openCutModalAddMetFoto(s,'3d'); }   // D6(a): na ✓ volgende uitsnede
+        else if(volgendDeelVan){ const r=volgendDeelVan; volgendDeelVan=null; openCutModalAdd('3d', r); }   // ketting: volgende deel van dezelfde tattoo
+        return; }
       if(a==="undo"){ undoEdit(); return; }
       if(a==="lock"){ if(editDecal){ editDecal.locked=!editDecal.locked; setLockUI();
         toast(editDecal.locked?tr('ui.vergrendeld'):tr('ui.ontgrendeld')); persistEdit(editDecal); } return; }
@@ -16168,6 +16173,7 @@ async function verwijderVoorbeelden() {
     const gf=document.getElementById('cmGeenFoto'); if(gf) gf.hidden=!!deelVoor;
   }
   let plaatsHerhaal=false;   // 'Nog een uit deze foto': na plaatsen de cut-modal heropenen met dezelfde foto
+  let plaatsKetting=false;   // '+ Nog een deel': na plaatsen + ✓ de cut-modal heropenen in deel-stand (volgende foto van dezelfde tattoo)
   let herhaalTeller=1;       // hoeveelste uitsnede uit dezelfde bronfoto (1 = eerste; badge toont vanaf 2)
   let vorigeLassos=[];       // {pts,rot90,flipH} van eerder geknipte tattoos uit dezelfde foto (vaag tonen)
   function toonInfo(b){ const e=document.getElementById("cmInfo"); if(e) e.hidden=!b; const n=document.getElementById("cmNaam"); if(n) n.hidden=!b; }   // naamveld zit in de bovenbalk (buiten cmInfo) -> mee togglen
@@ -16263,7 +16269,7 @@ async function verwijderVoorbeelden() {
   window.__tattiesNogEenUitFoto=(src)=>openCutModalAddMetFoto(src,'2d');   // host (2D-plaatsen) roept dit aan
   function openCutModalAdd(doel, voorDeel){
     addDoel = doel || '3d'; deelVoor = voorDeel || null;
-    pendingNew=true; pendingPlace=null; pendingEdit=null; pendingPlace2D=null; plaatsHerhaal=false; window.__tattiesHerhaalSrc=null;
+    pendingNew=true; pendingPlace=null; pendingEdit=null; pendingPlace2D=null; plaatsHerhaal=false; plaatsKetting=false; window.__tattiesHerhaalSrc=null;
     origImg=null; lassoPts=[]; imgTexture=null; baseCanvas=null; flipH=false; zetSpiegelUI();
     wandSeeds=[]; wandKeep=false; wandMode=false; zetWandUI(); lassoDragIdx=-1; cutModus='vrij'; drawingFree=false; zetSnijModusUI(); resetZoom(); rot90=0; huidMethode='kleur'; if(bgRemove) bgRemove.checked=false;
     eraseStrokes=[]; gumStroke=null; gumMode=false; gumHerstel=false; zetGumUI();
@@ -16596,7 +16602,7 @@ async function verwijderVoorbeelden() {
   }
   function closeCutModal(){ cutHistoryOpruimen(); wisKnipStaat();   // bewust gesloten: geen halve uitsnede bewaren
     resetSnapshot=null; laatsteActie=null; cutModal.classList.remove("on","cm-inkomend","cm-naarreview","cm-zachtin"); zetGegevensFase(false); pendingPlace=null; pendingEdit=null; pendingPlace2D=null; pendingNew=null; pendingEdit2D=null; toonCutInstellingen(false); toonInfo(false);
-    plaatsHerhaal=false; window.__tattiesHerhaalSrc=null; herhaalTeller=1; vorigeLassos=[]; addDoel='3d';   // D6(a): herhaal-state opruimen + doel terug naar default (geen stale vlag/lasso/doel)
+    plaatsHerhaal=false; plaatsKetting=false; window.__tattiesHerhaalSrc=null; herhaalTeller=1; vorigeLassos=[]; addDoel='3d';   // D6(a): herhaal-state opruimen + doel terug naar default (geen stale vlag/lasso/doel)
     deelVoor=null; zetDeelUI();
     if(imgTexture && imgTexture.dispose){ imgTexture.dispose(); } imgTexture=null;   // niet-geplaatste textuur vrijgeven (geen lek)
     cutPointers.clear(); pinch=null; drawingFree=false; gumStroke=null; lassoDragIdx=-1; clearTimeout(wheelEind);
@@ -17190,7 +17196,8 @@ async function verwijderVoorbeelden() {
         probeerAnnuleerCut(true);                // re-entrancy-guard vangt een tweede terug-druk tijdens de open vraag af
       } else if(cutHistPushed){ cutHistPushed=false; }   // vangnet: zwevende entry netjes consumeren (hoort na de succes-pad-fix niet meer voor te komen)
     });
-    { const meerBtn=document.getElementById("cmPlaceMeer"); if(meerBtn) meerBtn.onclick=()=>{ plaatsHerhaal=true; if(cmPlaceBtn) cmPlaceBtn.onclick(); }; }   // plaats deze + heropen cut met dezelfde foto
+    { const meerBtn=document.getElementById("cmPlaceMeer"); if(meerBtn) meerBtn.onclick=()=>{ plaatsHerhaal=true; plaatsKetting=false; if(cmPlaceBtn) cmPlaceBtn.onclick(); }; }   // plaats deze + heropen cut met dezelfde foto
+    { const deelBtn=document.getElementById("cmPlaceDeel"); if(deelBtn) deelBtn.onclick=()=>{ plaatsKetting=true; plaatsHerhaal=false; if(cmPlaceBtn) cmPlaceBtn.onclick(); }; }   // plaats dit deel + daarna de volgende foto van dezelfde tattoo
     // Info-wolkje bij '+ Nog een' (tik = uitleg tonen; sluit bij buiten-tik) - zelfde patroon als de tool-legenda
     { const inf=document.getElementById("cmMeerInfo"), tip=document.getElementById("cmMeerTip");
       if(inf && tip){
@@ -17532,6 +17539,7 @@ async function verwijderVoorbeelden() {
             naamEl.addEventListener('input',()=>naamEl.removeAttribute('aria-invalid'),{once:true}); }
           return; }
         const herhaal=plaatsHerhaal; plaatsHerhaal=false;   // D6(a): na plaatsen cut heropenen met dezelfde foto?
+        const ketting=plaatsKetting && !deel; plaatsKetting=false;   // '+ Nog een deel': na plaatsen + ✓ door naar het volgende deel
         if(herhaal && lassoPts.length>=3) vorigeLassos.push({pts:lassoPts.slice(), rot90, flipH});   // verb.3: vorige uitsnede onthouden
         const kunst3d=bouwKunst3d();
         const cvM=matteVoorOpslag(imgTexture.image, kunst3d);   // inkt-matte meteen bij opslag: 2D-PNG en de plaatsingstextuur tonen wat je krijgt
@@ -17545,7 +17553,7 @@ async function verwijderVoorbeelden() {
           if(typeof window.__tattiesStartPlaats2D==='function') window.__tattiesStartPlaats2D({ naam, info, kunst3d, src, aspect, status, herhaal });
           return;
         }
-        plaatsData={ tex:imgTexture, naam, info, kunst3d, status, herhaal, deelVoor:deel };
+        plaatsData={ tex:imgTexture, naam, info, kunst3d, status, herhaal, ketting, deelVoor:deel };
         imgTexture=null;   // eigendom gaat naar plaatsData; geen dispose
         cutModal.classList.remove("on"); cutHistoryOpruimen(); pendingNew=null; toonCutInstellingen(false); toonInfo(false);
         deelVoor=null; zetDeelUI();   // deel-stand van de modal opruimen (plaatsData weet zelf nog bij welk record)
