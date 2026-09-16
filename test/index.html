@@ -7997,7 +7997,7 @@ function createTattoo(overrides = {}) {
    ============================================================ */
 // App-versie (semver, handmatig ophogen bij een release). Bij een bump ook de
 // CACHE-naam in sw.js meebumpen, zodat clients de nieuwe build ophalen.
-const APP_VERSIE = '0.3.62';
+const APP_VERSIE = '0.3.63';
 
 /* Dev-haken die de CLOUD raken hangen alleen op een ontwikkelmachine aan window. Ze zijn geen
    lek op zichzelf (zonder XSS roept niemand ze aan, en CSP + esc() houden XSS tegen), maar ze
@@ -16750,6 +16750,24 @@ async function verwijderVoorbeelden() {
         wgt[i]=Math.max(0,Math.min(1,(rl-0.72)/0.2)); }
     }
     if(0.299*gr+0.587*gg+0.114*gb<60) return null;   // geen huid maar bv. een donkere achtergrond: niet aan beginnen
+    /* Geen huid BINNENIN (2026-09-16): de matte neemt de lichtste pixels als huid, maar bij een stuk met een wit spook,
+       witte inkt of een lichte achtergrond is dat de tekening zelf, en die wordt dan weggepoetst. Kenmerk: de huid langs
+       de lasso-rand heeft kleur (chroma), de 'huid' die binnenin geschat wordt is neutraal. Bij echte huid is allebei
+       beige, bij een ontwerp op papier allebei neutraal (daar werkt de matte juist goed). Gemeten op de TSSD-set:
+       3/264 treffers, alle drie tattoos met grote lichte vlakken; het been-stuk van de tester: rand 8.0, binnen 0.8. */
+    { const rb=Math.max(2, Math.round(Math.min(maxx-minx, maxy-miny)*s*0.03));
+      const op=new Uint8Array(n2); for(let i=0;i<n2;i++) op[i]=q[i*4+3]>=16?1:0;
+      const er1=new Uint8Array(n2), er2=new Uint8Array(n2);   // erosie in twee passen (min over een venster van 2rb+1)
+      for(let y=0;y<h2;y++) for(let x=0;x<w2;x++){ let v=1; for(let k=-rb;k<=rb&&v;k++){ const xx=x+k; if(xx<0||xx>=w2||!op[y*w2+xx]) v=0; } er1[y*w2+x]=v; }
+      for(let y=0;y<h2;y++) for(let x=0;x<w2;x++){ let v=1; for(let k=-rb;k<=rb&&v;k++){ const yy=y+k; if(yy<0||yy>=h2||!er1[yy*w2+x]) v=0; } er2[y*w2+x]=v; }
+      let rr=0,rg=0,rbb=0,rn=0, br=0,bg=0,bb=0,bn=0;
+      for(let i=0;i<n2;i++){ if(!op[i] || wgt[i]<=0.5) continue; const o=i*4;
+        if(!er2[i]){ rr+=q[o]; rg+=q[o+1]; rbb+=q[o+2]; rn++; } else { br+=q[o]; bg+=q[o+1]; bb+=q[o+2]; bn++; } }
+      if(rn>20 && bn>20){ const L1=[0,0,0], L2=[0,0,0];   // _lab wil hele 0-255-waarden (lookup-tabel)
+        _lab(Math.round(rr/rn),Math.round(rg/rn),Math.round(rbb/rn),L1); _lab(Math.round(br/bn),Math.round(bg/bn),Math.round(bb/bn),L2);
+        const cRand=Math.hypot(L1[1],L1[2]), cBin=Math.hypot(L2[1],L2[2]);
+        window.__matteDbg={cRand,cBin,rn,bn};   // dev: meetwaarden van de geen-huid-regel
+        if(cBin<2.5 && cRand-cBin>5) return null; } }   // de tekening is 'de huid': met huid tonen, niet matten
     const hs=new ImageData(w2,h2);
     for(let i=0;i<n2;i++){ const den=hw[i], o=i*4; hs.data[o]=den>0.02?hr[i]/den:gr; hs.data[o+1]=den>0.02?hg[i]/den:gg; hs.data[o+2]=den>0.02?hb[i]/den:gb; hs.data[o+3]=255; }
     sx.putImageData(hs,0,0);
@@ -17942,7 +17960,12 @@ async function verwijderVoorbeelden() {
     bindDbg:{ maakBind, uitBind, triBijPunt, triAantal, triWereld, surfaceAt, markersRef:()=>markers },
     addMetFoto:(src)=>openCutModalAddMetFoto(src,'3d'),
     zetFotoDbg:(src)=>new Promise((res,rej)=>{ const im=new Image(); im.onload=()=>{ zetCutFoto(im); res(true); }; im.onerror=rej; im.src=src; }),   // foto in de al open modal (deel-stand blijft)
-    editDecal:()=>editDecal };
+    editDecal:()=>editDecal,
+    // Sturing voor scenario-tests (echte flow, alleen de invoer is gescript): camera, lasso, tik om te plaatsen, verslepen, 3D-punt naar scherm.
+    camDbg:(o)=>{ o=o||{}; if(o.theta!=null) theta=o.theta; if(o.phi!=null) phi=o.phi; if(o.radius!=null) radius=o.radius; if(o.target) target.set(o.target[0],o.target[1],o.target[2]); targetGoal=null; radiusGoal=null; applyCam(); },
+    lassoDbg:(pts)=>{ lassoPts=(pts||[]).map(q=>({nx:q[0],ny:q[1]})); drawLasso(); updateCutout(); },
+    plaatsDbg:(x,y)=>plaatsNieuwe(x,y), moveDbg:(x,y)=>moveDecalTo(x,y),
+    schermDbg:(p)=>{ const v=new THREE.Vector3(p[0],p[1],p[2]).project(camera); const r=el.getBoundingClientRect(); return { x:r.left+(v.x+1)/2*r.width, y:r.top+(1-v.y)/2*r.height, voor:(v.z<1) }; } };
 
   /* ---- lazy init ---- */
   function initEngine(){
