@@ -1226,9 +1226,9 @@ form label,
 .cutmodal:not(.cm-compact) .cm-choose-cam{display:none;}   /* foto maken alleen bij de eerste keuze, niet bij 'andere foto' */
 .is-ios .cm-choose-cam{display:none !important;}            /* iOS biedt 'Take Photo' al via het OS-menu (wint van de compact-knopstijl) */
 .cutmodal .cm-choose{align-self:center;margin-top:6px;padding:7px 14px;font-size:var(--fs-sm);color:var(--gedempt);border-radius:999px;min-height:0;background:transparent;}
-.cutmodal.cm-compact .cm-choose{display:inline-flex;align-items:center;justify-content:center;gap:9px;margin-top:0;padding:15px 26px;font-size:var(--fs-md);font-weight:600;color:var(--op-inkt);background:var(--accent);border-color:var(--accent);min-height:52px;}
+.cutmodal.cm-compact .cm-choose{display:inline-flex;align-items:center;justify-content:center;gap:9px;margin-top:0;padding:15px 26px;font-size:var(--fs-md);font-weight:600;color:var(--op-accent);background:var(--rood);border:2px solid var(--rood-diep);box-shadow:3px 3px 0 var(--rood-diep);min-height:52px;}   /* 2026-09-18: rood = primaire actie, zoals de plaats-knop */
 .cutmodal.cm-compact .cm-choose .ik{width:22px;height:22px;vertical-align:0;}
-.cutmodal.cm-compact .cm-choose:hover{filter:brightness(1.08);border-color:var(--accent);}
+.cutmodal.cm-compact .cm-choose:hover{filter:brightness(1.08);border-color:var(--rood-diep);}
 .cutmodal .cm-toprow .chk{margin-top:0;}
 .cutmodal .chk input{width:16px;height:16px;flex:0 0 auto;}
 .cutmodal .cm-modus{margin:2px 0 8px;}
@@ -7998,7 +7998,7 @@ function createTattoo(overrides = {}) {
    ============================================================ */
 // App-versie (semver, handmatig ophogen bij een release). Bij een bump ook de
 // CACHE-naam in sw.js meebumpen, zodat clients de nieuwe build ophalen.
-const APP_VERSIE = '0.3.69';
+const APP_VERSIE = '0.3.70';
 
 /* Dev-haken die de CLOUD raken hangen alleen op een ontwikkelmachine aan window. Ze zijn geen
    lek op zichzelf (zonder XSS roept niemand ze aan, en CSP + esc() houden XSS tegen), maar ze
@@ -8870,6 +8870,7 @@ async function syncMetCloud() {
 const KLOK_SKEW_GRENS_MS = 15 * 60 * 1000;
 let klokSkewGemeld = false;
 function checkKlokSkew(accessToken) {
+  return;   // 2026-09-18 (Bram): melding uit. Niemand doet er iets mee en in de store-app is de klok geen issue; de server bepaalt de volgorde toch al.
   if (klokSkewGemeld || !accessToken) return;
   try {
     const claims = JSON.parse(atob(accessToken.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')));
