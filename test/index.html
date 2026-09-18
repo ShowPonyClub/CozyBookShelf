@@ -7997,7 +7997,7 @@ function createTattoo(overrides = {}) {
    ============================================================ */
 // App-versie (semver, handmatig ophogen bij een release). Bij een bump ook de
 // CACHE-naam in sw.js meebumpen, zodat clients de nieuwe build ophalen.
-const APP_VERSIE = '0.3.65';
+const APP_VERSIE = '0.3.66';
 
 /* Dev-haken die de CLOUD raken hangen alleen op een ontwikkelmachine aan window. Ze zijn geen
    lek op zichzelf (zonder XSS roept niemand ze aan, en CSP + esc() houden XSS tegen), maar ze
@@ -16993,6 +16993,13 @@ function maakTatnetGL(json, canvas) {
       const dLn=Math.min(0,dL);
       RL[i]=rl; DE[i]=Math.sqrt(dLn*dLn+da*da+db*db);
       // bijna-zwarte pixels hebben geen betrouwbare tint (zwarte inkt mist alleen de huid-tint): pas vanaf L>30 laten meetellen als kleur
+      if(gebied){   // Tatnet: alleen binnen het gebied tellen; 'kleur' = andere tint dan huid (hoek in ab) of verzadigder dan huid.
+        // Zwarte/grijze inkt is MINDER verzadigd in dezelfde richting als huid: dat telde met de zuivere huidschatting als 'kleur'
+        // (dC = huid-chroma ~15-20), waardoor alles inkt-kleur werd (toesteltest 2026-09-18).
+        if(gebied[i]<0.5) continue;
+        if(rl<0.8 || dE>12){ kandN++; const cP=Math.hypot(li[1],li[2]), cH=Math.hypot(lh[1],lh[2]);
+          const cosH=(cP>6&&cH>6)?(li[1]*lh[1]+li[2]*lh[2])/(cP*cH):1;
+          if(li[0]>30 && (cP>cH*1.15+4 || (cosH<0.82 && cP>8))) kleurN++; } continue; }
       if(rl<0.8 || dE>12){ kandN++; if(dC>14 && li[0]>30) kleurN++; } }
     if(modus==='auto') modus = (kandN>50 && kleurN/kandN>=0.10) ? 'kleur' : 'zwart';
     if(modus==='zwart'){
