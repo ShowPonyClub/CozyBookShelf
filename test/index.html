@@ -7997,7 +7997,7 @@ function createTattoo(overrides = {}) {
    ============================================================ */
 // App-versie (semver, handmatig ophogen bij een release). Bij een bump ook de
 // CACHE-naam in sw.js meebumpen, zodat clients de nieuwe build ophalen.
-const APP_VERSIE = '0.3.66';
+const APP_VERSIE = '0.3.67';
 
 /* Dev-haken die de CLOUD raken hangen alleen op een ontwikkelmachine aan window. Ze zijn geen
    lek op zichzelf (zonder XSS roept niemand ze aan, en CSP + esc() houden XSS tegen), maar ze
@@ -16899,6 +16899,20 @@ function maakTatnetGL(json, canvas) {
     if(!cv || !bron || !bron.full) return null;
     return tatnetGebied(bron.full, bron.sx|0, bron.sy|0, cv.width, cv.height);
   }
+  // Gebied-cache: kansen (sw x sh) -> grijs PNG op max 128 px (R = kans); en terug (bilineair via drawImage)
+  function gebiedNaarPng(g, sw, sh){
+    const s=Math.min(1, 128/Math.max(sw,sh)), w=Math.max(1,Math.round(sw*s)), h=Math.max(1,Math.round(sh*s));   // 128 px: zacht masker, ~10 kB
+    const c=document.createElement('canvas'); c.width=sw; c.height=sh; const x=c.getContext('2d'); const d=x.createImageData(sw,sh);
+    for(let i=0;i<sw*sh;i++){ const v=Math.round(Math.max(0,Math.min(1,g[i]))*255); d.data[i*4]=v; d.data[i*4+1]=v; d.data[i*4+2]=v; d.data[i*4+3]=255; }
+    x.putImageData(d,0,0);
+    const k=document.createElement('canvas'); k.width=w; k.height=h; const kx=k.getContext('2d'); kx.imageSmoothingEnabled=true; kx.imageSmoothingQuality='high'; kx.drawImage(c,0,0,w,h);
+    return { png:k.toDataURL('image/png'), w, h };
+  }
+  function pngNaarGebied(img, sw, sh){
+    const c=document.createElement('canvas'); c.width=sw; c.height=sh; const x=c.getContext('2d',{willReadFrequently:true});
+    x.imageSmoothingEnabled=true; x.imageSmoothingQuality='high'; x.drawImage(img,0,0,sw,sh);
+    const d=x.getImageData(0,0,sw,sh).data, g=new Float32Array(sw*sh); for(let i=0;i<sw*sh;i++) g[i]=d[i*4]/255; return g;
+  }
   // Lasso-bbox (pixels) op een canvas van w x h
   function lassoBbox(lasso, w, h){
     let mnx=1,mny=1,mxx=0,mxy=0; lasso.forEach(p=>{mnx=Math.min(mnx,p.nx);mny=Math.min(mny,p.ny);mxx=Math.max(mxx,p.nx);mxy=Math.max(mxy,p.ny);});
@@ -17045,7 +17059,8 @@ function maakTatnetGL(json, canvas) {
   function matteVoorOpslag(cv, k, bron){
     const ik=k && blendInkt(k.blend); if(!cv || !ik) return cv;
     const c=document.createElement('canvas'); c.width=cv.width; c.height=cv.height; c.getContext('2d').drawImage(cv,0,0);
-    const md=inktMatte(c, ik, tatnetGebiedVoor(c, bron)); k.blend = md ? ('inkt-'+md) : 'normaal'; if(md && ik==='auto') k.inktAuto=md;
+    const g=tatnetGebiedVoor(c, bron); k.tatnet = g ? gebiedNaarPng(g, c.width, c.height) : null;   // cache voor herstel (geen model-run)
+    const md=inktMatte(c, ik, g); k.blend = md ? ('inkt-'+md) : 'normaal'; if(md && ik==='auto') k.inktAuto=md;
     return md ? c : cv;
   }
 
@@ -17908,7 +17923,7 @@ function maakTatnetGL(json, canvas) {
       const im=new Image();
       im.onload=()=>{
         // Magic cut-masker (indien aanwezig) eerst meeladen; daarna dezelfde pijplijn.
-        const verder=(aiImg)=>{ try{
+        const verder=(aiImg, tatImg)=>{ try{
         // Zelfde 800px-cap als de live uitsnede, zodat de flood-fill identiek werkt.
         const maxAfm=1600;
         const scl=Math.min(1, maxAfm/Math.max(im.naturalWidth, im.naturalHeight));
@@ -17947,12 +17962,19 @@ function maakTatnetGL(json, canvas) {
           cc.getContext("2d").drawImage(sc, sx,sy,sw,sh, 0,0,sw,sh); shown=cc;
         }
         if(k.blend==='multiply') normalizeSkinTone(shown);   // slice 2: huid -> wit zodat multiply de huid laat verdwijnen
-        else if(blendInkt(k.blend)){ const wasAuto=blendInkt(k.blend)==='auto'; const md=inktMatte(shown, blendInkt(k.blend), (lasso.length>=3 && shown!==full) ? tatnetGebiedVoor(shown, {full:(schoonC||full), sx:lassoBbox(lasso, full.width, full.height).sx, sy:lassoBbox(lasso, full.width, full.height).sy}) : null);   // inkt-matte; 'auto' wordt hier zwart/kleur
+        else if(blendInkt(k.blend)){ const wasAuto=blendInkt(k.blend)==='auto';
+          let gebied=null;
+          if(lasso.length>=3 && shown!==full){
+            if(tatImg) gebied=pngNaarGebied(tatImg, shown.width, shown.height);   // cache uit het record: geen model-run bij herstel
+            else { const bb=lassoBbox(lasso, full.width, full.height); gebied=tatnetGebiedVoor(shown, {full:(schoonC||full), sx:bb.sx, sy:bb.sy});
+              if(gebied) k.tatnet=gebiedNaarPng(gebied, shown.width, shown.height); } }   // oud record: eenmalig berekenen en bewaren (persist volgt bij de volgende opslag)
+          const md=inktMatte(shown, blendInkt(k.blend), gebied);   // inkt-matte; 'auto' wordt hier zwart/kleur
           k.blend = md ? ('inkt-'+md) : 'normaal'; if(md && wasAuto) k.inktAuto=md; }   // onthoud de automatische keuze voor de knop-cyclus
         const tex=new THREE.CanvasTexture(shown); tex.encoding=THREE.sRGBEncoding; tex.anisotropy=maxAniso(); tex.needsUpdate=true; resolve(tex);
         }catch(e){ reject(e); } };
-        if(k.aiMask){ const mim=new Image(); mim.onload=()=>verder(mim); mim.onerror=()=>verder(null); mim.src=k.aiMask; }
-        else verder(null);
+        const metTat=(aiImg)=>{ if(k.tatnet && k.tatnet.png && window.__tattiesTatnet && window.__tattiesTatnet.aan){ const t=new Image(); t.onload=()=>verder(aiImg,t); t.onerror=()=>verder(aiImg,null); t.src=k.tatnet.png; } else verder(aiImg,null); };
+        if(k.aiMask){ const mim=new Image(); mim.onload=()=>metTat(mim); mim.onerror=()=>metTat(null); mim.src=k.aiMask; }
+        else metTat(null);
       };
       im.onerror=()=>reject(new Error("kon afbeelding niet laden"));
       im.src=k.srcUrl;
