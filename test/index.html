@@ -1368,7 +1368,8 @@ html.knipfull .cutmodal.cm-fullcut.cm-gegevens .cm-plaats-groot{display:flex;wid
    checkmark uit de knipstand (keuze Bram, 2026-09-04). Het is een doorgeefluik naar #cmPlace,
    zodat alle bestaande plaats-/bewerklogica en knoplabels ongemoeid blijven. */
 .cutmodal .cm-opslaan{display:none;}
-html.knipfull .cutmodal.cm-fullcut.cm-gegevens .cm-opslaan{display:flex;position:absolute;
+/* 2026-09-18: de ronde ✓ deed hetzelfde als de grote knop en oogde als 'klaar' -> verborgen (een hoofdactie per stap) */
+html.knipfull .cutmodal.cm-fullcut.cm-gegevens .cm-opslaan{display:none;position:absolute;
   top:calc(10px + env(safe-area-inset-top,0px));right:calc(10px + env(safe-area-inset-right,0px));z-index:8;
   width:44px;height:44px;min-height:44px;padding:0;border:0;border-radius:50%;align-items:center;justify-content:center;
   cursor:pointer;background:var(--rood);color:var(--op-accent);border:2px solid var(--rood-diep);box-shadow:2px 2px 0 var(--rood-diep);}
@@ -7526,7 +7527,7 @@ const I18N = {
     'ui.kies_eerst_foto':'Kies eerst een foto en knip de tattoo uit','ui.tattoo_geplaatst':'Tattoo geplaatst ✓',
     'ui.tattoo_bijgewerkt':'Tattoo bijgewerkt ✓','ui.plaatsen_mislukt':'Plaatsen mislukt','ui.fout':'fout',
     'ui.hersteld':'{n} tattoo{s} hersteld','ui.verwijder_bevestig':'Weet je zeker dat je deze tattoo wilt verwijderen?',
-    'ui.toevoegen':'Toevoegen','ui.volgende':'Volgende','ui.opslaan':'Opslaan','ui.tab_knippen':'Uitknippen','ui.tab_gegevens':'Gegevens','ui.tabs_aria':'Stap','ui.gegevens_hint':'Geef je tattoo een naam. De rest kan later.','ui.geen_uitsnede_hint':'Nog niets geknipt - de hele foto wordt gebruikt','ui.klik_plaatsen':'Tik op het model waar je de tattoo wilt','ui.zonder3d_formulier':'Geen 3D op dit toestel - je kunt de tattoo wel als gegevens opslaan','ui.naam_verplicht':'Geef de tattoo eerst een naam','ui.meer_details':'Meer details','ui.naam':'Naam tattoo','ui.naam_ph':'Naam tattoo *',
+    'ui.toevoegen':'Toevoegen','ui.volgende':'Volgende','ui.opslaan':'Opslaan','ui.tab_knippen':'Uitknippen','ui.tab_gegevens':'Gegevens','ui.tabs_aria':'Stap','ui.gegevens_hint':'Geef je tattoo een naam. De rest kan later.','ui.geen_uitsnede_hint':'Nog niets geknipt - de hele foto wordt gebruikt','ui.auto_lasso_hint':'Tattoo automatisch gevonden. Klopt het niet? Ga terug en trek zelf een lasso.','ui.klik_plaatsen':'Tik op het model waar je de tattoo wilt','ui.zonder3d_formulier':'Geen 3D op dit toestel - je kunt de tattoo wel als gegevens opslaan','ui.naam_verplicht':'Geef de tattoo eerst een naam','ui.meer_details':'Meer details','ui.naam':'Naam tattoo','ui.naam_ph':'Naam tattoo *',
     'ui.stage_aria':'3D-lichaamsmodel; gebruik de 2D-knop bovenaan voor de toegankelijke platte kaart','ui.stage_aria_solo':'3D-lichaamsmodel',
     'ui.lege_cta':'Nog geen tattoos - tik op + om er een toe te voegen',
     'ui.details':'Details',
@@ -7719,7 +7720,7 @@ const I18N = {
     'ui.kies_eerst_foto':'Pick a photo first and cut out the tattoo','ui.tattoo_geplaatst':'Tattoo placed ✓',
     'ui.tattoo_bijgewerkt':'Tattoo updated ✓','ui.plaatsen_mislukt':'Placing failed','ui.fout':'error',
     'ui.hersteld':'{n} tattoo{s} restored','ui.verwijder_bevestig':'Are you sure you want to delete this tattoo?',
-    'ui.toevoegen':'Add','ui.volgende':'Next','ui.opslaan':'Save','ui.tab_knippen':'Cut out','ui.tab_gegevens':'Details','ui.tabs_aria':'Step','ui.gegevens_hint':'Give your tattoo a name. The rest can wait.','ui.geen_uitsnede_hint':'Nothing cut out yet - the whole photo will be used','ui.klik_plaatsen':'Tap the model where you want the tattoo','ui.zonder3d_formulier':'No 3D on this device - you can still save the tattoo as details','ui.naam_verplicht':'Give the tattoo a name first','ui.meer_details':'More details','ui.naam':'Tattoo name','ui.naam_ph':'Tattoo name *',
+    'ui.toevoegen':'Add','ui.volgende':'Next','ui.opslaan':'Save','ui.tab_knippen':'Cut out','ui.tab_gegevens':'Details','ui.tabs_aria':'Step','ui.gegevens_hint':'Give your tattoo a name. The rest can wait.','ui.geen_uitsnede_hint':'Nothing cut out yet - the whole photo will be used','ui.auto_lasso_hint':'Tattoo found automatically. Not right? Go back and draw a lasso yourself.','ui.klik_plaatsen':'Tap the model where you want the tattoo','ui.zonder3d_formulier':'No 3D on this device - you can still save the tattoo as details','ui.naam_verplicht':'Give the tattoo a name first','ui.meer_details':'More details','ui.naam':'Tattoo name','ui.naam_ph':'Tattoo name *',
     'ui.stage_aria':'3D body model; use the 2D button at the top for the accessible flat map','ui.stage_aria_solo':'3D body model',
     'ui.lege_cta':'No tattoos yet - tap + to add one',
     'ui.details':'Details',
@@ -7997,7 +7998,7 @@ function createTattoo(overrides = {}) {
    ============================================================ */
 // App-versie (semver, handmatig ophogen bij een release). Bij een bump ook de
 // CACHE-naam in sw.js meebumpen, zodat clients de nieuwe build ophalen.
-const APP_VERSIE = '0.3.67';
+const APP_VERSIE = '0.3.69';
 
 /* Dev-haken die de CLOUD raken hangen alleen op een ontwikkelmachine aan window. Ze zijn geen
    lek op zichzelf (zonder XSS roept niemand ze aan, en CSP + esc() houden XSS tegen), maar ze
@@ -16505,7 +16506,9 @@ async function verwijderVoorbeelden() {
            let open=true; try{ open = localStorage.getItem('tatties-kniptools-open') !== '0'; }catch(e){}
            if(adv) adv.hidden=!open; if(tt) tt.setAttribute("aria-expanded", open?"true":"false"); }
     if(cmPlaceBtn) cmPlaceBtn.style.display=b?"":"none";
-    { const meerW=document.querySelector(".cm-meer-wrap"); if(meerW) meerW.style.display=(b&&pendingNew&&!deelVoor)?"":"none"; }   // '+ Nog een' (incl. info-knopje) alleen bij toevoegen, niet bij een deel
+    { const meerW=document.querySelector(".cm-meer-wrap"), bewerk=!!(pendingEdit||pendingEdit2D);
+      if(meerW) meerW.style.display=(b&&(pendingNew||bewerk)&&!deelVoor)?"":"none";   // '+ Nog een' bij toevoegen; '+ Nog een deel' ook bij bewerken (2026-09-18)
+      for(const id of ["cmPlaceMeer","cmMeerInfo"]){ const e=document.getElementById(id); if(e) e.style.display=bewerk?"none":""; } }
     cutModal.classList.toggle("cm-compact", !b);
     const kies=document.getElementById("cmChoose"); const kt=kies&&kies.querySelector("span");
     if(kt) kt.textContent = b ? tr('ui.andere_foto') : tr(IS_IOS ? 'ui.foto_toevoegen' : 'ui.foto_uploaden');   // iOS: camera-knop weg -> generiek 'foto toevoegen' (OS-menu biedt camera); Android: 'upload' naast de camera-knop
@@ -16866,12 +16869,13 @@ function maakTatnetGL(json, canvas) {
   window.__tattiesTatnet = { aan: TATNET_AAN, laatste: null, net: tatnetNet };
   // Gebied-kansen voor de bbox (sx,sy,sw,sh) van de lasso op de schone foto `full`: crop met 30% marge (zoals de
   // lasso-stand in de training), letterbox 256 met zwart, voorspellen (+ spiegel-TTA), terug naar bbox-pixels.
-  function tatnetGebied(full, sx, sy, sw, sh){
+  function tatnetGebied(full, sx, sy, sw, sh, mg){
     if(!window.__tattiesTatnet.aan) return null;
     const net=tatnetNet(); if(!net) return null;
     try{
       const R=net.res, t0=performance.now();
-      const mg=0.3, gr=Math.max(32, Math.max(sw,sh)*(1+2*mg)), cx=sx+sw/2, cy=sy+sh/2;
+      if(mg==null) mg=0.3;   // marge rond de bbox (lasso-stand); 0 = hele foto (auto-lasso)
+      const gr=Math.max(32, Math.max(sw,sh)*(1+2*mg)), cx=sx+sw/2, cy=sy+sh/2;
       const X0=Math.round(cx-gr/2), Y0=Math.round(cy-gr/2);
       const c=document.createElement('canvas'); c.width=R; c.height=R; const x=c.getContext('2d',{willReadFrequently:true});
       x.fillStyle='#000'; x.fillRect(0,0,R,R); x.imageSmoothingEnabled=true; x.imageSmoothingQuality='high';
@@ -16912,6 +16916,23 @@ function maakTatnetGL(json, canvas) {
     const c=document.createElement('canvas'); c.width=sw; c.height=sh; const x=c.getContext('2d',{willReadFrequently:true});
     x.imageSmoothingEnabled=true; x.imageSmoothingQuality='high'; x.drawImage(img,0,0,sw,sh);
     const d=x.getImageData(0,0,sw,sh).data, g=new Float32Array(sw*sh); for(let i=0;i<sw*sh;i++) g[i]=d[i*4]/255; return g;
+  }
+  // Foto zonder lasso: het model zoekt de tattoo op de hele (schone) foto; convexe omhulling van het gebied (+8%) wordt de lasso.
+  // Geeft true als er een lasso is gezet. Grenzen: gebied 1%..92% van de foto (anders niets gevonden / alles is tattoo).
+  function tatnetAutoLasso(full){
+    if(!full || !window.__tattiesTatnet.aan) return false;
+    const g=tatnetGebied(full, 0, 0, full.width, full.height, 0); if(!g) return false;
+    const W=full.width, H=full.height, st=Math.max(1,Math.round(Math.max(W,H)/96)), pts=[]; let n=0;
+    for(let y=0;y<H;y+=st) for(let x=0;x<W;x+=st){ if(g[y*W+x]>0.5){ pts.push([x,y]); n++; } }
+    const dek=n/Math.ceil(W/st)/Math.ceil(H/st); if(dek<0.01 || dek>0.92 || pts.length<6) return false;
+    pts.sort((a,b)=>a[0]-b[0]||a[1]-b[1]);   // monotone chain (convexe omhulling)
+    const kr=(o,a,b)=>(a[0]-o[0])*(b[1]-o[1])-(a[1]-o[1])*(b[0]-o[0]);
+    const onder=[]; for(const p of pts){ while(onder.length>=2 && kr(onder[onder.length-2],onder[onder.length-1],p)<=0) onder.pop(); onder.push(p); }
+    const boven=[]; for(let i=pts.length-1;i>=0;i--){ const p=pts[i]; while(boven.length>=2 && kr(boven[boven.length-2],boven[boven.length-1],p)<=0) boven.pop(); boven.push(p); }
+    const hull=onder.slice(0,-1).concat(boven.slice(0,-1)); if(hull.length<3) return false;
+    let cx=0,cy=0; for(const p of hull){ cx+=p[0]; cy+=p[1]; } cx/=hull.length; cy/=hull.length;
+    lassoPts=hull.map(p=>({ nx:Math.max(0,Math.min(1,(cx+(p[0]-cx)*1.08)/W)), ny:Math.max(0,Math.min(1,(cy+(p[1]-cy)*1.08)/H)) }));
+    return true;
   }
   // Lasso-bbox (pixels) op een canvas van w x h
   function lassoBbox(lasso, w, h){
@@ -17426,7 +17447,10 @@ function maakTatnetGL(json, canvas) {
       }; }
     { const vb=document.getElementById("cmVolgende"); if(vb) vb.onclick=()=>{
         // Niets geknipt (geen lasso/toverstaf/gum) -> hele foto wordt de decal: even melden, niet blokkeren
-        if(!(lassoPts.length>=3 || wandSeeds.length || eraseStrokes.length || aiMask)) toast(tr('ui.geen_uitsnede_hint'));
+        if(!(lassoPts.length>=3 || wandSeeds.length || eraseStrokes.length || aiMask)){
+          // Tatnet: geen lasso -> het model zoekt de tattoo zelf en legt er een lasso omheen (2026-09-18)
+          let auto=false; try{ auto = !!origImg && tatnetAutoLasso(buildCleanCanvas()); }catch(e){ console.warn('auto-lasso', e); }
+          if(auto){ drawLasso(); updateCutout(); toast(tr('ui.auto_lasso_hint')); } else toast(tr('ui.geen_uitsnede_hint')); }
         if(deelVoor){ if(cmPlaceBtn) cmPlaceBtn.click(); return; }   // deel: geen gegevens-stap, meteen plaatsen
         naarReview();
       }; }   // fase 2: knippen klaar -> review-scherm met naam/details
@@ -17469,7 +17493,8 @@ function maakTatnetGL(json, canvas) {
       } else if(cutHistPushed){ cutHistPushed=false; }   // vangnet: zwevende entry netjes consumeren (hoort na de succes-pad-fix niet meer voor te komen)
     });
     { const meerBtn=document.getElementById("cmPlaceMeer"); if(meerBtn) meerBtn.onclick=()=>{ plaatsHerhaal=true; plaatsKetting=false; if(cmPlaceBtn) cmPlaceBtn.onclick(); }; }   // plaats deze + heropen cut met dezelfde foto
-    { const deelBtn=document.getElementById("cmPlaceDeel"); if(deelBtn) deelBtn.onclick=()=>{ plaatsKetting=true; plaatsHerhaal=false; if(cmPlaceBtn) cmPlaceBtn.onclick(); }; }   // plaats dit deel + daarna de volgende foto van dezelfde tattoo
+    let kettingNaBewerk=false;   // '+ Nog een deel' vanuit bewerken: na opslaan de deel-stand openen (2026-09-18)
+    { const deelBtn=document.getElementById("cmPlaceDeel"); if(deelBtn) deelBtn.onclick=()=>{ kettingNaBewerk=!!(pendingEdit||pendingEdit2D); plaatsKetting=!kettingNaBewerk; plaatsHerhaal=false; if(cmPlaceBtn) cmPlaceBtn.onclick(); }; }   // plaats dit deel + daarna de volgende foto van dezelfde tattoo
     // Info-wolkje bij '+ Nog een' (tik = uitleg tonen; sluit bij buiten-tik) - zelfde patroon als de tool-legenda
     { const inf=document.getElementById("cmMeerInfo"), tip=document.getElementById("cmMeerTip");
       if(inf && tip){
@@ -17801,6 +17826,7 @@ function maakTatnetGL(json, canvas) {
         if(typeof window.__tattiesNaStatus==="function") window.__tattiesNaStatus(rec.status);   // wens<->gezet: zichtbaarheid/dim bijwerken
         if(typeof window.__tattiesNaBewerk==="function") window.__tattiesNaBewerk(rec.id);   // detailpagina verversen indien open
         toast(tr('ui.tattoo_bijgewerkt'));
+        if(kettingNaBewerk){ kettingNaBewerk=false; setTimeout(()=>openCutModalAdd('3d', rec), 120); }   // '+ Nog een deel' vanuit bewerken
         return;
       }
       if(pendingNew){
@@ -17874,6 +17900,7 @@ function maakTatnetGL(json, canvas) {
         if(m.rec && typeof window.__tattiesNaStatus==="function") window.__tattiesNaStatus(m.rec.status);   // wens<->gezet: zichtbaarheid/dim bijwerken
         if(typeof window.__tattiesNaBewerk==="function") window.__tattiesNaBewerk(m.rec&&m.rec.id);
         imgTexture=null;   // marker bezit de textuur nu
+        if(kettingNaBewerk){ kettingNaBewerk=false; const r=m.rec; if(r) setTimeout(()=>openCutModalAdd('3d', r), 120); }   // '+ Nog een deel' vanuit bewerken
         return;
       }
       if(!pendingPlace){ closeCutModal(); return; }
