@@ -7997,7 +7997,7 @@ function createTattoo(overrides = {}) {
    ============================================================ */
 // App-versie (semver, handmatig ophogen bij een release). Bij een bump ook de
 // CACHE-naam in sw.js meebumpen, zodat clients de nieuwe build ophalen.
-const APP_VERSIE = '0.3.64';
+const APP_VERSIE = '0.3.65';
 
 /* Dev-haken die de CLOUD raken hangen alleen op een ontwikkelmachine aan window. Ze zijn geen
    lek op zichzelf (zonder XSS roept niemand ze aan, en CSP + esc() houden XSS tegen), maar ze
@@ -16889,6 +16889,8 @@ function maakTatnetGL(json, canvas) {
           g[yy*sw+xx]=(pr[y0*R+x0]*(1-tx)+pr[y0*R+x1]*tx)*(1-ty)+(pr[y1*R+x0]*(1-tx)+pr[y1*R+x1]*tx)*ty; } }
       let dek=0; for(let i=0;i<g.length;i++) if(g[i]>0.5) dek++;
       window.__tattiesTatnet.laatste={ms:performance.now()-t0, dek:dek/g.length, sw, sh};
+      // Testbuild: meetregel zodat je op een toestel ziet dat het model draaide (weg zodra TATNET_AAN geen dev-vlag meer is)
+      if(window.__tattiesTatnet.toast!==false) try{ toast('Tatnet: '+Math.round(performance.now()-t0)+' ms, gebied '+Math.round(100*dek/g.length)+'%'); }catch(e){}
       return g;
     }catch(e){ console.warn('tatnet gebied mislukt:', e && e.message); return null; }
   }
