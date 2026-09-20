@@ -1081,9 +1081,9 @@ form label,
 .stage-knoppen #t3d-info:hover,.stage-knoppen #t3d-reset:hover,.stage-knoppen #t3d-deel:hover{border-color:var(--accent);}
 .stage-knoppen #t3d-info .ik,.stage-knoppen #t3d-deel .ik{width:22px;height:22px;}
 /* Reset-knop = ook 'Heel lichaam' (2026-09-15): met een losse ledemaat toont hij het lichaampje i.p.v. de pijl */
-#t3d-reset .ik-lichaam{display:none;}
-#t3d-reset.lede .ik-reset{display:none;}
-#t3d-reset.lede .ik-lichaam{display:block;width:22px;height:22px;}
+/* Altijd het lichaampje (2026-09-20, Bram): de knop is de 'weergave'-knop (beginstand / heel lichaam); de draaipijl las als 'opnieuw' */
+#t3d-reset .ik-reset{display:none;}
+#t3d-reset .ik-lichaam{display:block;width:22px;height:22px;}
 /* Uitleg-paneel: zelfde sheet als Instellingen (greep, kop, van onderen omhoog) */
 .sheet-overlay{position:fixed;inset:0;z-index:40;overflow:hidden;background:rgba(34,26,18,.35);backdrop-filter:blur(2px);opacity:0;pointer-events:none;transition:opacity .25s ease;}   /* overflow:hidden: het weggeschoven paneel mag de pagina niet langer maken */
 .sheet-overlay.open{opacity:1;pointer-events:auto;}
@@ -2117,9 +2117,9 @@ form label{text-transform:none;letter-spacing:.005em;font-size:.8rem;color:var(-
       </button>
         </div>
         <div class="sk-rechts">
+          <button type="button" id="t3d-reset" data-i18n-title="ui.beginstand" data-i18n-aria="ui.beginstand" title="Beginstand" aria-label="Beginstand"><svg class="ik ik-reset" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12a8 8 0 1 0 2.3-5.6"/><path d="M3 4v4h4"/></svg><svg class="ik ik-lichaam" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="4.6" r="2"/><path d="M12 7v7"/><path d="M5 9.5h14"/><path d="M9 21l3-7 3 7"/></svg></button>
           <button type="button" id="t3d-deel" data-i18n-title="ui.deel_opname" data-i18n-aria="ui.deel_opname" title="Opname delen" aria-label="Opname delen"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15V4"/><path d="M8 8l4-4 4 4"/><path d="M5 12v7a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-7"/></svg></button>
           <button type="button" id="t3d-info" data-i18n-title="ui.uitleg_knop" data-i18n-aria="ui.uitleg_knop" title="Uitleg" aria-label="Uitleg"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5"/><path d="M12 7.6h.01"/></svg></button>
-          <button type="button" id="t3d-reset" data-i18n-title="ui.beginstand" data-i18n-aria="ui.beginstand" title="Beginstand" aria-label="Beginstand"><svg class="ik ik-reset" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12a8 8 0 1 0 2.3-5.6"/><path d="M3 4v4h4"/></svg><svg class="ik ik-lichaam" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="4.6" r="2"/><path d="M12 7v7"/><path d="M5 9.5h14"/><path d="M9 21l3-7 3 7"/></svg></button>
         </div>
       </div>
       <div id="t3d-toast"></div>
@@ -8012,7 +8012,7 @@ function createTattoo(overrides = {}) {
    ============================================================ */
 // App-versie (semver, handmatig ophogen bij een release). Bij een bump ook de
 // CACHE-naam in sw.js meebumpen, zodat clients de nieuwe build ophalen.
-const APP_VERSIE = '0.3.79';
+const APP_VERSIE = '0.3.80';
 
 /* Dev-haken die de CLOUD raken hangen alleen op een ontwikkelmachine aan window. Ze zijn geen
    lek op zichzelf (zonder XSS roept niemand ze aan, en CSP + esc() houden XSS tegen), maar ze
