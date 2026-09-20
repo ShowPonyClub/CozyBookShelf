@@ -215,6 +215,7 @@ body{
   background-color:var(--bg);
   color:var(--tekst);
   min-height:100vh;
+  min-height:100svh;   /* kleine viewport: op iOS is 100vh groter dan innerHeight en maakte de pagina blijvend scrollbaar (toesteltest 2026-09-20) */
   overscroll-behavior-y:none;   /* pull-to-refresh uit (standalone Android): een swipe-omlaag bovenaan een half ingevuld formulier = stille reload = werk kwijt */
   -webkit-font-smoothing:antialiased;
 }
@@ -815,7 +816,11 @@ input[type=range]:focus{box-shadow:none;border:none}
   width:max-content;max-width:90vw;text-align:left;box-shadow:0 10px 30px rgba(34,26,18,.35);   /* width:max-content: met left:50% krimpt een fixed element anders tot een halve schermbreedte (smalle 'Ververs'-toast, 2026-09-15) */
 }
 #toast.zichtbaar{opacity:1;transform:translateX(-50%) translateY(0)}
-#toast.met-actie{pointer-events:auto;display:flex;align-items:center;gap:12px;padding:4px 8px 4px 16px}
+#toast.met-actie{pointer-events:auto;display:flex;align-items:center;gap:8px;padding:4px 4px 4px 16px;max-width:calc(100vw - 24px)}   /* tekst + knop + kruisje op een regel, ook op 375 px */
+#toast .toast-knop{margin-left:4px}
+.toast-sluit{min-width:44px;min-height:44px;display:inline-flex;align-items:center;justify-content:center;background:none;border:0;padding:0;
+  color:var(--op-accent);opacity:.7;font-size:1.35rem;line-height:1;cursor:pointer;border-radius:var(--r-sm,8px);}
+.toast-sluit:hover,.toast-sluit:focus-visible{opacity:1}
 /* Sync-indicator: klein pilletje bovenin (spinner 'Synchroniseren…' -> ✓ 'Bijgewerkt') */
 #sync-ind{position:fixed;left:50%;top:max(64px,calc(env(safe-area-inset-top) + 60px));transform:translateX(-50%);z-index:55;
   display:inline-flex;align-items:center;gap:8px;background:#2A2118;color:var(--op-accent);border:1px solid var(--rand);
@@ -1833,7 +1838,7 @@ html.knipfull .cutmodal.cm-review .cm-bewerkbtn span{position:absolute;width:1px
    onderaan het startscherm. */
 .onboarding-feedback{margin:8px 0 12px;font-size:.82rem;font-weight:400;color:var(--gedempt);
   font-family:var(--serif);letter-spacing:.04em;opacity:.75;line-height:1.35}
-.onboarding .inst-label{text-align:left}
+.onboarding .inst-label{text-align:left;font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--gedempt);opacity:1;font-weight:600;margin:18px 0 8px}   /* zelfde labelstijl als 'OPACITY' in de bewerkbalk; los van de zinsvorm-labels in Instellingen (toesteltest 2026-09-20) */
 .onboarding .silhouet-keuze{width:100%}
 .onboarding .silhouet-keuze button{flex:1}
 .onboarding-start{margin-top:10px;min-height:48px;font-size:1.02rem}
@@ -2062,12 +2067,8 @@ form label{text-transform:none;letter-spacing:.005em;font-size:.8rem;color:var(-
 
     <div id="tattoo-list"></div>
 
-    <!-- Back-up (export/import) staat in Instellingen, bij Account: dat zijn samen de
-         twee manieren om je collectie veilig te stellen. Hier blijft alleen het delen
-         van de kaart als afbeelding, want dat hoort bij je collectie zelf. -->
-    <div class="backup-row">
-      <button class="knop-sec" id="btn-kaart-export"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5" width="16" height="14" rx="2"/><circle cx="9" cy="10" r="1.5"/><path d="M5 18l4.5-4.5 3 3 3-3L19 17"/></svg><span data-i18n="btn.png">Kaart als PNG</span></button>
-    </div>
+    <!-- 'Kaart als PNG' is weggehaald (2026-09-20, toesteltest): het 2D-silhouet met stippen zegt een artiest niets.
+         Opvolger: een opname van de 3D-weergave delen; later een deellink naar een alleen-lezen viewer (online sync). -->
   </section>
 
   <!-- ===================== STATISTIEKEN ===================== -->
@@ -8004,7 +8005,7 @@ function createTattoo(overrides = {}) {
    ============================================================ */
 // App-versie (semver, handmatig ophogen bij een release). Bij een bump ook de
 // CACHE-naam in sw.js meebumpen, zodat clients de nieuwe build ophalen.
-const APP_VERSIE = '0.3.76';
+const APP_VERSIE = '0.3.77';
 
 /* Dev-haken die de CLOUD raken hangen alleen op een ontwikkelmachine aan window. Ze zijn geen
    lek op zichzelf (zonder XSS roept niemand ze aan, en CSP + esc() houden XSS tegen), maar ze
@@ -9958,16 +9959,29 @@ function toast(tekst) {
   const el = $('#toast');
   el.classList.remove('met-actie');
   el.textContent = tekst;
+  toastPlaats(el);
   el.classList.add('zichtbaar');
   tril(12);   // subtiele haptische bevestiging bij elke actie-melding (no-op op desktop)
   clearTimeout(toastTimer);
   toastTimer = setTimeout(() => el.classList.remove('zichtbaar'), 2600);
 }
+/* Staat een bewerkbalk open (3D #editbar of 2D #editbar2d), zet de toast er dan direct boven i.p.v. eroverheen
+   (toesteltest 2026-09-20: 'Ongedaan maken' lag over de knoppen van de balk). Anders de gewone plek onderin. */
+function toastPlaats(el) {
+  let bodem = '';
+  for (const id of ['editbar', 'editbar2d']) {
+    const eb = document.getElementById(id);
+    if (!eb || !eb.classList.contains('on') || !eb.offsetParent) continue;
+    const r = eb.getBoundingClientRect(); if (!(r.height > 0)) continue;
+    bodem = Math.round(window.innerHeight - r.top + 10) + 'px'; break;
+  }
+  el.style.bottom = bodem;
+}
 /* Toast met actieknop, bijv. 'Ongedaan maken' */
 let toastActieTijd = 0;
 function toastMetActie(tekst, label, fn) {
   const el = $('#toast'); toastActieTijd = performance.now();
-  el.innerHTML = '<span></span><button id="toast-actie" class="toast-knop"></button>';
+  el.innerHTML = '<span></span><button id="toast-actie" class="toast-knop"></button><button id="toast-sluit" class="toast-sluit" type="button">\u00d7</button>';
   el.querySelector('span').textContent = tekst;
   const knop = $('#toast-actie');
   knop.textContent = label;
@@ -9975,12 +9989,16 @@ function toastMetActie(tekst, label, fn) {
     el.classList.remove('zichtbaar', 'met-actie');
     fn();
   });
+  const sluit = $('#toast-sluit');
+  sluit.setAttribute('aria-label', tr('aria.sluiten')); sluit.title = tr('aria.sluiten');
+  sluit.addEventListener('click', () => { clearTimeout(toastTimer); el.classList.remove('zichtbaar', 'met-actie'); });
+  toastPlaats(el);
   el.classList.add('zichtbaar', 'met-actie');
   tril([14, 36, 14]);   // firmere dubbel-puls voor zwaardere/ongedaan-maakbare acties (bv. verwijderen)
   clearTimeout(toastTimer);
   // Ruimer dan een gewone toast: de actieknop (bv. 'Ongedaan maken') moet bereikbaar
   // blijven, ook voor toetsenbord/screenreader-gebruikers.
-  toastTimer = setTimeout(() => el.classList.remove('zichtbaar', 'met-actie'), 12000);
+  toastTimer = setTimeout(() => el.classList.remove('zichtbaar', 'met-actie'), 7000);   // was 12 s: te lang in beeld (toesteltest 2026-09-20); kruisje sluit eerder
 }
 
 /* Precies één nav-knop (3D/2D/collectie/stats/instellingen) als actief (inktstempel) markeren; de rest uit. */
@@ -13528,7 +13546,7 @@ async function verwijderVoorbeelden() {
       }
     });
   })();
-  $('#btn-kaart-export').addEventListener('click', exporteerKaartAfbeelding);
+  { const kb=$('#btn-kaart-export'); if(kb) kb.addEventListener('click', exporteerKaartAfbeelding); }   // knop is weg (2026-09-20); functie blijft voor de opvolger
   document.querySelectorAll('.lijst-tools button[data-modus]').forEach((b) =>
     b.addEventListener('click', () => {
       if (lijstModus !== b.dataset.modus) {           // bij wissel: zoekterm wissen (voorkomt 'lege' lijst-verwarring)
@@ -13792,11 +13810,14 @@ async function verwijderVoorbeelden() {
     const nu=performance.now(); if(nu-_overloopT<80) return; _overloopT=nu;
     const v=document.getElementById("view-3d"); if(!v || v.classList.contains("verborgen")) return;
     if(cutModal && cutModal.classList.contains("on")) return;   // knipmodal open: die heeft zijn eigen hoogte
-    const over=document.documentElement.scrollHeight - window.innerHeight;
-    if(over<=1) return;
+    if(document.documentElement.scrollHeight - window.innerHeight <= 1) return;
+    // Absoluut herrekenen (niet het verschil aftrekken): met body op 100vh bleef de overloop op iOS bestaan en ratelde een
+    // incrementele correctie de stage naar het minimum (v0.3.75/76). De uitkomst hangt nu niet van de vorige waarde af.
+    const top=stage.getBoundingClientRect().top + (window.scrollY||0);
+    const mn=document.querySelector('main'); const onder=mn ? (parseFloat(getComputedStyle(mn).paddingBottom)||0) : 12;
     const cur=parseFloat(getComputedStyle(stage).getPropertyValue("--stage-h"))||stage.clientHeight;
-    const h=Math.max(380, Math.round(cur-over));
-    if(h<cur){ stage.style.setProperty("--stage-h", h+"px"); if(window.scrollY) window.scrollTo(0,0); if(renderer) resize(); }
+    const h=Math.max(380, Math.round(window.innerHeight - top - onder));
+    if(h<cur-1){ stage.style.setProperty("--stage-h", h+"px"); if(window.scrollY) window.scrollTo(0,0); if(renderer) resize(); }
   }
   function resize(){ if(!renderer||!stage)return;
     pinStageHoogte();
