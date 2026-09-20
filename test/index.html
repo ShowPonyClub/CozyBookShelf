@@ -8004,7 +8004,7 @@ function createTattoo(overrides = {}) {
    ============================================================ */
 // App-versie (semver, handmatig ophogen bij een release). Bij een bump ook de
 // CACHE-naam in sw.js meebumpen, zodat clients de nieuwe build ophalen.
-const APP_VERSIE = '0.3.73';
+const APP_VERSIE = '0.3.74';
 
 /* Dev-haken die de CLOUD raken hangen alleen op een ontwikkelmachine aan window. Ze zijn geen
    lek op zichzelf (zonder XSS roept niemand ze aan, en CSP + esc() houden XSS tegen), maar ze
@@ -13681,7 +13681,13 @@ async function verwijderVoorbeelden() {
     let cPoint=center.clone(), cNormal=editDecal.normal.clone(), cMesh=editDecal.mesh||pickMeshes[0];
     try{
       _ringRay.set(center.clone().addScaledVector(editDecal.normal,0.06), editDecal.normal.clone().multiplyScalar(-1));
-      const hit=_ringRay.intersectObject(cMesh,false)[0];
+      // Niet de EERSTE treffer, maar de treffer het dichtst bij het middelpunt met een normaal die dezelfde kant op wijst:
+      // aan de binnenkant van de bovenarm wijst de normaal naar de borst, de straal begon dan achter de borst en raakte die
+      // als eerste -> ring op de borst (toesteltest 2026-09-20).
+      const hits=_ringRay.intersectObject(cMesh,false); let hit=null, best=Infinity;
+      for(const h of hits){ const fn=h.face ? h.face.normal.clone().transformDirection(h.object.matrixWorld).normalize() : null;
+        if(fn && fn.dot(editDecal.normal)<0) continue;
+        const dd=h.point.distanceTo(center); if(dd<best){ best=dd; hit=h; } }
       if(hit){ cPoint=hit.point.clone(); if(hit.face) cNormal=hit.face.normal.clone().transformDirection(hit.object.matrixWorld).normalize(); cMesh=hit.object; }
     }catch(e){}
     const tex=ringTex(rx,ry);
@@ -15355,7 +15361,9 @@ async function verwijderVoorbeelden() {
       // een geknepen snipper (polstest 2026-09-19: inkepingen aan de rand).
       const L2=(q,s2)=>(pos[q*3]-pos[s2*3])**2+(pos[q*3+1]-pos[s2*3+1])**2+(pos[q*3+2]-pos[s2*3+2])**2;
       const U2=(q,s2)=>(uv[q*2]-uv[s2*2])**2+(uv[q*2+1]-uv[s2*2+1])**2;
-      if(U2(a,b)>2.6*L2(a,b) || U2(b,c)>2.6*L2(b,c) || U2(a,c)>2.6*L2(a,c)) continue;   // uv-zijde > 1,6x de 3D-zijde
+      // Drempel 5x: op een bol rekt de afwikkeling de omtrekrichting legitiem op (1,57x bij 90 graden; borst vrouwmodel tot
+      // 4,4x, toesteltest 2026-09-20 gaf gaten bij 1,6x); een echte naad zit op tientallen keren (uv-sprong = decalbreedte).
+      if(U2(a,b)>25*L2(a,b) || U2(b,c)>25*L2(b,c) || U2(a,c)>25*L2(a,c)) continue;   // uv-zijde > 5x de 3D-zijde
       if((opp2>0)!==(o3>0) && Math.abs(opp2)>0.5*Math.sqrt(cx*cx+cy*cy+cz*cz)) continue;   // gespiegeld met echte grootte
       if(ua>=-hx&&ua<=hx&&ub>=-hx&&ub<=hx&&uc>=-hx&&uc<=hx&&va>=-hy&&va<=hy&&vb>=-hy&&vb<=hy&&vc>=-hy&&vc<=hy){
         // geheel binnen (verreweg de meeste): geen knip nodig
@@ -15388,10 +15396,14 @@ async function verwijderVoorbeelden() {
   }
   // Wikkel-geometry voor makeImage (wereldcoordinaten, zoals DecalGeometry). null = geen graaf/zaad -> projectie-terugval.
   const _wX=new THREE.Vector3(), _wY=new THREE.Vector3(), _wZ=new THREE.Vector3();
-  function expDecalGeo(mesh, point, helper, size){
+  function expDecalGeo(mesh, point, normal, helper, size){
     const grid=faceGridFor(mesh), vg=grid && vertexGraafFor(mesh); if(!vg) return null;
-    const MG=grid.maxR||FGRID_CELL, faces=grid.faces, R=Math.max(0.03, 3*MG);
-    let seed=-1, sd=Infinity;   // zaad: dichtste driehoek bij het plaatspunt
+    const MG=grid.maxR||FGRID_CELL, faces=grid.faces, R=Math.max(0.03, 3*MG), nrm=vg.nrm, fv=vg.fv;
+    // zaad: dichtste driehoek bij het plaatspunt waarvan de normaal dezelfde kant op wijst (aan de binnenkant van de
+    // bovenarm ligt de borst soms dichterbij dan de arm zelf: selectiering belandde daar, toesteltest 2026-09-20);
+    // terugval = dichtste zonder die eis
+    const nx=normal?normal.x:0, ny=normal?normal.y:0, nz=normal?normal.z:0;
+    let seed=-1, sd=Infinity, seed2=-1, sd2=Infinity;
     const c0=Math.floor((point.x-R)/FGRID_CELL),c1=Math.floor((point.x+R)/FGRID_CELL);
     const d0=Math.floor((point.y-R)/FGRID_CELL),d1=Math.floor((point.y+R)/FGRID_CELL);
     const e0=Math.floor((point.z-R)/FGRID_CELL),e1=Math.floor((point.z+R)/FGRID_CELL);
@@ -15399,8 +15411,12 @@ async function verwijderVoorbeelden() {
       const arr=grid.cells.get(ci+','+di+','+ei); if(!arr) continue;
       for(let q=0;q<arr.length;q++){ const fi=arr[q], f=faces[fi];
         const dd=(f.cx-point.x)**2+(f.cy-point.y)**2+(f.cz-point.z)**2;
-        if(dd<sd){ sd=dd; seed=fi; } }
+        if(dd<sd2){ sd2=dd; seed2=fi; }
+        if(dd<sd){ const a=fv[fi*3], b=fv[fi*3+1], c=fv[fi*3+2];
+          const fd=(nrm[a*3]+nrm[b*3]+nrm[c*3])*nx+(nrm[a*3+1]+nrm[b*3+1]+nrm[c*3+1])*ny+(nrm[a*3+2]+nrm[b*3+2]+nrm[c*3+2])*nz;
+          if(fd>=0){ sd=dd; seed=fi; } } }
     }
+    if(seed<0) seed=seed2;
     if(seed<0) return null;
     helper.matrixWorld.extractBasis(_wX,_wY,_wZ);
     const hx=size.x/2, hy=size.y/2, rMax=(Math.hypot(hx,hy)+2*MG)*1.2;   // padlengte overschat de geodeet iets: marge
@@ -15437,7 +15453,7 @@ async function verwijderVoorbeelden() {
         // Culling: alleen nabije driehoeken projecteren (val terug op de volledige mesh als er niets is)
         // Geodetische cull (blijft op het aaneengesloten lichaamsdeel); val terug op box-cull, dan volledige mesh.
         // Wikkel-decal (exp-map) eerst: wikkelt om het lichaamsdeel. null -> orthografische projectie zoals voorheen.
-        let geo=decalWikkel ? expDecalGeo(mesh, point, helper, size) : null;
+        let geo=decalWikkel ? expDecalGeo(mesh, point, normal, helper, size) : null;
         if(!geo){
           const rg=connectedDecalGeo(mesh, point, size, helper.rotation) || localDecalGeo(mesh, point, size, helper.rotation);
           if(rg){
