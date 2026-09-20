@@ -8004,7 +8004,7 @@ function createTattoo(overrides = {}) {
    ============================================================ */
 // App-versie (semver, handmatig ophogen bij een release). Bij een bump ook de
 // CACHE-naam in sw.js meebumpen, zodat clients de nieuwe build ophalen.
-const APP_VERSIE = '0.3.74';
+const APP_VERSIE = '0.3.75';
 
 /* Dev-haken die de CLOUD raken hangen alleen op een ontwikkelmachine aan window. Ze zijn geen
    lek op zichzelf (zonder XSS roept niemand ze aan, en CSP + esc() houden XSS tegen), maar ze
@@ -13666,7 +13666,10 @@ async function verwijderVoorbeelden() {
     const img=editDecal.tex&&editDecal.tex.image;
     const asp=(img&&img.width)?(img.height/img.width):1;
     if(editDecal.tex && editDecal._artTex!==editDecal.tex){ editDecal._art=artMetrics(img); editDecal._artTex=editDecal.tex; }
-    const a=editDecal._art;
+    // ring op de omtrek van de uitsnede (lasso), niet op de inkt-bbox: in de inkt-stand schoof de ring anders mee met de
+    // inktvlekken en stak de tattoo eruit (toesteltest 2026-09-20). Zonder lasso (hele foto): bbox van de zichtbare pixels.
+    const _kd=deelVan(editDecal), _kl=_kd && _kd.kunst3d && _kd.kunst3d.lasso;
+    const a=(_kl && _kl.length>=3) ? null : editDecal._art;
     if(!_ringHelper) _ringHelper=new THREE.Object3D();
     _ringHelper.position.copy(editDecal.point); _ringHelper.up.set(0,1,0);
     _ringHelper.lookAt(_rgT.copy(editDecal.point).add(editDecal.normal));
@@ -13770,12 +13773,30 @@ async function verwijderVoorbeelden() {
     const coarse=!!(window.matchMedia && window.matchMedia("(pointer:coarse)").matches);
     const w=stage.clientWidth;
     if(!w) return;                       // verborgen view: niets te meten
-    if(coarse && w===pinW) return;
+    if(coarse && w===pinW){ corrigeerStageOverloop(); return; }
     pinW=w;
     const top=stage.getBoundingClientRect().top + (window.scrollY||0);   // documentpositie, onafhankelijk van scrollstand
     const mn=document.querySelector('main'); const onder=mn ? (parseFloat(getComputedStyle(mn).paddingBottom)||0) : 12;   // in 3D 12px (CSS :has), elders de gewone 32
     const h=Math.max(380, Math.round(window.innerHeight - top - onder));
     stage.style.setProperty("--stage-h", h+"px");
+    corrigeerStageOverloop();
+  }
+  // Vangnet (toesteltest 2026-09-20, iPhone): de pagina kon in 3D toch scrollen en de overlay-knoppen schoven onder de kop.
+  // Is het document langer dan het venster terwijl de 3D-weergave zichtbaar is, haal dan het verschil van de stagehoogte af.
+  // Alleen krimpen, nooit groeien (geen gesprong bij in- en uitschuivende browserbalken); ook aangeroepen bij scrollen.
+  // Synchroon (geen requestAnimationFrame: die staat stil in een verborgen tab en dan blijft een bezig-vlag hangen), met een
+  // lichte throttle omdat scroll-events in salvo's komen.
+  let _overloopT=0;
+  function corrigeerStageOverloop(){
+    if(!stage || !stage.clientWidth) return;
+    const nu=performance.now(); if(nu-_overloopT<80) return; _overloopT=nu;
+    const v=document.getElementById("view-3d"); if(!v || v.classList.contains("verborgen")) return;
+    if(cutModal && cutModal.classList.contains("on")) return;   // knipmodal open: die heeft zijn eigen hoogte
+    const over=document.documentElement.scrollHeight - window.innerHeight;
+    if(over<=1) return;
+    const cur=parseFloat(getComputedStyle(stage).getPropertyValue("--stage-h"))||stage.clientHeight;
+    const h=Math.max(380, Math.round(cur-over));
+    if(h<cur){ stage.style.setProperty("--stage-h", h+"px"); if(window.scrollY) window.scrollTo(0,0); if(renderer) resize(); }
   }
   function resize(){ if(!renderer||!stage)return;
     pinStageHoogte();
@@ -17612,7 +17633,9 @@ function maakTatnetGL(json, canvas) {
     lassoPts.forEach((p,i)=>{ const X=r.left+p.nx*r.w, Y=r.top+p.ny*r.h; i?ctx.lineTo(X,Y):ctx.moveTo(X,Y); });
     if(lassoPts.length>=3){ ctx.closePath(); ctx.fillStyle="rgba("+accentRgb()+",.14)"; ctx.fill(); }
     ctx.lineWidth=2; ctx.lineJoin="round"; ctx.strokeStyle="#CE2727"; ctx.stroke();
-    // sleep-handles op elk punt
+    // sleep-handles op elk punt, alleen in de Points-stand: in Freehand zijn het geen handvatten (een nieuwe aanraking begint
+    // een nieuwe lijn) en bij een vloeiende lijn was de omcirkeling bijna alleen puntjes (toesteltest 2026-09-20)
+    if(cutModus!=='punt') return;
     lassoPts.forEach((p,i)=>{ const X=r.left+p.nx*r.w, Y=r.top+p.ny*r.h;
       ctx.beginPath(); ctx.arc(X,Y, i===lassoDragIdx?7:5, 0, Math.PI*2);
       ctx.fillStyle="#CE2727"; ctx.fill(); ctx.lineWidth=2; ctx.strokeStyle="#fff"; ctx.stroke(); });
@@ -18509,7 +18532,8 @@ function maakTatnetGL(json, canvas) {
     bindControls();
     bindCutUI();
     bindEditUI();
-    window.addEventListener("resize",()=>{ resize(); fitCutModalVV(); });   // ook de cut-modal meenemen bij een gewone resize/rotatie (vangnet naast visualViewport)
+    window.addEventListener("resize",()=>{ resize(); fitCutModalVV(); });
+    window.addEventListener("scroll",()=>corrigeerStageOverloop(),{passive:true});   // vangnet: scrollen in 3D = stage te hoog   // ook de cut-modal meenemen bij een gewone resize/rotatie (vangnet naast visualViewport)
     window.addEventListener("orientationchange",()=>{ setTimeout(fitCutModalVV,120); });   // sommige webviews melden de nieuwe maat pas ná de rotatie-animatie
     resize();
     if(window.visualViewport){ window.visualViewport.addEventListener("resize",fitCutModalVV); window.visualViewport.addEventListener("scroll",fitCutModalVV); }
