@@ -1076,10 +1076,10 @@ form label,
 .stage-knoppen button{pointer-events:auto;box-shadow:0 4px 14px rgba(0,0,0,.22);}
 .stage-knoppen .gepland-toggle{background:var(--kaart);min-height:44px;padding:6px 14px;}   /* even hoog als de ronde knoppen rechts */
 .stage-knoppen #toon-gepland-3d{position:static;left:auto;top:auto;z-index:auto;}   /* de oude absolute plek (van de 2D-kaart) viel over 'Heel lichaam' heen */
-.stage-knoppen #t3d-reset,.stage-knoppen #t3d-info{position:static;top:auto;right:auto;width:44px;height:44px;border-radius:50%;flex:none;
+.stage-knoppen #t3d-reset,.stage-knoppen #t3d-info,.stage-knoppen #t3d-deel{position:static;top:auto;right:auto;width:44px;height:44px;border-radius:50%;flex:none;
   background:var(--kaart);border:1px solid var(--rand);color:var(--tekst);cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:inherit;}
-.stage-knoppen #t3d-info:hover,.stage-knoppen #t3d-reset:hover{border-color:var(--accent);}
-.stage-knoppen #t3d-info .ik{width:22px;height:22px;}
+.stage-knoppen #t3d-info:hover,.stage-knoppen #t3d-reset:hover,.stage-knoppen #t3d-deel:hover{border-color:var(--accent);}
+.stage-knoppen #t3d-info .ik,.stage-knoppen #t3d-deel .ik{width:22px;height:22px;}
 /* Reset-knop = ook 'Heel lichaam' (2026-09-15): met een losse ledemaat toont hij het lichaampje i.p.v. de pijl */
 #t3d-reset .ik-lichaam{display:none;}
 #t3d-reset.lede .ik-reset{display:none;}
@@ -1844,6 +1844,10 @@ html.knipfull .cutmodal.cm-review .cm-bewerkbtn span{position:absolute;width:1px
 .onboarding-start{margin-top:10px;min-height:48px;font-size:1.02rem}
 .onb-skip{margin:2px auto 0;color:var(--gedempt);font-size:.85rem;padding:0 14px;min-width:44px;min-height:44px}
 .onb-skip:hover{color:var(--accent)}
+/* 'Al een account? Inloggen' onder de knoppen (2026-09-20): voor wie z'n collectie op een nieuw toestel terughaalt */
+.onb-login{margin:22px 0 0;color:var(--gedempt);font-size:.85rem;display:flex;justify-content:center;align-items:center;gap:6px;flex-wrap:wrap}
+.onb-login button{background:transparent;border:0;padding:0 8px;min-height:44px;color:var(--tekst);font:inherit;font-weight:700;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+.onb-login button:hover{color:var(--accent)}
 /* CTA-highlight: korte puls op de '+ Add tattoo'-knop nadat de onboarding sluit */
 .highlight-puls{animation:ctaPuls 1.1s ease-out 2}
 @keyframes ctaPuls{0%{box-shadow:0 0 0 0 rgba(var(--accent-rgb),.55)}70%{box-shadow:0 0 0 16px rgba(var(--accent-rgb),0)}100%{box-shadow:0 0 0 0 rgba(var(--accent-rgb),0)}}
@@ -2113,6 +2117,7 @@ form label{text-transform:none;letter-spacing:.005em;font-size:.8rem;color:var(-
       </button>
         </div>
         <div class="sk-rechts">
+          <button type="button" id="t3d-deel" data-i18n-title="ui.deel_opname" data-i18n-aria="ui.deel_opname" title="Opname delen" aria-label="Opname delen"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15V4"/><path d="M8 8l4-4 4 4"/><path d="M5 12v7a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-7"/></svg></button>
           <button type="button" id="t3d-info" data-i18n-title="ui.uitleg_knop" data-i18n-aria="ui.uitleg_knop" title="Uitleg" aria-label="Uitleg"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5"/><path d="M12 7.6h.01"/></svg></button>
           <button type="button" id="t3d-reset" data-i18n-title="ui.beginstand" data-i18n-aria="ui.beginstand" title="Beginstand" aria-label="Beginstand"><svg class="ik ik-reset" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12a8 8 0 1 0 2.3-5.6"/><path d="M3 4v4h4"/></svg><svg class="ik ik-lichaam" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="4.6" r="2"/><path d="M12 7v7"/><path d="M5 9.5h14"/><path d="M9 21l3-7 3 7"/></svg></button>
         </div>
@@ -2161,6 +2166,7 @@ form label{text-transform:none;letter-spacing:.005em;font-size:.8rem;color:var(-
         <li data-i18n-html="uitleg.3d3"><strong>Tattoo toevoegen:</strong> tik op &#43; (rechtsonder), kies een foto, knip uit en geef een naam → Toevoegen. Tik daarna op het model waar hij moet komen. <strong>Tip:</strong> het makkelijkst is om één tattoo tegelijk toe te voegen, maar je kunt er ook meerdere uit één foto knippen (knop "+ Nog een" na het plaatsen).</li>
         <li data-i18n-html="uitleg.3d4"><strong>Bewerken:</strong> dubbeltik op een geplaatste tattoo. Sleep om te verplaatsen, knijp om te schalen en te draaien. In de balk eronder zitten het potlood (opnieuw uitsnijden), het slot en de prullenbak.</li>
         <li data-i18n-html="uitleg.3d5"><strong>Wisselen:</strong> gebruik de 2D/3D-knop bovenaan voor de platte lichaamskaart.</li>
+        <li data-i18n-html="uitleg.3d6"><strong>Delen:</strong> tik op de deelknop (pijl omhoog, rechtsboven) om de weergave zoals je die nu ziet als afbeelding te delen, bijvoorbeeld met je artiest.</li>
       </ol>
     </div>
     </div>
@@ -2553,6 +2559,7 @@ form label{text-transform:none;letter-spacing:.005em;font-size:.8rem;color:var(-
       <div class="tint-rij" id="onb-tint"></div>
       <button type="button" class="knop onboarding-start" id="onb-next" data-i18n="onb.volgende">Volgende</button>
       <button type="button" class="linkbtn onb-skip" id="onb-overslaan" data-i18n="onb.overslaan">Overslaan</button>
+      <p class="onb-login"><span data-i18n="onb.al_account">Al een account?</span> <button type="button" id="onb-inloggen" data-i18n="onb.inloggen">Inloggen</button></p>
     </div>
     <div id="onb-stap2" hidden>
       <h1 class="onboarding-titel" data-i18n="onb.stap2_titel">Je eerste tattoo toevoegen</h1>
@@ -7456,7 +7463,7 @@ const I18N = {
     'hint.stap3':'<strong>3.</strong> Maak af en toe een back-up via <strong>Exporteren</strong>.',
     'hint.begrepen':'Begrepen',
     'onb.titel':'Welkom bij Tatties','onb.sub':'Kies je lichaam en huidskleur om te beginnen.','onb.start':'Aan de slag',
-    'onb.volgende':'Volgende','onb.terug':'Terug','onb.overslaan':'Overslaan','onb.opnieuw':'Introductie opnieuw','onb.stap2_titel':'Je eerste tattoo toevoegen',
+    'onb.volgende':'Volgende','onb.terug':'Terug','onb.overslaan':'Overslaan','onb.al_account':'Al een account?','onb.inloggen':'Inloggen','onb.opnieuw':'Introductie opnieuw','onb.stap2_titel':'Je eerste tattoo toevoegen',
     'onb.stap2_sub':'Tik straks op "+ Nieuwe tattoo" om een foto te kiezen, uit te snijden en op het model te plaatsen.',
     'sv.collectie':'Collectie','sv.wishlist':'Wishlist',
     'uitleg.titel3d':'Zo werkt de 3D-weergave',
@@ -7464,7 +7471,7 @@ const I18N = {
     'uitleg.3d2':'<strong>Draaien:</strong> sleep met je vinger of muis om het model rond te draaien.',
     'uitleg.3d3':'<strong>Tattoo toevoegen:</strong> tik op + (rechtsonder), kies een foto, knip uit en geef een naam → Toevoegen. Tik daarna op het model waar hij moet komen. <strong>Tip:</strong> het makkelijkst is om één tattoo tegelijk toe te voegen, maar je kunt er ook meerdere uit één foto knippen (knop "+ Nog een" na het plaatsen).',
     'uitleg.3d4':'<strong>Bewerken:</strong> dubbeltik op een geplaatste tattoo. Sleep om te verplaatsen, knijp om te schalen en te draaien. In de balk eronder zitten het potlood (opnieuw uitsnijden), het slot en de prullenbak.',
-    'uitleg.3d5':'<strong>Wisselen:</strong> gebruik de 2D/3D-knop bovenaan voor de platte lichaamskaart.',
+    'uitleg.3d5':'<strong>Wisselen:</strong> gebruik de 2D/3D-knop bovenaan voor de platte lichaamskaart.','uitleg.3d6':'<strong>Delen:</strong> tik op de deelknop (pijl omhoog, rechtsboven) om de weergave zoals je die nu ziet als afbeelding te delen, bijvoorbeeld met je artiest.',
     'uitleg.titel2d':'Zo werkt de 2D-kaart',
     'uitleg.2d1':'<strong>Tattoo toevoegen:</strong> tik op + (rechtsonder), kies een foto, knip uit en geef een naam → Toevoegen. Tik daarna op de kaart waar hij moet komen. <strong>Tip:</strong> het makkelijkst is om één tattoo tegelijk toe te voegen, maar je kunt er ook meerdere uit één foto knippen (knop "+ Nog een" na het plaatsen).',
     'uitleg.2d2':'<strong>Bijstellen:</strong> versleep om te verplaatsen, knijp/draai met twee vingers om te schalen en roteren - of gebruik de knoppen in het bewerkmenu.',
@@ -7527,7 +7534,7 @@ const I18N = {
     'ui.geen_foto_bewaard':'Geen originele foto bewaard voor deze tattoo','ui.pas_aan_sla_op':'Pas de uitsnede aan en sla op',
     'ui.foto_niet_geladen':'Kon de foto niet laden','ui.knip_terug_vraag':'Je was een tattoo aan het uitsnijden. Verdergaan waar je gebleven was?','ui.knip_terug_ja':'Verdergaan','ui.knip_terug_klaar':'Je uitsnede staat er weer','ui.teken_lijn':'Teken een lijn rond de tattoo en stel de gevoeligheid in',
     'ui.geen_afbeelding':'Kies een afbeelding (geen ander bestandstype)','ui.foto_te_groot':'Foto te groot (max 30 MB)','ui.foto_mislukt':'Kon de foto niet verwerken',
-    'ui.reset':'Reset','ui.uitleg_knop':'Uitleg','ui.knop_uitleg':'Wat doen de knoppen?','ui.info':'Info','ui.gereedschap':'Gereedschap',
+    'ui.reset':'Reset','ui.uitleg_knop':'Uitleg','ui.deel_opname':'Opname delen','toast.opname_mislukt':'Opname maken is niet gelukt','toast.opname_bewaard':'Opname bewaard','ui.knop_uitleg':'Wat doen de knoppen?','ui.info':'Info','ui.gereedschap':'Gereedschap',
     'inst.vorm.binnenkort':'Binnenkort','ui.bouw2d_kop':'Nog in aanbouw','ui.bouw2d_sub':'Gebruik zolang het 3D-model.',
     'aria.volledigoverzicht':'Volledig overzicht','aria.welkom':'Welkom',
     'ui.tik_achtergrond':'Tik op de achtergrond in de foto','ui.pipet_uit':'Pipet uit',
@@ -7649,7 +7656,7 @@ const I18N = {
     'hint.stap3':'<strong>3.</strong> Make a backup now and then via <strong>Export</strong>.',
     'hint.begrepen':'Got it',
     'onb.titel':'Welcome to Tatties','onb.sub':'Pick your body and skin tone to get started.','onb.start':'Get started',
-    'onb.volgende':'Next','onb.terug':'Back','onb.overslaan':'Skip','onb.opnieuw':'Replay intro','onb.stap2_titel':'Add your first tattoo',
+    'onb.volgende':'Next','onb.terug':'Back','onb.overslaan':'Skip','onb.al_account':'Already have an account?','onb.inloggen':'Log in','onb.opnieuw':'Replay intro','onb.stap2_titel':'Add your first tattoo',
     'onb.stap2_sub':'Next, tap "+ New tattoo" to pick a photo, cut it out and place it on the model.',
     'sv.collectie':'Collection','sv.wishlist':'Wishlist',
     'uitleg.titel3d':'How the 3D view works',
@@ -7657,7 +7664,7 @@ const I18N = {
     'uitleg.3d2':'<strong>Rotate:</strong> drag with your finger or mouse to turn the model.',
     'uitleg.3d3':'<strong>Add a tattoo:</strong> tap + (bottom right), pick a photo, cut it out and give it a name → Add. Then tap the model where it should go. <strong>Tip:</strong> it\'s easiest to add one tattoo at a time, but you can also cut several from one photo (the "+ Another" button after placing).',
     'uitleg.3d4':'<strong>Edit:</strong> double-tap a placed tattoo. Drag to move, pinch to scale and rotate. The bar below has the pencil (recrop), the lock and the bin.',
-    'uitleg.3d5':'<strong>Switch:</strong> use the 2D/3D button at the top for the flat body map.',
+    'uitleg.3d5':'<strong>Switch:</strong> use the 2D/3D button at the top for the flat body map.','uitleg.3d6':'<strong>Share:</strong> tap the share button (arrow up, top right) to share the view as you see it now as an image, for example with your artist.',
     'uitleg.titel2d':'How the 2D map works',
     'uitleg.2d1':'<strong>Add a tattoo:</strong> tap + (bottom right), pick a photo, cut it out and give it a name → Add. Then tap the map where it should go. <strong>Tip:</strong> it\'s easiest to add one tattoo at a time, but you can also cut several from one photo (the "+ Another" button after placing).',
     'uitleg.2d2':'<strong>Fine-tune:</strong> drag to move, pinch/twist with two fingers to scale and rotate - or use the buttons in the edit menu.',
@@ -7720,7 +7727,7 @@ const I18N = {
     'ui.geen_foto_bewaard':'No original photo saved for this tattoo','ui.pas_aan_sla_op':'Adjust the cut-out and save',
     'ui.foto_niet_geladen':'Could not load the photo','ui.knip_terug_vraag':'You were cutting out a tattoo. Carry on where you left off?','ui.knip_terug_ja':'Carry on','ui.knip_terug_klaar':'Your cut-out is back','ui.teken_lijn':'Draw a line around the tattoo and set the sensitivity',
     'ui.geen_afbeelding':'Please choose an image (not another file type)','ui.foto_te_groot':'Photo too large (max 30 MB)','ui.foto_mislukt':'Could not process the photo',
-    'ui.reset':'Reset','ui.uitleg_knop':'Help','ui.knop_uitleg':'What do the buttons do?','ui.info':'Info','ui.gereedschap':'Tools',
+    'ui.reset':'Reset','ui.uitleg_knop':'Help','ui.deel_opname':'Share snapshot','toast.opname_mislukt':'Could not create the snapshot','toast.opname_bewaard':'Snapshot saved','ui.knop_uitleg':'What do the buttons do?','ui.info':'Info','ui.gereedschap':'Tools',
     'inst.vorm.binnenkort':'Coming soon','ui.bouw2d_kop':'Under construction','ui.bouw2d_sub':'Use the 3D model for now.',
     'aria.volledigoverzicht':'Full overview','aria.welkom':'Welcome',
     'ui.tik_achtergrond':'Tap the background in the photo','ui.pipet_uit':'Eyedropper off',
@@ -8005,7 +8012,7 @@ function createTattoo(overrides = {}) {
    ============================================================ */
 // App-versie (semver, handmatig ophogen bij een release). Bij een bump ook de
 // CACHE-naam in sw.js meebumpen, zodat clients de nieuwe build ophalen.
-const APP_VERSIE = '0.3.77';
+const APP_VERSIE = '0.3.79';
 
 /* Dev-haken die de CLOUD raken hangen alleen op een ontwikkelmachine aan window. Ze zijn geen
    lek op zichzelf (zonder XSS roept niemand ze aan, en CSP + esc() houden XSS tegen), maar ze
@@ -13193,6 +13200,7 @@ async function verwijderVoorbeelden() {
     const b = $('#btn-3d'); if (b) b.click();
   });
   { const ov = $('#onb-overslaan'); if (ov) ov.addEventListener('click', rondOnboardingAf); }   // Overslaan = afronden + onthouden (zelfde vlag)
+  { const li = $('#onb-inloggen'); if (li) li.addEventListener('click', () => { rondOnboardingAf(); setTimeout(() => { try { openAccount(); } catch (_) {} }, 60); }); }   // al een account: intro sluiten, account-venster openen
   { const ob = $('#inst-onboarding'); if (ob) ob.addEventListener('click', () => {   // 'Introductie opnieuw' vanuit instellingen
       try { localStorage.removeItem('tatties-onboarding-gedaan'); } catch { /* geen vlag */ }
       if (typeof sluitInstellingen === 'function') sluitInstellingen();
@@ -13652,6 +13660,48 @@ async function verwijderVoorbeelden() {
     const k=radius*0.0018;
     target.addScaledVector(right,-dx*k).addScaledVector(up, dy*k);
     target.x=clamp(target.x,-0.9,0.9); target.y=clamp(target.y,-0.1,2.1); target.z=clamp(target.z,-0.9,0.9);
+  }
+  // ---- Opname delen (2026-09-20, opvolger van 'Kaart als PNG') -----------------------------------
+  // De huidige weergave als PNG: eigen render target (de canvas bewaart zijn buffer niet), selectiering buiten beeld,
+  // texture.encoding = outputEncoding zodat de kleuren gelijk zijn aan het scherm. Max ~1600 px op de langste zijde.
+  function maakOpname(){
+    if(!renderer || !scene || !camera) return null;
+    const src=renderer.domElement, cw=src.clientWidth||320, ch=src.clientHeight||320;
+    const schaal=Math.min(2, Math.max(renderer.getPixelRatio()||1, 1600/Math.max(cw,ch)));
+    const w=Math.round(cw*schaal), h=Math.round(ch*schaal);
+    // Multisample-target (WebGL2) voor anti-aliasing zoals op het scherm; r128 leest bij readRenderTargetPixels uit het
+    // opgeloste framebuffer, dus eerst setRenderTarget(null) (= de resolve) en dan pas uitlezen.
+    const msaa=!!(renderer.capabilities.isWebGL2 && THREE.WebGLMultisampleRenderTarget);
+    const rt=msaa ? new THREE.WebGLMultisampleRenderTarget(w,h) : new THREE.WebGLRenderTarget(w,h);
+    if(msaa) rt.samples=Math.min(4, renderer.capabilities.maxSamples||4);
+    rt.texture.encoding=renderer.outputEncoding;
+    const ringWas=!!(selRing && selRing.visible); if(selRing) selRing.visible=false;
+    const oldAsp=camera.aspect; camera.aspect=w/h; camera.updateProjectionMatrix();
+    try{
+      renderer.setRenderTarget(rt); renderer.render(scene,camera); renderer.setRenderTarget(null);
+      const buf=new Uint8Array(w*h*4); renderer.readRenderTargetPixels(rt,0,0,w,h,buf);
+      const c=document.createElement('canvas'); c.width=w; c.height=h; const x=c.getContext('2d');
+      const id=x.createImageData(w,h); for(let y=0;y<h;y++) id.data.set(buf.subarray((h-1-y)*w*4,(h-y)*w*4), y*w*4);
+      x.putImageData(id,0,0); return c;
+    }catch(e){ console.error('opname mislukt', e); return null; }
+    finally{ renderer.setRenderTarget(null); rt.dispose(); camera.aspect=oldAsp; camera.updateProjectionMatrix(); if(selRing) selRing.visible=ringWas; }
+  }
+  let opnameBezig=false;
+  async function deelOpname(){
+    if(opnameBezig) return; opnameBezig=true;
+    try{
+      const c=maakOpname(); if(!c){ toast(tr('toast.opname_mislukt')); return; }
+      const blob=await new Promise(res=>c.toBlob(res,'image/png')); if(!blob){ toast(tr('toast.opname_mislukt')); return; }
+      const naam='tatties-'+new Date().toISOString().slice(0,10)+'.png';
+      const file=(typeof File!=='undefined') ? new File([blob], naam, {type:'image/png'}) : null;
+      if(file && navigator.share && navigator.canShare && navigator.canShare({files:[file]})){
+        try{ await navigator.share({files:[file], title:'Tatties'}); tril(12); return; }
+        catch(e){ if(e && e.name==='AbortError') return; }   // geannuleerd = klaar; andere fout -> downloaden
+      }
+      const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=naam; document.body.appendChild(a); a.click();
+      setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); }, 2000);
+      toast(tr('toast.opname_bewaard'));
+    } finally { opnameBezig=false; }
   }
   function resetView(){
     targetGoal=null; radiusGoal=null; radius=CAM0.radius; theta=CAM0.theta; phi=CAM0.phi;
@@ -18491,6 +18541,7 @@ function maakTatnetGL(json, canvas) {
     stateRef:()=>({ inited, currentGender, meldAndereModel, actief3D, plaatsModus, plaatsDataAan: !!plaatsData, plaatsTex: !!(plaatsData && plaatsData.tex) }),
     cameraRef:()=>camera, rendererRef:()=>renderer,   // schaal-/fov-metingen (zie resize)
     bindDbg:{ maakBind, uitBind, triBijPunt, triAantal, triWereld, surfaceAt, markersRef:()=>markers },
+    opname:maakOpname,
     wikkel:{ aan:()=>decalWikkel, zet:(b)=>{ decalWikkel=!!b; for(const m of markers) rebuildMarker(m); return decalWikkel; },
              expDecalGeo, expMap, graafUitDriehoeken, vertexGraafFor, bouwDecalUitExpMap },
     addMetFoto:(src)=>openCutModalAddMetFoto(src,'3d'),
@@ -18542,6 +18593,7 @@ function maakTatnetGL(json, canvas) {
     body=new THREE.Group(); scene.add(body);
     // selectie-ring wordt on-demand als huid-decal gebouwd (buildSelRing), niet meer als platte ring vooraf
     const rb=document.getElementById("t3d-reset"); if(rb) rb.onclick=()=>{ stopIsolatie(); resetView(); };
+    { const db=document.getElementById("t3d-deel"); if(db) db.onclick=()=>{ deelOpname(); }; }
     { const ib=document.getElementById("t3d-info"); if(ib) ib.onclick=openUitleg3D;
       const sb2=document.getElementById("t3d-uitleg-sluit"); if(sb2) sb2.onclick=sluitUitleg3D;
       const ov=document.getElementById("t3d-uitleg-overlay"); if(ov) ov.addEventListener("click", e=>{ if(e.target===ov) sluitUitleg3D(); }); }
