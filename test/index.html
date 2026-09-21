@@ -92,10 +92,14 @@
   // PWA-icons: raster-PNG (192/512) zodat Android-Chrome 'beforeinstallprompt' vuurt (SVG-only volstaat daar niet).
   const ICON_PNG_192 = 'data:image/png;base64,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';
   const ICON_PNG_512 = 'data:image/png;base64,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';
+  // Taal van het manifest = taal van de app: Engels, tenzij de gebruiker zelf NL koos (zelfde regel als de UI, doorloop 2026-09-21).
+  let manifestNl = false;
+  try { manifestNl = localStorage.getItem('tatties-taal') === 'nl' && !!localStorage.getItem('tatties-taal-gekozen'); } catch (e) {}
   const manifest = {
     name: 'Tatties',
     short_name: 'Tatties',
-    description: 'Persoonlijke tattoo-tracker - werkt volledig offline.',
+    lang: manifestNl ? 'nl' : 'en',
+    description: manifestNl ? 'Persoonlijke tattoo-tracker - werkt volledig offline.' : 'Personal tattoo tracker - works fully offline.',
     start_url: '.',
     scope: '.',
     display: 'standalone',
@@ -187,6 +191,11 @@
   --invalid-rgb:138,90,0;
   --succes:#5FBE86;      /* bevestiging/voltooid (licht, thema-onafhankelijk) */
   --succes-diep:#227A3E; /* diepe succesgroen voor gevulde knoppen: donker genoeg voor --op-accent-tekst, in beide thema's gelijk */
+  /* Toast-familie (toast, actie-toast, sync-pil, 3D-melding, knipstrip): inkt-vlak op papier. In het donkere thema een
+     papier-vlak op inkt (blackwork), anders verdwijnt het vlak tegen de grond (1,1:1, doorloop 2026-09-21). */
+  --toast-bg:#2A2118;
+  --toast-tekst:#F0EDE8;
+  --toast-knop:#F0EDE8;   /* actieknop = tekstkleur (vet, kapitaal, onderstreept), geen tweede accent (doorloop 2026-09-21) */
   /* Lettergrootte-schaal (modulair, rem) - zie HUISSTIJL.md */
   --fs-xs:.72rem;
   --fs-sm:.82rem;
@@ -640,6 +649,7 @@ dl.toon-leeg .veldrij.leeg-veld{display:flex}
 .start-stat:first-child{border-left:0}
 /* Blijft er na het weglaten van nulwaarden maar een tegel over, dan hoort die niet over de
    volle breedte uit te rekken; dat leest als een banner in plaats van als een cijfer. */
+.start-stats:empty,.start-wrap.leeg .start-stats{display:none}   /* lege staat: geen leeg kaartje (doorloop 2026-09-21) */
 .start-stats.weinig{justify-content:center}
 .start-stats.weinig .start-stat{flex:0 1 170px}
 .start-stat-getal{display:block;font-size:clamp(1.25rem,5vw,1.6rem);line-height:1.15;font-weight:700;color:var(--accent-diep);font-family:var(--serif);white-space:nowrap}
@@ -810,7 +820,7 @@ input[type=range]:focus{box-shadow:none;border:none}
 #toast{
   position:fixed;left:50%;transform:translateX(-50%) translateY(20px);
   bottom:max(86px,calc(env(safe-area-inset-bottom) + 70px));z-index:100;
-  background:#2A2118;color:var(--op-accent);border-left:3px solid var(--accent);
+  background:var(--toast-bg);color:var(--toast-tekst);border-left:3px solid var(--accent);
   padding:12px 16px;border-radius:var(--r-md);
   font-size:.9rem;opacity:0;pointer-events:none;transition:opacity .2s, transform .2s;
   width:max-content;max-width:90vw;text-align:left;box-shadow:0 10px 30px rgba(34,26,18,.35);   /* width:max-content: met left:50% krimpt een fixed element anders tot een halve schermbreedte (smalle 'Ververs'-toast, 2026-09-15) */
@@ -819,14 +829,14 @@ input[type=range]:focus{box-shadow:none;border:none}
 #toast.met-actie{pointer-events:auto;display:flex;align-items:center;gap:8px;padding:4px 4px 4px 16px;max-width:calc(100vw - 24px)}   /* tekst + knop + kruisje op een regel, ook op 375 px */
 #toast .toast-knop{margin-left:4px}
 .toast-sluit{min-width:44px;min-height:44px;display:inline-flex;align-items:center;justify-content:center;background:none;border:0;padding:0;
-  color:var(--op-accent);opacity:.7;font-size:1.35rem;line-height:1;cursor:pointer;border-radius:var(--r-sm,8px);}
+  color:var(--toast-tekst);opacity:.7;font-size:1.35rem;line-height:1;cursor:pointer;border-radius:var(--r-sm,8px);}
 .toast-sluit:hover,.toast-sluit:focus-visible{opacity:1}
 /* Sync-indicator: klein pilletje bovenin (spinner 'Synchroniseren…' -> ✓ 'Bijgewerkt') */
 #sync-ind{position:fixed;left:50%;top:max(64px,calc(env(safe-area-inset-top) + 60px));transform:translateX(-50%);z-index:55;
-  display:inline-flex;align-items:center;gap:8px;background:#2A2118;color:var(--op-accent);border:1px solid var(--rand);
+  display:inline-flex;align-items:center;gap:8px;background:var(--toast-bg);color:var(--toast-tekst);border:1px solid var(--rand);
   padding:7px 13px;border-radius:999px;font-size:.8rem;font-weight:600;box-shadow:0 6px 20px rgba(34,26,18,.3);}
 #sync-ind[hidden]{display:none;}
-#sync-ind .si-spin{width:14px;height:14px;border-radius:50%;border:2px solid rgba(240,237,232,.3);border-top-color:var(--accent);animation:t3dspin .8s linear infinite;}
+#sync-ind .si-spin{width:14px;height:14px;border-radius:50%;border:2px solid color-mix(in srgb, var(--toast-tekst) 30%, transparent);border-top-color:var(--toast-tekst);animation:t3dspin .8s linear infinite;}
 #sync-ind .si-vink{display:none;color:var(--succes);font-weight:800;}
 #sync-ind.klaar .si-spin{display:none;}
 #sync-ind.klaar .si-vink{display:inline;}
@@ -835,7 +845,7 @@ input[type=range]:focus{box-shadow:none;border:none}
   /* De knop die een verwijdering terugdraait mag niet zelf een mistap uitlokken: 44px conform
      de huisstijl (stond op 24). De melding dooft na een paar seconden, dus dit is precies het
      moment waarop mikken moeilijk is. */
-  min-height:44px;padding:4px 10px;color:#F2A285;font-weight:800;
+  min-height:44px;padding:4px 10px;color:var(--toast-knop);font-weight:800;text-decoration:underline;text-underline-offset:3px;
   font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;white-space:nowrap;
   display:inline-flex;align-items:center;
 }
@@ -994,6 +1004,9 @@ form label,
   --invalid:#E2B25A;        /* oker op donker (8:1) */
   --invalid-rgb:226,178,90;
   --op-grond:#9E9382;   /* donker thema: --gedempt haalt hier al 6,02:1 */       /* gedempte/secundaire tekst */
+  --toast-bg:#ECE3D2;      /* toast = papier-vlak op inkt */
+  --toast-tekst:#181511;
+  --toast-knop:#181511;    /* = tekstkleur op het papier-vlak */
   --raster:#322C21;        /* rasterlijnen op het papier */
   --inktblauw:#3B5488;     /* helderder navy zodat selectie opvalt */
   /* Blackwork-modus: papier wordt zwart, inkt wordt papierwit; het rood blijft gelijk */
@@ -1095,6 +1108,7 @@ form label,
 /* Op een kort scherm viel de hintregel half onder de vouw (gemeten op 320x640: de onderste 34px).
    Het veld iets korter maken scheelt genoeg en houdt het model nog ruim in beeld. */
 @media (max-height:700px){ #stage{height:66vh;height:66svh;height:var(--stage-h,66svh);min-height:380px} }
+@media (orientation:landscape){ #stage{min-height:240px} }   /* landscape: 380 paste niet in 375 hoog en liet de pagina scrollen (doorloop 2026-09-21) */
 #t3d-uitleg{padding:4px 16px 16px;color:var(--gedempt);}
 #t3d-uitleg ol{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px;font-size:var(--fs-sm);line-height:1.45;}
 #t3d-uitleg strong{color:var(--tekst);}
@@ -1104,8 +1118,8 @@ form label,
 #t2d-uitleg ol{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px;font-size:var(--fs-sm);line-height:1.45;}
 #t2d-uitleg strong{color:var(--tekst);}
 #t3d-toast{position:absolute;left:50%;top:64px;transform:translateX(-50%);   /* onder de overlay-knoppen (2026-09-14) */
-  background:rgba(14,17,22,.92);border:1px solid #262d38;color:#e8eaed;font-size:var(--fs-sm);
-  padding:8px 14px;border-radius:var(--r-sm);opacity:0;transition:opacity .3s;pointer-events:none;max-width:80%;text-align:center;z-index:4;}
+  background:var(--toast-bg);color:var(--toast-tekst);border-left:3px solid var(--accent);font-size:.9rem;   /* zelfde vlak als #toast (doorloop 2026-09-21) */
+  padding:12px 16px;border-radius:var(--r-md);box-shadow:0 10px 30px rgba(34,26,18,.35);opacity:0;transition:opacity .3s;pointer-events:none;max-width:80%;text-align:center;z-index:4;}
 .t3d-tools{display:flex;align-items:center;gap:10px;padding:2px 2px 6px;}
 .t3d-tools .t3d-label{font-size:var(--fs-xs);text-transform:uppercase;letter-spacing:.1em;color:#8b95a3;white-space:nowrap;}
 .t3d-tools input[type=range]{flex:1;accent-color:#e0533d;height:22px;cursor:pointer;}
@@ -1229,6 +1243,11 @@ form label,
 .cutmodal .cm-geenfoto{display:none;}
 .cutmodal.cm-compact .cm-geenfoto{display:inline-flex;align-items:center;justify-content:center;align-self:center;margin-top:4px;min-height:44px;color:rgba(255,255,255,.85);font-size:.88rem;}
 .cutmodal:not(.cm-compact) .cm-choose-cam{display:none;}   /* foto maken alleen bij de eerste keuze, niet bij 'andere foto' */
+/* Een rood per scherm (doorloop 2026-09-21): uploaden = primair (rood, bovenaan), foto maken = secundair eronder. */
+.cutmodal.cm-compact .cm-choose.cm-choose-cam{order:2;background:var(--kaart);color:var(--tekst);border:1px solid var(--rand);box-shadow:none;}
+.cutmodal.cm-compact .cm-choose.cm-choose-cam:hover{filter:none;border-color:var(--tekst);}
+[data-theme="dark"] .cutmodal.cm-compact .cm-choose.cm-choose-cam{background:transparent;border-color:rgba(236,227,210,.55);}   /* op de donkere overlay: omlijnd i.p.v. donker vlak */
+.cutmodal.cm-compact .cm-geenfoto{order:3;}   /* de 'zonder foto'-link blijft onderaan */
 .is-ios .cm-choose-cam{display:none !important;}            /* iOS biedt 'Take Photo' al via het OS-menu (wint van de compact-knopstijl) */
 .cutmodal .cm-choose{align-self:center;margin-top:6px;padding:7px 14px;font-size:var(--fs-sm);color:var(--gedempt);border-radius:999px;min-height:0;background:transparent;}
 .cutmodal.cm-compact .cm-choose{display:inline-flex;align-items:center;justify-content:center;gap:9px;margin-top:0;padding:15px 26px;font-size:var(--fs-md);font-weight:600;color:var(--op-accent);background:var(--rood);border:2px solid var(--rood-diep);box-shadow:3px 3px 0 var(--rood-diep);min-height:52px;}   /* 2026-09-18: rood = primaire actie, zoals de plaats-knop */
@@ -1249,7 +1268,7 @@ form label,
 .cutmodal .cm-foot .btn{flex:1;}
 /* In-modal feedback: body-toasts renderen onzichtbaar in de modal op iOS, dus tonen we
    meldingen (reset/teruggezet/fouten) hier bovenaan de modal-body. Donker toast-vlak conform huisstijl. */
-.cutmodal .cm-feedback{position:absolute;top:8px;left:50%;transform:translateX(-50%);z-index:5;max-width:calc(100% - 24px);pointer-events:none;margin:0;padding:9px 13px;background:#2A2118;color:var(--op-accent);border-left:3px solid var(--accent);border-radius:var(--r-sm);font-size:var(--fs-sm);line-height:1.35;text-align:center;box-shadow:0 8px 22px rgba(34,26,18,.4);}
+.cutmodal .cm-feedback{position:absolute;top:8px;left:50%;transform:translateX(-50%);z-index:5;max-width:calc(100% - 24px);pointer-events:none;margin:0;padding:9px 13px;background:var(--toast-bg);color:var(--toast-tekst);border-left:3px solid var(--accent);border-radius:var(--r-sm);font-size:var(--fs-sm);line-height:1.35;text-align:center;box-shadow:0 8px 22px rgba(34,26,18,.4);}
 .cutmodal .cm-feedback[hidden]{display:none;}
 /* Magic cut (AI-uitsnede): volle-breedte primaire actie bovenaan de bewerkbalk. Zit IN .cut-tools
    (flex:0 0 100% = eigen rij; order:-1 = altijd boven Reset/Undo/Tools) zodat hij met de gedokte
@@ -1634,8 +1653,10 @@ html.knipfull .cutmodal.cm-fullcut.cm-gegevens #cmPlaceDeel{margin:0;padding:2px
    .linkbtn): zelfde vulling, rand, ronding, tekstgrootte en tikdoel. Ze stonden hier als
    onderstreepte tekstlinks, waardoor de onderste rij van de twee kaarten niet op elkaar leek. */
 html.knipfull .cutmodal.cm-fullcut.cm-gegevens .cm-choose,
-/* '+ Nog een' als tekstlink (UX-doorloop 2026-09-14): secundair naast de rode plaats-knop, niet even zwaar als de rest */
-html.knipfull .cutmodal.cm-fullcut.cm-gegevens #cmPlaceMeer{display:inline-flex;align-items:center;gap:5px;
+/* '+ Nog een' en '+ Nog een deel' als tekstlink (UX-doorloop 2026-09-14): secundair naast de rode plaats-knop, niet even zwaar
+   als de rest. Beide op 44 px (doorloop 2026-09-21: de deel-link stond nog op 20 px). */
+html.knipfull .cutmodal.cm-fullcut.cm-gegevens #cmPlaceMeer,
+html.knipfull .cutmodal.cm-fullcut.cm-gegevens #cmPlaceDeel{display:inline-flex;align-items:center;gap:5px;
   margin:0;padding:9px 4px;min-height:44px;box-shadow:none;
   background:transparent;border:0;border-radius:0;color:var(--gedempt);
   font-size:var(--fs-sm);font-weight:600;text-decoration:underline;}
@@ -1746,6 +1767,10 @@ html.knipfull .cutmodal.cm-review .cm-bewerkbtn span{position:absolute;width:1px
   background:var(--veldbg);border:1px solid var(--rand);color:var(--tekst);font-size:.82rem;font-weight:600;
   padding:8px 14px;border-radius:999px;text-align:center;box-shadow:0 2px 10px rgba(0,0,0,.18);pointer-events:none;}
 .lege-hint[hidden]{display:none;}
+/* 3D: de lege-pil op de plek van de draaihint (linksonder naast de +, op de vloer), niet over de schenen; zolang de
+   eenmalige draaihint aan staat blijft de pil weg (doorloop 2026-09-21). */
+#view-3d #lege-hint-3d{left:12px;right:74px;bottom:14px;transform:none;max-width:none;}
+#view-3d:has(#hint.on) #lege-hint-3d{display:none;}
 .cutmodal .cm-veld{display:flex;flex-direction:column;gap:4px;font-size:var(--fs-sm);color:var(--gedempt);margin:8px 0 0;}
 /* Accentkleur: swatch naast de tekst (rij) i.p.v. eronder */
 .cutmodal .cm-accent-veld{flex-direction:row;align-items:center;justify-content:space-between;gap:14px;}
@@ -2162,7 +2187,7 @@ form label{text-transform:none;letter-spacing:.005em;font-size:.8rem;color:var(-
     <div id="t3d-uitleg">
       <ol>
         <li data-i18n-html="uitleg.3d1"><strong>Model kiezen:</strong> stel man of vrouw en je huidskleur in via Instellingen (tandwiel rechtsboven).</li>
-        <li data-i18n-html="uitleg.3d2"><strong>Draaien:</strong> sleep met je vinger of muis om het model rond te draaien.</li>
+        <li data-i18n-html="uitleg.3d2"><strong>Draaien:</strong> sleep met je vinger of muis om het model rond te draaien. Tik op een arm of been om dat deel apart te bekijken; <strong>Heel lichaam</strong> (rechtsboven) zet alles terug in de beginstand. Met <strong>Wishlist</strong> (linksboven) toon je ook je wens-tattoos.</li>
         <li data-i18n-html="uitleg.3d3"><strong>Tattoo toevoegen:</strong> tik op &#43; (rechtsonder), kies een foto, knip uit en geef een naam → Toevoegen. Tik daarna op het model waar hij moet komen. <strong>Tip:</strong> het makkelijkst is om één tattoo tegelijk toe te voegen, maar je kunt er ook meerdere uit één foto knippen (knop "+ Nog een" na het plaatsen).</li>
         <li data-i18n-html="uitleg.3d4"><strong>Bewerken:</strong> dubbeltik op een geplaatste tattoo. Sleep om te verplaatsen, knijp om te schalen en te draaien. In de balk eronder zitten het potlood (opnieuw uitsnijden), het slot en de prullenbak.</li>
         <li data-i18n-html="uitleg.3d5"><strong>Wisselen:</strong> gebruik de 2D/3D-knop bovenaan voor de platte lichaamskaart.</li>
@@ -7468,7 +7493,7 @@ const I18N = {
     'sv.collectie':'Collectie','sv.wishlist':'Wishlist',
     'uitleg.titel3d':'Zo werkt de 3D-weergave',
     'uitleg.3d1':'<strong>Model kiezen:</strong> kies mannelijk of vrouwelijk en je huidskleur via Instellingen (tandwiel rechtsboven).',
-    'uitleg.3d2':'<strong>Draaien:</strong> sleep met je vinger of muis om het model rond te draaien.',
+    'uitleg.3d2':'<strong>Draaien:</strong> sleep met je vinger of muis om het model rond te draaien. Tik op een arm of been om dat deel apart te bekijken; <strong>Heel lichaam</strong> (rechtsboven) zet alles terug in de beginstand. Met <strong>Wishlist</strong> (linksboven) toon je ook je wens-tattoos.',
     'uitleg.3d3':'<strong>Tattoo toevoegen:</strong> tik op + (rechtsonder), kies een foto, knip de tattoo uit en geef een naam → Op het model plaatsen. Tik daarna op het model waar hij moet komen. <strong>Tip:</strong> het makkelijkst is om één tattoo tegelijk toe te voegen, maar je kunt er ook meerdere uit één foto knippen (knop "+ Nog een" na het plaatsen).',
     'uitleg.3d4':'<strong>Bewerken:</strong> dubbeltik op een geplaatste tattoo. Sleep om te verplaatsen, knijp om te schalen en te draaien. In de balk eronder zitten het potlood (opnieuw uitknippen), het slot en de prullenbak.',
     'uitleg.3d5':'<strong>Wisselen:</strong> gebruik de 2D/3D-knop bovenaan voor de platte lichaamskaart.','uitleg.3d6':'<strong>Delen:</strong> tik op de deelknop (pijl omhoog, rechtsboven) om de weergave zoals je die nu ziet als afbeelding te delen, bijvoorbeeld met je artiest.',
@@ -7539,7 +7564,7 @@ const I18N = {
     'aria.volledigoverzicht':'Volledig overzicht','aria.welkom':'Welkom',
     'ui.tik_achtergrond':'Tik op de achtergrond in de foto','ui.pipet_uit':'Pipet uit',
     'ui.kies_eerst_foto':'Kies eerst een foto en knip de tattoo uit','ui.tattoo_geplaatst':'Tattoo geplaatst ✓',
-    'ui.tattoo_bijgewerkt':'Tattoo bijgewerkt ✓','ui.plaatsen_mislukt':'Plaatsen mislukt','ui.fout':'fout',
+    'ui.tattoo_bijgewerkt':'Tattoo bijgewerkt ✓','ui.plaatsen_mislukt':'Plaatsen mislukt','ui.dev_aan':'Testmeldingen aan (Tatnet-tijden)','ui.dev_uit':'Testmeldingen uit','ui.fout':'fout',
     'ui.hersteld':'{n} tattoo{s} hersteld','ui.verwijder_bevestig':'Weet je zeker dat je deze tattoo wilt verwijderen?',
     'ui.toevoegen':'Toevoegen','ui.volgende':'Volgende','ui.opslaan':'Opslaan','ui.tab_knippen':'Uitknippen','ui.tab_gegevens':'Gegevens','ui.tabs_aria':'Stap','ui.gegevens_hint':'Geef je tattoo een naam. De rest kan later.','ui.geen_uitsnede_hint':'Nog niets geknipt - de hele foto wordt gebruikt','ui.auto_lasso_hint':'Tattoo automatisch gevonden. Klopt het niet? Ga terug en teken zelf een lijn rond de tattoo.','ui.klik_plaatsen':'Tik op het model waar je de tattoo wilt','ui.zonder3d_formulier':'Geen 3D op dit toestel - je kunt de tattoo wel als gegevens opslaan','ui.naam_verplicht':'Geef de tattoo eerst een naam','ui.meer_details':'Meer details','ui.naam':'Naam tattoo','ui.naam_ph':'Naam tattoo *',
     'ui.stage_aria':'3D-lichaamsmodel; gebruik de 2D-knop bovenaan voor de toegankelijke platte kaart','ui.stage_aria_solo':'3D-lichaamsmodel',
@@ -7615,7 +7640,7 @@ const I18N = {
     'toast.geplaatst':'Geplaatst op het gekozen lichaamsdeel - tik op de kaart om te verschuiven','toast.kieslichaamsdeel':'Kies eerst een lichaamsdeel, of tik op de kaart om te plaatsen',
     'toast.afbmislukt':'Afbeelding maken lukte niet','toast.kaartopgeslagen':'Kaart opgeslagen als afbeelding',
     'toast.vastgezet':'Tattoo vastgezet','toast.ontgrendeld':'Tattoo ontgrendeld',
-    'toast.wensverwijderd':'Wens verwijderd','toast.tattooverwijderd':'Tattoo verwijderd','toast.ongedaan':'Ongedaan maken',
+    'toast.wensverwijderd':'Wens verwijderd','toast.tattooverwijderd':'Tattoo verwijderd','toast.ongedaan':'Ongedaan',
     'toast.deelverwijderd':'Deel verwijderd','toast.deel_teruggezet':'Deel teruggezet','ui.deel_verwijder_vraag':'Dit deel van {naam} verwijderen? De andere delen blijven staan.','kaart.delen':'{n} delen','toast.tattooweg':'Deze tattoo bestaat niet meer','toast.datumtoekomst':'Kies een datum van vandaag of eerder',
     'toast.sessieverwijderd':'Sessie verwijderd','toast.touchupverwijderd':'Touch-up verwijderd','toast.taakverwijderd':'Taak verwijderd',
     'toast.teruggezet':'"{naam}" teruggezet','confirm.verwijder':'"{naam}" verwijderen?',
@@ -7661,7 +7686,7 @@ const I18N = {
     'sv.collectie':'Collection','sv.wishlist':'Wishlist',
     'uitleg.titel3d':'How the 3D view works',
     'uitleg.3d1':'<strong>Pick a model:</strong> choose masculine or feminine and your skin tone via Settings (gear, top right).',
-    'uitleg.3d2':'<strong>Rotate:</strong> drag with your finger or mouse to turn the model.',
+    'uitleg.3d2':'<strong>Rotate:</strong> drag with your finger or mouse to turn the model. Tap an arm or leg to view that part on its own; <strong>Whole body</strong> (top right) resets everything to the starting view. <strong>Wishlist</strong> (top left) also shows your wish tattoos.',
     'uitleg.3d3':'<strong>Add a tattoo:</strong> tap + (bottom right), pick a photo, cut the tattoo out and give it a name → Place on the model. Then tap the model where it should go. <strong>Tip:</strong> it\'s easiest to add one tattoo at a time, but you can also cut several from one photo (the "+ Another" button after placing).',
     'uitleg.3d4':'<strong>Edit:</strong> double-tap a placed tattoo. Drag to move, pinch to scale and rotate. The bar below has the pencil (cut out again), the lock and the bin.',
     'uitleg.3d5':'<strong>Switch:</strong> use the 2D/3D button at the top for the flat body map.','uitleg.3d6':'<strong>Share:</strong> tap the share button (arrow up, top right) to share the view as you see it now as an image, for example with your artist.',
@@ -7732,7 +7757,7 @@ const I18N = {
     'aria.volledigoverzicht':'Full overview','aria.welkom':'Welcome',
     'ui.tik_achtergrond':'Tap the background in the photo','ui.pipet_uit':'Eyedropper off',
     'ui.kies_eerst_foto':'Pick a photo first and cut out the tattoo','ui.tattoo_geplaatst':'Tattoo placed ✓',
-    'ui.tattoo_bijgewerkt':'Tattoo updated ✓','ui.plaatsen_mislukt':'Placing failed','ui.fout':'error',
+    'ui.tattoo_bijgewerkt':'Tattoo updated ✓','ui.plaatsen_mislukt':'Placing failed','ui.dev_aan':'Test messages on (Tatnet timings)','ui.dev_uit':'Test messages off','ui.fout':'error',
     'ui.hersteld':'{n} tattoo{s} restored','ui.verwijder_bevestig':'Are you sure you want to delete this tattoo?',
     'ui.toevoegen':'Add','ui.volgende':'Next','ui.opslaan':'Save','ui.tab_knippen':'Cut out','ui.tab_gegevens':'Details','ui.tabs_aria':'Step','ui.gegevens_hint':'Give your tattoo a name. The rest can wait.','ui.geen_uitsnede_hint':'Nothing cut out yet - the whole photo will be used','ui.auto_lasso_hint':'Tattoo found automatically. Not right? Go back and draw a line around the tattoo yourself.','ui.klik_plaatsen':'Tap the model where you want the tattoo','ui.zonder3d_formulier':'No 3D on this device - you can still save the tattoo as details','ui.naam_verplicht':'Give the tattoo a name first','ui.meer_details':'More details','ui.naam':'Tattoo name','ui.naam_ph':'Tattoo name *',
     'ui.stage_aria':'3D body model; use the 2D button at the top for the accessible flat map','ui.stage_aria_solo':'3D body model',
@@ -8012,7 +8037,7 @@ function createTattoo(overrides = {}) {
    ============================================================ */
 // App-versie (semver, handmatig ophogen bij een release). Bij een bump ook de
 // CACHE-naam in sw.js meebumpen, zodat clients de nieuwe build ophalen.
-const APP_VERSIE = '0.3.83';
+const APP_VERSIE = '0.3.97';
 
 /* Dev-haken die de CLOUD raken hangen alleen op een ontwikkelmachine aan window. Ze zijn geen
    lek op zichzelf (zonder XSS roept niemand ze aan, en CSP + esc() houden XSS tegen), maar ze
@@ -13088,7 +13113,12 @@ async function verwijderVoorbeelden() {
   { const cs = $('#col-stats'); if (cs) cs.addEventListener('click', () => openStats('collectie')); }   // Statistieken vanaf de Collectie-pagina
   $('#c-terug').addEventListener('click', () => toonView('home'));
   $('#btn-instellingen').addEventListener('click', openInstellingen);
-  { const ve = $('#start-versie'); if (ve) ve.textContent = 'v' + APP_VERSIE; }
+  { const ve = $('#start-versie'); if (ve) { ve.textContent = 'v' + APP_VERSIE;
+      // Teststand (doorloop 2026-09-21): vijf tikken binnen 2 s op het versienummer wisselen 'tatties-dev' (Tatnet-tijden in een melding).
+      let tikN = 0, tikT = 0;
+      ve.addEventListener('click', () => { const nu = performance.now(); tikN = (nu - tikT < 2000) ? tikN + 1 : 1; tikT = nu; if (tikN < 5) return; tikN = 0;
+        let aan = false; try { aan = localStorage.getItem('tatties-dev') !== '1'; localStorage.setItem('tatties-dev', aan ? '1' : '0'); } catch (e) {}
+        toast(tr(aan ? 'ui.dev_aan' : 'ui.dev_uit')); }); } }
   document.querySelectorAll('#toon-gepland, #toon-gepland-3d').forEach(b => b.addEventListener('click', toggleGepland));
   zetGeplandUI();   // begin-staat (uit, of opgeslagen voorkeur) op beide toggles tonen
   // Startscherm: logo → terug naar start; tegels, CTA en recent-items
@@ -13830,6 +13860,11 @@ async function verwijderVoorbeelden() {
   const FOV_BASIS=45;              // fov waarop de schaal geijkt is (= startwaarde van de camera)
   let hIjk=0, wIjk=-1, ebIjk=-1;   // renderhoogte/breedte/balkhoogte waarop die ijking hoort
   let pinW=-1;                     // breedte waarop de vaste veldhoogte gemeten is
+  // Minimale stagehoogte: 380 in portrait (vangnet: de stage krimpt wel maar groeit nooit vanzelf, dus een tijdelijk kleiner
+  // innerHeight door een toetsenbord mag 'm niet klein achterlaten); in landscape 240, anders scrolt de pagina (doorloop 2026-09-21).
+  const STAGE_MIN=()=> (window.innerWidth>window.innerHeight) ? 240 : 380;
+  // Documentpositie van de stage via offsetTop: negeert de translateY van de view-opkomanimatie (anders mat de eerste pin 8 px te laag).
+  function stageTop(){ let t=0; for(let e=stage; e; e=e.offsetParent) t+=e.offsetTop; return t; }
   /* Veldhoogte vastzetten op wat de CSS bij het openen geeft. Daarna beweegt het veld niet meer mee
      met in- en uitschuivende browserbalken; alleen een echte breedtewissel (rotatie, venster) meet
      opnieuw - de breedte verandert namelijk niet als zo'n balk verschijnt of verdwijnt. */
@@ -13843,9 +13878,9 @@ async function verwijderVoorbeelden() {
     if(!w) return;                       // verborgen view: niets te meten
     if(coarse && w===pinW){ corrigeerStageOverloop(); return; }
     pinW=w;
-    const top=stage.getBoundingClientRect().top + (window.scrollY||0);   // documentpositie, onafhankelijk van scrollstand
+    const top=stageTop();   // documentpositie zonder de opkom-transform van de view (doorloop 2026-09-21)
     const mn=document.querySelector('main'); const onder=mn ? (parseFloat(getComputedStyle(mn).paddingBottom)||0) : 12;   // in 3D 12px (CSS :has), elders de gewone 32
-    const h=Math.max(380, Math.round(window.innerHeight - top - onder));
+    const h=Math.max(STAGE_MIN(), Math.round(window.innerHeight - top - onder));
     stage.style.setProperty("--stage-h", h+"px");
     corrigeerStageOverloop();
   }
@@ -13863,10 +13898,10 @@ async function verwijderVoorbeelden() {
     if(document.documentElement.scrollHeight - window.innerHeight <= 1) return;
     // Absoluut herrekenen (niet het verschil aftrekken): met body op 100vh bleef de overloop op iOS bestaan en ratelde een
     // incrementele correctie de stage naar het minimum (v0.3.75/76). De uitkomst hangt nu niet van de vorige waarde af.
-    const top=stage.getBoundingClientRect().top + (window.scrollY||0);
+    const top=stageTop();
     const mn=document.querySelector('main'); const onder=mn ? (parseFloat(getComputedStyle(mn).paddingBottom)||0) : 12;
     const cur=parseFloat(getComputedStyle(stage).getPropertyValue("--stage-h"))||stage.clientHeight;
-    const h=Math.max(380, Math.round(window.innerHeight - top - onder));
+    const h=Math.max(STAGE_MIN(), Math.round(window.innerHeight - top - onder));
     if(h<cur-1){ stage.style.setProperty("--stage-h", h+"px"); if(window.scrollY) window.scrollTo(0,0); if(renderer) resize(); }
   }
   function resize(){ if(!renderer||!stage)return;
@@ -14089,10 +14124,16 @@ async function verwijderVoorbeelden() {
       front = (t.lichaamsdeel!=='rug') && ((t&&t.zijde||'voor')!=='achter');
       p0 = z.v.x; p1 = z.v.y;
     }
-    const orig=new THREE.Vector3(p0, p1, front?2:-2);
     const dir=new THREE.Vector3(0,0,front?-1:1);
-    const rc=new THREE.Raycaster(orig,dir);
-    const hits=rc.intersectObjects(pickMeshes,true);
+    const rc=new THREE.Raycaster(new THREE.Vector3(p0, p1, front?2:-2),dir);
+    let hits=rc.intersectObjects(pickMeshes,true);
+    // Mist de straal (hand, kuit, voet: het zonecentrum ligt net naast het lichaam), zoek dan in een raster om het centrum;
+    // de dichtstbijzijnde treffer wint (doorloop 2026-09-21: 6 van 16 zones gaven 'Plaatsen mislukt').
+    for(let r=0.02; !hits.length && r<=0.12; r+=0.02){
+      for(let k=0;k<8;k++){ const a=k*Math.PI/4;
+        rc.set(new THREE.Vector3(p0+Math.cos(a)*r, p1+Math.sin(a)*r, front?2:-2), dir);
+        const hh=rc.intersectObjects(pickMeshes,true); if(hh.length){ hits=hh; break; } }
+    }
     if(!hits.length) return null;
     const h=hits[0], pt=h.point;
     let nrm = h.face ? h.face.normal.clone().transformDirection(h.object.matrixWorld) : dir.clone().multiplyScalar(-1);
@@ -15439,29 +15480,50 @@ async function verwijderVoorbeelden() {
       if(a===b||b===c||a===c) continue;
       if(!(d[a]<Infinity && d[b]<Infinity && d[c]<Infinity)) continue;
       if(ver(a)||ver(b)||ver(c)) continue;
-      const ua=uv[a*2], va=uv[a*2+1], ub=uv[b*2], vb=uv[b*2+1], uc=uv[c*2], vc=uv[c*2+1];
-      if((ua<-hx&&ub<-hx&&uc<-hx)||(ua>hx&&ub>hx&&uc>hx)||(va<-hy&&vb<-hy&&vc<-hy)||(va>hy&&vb>hy&&vc>hy)) continue;
-      const opp2=(ub-ua)*(vc-va)-(uc-ua)*(vb-va);
+      const UU=[uv[a*2],uv[b*2],uv[c*2]], VV=[uv[a*2+1],uv[b*2+1],uv[c*2+1]];   // uv per hoekpunt (kan bij een naad worden herplaatst)
       const ex=pos[b*3]-pos[a*3], ey=pos[b*3+1]-pos[a*3+1], ez=pos[b*3+2]-pos[a*3+2];
       const fx=pos[c*3]-pos[a*3], fy=pos[c*3+1]-pos[a*3+1], fz=pos[c*3+2]-pos[a*3+2];
       const cx=ey*fz-ez*fy, cy=ez*fx-ex*fz, cz=ex*fy-ey*fx;
       const o3=cx*(nrm[a*3]+nrm[b*3]+nrm[c*3])+cy*(nrm[a*3+1]+nrm[b*3+1]+nrm[c*3+1])+cz*(nrm[a*3+2]+nrm[b*3+2]+nrm[c*3+2]);
-      if(Math.abs(opp2)<1e-12) continue;   // ontaard
       // Naadtoets: een zijde die in uv veel langer is dan in 3D overspant de ontmoetingslijn van twee flood-fronten
-      // (volledige wikkel, oksel) -> weg, anders smeert de textuur daaroverheen. Een echte vouw (gespiegeld EN van
-      // wezenlijke grootte) ook weg. Licht geknepen slivers vlak bij die lijn blijven: een gaatje valt meer op dan
-      // een geknepen snipper (polstest 2026-09-19: inkepingen aan de rand).
+      // (volledige wikkel, oksel). Een echte vouw (gespiegeld EN van wezenlijke grootte) gaat weg. Licht geknepen slivers
+      // vlak bij die lijn blijven: een gaatje valt meer op dan een geknepen snipper (polstest 2026-09-19: inkepingen aan de rand).
       const L2=(q,s2)=>(pos[q*3]-pos[s2*3])**2+(pos[q*3+1]-pos[s2*3+1])**2+(pos[q*3+2]-pos[s2*3+2])**2;
       const U2=(q,s2)=>(uv[q*2]-uv[s2*2])**2+(uv[q*2+1]-uv[s2*2+1])**2;
       // Drempel 5x: op een bol rekt de afwikkeling de omtrekrichting legitiem op (1,57x bij 90 graden; borst vrouwmodel tot
       // 4,4x, toesteltest 2026-09-20 gaf gaten bij 1,6x); een echte naad zit op tientallen keren (uv-sprong = decalbreedte).
-      if(U2(a,b)>25*L2(a,b) || U2(b,c)>25*L2(b,c) || U2(a,c)>25*L2(a,c)) continue;   // uv-zijde > 5x de 3D-zijde
+      const sAB=U2(a,b)>25*L2(a,b), sBC=U2(b,c)>25*L2(b,c), sAC=U2(a,c)>25*L2(a,c);
+      if(sAB||sBC||sAC){
+        // Naad afhechten (doorloop 2026-09-21): weglaten gaf een strook huid waar de twee fronten elkaar ontmoeten (band breder
+        // dan de omtrek). De ene vertex aan de andere kant van de naad krijgt een uv die isometrisch uit de twee andere vertices
+        // en de 3D-zijden volgt (cirkelsnijpunt), met de orientatie die de exp-map overal aanhoudt. De textuur van deze kant
+        // loopt zo door tot op de naad; de twee helften overlappen daar (er is geen 'goed' antwoord voorbij de omtrek).
+        let odd=-1; if(sAC&&sBC&&!sAB) odd=2; else if(sAB&&sAC&&!sBC) odd=0; else if(sAB&&sBC&&!sAC) odd=1;
+        if(odd<0) continue;   // niet een enkele losse vertex: weg (zoals voorheen)
+        const tri=[a,b,c], o=tri[odd], p1=tri[(odd+1)%3], p2=tri[(odd+2)%3], i1=(odd+1)%3, i2=(odd+2)%3;
+        const u1=UU[i1], v1=VV[i1], u2=UU[i2], v2=VV[i2];
+        const dU=Math.hypot(u2-u1,v2-v1), d3=Math.sqrt(L2(p1,p2)); if(!(d3>1e-9) || !(dU>1e-9)) continue;
+        const k=dU/d3, r1=Math.sqrt(L2(p1,o))*k, r2=Math.sqrt(L2(p2,o))*k;   // lokale rek van de zijde p1-p2 meenemen
+        const x=(r1*r1-r2*r2+dU*dU)/(2*dU), h2=r1*r1-x*x; if(h2<0) continue;
+        const h=Math.sqrt(h2), tx=(u2-u1)/dU, ty=(v2-v1)/dU;
+        let best=null;
+        for(const q of [[u1+x*tx-h*ty, v1+x*ty+h*tx],[u1+x*tx+h*ty, v1+x*ty-h*tx]]){
+          const U3=UU.slice(), V3=VV.slice(); U3[odd]=q[0]; V3[odd]=q[1];
+          const s2=(U3[1]-U3[0])*(V3[2]-V3[0])-(U3[2]-U3[0])*(V3[1]-V3[0]);
+          if((s2>0)===(o3>0)){ best=q; break; } }
+        if(!best) continue;
+        UU[odd]=best[0]; VV[odd]=best[1];
+      }
+      const ua=UU[0], va=VV[0], ub=UU[1], vb=VV[1], uc=UU[2], vc=VV[2];
+      if((ua<-hx&&ub<-hx&&uc<-hx)||(ua>hx&&ub>hx&&uc>hx)||(va<-hy&&vb<-hy&&vc<-hy)||(va>hy&&vb>hy&&vc>hy)) continue;
+      const opp2=(ub-ua)*(vc-va)-(uc-ua)*(vb-va);
+      if(Math.abs(opp2)<1e-12) continue;   // ontaard
       if((opp2>0)!==(o3>0) && Math.abs(opp2)>0.5*Math.sqrt(cx*cx+cy*cy+cz*cz)) continue;   // gespiegeld met echte grootte
       if(ua>=-hx&&ua<=hx&&ub>=-hx&&ub<=hx&&uc>=-hx&&uc<=hx&&va>=-hy&&va<=hy&&vb>=-hy&&vb<=hy&&vc>=-hy&&vc<=hy){
         // geheel binnen (verreweg de meeste): geen knip nodig
-        const tri=[a,b,c]; for(let k=0;k<3;k++){ const q=tri[k]; P.push(pos[q*3],pos[q*3+1],pos[q*3+2]); N.push(nrm[q*3],nrm[q*3+1],nrm[q*3+2]); U.push(uv[q*2]/(2*hx)+0.5, uv[q*2+1]/(2*hy)+0.5); }
+        const tri=[a,b,c]; for(let k=0;k<3;k++){ const q=tri[k]; P.push(pos[q*3],pos[q*3+1],pos[q*3+2]); N.push(nrm[q*3],nrm[q*3+1],nrm[q*3+2]); U.push(UU[k]/(2*hx)+0.5, VV[k]/(2*hy)+0.5); }
         continue; }
-      let poly=[a,b,c].map(q=>[uv[q*2],uv[q*2+1],pos[q*3],pos[q*3+1],pos[q*3+2],nrm[q*3],nrm[q*3+1],nrm[q*3+2]]);
+      let poly=[a,b,c].map((q,k)=>[UU[k],VV[k],pos[q*3],pos[q*3+1],pos[q*3+2],nrm[q*3],nrm[q*3+1],nrm[q*3+2]]);
       for(let s=0;s<4 && poly.length;s++){ const pa=vlak[s][0], pb=vlak[s][1], pc=vlak[s][2], uit=[];
         for(let j=0;j<poly.length;j++){ const A=poly[j], B=poly[(j+1)%poly.length];
           const da=pa*A[0]+pb*A[1]+pc, db=pa*B[0]+pb*B[1]+pc;
@@ -17162,6 +17224,7 @@ function maakTatnetGL(json, canvas) {
     return _tatnet;
   }
   window.__tattiesTatnet = { aan: TATNET_AAN, laatste: null, net: tatnetNet };
+  function devStand(){ try{ return localStorage.getItem('tatties-dev')==='1'; }catch(e){ return false; } }   // teststand: 5x tikken op het versienummer (startscherm)
   // Gebied-kansen voor de bbox (sx,sy,sw,sh) van de lasso op de schone foto `full`: crop met 30% marge (zoals de
   // lasso-stand in de training), letterbox 256 met zwart, voorspellen (+ spiegel-TTA), terug naar bbox-pixels.
   function tatnetGebied(full, sx, sy, sw, sh, mg){
@@ -17189,7 +17252,7 @@ function maakTatnetGL(json, canvas) {
       let dek=0; for(let i=0;i<g.length;i++) if(g[i]>0.5) dek++;
       window.__tattiesTatnet.laatste={ms:performance.now()-t0, dek:dek/g.length, sw, sh};
       // Testbuild: meetregel zodat je op een toestel ziet dat het model draaide (weg zodra TATNET_AAN geen dev-vlag meer is)
-      if(window.__tattiesTatnet.toast!==false) try{ toast('Tatnet: '+Math.round(performance.now()-t0)+' ms, gebied '+Math.round(100*dek/g.length)+'%'); }catch(e){}
+      if(window.__tattiesTatnet.toast===true || (window.__tattiesTatnet.toast!==false && devStand())) try{ toast('Tatnet: '+Math.round(performance.now()-t0)+' ms, gebied '+Math.round(100*dek/g.length)+'%'); }catch(e){}
       return g;
     }catch(e){ console.warn('tatnet gebied mislukt:', e && e.message); return null; }
   }
@@ -17331,7 +17394,7 @@ function maakTatnetGL(json, canvas) {
     const hd=hx.getImageData(0,0,W,H).data;
     // per pixel: ratio-helderheid, Lab-afstand (dE) en tintverschil (dC)
     const RL=new Float32Array(N), DE=new Float32Array(N); const li=[0,0,0], lh=[0,0,0];
-    let kandN=0, kleurN=0;
+    let kandN=0, kleurN=0, kleurSterk=0;
     for(let i=0;i<N;i++){ const o=i*4; if(p[o+3]<16){ RL[i]=1; DE[i]=0; continue; }
       const rl=0.299*p[o]/Math.max(hd[o],1)+0.587*p[o+1]/Math.max(hd[o+1],1)+0.114*p[o+2]/Math.max(hd[o+2],1);
       _lab(p[o],p[o+1],p[o+2],li); _lab(hd[o],hd[o+1],hd[o+2],lh);
@@ -17349,9 +17412,15 @@ function maakTatnetGL(json, canvas) {
         if(gebied[i]<0.5) continue;
         if(rl<0.8 || dE>12){ kandN++; const cP=Math.hypot(li[1],li[2]), cH=Math.hypot(lh[1],lh[2]);
           const cosH=(cP>6&&cH>6)?(li[1]*lh[1]+li[2]*lh[2])/(cP*cH):1;
-          if(li[0]>30 && (cP>cH*1.15+4 || (cosH<0.82 && cP>8))) kleurN++; } continue; }
+          if(li[0]>30 && (cP>cH*1.15+4 || (cosH<0.82 && cP>8))) kleurN++;
+          if(li[0]>30 && (cP>cH*1.5+12 || (cosH<0.5 && cP>12))) kleurSterk++; } continue; }
       if(rl<0.8 || dE>12){ kandN++; if(dC>14 && li[0]>30) kleurN++; } }
-    if(modus==='auto') modus = (kandN>50 && kleurN/kandN>=0.10) ? 'kleur' : 'zwart';
+    // Auto-keuze (doorloop 2026-09-21): op STERK gekleurde pixels (zwart 0-1,2%, kleur 3,4-44% op de proef-foto's), niet meer op
+    // 10% losjes gekleurd: dat wisselde met de lasso-ruimte (schorpioen 9,99% auto vs 21% ruime lijn). >= 30% losjes = vangnet
+    // voor pastel/aquarel. Zonder Tatnet-gebied blijft kleurSterk 0 en beslist de oude 10%-regel (dC > 14).
+    if(modus==='auto'){ const st=kandN?kleurSterk/kandN:0, lo=kandN?kleurN/kandN:0;
+      modus = (kandN>50 && (gebied ? (st>=0.02 || lo>=0.30) : lo>=0.10)) ? 'kleur' : 'zwart';
+      window.__matteKlas={kandN,kleurN,kleurSterk,sterk:st,los:lo,modus}; }   // dev: tellingen van de laatste auto-beslissing
     if(modus==='zwart'){
       // Vervaagde/lichte inkt (variant C, 2026-09-13, gemeten op 77 TSSD-foto's: gemist 0.47->0.43, lek 0.21->0.22):
       // de mediaan van de inkt-kandidaten (ratio < 0.8) hoort minstens alpha 0.6 te halen; is de inkt lichter, dan
@@ -17726,7 +17795,7 @@ function maakTatnetGL(json, canvas) {
     ctx.lineWidth=2; ctx.lineJoin="round"; ctx.strokeStyle="#CE2727"; ctx.stroke();
     // sleep-handles op elk punt, alleen in de Points-stand: in Freehand zijn het geen handvatten (een nieuwe aanraking begint
     // een nieuwe lijn) en bij een vloeiende lijn was de omcirkeling bijna alleen puntjes (toesteltest 2026-09-20)
-    if(cutModus!=='punt') return;
+    if(cutModus!=='punten') return;   // standnamen: 'vrij' | 'punten' (doorloop 2026-09-21: stond op 'punt', dus nooit getekend)
     lassoPts.forEach((p,i)=>{ const X=r.left+p.nx*r.w, Y=r.top+p.ny*r.h;
       ctx.beginPath(); ctx.arc(X,Y, i===lassoDragIdx?7:5, 0, Math.PI*2);
       ctx.fillStyle="#CE2727"; ctx.fill(); ctx.lineWidth=2; ctx.strokeStyle="#fff"; ctx.stroke(); });
