@@ -303,7 +303,10 @@ h1,h2,h3{font-weight:700;letter-spacing:.01em}
 /* Korte toelichting onder een paginatitel (Collectie/Wishlist, Statistieken) */
 .pagina-sub{color:var(--gedempt);font-size:.86rem;line-height:1.4;margin:-6px 0 14px}
 main{padding:16px 16px 32px;max-width:560px;margin:0 auto}
-main:has(#view-3d:not(.verborgen)){padding-bottom:12px}   /* 3D: het venster loopt tot vlak boven de schermrand (pinStageHoogte rekent met deze marge) */
+/* 3D zonder kader (2026-09-22): het venster loopt tot de schermranden. De onderrand houdt de safe-area, zodat de + knop niet
+   onder de home-indicator valt; die strook heeft dezelfde kleur als de scene (papier/inkt), dus je ziet 'm niet.
+   pinStageHoogte rekent met deze padding-bottom. */
+main:has(#view-3d:not(.verborgen)){padding:0 0 env(safe-area-inset-bottom,0px);max-width:none}
 
 main > section{animation:opkomen .3s ease both}
 @keyframes opkomen{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
@@ -1073,17 +1076,17 @@ form label,
    De vh/svh-regels blijven de terugval zolang die pin er nog niet is. */
 #stage{position:relative;width:100%;height:72vh;height:72svh;height:var(--stage-h,72svh);   /* --stage-h = schermhoogte min de kop (JS, pinStageHoogte) */
   min-height:380px;touch-action:none;cursor:grab;
-  background:#403a34;border-radius:var(--r-lg);overflow:hidden;}   /* = scene.background: als de bewerkbalk dockt krimpt het canvas en wordt de stage-grond zichtbaar, dus dezelfde warme studio-tint (was koud zwart #0e1116) */
+  background:var(--bg);border-radius:0;overflow:hidden;}   /* = scene.background (zetSceneKleur): als de bewerkbalk dockt krimpt het canvas en wordt de stage-grond zichtbaar, dus dezelfde kleur als de scene */
 #stage:active{cursor:grabbing;}
 #stage canvas{display:block;}
 /* Hint als overlay onderin het venster (links van de +), alleen zichtbaar met .on: eenmalig bij de eerste 3D-opening
    (vervaagt na een paar seconden) en zolang een ledemaat los staat. */
-#view-3d #hint{position:absolute;left:12px;right:74px;bottom:14px;z-index:5;margin:0;background:var(--kaart);border:1px solid var(--rand);
+#view-3d #hint{position:absolute;left:max(12px,env(safe-area-inset-left,0px));right:74px;bottom:14px;z-index:5;margin:0;background:var(--kaart);border:1px solid var(--rand);
   color:var(--tekst);font-size:var(--fs-sm);padding:8px 12px;border-radius:var(--r-md);text-align:center;box-shadow:0 4px 14px rgba(0,0,0,.22);
   opacity:0;visibility:hidden;pointer-events:none;transition:opacity .5s ease,visibility .5s;}
 #view-3d #hint.on{opacity:1;visibility:visible;}
 /* Knoppen als overlay bovenin het venster: links de standen (Wishlist, Armen, Heel lichaam), rechts uitleg + reset. */
-.stage-knoppen{position:absolute;top:10px;left:10px;right:10px;z-index:6;display:flex;justify-content:space-between;align-items:flex-start;gap:8px;pointer-events:none;}
+.stage-knoppen{position:absolute;top:10px;left:max(10px,env(safe-area-inset-left,0px));right:max(10px,env(safe-area-inset-right,0px));z-index:6;display:flex;justify-content:space-between;align-items:flex-start;gap:8px;pointer-events:none;}
 .stage-knoppen .sk-links,.stage-knoppen .sk-rechts{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
 .stage-knoppen .sk-links{flex:1 1 auto;min-width:0;}   /* links mag wikkelen (Wishlist + Heel lichaam), rechts blijft een rij */
 .stage-knoppen .sk-rechts{justify-content:flex-end;flex:none;flex-wrap:nowrap;}
@@ -1736,7 +1739,7 @@ html.knipfull .cutmodal.cm-review .cm-bewerkbtn span{position:absolute;width:1px
 .cutmodal .chk input{accent-color:var(--accent);}
 .cutmodal .slider{width:100%;accent-color:var(--accent);height:22px;cursor:pointer;}
 /* 3D toevoeg-flow: + knop, plaats-banner, info-velden in de modal */
-#t3d-add{position:absolute;right:14px;bottom:14px;z-index:6;width:48px;height:48px;border-radius:50%;
+#t3d-add{position:absolute;right:max(14px,env(safe-area-inset-right,0px));bottom:14px;z-index:6;width:48px;height:48px;border-radius:50%;
   display:flex;align-items:center;justify-content:center;background:var(--rood);color:var(--op-accent);border:2px solid var(--rood-diep);box-shadow:3px 3px 0 var(--rood-diep);
   font-size:28px;line-height:1;cursor:pointer;}
 #t3d-add:active{transform:scale(.97)}
@@ -1770,7 +1773,7 @@ html.knipfull .cutmodal.cm-review .cm-bewerkbtn span{position:absolute;width:1px
 .lege-hint[hidden]{display:none;}
 /* 3D: de lege-pil op de plek van de draaihint (linksonder naast de +, op de vloer), niet over de schenen; zolang de
    eenmalige draaihint aan staat blijft de pil weg (doorloop 2026-09-21). */
-#view-3d #lege-hint-3d{left:12px;right:74px;bottom:14px;transform:none;max-width:none;}
+#view-3d #lege-hint-3d{left:max(12px,env(safe-area-inset-left,0px));right:74px;bottom:14px;transform:none;max-width:none;}
 #view-3d:has(#hint.on) #lege-hint-3d{display:none;}
 .cutmodal .cm-veld{display:flex;flex-direction:column;gap:4px;font-size:var(--fs-sm);color:var(--gedempt);margin:8px 0 0;}
 /* Accentkleur: swatch naast de tekst (rij) i.p.v. eronder */
@@ -7924,6 +7927,7 @@ function pasThemaToe() {
     (themaVoorkeur === 'auto' && _systeemDonker && _systeemDonker.matches);
   document.documentElement.setAttribute('data-theme', donker ? 'dark' : 'light');
   zetThemaKleur(donker);
+  if (window.__tatties3DThema) { try { window.__tatties3DThema(); } catch (e) { /* 3D nog niet geladen */ } }   // scene-achtergrond = papier/inkt
 }
 
 /* Statusbalk/adresbalk-kleur meesturen met het thema (iOS standalone, Android Chrome) */
@@ -8038,7 +8042,7 @@ function createTattoo(overrides = {}) {
    ============================================================ */
 // App-versie (semver, handmatig ophogen bij een release). Bij een bump ook de
 // CACHE-naam in sw.js meebumpen, zodat clients de nieuwe build ophalen.
-const APP_VERSIE = '0.3.98';
+const APP_VERSIE = '0.3.99';
 
 /* Dev-haken die de CLOUD raken hangen alleen op een ontwikkelmachine aan window. Ze zijn geen
    lek op zichzelf (zonder XSS roept niemand ze aan, en CSP + esc() houden XSS tegen), maar ze
@@ -18626,6 +18630,24 @@ function maakTatnetGL(json, canvas) {
   window.__tattiesGetUnderwear3D = ()=>underwear;
   window.__tattiesSetSkin3D = setSkin3D;
   window.__tatties3DPauze = function(){ actief3D=false; };   // renderlus pauzeren als een host-view wordt getoond
+  /* Scene-achtergrond = de papierkleur van het thema. Via getComputedStyle, want canvas/WebGL kent geen CSS-variabelen
+     (valkuil v0.3.47: var(--..) in een canvas-kleur gaf een zwart vlak). Host roept dit aan bij een themawissel. */
+  function zetSceneKleur(){
+    if(!scene) return;
+    let c='#EFE4D0';
+    try{ const v=getComputedStyle(document.documentElement).getPropertyValue('--bg').trim(); if(v) c=v; }catch(e){}
+    try{ scene.background=new THREE.Color(c); }catch(e){}
+  }
+  window.__tatties3DThema = zetSceneKleur;
+  /* Zachte schaduwvlek onder het model: alpha 1 in het midden, 0 aan de rand. Tegen de donkere studio-achtergrond viel een
+     vlakke schijf niet op, op papier wel (grijs vlak met een harde rand). */
+  function vloerTextuur(){
+    const c=document.createElement('canvas'); c.width=c.height=128; const x=c.getContext('2d');
+    const g=x.createRadialGradient(64,64,0,64,64,64);
+    g.addColorStop(0,'rgba(255,255,255,1)'); g.addColorStop(0.45,'rgba(255,255,255,0.75)'); g.addColorStop(1,'rgba(255,255,255,0)');
+    x.fillStyle=g; x.fillRect(0,0,128,128);
+    return new THREE.CanvasTexture(c);
+  }
   // Dev-haakje (preview/console): decal-culling direct kunnen meten zonder UI-flow. Geen product-pad.
   window.__tattiesDecalDbg = { inktMatte, enterEditDecal, faceGridFor, connectedDecalGeo, localDecalGeo, meshAtPoint, sceneRef:()=>scene, modelRef:()=>modelRoot,
     stateRef:()=>({ inited, currentGender, meldAndereModel, actief3D, plaatsModus, plaatsDataAan: !!plaatsData, plaatsTex: !!(plaatsData && plaatsData.tex) }),
@@ -18647,7 +18669,7 @@ function maakTatnetGL(json, canvas) {
   function initEngine(){
     if(inited) return; inited=true;
     stage=document.getElementById("stage");
-    scene=new THREE.Scene(); scene.background=new THREE.Color(0x403a34);  // warme, ontzadigde studio-achtergrond (zelfde in licht/donker)
+    scene=new THREE.Scene(); zetSceneKleur();   // achtergrond = papier/inkt, net als de 3D-hero op de landing (2026-09-22)
     camera=new THREE.PerspectiveCamera(45,1,0.05,100);
     target=new THREE.Vector3(0,0.95,0);
     // PLAT-13: renderer-creatie kan gooien (WebGL uit/blocklisted). Vroeger bleef inited=true
@@ -18677,8 +18699,8 @@ function maakTatnetGL(json, canvas) {
     scene.add(new THREE.HemisphereLight(0xfff1e0,0x2a2420,0.6));
     key=new THREE.DirectionalLight(0xffffff,0.65); scene.add(key);
     rim=new THREE.DirectionalLight(0xd8e4ff,0.22); rim.position.set(-4,2,-5); scene.add(rim);
-    ground=new THREE.Mesh(new THREE.CircleGeometry(1.2,48),
-      new THREE.MeshBasicMaterial({color:0x000000, transparent:true, opacity:0.25}));
+    ground=new THREE.Mesh(new THREE.CircleGeometry(1.2,48), new THREE.MeshBasicMaterial({
+      color:0x000000, transparent:true, opacity:0.45, depthWrite:false, map:vloerTextuur() }));   // zachte vlek: op papier gaf een vlakke schijf een harde rand
     ground.rotation.x=-Math.PI/2; scene.add(ground);
     body=new THREE.Group(); scene.add(body);
     // selectie-ring wordt on-demand als huid-decal gebouwd (buildSelRing), niet meer als platte ring vooraf
