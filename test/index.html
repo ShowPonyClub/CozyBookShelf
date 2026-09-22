@@ -307,6 +307,9 @@ main{padding:16px 16px 32px;max-width:560px;margin:0 auto}
    onder de home-indicator valt; die strook heeft dezelfde kleur als de scene (papier/inkt), dus je ziet 'm niet.
    pinStageHoogte rekent met deze padding-bottom. */
 main:has(#view-3d:not(.verborgen)){padding:0 0 env(safe-area-inset-bottom,0px);max-width:none}
+/* Geen rasterpapier onder de 3D-weergave: de scene bedekt de grond toch, en zo valt de safe-area-strook onderaan niet op
+   als lijntjespapier tegen de egale scene (iPhone-check 2026-09-22). */
+body:has(#view-3d:not(.verborgen)){background:var(--bg)}
 
 main > section{animation:opkomen .3s ease both}
 @keyframes opkomen{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
@@ -1112,7 +1115,7 @@ form label,
 /* Op een kort scherm viel de hintregel half onder de vouw (gemeten op 320x640: de onderste 34px).
    Het veld iets korter maken scheelt genoeg en houdt het model nog ruim in beeld. */
 @media (max-height:700px){ #stage{height:66vh;height:66svh;height:var(--stage-h,66svh);min-height:380px} }
-@media (orientation:landscape){ #stage{min-height:240px} }   /* landscape: 380 paste niet in 375 hoog en liet de pagina scrollen (doorloop 2026-09-21) */
+@media (orientation:landscape){ #stage{min-height:200px} }   /* landscape: 380 paste niet in 375 hoog (doorloop 2026-09-21); 240 paste niet op een iPhone met hoge kop + home-indicator (2026-09-22) */
 #t3d-uitleg{padding:4px 16px 16px;color:var(--gedempt);}
 #t3d-uitleg ol{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px;font-size:var(--fs-sm);line-height:1.45;}
 #t3d-uitleg strong{color:var(--tekst);}
@@ -8042,7 +8045,7 @@ function createTattoo(overrides = {}) {
    ============================================================ */
 // App-versie (semver, handmatig ophogen bij een release). Bij een bump ook de
 // CACHE-naam in sw.js meebumpen, zodat clients de nieuwe build ophalen.
-const APP_VERSIE = '0.3.99';
+const APP_VERSIE = '0.3.100';
 
 /* Dev-haken die de CLOUD raken hangen alleen op een ontwikkelmachine aan window. Ze zijn geen
    lek op zichzelf (zonder XSS roept niemand ze aan, en CSP + esc() houden XSS tegen), maar ze
@@ -13867,7 +13870,7 @@ async function verwijderVoorbeelden() {
   let pinW=-1;                     // breedte waarop de vaste veldhoogte gemeten is
   // Minimale stagehoogte: 380 in portrait (vangnet: de stage krimpt wel maar groeit nooit vanzelf, dus een tijdelijk kleiner
   // innerHeight door een toetsenbord mag 'm niet klein achterlaten); in landscape 240, anders scrolt de pagina (doorloop 2026-09-21).
-  const STAGE_MIN=()=> (window.innerWidth>window.innerHeight) ? 240 : 380;
+  const STAGE_MIN=()=> (window.innerWidth>window.innerHeight) ? 200 : 380;   // landscape: 240 paste niet op een iPhone met hoge kop + home-indicator
   // Documentpositie van de stage via offsetTop: negeert de translateY van de view-opkomanimatie (anders mat de eerste pin 8 px te laag).
   function stageTop(){ let t=0; for(let e=stage; e; e=e.offsetParent) t+=e.offsetTop; return t; }
   /* Veldhoogte vastzetten op wat de CSS bij het openen geeft. Daarna beweegt het veld niet meer mee
@@ -13900,14 +13903,21 @@ async function verwijderVoorbeelden() {
     const nu=performance.now(); if(nu-_overloopT<80) return; _overloopT=nu;
     const v=document.getElementById("view-3d"); if(!v || v.classList.contains("verborgen")) return;
     if(cutModal && cutModal.classList.contains("on")) return;   // knipmodal open: die heeft zijn eigen hoogte
-    if(document.documentElement.scrollHeight - window.innerHeight <= 1) return;
+    const overloop=document.documentElement.scrollHeight - window.innerHeight > 1;
     // Absoluut herrekenen (niet het verschil aftrekken): met body op 100vh bleef de overloop op iOS bestaan en ratelde een
     // incrementele correctie de stage naar het minimum (v0.3.75/76). De uitkomst hangt nu niet van de vorige waarde af.
     const top=stageTop();
     const mn=document.querySelector('main'); const onder=mn ? (parseFloat(getComputedStyle(mn).paddingBottom)||0) : 12;
     const cur=parseFloat(getComputedStyle(stage).getPropertyValue("--stage-h"))||stage.clientHeight;
     const h=Math.max(STAGE_MIN(), Math.round(window.innerHeight - top - onder));
-    if(h<cur-1){ stage.style.setProperty("--stage-h", h+"px"); if(window.scrollY) window.scrollTo(0,0); if(renderer) resize(); }
+    if(overloop){
+      if(h<cur-1){ stage.style.setProperty("--stage-h", h+"px"); if(window.scrollY) window.scrollTo(0,0); if(renderer) resize(); }
+      return;
+    }
+    // ... en mag ook groeien: zonder paginascroll kan een browserbalk niet door scrollen in- of uitschuiven, dus geen gewiebel.
+    // Zonder dit hield een stage die ooit te klein gepind is (Safari-balk terug na scrollen op het startscherm) een strook
+    // onderaan, met de + knop te hoog (iPhone-check 2026-09-22).
+    if(h>cur+1){ stage.style.setProperty("--stage-h", h+"px"); if(renderer) resize(); }
   }
   function resize(){ if(!renderer||!stage)return;
     pinStageHoogte();
