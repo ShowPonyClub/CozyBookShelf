@@ -2222,8 +2222,11 @@ form label{text-transform:none;letter-spacing:.005em;font-size:.8rem;color:var(-
             <span id="cmBewerkBadge" class="cm-bewerk-badge" hidden data-i18n="ui.bewerken">Bewerken</span>
             <button id="cmCancel" class="cm-x" data-i18n-title="form.annuleren" data-i18n-aria="form.annuleren" title="Annuleer" aria-label="Annuleer">&times;</button>
           </div>
-          <input type="file" id="imgInput" accept="image/*" style="display:none">
-          <input type="file" id="imgInputCamera" accept="image/*" capture="environment" style="display:none">
+          <!-- Visueel verborgen, NIET display:none: Safari weigert een programmatische .click() op een
+               input die display:none is, waardoor de fotokeuze-knop niets deed. tabindex=-1 want de
+               knop ervoor is de ingang. -->
+          <input type="file" id="imgInput" accept="image/*" class="visueel-verborgen" tabindex="-1">
+          <input type="file" id="imgInputCamera" accept="image/*" capture="environment" class="visueel-verborgen" tabindex="-1">
           <div id="cmSettings" hidden>
             <span class="hintline" id="cmHint" style="display:block;margin:0 0 6px">Teken met je vinger een lijn rond de tattoo.</span>
             <span class="hintline" id="cmGegevensHint" data-i18n="ui.gegevens_hint" hidden>Geef je tattoo een naam. De rest kan later.</span>
@@ -8059,7 +8062,7 @@ function createTattoo(overrides = {}) {
    ============================================================ */
 // App-versie (semver, handmatig ophogen bij een release). Bij een bump ook de
 // CACHE-naam in sw.js meebumpen, zodat clients de nieuwe build ophalen.
-const APP_VERSIE = '0.3.106';
+const APP_VERSIE = '0.3.107';
 
 /* Dev-haken die de CLOUD raken hangen alleen op een ontwikkelmachine aan window. Ze zijn geen
    lek op zichzelf (zonder XSS roept niemand ze aan, en CSP + esc() houden XSS tegen), maar ze
