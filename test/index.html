@@ -2311,7 +2311,8 @@ form label{text-transform:none;letter-spacing:.005em;font-size:.8rem;color:var(-
           <div class="cm-links">
           <div class="cm-choose-rij">
             <!-- Kop + context alleen zichtbaar in de compacte keuzestand (FLOW-2). De 'blijft op dit
-                 toestel'-zin (ui.kies_sub) wisselt via I18N_MAGIC naar ui.kies_sub_magic zodra MAGIC_CUT_AAN aanstaat. -->
+                 toestel'-zin (ui.kies_sub) wisselt naar ui.kies_sub_neutraal zodra de foto het toestel kan
+                 verlaten: ingelogd met actieve sync, of Magic cut aan (zie i18nSleutel/fotoKanWeg). -->
             <span class="cm-kies-kop" data-i18n="ui.kies_kop">Nieuwe tattoo - kies een foto</span>
             <span class="cm-kies-sub" data-i18n="ui.kies_sub">Een screenshot of ontwerp kan ook. Je foto blijft op dit toestel.</span>
             <button class="btn cm-choose cm-choose-cam" id="cmChooseCam"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h3l1.5-2h7L17 8h3v11H4z"/><circle cx="12" cy="13" r="3.2"/></svg> <span data-i18n="ui.foto_maken">Take photo</span></button>
@@ -7520,7 +7521,7 @@ const I18N = {
     'start.leeg_uitleg':'Zie waar je volgende tattoo past op een 3D-lichaam. En bewaar de inkt die je al hebt.','start.privacy':'Alles blijft op dit toestel. Sync is optioneel.','start.privacy_magic':'Alles blijft op dit toestel. Sync en Magic cut zijn optioneel.','start.kijk3d':'Bekijk eerst het 3D-lichaam','ui.geen_foto_link':'Geen foto? Alleen gegevens opslaan','ui.gl_onbeschikbaar':'3D-weergave is niet beschikbaar op dit toestel (WebGL werkt niet).','inapp.tekst':'Je zit in de app-browser van TikTok/Instagram - je tattoos worden hier mogelijk niet bewaard. Open Tatties in Safari of Chrome.','inapp.kopieer':'Kopieer link','inapp.gekopieerd':'Link gekopieerd - plak hem in je browser','ui.gl_verloren':'De 3D-weergave is gestopt omdat je toestel geheugen tekortkwam. Ververs om verder te gaan.',
     'start.kies_titel':'Tattoo toevoegen','start.kies_3d':'Op het 3D-model','start.kies_3d_sub':'Plaats op het 3D-lichaam',
     'start.kies_2d':'Op de 2D-kaart','start.kies_2d_sub':'Plaats op de platte voor/achter-kaart','start.kies_2d_wip':'Nog in aanbouw',
-    'ui.foto_maken':'Foto maken','ui.foto_uploaden':'Foto uploaden','ui.foto_toevoegen':'Tattoo toevoegen','ui.kies_kop':'Nieuwe tattoo - kies een foto','ui.kies_sub':'Een screenshot of ontwerp kan ook. Je foto blijft op dit toestel.','ui.kies_sub_magic':'Een screenshot of ontwerp kan ook.','ui.andere_foto':'Andere foto','ui.plaatsen':'Plaatsen','ui.plaats_op_model':'Op het model plaatsen','ui.nog_een':'+ Nog een','ui.nog_een_uitleg':'Plaats deze en knip daarna nog een tattoo uit dezelfde foto','ui.herhaal_hint':'Plaats \'m goed en tik op ✓ - daarna knip je de volgende uit deze foto','ui.herhaal_volgende':'Knip de volgende tattoo uit dezelfde foto','ui.volgende_uitsnede':'Volgende uitsnede','ui.uit_deze_foto':'uit deze foto',
+    'ui.foto_maken':'Foto maken','ui.foto_uploaden':'Foto uploaden','ui.foto_toevoegen':'Tattoo toevoegen','ui.kies_kop':'Nieuwe tattoo - kies een foto','ui.kies_sub':'Een screenshot of ontwerp kan ook. Je foto blijft op dit toestel.','ui.kies_sub_neutraal':'Een screenshot of ontwerp kan ook.','ui.andere_foto':'Andere foto','ui.plaatsen':'Plaatsen','ui.plaats_op_model':'Op het model plaatsen','ui.nog_een':'+ Nog een','ui.nog_een_uitleg':'Plaats deze en knip daarna nog een tattoo uit dezelfde foto','ui.herhaal_hint':'Plaats \'m goed en tik op ✓ - daarna knip je de volgende uit deze foto','ui.herhaal_volgende':'Knip de volgende tattoo uit dezelfde foto','ui.volgende_uitsnede':'Volgende uitsnede','ui.uit_deze_foto':'uit deze foto',
     'ui.reset_uitsnede':'Reset uitsnede','ui.spiegelen':'Spiegelen','ui.achtergrond_weghalen':'Achtergrond weghalen',
     'ui.toverstaf':'Toverstaf','ui.ongedaan':'Ongedaan','ui.niets_ongedaan':'Niets om ongedaan te maken','ui.teruggezet':'Teruggezet','ui.uitsnede_gewist':'Uitsnede gewist - tik Ongedaan om terug te halen',
     'ui.tik_uitknippen':'Tik op het deel dat je wilt weghalen','ui.toverstaf_uit':'Toverstaf uit',
@@ -7713,7 +7714,7 @@ const I18N = {
     'start.leeg_uitleg':'See where your next tattoo fits on a 3D body. And keep the ink you already have.','start.privacy':'Everything stays on this device. Syncing is optional.','start.privacy_magic':'Everything stays on this device. Syncing and Magic cut are optional.','start.kijk3d':'Just explore the 3D body first','ui.geen_foto_link':'No photo? Just save the details','ui.gl_onbeschikbaar':'3D view isn\'t available on this device (WebGL isn\'t working).','inapp.tekst':"You're in the TikTok/Instagram in-app browser - your tattoos may not be saved here. Open Tatties in Safari or Chrome.",'inapp.kopieer':'Copy link','inapp.gekopieerd':'Link copied - paste it in your browser','ui.gl_verloren':'The 3D view stopped because your device ran out of memory. Refresh to continue.',
     'start.kies_titel':'Add tattoo','start.kies_3d':'On the 3D model','start.kies_3d_sub':'Place on the 3D body',
     'start.kies_2d':'On the 2D map','start.kies_2d_sub':'Place on the flat front/back map','start.kies_2d_wip':'Under construction',
-    'ui.foto_maken':'Take photo','ui.foto_uploaden':'Upload photo','ui.foto_toevoegen':'Add tattoo','ui.kies_kop':'New tattoo - pick a photo','ui.kies_sub':'A screenshot or design works too. Your photo stays on this device.','ui.kies_sub_magic':'A screenshot or design works too.','ui.andere_foto':'Different photo','ui.plaatsen':'Place','ui.plaats_op_model':'Place on the model','ui.nog_een':'+ Another','ui.nog_een_uitleg':'Place this one, then cut another tattoo from the same photo','ui.herhaal_hint':'Position it and tap ✓ - then cut the next one from this photo','ui.herhaal_volgende':'Cut the next tattoo from the same photo','ui.volgende_uitsnede':'Next cut-out','ui.uit_deze_foto':'from this photo',
+    'ui.foto_maken':'Take photo','ui.foto_uploaden':'Upload photo','ui.foto_toevoegen':'Add tattoo','ui.kies_kop':'New tattoo - pick a photo','ui.kies_sub':'A screenshot or design works too. Your photo stays on this device.','ui.kies_sub_neutraal':'A screenshot or design works too.','ui.andere_foto':'Different photo','ui.plaatsen':'Place','ui.plaats_op_model':'Place on the model','ui.nog_een':'+ Another','ui.nog_een_uitleg':'Place this one, then cut another tattoo from the same photo','ui.herhaal_hint':'Position it and tap ✓ - then cut the next one from this photo','ui.herhaal_volgende':'Cut the next tattoo from the same photo','ui.volgende_uitsnede':'Next cut-out','ui.uit_deze_foto':'from this photo',
     'ui.reset_uitsnede':'Reset cut-out','ui.spiegelen':'Mirror','ui.achtergrond_weghalen':'Remove background',
     'ui.toverstaf':'Magic wand','ui.ongedaan':'Undo','ui.niets_ongedaan':'Nothing to undo','ui.teruggezet':'Reverted','ui.uitsnede_gewist':'Cut-out cleared - tap Undo to restore',
     'ui.tik_uitknippen':'Tap the part you want to remove','ui.toverstaf_uit':'Magic wand off',
@@ -7869,11 +7870,20 @@ function tr(k){
   const f = I18N.nl[k];
   return f !== undefined ? f : k;
 }
-// Top-line privacyclaims die alleen kloppen zonder Magic cut; met de knop aan (MAGIC_CUT_AAN) krijgen ze de
+// Top-line privacyclaim die alleen klopt zonder Magic cut; met de knop aan (MAGIC_CUT_AAN) krijgt hij de
 // variant met de opt-in-uitzondering, zodat marketing en beleid consistent blijven (privacy-gate punt 6).
-const I18N_MAGIC = { 'start.privacy':'start.privacy_magic', 'ui.kies_sub':'ui.kies_sub_magic' };
+const I18N_MAGIC = { 'start.privacy':'start.privacy_magic' };
+/* 'Je foto blijft op dit toestel' (ui.kies_sub) klopt alleen zolang de foto het toestel niet KAN verlaten.
+   Twee redenen waarom dat niet meer zo is: Magic cut (staat uit) en cloud-sync bij een ingelogd account.
+   start.privacy hoeft hier niet mee: die zegt zelf al 'Sync is optioneel', ook ingelogd waar. */
+function fotoKanWeg(){ return MAGIC_CUT_AAN || !!(huidigeUserId && !syncGeblokkeerd); }
+function i18nSleutel(k){
+  if (MAGIC_CUT_AAN && I18N_MAGIC[k]) return I18N_MAGIC[k];
+  if (k === 'ui.kies_sub' && fotoKanWeg()) return 'ui.kies_sub_neutraal';
+  return k;
+}
 function vertaalStatisch(){
-  document.querySelectorAll('[data-i18n]').forEach(el => { const k = el.getAttribute('data-i18n'); el.textContent = tr((MAGIC_CUT_AAN && I18N_MAGIC[k]) || k); });
+  document.querySelectorAll('[data-i18n]').forEach(el => { const k = el.getAttribute('data-i18n'); el.textContent = tr(i18nSleutel(k)); });
   // De 3D-hint kan een eigen tekst hebben (welk ledemaat los staat); die zetten we hierna terug.
   try{ if (window.__tattiesLedeUI) window.__tattiesLedeUI(); }catch(e){ /* 3D nog niet geladen */ }
   document.querySelectorAll('[data-i18n-html]').forEach(el => { el.innerHTML = tr(el.getAttribute('data-i18n-html')); });
@@ -8045,7 +8055,7 @@ function createTattoo(overrides = {}) {
    ============================================================ */
 // App-versie (semver, handmatig ophogen bij een release). Bij een bump ook de
 // CACHE-naam in sw.js meebumpen, zodat clients de nieuwe build ophalen.
-const APP_VERSIE = '0.3.103';
+const APP_VERSIE = '0.3.104';
 
 /* Dev-haken die de CLOUD raken hangen alleen op een ontwikkelmachine aan window. Ze zijn geen
    lek op zichzelf (zonder XSS roept niemand ze aan, en CSP + esc() houden XSS tegen), maar ze
@@ -13362,6 +13372,7 @@ async function verwijderVoorbeelden() {
       if (blokGrens) blokGrens.hidden = !blok;
       if (elSyncUitleg) elSyncUitleg.hidden = blok;
       if (elSyncRij) elSyncRij.hidden = blok;
+      vertaalStatisch();   // ui.kies_sub hangt aan de inlog/sync-status (fotoKanWeg)
     }
     function foutTekst(err){
       const m = (err && (err.message || '') + '').toLowerCase();
