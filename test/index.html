@@ -1089,7 +1089,7 @@ form label,
   opacity:0;visibility:hidden;pointer-events:none;transition:opacity .5s ease,visibility .5s;}
 #view-3d #hint.on{opacity:1;visibility:visible;}
 /* Knoppen als overlay bovenin het venster: links de standen (Wishlist, Armen, Heel lichaam), rechts uitleg + reset. */
-.stage-knoppen{position:absolute;top:10px;left:max(10px,env(safe-area-inset-left,0px));right:max(10px,env(safe-area-inset-right,0px));z-index:6;display:flex;justify-content:space-between;align-items:flex-start;gap:8px;pointer-events:none;}
+.stage-knoppen{position:absolute;top:2px;left:max(10px,env(safe-area-inset-left,0px));right:max(10px,env(safe-area-inset-right,0px));z-index:6;display:flex;justify-content:space-between;align-items:flex-start;gap:8px;pointer-events:none;}
 .stage-knoppen .sk-links,.stage-knoppen .sk-rechts{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
 .stage-knoppen .sk-links{flex:1 1 auto;min-width:0;}   /* links mag wikkelen (Wishlist + Heel lichaam), rechts blijft een rij */
 .stage-knoppen .sk-rechts{justify-content:flex-end;flex:none;flex-wrap:nowrap;}
@@ -8045,7 +8045,7 @@ function createTattoo(overrides = {}) {
    ============================================================ */
 // App-versie (semver, handmatig ophogen bij een release). Bij een bump ook de
 // CACHE-naam in sw.js meebumpen, zodat clients de nieuwe build ophalen.
-const APP_VERSIE = '0.3.101';
+const APP_VERSIE = '0.3.102';
 
 /* Dev-haken die de CLOUD raken hangen alleen op een ontwikkelmachine aan window. Ze zijn geen
    lek op zichzelf (zonder XSS roept niemand ze aan, en CSP + esc() houden XSS tegen), maar ze
