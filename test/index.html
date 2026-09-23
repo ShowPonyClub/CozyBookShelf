@@ -1095,6 +1095,10 @@ form label,
 .stage-knoppen .sk-rechts{justify-content:flex-end;flex:none;flex-wrap:nowrap;}
 .stage-knoppen button{pointer-events:auto;box-shadow:0 4px 14px rgba(0,0,0,.22);}
 .stage-knoppen .gepland-toggle{background:var(--kaart);min-height:44px;padding:6px 14px;}   /* even hoog als de ronde knoppen rechts */
+/* De aan-stand houdt zijn omgekeerde vlak: de regel hierboven heeft dezelfde specificiteit als
+   .gepland-toggle.actief en staat later, dus die won de achtergrond terwijl de tekst al naar --op-inkt
+   omsloeg -> de knop oogde leeg (donker op donker, in het lichte thema licht op licht). */
+.stage-knoppen .gepland-toggle.actief{background:var(--accent-vlak);}
 .stage-knoppen #toon-gepland-3d{position:static;left:auto;top:auto;z-index:auto;}   /* de oude absolute plek (van de 2D-kaart) viel over 'Heel lichaam' heen */
 .stage-knoppen #t3d-reset,.stage-knoppen #t3d-info,.stage-knoppen #t3d-deel{position:static;top:auto;right:auto;width:44px;height:44px;border-radius:50%;flex:none;
   background:var(--kaart);border:1px solid var(--rand);color:var(--tekst);cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:inherit;}
@@ -8055,7 +8059,7 @@ function createTattoo(overrides = {}) {
    ============================================================ */
 // App-versie (semver, handmatig ophogen bij een release). Bij een bump ook de
 // CACHE-naam in sw.js meebumpen, zodat clients de nieuwe build ophalen.
-const APP_VERSIE = '0.3.104';
+const APP_VERSIE = '0.3.106';
 
 /* Dev-haken die de CLOUD raken hangen alleen op een ontwikkelmachine aan window. Ze zijn geen
    lek op zichzelf (zonder XSS roept niemand ze aan, en CSP + esc() houden XSS tegen), maar ze
@@ -18267,6 +18271,9 @@ function maakTatnetGL(json, canvas) {
         imgTexture=null;   // eigendom gaat naar plaatsData; geen dispose
         cutModal.classList.remove("on"); cutHistoryOpruimen(); pendingNew=null; toonCutInstellingen(false); toonInfo(false);
         deelVoor=null; zetDeelUI();   // deel-stand van de modal opruimen (plaatsData weet zelf nog bij welk record)
+        /* Plaatsen en bewerken kunnen niet tegelijk: de editDecal-tak in pointerup/touchend staat voor de
+           plaatsModus-tak, dus een openstaande bewerkstand slikt de 'tik om te plaatsen' op. */
+        if(editDecal) exitEditDecal();
         plaatsModus=true; if(window.__plaatsHintAan) window.__plaatsHintAan();   // banner weg: de 'tik om te plaatsen'-hint op het lichaam volstaat
         return;
       }
