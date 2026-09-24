@@ -264,7 +264,7 @@
   <div class="rij"><label>Gewicht</label><input id="s-weight" type="range" min="40" max="180" step="any" value="70"><span class="w" id="w-weight">70 kg</span></div>
   <div class="rij"><label>Bouw</label><input id="s-spier" type="range" min="0" max="1" step="0.01" value="0.5"><span class="w" id="w-spier">.50</span></div>
   <div class="rij"><label>Gender</label><input id="s-gender" type="range" min="0" max="1" step="0.01" value="0.5"><span class="w" id="w-gender">.50</span></div>
-  <div class="rij"><label>Lengte</label><input id="s-lengte" type="range" min="0" max="1" step="0.01" value="0.5"><span class="w" id="w-lengte">-</span></div>
+  <div class="rij"><label>Lengte</label><input id="s-lengte" type="range" min="0" max="1" step="any" value="0.5"><span class="w" id="w-lengte">-</span></div>
   <div class="rij"><label>Cupmaat</label><input id="s-cup" type="range" min="0" max="1" step="0.01" value="0.5"><span class="w" id="w-cup">.50</span></div>
   <div class="rij"><label>Stevigheid</label><input id="s-firm" type="range" min="0" max="1" step="0.01" value="0.5"><span class="w" id="w-firm">.50</span></div>
   <details id="fijn"><summary>Fijnafstelling<button id="eenheid" type="button">cm</button></summary><div id="fijn-rijen"></div></details>
@@ -702,19 +702,32 @@ function tabelKlussen(gender, height){
    (toesteltest Bram 2026-09-24). Daarom meten we na elke blend het echte gewicht en corrigeren
    we het doel voor de volgende frame. Kost een volumemeting (~0,5 ms). */
 var sleepKorr = 1, _sleepGemeten = 1, _sleepVorige = null;
+/* Voorspelling voor de lengte: bij gelijke assen schaalt het gewicht met ongeveer lengte^2,25
+   (gemeten 145 -> 205 cm: 1,9 tot 2,5, mediaan 2,2 tot 2,3, vrijwel gelijk voor vrouw, man,
+   jong en oud). De terugkoppeling hoeft dan alleen het restje te doen; zonder deze voorspelling
+   kon de gedempte correctie een grote lengtestap niet bijhouden (205 -> 145 cm: 20 kg sprong). */
+function lengteFactor(){
+  if(!gewTabelVoor || !gewTabelVoor.cm) return 1;
+  return Math.pow(lengteDoel() / gewTabelVoor.cm, 2.25);
+}
 function sleepBijstellen(voorspel){
   if(!gewTabel || !tabelVerouderd(gewTabelVoor, +sliders.gender.value)){
     sleepKorr = 1; _sleepGemeten = 1; _sleepVorige = null; return;
   }
   var doel = +sliders.weight.value, kg = gewichtKg();
-  var geschat = doel / sleepKorr;
+  var geschat = doel / (lengteFactor() * sleepKorr);
   if(!(kg > 1 && geschat > 1)) return;
-  var gemeten = kg / geschat;
+  var gemeten = kg / (geschat * lengteFactor());    /* het restje na de lengtevoorspelling */
   /* De meting hoort bij DEZE frame; de volgende frame staat de schuif alweer verder. Bij een
      gelijkmatige sleep loopt de correctie dus een frame achter; die trend tellen we erbij op. */
   var trend = (voorspel && _sleepVorige !== null) ? gemeten - _sleepVorige : 0;
   _sleepVorige = gemeten; _sleepGemeten = gemeten;
-  sleepKorr = Math.max(0.5, Math.min(2, gemeten + trend));
+  /* Gedempt: de trend voor de helft, en hooguit 3% verschil per frame. Aan de rand van het
+     gewichtsbereik gedraagt de verhouding zich grillig en schoot de correctie heen en weer
+     (lengte 205 -> 145 cm: taille 71,6 -> 79,5 -> 76,9 cm in drie frames). */
+  var nieuw = gemeten + 0.5 * trend;
+  nieuw = Math.max(sleepKorr - 0.03, Math.min(sleepKorr + 0.03, nieuw));
+  sleepKorr = Math.max(0.5, Math.min(2, nieuw));
 }
 function zetTabel(uit, ms){
   sleepKorr = 1; _sleepVorige = null;
@@ -910,9 +923,10 @@ function lichaamsLengte(){
 /* Waar de lengte-as vastloopt, schalen we het hele lichaam gelijkmatig naar de gevraagde
    lengte. Een oude, gespierde man haalt met MakeHuman's height-as geen 145 cm (hij blijft op
    156), een zachte wel: de lengte versprong dan bij het schuiven aan de bouw (toesteltest
-   Bram 2026-09-24). Onder 0,2 cm verschil geen schaal: dat is de tolerantie van de iteratie. */
+   Bram 2026-09-24). Ook het restje van de iteratie (die stopt binnen 0,15 cm) werkt de schaal weg:
+   anders gaf de +knop bij de lengte stappen van 0,8 tot 1,4 cm. */
 function lengteSchaalVoor(cm, doelCm){
-  return (cm > 0 && Math.abs(cm - doelCm) > 0.2) ? doelCm / cm : 1;
+  return (cm > 0 && Math.abs(cm - doelCm) > 0.005) ? doelCm / cm : 1;
 }
 var _schaal = null;        /* {g,m,w,h,s}: de schaal die bij deze stand hoort (uit waarden()) */
 function blend(gender, muscle, weight, height, metGrenzen){
@@ -1531,7 +1545,7 @@ function bouwStand(){
   var m = +sliders.spier.value, doel = +sliders.weight.value;
   /* Tijdens het slepen van geslacht, lengte of leeftijd hoort de tabel nog bij de oude stand;
      sleepKorr (echt gewicht / geschat, gemeten na de vorige frame) houdt de kilo's dan toch vast. */
-  var doelTabel = doel / sleepKorr;
+  var doelTabel = doel / (lengteFactor() * sleepKorr);
   var w = losGewichtOp(m, doelTabel);
   /* Wat de gewicht-as niet haalt, vult vet aan. Zet vetF, want de weging leest hem. */
   aanvulling = (vetKorr && vetKorr.m === m && vetKorr.kg === doel && vetKorr.tabel === gewTabel)
@@ -2611,6 +2625,7 @@ window.__spike = {
   },
   zetEenheid: function(e){ EENHEID = e; toonWaarden(); },
   leeftijd: function(){ return leeftijdJaar; },
+  schaal: function(){ return { schaal:_schaal, doel:lengteDoel(), laatste:_laatsteLengte, huidig:huidigeHeight }; },
   tabelBezig: function(){ return !!tabelTaak || !!_overgang; },   /* ook een lopende overgang */
   zetLeeftijd: function(j){
     leeftijdJaar = Math.max(LEEFTIJD_MIN, Math.min(LEEFTIJD_MAX, j));
