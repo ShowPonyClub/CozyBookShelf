@@ -10,7 +10,7 @@
   /* Tokens uit HUISSTIJL.md, zodat dit stuk zo de app in kan. */
   :root{
     --bg:#EFE4D0; --tekst:#221A12; --gedempt:#5A503F; --accent:#221A12;
-    --op-inkt:#F0EDE8; --op-accent:#F0EDE8; --accent-rgb:34,26,18;
+    --op-inkt:#F0EDE8; --op-accent:#F0EDE8; --accent-rgb:34,26,18; --kaart-rgb:251,247,238;
     --rood:#CE2727; --rood-diep:#8E1B1B;
     --kaart:#FBF7EE; --veldbg:#FFFCF5; --rand:#D9CBB3;
     --r-sm:8px; --r-md:12px; --r-lg:16px;
@@ -22,7 +22,7 @@
   }
   :root[data-theme="dark"]{
     --bg:#181511; --tekst:#ECE3D2; --gedempt:#9E9382; --accent:#ECE3D2;
-    --op-inkt:#181511; --accent-rgb:236,227,210; --kaart:#221E17; --veldbg:#201C15; --rand:#3A352B;
+    --op-inkt:#181511; --accent-rgb:236,227,210; --kaart:#221E17; --kaart-rgb:34,30,23; --veldbg:#201C15; --rand:#3A352B;
   }
   *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
   html,body{margin:0;height:100%;background:var(--bg);color:var(--tekst);
@@ -129,9 +129,25 @@
     text-align:center;margin:2px 0 0;min-height:1.4em}
 
   /* stap 4 en 5: de fijnregeling */
-  /* als een kaart uit Instellingen (.inst-kaart): licht vlak, rand, rijen met scheidingslijnen */
-  .gen-rijen{max-height:31vh;overflow-y:auto;background:var(--kaart);border:1px solid var(--rand);
-    border-radius:var(--r-md)}
+  /* als een kaart uit Instellingen (.inst-kaart): licht vlak, rand, rijen met scheidingslijnen.
+     Scrollschaduwen: de twee lokale verlopen (kaartkleur) schuiven mee met de inhoud en dekken de
+     vaste schaduwen af zodra je aan de rand bent; zo zie je alleen een schaduw waar nog meer staat. */
+  .gen-kaart{position:relative}
+  .gen-rijen{max-height:31vh;overflow-y:auto;border:1px solid var(--rand);border-radius:var(--r-md);
+    background:
+      linear-gradient(var(--kaart) 30%, rgba(var(--kaart-rgb),0)) top / 100% 28px no-repeat local,
+      linear-gradient(rgba(var(--kaart-rgb),0), var(--kaart) 70%) bottom / 100% 28px no-repeat local,
+      radial-gradient(farthest-side at 50% 0, rgba(0,0,0,.16), rgba(0,0,0,0)) top / 100% 12px no-repeat scroll,
+      radial-gradient(farthest-side at 50% 100%, rgba(0,0,0,.16), rgba(0,0,0,0)) bottom / 100% 12px no-repeat scroll,
+      var(--kaart)}
+  .gen-scrollpijl{position:absolute;left:50%;bottom:0;transform:translate(-50%,50%);width:34px;height:20px;
+    border-radius:999px;border:1px solid var(--rand);background:var(--veldbg);color:var(--gedempt);
+    display:flex;align-items:center;justify-content:center;pointer-events:none;
+    box-shadow:0 1px 4px rgba(0,0,0,.14);opacity:0;transition:opacity .18s ease}
+  .gen-scrollpijl.zichtbaar{opacity:1}
+  .gen-scrollpijl svg{width:14px;height:14px}
+  .gen-scrollpijl svg, .gen-meer svg{width:18px;height:18px;fill:none;stroke:currentColor;
+    stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
   .gen-rij{display:flex;align-items:center;gap:10px;min-height:48px;padding:0 12px;
     border-bottom:1px solid var(--rand)}
   .gen-rij:last-child{border-bottom:0}
@@ -143,12 +159,13 @@
   .gen-rij .meet{flex:none;width:48px;text-align:right;
     font:var(--fs-xs)/1 var(--label-font);color:var(--gedempt);
     font-variant-numeric:tabular-nums}
-  .gen-meer{margin-top:10px;padding:7px 15px;min-height:44px;
-    font:600 var(--fs-sm)/1 var(--serif);color:var(--gedempt);
-    background:var(--veldbg);border:1px solid var(--rand);border-radius:999px;
-    cursor:pointer}
-  .gen-meer[aria-expanded="true"]{background:var(--accent);color:var(--op-inkt);
-    border-color:var(--accent)}
+  /* "Meer instellen" als laatste rij in de kaart, met een pijltje dat omdraait als hij open is */
+  .gen-meer{display:flex;align-items:center;justify-content:center;gap:6px;width:100%;
+    margin:0;padding:0 12px;min-height:48px;border:0;border-radius:0;
+    background:none;color:var(--tekst);
+    font:600 var(--fs-sm)/1 var(--serif);cursor:pointer}
+  .gen-meer svg{transition:transform .18s ease}
+  .gen-meer[aria-expanded="true"] svg{transform:rotate(180deg)}
 
   /* Schuiven zoals in de app (.tint-schuif): een pilbaan en een lichte duim van 30 px met een
      dunne ring en een zachte schaduw. Het tikgebied blijft 44 px hoog (punt 3). */
@@ -200,7 +217,6 @@
 
   /* onderbalk */
   .gen-balk{display:flex;align-items:center;gap:10px;margin-top:16px}
-  .gen-balk2{display:flex;justify-content:center;margin-top:4px}
   /* Zoals de onboarding van de app: Terug = lichte knop (.knop-sec), Volgende = inktknop
      (.knop). Rood alleen voor de afronding (Klaar): een rode handeling per flow (HUISSTIJL). */
   .gen-terug{min-height:48px;padding:12px 16px;font:600 var(--fs-base)/1 var(--serif);
@@ -215,10 +231,6 @@
   .gen-door.laatste{font-size:1.2rem;font-weight:700;color:var(--op-accent);background:var(--rood);
     border:2px solid var(--rood-diep);box-shadow:3px 3px 0 var(--rood-diep)}
   .gen-door.laatste:active{filter:none;transform:translate(2px,2px);box-shadow:1px 1px 0 var(--rood-diep)}
-  .gen-sla{background:none;border:0;color:var(--gedempt);cursor:pointer;
-    font:600 var(--fs-sm)/1 var(--label-font);text-decoration:underline;
-    padding:12px 18px;min-height:44px}
-  .gen-sla[hidden]{display:none}
 
   /* Greep boven het paneel: tik om het paneel in te klappen en het model groot te
      zien (punt 2). Hij hangt in de strook boven het paneel, dus kost geen hoogte. */
@@ -229,7 +241,7 @@
     background:var(--gedempt);opacity:.55}
   .gen-greep:focus-visible{outline:2px solid var(--accent);outline-offset:-4px}
   #gen.ingeklapt .gen-voortgang, #gen.ingeklapt #gen-sub, #gen.ingeklapt #gen-inhoud,
-  #gen.ingeklapt .gen-balk, #gen.ingeklapt .gen-balk2,
+  #gen.ingeklapt .gen-balk,
   #gen.ingeklapt #gen-herstel{display:none}
   #gen.ingeklapt .gen-koprij{cursor:pointer}
 
@@ -249,9 +261,7 @@
     .gen-eenheden{margin:4px 0 0}
     .gen-schuif{margin:2px 0 0}
     .gen-rijen{max-height:24vh}
-    .gen-meer{margin-top:4px}
     .gen-balk{margin-top:8px}
-    .gen-balk2{margin-top:0}
   }
 
   /* Liggend: het paneel naast het model in plaats van eronder. Eronder bleef er niets
@@ -318,9 +328,6 @@
     <div class="gen-balk">
       <button class="gen-terug" id="gen-terug" type="button">Terug</button>
       <button class="gen-door" id="gen-door" type="button">Volgende</button>
-    </div>
-    <div class="gen-balk2">
-      <button class="gen-sla" id="gen-sla" type="button" hidden>Deze stap overslaan</button>
     </div>
   </div>
 </div>
@@ -1719,12 +1726,11 @@ var I18N = {
     'gen.terug': 'Terug',
     'gen.volgende': 'Volgende',
     'gen.klaar': 'Klaar',
-    'gen.overslaan': 'Deze stap overslaan',
     'gen.reset': 'Opnieuw',
     'gen.inklappen': 'Model groter bekijken',
     'gen.uitklappen': 'Vragen weer tonen',
     'gen.meer': 'Meer instellen',
-    'gen.minder': 'Minder',
+    'gen.minder': 'Minder instellen',
 
     'gen.geslacht.kop': 'Welke vorm past bij jou?',
     'gen.geslacht.sub': 'Dit bepaalt de basisvorm. Je kunt het later nog bijstellen.',
@@ -1766,7 +1772,7 @@ var I18N = {
 
     'gen.boven.kop': 'Bovenlichaam',
     'gen.onder.kop': 'Onderlichaam',
-    'gen.deel.sub': 'Sleep tot het klopt. Overslaan mag ook.',
+    'gen.deel.sub': 'Sleep tot het klopt, of tik gewoon op Volgende.',
 
     'mod.schouderbreedte': 'Schouders',
     'mod.borstkas': 'Borstkas',
@@ -1796,12 +1802,11 @@ var I18N = {
     'gen.terug': 'Back',
     'gen.volgende': 'Next',
     'gen.klaar': 'Done',
-    'gen.overslaan': 'Skip this step',
     'gen.reset': 'Reset',
     'gen.inklappen': 'Show the model larger',
     'gen.uitklappen': 'Show the questions again',
     'gen.meer': 'More settings',
-    'gen.minder': 'Fewer',
+    'gen.minder': 'Fewer settings',
 
     'gen.geslacht.kop': 'Which shape suits you?',
     'gen.geslacht.sub': 'This sets the basic shape. You can adjust it later.',
@@ -1843,7 +1848,7 @@ var I18N = {
 
     'gen.boven.kop': 'Upper body',
     'gen.onder.kop': 'Lower body',
-    'gen.deel.sub': 'Drag until it looks right. You can skip this.',
+    'gen.deel.sub': 'Drag until it looks right, or just tap Next.',
 
     'mod.schouderbreedte': 'Shoulders',
     'mod.borstkas': 'Chest',
@@ -1944,11 +1949,9 @@ function genNaarStap(n){
   }
   $('#gen-terug').hidden = (GEN.stap === 0);
   $('#gen-terug').textContent = tr('gen.terug');
-  $('#gen-sla').textContent = tr('gen.overslaan');
   $('#gen-herstel').textContent = tr('gen.reset');
   $('#gen-door').textContent = tr(GEN.stap === GEN_STAPPEN.length-1 ? 'gen.klaar' : 'gen.volgende');
   $('#gen-door').classList.toggle('laatste', GEN.stap === GEN_STAPPEN.length-1);
-  $('#gen-sla').hidden = !st.groep;
   $('#gen-stapvan').textContent = tr('gen.stapvan')
     .replace('{n}', GEN.stap + 1).replace('{m}', GEN_STAPPEN.length);
   genKnopStaat();
@@ -2313,11 +2316,26 @@ function genEenheden(opties, actief, bij){
 }
 
 /* ---- stap 4 en 5: de fijnregeling per lichaamsdeel */
+/* Stap 4 en 5. "Meer instellen" is de laatste rij IN de kaart, met een pijltje: dan is duidelijk
+   dat de extra schuiven in datzelfde vak verschijnen (toesteltest Bram 2026-09-24). Dat je in de
+   kaart kunt scrollen, laten een schaduw aan de rand en een pijltje onderaan zien (genScrollHint). */
+var PIJL_OMLAAG = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>';
 function genLichaamsdeel(h, groep){
   var g = GEN_GROEPEN[groep];
+  var kaart = document.createElement('div');
+  kaart.className = 'gen-kaart';
   var rijen = document.createElement('div');
   rijen.className = 'gen-rijen';
-  h.appendChild(rijen);
+  /* Alleen een teken, geen knop: een knop op die plek lag op een schuifknop en ving tikken af.
+     pointer-events:none, dus tikken en slepen gaan er gewoon doorheen. */
+  var pijl = document.createElement('span');
+  pijl.className = 'gen-scrollpijl';
+  pijl.setAttribute('aria-hidden', 'true');
+  pijl.innerHTML = PIJL_OMLAAG;
+  kaart.appendChild(rijen); kaart.appendChild(pijl);
+  h.appendChild(kaart);
+  function hint(){ genScrollHint(rijen, pijl); }
+  rijen.addEventListener('scroll', hint, { passive:true });
   function vul(){
     rijen.innerHTML = '';
     var lijst = g.primair.concat(GEN.meerOpen ? g.meer : []);
@@ -2325,21 +2343,31 @@ function genLichaamsdeel(h, groep){
       lijst = lijst.concat(GEN.meerOpen ? ['__cup', '__firm'] : ['__cup']);
     }
     for(var i=0;i<lijst.length;i++) rijen.appendChild(genRij(lijst[i]));
+    if(g.meer.length){
+      var meer = document.createElement('button');
+      meer.type = 'button'; meer.className = 'gen-meer';
+      meer.setAttribute('aria-expanded', GEN.meerOpen ? 'true' : 'false');
+      meer.innerHTML = '<span></span>' + PIJL_OMLAAG;
+      meer.firstChild.textContent = tr(GEN.meerOpen ? 'gen.minder' : 'gen.meer');
+      meer.addEventListener('click', function(){
+        var eersteNieuw = g.primair.length;
+        GEN.meerOpen = !GEN.meerOpen;
+        vul();
+        var knop = rijen.querySelector('.gen-meer'); if(knop) knop.focus({ preventScroll:true });
+        /* open: de eerste nieuwe schuif in beeld schuiven, zodat je ziet dat er iets bijkwam */
+        var r = rijen.children[eersteNieuw];
+        if(GEN.meerOpen && r) rijen.scrollTo({ top: Math.max(0, r.offsetTop - rijen.clientHeight * 0.3), behavior: 'smooth' });
+      });
+      rijen.appendChild(meer);
+    }
+    requestAnimationFrame(hint);
   }
   vul();
-  if(g.meer.length){
-    var meer = document.createElement('button');
-    meer.type = 'button'; meer.className = 'gen-meer';
-    meer.setAttribute('aria-expanded', 'false');
-    meer.textContent = tr('gen.meer');
-    meer.addEventListener('click', function(){
-      GEN.meerOpen = !GEN.meerOpen;
-      meer.setAttribute('aria-expanded', GEN.meerOpen ? 'true' : 'false');
-      meer.textContent = tr(GEN.meerOpen ? 'gen.minder' : 'gen.meer');
-      vul();
-    });
-    h.appendChild(meer);
-  }
+}
+/* Pijltje onderaan zolang er onder de rand nog rijen staan; weg als je onderaan bent. */
+function genScrollHint(rijen, pijl){
+  var meerOnder = rijen.scrollTop + rijen.clientHeight < rijen.scrollHeight - 4;
+  pijl.classList.toggle('zichtbaar', meerOnder);
 }
 
 function genRij(sleutel){
@@ -2542,7 +2570,6 @@ window.addEventListener('resize', function(){
   if(!genEl().hidden) genCamera(GEN_STAPPEN[GEN.stap]);
 });
 $('#gen-herstel').addEventListener('click', genHerstel);
-$('#gen-sla').addEventListener('click', function(){ genNaarStap(GEN.stap + 1); });
 $('#gen-door').addEventListener('click', function(){
   if(GEN.stap === GEN_STAPPEN.length - 1){
     genStop();
