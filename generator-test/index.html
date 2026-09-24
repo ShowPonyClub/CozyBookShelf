@@ -98,6 +98,10 @@
   .gen-keuze:active{transform:scale(.96)}
   .gen-keuze-uitleg{font:var(--fs-sm)/1.35 var(--label-font);color:var(--gedempt);
     text-align:center;margin:8px 0 0;min-height:1.35em}
+  .gen-keuze-uitleg.let-op{display:block;color:var(--tekst);font-weight:600}
+  .gen-keuzes.let-op{animation:genLetOp .5s ease 2}
+  @keyframes genLetOp{0%,100%{box-shadow:0 0 0 0 rgba(var(--accent-rgb),0)}
+    50%{box-shadow:0 0 0 4px rgba(var(--accent-rgb),.35)}}
   /* labels in kleine kapitalen, zoals BODY en SKIN TONE in de onboarding (.onboarding .inst-label) */
   .gen-label{font:600 .72rem/1.2 var(--label-font);letter-spacing:.1em;text-transform:uppercase;
     color:var(--gedempt);margin:18px 0 6px;text-align:left}
@@ -1735,7 +1739,7 @@ var I18N = {
     'gen.geslacht.links': 'smallere schouders, bredere heupen',
     'gen.geslacht.rechts': 'bredere schouders, smallere heupen',
     'gen.stapvan': 'Stap {n} van {m}',
-    'gen.kies_eerst': 'Kies eerst een basisvorm',
+    'gen.kies_eerst': 'Kies eerst een vorm',
     'aria.lengte': 'Lengte',
     'aria.gewicht': 'Gewicht',
     'aria.bouw': 'Bouw',
@@ -1812,7 +1816,7 @@ var I18N = {
     'gen.geslacht.links': 'narrower shoulders, wider hips',
     'gen.geslacht.rechts': 'wider shoulders, narrower hips',
     'gen.stapvan': 'Step {n} of {m}',
-    'gen.kies_eerst': 'Choose a basic shape first',
+    'gen.kies_eerst': 'Choose a shape first',
     'aria.lengte': 'Height',
     'aria.gewicht': 'Weight',
     'aria.bouw': 'Build',
@@ -1965,9 +1969,12 @@ function genNaarStap(n){
    paneelhoogte. Zo klopt het kader ook op een kleiner scherm of als de tekst omloopt. */
 /* Op stap 1 kan Volgende pas na een keuze (punt 9). Eerst koos Volgende stil het
    middenlichaam, zonder dat je dat zag. */
+/* Volgende staat altijd aan. Eerst stond hij uit tot er een vorm gekozen was (punt 9), maar in
+   de nieuwe opmaak leek de uitgeschakelde knop op een gewone lichte knop: je tikte en er gebeurde
+   niets (toesteltest Bram 2026-09-24). Nu zegt een tik zonder keuze wat er moet (genKiesEerst). */
 function genKnopStaat(){
   var geblokt = (GEN.stap === 0 && !GEN.gekozenGeslacht);
-  $('#gen-door').disabled = geblokt;
+  $('#gen-door').disabled = false;
   $('#gen-door').title = geblokt ? tr('gen.kies_eerst') : '';
   $('#gen-door').setAttribute('aria-label', geblokt
     ? tr('gen.volgende') + '. ' + tr('gen.kies_eerst') : $('#gen-door').textContent);
@@ -2503,6 +2510,15 @@ function genKlap(dicht){
   k.setAttribute('aria-label', tr(dicht ? 'gen.uitklappen' : 'gen.inklappen'));
   k.title = k.getAttribute('aria-label');
 }
+function genKiesEerst(){
+  var pil = $('#gen-inhoud .gen-keuzes'), uitleg = $('#gen-inhoud .gen-keuze-uitleg');
+  if(uitleg){ uitleg.textContent = tr('gen.kies_eerst'); uitleg.classList.add('let-op'); }
+  if(pil){
+    pil.classList.remove('let-op'); void pil.offsetWidth;     /* animatie opnieuw starten */
+    pil.classList.add('let-op');
+    var eerste = pil.querySelector('.gen-keuze'); if(eerste) eerste.focus({ preventScroll:true });
+  }
+}
 function genStop(){
   if(camera.view && camera.view.enabled) camera.clearViewOffset();
   genEl().hidden = true;
@@ -2533,7 +2549,7 @@ $('#gen-door').addEventListener('click', function(){
     baan.doel.set(0, 0.9, 0); baan.theta = 0; baan.r = 3.2; zetCamera();
     return;
   }
-  if(GEN.stap === 0 && !GEN.gekozenGeslacht) return;   /* knop staat dan ook uit */
+  if(GEN.stap === 0 && !GEN.gekozenGeslacht){ genKiesEerst(); return; }
   genNaarStap(GEN.stap + 1);
 });
 $('#gen-taal').addEventListener('click', function(){
