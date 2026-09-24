@@ -10,7 +10,7 @@
   /* Tokens uit HUISSTIJL.md, zodat dit stuk zo de app in kan. */
   :root{
     --bg:#EFE4D0; --tekst:#221A12; --gedempt:#5A503F; --accent:#221A12;
-    --op-inkt:#F0EDE8; --op-accent:#F0EDE8;
+    --op-inkt:#F0EDE8; --op-accent:#F0EDE8; --accent-rgb:34,26,18;
     --rood:#CE2727; --rood-diep:#8E1B1B;
     --kaart:#FBF7EE; --veldbg:#FFFCF5; --rand:#D9CBB3;
     --r-sm:8px; --r-md:12px; --r-lg:16px;
@@ -22,7 +22,7 @@
   }
   :root[data-theme="dark"]{
     --bg:#181511; --tekst:#ECE3D2; --gedempt:#9E9382; --accent:#ECE3D2;
-    --op-inkt:#181511; --kaart:#221E17; --veldbg:#201C15; --rand:#3A352B;
+    --op-inkt:#181511; --accent-rgb:236,227,210; --kaart:#221E17; --veldbg:#201C15; --rand:#3A352B;
   }
   *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
   html,body{margin:0;height:100%;background:var(--bg);color:var(--tekst);
@@ -86,17 +86,21 @@
   .gen-sub{font-size:var(--fs-sm);color:var(--gedempt);margin:0 0 16px;
     font-family:var(--label-font)}
 
-  /* stap 1: drie keuzes onder elkaar, groot genoeg om te tikken */
-  .gen-keuzes{display:flex;flex-direction:column;gap:8px}
-  .gen-keuze{display:flex;align-items:center;gap:12px;width:100%;min-height:56px;
-    padding:10px 16px;text-align:left;font:600 var(--fs-md)/1.2 var(--serif);
-    color:var(--tekst);background:var(--veldbg);border:1px solid var(--rand);
-    border-radius:var(--r-md);cursor:pointer}
-  .gen-keuze:hover{border-color:var(--accent)}
-  .gen-keuze.actief{background:var(--accent);color:var(--op-inkt);border-color:var(--accent)}
-  .gen-keuze small{display:block;font:400 var(--fs-xs)/1.3 var(--label-font);
-    color:var(--gedempt);margin-top:2px}
-  .gen-keuze.actief small{color:var(--op-inkt)}
+  /* stap 1: de vormkeuze als keuzepil, zoals Masculine/Feminine in de onboarding van de app
+     (.silhouet-keuze): een lichte pil, de gekozen vorm een inktpil erin. De uitleg van de
+     gekozen vorm staat eronder in plaats van in elke knop. */
+  .gen-keuzes{display:flex;gap:0;background:var(--veldbg);border:1px solid var(--rand);
+    border-radius:999px;padding:3px}
+  .gen-keuze{flex:1;min-height:44px;padding:6px 8px;border:0;border-radius:999px;
+    background:none;color:var(--gedempt);font:600 .86rem/1.1 var(--serif);letter-spacing:.02em;
+    cursor:pointer;transition:transform .12s ease,background-color .14s ease,color .14s ease}
+  .gen-keuze.actief{background:var(--accent);color:var(--op-inkt)}
+  .gen-keuze:active{transform:scale(.96)}
+  .gen-keuze-uitleg{font:var(--fs-sm)/1.35 var(--label-font);color:var(--gedempt);
+    text-align:center;margin:8px 0 0;min-height:1.35em}
+  /* labels in kleine kapitalen, zoals BODY en SKIN TONE in de onboarding (.onboarding .inst-label) */
+  .gen-label{font:600 .72rem/1.2 var(--label-font);letter-spacing:.1em;text-transform:uppercase;
+    color:var(--gedempt);margin:18px 0 6px;text-align:left}
 
   /* stap 2 en 3: een groot getal dat je met de slider zet */
   .gen-getal{display:flex;align-items:baseline;justify-content:center;gap:6px;
@@ -104,25 +108,30 @@
   .gen-getal b{font-size:var(--fs-2xl);font-weight:700;line-height:1;
     font-variant-numeric:tabular-nums}
   .gen-getal span{font-size:var(--fs-md);color:var(--gedempt)}
-  .gen-eenheden{display:flex;justify-content:center;gap:0;margin:10px 0 2px}
-  .gen-eenheid{min-width:58px;min-height:44px;padding:4px 14px;
-    font:600 var(--fs-sm)/1 var(--serif);color:var(--tekst);
-    background:var(--veldbg);border:1px solid var(--rand);cursor:pointer}
-  .gen-eenheid:first-child{border-radius:999px 0 0 999px}
-  .gen-eenheid:last-child{border-radius:0 999px 999px 0;border-left:0}
-  .gen-eenheid.actief{background:var(--accent);color:var(--op-inkt);border-color:var(--accent)}
+  .gen-eenheden{display:flex;width:max-content;gap:0;margin:10px auto 2px;padding:3px;
+    background:var(--veldbg);border:1px solid var(--rand);border-radius:999px}
+  .gen-eenheid{min-width:48px;min-height:44px;padding:4px 12px;border:0;border-radius:999px;
+    background:none;font:600 var(--fs-sm)/1 var(--serif);color:var(--gedempt);cursor:pointer;
+    transition:background-color .14s ease,color .14s ease}
+  .gen-eenheid.actief{background:var(--accent);color:var(--op-inkt)}
   .gen-schuif{width:100%;margin:10px 0 0}
   .gen-leeftijd{display:flex;justify-content:space-between;align-items:baseline;
-    margin:16px 2px 0;font:var(--fs-sm)/1.2 var(--label-font);color:var(--gedempt)}
-  .gen-leeftijd b{font:700 var(--fs-md)/1 var(--serif);color:var(--tekst);
+    margin:18px 2px 0;font:600 .72rem/1.2 var(--label-font);letter-spacing:.1em;
+    text-transform:uppercase;color:var(--gedempt)}
+  .gen-leeftijd b{font:700 var(--fs-md)/1 var(--serif);color:var(--tekst);letter-spacing:0;
+    text-transform:none;
     font-variant-numeric:tabular-nums}
   .gen-hint{font:var(--fs-xs)/1.4 var(--label-font);color:var(--gedempt);
     text-align:center;margin:2px 0 0;min-height:1.4em}
 
   /* stap 4 en 5: de fijnregeling */
-  .gen-rijen{max-height:31vh;overflow-y:auto;margin:0 -4px;padding:0 4px}
-  .gen-rij{display:flex;align-items:center;gap:10px;min-height:44px}
-  .gen-rij label{flex:none;width:104px;font:var(--fs-sm)/1.2 var(--label-font);
+  /* als een kaart uit Instellingen (.inst-kaart): licht vlak, rand, rijen met scheidingslijnen */
+  .gen-rijen{max-height:31vh;overflow-y:auto;background:var(--kaart);border:1px solid var(--rand);
+    border-radius:var(--r-md)}
+  .gen-rij{display:flex;align-items:center;gap:10px;min-height:48px;padding:0 12px;
+    border-bottom:1px solid var(--rand)}
+  .gen-rij:last-child{border-bottom:0}
+  .gen-rij label{flex:none;width:96px;font:500 var(--fs-base)/1.2 var(--serif);
     color:var(--tekst)}
   /* min-width:0, anders krimpt de schuif niet onder zijn eigen breedte en valt de
      cm-kolom op 320 px breed buiten het paneel. */
@@ -130,31 +139,44 @@
   .gen-rij .meet{flex:none;width:48px;text-align:right;
     font:var(--fs-xs)/1 var(--label-font);color:var(--gedempt);
     font-variant-numeric:tabular-nums}
-  .gen-meer{margin-top:8px;padding:7px 15px;min-height:44px;
+  .gen-meer{margin-top:10px;padding:7px 15px;min-height:44px;
     font:600 var(--fs-sm)/1 var(--serif);color:var(--gedempt);
     background:var(--veldbg);border:1px solid var(--rand);border-radius:999px;
     cursor:pointer}
   .gen-meer[aria-expanded="true"]{background:var(--accent);color:var(--op-inkt);
     border-color:var(--accent)}
 
-  /* Schuiven in de huisstijl, 44 px hoog met een duim van 28 px (punt 3). De standaard
-     browserschuif is op iOS 30 px hoog met een kleine duim. */
+  /* Schuiven zoals in de app (.tint-schuif): een pilbaan en een lichte duim van 30 px met een
+     dunne ring en een zachte schaduw. Het tikgebied blijft 44 px hoog (punt 3). */
   #gen input[type=range]{-webkit-appearance:none;appearance:none;background:transparent;
     height:44px;cursor:pointer;touch-action:pan-y}
-  #gen input[type=range]::-webkit-slider-runnable-track{height:4px;border-radius:2px;
-    background:var(--rand)}
-  #gen input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:28px;height:28px;
-    margin-top:-12px;border-radius:50%;background:var(--accent);
-    border:3px solid var(--bg);box-shadow:0 0 0 1px var(--accent)}
-  #gen input[type=range]::-moz-range-track{height:4px;border-radius:2px;background:var(--rand)}
-  #gen input[type=range]::-moz-range-thumb{width:22px;height:22px;border-radius:50%;
-    background:var(--accent);border:3px solid var(--bg);box-shadow:0 0 0 1px var(--accent)}
+  #gen input[type=range]::-webkit-slider-runnable-track{height:8px;border-radius:999px;
+    background:var(--rand);border:1px solid rgba(0,0,0,.08)}
+  #gen input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:30px;height:30px;
+    margin-top:-12px;border-radius:50%;background:var(--kaart);border:2px solid var(--kaart);
+    box-shadow:0 0 0 1px rgba(0,0,0,.3), 0 2px 6px rgba(0,0,0,.32)}
+  #gen input[type=range]::-moz-range-track{height:8px;border-radius:999px;background:var(--rand)}
+  #gen input[type=range]::-moz-range-thumb{width:26px;height:26px;border-radius:50%;
+    background:var(--kaart);border:2px solid var(--kaart);
+    box-shadow:0 0 0 1px rgba(0,0,0,.3), 0 2px 6px rgba(0,0,0,.32)}
+  /* donker: papier is zwart, dus de duim wordt papierwit (zoals de inkt), anders verdwijnt hij */
+  :root[data-theme="dark"] #gen input[type=range]::-webkit-slider-thumb{
+    background:var(--accent);box-shadow:0 0 0 1px rgba(0,0,0,.5), 0 2px 6px rgba(0,0,0,.6)}
+  :root[data-theme="dark"] #gen input[type=range]::-moz-range-thumb{
+    background:var(--accent);box-shadow:0 0 0 1px rgba(0,0,0,.5), 0 2px 6px rgba(0,0,0,.6)}
   #gen input[type=range]:focus-visible{outline:2px solid var(--accent);outline-offset:2px;
     border-radius:var(--r-sm)}
 
   /* de uiteinden van een schuif, links en rechts (punt 10) */
+  /* fs-sm i.p.v. fs-xs: 'zachter' en 'gespierder' waren op de telefoon te klein (toesteltest) */
   .gen-einden{display:flex;justify-content:space-between;gap:12px;margin:0 2px;
-    font:var(--fs-xs)/1.3 var(--label-font);color:var(--gedempt)}
+    font:var(--fs-sm)/1.3 var(--label-font);color:var(--gedempt)}
+  .gen-getalblok{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;
+    gap:8px 16px;margin:6px 0 2px}
+  .gen-getalblok .gen-getal{margin:0;min-width:4.4em}
+  .gen-getalblok .gen-getalrij{gap:10px}
+  .gen-getalblok .gen-eenheden{margin:0}
+  .gen-getalblok .gen-eenheid{min-width:44px;padding:4px 8px}
   .gen-einden span:last-child{text-align:right}
 
   /* min/plus naast het grote getal (punt 6) */
@@ -175,15 +197,20 @@
   /* onderbalk */
   .gen-balk{display:flex;align-items:center;gap:10px;margin-top:16px}
   .gen-balk2{display:flex;justify-content:center;margin-top:4px}
-  .gen-terug{min-height:44px;padding:11px 16px;font:600 var(--fs-base)/1 var(--serif);
-    color:var(--tekst);background:var(--veldbg);border:1px solid var(--rand);
-    border-radius:var(--r-sm);cursor:pointer}
+  /* Zoals de onboarding van de app: Terug = lichte knop (.knop-sec), Volgende = inktknop
+     (.knop). Rood alleen voor de afronding (Klaar): een rode handeling per flow (HUISSTIJL). */
+  .gen-terug{min-height:48px;padding:12px 16px;font:600 var(--fs-base)/1 var(--serif);
+    color:var(--tekst);background:var(--kaart);border:1px solid var(--rand);
+    border-radius:var(--r-md);cursor:pointer}
   .gen-terug[hidden]{display:none}
-  .gen-door{flex:1;min-height:48px;padding:12px 18px;
-    font:700 1.2rem/1 var(--serif);color:var(--op-accent);
-    background:var(--rood);border:2px solid var(--rood-diep);
-    border-radius:var(--r-sm);box-shadow:3px 3px 0 var(--rood-diep);cursor:pointer}
-  .gen-door:active{transform:translate(2px,2px);box-shadow:1px 1px 0 var(--rood-diep)}
+  .gen-door{flex:1;min-height:48px;padding:12px 18px;border:0;
+    font:800 1.02rem/1 var(--serif);letter-spacing:.01em;color:var(--op-inkt);
+    background:var(--accent);border-radius:var(--r-md);
+    box-shadow:0 3px 12px rgba(var(--accent-rgb),.3);cursor:pointer}
+  .gen-door:active{filter:brightness(.94)}
+  .gen-door.laatste{font-size:1.2rem;font-weight:700;color:var(--op-accent);background:var(--rood);
+    border:2px solid var(--rood-diep);box-shadow:3px 3px 0 var(--rood-diep)}
+  .gen-door.laatste:active{filter:none;transform:translate(2px,2px);box-shadow:1px 1px 0 var(--rood-diep)}
   .gen-sla{background:none;border:0;color:var(--gedempt);cursor:pointer;
     font:600 var(--fs-sm)/1 var(--label-font);text-decoration:underline;
     padding:12px 18px;min-height:44px}
@@ -209,17 +236,14 @@
     .gen-binnen{padding:8px 16px 10px}
     .gen-voortgang{margin:0 0 6px}
     #gen-sub{display:none}
-    .gen-keuzes{flex-direction:row;gap:0}
-    .gen-keuze{min-height:48px;padding:8px 6px;justify-content:center;text-align:center;
-      font-size:var(--fs-base);border-radius:0;border-left-width:0}
-    .gen-keuze:first-child{border-radius:999px 0 0 999px;border-left-width:1px}
-    .gen-keuze:last-child{border-radius:0 999px 999px 0}
-    .gen-keuze small{display:none}
+    .gen-keuze-uitleg{display:none}
+    .gen-label{margin:10px 0 4px}
+    .gen-hint{min-height:0}            /* de hint verschijnt bijna nooit meer; geen lege regel reserveren */
+    .gen-hint:empty{margin:0}
     .gen-getal{margin:0}
     .gen-leeftijd{margin-top:8px}
     .gen-eenheden{margin:4px 0 0}
     .gen-schuif{margin:2px 0 0}
-    #gen-inhoud .gen-sub{margin:6px 0 0}
     .gen-rijen{max-height:24vh}
     .gen-meer{margin-top:4px}
     .gen-balk{margin-top:8px}
@@ -1731,7 +1755,7 @@ var I18N = {
 
     'gen.gewicht.kop': 'Hoeveel weeg je?',
     'gen.gewicht.sub': 'Een schatting is goed. Daarna kies je je bouw.',
-    'gen.gewicht.bouw': 'Hoe ben je gebouwd?',
+    'gen.gewicht.bouw': 'Bouw',
     'gen.gewicht.links': 'zachter',
     'gen.gewicht.rechts': 'gespierder',
     'gen.gewicht.klem': 'Verder dan {n} kg gaat het model hier niet.',
@@ -1808,7 +1832,7 @@ var I18N = {
 
     'gen.gewicht.kop': 'How much do you weigh?',
     'gen.gewicht.sub': 'A rough guess is fine. Then choose your build.',
-    'gen.gewicht.bouw': "What's your build?",
+    'gen.gewicht.bouw': 'Build',
     'gen.gewicht.links': 'softer',
     'gen.gewicht.rechts': 'more muscular',
     'gen.gewicht.klem': "The model can't go past {n} kg here.",
@@ -1919,6 +1943,7 @@ function genNaarStap(n){
   $('#gen-sla').textContent = tr('gen.overslaan');
   $('#gen-herstel').textContent = tr('gen.reset');
   $('#gen-door').textContent = tr(GEN.stap === GEN_STAPPEN.length-1 ? 'gen.klaar' : 'gen.volgende');
+  $('#gen-door').classList.toggle('laatste', GEN.stap === GEN_STAPPEN.length-1);
   $('#gen-sla').hidden = !st.groep;
   $('#gen-stapvan').textContent = tr('gen.stapvan')
     .replace('{n}', GEN.stap + 1).replace('{m}', GEN_STAPPEN.length);
@@ -2061,12 +2086,8 @@ function genGeslacht(h){
     b.type = 'button';
     b.className = 'gen-keuze' + (GEN.gekozenGeslacht === k.id ? ' actief' : '');
     b.setAttribute('aria-pressed', GEN.gekozenGeslacht === k.id ? 'true' : 'false');
-    var sp = document.createElement('span');
-    sp.appendChild(document.createTextNode(k.label));
-    var sm = document.createElement('small');
-    sm.textContent = k.sub;
-    sp.appendChild(sm);
-    b.appendChild(sp);
+    b.textContent = k.label;
+    b.title = k.sub;
     b.addEventListener('click', function(){
       GEN.gekozenGeslacht = k.id;
       sliders.gender.value = k.g;
@@ -2080,6 +2101,11 @@ function genGeslacht(h){
     doos.appendChild(b);
   });
   h.appendChild(doos);
+  var gekozen = keuzes.filter(function(k){ return k.id === GEN.gekozenGeslacht; })[0];
+  var uitleg = document.createElement('p');
+  uitleg.className = 'gen-keuze-uitleg';
+  uitleg.textContent = gekozen ? gekozen.sub : '';
+  h.appendChild(uitleg);
   if(GEN.gekozenGeslacht === 'nb') genFijnGender(h);
   genLeeftijd(h);
 }
@@ -2152,11 +2178,11 @@ function genLengte(h){
     }
     toon.appendChild(b); toon.appendChild(sp);
   }
-  h.appendChild(genGetalRij(toon, r, stapCm));
-  h.appendChild(genEenheden(['cm', 'ft'], GEN.lengteEenheid, function(e){
-    GEN.lengteEenheid = e; snap(); ververs(); noem();
-    r.dispatchEvent(new Event('change'));
-  }));
+  h.appendChild(genGetalBlok(genGetalRij(toon, r, stapCm),
+    genEenheden(['cm', 'ft'], GEN.lengteEenheid, function(e){
+      GEN.lengteEenheid = e; snap(); ververs(); noem();
+      r.dispatchEvent(new Event('change'));
+    })));
   h.appendChild(r);
   r.addEventListener('input', function(){
     snap();
@@ -2217,17 +2243,16 @@ function genGewicht(h){
       ? tr('gen.gewicht.klem').replace('{n}', Math.round(echt))
       : '';
   }
-  h.appendChild(genGetalRij(toon, r, function(){ return 1; }));
-  h.appendChild(genEenheden(['kg', 'lb', 'st'], GEN.gewichtEenheid, function(e){
-    var kg = inKg();
-    GEN.gewichtEenheid = e; zetSchaal(kg); ververs(); noem();
-  }));
+  h.appendChild(genGetalBlok(genGetalRij(toon, r, function(){ return 1; }),
+    genEenheden(['kg', 'lb', 'st'], GEN.gewichtEenheid, function(e){
+      var kg = inKg();
+      GEN.gewichtEenheid = e; zetSchaal(kg); ververs(); noem();
+    })));
   h.appendChild(r);
   h.appendChild(hint);
 
   var lab = document.createElement('p');
-  lab.className = 'gen-sub';
-  lab.style.margin = '18px 0 0';
+  lab.className = 'gen-label';
   lab.textContent = tr('gen.gewicht.bouw');
   lab.id = 'gen-bouwvraag';
   h.appendChild(lab);
@@ -2248,6 +2273,14 @@ function genGewicht(h){
   ververs();
 }
 
+/* Getal en eenheidknoppen op een regel (toesteltest Bram 2026-09-24): de lege ruimte naast het
+   getal verdwijnt en het paneel wordt lager. Past het niet (320 px), dan lopen de knoppen eronder. */
+function genGetalBlok(rij, eenheden){
+  var blok = document.createElement('div');
+  blok.className = 'gen-getalblok';
+  blok.appendChild(rij); blok.appendChild(eenheden);
+  return blok;
+}
 function genEenheden(opties, actief, bij){
   var doos = document.createElement('div');
   doos.className = 'gen-eenheden';
@@ -2331,10 +2364,15 @@ function genRij(sleutel){
     lab.textContent = tr('mod.' + sleutel);
     sl.min = -1; sl.max = 1; sl.value = detailStand[sleutel] || 0;
     var isMaat = !!maatVan[sleutel];
+    /* De maten volgen de lengte-eenheid uit stap 2: wie ft kiest, ziet inches (toesteltest). */
     var toonMeet = function(){
-      var cm = isMaat ? Math.round(meetMaat(sleutel)) : null;
-      meet.textContent = isMaat ? cm + ' cm' : '';
-      sl.setAttribute('aria-valuetext', genWoord(+sl.value) + (isMaat ? ', ' + cm + ' cm' : ''));
+      var tekst = '';
+      if(isMaat){
+        var cm = meetMaat(sleutel);
+        tekst = (GEN.lengteEenheid === 'ft') ? Math.round(cm / 2.54) + ' in' : Math.round(cm) + ' cm';
+      }
+      meet.textContent = tekst;
+      sl.setAttribute('aria-valuetext', genWoord(+sl.value) + (isMaat ? ', ' + tekst : ''));
     };
     sl.addEventListener('input', function(){
       detailStand[sleutel] = +sl.value;
