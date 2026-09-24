@@ -10,3 +10,6 @@
 
 User-agent: *
 Disallow: /test/
+
+# /generator-test/ is een losse proef van de lichaamsgenerator (spike), geen onderdeel van de app.
+Disallow: /generator-test/
