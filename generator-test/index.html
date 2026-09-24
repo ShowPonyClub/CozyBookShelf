@@ -5,6 +5,12 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
 <title>Tatties spike - body sliders</title>
+<!-- Als app op het beginscherm (zoals tatties-3d.html), om zonder Safari-balken te testen.
+     Bewust geen service worker: elke start haalt de nieuwste proef op. -->
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Generator">
 <link rel="stylesheet" href="lib/recoleta.css">
 <style>
   /* Tokens uit HUISSTIJL.md, zodat dit stuk zo de app in kan. */
@@ -119,12 +125,22 @@
     transition:background-color .14s ease,color .14s ease}
   .gen-eenheid.actief{background:var(--accent);color:var(--op-inkt)}
   .gen-schuif{width:100%;margin:10px 0 0}
-  .gen-leeftijd{display:flex;justify-content:space-between;align-items:baseline;
+  .gen-leeftijd, .gen-huidlabel{display:flex;justify-content:space-between;align-items:baseline;
     margin:18px 2px 0;font:600 .72rem/1.2 var(--label-font);letter-spacing:.1em;
     text-transform:uppercase;color:var(--gedempt)}
   .gen-leeftijd b{font:700 var(--fs-md)/1 var(--serif);color:var(--tekst);letter-spacing:0;
     text-transform:none;
     font-variant-numeric:tabular-nums}
+  /* Huidskleur: dezelfde schuif als .tint-schuif in de app. De baan toont het hele palet, de
+     duim draagt de gekozen kleur (ook in donker, anders zie je niet welke kleur je hebt). */
+  #gen input[type=range].gen-tint::-webkit-slider-runnable-track{height:14px;
+    background:var(--tint-baan);border:1px solid rgba(0,0,0,.22)}
+  #gen input[type=range].gen-tint::-moz-range-track{height:14px;
+    background:var(--tint-baan);border:1px solid rgba(0,0,0,.22)}
+  #gen input[type=range].gen-tint::-webkit-slider-thumb{margin-top:-9px;background:var(--tint-duim)}
+  #gen input[type=range].gen-tint::-moz-range-thumb{background:var(--tint-duim)}
+  :root[data-theme="dark"] #gen input[type=range].gen-tint::-webkit-slider-thumb{background:var(--tint-duim)}
+  :root[data-theme="dark"] #gen input[type=range].gen-tint::-moz-range-thumb{background:var(--tint-duim)}
   .gen-hint{font:var(--fs-xs)/1.4 var(--label-font);color:var(--gedempt);
     text-align:center;margin:2px 0 0;min-height:1.4em}
 
@@ -232,18 +248,6 @@
     border:2px solid var(--rood-diep);box-shadow:3px 3px 0 var(--rood-diep)}
   .gen-door.laatste:active{filter:none;transform:translate(2px,2px);box-shadow:1px 1px 0 var(--rood-diep)}
 
-  /* Greep boven het paneel: tik om het paneel in te klappen en het model groot te
-     zien (punt 2). Hij hangt in de strook boven het paneel, dus kost geen hoogte. */
-  .gen-greep{position:absolute;left:50%;top:-40px;transform:translateX(-50%);
-    width:72px;height:44px;padding:0;background:none;border:0;border-radius:999px;
-    cursor:pointer;display:flex;align-items:center;justify-content:center}
-  .gen-greep::before{content:"";width:40px;height:5px;border-radius:3px;
-    background:var(--gedempt);opacity:.55}
-  .gen-greep:focus-visible{outline:2px solid var(--accent);outline-offset:-4px}
-  #gen.ingeklapt .gen-voortgang, #gen.ingeklapt #gen-sub, #gen.ingeklapt #gen-inhoud,
-  #gen.ingeklapt .gen-balk,
-  #gen.ingeklapt #gen-herstel{display:none}
-  #gen.ingeklapt .gen-koprij{cursor:pointer}
 
   /* Compacte stand voor lage schermen (punt 2). Op een iPhone SE bleef er eerst 26%
      van het scherm over voor het model. Minder lucht, geen subtekst, en de drie
@@ -257,7 +261,13 @@
     .gen-hint{min-height:0}            /* de hint verschijnt bijna nooit meer; geen lege regel reserveren */
     .gen-hint:empty{margin:0}
     .gen-getal{margin:0}
-    .gen-leeftijd{margin-top:8px}
+    .gen-leeftijd, .gen-huidlabel{margin-top:8px}
+    /* Label naast de schuif in plaats van erboven: de huidskleur kostte het model anders
+       72 px op 320x568. Leeftijd en waarde staan onder elkaar in de labelkolom. */
+    .gen-blok{display:flex;align-items:center;gap:10px;margin-top:4px}
+    .gen-blok > .gen-leeftijd, .gen-blok > .gen-huidlabel{flex:0 0 6.6rem;flex-direction:column;
+      align-items:flex-start;gap:3px;margin:0}
+    .gen-blok > .gen-schuif{flex:1;min-width:0;margin:0}
     .gen-eenheden{margin:4px 0 0}
     .gen-schuif{margin:2px 0 0}
     .gen-rijen{max-height:24vh}
@@ -275,7 +285,6 @@
     .gen-binnen{height:100%;display:flex;flex-direction:column;padding:10px 16px 10px 26px}
     #gen-inhoud{flex:1 1 auto;min-height:0;overflow-y:auto;margin:0 -4px;padding:0 4px}
     .gen-rijen{max-height:none;overflow:visible}
-    .gen-greep{display:none}
     .gen-kop{font-size:var(--fs-lg)}
     body #gen-taal{right:auto;left:8px}
     body #gen-dev{right:auto;left:52px}
@@ -315,7 +324,6 @@
   </div>
 </div>
 <div id="gen" hidden>
-  <button class="gen-greep" id="gen-greep" type="button" aria-expanded="true"></button>
   <div class="gen-binnen">
     <div class="gen-voortgang" id="gen-voortgang" aria-hidden="true"></div>
     <p class="vh" id="gen-stapvan" aria-live="polite"></p>
@@ -429,9 +437,63 @@ zetCamera();
   stage.addEventListener('touchend', function(){ pinch=0; });
 })();
 
+/* ----------------------------------------------------------- huidskleur
+   Palet en verloop uit de app (HUIDTINTEN, tintBijFractie), zodat de schuif hier dezelfde
+   kleuren geeft als de onboarding. De app bewaart de keuze in localStorage 'tatties-tint'; de
+   proef staat op hetzelfde domein en begint dus met de kleur die je in de app koos. Terug
+   schrijven doet hij niet: dat zou de app-instelling stilletjes veranderen. */
+var HUIDTINTEN = ['#ffe0d0', '#f6cdaf', '#e8b48c', '#d29c74', '#b07a54', '#8a5a3c', '#653f29', '#43291b'];
+var huidtint = '#e8b48c';
+try { huidtint = localStorage.getItem('tatties-tint') || huidtint; } catch(e) {}
+if(!/^#[0-9a-f]{6}$/i.test(huidtint)) huidtint = '#e8b48c';
+function _hexNaarHsl(hex){
+  var c = parseInt(hex.slice(1), 16), r = ((c >> 16) & 255) / 255, g = ((c >> 8) & 255) / 255, b = (c & 255) / 255;
+  var mx = Math.max(r, g, b), mn = Math.min(r, g, b), l = (mx + mn) / 2, h = 0, s = 0, d;
+  if(mx !== mn){ d = mx - mn; s = l > 0.5 ? d / (2 - mx - mn) : d / (mx + mn);
+    if(mx === r) h = ((g - b) / d + (g < b ? 6 : 0)); else if(mx === g) h = (b - r) / d + 2; else h = (r - g) / d + 4; h *= 60; }
+  return [h, s, l];
+}
+function _hslNaarHex(h, s, l){
+  var c = (1 - Math.abs(2 * l - 1)) * s, x = c * (1 - Math.abs((h / 60) % 2 - 1)), m = l - c / 2;
+  var r = 0, g = 0, b = 0;
+  if(h < 60){ r = c; g = x; } else if(h < 120){ r = x; g = c; } else if(h < 180){ g = c; b = x; }
+  else if(h < 240){ g = x; b = c; } else if(h < 300){ r = x; b = c; } else { r = c; b = x; }
+  var to = function(v){ return Math.max(0, Math.min(255, Math.round((v + m) * 255))); };
+  return '#' + ((1 << 24) + (to(r) << 16) + (to(g) << 8) + to(b)).toString(16).slice(1);
+}
+function tintBijFractie(t){
+  t = Math.max(0, Math.min(1, t));
+  var n = HUIDTINTEN.length - 1, x = t * n, i = Math.min(n - 1, Math.floor(x)), f = x - i;
+  var A = _hexNaarHsl(HUIDTINTEN[i]), B = _hexNaarHsl(HUIDTINTEN[i + 1]);
+  var dh = B[0] - A[0]; if(dh > 180) dh -= 360; if(dh < -180) dh += 360;
+  return _hslNaarHex((A[0] + dh * f + 360) % 360, A[1] + (B[1] - A[1]) * f, A[2] + (B[2] - A[2]) * f);
+}
+function fractieBijTint(hex){
+  var c = parseInt(hex.slice(1), 16), cr = (c >> 16) & 255, cg = (c >> 8) & 255, cb = c & 255;
+  var best = 0, bd = Infinity;
+  for(var i = 0; i <= 100; i++){
+    var h = parseInt(tintBijFractie(i / 100).slice(1), 16);
+    var dr = ((h >> 16) & 255) - cr, dg = ((h >> 8) & 255) - cg, db = (h & 255) - cb;
+    var d = dr * dr + dg * dg + db * db;
+    if(d < bd){ bd = d; best = i / 100; }
+  }
+  return best;
+}
+function tintBaanVerloop(){
+  var stops = [];
+  for(var i = 0; i <= 12; i++) stops.push(tintBijFractie(i / 12) + ' ' + Math.round(i / 12 * 100) + '%');
+  return 'linear-gradient(90deg,' + stops.join(',') + ')';
+}
+/* Zoals applySkin3D in de app: de hex is sRGB, het materiaal rekent lineair. */
+function zetHuidtint(hex){
+  huidtint = hex;
+  huid.color.set(hex); huid.color.convertSRGBToLinear();
+}
+
 /* ------------------------------------------------------------ materiaal */
 var huid = new THREE.MeshStandardMaterial({
   color:0xd8b49a, roughness:0.72, metalness:0.0 });
+zetHuidtint(huidtint);
 
 /* --------------------------------------------- tattoo-texturen (canvas) */
 function tattooTextuur(soort){
@@ -1727,8 +1789,6 @@ var I18N = {
     'gen.volgende': 'Volgende',
     'gen.klaar': 'Klaar',
     'gen.reset': 'Opnieuw',
-    'gen.inklappen': 'Model groter bekijken',
-    'gen.uitklappen': 'Vragen weer tonen',
     'gen.meer': 'Meer instellen',
     'gen.minder': 'Minder instellen',
 
@@ -1742,6 +1802,7 @@ var I18N = {
     'gen.geslacht.man_sub': 'Bredere schouders, rechtere heupen',
     'gen.leeftijd': 'Leeftijd',
     'gen.jaar': '{n} jaar',
+    'gen.huid': 'Huidskleur',
     'gen.geslacht.links': 'smallere schouders, bredere heupen',
     'gen.geslacht.rechts': 'bredere schouders, smallere heupen',
     'gen.stapvan': 'Stap {n} van {m}',
@@ -1803,8 +1864,6 @@ var I18N = {
     'gen.volgende': 'Next',
     'gen.klaar': 'Done',
     'gen.reset': 'Reset',
-    'gen.inklappen': 'Show the model larger',
-    'gen.uitklappen': 'Show the questions again',
     'gen.meer': 'More settings',
     'gen.minder': 'Fewer settings',
 
@@ -1818,6 +1877,7 @@ var I18N = {
     'gen.geslacht.man_sub': 'Wider shoulders, straighter hips',
     'gen.leeftijd': 'Age',
     'gen.jaar': '{n} years',
+    'gen.huid': 'Skin tone',
     'gen.geslacht.links': 'narrower shoulders, wider hips',
     'gen.geslacht.rechts': 'wider shoulders, narrower hips',
     'gen.stapvan': 'Step {n} of {m}',
@@ -1956,7 +2016,6 @@ function genNaarStap(n){
     .replace('{n}', GEN.stap + 1).replace('{m}', GEN_STAPPEN.length);
   genKnopStaat();
   genVulInhoud(st);
-  genKlap(false);
   /* Bij een nieuwe stap de focus naar de kop, zodat een screenreader de vraag voorleest
      in plaats van stil te blijven staan op een knop die net verdwenen is. */
   if(GEN.gestart) $('#gen-kop').focus({ preventScroll:true });
@@ -2047,8 +2106,9 @@ function genCamera(st){
      verschuift een view-offset het beeldmidden naar het midden van die strook. De
      camera blijft zo op het model gericht, dus draaien blijft om het model heen. */
   var opzij = !!r && r.left > W * 0.25 && r.height > H * 0.8;
-  /* De greep hangt 40 px boven het paneel; die strook houden we vrij van het model. */
-  var bezet = r ? r.height + 40 : 0;
+  /* Een smalle strook boven het paneel vrij, zodat de voeten er niet tegenaan staan. (Hier
+     hing tot 2026-09-24 een inklapgreep van 40 px; weggehaald na de toesteltest: onduidelijk.) */
+  var bezet = r ? r.height + 8 : 0;
   var zicht = opzij ? 0.95 : Math.max(0.28, Math.min(0.95, (H - bezet) / H));
   var beeldH = hoogte / (zicht * 0.9);                  /* 10% lucht eromheen */
   if(opzij){
@@ -2118,6 +2178,26 @@ function genGeslacht(h){
   h.appendChild(uitleg);
   if(GEN.gekozenGeslacht === 'nb') genFijnGender(h);
   genLeeftijd(h);
+  genHuid(h);
+}
+/* Huidskleur, in stap 1 zoals in de app-onboarding (daar staat hij naast de lichaamskeuze).
+   Een kleur verandert de vorm niet, dus geen blend en geen decal-rebuild. */
+function genHuid(h){
+  var rij = document.createElement('div');
+  rij.className = 'gen-huidlabel';
+  var lab = document.createElement('span');
+  lab.textContent = tr('gen.huid');
+  rij.appendChild(lab);
+  var r = document.createElement('input');
+  r.type = 'range'; r.min = 0; r.max = 100; r.step = 1;
+  r.value = Math.round(fractieBijTint(huidtint) * 100);
+  r.className = 'gen-schuif gen-tint';
+  r.setAttribute('aria-label', tr('gen.huid'));
+  r.style.setProperty('--tint-baan', tintBaanVerloop());
+  function toon(){ r.style.setProperty('--tint-duim', huidtint); }
+  r.addEventListener('input', function(){ zetHuidtint(tintBijFractie(r.value / 100)); toon(); });
+  toon();
+  genBlok(h, rij, r);
 }
 /* Leeftijd (punt 11), in stap 1 omdat hij net als geslacht de basisvorm zet. */
 function genLeeftijd(h){
@@ -2136,8 +2216,14 @@ function genLeeftijd(h){
   r.addEventListener('input', function(){ leeftijdJaar = +r.value; toon(); genPasToe(false); });
   r.addEventListener('change', function(){ leeftijdJaar = +r.value; genPasToe(true); });
   toon();
-  h.appendChild(rij);
-  h.appendChild(r);
+  genBlok(h, rij, r);
+}
+/* Label en schuif samen in een blok, zodat de compacte stand ze naast elkaar kan zetten. */
+function genBlok(h, rij, r){
+  var blok = document.createElement('div');
+  blok.className = 'gen-blok';
+  blok.appendChild(rij); blok.appendChild(r);
+  h.appendChild(blok);
 }
 function genFijnGender(h){
   var r = document.createElement('input');
@@ -2493,7 +2579,8 @@ function genStart(){
     bouw: +sliders.spier.value,
     cupsize: cupStand.cupsize,
     firmness: cupStand.firmness,
-    leeftijd: leeftijdJaar
+    leeftijd: leeftijdJaar,
+    huidtint: huidtint
   };
   genNaarStap(0);
 }
@@ -2506,6 +2593,7 @@ function genHerstel(){
     GEN.gekozenGeslacht = null;
     sliders.gender.value = (b.gender === undefined) ? 0.5 : b.gender;
     leeftijdJaar = (b.leeftijd === undefined) ? 25 : b.leeftijd;
+    if(b.huidtint) zetHuidtint(b.huidtint);
   } else if(st.id === 'lengte'){
     sliders.lengte.value = (b.lengte === undefined) ? 0.5 : b.lengte;
   } else if(st.id === 'gewicht'){
@@ -2529,15 +2617,6 @@ function genHerstel(){
   genKnopStaat();
   genCamera(st);
 }
-/* Het paneel in- of uitklappen (punt 2). Ingeklapt blijft alleen de kop staan, zodat
-   je weet waar je was; het model krijgt de rest van het scherm. */
-function genKlap(dicht){
-  var g = genEl(), k = $('#gen-greep');
-  g.classList.toggle('ingeklapt', !!dicht);
-  k.setAttribute('aria-expanded', dicht ? 'false' : 'true');
-  k.setAttribute('aria-label', tr(dicht ? 'gen.uitklappen' : 'gen.inklappen'));
-  k.title = k.getAttribute('aria-label');
-}
 function genKiesEerst(){
   var pil = $('#gen-inhoud .gen-keuzes'), uitleg = $('#gen-inhoud .gen-keuze-uitleg');
   if(uitleg){ uitleg.textContent = tr('gen.kies_eerst'); uitleg.classList.add('let-op'); }
@@ -2556,15 +2635,6 @@ function genStop(){
 }
 
 $('#gen-terug').addEventListener('click', function(){ genNaarStap(GEN.stap - 1); });
-$('#gen-greep').addEventListener('click', function(){
-  genKlap(!genEl().classList.contains('ingeklapt'));
-  genCamera(GEN_STAPPEN[GEN.stap]);
-});
-$('.gen-koprij').addEventListener('click', function(e){
-  if(!genEl().classList.contains('ingeklapt') || e.target.closest('button')) return;
-  genKlap(false);
-  genCamera(GEN_STAPPEN[GEN.stap]);
-});
 /* Draaien of een ander formaat: het kader hangt af van de paneelstand. */
 window.addEventListener('resize', function(){
   if(!genEl().hidden) genCamera(GEN_STAPPEN[GEN.stap]);
@@ -2706,6 +2776,7 @@ window.__spike = {
   },
   zetEenheid: function(e){ EENHEID = e; toonWaarden(); },
   leeftijd: function(){ return leeftijdJaar; },
+  huid: function(){ return { tint:huidtint, lineair:huid.color.getHexString() }; },
   schaal: function(){ return { schaal:_schaal, doel:lengteDoel(), laatste:_laatsteLengte, huidig:huidigeHeight }; },
   tabelBezig: function(){ return !!tabelTaak || !!_overgang; },   /* ook een lopende overgang */
   zetLeeftijd: function(j){
