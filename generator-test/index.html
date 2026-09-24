@@ -97,6 +97,7 @@
      gekozen vorm staat eronder in plaats van in elke knop. */
   .gen-keuzes{display:flex;gap:0;background:var(--veldbg);border:1px solid var(--rand);
     border-radius:999px;padding:3px}
+  .gen-keuze[hidden]{display:none}
   .gen-keuze{flex:1;min-height:44px;padding:6px 8px;border:0;border-radius:999px;
     background:none;color:var(--gedempt);font:600 .86rem/1.1 var(--serif);letter-spacing:.02em;
     cursor:pointer;transition:transform .12s ease,background-color .14s ease,color .14s ease}
@@ -131,16 +132,14 @@
   .gen-leeftijd b{font:700 var(--fs-md)/1 var(--serif);color:var(--tekst);letter-spacing:0;
     text-transform:none;
     font-variant-numeric:tabular-nums}
-  /* Huidskleur: dezelfde schuif als .tint-schuif in de app. De baan toont het hele palet, de
-     duim draagt de gekozen kleur (ook in donker, anders zie je niet welke kleur je hebt). */
-  #gen input[type=range].gen-tint::-webkit-slider-runnable-track{height:14px;
-    background:var(--tint-baan);border:1px solid rgba(0,0,0,.22)}
-  #gen input[type=range].gen-tint::-moz-range-track{height:14px;
-    background:var(--tint-baan);border:1px solid rgba(0,0,0,.22)}
-  #gen input[type=range].gen-tint::-webkit-slider-thumb{margin-top:-9px;background:var(--tint-duim)}
+  /* Huidskleur: de baan toont het hele palet (zoals .tint-schuif in de app), de duim draagt
+     de gekozen kleur (ook in donker, anders zie je niet welke kleur je hebt). */
+  #gen input[type=range].gen-tint::-webkit-slider-runnable-track{
+    background:var(--tint-baan);border-color:rgba(0,0,0,.22)}
+  #gen input[type=range].gen-tint::-moz-range-track{
+    background:var(--tint-baan);border-color:rgba(0,0,0,.22)}
+  #gen input[type=range].gen-tint::-webkit-slider-thumb{background:var(--tint-duim)}
   #gen input[type=range].gen-tint::-moz-range-thumb{background:var(--tint-duim)}
-  :root[data-theme="dark"] #gen input[type=range].gen-tint::-webkit-slider-thumb{background:var(--tint-duim)}
-  :root[data-theme="dark"] #gen input[type=range].gen-tint::-moz-range-thumb{background:var(--tint-duim)}
   .gen-hint{font:var(--fs-xs)/1.4 var(--label-font);color:var(--gedempt);
     text-align:center;margin:2px 0 0;min-height:1.4em}
 
@@ -183,24 +182,23 @@
   .gen-meer svg{transition:transform .18s ease}
   .gen-meer[aria-expanded="true"] svg{transform:rotate(180deg)}
 
-  /* Schuiven zoals in de app (.tint-schuif): een pilbaan en een lichte duim van 30 px met een
-     dunne ring en een zachte schaduw. Het tikgebied blijft 44 px hoog (punt 3). */
+  /* Schuiven (toesteltest 2026-09-24): elke baan 14 px dik, zoals de huidskleur, en een
+     rechthoekige duim met een inktrand, als een schuif op een mengpaneel. Een ronde duim
+     ging op papier op in de baan. De rand is de tekstkleur, dus in donker papierwit.
+     Het tikgebied blijft 44 px hoog (punt 3). Maten border-box: baan 14, duim 18 x 34;
+     de duim hangt aan de binnenkant van de baan (12 px), dus margin-top (12 - 34) / 2. */
   #gen input[type=range]{-webkit-appearance:none;appearance:none;background:transparent;
     height:44px;cursor:pointer;touch-action:pan-y}
-  #gen input[type=range]::-webkit-slider-runnable-track{height:8px;border-radius:999px;
+  #gen input[type=range]::-webkit-slider-runnable-track{box-sizing:border-box;height:14px;
+    border-radius:999px;background:var(--rand);border:1px solid rgba(0,0,0,.08)}
+  #gen input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;box-sizing:border-box;
+    width:18px;height:34px;margin-top:-11px;border-radius:5px;
+    background:var(--kaart);border:2.5px solid var(--tekst);box-shadow:0 2px 5px rgba(0,0,0,.25)}
+  #gen input[type=range]::-moz-range-track{box-sizing:border-box;height:14px;border-radius:999px;
     background:var(--rand);border:1px solid rgba(0,0,0,.08)}
-  #gen input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:30px;height:30px;
-    margin-top:-12px;border-radius:50%;background:var(--kaart);border:2px solid var(--kaart);
-    box-shadow:0 0 0 1px rgba(0,0,0,.3), 0 2px 6px rgba(0,0,0,.32)}
-  #gen input[type=range]::-moz-range-track{height:8px;border-radius:999px;background:var(--rand)}
-  #gen input[type=range]::-moz-range-thumb{width:26px;height:26px;border-radius:50%;
-    background:var(--kaart);border:2px solid var(--kaart);
-    box-shadow:0 0 0 1px rgba(0,0,0,.3), 0 2px 6px rgba(0,0,0,.32)}
-  /* donker: papier is zwart, dus de duim wordt papierwit (zoals de inkt), anders verdwijnt hij */
-  :root[data-theme="dark"] #gen input[type=range]::-webkit-slider-thumb{
-    background:var(--accent);box-shadow:0 0 0 1px rgba(0,0,0,.5), 0 2px 6px rgba(0,0,0,.6)}
-  :root[data-theme="dark"] #gen input[type=range]::-moz-range-thumb{
-    background:var(--accent);box-shadow:0 0 0 1px rgba(0,0,0,.5), 0 2px 6px rgba(0,0,0,.6)}
+  #gen input[type=range]::-moz-range-thumb{box-sizing:border-box;width:18px;height:34px;
+    border-radius:5px;background:var(--kaart);border:2.5px solid var(--tekst);
+    box-shadow:0 2px 5px rgba(0,0,0,.25)}
   #gen input[type=range]:focus-visible{outline:2px solid var(--accent);outline-offset:2px;
     border-radius:var(--r-sm)}
 
@@ -286,18 +284,28 @@
     #gen-inhoud{flex:1 1 auto;min-height:0;overflow-y:auto;margin:0 -4px;padding:0 4px}
     .gen-rijen{max-height:none;overflow:visible}
     .gen-kop{font-size:var(--fs-lg)}
-    body #gen-taal{right:auto;left:8px}
-    body #gen-dev{right:auto;left:52px}
+    body #gen-beeld{right:auto;left:8px}
+    body #gen-taal{right:auto;left:60px}
+    body #gen-dev{right:auto;left:104px}
   }
 
   /* de dev-balk blijft, maar uit de weg */
   #paneel.verstopt{display:none}
   body.genaan #hud{display:none}
-  #gen-taal{position:fixed;right:52px;top:calc(env(safe-area-inset-top) + 8px);z-index:21;
+  /* Beeld terugzetten, zoals #t3d-reset in de 3D-app: rond, 44 px, het lichaampje. Rechtsboven in
+     de hoek; NL en dev (alleen voor de proef) staan links ervan. */
+  #gen-beeld{position:fixed;right:8px;top:calc(env(safe-area-inset-top) + 8px);z-index:21;
+    width:44px;height:44px;border-radius:50%;padding:0;display:flex;align-items:center;
+    justify-content:center;background:var(--kaart);border:1px solid var(--rand);
+    color:var(--tekst);cursor:pointer}
+  #gen-beeld:hover{border-color:var(--accent)}
+  #gen-beeld svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:2;
+    stroke-linecap:round;stroke-linejoin:round}
+  #gen-taal{position:fixed;right:104px;top:calc(env(safe-area-inset-top) + 14px);z-index:21;
     font:600 var(--fs-xs)/1 var(--label-font);padding:7px 10px;min-height:32px;
     background:var(--veldbg);border:1px solid var(--rand);border-radius:999px;
     color:var(--gedempt);cursor:pointer}
-  #gen-dev{position:fixed;right:8px;top:calc(env(safe-area-inset-top) + 8px);z-index:21;
+  #gen-dev{position:fixed;right:60px;top:calc(env(safe-area-inset-top) + 14px);z-index:21;
     font:var(--fs-xs)/1 var(--label-font);padding:7px 10px;min-height:32px;
     background:var(--veldbg);border:1px solid var(--rand);border-radius:999px;
     color:var(--gedempt);cursor:pointer}
@@ -339,6 +347,7 @@
     </div>
   </div>
 </div>
+<button id="gen-beeld" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="4.6" r="2"/><path d="M12 7v7"/><path d="M5 9.5h14"/><path d="M9 21l3-7 3 7"/></svg></button>
 <button id="gen-taal" type="button">NL</button>
 <button id="gen-dev" type="button">dev</button>
 <div id="laden">model laden...</div>
@@ -612,6 +621,22 @@ function leeftijdAs(){
   return 0.5 + Math.min(65, leeftijdJaar - 25) / 65 * 0.5;
 }
 
+/* Armlengte bij leeftijd (toesteltest 2026-09-24: "waarom worden de armen korter?").
+   MakeHuman's oude targets maken het hele lichaam kleiner, ook de armbotten; wij trekken de
+   lengte daarna recht, dus de armen bleven kort. In het echt krimpt vooral de rug. Gemeten
+   (25 -> 90 jaar, drie standen per vorm): man bovenarm -1,2 tot -2,1 cm, onderarm -2,7 tot
+   -3,2; vrouw juist +0,3 tot +0,4 en +0,5 tot +0,6. De armlengte-modifiers vullen dat aan:
+   ~6,9 (boven) en ~6,5 cm (onder) per eenheid, lineair met de leeftijdsas. Rest (zelfde negen
+   standen, 25 tegen 90 jaar) hooguit 0,65 cm. */
+var ARM_LEEFTIJD = { bovenarmlengte:{ man:1.7, vrouw:-0.35, cmPer:6.9 },
+                     onderarmlengte:{ man:3.0, vrouw:-0.55, cmPer:6.5 } };
+function armLeeftijd(sleutel, gender){
+  var a = ARM_LEEFTIJD[sleutel];
+  if(!a || leeftijdJaar <= 25) return 0;
+  var t = (leeftijdAs() - 0.5) / 0.5;
+  return t * (a.man * gender + a.vrouw * (1 - gender)) / a.cmPer;
+}
+
 var _w = null;
 function gewichten(gender, muscle, weight, height){
   var gw = asWeights(macro.gender, gender),
@@ -683,7 +708,8 @@ function gewichten(gender, muscle, weight, height){
   var vv = vetF ? vetVerdeling(gender) : null;
   for(var d3=0; d3<plan.det.length; d3++){
     var sl3 = plan.det[d3].sleutel;
-    var v3 = (detailStand[sl3] || 0) + (vv ? vetBijdrage(vv, sl3, vetF) : 0);
+    var v3 = (detailStand[sl3] || 0) + (vv ? vetBijdrage(vv, sl3, vetF) : 0) +
+             armLeeftijd(sl3, gender);
     if(v3 > VET_KAP) v3 = VET_KAP; else if(v3 < -1) v3 = -1;
     if(v3 > 0) _w[plan.det[d3].incr] = v3;
     else if(v3 < 0) _w[plan.det[d3].decr] = -v3;
@@ -876,12 +902,20 @@ function bouwGewichtTabelLos(gender, height, klaar){
    niet (de gespierde hoek van MakeHuman is erg slank), dus loopt f door tot 2 met een
    ANDERE verdeling: heup en benen stonden bij vrouw al op 1, en daar verder op
    doorduwen gaf zadeltassen met een harde rand bij de knie. Laag 2 legt het over buik,
-   taille, armen en de dij-, bovenarm- en kuitmaat. */
-var VET_VROUW  = { taille:0.6, buik:0.6, heupen:1,   billen:1,   armenVet:0.8, benenVet:1 };
-var VET_MAN    = { taille:1,   buik:1,   heupen:0.6, billen:0.5, armenVet:0.8, benenVet:0.6 };
-var VET2_VROUW = { taille:0.6, buik:0.8, heupen:0.2, billen:0.3, armenVet:0.4, benenVet:0,
+   taille, armen en de dij-, bovenarm- en kuitmaat.
+
+   Buik laag (toesteltest 2026-09-24): de buik-modifier is MakeHuman's stomach-pregnant, en
+   die maakt bij 1,6 bovenop de zware hoek een platte plank met een scherpe onderrand (bij
+   180 kg stak hij als een punt naar voren). Nu buik 0,5 + 0,15 (man) en 0,4 + 0,15
+   (vrouw), en de taille in laag 2 hoger. Gemeten (tools/zware_buik.js, 166 cm): voorsprong
+   voor de borst bij man 120 kg bouw midden 18 -> 10 cm, man 180 kg zacht 20 -> 12 cm,
+   vrouw 180 kg zacht 24 -> 17 cm. Prijs: bij bouw midden haalt het model iets minder
+   (man 161 -> 155 kg op 166 cm). */
+var VET_VROUW  = { taille:0.6, buik:0.4, heupen:1,   billen:1,   armenVet:0.8, benenVet:1 };
+var VET_MAN    = { taille:1,   buik:0.5, heupen:0.6, billen:0.5, armenVet:0.8, benenVet:0.6 };
+var VET2_VROUW = { taille:0.8, buik:0.15, heupen:0.2, billen:0.3, armenVet:0.4, benenVet:0,
                    dij:0.6, bovenarm:0.3, kuit:0.4 };
-var VET2_MAN   = { taille:0.5, buik:0.7, heupen:0.3, billen:0.3, armenVet:0.5, benenVet:0.3,
+var VET2_MAN   = { taille:0.9, buik:0.15, heupen:0.3, billen:0.3, armenVet:0.5, benenVet:0.3,
                    dij:0.6, bovenarm:0.6, kuit:0.4 };
 var VET_MAX = 2;
 var VET_KAP = 1.6;            /* per modifier, gebruiker plus aanvulling */
@@ -1788,7 +1822,10 @@ var I18N = {
     'gen.terug': 'Terug',
     'gen.volgende': 'Volgende',
     'gen.klaar': 'Klaar',
+    'gen.beeld': 'Heel lichaam',
     'gen.reset': 'Opnieuw',
+    'gen.reset_alles': 'Wis alles',
+    'gen.reset_zeker': 'Zeker?',
     'gen.meer': 'Meer instellen',
     'gen.minder': 'Minder instellen',
 
@@ -1863,7 +1900,10 @@ var I18N = {
     'gen.terug': 'Back',
     'gen.volgende': 'Next',
     'gen.klaar': 'Done',
+    'gen.beeld': 'Whole body',
     'gen.reset': 'Reset',
+    'gen.reset_alles': 'Clear all',
+    'gen.reset_zeker': 'Sure?',
     'gen.meer': 'More settings',
     'gen.minder': 'Fewer settings',
 
@@ -1944,6 +1984,7 @@ function tr(sleutel){
 function zetTaal(t){
   taal = (t === 'nl') ? 'nl' : 'en';
   document.documentElement.lang = taal;
+  zetBeeldLabel();
   if(!genEl().hidden) genNaarStap(GEN.stap);
 }
 
@@ -2009,7 +2050,8 @@ function genNaarStap(n){
   }
   $('#gen-terug').hidden = (GEN.stap === 0);
   $('#gen-terug').textContent = tr('gen.terug');
-  $('#gen-herstel').textContent = tr('gen.reset');
+  clearTimeout(_wisVraag); _wisVraag = 0;
+  genHerstelLabel();
   $('#gen-door').textContent = tr(GEN.stap === GEN_STAPPEN.length-1 ? 'gen.klaar' : 'gen.volgende');
   $('#gen-door').classList.toggle('laatste', GEN.stap === GEN_STAPPEN.length-1);
   $('#gen-stapvan').textContent = tr('gen.stapvan')
@@ -2143,6 +2185,10 @@ function genVulInhoud(st){
    die een vrouwelijk lichaam kiest omdat dat past (bijvoorbeeld voor een topoperatie)
    moet dat zonder label kunnen. De gender-as is continu; tussenin is het midden, met
    een schuif om zelf te kiezen waar. */
+/* Tussenin staat voorlopig uit (Bram, 2026-09-24: twijfel, later opnieuw bekijken). De knop
+   blijft verborgen in de DOM, zodat de meetscripts hun vaste volgorde (0 vrouw, 1 tussenin,
+   2 man) houden. Aan = deze vlag op true. */
+var GEN_TUSSENIN = false;
 function genGeslacht(h){
   var keuzes = [
     { id:'vrouw', label:tr('gen.geslacht.vrouw'), sub:tr('gen.geslacht.vrouw_sub'), g:0 },
@@ -2158,6 +2204,7 @@ function genGeslacht(h){
     b.setAttribute('aria-pressed', GEN.gekozenGeslacht === k.id ? 'true' : 'false');
     b.textContent = k.label;
     b.title = k.sub;
+    if(k.id === 'nb' && !GEN_TUSSENIN) b.hidden = true;
     b.addEventListener('click', function(){
       GEN.gekozenGeslacht = k.id;
       sliders.gender.value = k.g;
@@ -2585,10 +2632,12 @@ function genStart(){
   genNaarStap(0);
 }
 
-/* Alleen de waarden van de huidige stap terugzetten. Bewust per stap: een knop die
-   alles wist is op stap 5 een ongeluk. */
-function genHerstel(){
-  var st = GEN_STAPPEN[GEN.stap], b = GEN.begin || {};
+/* Stap 2 tot 5: alleen de waarden van die stap terugzetten. Bewust per stap: een knop die
+   alles wist is op stap 5 een ongeluk. Stap 1 is het begin, dus daar wist hij ALLES
+   (Bram, 2026-09-24). Omdat je op stap 1 niet ziet wat je in de latere stappen kwijtraakt,
+   vraagt de eerste tik dan "Zeker?" en wist pas de tweede (binnen 4 s). */
+function genHerstelStap(st){
+  var b = GEN.begin || {};
   if(st.id === 'geslacht'){
     GEN.gekozenGeslacht = null;
     sliders.gender.value = (b.gender === undefined) ? 0.5 : b.gender;
@@ -2611,6 +2660,35 @@ function genHerstel(){
       $('#s-cup').value = cupStand.cupsize;
       $('#s-firm').value = cupStand.firmness;
     }
+  }
+}
+/* Staat er in stap 2 tot 5 iets anders dan bij de start? */
+function genLaterVeranderd(){
+  var b = GEN.begin || {}, k;
+  if(b.lengte !== undefined && +sliders.lengte.value !== b.lengte) return true;
+  if(b.gewicht !== undefined && +sliders.weight.value !== b.gewicht) return true;
+  if(b.bouw !== undefined && +sliders.spier.value !== b.bouw) return true;
+  if(b.cupsize !== undefined && (cupStand.cupsize !== b.cupsize || cupStand.firmness !== b.firmness)) return true;
+  for(k in detailStand) if(detailStand[k]) return true;
+  return false;
+}
+var _wisVraag = 0;
+function genHerstelLabel(){
+  $('#gen-herstel').textContent = tr(_wisVraag ? 'gen.reset_zeker' : GEN.stap === 0 ? 'gen.reset_alles' : 'gen.reset');
+}
+function genHerstel(){
+  var st = GEN_STAPPEN[GEN.stap];
+  if(GEN.stap === 0){
+    if(!_wisVraag && genLaterVeranderd()){
+      _wisVraag = setTimeout(function(){ _wisVraag = 0; genHerstelLabel(); }, 4000);
+      genHerstelLabel();
+      return;
+    }
+    clearTimeout(_wisVraag); _wisVraag = 0;
+    GEN_STAPPEN.forEach(genHerstelStap);
+    genHerstelLabel();
+  } else {
+    genHerstelStap(st);
   }
   genPasToe(true);
   genVulInhoud(st);
@@ -2648,6 +2726,17 @@ $('#gen-door').addEventListener('click', function(){
   }
   if(GEN.stap === 0 && !GEN.gekozenGeslacht){ genKiesEerst(); return; }
   genNaarStap(GEN.stap + 1);
+});
+/* Beeld terugzetten: tijdens de generator het kader van de huidige stap (voor, iets
+   gedraaid), daarna de stand waarmee Klaar het model toont. Verandert niets aan het lichaam. */
+function zetBeeldLabel(){
+  var k = $('#gen-beeld'); if(!k) return;
+  k.setAttribute('aria-label', tr('gen.beeld')); k.title = tr('gen.beeld');
+}
+zetBeeldLabel();
+$('#gen-beeld').addEventListener('click', function(){
+  if(!genEl().hidden){ genCamera(GEN_STAPPEN[GEN.stap]); return; }
+  baan.doel.set(0, 0.9, 0); baan.theta = 0; baan.phi = Math.PI/2; baan.r = 3.2; zetCamera();
 });
 $('#gen-taal').addEventListener('click', function(){
   zetTaal(taal === 'en' ? 'nl' : 'en');
@@ -2850,6 +2939,26 @@ window.__spike = {
     baan.theta=theta; baan.phi=phi; if(r) baan.r=r; zetCamera();
   },
   zetDoel: function(x, y, z){ baan.doel.set(x, y, z); zetCamera(); },
+  /* Buik van opzij (tools/zware_buik.js): hoe ver de buik voor de borst uitsteekt, in cm,
+     en op welke hoogte (fractie van de lengte) het verste punt zit. */
+  /* De vet-verdeling om varianten te proberen (tools/zware_buik.js); de objecten zijn de echte. */
+  vet: function(){ _vetCache = { g:-1, v:null };
+    return { l1v:VET_VROUW, l1m:VET_MAN, l2v:VET2_VROUW, l2m:VET2_MAN }; },
+  buik: function(){
+    var p = posAttr.array, n = p.length / 3, i, y, lo = Infinity, hi = -Infinity;
+    for(i=0;i<n;i++){ y = p[i*3+1]; if(y<lo) lo=y; if(y>hi) hi=y; }
+    var H = hi - lo, cmPer = lichaamsLengte() / H;
+    var buikZ = -Infinity, buikY = 0, borstZ = -Infinity, rugZ = Infinity;
+    for(i=0;i<n;i++){
+      var x = p[i*3], z = p[i*3+2], f = (p[i*3+1] - lo) / H;
+      if(Math.abs(x) > 0.25 * H * 0.5) continue;            /* armen en handen niet meetellen */
+      if(f > 0.45 && f < 0.66 && z > buikZ){ buikZ = z; buikY = f; }
+      if(f > 0.70 && f < 0.76 && z > borstZ) borstZ = z;
+      if(f > 0.45 && f < 0.66 && z < rugZ) rugZ = z;
+    }
+    return { voorsprongCm: +((buikZ - borstZ) * cmPer).toFixed(1), puntHoogte: +buikY.toFixed(3),
+             dikteCm: +((buikZ - rugZ) * cmPer).toFixed(1) };
+  },
   /* Wereldpositie + oppervlakte van elke ankerdriehoek in de huidige stand.
      De oppervlakte laat zien hoeveel de huid onder de tattoo rekt. */
   ankerMeting: function(){
