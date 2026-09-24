@@ -1,0 +1,2616 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta name="robots" content="noindex">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<title>Tatties spike - body sliders</title>
+<link rel="stylesheet" href="lib/recoleta.css">
+<style>
+  /* Tokens uit HUISSTIJL.md, zodat dit stuk zo de app in kan. */
+  :root{
+    --bg:#EFE4D0; --tekst:#221A12; --gedempt:#5A503F; --accent:#221A12;
+    --op-inkt:#F0EDE8; --op-accent:#F0EDE8;
+    --rood:#CE2727; --rood-diep:#8E1B1B;
+    --kaart:#FBF7EE; --veldbg:#FFFCF5; --rand:#D9CBB3;
+    --r-sm:8px; --r-md:12px; --r-lg:16px;
+    --fs-xs:.72rem; --fs-sm:.82rem; --fs-base:.92rem; --fs-md:1.02rem;
+    --fs-lg:1.3rem; --fs-xl:1.7rem; --fs-2xl:2.2rem;
+    --serif:'Recoleta',Georgia,'Times New Roman',serif;
+    --label-font:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+    --inkt:#181511; --lijn:#c9bba2;            /* legacy, voor de dev-balk */
+  }
+  :root[data-theme="dark"]{
+    --bg:#181511; --tekst:#ECE3D2; --gedempt:#9E9382; --accent:#ECE3D2;
+    --op-inkt:#181511; --kaart:#221E17; --veldbg:#201C15; --rand:#3A352B;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;height:100%;background:var(--bg);color:var(--tekst);
+    font:var(--fs-base)/1.45 var(--serif);overscroll-behavior:none;-webkit-font-smoothing:antialiased}
+  #stage{position:fixed;inset:0;touch-action:none}
+  canvas{display:block}
+  #paneel{position:fixed;left:0;right:0;bottom:0;padding:10px 14px calc(10px + env(safe-area-inset-bottom));
+    background:rgba(239,228,208,.93);border-top:1px solid var(--lijn)}
+  .rij{display:flex;align-items:center;gap:10px;margin:7px 0}
+  .rij label{width:104px;flex:none;font-weight:600}
+  .rij input[type=range]{flex:1;accent-color:var(--accent)}
+  .rij .w{width:52px;flex:none;text-align:right;font-variant-numeric:tabular-nums;opacity:.7}
+  #hud{position:fixed;top:env(safe-area-inset-top);left:0;padding:8px 10px;
+    font:11px/1.45 ui-monospace,SFMono-Regular,Menlo,monospace;white-space:pre;
+    background:rgba(24,21,17,.8);color:#EFE4D0;border-radius:0 0 10px 0;pointer-events:none}
+  #knoppen{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+  button{font:inherit;padding:7px 11px;border:1px solid var(--lijn);border-radius:9px;
+    background:#fff8ec;color:var(--inkt);cursor:pointer}
+  button.aan{background:var(--accent);color:#fff;border-color:var(--accent)}
+  #fijn{margin-top:4px}
+  #fijn summary{cursor:pointer;font-weight:600;padding:3px 0;user-select:none;font-size:13px}
+  #fijn-rijen{max-height:22vh;overflow-y:auto;padding-right:4px;
+    border-top:1px solid var(--lijn);margin-top:3px;padding-top:3px}
+  #fijn .rij{margin:1px 0;gap:8px}
+  #fijn .rij label{width:88px;font-weight:400;font-size:12px}
+  #fijn .rij input[type=range]{height:18px}
+  #fijn .rij .w{font-size:11px}
+  #fijn .rij input.maat{width:52px;font:inherit;font-size:11px;text-align:right;
+    border:1px solid var(--lijn);border-radius:5px;background:#fff8ec;padding:1px 3px}
+  #fijn .rij input.maat::-webkit-outer-spin-button,
+  #fijn .rij input.maat::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+  #eenheid{float:right;font-weight:400;font-size:11px;border:1px solid var(--lijn);
+    border-radius:6px;background:#fff8ec;padding:1px 7px;cursor:pointer}
+
+  /* ===================================================== lichaamsgenerator
+     Stappenflow over de scene heen: het model blijft altijd zichtbaar en past
+     zich live aan. Opgezet met de tokens uit HUISSTIJL.md zodat dit stuk zo de
+     app in kan. */
+  #gen{position:fixed;left:0;right:0;bottom:0;z-index:20;
+    padding:0 0 env(safe-area-inset-bottom);
+    background:linear-gradient(to bottom, rgba(239,228,208,0) 0, var(--bg) 22px, var(--bg) 100%);
+    font-family:var(--serif)}
+  :root[data-theme="dark"] #gen{background:linear-gradient(to bottom,
+    rgba(24,21,17,0) 0, var(--bg) 22px, var(--bg) 100%)}
+  #gen[hidden]{display:none}
+  .gen-binnen{max-width:520px;margin:0 auto;padding:14px 18px 16px}
+
+  /* voortgang: vijf streepjes, gevuld = gedaan */
+  .gen-voortgang{display:flex;gap:5px;margin:0 0 14px}
+  .gen-voortgang i{flex:1;height:3px;border-radius:2px;background:var(--rand)}
+  .gen-voortgang i.op{background:var(--accent)}
+
+  .gen-koprij{display:flex;align-items:baseline;justify-content:space-between;gap:10px}
+  /* Kleiner op smalle schermen, zodat de kop op een regel past (punt 7). */
+  .gen-kop{font-size:clamp(1.3rem, 5.6vw, var(--fs-xl));font-weight:700;margin:0 0 3px;
+    letter-spacing:-.01em;outline:0}
+  .gen-herstel{flex:none;background:none;border:0;cursor:pointer;color:var(--gedempt);
+    font:600 var(--fs-sm)/1 var(--label-font);text-decoration:underline;
+    padding:10px 4px;min-height:44px;min-width:44px}
+  .gen-herstel[hidden]{display:none}
+  .gen-sub{font-size:var(--fs-sm);color:var(--gedempt);margin:0 0 16px;
+    font-family:var(--label-font)}
+
+  /* stap 1: drie keuzes onder elkaar, groot genoeg om te tikken */
+  .gen-keuzes{display:flex;flex-direction:column;gap:8px}
+  .gen-keuze{display:flex;align-items:center;gap:12px;width:100%;min-height:56px;
+    padding:10px 16px;text-align:left;font:600 var(--fs-md)/1.2 var(--serif);
+    color:var(--tekst);background:var(--veldbg);border:1px solid var(--rand);
+    border-radius:var(--r-md);cursor:pointer}
+  .gen-keuze:hover{border-color:var(--accent)}
+  .gen-keuze.actief{background:var(--accent);color:var(--op-inkt);border-color:var(--accent)}
+  .gen-keuze small{display:block;font:400 var(--fs-xs)/1.3 var(--label-font);
+    color:var(--gedempt);margin-top:2px}
+  .gen-keuze.actief small{color:var(--op-inkt)}
+
+  /* stap 2 en 3: een groot getal dat je met de slider zet */
+  .gen-getal{display:flex;align-items:baseline;justify-content:center;gap:6px;
+    margin:6px 0 2px}
+  .gen-getal b{font-size:var(--fs-2xl);font-weight:700;line-height:1;
+    font-variant-numeric:tabular-nums}
+  .gen-getal span{font-size:var(--fs-md);color:var(--gedempt)}
+  .gen-eenheden{display:flex;justify-content:center;gap:0;margin:10px 0 2px}
+  .gen-eenheid{min-width:58px;min-height:44px;padding:4px 14px;
+    font:600 var(--fs-sm)/1 var(--serif);color:var(--tekst);
+    background:var(--veldbg);border:1px solid var(--rand);cursor:pointer}
+  .gen-eenheid:first-child{border-radius:999px 0 0 999px}
+  .gen-eenheid:last-child{border-radius:0 999px 999px 0;border-left:0}
+  .gen-eenheid.actief{background:var(--accent);color:var(--op-inkt);border-color:var(--accent)}
+  .gen-schuif{width:100%;margin:10px 0 0}
+  .gen-leeftijd{display:flex;justify-content:space-between;align-items:baseline;
+    margin:16px 2px 0;font:var(--fs-sm)/1.2 var(--label-font);color:var(--gedempt)}
+  .gen-leeftijd b{font:700 var(--fs-md)/1 var(--serif);color:var(--tekst);
+    font-variant-numeric:tabular-nums}
+  .gen-hint{font:var(--fs-xs)/1.4 var(--label-font);color:var(--gedempt);
+    text-align:center;margin:2px 0 0;min-height:1.4em}
+
+  /* stap 4 en 5: de fijnregeling */
+  .gen-rijen{max-height:31vh;overflow-y:auto;margin:0 -4px;padding:0 4px}
+  .gen-rij{display:flex;align-items:center;gap:10px;min-height:44px}
+  .gen-rij label{flex:none;width:104px;font:var(--fs-sm)/1.2 var(--label-font);
+    color:var(--tekst)}
+  /* min-width:0, anders krimpt de schuif niet onder zijn eigen breedte en valt de
+     cm-kolom op 320 px breed buiten het paneel. */
+  .gen-rij input[type=range]{flex:1;min-width:0}
+  .gen-rij .meet{flex:none;width:48px;text-align:right;
+    font:var(--fs-xs)/1 var(--label-font);color:var(--gedempt);
+    font-variant-numeric:tabular-nums}
+  .gen-meer{margin-top:8px;padding:7px 15px;min-height:44px;
+    font:600 var(--fs-sm)/1 var(--serif);color:var(--gedempt);
+    background:var(--veldbg);border:1px solid var(--rand);border-radius:999px;
+    cursor:pointer}
+  .gen-meer[aria-expanded="true"]{background:var(--accent);color:var(--op-inkt);
+    border-color:var(--accent)}
+
+  /* Schuiven in de huisstijl, 44 px hoog met een duim van 28 px (punt 3). De standaard
+     browserschuif is op iOS 30 px hoog met een kleine duim. */
+  #gen input[type=range]{-webkit-appearance:none;appearance:none;background:transparent;
+    height:44px;cursor:pointer;touch-action:pan-y}
+  #gen input[type=range]::-webkit-slider-runnable-track{height:4px;border-radius:2px;
+    background:var(--rand)}
+  #gen input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:28px;height:28px;
+    margin-top:-12px;border-radius:50%;background:var(--accent);
+    border:3px solid var(--bg);box-shadow:0 0 0 1px var(--accent)}
+  #gen input[type=range]::-moz-range-track{height:4px;border-radius:2px;background:var(--rand)}
+  #gen input[type=range]::-moz-range-thumb{width:22px;height:22px;border-radius:50%;
+    background:var(--accent);border:3px solid var(--bg);box-shadow:0 0 0 1px var(--accent)}
+  #gen input[type=range]:focus-visible{outline:2px solid var(--accent);outline-offset:2px;
+    border-radius:var(--r-sm)}
+
+  /* de uiteinden van een schuif, links en rechts (punt 10) */
+  .gen-einden{display:flex;justify-content:space-between;gap:12px;margin:0 2px;
+    font:var(--fs-xs)/1.3 var(--label-font);color:var(--gedempt)}
+  .gen-einden span:last-child{text-align:right}
+
+  /* min/plus naast het grote getal (punt 6) */
+  .gen-getalrij{display:flex;align-items:center;justify-content:center;gap:14px}
+  .gen-stap{width:44px;height:44px;flex:none;border-radius:50%;cursor:pointer;
+    font:600 1.4rem/1 var(--serif);color:var(--tekst);
+    background:var(--veldbg);border:1px solid var(--rand)}
+  .gen-stap:active{background:var(--accent);color:var(--op-inkt);border-color:var(--accent)}
+
+  /* Volgende zonder keuze (punt 9): geen rood, want er is nog niets te doen */
+  .gen-door:disabled{background:var(--veldbg);color:var(--gedempt);border-color:var(--rand);
+    box-shadow:none;cursor:default}
+
+  /* alleen voor screenreaders */
+  .vh{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;
+    clip:rect(0 0 0 0);white-space:nowrap;border:0}
+
+  /* onderbalk */
+  .gen-balk{display:flex;align-items:center;gap:10px;margin-top:16px}
+  .gen-balk2{display:flex;justify-content:center;margin-top:4px}
+  .gen-terug{min-height:44px;padding:11px 16px;font:600 var(--fs-base)/1 var(--serif);
+    color:var(--tekst);background:var(--veldbg);border:1px solid var(--rand);
+    border-radius:var(--r-sm);cursor:pointer}
+  .gen-terug[hidden]{display:none}
+  .gen-door{flex:1;min-height:48px;padding:12px 18px;
+    font:700 1.2rem/1 var(--serif);color:var(--op-accent);
+    background:var(--rood);border:2px solid var(--rood-diep);
+    border-radius:var(--r-sm);box-shadow:3px 3px 0 var(--rood-diep);cursor:pointer}
+  .gen-door:active{transform:translate(2px,2px);box-shadow:1px 1px 0 var(--rood-diep)}
+  .gen-sla{background:none;border:0;color:var(--gedempt);cursor:pointer;
+    font:600 var(--fs-sm)/1 var(--label-font);text-decoration:underline;
+    padding:12px 18px;min-height:44px}
+  .gen-sla[hidden]{display:none}
+
+  /* Greep boven het paneel: tik om het paneel in te klappen en het model groot te
+     zien (punt 2). Hij hangt in de strook boven het paneel, dus kost geen hoogte. */
+  .gen-greep{position:absolute;left:50%;top:-40px;transform:translateX(-50%);
+    width:72px;height:44px;padding:0;background:none;border:0;border-radius:999px;
+    cursor:pointer;display:flex;align-items:center;justify-content:center}
+  .gen-greep::before{content:"";width:40px;height:5px;border-radius:3px;
+    background:var(--gedempt);opacity:.55}
+  .gen-greep:focus-visible{outline:2px solid var(--accent);outline-offset:-4px}
+  #gen.ingeklapt .gen-voortgang, #gen.ingeklapt #gen-sub, #gen.ingeklapt #gen-inhoud,
+  #gen.ingeklapt .gen-balk, #gen.ingeklapt .gen-balk2,
+  #gen.ingeklapt #gen-herstel{display:none}
+  #gen.ingeklapt .gen-koprij{cursor:pointer}
+
+  /* Compacte stand voor lage schermen (punt 2). Op een iPhone SE bleef er eerst 26%
+     van het scherm over voor het model. Minder lucht, geen subtekst, en de drie
+     geslachtskeuzes naast elkaar als segmented control. */
+  @media (max-height:700px){
+    .gen-binnen{padding:8px 16px 10px}
+    .gen-voortgang{margin:0 0 6px}
+    #gen-sub{display:none}
+    .gen-keuzes{flex-direction:row;gap:0}
+    .gen-keuze{min-height:48px;padding:8px 6px;justify-content:center;text-align:center;
+      font-size:var(--fs-base);border-radius:0;border-left-width:0}
+    .gen-keuze:first-child{border-radius:999px 0 0 999px;border-left-width:1px}
+    .gen-keuze:last-child{border-radius:0 999px 999px 0}
+    .gen-keuze small{display:none}
+    .gen-getal{margin:0}
+    .gen-leeftijd{margin-top:8px}
+    .gen-eenheden{margin:4px 0 0}
+    .gen-schuif{margin:2px 0 0}
+    #gen-inhoud .gen-sub{margin:6px 0 0}
+    .gen-rijen{max-height:24vh}
+    .gen-meer{margin-top:4px}
+    .gen-balk{margin-top:8px}
+    .gen-balk2{margin-top:0}
+  }
+
+  /* Liggend: het paneel naast het model in plaats van eronder. Eronder bleef er niets
+     over. De inhoud scrolt, de knoppen blijven onderaan staan. */
+  @media (orientation:landscape) and (max-height:600px) and (min-width:560px){
+    #gen{top:0;left:auto;width:min(400px, 48vw);
+      padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) 0;
+      background:linear-gradient(to right, rgba(239,228,208,0) 0, var(--bg) 22px, var(--bg) 100%)}
+    :root[data-theme="dark"] #gen{background:linear-gradient(to right,
+      rgba(24,21,17,0) 0, var(--bg) 22px, var(--bg) 100%)}
+    .gen-binnen{height:100%;display:flex;flex-direction:column;padding:10px 16px 10px 26px}
+    #gen-inhoud{flex:1 1 auto;min-height:0;overflow-y:auto;margin:0 -4px;padding:0 4px}
+    .gen-rijen{max-height:none;overflow:visible}
+    .gen-greep{display:none}
+    .gen-kop{font-size:var(--fs-lg)}
+    body #gen-taal{right:auto;left:8px}
+    body #gen-dev{right:auto;left:52px}
+  }
+
+  /* de dev-balk blijft, maar uit de weg */
+  #paneel.verstopt{display:none}
+  body.genaan #hud{display:none}
+  #gen-taal{position:fixed;right:52px;top:calc(env(safe-area-inset-top) + 8px);z-index:21;
+    font:600 var(--fs-xs)/1 var(--label-font);padding:7px 10px;min-height:32px;
+    background:var(--veldbg);border:1px solid var(--rand);border-radius:999px;
+    color:var(--gedempt);cursor:pointer}
+  #gen-dev{position:fixed;right:8px;top:calc(env(safe-area-inset-top) + 8px);z-index:21;
+    font:var(--fs-xs)/1 var(--label-font);padding:7px 10px;min-height:32px;
+    background:var(--veldbg);border:1px solid var(--rand);border-radius:999px;
+    color:var(--gedempt);cursor:pointer}
+  #laden{position:fixed;inset:0;display:grid;place-items:center;background:var(--bg);font-weight:600}
+</style>
+</head>
+<body>
+<div id="stage"></div>
+<div id="hud">laden...</div>
+<div id="paneel">
+  <div class="rij"><label>Gewicht</label><input id="s-weight" type="range" min="40" max="180" step="any" value="70"><span class="w" id="w-weight">70 kg</span></div>
+  <div class="rij"><label>Bouw</label><input id="s-spier" type="range" min="0" max="1" step="0.01" value="0.5"><span class="w" id="w-spier">.50</span></div>
+  <div class="rij"><label>Gender</label><input id="s-gender" type="range" min="0" max="1" step="0.01" value="0.5"><span class="w" id="w-gender">.50</span></div>
+  <div class="rij"><label>Lengte</label><input id="s-lengte" type="range" min="0" max="1" step="0.01" value="0.5"><span class="w" id="w-lengte">-</span></div>
+  <div class="rij"><label>Cupmaat</label><input id="s-cup" type="range" min="0" max="1" step="0.01" value="0.5"><span class="w" id="w-cup">.50</span></div>
+  <div class="rij"><label>Stevigheid</label><input id="s-firm" type="range" min="0" max="1" step="0.01" value="0.5"><span class="w" id="w-firm">.50</span></div>
+  <details id="fijn"><summary>Fijnafstelling<button id="eenheid" type="button">cm</button></summary><div id="fijn-rijen"></div></details>
+  <div id="knoppen">
+    <button id="b-live">Decals live (modus B)</button>
+    <button id="b-voor">Voor</button>
+    <button id="b-zij">Zij</button>
+    <button id="b-meet">Meet 20x</button>
+    <button id="b-reset">Reset</button>
+  </div>
+</div>
+<div id="gen" hidden>
+  <button class="gen-greep" id="gen-greep" type="button" aria-expanded="true"></button>
+  <div class="gen-binnen">
+    <div class="gen-voortgang" id="gen-voortgang" aria-hidden="true"></div>
+    <p class="vh" id="gen-stapvan" aria-live="polite"></p>
+    <div class="gen-koprij">
+      <h2 class="gen-kop" id="gen-kop" tabindex="-1"></h2>
+      <button class="gen-herstel" id="gen-herstel" type="button">Opnieuw</button>
+    </div>
+    <p class="gen-sub" id="gen-sub"></p>
+    <div id="gen-inhoud"></div>
+    <div class="gen-balk">
+      <button class="gen-terug" id="gen-terug" type="button">Terug</button>
+      <button class="gen-door" id="gen-door" type="button">Volgende</button>
+    </div>
+    <div class="gen-balk2">
+      <button class="gen-sla" id="gen-sla" type="button" hidden>Deze stap overslaan</button>
+    </div>
+  </div>
+</div>
+<button id="gen-taal" type="button">NL</button>
+<button id="gen-dev" type="button">dev</button>
+<div id="laden">model laden...</div>
+
+<script src="lib/three.min.js"></script>
+<script src="lib/BufferGeometryUtils.js"></script>
+<script src="lib/GLTFLoader.js"></script>
+<script src="lib/DecalGeometry.js"></script>
+<script>
+(function(){
+'use strict';
+var $ = function(s){ return document.querySelector(s); };
+
+/* ---------------------------------------------------------------- scene */
+var stage = $('#stage');
+var renderer = new THREE.WebGLRenderer({ antialias:true, alpha:false });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio||1, 2));
+renderer.outputEncoding = THREE.sRGBEncoding;
+stage.appendChild(renderer.domElement);
+
+var scene = new THREE.Scene();
+/* De scene staat op de papierkleur van het thema, net als in het product
+   (zetSceneKleur). Anders blijft de 3D-achtergrond licht in blackwork-modus. */
+function zetSceneKleur(){
+  var c = getComputedStyle(document.documentElement).getPropertyValue('--bg').trim();
+  try { scene.background = new THREE.Color(c || '#EFE4D0'); }
+  catch(e){ scene.background = new THREE.Color(0xEFE4D0); }
+}
+zetSceneKleur();
+var camera = new THREE.PerspectiveCamera(35, 1, 0.05, 50);
+
+scene.add(new THREE.HemisphereLight(0xffffff, 0x9c8f7a, 0.85));
+var zon = new THREE.DirectionalLight(0xffffff, 0.75);
+zon.position.set(1.2, 2.4, 2.0);
+scene.add(zon);
+var vul = new THREE.DirectionalLight(0xffffff, 0.28);
+vul.position.set(-1.6, 0.8, -1.4);
+scene.add(vul);
+
+function pasMaat(){
+  var w = window.innerWidth, h = window.innerHeight;
+  /* Derde parameter weglaten (of true): setSize moet OOK de CSS-maat van het canvas
+     zetten. Met false krijgt het canvas alleen een grotere tekenbuffer en rekt de
+     browser 'm uit op zijn attribuutmaat - op een scherm met pixelratio 2 is het canvas
+     dan twee keer het venster en schuift het model rechtsonder uit beeld. */
+  renderer.setSize(w, h);
+  camera.aspect = w/h; camera.updateProjectionMatrix();
+}
+window.addEventListener('resize', pasMaat); pasMaat();
+
+/* ------------------------------------------------------- orbit (simpel) */
+var baan = { theta:0, phi:Math.PI/2, r:3.4, doel:new THREE.Vector3(0,0.9,0) };
+function zetCamera(){
+  var sp = Math.sin(baan.phi), cp = Math.cos(baan.phi);
+  camera.position.set(
+    baan.doel.x + baan.r*sp*Math.sin(baan.theta),
+    baan.doel.y + baan.r*cp,
+    baan.doel.z + baan.r*sp*Math.cos(baan.theta));
+  camera.lookAt(baan.doel);
+}
+zetCamera();
+(function(){
+  var neer=false, lx=0, ly=0, pinch=0;
+  function afst(e){
+    var a=e.touches[0], b=e.touches[1];
+    return Math.sqrt(Math.pow(a.clientX-b.clientX,2) + Math.pow(a.clientY-b.clientY,2));
+  }
+  stage.addEventListener('pointerdown', function(e){
+    neer=true; lx=e.clientX; ly=e.clientY;
+    try{ stage.setPointerCapture(e.pointerId); }catch(err){}
+  });
+  stage.addEventListener('pointermove', function(e){
+    if(!neer) return;
+    baan.theta -= (e.clientX-lx)*0.008;
+    baan.phi = Math.max(0.15, Math.min(Math.PI-0.15, baan.phi - (e.clientY-ly)*0.006));
+    lx=e.clientX; ly=e.clientY; zetCamera();
+  });
+  stage.addEventListener('pointerup', function(){ neer=false; });
+  stage.addEventListener('pointercancel', function(){ neer=false; });
+  stage.addEventListener('wheel', function(e){
+    e.preventDefault();
+    baan.r = Math.max(0.8, Math.min(8, baan.r * (1 + (e.deltaY>0?1:-1)*0.08)));
+    zetCamera();
+  }, {passive:false});
+  stage.addEventListener('touchstart', function(e){
+    if(e.touches.length===2){ neer=false; pinch=afst(e); }
+  }, {passive:false});
+  stage.addEventListener('touchmove', function(e){
+    if(e.touches.length===2){
+      e.preventDefault();
+      var d=afst(e);
+      if(pinch) baan.r = Math.max(0.8, Math.min(8, baan.r * pinch/d));
+      pinch=d; zetCamera();
+    }
+  }, {passive:false});
+  stage.addEventListener('touchend', function(){ pinch=0; });
+})();
+
+/* ------------------------------------------------------------ materiaal */
+var huid = new THREE.MeshStandardMaterial({
+  color:0xd8b49a, roughness:0.72, metalness:0.0 });
+
+/* --------------------------------------------- tattoo-texturen (canvas) */
+function tattooTextuur(soort){
+  var c = document.createElement('canvas'); c.width = c.height = 256;
+  var g = c.getContext('2d');
+  g.clearRect(0,0,256,256);
+  g.strokeStyle = '#141414'; g.fillStyle = '#141414';
+  g.lineWidth = 12; g.lineCap = 'round'; g.lineJoin = 'round';
+  var i, t, r, a, rr;
+  if(soort===0){
+    g.beginPath();
+    for(i=0;i<10;i++){ r = (i%2) ? 48 : 110; a = -Math.PI/2 + i*Math.PI/5;
+      if(i) g.lineTo(128+r*Math.cos(a), 128+r*Math.sin(a));
+      else  g.moveTo(128+r*Math.cos(a), 128+r*Math.sin(a)); }
+    g.closePath(); g.fill();
+  } else if(soort===1){
+    g.beginPath(); g.moveTo(128,28); g.lineTo(128,226);
+    g.moveTo(66,92); g.lineTo(190,92);
+    g.moveTo(60,168); g.quadraticCurveTo(128,236,196,168); g.stroke();
+  } else if(soort===2){
+    g.beginPath();
+    for(t=0;t<30;t+=0.12){ rr = 6+t*3.3;
+      if(t) g.lineTo(128+rr*Math.cos(t), 128+rr*Math.sin(t));
+      else  g.moveTo(128+rr*Math.cos(t), 128+rr*Math.sin(t)); }
+    g.stroke();
+  } else if(soort===3){
+    g.beginPath(); g.moveTo(128,34); g.lineTo(220,196); g.lineTo(36,196);
+    g.closePath(); g.stroke();
+    g.beginPath(); g.moveTo(36,142); g.lineTo(220,142); g.stroke();
+  } else {
+    g.fillRect(24,104,208,20);
+    g.font = 'bold 54px serif'; g.textAlign='center';
+    g.fillText('TAT', 128, 88); g.fillText('TIES', 128, 190);
+  }
+  var tex = new THREE.CanvasTexture(c);
+  tex.encoding = THREE.sRGBEncoding;
+  return tex;
+}
+var decalMats = [];
+(function(){
+  for(var i=0;i<5;i++){
+    decalMats.push(new THREE.MeshStandardMaterial({
+      map: tattooTextuur(i), transparent:true, depthTest:true, depthWrite:false,
+      polygonOffset:true, polygonOffsetFactor:-4, roughness:0.85, metalness:0.0 }));
+  }
+})();
+
+/* --------------------------------------------------------------- toestand */
+var mesh=null, basePos=null, targets=[], namen=[], macro=null;
+var weld=null, nWeld=0, tris=null, posAttr=null, norAttr=null, wAcc=null;
+var hoogteMap = {};
+var details = [], detailEls = {}, detailStand = {};
+var cupMap = {}, cupStand = { cupsize:0.5, firmness:0.5 };
+var maatVan = {}, ringen = {}, afstanden = {}, maatBuf = {}, maatEls = {};
+var ankers=[], decals=[];
+var live=false;
+var meting = { blend:0, normalen:0, grenzen:0, raster:0, decals:0, volgen:0, cullVerts:0, lengteIters:0, gewTabel:0, fps:0 };
+
+/* -------------------------------------------------- macro-weging (exact) */
+function asWeights(as_, w){
+  var uit = {}, i, p, f;
+  for(i=0;i<as_.parts.length;i++){
+    p = as_.parts[i];
+    if(w < p.lowest || w > p.highest) continue;
+    f = (w - p.lowest) / (p.highest - p.lowest);
+    if(p.low)  uit[p.low]  = (uit[p.low]||0)  + (1-f);
+    if(p.high) uit[p.high] = (uit[p.high]||0) + f;
+  }
+  return uit;
+}
+var namenIdx = null, plan = null;
+
+/* De weegstructuur wordt een keer opgebouwd. Anders zou elke blend 46 targetnamen
+   met indexOf en split uit elkaar trekken, en de lengte-iteratie roept de weging
+   twee tot vier keer per frame aan. */
+function bouwPlan(){
+  plan = { ethnic:{}, corner:{}, height:{}, cup:{}, det:[] };
+  for(var i=0;i<namen.length;i++){
+    var n = namen[i];
+    if(n.indexOf('ethnic-')===0){
+      var e = n.slice(7).split('-');  /* gesl-leeftijd */
+      (plan.ethnic[e[0]] = plan.ethnic[e[0]] || {})[e[1]] = i;
+    }
+    else if(n.indexOf('det-')===0){ /* via extras.details, hieronder */ }
+    else if(n.indexOf('height-')===0 || n.indexOf('cup-')===0){ /* via de maps hieronder */ }
+    else {
+      var d = n.split('-');           /* gesl-leeftijd-Xmuscle-Yweight */
+      var c0 = (plan.corner[d[0]] = plan.corner[d[0]] || {});
+      var c1 = (c0[d[1]] = c0[d[1]] || {});
+      (c1[d[2]] = c1[d[2]] || {})[d[3]] = i;
+    }
+  }
+  /* Geneste tabel vullen: pad = de delen van de sleutel, blad = targetindex. */
+  function zetIn(boom, delen, waarde){
+    for(var k=0; k<delen.length-1; k++) boom = (boom[delen[k]] = boom[delen[k]] || {});
+    boom[delen[delen.length-1]] = waarde;
+  }
+  for(var sleutel in hoogteMap)     /* gesl-leeftijd-Xmuscle-Yweight-Zheight */
+    zetIn(plan.height, sleutel.split('-'), namenIdx[hoogteMap[sleutel]]);
+  for(var sleutel2 in cupMap)       /* leeftijd-Xmuscle-Yweight-Zcup-Wfirmness */
+    zetIn(plan.cup, sleutel2.split('-'), namenIdx[cupMap[sleutel2]]);
+  for(var d2=0; d2<details.length; d2++){
+    var sl = details[d2].sleutel;
+    plan.det.push({ sleutel:sl, incr:namenIdx['det-'+sl+'-incr'],
+                    decr:namenIdx['det-'+sl+'-decr'] });
+  }
+}
+
+/* ---------------------------------------------------------------- leeftijd
+   MakeHuman's age-as: 0,5 = 25 jaar (young), 1,0 = 90 jaar (old), lineair. Onder 25
+   zou het child-targets nodig hebben (kinderverhoudingen), dus 18 tot 25 blijft young.
+   0,49999 in plaats van 0,5: daar weegt young precies 1, zoals voor deze as. */
+var LEEFTIJD_MIN = 18, LEEFTIJD_MAX = 90, leeftijdJaar = 25;
+function leeftijdAs(){
+  if(leeftijdJaar <= 25) return 0.49999;
+  return 0.5 + Math.min(65, leeftijdJaar - 25) / 65 * 0.5;
+}
+
+var _w = null;
+function gewichten(gender, muscle, weight, height){
+  var gw = asWeights(macro.gender, gender),
+      aw = asWeights(macro.age, leeftijdAs()),
+      mw = asWeights(macro.muscle, muscle),
+      ww = asWeights(macro.weight, weight),
+      hw = asWeights(macro.height, height),
+      cw = asWeights(macro.cupsize, cupStand.cupsize),
+      fw = asWeights(macro.firmness, cupStand.firmness);
+  if(!_w || _w.length !== namen.length) _w = new Float32Array(namen.length);
+  _w.fill(0);
+  var g, a, m, w, h, ga, gm, gmw;
+  for(g in gw){
+    for(a in aw){
+      ga = gw[g] * aw[a];
+      if(ga < 1e-9) continue;
+      _w[plan.ethnic[g][a]] += ga;
+      var cg = plan.corner[g] && plan.corner[g][a], hg = plan.height[g] && plan.height[g][a];
+      for(m in mw){
+        gm = ga * mw[m];
+        var cm2 = cg && cg[m], hm = hg && hg[m];
+        for(w in ww){
+          gmw = gm * ww[w];
+          if(cm2 && cm2[w] !== undefined) _w[cm2[w]] += gmw;
+          var hwv = hm && hm[w];
+          if(hwv) for(h in hw) if(hwv[h] !== undefined) _w[hwv[h]] += gmw * hw[h];
+        }
+      }
+    }
+  }
+  /* Stap 3 van de aanvulling (punt 13): een deel van MakeHuman's zwaarste hoek
+     (minmuscle-maxweight) BOVENOP de huidige vorm. Opgeteld, niet in plaats van: de
+     eigen bouw blijft, en het gewicht loopt monotoon op. */
+  if(extraZwaar > 0){
+    for(g in gw) for(a in aw){
+      var hz = plan.corner[g] && plan.corner[g][a] && plan.corner[g][a].minmuscle;
+      if(hz && hz.maxweight !== undefined) _w[hz.maxweight] += gw[g] * aw[a] * extraZwaar;
+    }
+  }
+  /* Borstomvang en -stevigheid. Alleen female-targets, dus ze wegen vanzelf uit
+     zodra de gender-slider naar man gaat. */
+  var vrouw = gw['female'] || 0;
+  if(vrouw > 1e-5){
+    for(a in aw){
+      var ca = plan.cup[a];
+      if(!ca) continue;
+      for(m in mw){
+        var cm3 = ca[m];
+        if(!cm3) continue;
+        for(w in ww){
+          var cw3 = cm3[w];
+          if(!cw3) continue;
+          for(var c in cw){
+            var cf = cw3[c];
+            if(!cf) continue;
+            for(var f in fw){
+              if(cf[f] !== undefined)
+                _w[cf[f]] += vrouw * aw[a] * mw[m] * ww[w] * cw[c] * fw[f];
+            }
+          }
+        }
+      }
+    }
+  }
+  /* Detail-modifiers: een slider van -1 tot +1 weegt lineair op het incr- of het
+     decr-target. Ze staan los van het macrosysteem, dus geen productweging. */
+  /* Plus de vet-aanvulling (zie vetVerdeling): opgeteld bij wat de gebruiker zelf
+     instelt, niet in plaats daarvan. */
+  var vv = vetF ? vetVerdeling(gender) : null;
+  for(var d3=0; d3<plan.det.length; d3++){
+    var sl3 = plan.det[d3].sleutel;
+    var v3 = (detailStand[sl3] || 0) + (vv ? vetBijdrage(vv, sl3, vetF) : 0);
+    if(v3 > VET_KAP) v3 = VET_KAP; else if(v3 < -1) v3 = -1;
+    if(v3 > 0) _w[plan.det[d3].incr] = v3;
+    else if(v3 < 0) _w[plan.det[d3].decr] = -v3;
+  }
+  return _w;
+}
+
+/* ------------------------------------------------------------- CPU-blend */
+/* De body-mesh is dicht (0 randkanten), dus het volume is de som van getekende
+   tetraeders vanaf de oorsprong. Lichaamsdichtheid ligt rond 1,01 kg/L. */
+function gewichtKg(buf){
+  var p = buf || posAttr.array, t = tris, som = 0, f;
+  for(f=0; f<t.length; f+=3){
+    var a=t[f]*3, b=t[f+1]*3, c=t[f+2]*3;
+    som += p[a]  *(p[b+1]*p[c+2] - p[b+2]*p[c+1])
+         - p[a+1]*(p[b]  *p[c+2] - p[b+2]*p[c])
+         + p[a+2]*(p[b]  *p[c+1] - p[b+1]*p[c]);
+  }
+  return Math.abs(som)/6 * 1000 * 1.01;      /* m3 -> liter -> kg */
+}
+
+/* --------------------------------------------------------------- bouw-as
+   Lengte en gewicht zetten het volume van een lichaam, maar niet de verdeling: bij
+   72 kg en 180 cm loopt de bovenarm van 28 tot 34 cm, afhankelijk van hoeveel van dat
+   gewicht spier is. Daarom stuurt de UI niet de ruwe assen aan maar twee vragen die
+   een mens kan beantwoorden: hoeveel weeg je, en hoe is dat verdeeld.
+
+   De bouw-slider zet de spiermassa; de gewicht-as wordt daarna opgelost zodat het
+   aantal kilo's gelijk blijft. Dat oplossen kan niet per frame (een blend plus een
+   volumemeting kost samen 4 ms), dus bij het laden en na elke gender- of
+   lengtewijziging wordt een klein raster gemeten waarin we daarna interpoleren. */
+var GEW_N = 5;
+var gewTabel = null;          /* [muscle-index][weight-index] -> kg */
+var gewTabelVoor = null;      /* de gender/height waarvoor hij geldt */
+
+function blendPos(gender, muscle, weight, height, buf){
+  var arr = buf || posAttr.array;
+  arr.set(basePos);
+  var w = gewichten(gender, muscle, weight, height);
+  for(var k=0;k<targets.length;k++){
+    var g = w[k];
+    if(g < 1e-5 && g > -1e-5) continue;
+    var t = targets[k], idx = t.idx, val = t.val;
+    for(var j=0;j<idx.length;j++){
+      var v = idx[j]*3, o = j*3;
+      arr[v] += g*val[o]; arr[v+1] += g*val[o+1]; arr[v+2] += g*val[o+2];
+    }
+  }
+}
+
+/* Per rastercel wordt de lengte OPNIEUW opgelost. Zonder dat zit de tabel er tot
+   anderhalve kilo naast: de lengte-as past zich aan bij een andere gewicht-stand, en
+   een lichaam dat een paar centimeter langer is weegt meer.
+
+   De tabel is een lijst klussen (elk een blend plus volumemeting, in een eigen buffer
+   zodat de zichtbare mesh niet geraakt wordt). Zo kan hij in een keer gebouwd worden
+   (meetscripts, laden) of in stukjes over een paar frames (de generator). Met de
+   leeftijdsas kost de hele tabel bij 6x CPU tot 470 ms: in een keer bevriest dan de
+   UI na elke tik op geslacht, lengte of leeftijd. */
+var _tabelBuf = null;
+function tabelKlussen(gender, height){
+  var doelCm = lengteDoel();
+  if(!_tabelBuf) _tabelBuf = new Float32Array(basePos.length);
+  var buf = _tabelBuf;
+  var uit = { gewTabel:[], vetPlus:[], vetPlus2:[], vetPlus3:[], vetMin:[],
+              voor:{ gender:gender, height:height, cm:doelCm, jaar:leeftijdJaar } };
+  var klussen = [];
+  /* Een meting bij vet-factor f. vetF is globaal (de weging leest hem), dus binnen de
+     klus zetten en terugzetten, ook voor de lengte-iteratie. */
+  function meet(f, m, w, h, z){
+    var was = vetF, wasZ = extraZwaar; vetF = f; extraZwaar = z || 0;
+    blendPos(gender, m, w, h, buf);
+    vetF = was; extraZwaar = wasZ;
+    return gewichtKg(buf);
+  }
+  function lengte(m, w){
+    var was = vetF, wasZ = extraZwaar; vetF = 0; extraZwaar = 0;
+    var h = losHeightOpVanaf(gender, m, w, doelCm, height);
+    vetF = was; extraZwaar = wasZ;
+    return h;
+  }
+  for(var mi=0; mi<GEW_N; mi++) (function(mi){
+    var m = mi/(GEW_N-1), rij = [], hs = [], k1 = 0, k2 = 0;
+    uit.gewTabel.push(rij);
+    for(var wi=0; wi<GEW_N; wi++) (function(wi){
+      klussen.push(function(){
+        var w = wi/(GEW_N-1);
+        hs[wi] = lengte(m, w);
+        rij[wi] = meet(0, m, w, hs[wi]);
+      });
+    })(wi);
+    /* Wat de vet-aanvulling toevoegt, aan de rand waar hij ingaat: +1 en +2 bovenop
+       gewicht-as 1, -1 onder gewicht-as 0. Vijftien blends extra. */
+    klussen.push(function(){ k1 = meet(1, m, 1, hs[GEW_N-1]); uit.vetPlus[mi] = k1 - rij[GEW_N-1]; });
+    klussen.push(function(){ k2 = meet(2, m, 1, hs[GEW_N-1]); uit.vetPlus2[mi] = k2 - k1; });
+    /* Stap 3: de gewicht-as voorbij 1, bovenop vet 2. */
+    klussen.push(function(){ uit.vetPlus3[mi] = meet(2, m, 1, hs[GEW_N-1], 1) - k2; });
+    klussen.push(function(){ uit.vetMin[mi] = rij[0] - meet(-1, m, 0, hs[0]); });
+  })(mi);
+  return { klussen:klussen, uit:uit };
+}
+function zetTabel(uit, ms){
+  gewTabel = uit.gewTabel;
+  vetPlus = uit.vetPlus; vetPlus2 = uit.vetPlus2; vetPlus3 = uit.vetPlus3; vetMin = uit.vetMin;
+  gewTabelVoor = uit.voor;
+  vetKorr = null;
+  meting.gewTabel = ms;
+}
+function bouwGewichtTabel(gender, height){
+  var t0 = performance.now();
+  tabelTaak = null;                   /* een lopende bouw in stukjes vervalt */
+  var k = tabelKlussen(gender, height);
+  for(var i=0; i<k.klussen.length; i++) k.klussen[i]();
+  zetTabel(k.uit, performance.now() - t0);
+}
+/* In stukjes: per beurt zoveel klussen als in 8 ms passen. Tot hij klaar is blijft de
+   oude tabel gelden (het gewicht wijkt dan even een kilo of wat af, zoals tijdens het
+   slepen); daarna roept hij `klaar` aan om het gewicht opnieuw toe te passen. */
+var tabelTaak = null;
+function bouwGewichtTabelLos(gender, height, klaar){
+  var k = tabelKlussen(gender, height);
+  var taak = { k:k, i:0, werk:0 };
+  tabelTaak = taak;
+  function stap(){
+    if(tabelTaak !== taak) return;
+    var t0 = performance.now();
+    while(taak.i < k.klussen.length && performance.now() - t0 < 8) k.klussen[taak.i++]();
+    taak.werk += performance.now() - t0;
+    if(taak.i < k.klussen.length){ setTimeout(stap, 0); return; }
+    tabelTaak = null;
+    zetTabel(k.uit, taak.werk);
+    if(klaar) klaar();
+  }
+  /* setTimeout en geen requestAnimationFrame: die staat stil in een verborgen tab,
+     en dan zou de tabel nooit afkomen. Tussen twee timeouts kan de browser tekenen. */
+  setTimeout(stap, 0);
+}
+
+/* ------------------------------------------------------- vet-aanvulling
+   MakeHuman's gewichtsbereik hangt sterk af van de spiermassa: bij bouw 0,5 haalt een
+   man van 180 cm maar 64 tot 77 kg. Wie sportief is en 85 kg weegt, kreeg dus te horen
+   dat hij "zachter" moest kiezen (41 van 100 in de persona-doorloop). Nu blijft de bouw
+   staan en vult vet het verschil aan: de gewicht-as gaat eerst tot zijn rand, wat daarna
+   nog ontbreekt (of te veel is) komt uit de vet-modifiers. EEN factor f, verdeeld per
+   gender: meer heup, billen en benen bij vrouw, meer buik en taille bij man.
+
+   Tot f = 1 geldt laag 1. Een gespierd lichaam van 100+ kg haalt daarmee zijn gewicht
+   niet (de gespierde hoek van MakeHuman is erg slank), dus loopt f door tot 2 met een
+   ANDERE verdeling: heup en benen stonden bij vrouw al op 1, en daar verder op
+   doorduwen gaf zadeltassen met een harde rand bij de knie. Laag 2 legt het over buik,
+   taille, armen en de dij-, bovenarm- en kuitmaat. */
+var VET_VROUW  = { taille:0.6, buik:0.6, heupen:1,   billen:1,   armenVet:0.8, benenVet:1 };
+var VET_MAN    = { taille:1,   buik:1,   heupen:0.6, billen:0.5, armenVet:0.8, benenVet:0.6 };
+var VET2_VROUW = { taille:0.6, buik:0.8, heupen:0.2, billen:0.3, armenVet:0.4, benenVet:0,
+                   dij:0.6, bovenarm:0.3, kuit:0.4 };
+var VET2_MAN   = { taille:0.5, buik:0.7, heupen:0.3, billen:0.3, armenVet:0.5, benenVet:0.3,
+                   dij:0.6, bovenarm:0.6, kuit:0.4 };
+var VET_MAX = 2;
+var VET_KAP = 1.6;            /* per modifier, gebruiker plus aanvulling */
+var vetF = 0;                 /* de vet-factor die de blend nu meeneemt, -1..VET_MAX */
+/* De aanvulling als EEN getal a, van -1 tot 3: tot 2 is het de vet-factor. Van 2 tot 3
+   (punt 13, BMI boven de 40) komt daar extraZwaar bij: een deel van de zwaarste
+   MakeHuman-hoek, zie gewichten(). Eerst geprobeerd: de gewicht-as voorbij 1 doortrekken
+   (helpt bij een gemiddelde bouw bijna niets, die hoek is slank) en de spiermassa intern
+   naar 0 schuiven (de spier-as is niet monotoon, dus het lichaam werd eerst LICHTER). */
+var AANV_MAX = 3;
+var extraZwaar = 0;
+var aanvulling = 0;
+var vetPlus = null, vetPlus2 = null, vetPlus3 = null, vetMin = null;   /* kg per eenheid, per spier-rij */
+var vetKorr = null;           /* bijgestelde factor na loslaten, zie vetBijstellen */
+var _vetCache = { g:-1, v:null };
+/* Per modifier de aanvulling bij factor f. */
+function vetBijdrage(vv, k, f){
+  if(f <= 1) return f * (vv.l1[k] || 0);
+  return (vv.l1[k] || 0) + (f - 1) * (vv.l2[k] || 0);
+}
+function vetVerdeling(gender){
+  if(_vetCache.g === gender) return _vetCache.v;
+  var v = { l1:{}, l2:{} }, k;
+  for(k in VET_VROUW)  v.l1[k] = VET_VROUW[k]  * (1-gender) + VET_MAN[k]  * gender;
+  for(k in VET2_VROUW) v.l2[k] = VET2_VROUW[k] * (1-gender) + VET2_MAN[k] * gender;
+  _vetCache = { g:gender, v:v };
+  return v;
+}
+function vetPerEenheid(muscle, teken){
+  var t = teken > 2 ? vetPlus3 : teken > 1 ? vetPlus2 : teken > 0 ? vetPlus : vetMin;
+  var fm = Math.max(0, Math.min(1, muscle)) * (GEW_N-1);
+  var m0 = Math.min(GEW_N-2, Math.floor(fm)), dm = fm - m0;
+  return Math.max(0.5, t[m0]*(1-dm) + t[m0+1]*dm);
+}
+/* Schatting uit de tabel (goedkoop, ook tijdens het slepen). */
+function vetSchatting(muscle, weight, doelKg){
+  if(!gewTabel || !vetPlus) return 0;
+  var f = 0;
+  if(weight >= 1){
+    var over = doelKg - kgUitTabel(muscle, 1);
+    if(over > 0){
+      var p1 = vetPerEenheid(muscle, 1), p2 = vetPerEenheid(muscle, 2);
+      f = over <= p1 ? over / p1
+        : over <= p1 + p2 ? 1 + (over - p1) / p2
+        : 2 + (over - p1 - p2) / vetPerEenheid(muscle, 3);
+    }
+  } else if(weight <= 0){
+    var onder = doelKg - kgUitTabel(muscle, 0);
+    if(onder < 0) f = onder / vetPerEenheid(muscle, -1);
+  }
+  return Math.max(-1, Math.min(AANV_MAX, f));
+}
+/* Bij loslaten: het echte gewicht meten en de factor een of twee secant-stappen
+   bijstellen. Kost per stap een blend plus volumemeting (~4 ms). De uitkomst wordt
+   bewaard, zodat een latere blend bij dezelfde stand niet terugvalt op de schatting. */
+function vetBijstellen(){
+  if(!aanvulling) return;
+  var m = +sliders.spier.value, doel = +sliders.weight.value;
+  for(var i=0; i<3; i++){      /* drie: stap 3 is niet lineair */
+    var kg = gewichtKg();
+    if(Math.abs(kg - doel) < 0.3) break;
+    var a = aanvulling;
+    var f = Math.max(-1, Math.min(AANV_MAX, a + (doel - kg) /
+      vetPerEenheid(m, a > 2 ? 3 : a > 1 ? 2 : a > 0 ? 1 : -1)));
+    if(f === a) break;
+    vetKorr = { m:m, kg:doel, tabel:gewTabel, f:f };
+    var v = waarden();
+    blend(v.gender, v.muscle, v.weight, v.height, true);
+  }
+}
+
+/* De tabel hoort bij een gender en een lengte. Herbouwen kost ongeveer 20 ms, te veel
+   voor elke frame, dus dat gebeurt alleen als hij echt te ver afstaat. Tijdens het
+   slepen van gender of lengte is hij dan even een beetje verouderd; bij het loslaten
+   wordt hij sowieso ververst. */
+function tabelVerouderd(voor, gender){
+  return !voor ||
+     Math.abs(voor.gender - gender) > 0.005 ||
+     Math.abs(voor.cm - lengteDoel()) > 0.5 ||
+     voor.jaar !== leeftijdJaar;
+}
+/* Voor de generator: start een bouw in stukjes als de tabel (of de bouw die al loopt)
+   niet meer bij deze stand hoort. Geeft true als er een bouw loopt. */
+function zorgTabelLos(gender, height, klaar){
+  if(tabelTaak && !tabelVerouderd(tabelTaak.k.uit.voor, gender)) return true;
+  if(!tabelVerouderd(gewTabelVoor, gender)){ tabelTaak = null; return false; }
+  bouwGewichtTabelLos(gender, height, klaar);
+  return true;
+}
+function zorgTabel(gender, height){
+  /* Drempels bijna nul. Eerst stond de lengte op 3 cm speling, en dat bleek te grof:
+     wie 184 cm koos en daarna 181, kreeg de tabel van 184 en woog bijna 4 kg te weinig,
+     zonder melding (gevonden in de persona-doorloop). Deze functie draait alleen bij
+     het loslaten, dus altijd verversen kost hooguit 40 ms op een moment dat er toch
+     al decals herbouwd worden. */
+  if(tabelVerouderd(gewTabelVoor, gender)) bouwGewichtTabel(gender, height);
+}
+
+/* Kilo's bij een stand, uit het raster. Lineair interpoleren volstaat: de tabel is
+   glad en in de gewicht-richting monotoon. */
+function kgUitTabel(muscle, weight){
+  if(!gewTabel) return 0;
+  var fm = Math.max(0, Math.min(1, muscle)) * (GEW_N-1);
+  var fw = Math.max(0, Math.min(1, weight)) * (GEW_N-1);
+  var m0 = Math.min(GEW_N-2, Math.floor(fm)), w0 = Math.min(GEW_N-2, Math.floor(fw));
+  var dm = fm - m0, dw = fw - w0;
+  var a = gewTabel[m0][w0]   * (1-dw) + gewTabel[m0][w0+1]   * dw;
+  var b = gewTabel[m0+1][w0] * (1-dw) + gewTabel[m0+1][w0+1] * dw;
+  return a*(1-dm) + b*dm;
+}
+
+/* Welke gewicht-as geeft dit aantal kilo's bij deze bouw? Monotoon in weight, dus
+   bisectie op de tabel. Buiten bereik klemt hij op 0 of 1. */
+function losGewichtOp(muscle, doelKg){
+  if(!gewTabel) return 0.5;
+  var lo = 0, hi = 1, mid, i;
+  if(kgUitTabel(muscle, 0) >= doelKg) return 0;
+  if(kgUitTabel(muscle, 1) <= doelKg) return 1;
+  for(i=0;i<20;i++){
+    mid = (lo+hi)/2;
+    if(kgUitTabel(muscle, mid) < doelKg) lo = mid; else hi = mid;
+  }
+  return (lo+hi)/2;
+}
+
+function kgBereik(muscle){
+  return { min:kgUitTabel(muscle, 0), max:kgUitTabel(muscle, 1) };
+}
+
+function lichaamsLengte(){
+  var p = posAttr.array, lo = Infinity, hi = -Infinity;
+  for(var i=1;i<p.length;i+=3){ if(p[i]<lo) lo=p[i]; if(p[i]>hi) hi=p[i]; }
+  return (hi-lo)*100;
+}
+
+function blend(gender, muscle, weight, height, metGrenzen){
+  var t0 = performance.now();
+  var arr = posAttr.array;
+  arr.set(basePos);
+  var w = gewichten(gender, muscle, weight, height === undefined ? 0.5 : height);
+  for(var k=0;k<targets.length;k++){
+    var g = w[k];
+    if(g < 1e-5 && g > -1e-5) continue;
+    var t = targets[k], idx = t.idx, val = t.val;
+    for(var j=0;j<idx.length;j++){
+      var v = idx[j]*3, o = j*3;
+      arr[v]   += g*val[o];
+      arr[v+1] += g*val[o+1];
+      arr[v+2] += g*val[o+2];
+    }
+  }
+  posAttr.needsUpdate = true;
+  meting.blend = performance.now() - t0;
+
+  t0 = performance.now();
+  normalenBij();
+  meting.normalen = performance.now() - t0;
+
+  /* computeBoundingSphere/Box kost op 14.517 verts meer dan de blend en de normalen
+     samen (gemeten 3,4 van de 4,0 ms). De mesh staat op frustumCulled=false en
+     DecalGeometry gebruikt de grenzen niet, dus ze hoeven alleen bij het loslaten
+     bijgewerkt te worden - daar hangt raycasten wel vanaf. */
+  if(metGrenzen) grenzenBij();
+}
+function grenzenBij(){
+  var t0 = performance.now();
+  mesh.geometry.computeBoundingSphere();
+  mesh.geometry.computeBoundingBox();
+  meting.grenzen = performance.now() - t0;
+}
+
+/* Normalen op de GELASTE topologie; naadduplicaten erven dezelfde normaal,
+   anders worden de UV-naden zichtbaar als harde randen. */
+function normalenBij(){
+  var p = posAttr.array, n = norAttr.array, a = wAcc, f, v;
+  a.fill(0);
+  for(f=0;f<tris.length;f+=3){
+    var i0=tris[f]*3, i1=tris[f+1]*3, i2=tris[f+2]*3;
+    var ax=p[i0], ay=p[i0+1], az=p[i0+2];
+    var e1x=p[i1]-ax, e1y=p[i1+1]-ay, e1z=p[i1+2]-az;
+    var e2x=p[i2]-ax, e2y=p[i2+1]-ay, e2z=p[i2+2]-az;
+    var cx=e1y*e2z-e1z*e2y, cy=e1z*e2x-e1x*e2z, cz=e1x*e2y-e1y*e2x;
+    var w0=weld[tris[f]]*3, w1=weld[tris[f+1]]*3, w2=weld[tris[f+2]]*3;
+    a[w0]+=cx; a[w0+1]+=cy; a[w0+2]+=cz;
+    a[w1]+=cx; a[w1+1]+=cy; a[w1+2]+=cz;
+    a[w2]+=cx; a[w2+1]+=cy; a[w2+2]+=cz;
+  }
+  for(v=0;v<weld.length;v++){
+    var s=weld[v]*3, x=a[s], y=a[s+1], z=a[s+2];
+    var l=Math.sqrt(x*x+y*y+z*z) || 1;
+    var o=v*3;
+    n[o]=x/l; n[o+1]=y/l; n[o+2]=z/l;
+  }
+  norAttr.needsUpdate = true;
+}
+
+/* ------------------------------ ankers: faceIndex + barycentrische coordinaat */
+var _a=new THREE.Vector3(), _b=new THREE.Vector3(), _c=new THREE.Vector3();
+var _n=new THREE.Vector3(), _p=new THREE.Vector3(), _t=new THREE.Vector3();
+var _h=new THREE.Vector3();
+function ankerPlek(anker){
+  var f = anker.tri*3;
+  var i0=tris[f], i1=tris[f+1], i2=tris[f+2], p=posAttr.array;
+  _a.set(p[i0*3],p[i0*3+1],p[i0*3+2]);
+  _b.set(p[i1*3],p[i1*3+1],p[i1*3+2]);
+  _c.set(p[i2*3],p[i2*3+1],p[i2*3+2]);
+  var u=anker.u, v=anker.v, w=1-u-v;
+  _p.set(_a.x*w+_b.x*u+_c.x*v, _a.y*w+_b.y*u+_c.y*v, _a.z*w+_b.z*u+_c.z*v);
+  /* vlaknormaal van dezelfde driehoek: draait mee met de vorm */
+  _h.copy(_c).sub(_a);
+  _n.copy(_b).sub(_a).cross(_h).normalize();
+  /* raakvector = zijde a->b, zodat de eigen hoek meedraait met de driehoek */
+  _t.copy(_b).sub(_a).normalize();
+  return { p:_p, n:_n, t:_t };
+}
+
+/* --------------------------------------------------- versnelling: box-cull
+   DecalGeometry in r128 loopt over ELKE driehoek van de mesh. Op 26.756 driehoeken
+   is dat het duurste stuk van een vormwijziging. Het product snijdt dat weg met een
+   voxelraster (faceGridFor/localDecalGeo); dit is daar een uitgeklede versie van,
+   zodat de spike meet wat de app werkelijk zou doen. Het raster hangt aan de
+   vervormde mesh, dus het moet na elke blend opnieuw - die kost meten we mee. */
+var RASTER_CEL = 0.05;                       /* 5 cm */
+var raster = null;
+function bouwRaster(){
+  var t0 = performance.now();
+  var p = posAttr.array, cellen = new Map(), maxR2 = 0;
+  var n = tris.length/3, f, i;
+  for(f=0; f<n; f++){
+    var i0=tris[f*3]*3, i1=tris[f*3+1]*3, i2=tris[f*3+2]*3;
+    var cx=(p[i0]+p[i1]+p[i2])/3, cy=(p[i0+1]+p[i1+1]+p[i2+1])/3, cz=(p[i0+2]+p[i1+2]+p[i2+2])/3;
+    var r2 = Math.max(
+      (p[i0]-cx)*(p[i0]-cx)+(p[i0+1]-cy)*(p[i0+1]-cy)+(p[i0+2]-cz)*(p[i0+2]-cz),
+      (p[i1]-cx)*(p[i1]-cx)+(p[i1+1]-cy)*(p[i1+1]-cy)+(p[i1+2]-cz)*(p[i1+2]-cz),
+      (p[i2]-cx)*(p[i2]-cx)+(p[i2+1]-cy)*(p[i2+1]-cy)+(p[i2+2]-cz)*(p[i2+2]-cz));
+    if(r2 > maxR2) maxR2 = r2;
+    var k = (Math.floor(cx/RASTER_CEL)+512) + ':' +
+            (Math.floor(cy/RASTER_CEL)+512) + ':' +
+            (Math.floor(cz/RASTER_CEL)+512);
+    var lijst = cellen.get(k);
+    if(lijst) lijst.push(f); else cellen.set(k, [f]);
+  }
+  raster = { cellen:cellen, maxR:Math.sqrt(maxR2) };
+  meting.raster = performance.now() - t0;
+}
+
+/* Alleen de driehoeken binnen het bereik van de decal, als losse geometry. */
+var _tmpGeo = new THREE.BufferGeometry();
+var _tmpMesh = new THREE.Mesh(_tmpGeo, huid);
+function meshBijDecal(plek, size){
+  if(!raster) bouwRaster();
+  var R = size*0.87 + raster.maxR;            /* halve diagonaal van de box + marge */
+  var p = posAttr.array;
+  var c0 = Math.floor((plek.p.x-R)/RASTER_CEL), c1 = Math.floor((plek.p.x+R)/RASTER_CEL);
+  var d0 = Math.floor((plek.p.y-R)/RASTER_CEL), d1 = Math.floor((plek.p.y+R)/RASTER_CEL);
+  var e0 = Math.floor((plek.p.z-R)/RASTER_CEL), e1 = Math.floor((plek.p.z+R)/RASTER_CEL);
+  var uit = [], R2 = R*R, a, b, c, lijst, i, f;
+  for(a=c0; a<=c1; a++) for(b=d0; b<=d1; b++) for(c=e0; c<=e1; c++){
+    lijst = raster.cellen.get((a+512)+':'+(b+512)+':'+(c+512));
+    if(!lijst) continue;
+    for(i=0;i<lijst.length;i++){
+      f = lijst[i];
+      var i0=tris[f*3]*3, i1=tris[f*3+1]*3, i2=tris[f*3+2]*3;
+      var cx=(p[i0]+p[i1]+p[i2])/3, cy=(p[i0+1]+p[i1+1]+p[i2+1])/3, cz=(p[i0+2]+p[i1+2]+p[i2+2])/3;
+      var dx=cx-plek.p.x, dy=cy-plek.p.y, dz=cz-plek.p.z;
+      if(dx*dx+dy*dy+dz*dz <= R2) uit.push(f);
+    }
+  }
+  var pos = new Float32Array(uit.length*9), nrm = new Float32Array(uit.length*9);
+  var na = norAttr.array;
+  for(i=0;i<uit.length;i++){
+    f = uit[i];
+    for(var k=0;k<3;k++){
+      var v = tris[f*3+k]*3, o = i*9 + k*3;
+      pos[o]=p[v]; pos[o+1]=p[v+1]; pos[o+2]=p[v+2];
+      nrm[o]=na[v]; nrm[o+1]=na[v+1]; nrm[o+2]=na[v+2];
+    }
+  }
+  _tmpGeo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+  _tmpGeo.setAttribute('normal', new THREE.BufferAttribute(nrm, 3));
+  _tmpGeo.setIndex(null);
+  _tmpMesh.matrixWorld.copy(mesh.matrixWorld);
+  meting.cullVerts = uit.length*3;
+  return _tmpMesh;
+}
+
+var helper = new THREE.Object3D();
+var _m4 = new THREE.Matrix4();
+var gebruikCull = true;
+function bouwDecal(anker){
+  var plek = ankerPlek(anker);
+  var z = plek.n.clone();
+  var x = plek.t.clone().addScaledVector(z, -plek.t.dot(z)).normalize();
+  var y = z.clone().cross(x);
+  _m4.makeBasis(x, y, z);
+  helper.position.copy(plek.p);
+  helper.quaternion.setFromRotationMatrix(_m4);
+  helper.rotateZ(anker.rot);
+  helper.updateMatrixWorld(true);
+  var doelMesh = gebruikCull ? meshBijDecal(plek, anker.size) : mesh;
+  return new THREE.DecalGeometry(doelMesh, plek.p, helper.rotation,
+           new THREE.Vector3(anker.size, anker.size, anker.size*1.6));
+}
+function bouwAlleDecals(){
+  grenzenBij();
+  if(gebruikCull) bouwRaster();
+  var t0 = performance.now();
+  for(var i=0;i<ankers.length;i++){
+    var geo = bouwDecal(ankers[i]);
+    if(decals[i]){ decals[i].geometry.dispose(); decals[i].geometry = geo; }
+    else { decals[i] = new THREE.Mesh(geo, decalMats[i]); scene.add(decals[i]); }
+    /* De geometry staat in wereldcoordinaten, dus de mesh zelf op identiteit. */
+    decals[i].matrixAutoUpdate = false;
+    decals[i].matrix.identity();
+    decals[i].matrixWorldNeedsUpdate = true;
+    ankers[i].basis = ankerBasis(ankers[i]);      /* ijkpunt voor het meeslepen */
+  }
+  meting.decals = performance.now() - t0;
+}
+
+/* --------------------------------------------------- decals meeslepen (modus A+)
+   Tijdens het slepen opnieuw projecteren is te duur op een ouder toestel, maar de
+   decal laten staan is erger dan het lijkt: de huid loopt eronder weg en de tattoo
+   zakt half in het lichaam. Daarom schuift de bestaande geometry stijf mee met zijn
+   anker - alleen verplaatsen en draaien, geen herprojectie. De vervorming klopt dan
+   even niet, maar de tattoo blijft heel en op zijn plek. Bij het loslaten volgt de
+   echte herbouw. Kost vijf matrixvermenigvuldigingen. */
+function ankerBasis(anker){
+  var plek = ankerPlek(anker);
+  var z = plek.n.clone();
+  var x = plek.t.clone().addScaledVector(z, -plek.t.dot(z)).normalize();
+  var y = z.clone().cross(x);
+  var m = new THREE.Matrix4().makeBasis(x, y, z);
+  m.setPosition(plek.p);
+  return m;
+}
+var _inv = new THREE.Matrix4();
+function volgAnkers(){
+  var t0 = performance.now();
+  for(var i=0;i<decals.length;i++){
+    if(!decals[i] || !ankers[i].basis) continue;
+    _inv.copy(ankers[i].basis).invert();
+    decals[i].matrix.multiplyMatrices(ankerBasis(ankers[i]), _inv);
+    decals[i].matrixWorldNeedsUpdate = true;
+  }
+  meting.volgen = performance.now() - t0;
+}
+
+/* --------------------------------------------------------------- laden */
+/* GLTFLoader pakt elke sparse morph target uit naar een dense array van 14.517 x 3
+   floats: 174 KB per target, bij 130 targets ruim 20 MB. We halen er de niet-nul
+   verts uit en laten de dense arrays daarna los. Scheelt geheugen en is sneller,
+   want de blend loopt dan over aaneengesloten waarden. */
+function compact(arr){
+  var idx = [], val = [], v, o;
+  for(v=0; v<arr.length/3; v++){
+    o = v*3;
+    if(arr[o]!==0 || arr[o+1]!==0 || arr[o+2]!==0){
+      idx.push(v); val.push(arr[o], arr[o+1], arr[o+2]);
+    }
+  }
+  return { idx:new Uint16Array(idx), val:new Float32Array(val) };
+}
+
+/* Blendt alleen een vaste set verts, zonder de mesh aan te raken. Voor het meten van
+   lengte en omtrekken tijdens een iteratie.
+
+   Het plan wordt EEN keer per vertset gebouwd: welke targets die verts raken en waar
+   in hun delta-array dat staat. Zonder dat zou elke meting over alle 130 targets en
+   al hun delta's lopen, en de lengte-iteratie meet twee tot vier keer per frame. */
+function maakDeelPlan(verts){
+  var plek = new Map(), i, k, j, p, t;
+  for(i=0;i<verts.length;i++) plek.set(verts[i], i);
+  var plan_ = [];
+  for(k=0;k<targets.length;k++){
+    t = targets[k];
+    var lok = [], off = [];
+    for(j=0;j<t.idx.length;j++){
+      p = plek.get(t.idx[j]);
+      if(p !== undefined){ lok.push(p); off.push(j*3); }
+    }
+    if(lok.length) plan_.push({ k:k, lok:new Uint16Array(lok), off:new Uint32Array(off) });
+  }
+  return { verts:verts, delen:plan_, buf:new Float32Array(verts.length*3) };
+}
+
+function blendDeel(dp, w){
+  var uit = dp.buf, verts = dp.verts, i, d, j, g, t, o, q;
+  for(i=0;i<verts.length;i++){
+    uit[i*3]   = basePos[verts[i]*3];
+    uit[i*3+1] = basePos[verts[i]*3+1];
+    uit[i*3+2] = basePos[verts[i]*3+2];
+  }
+  for(d=0;d<dp.delen.length;d++){
+    g = w[dp.delen[d].k];
+    if(g < 1e-5 && g > -1e-5) continue;
+    t = targets[dp.delen[d].k];
+    var lok = dp.delen[d].lok, off = dp.delen[d].off;
+    for(j=0;j<lok.length;j++){
+      q = lok[j]*3; o = off[j];
+      uit[q]   += g*t.val[o];
+      uit[q+1] += g*t.val[o+1];
+      uit[q+2] += g*t.val[o+2];
+    }
+  }
+  return uit;
+}
+
+new THREE.GLTFLoader().load('work/body.glb', function(gltf){
+  var extras = gltf.parser.json.extras && gltf.parser.json.extras.tatties;
+  if(!extras){ $('#laden').textContent = 'extras.tatties ontbreekt in het glb'; return; }
+  macro = extras.macro;
+  namen = extras.targetNames;
+  hoogteMap = extras.hoogteMap || {};
+  cupMap = extras.cupMap || {};
+  maatVan = extras.maatVan || {};
+  ringen = extras.ringen || {};
+  afstanden = extras.afstanden || {};
+  namenIdx = {};
+  for(var q=0;q<namen.length;q++) namenIdx[namen[q]] = q;
+  details = extras.details || [];
+  bouwPlan();
+
+  gltf.scene.traverse(function(o){ if(o.isMesh && !mesh) mesh = o; });
+  if(!mesh){ $('#laden').textContent = 'geen mesh in het glb'; return; }
+  mesh.material = huid;
+  mesh.frustumCulled = false;
+  scene.add(mesh);
+
+  var geo = mesh.geometry;
+  posAttr = geo.attributes.position;
+  norAttr = geo.attributes.normal;
+  basePos = new Float32Array(posAttr.array);
+  tris = geo.index.array;
+  weld = geo.attributes._weld.array;
+  nWeld = 0;
+  for(var v=0; v<weld.length; v++){ if(weld[v]+1 > nWeld) nWeld = weld[v]+1; }
+  wAcc = new Float32Array(nWeld*3);
+
+  var mt = geo.morphAttributes.position || [];
+  for(var k=0;k<mt.length;k++) targets.push(compact(mt[k].array));
+  geo.morphAttributes.position = [];        /* dense arrays vrijgeven */
+  geo.morphAttributes = {};
+  /* GPU-morphing blijft uit: r128 kan er maar 8 aan en DecalGeometry ziet ze niet */
+  huid.morphTargets = false;
+  mesh.morphTargetInfluences = null;
+
+  console.log('geladen: ' + posAttr.count + ' verts, ' + (tris.length/3) +
+              ' driehoeken, ' + targets.length + ' targets, ' + nWeld + ' gelast');
+
+  bouwDetailSliders();
+  kiesUitersten();
+  bouwGewichtTabel(0.5, 0.5);
+  blend(0.5, 0.5, 0.5, 0.5, true);
+  /* De lengte-slider is absoluut in cm; zet hem op wat het neutrale model van zichzelf
+     is (ongeveer 166 cm), anders springt het model bij het openen naar 175. */
+  sliders.lengte.value = (lichaamsLengte() - LENGTE_CM_MIN) / (LENGTE_CM_MAX - LENGTE_CM_MIN);
+  sliders.weight.value = Math.round(gewichtKg());
+  toonWaarden();
+  kiesAnkers();
+  bouwAlleDecals();
+  $('#laden').style.display = 'none';
+  lus();
+  genStart();
+}, undefined, function(err){
+  $('#laden').textContent = 'laden mislukt: ' + err;
+  console.error(err);
+});
+
+/* Vijf ankers op herkenbare plekken, gekozen op de NEUTRALE stand door de
+   dichtstbijzijnde driehoek bij een richtpunt te zoeken. */
+function kiesAnkers(){
+  /* Plekken met genoeg vlakke huid eromheen: kale DecalGeometry breekt in holtes
+     (oksel, lies) omdat ze zonder geodetische begrenzing naar het aangrenzende
+     lichaamsdeel lekt. Het product lost dat op met expDecalGeo; dat valt buiten
+     deze spike, dus de testankers mijden die plekken. */
+  /* nx/ny/nz = de kant waar de tattoo naartoe moet kijken. Zonder die eis pakt de
+     dichtstbijzijnde driehoek net zo goed de achterkant van een arm. */
+  var doelen = [
+    { naam:'bovenarm links',  x: 0.235, y:1.13, z: 0.02, nx: 0.9, ny:0, nz: 0.4, size:0.075, rot:0 },
+    { naam:'onderarm rechts', x:-0.305, y:0.99, z: 0.10, nx:-0.8, ny:0, nz: 0.6, size:0.070, rot:0.4 },
+    { naam:'borst',           x: 0.07,  y:1.34, z: 0.11, nx: 0.1, ny:0, nz: 1.0, size:0.12,  rot:0 },
+    { naam:'dij links',       x: 0.09,  y:0.62, z: 0.09, nx: 0.2, ny:0, nz: 1.0, size:0.13,  rot:0.2 },
+    { naam:'rug',             x:-0.02,  y:1.25, z:-0.11, nx: 0.0, ny:0, nz:-1.0, size:0.14,  rot:0 }
+  ];
+  var p = posAttr.array, d, f, beste, bestD;
+  for(d=0; d<doelen.length; d++){
+    var doel = doelen[d];
+    var rl = Math.sqrt(doel.nx*doel.nx + doel.ny*doel.ny + doel.nz*doel.nz);
+    var rx = doel.nx/rl, ry = doel.ny/rl, rz = doel.nz/rl;
+    beste=-1; bestD=1e9;
+    for(f=0; f<tris.length; f+=3){
+      var i0=tris[f]*3, i1=tris[f+1]*3, i2=tris[f+2]*3;
+      var ax=p[i0], ay=p[i0+1], az=p[i0+2];
+      var e1x=p[i1]-ax, e1y=p[i1+1]-ay, e1z=p[i1+2]-az;
+      var e2x=p[i2]-ax, e2y=p[i2+1]-ay, e2z=p[i2+2]-az;
+      var cnx=e1y*e2z-e1z*e2y, cny=e1z*e2x-e1x*e2z, cnz=e1x*e2y-e1y*e2x;
+      var cl=Math.sqrt(cnx*cnx+cny*cny+cnz*cnz) || 1;
+      if((cnx*rx + cny*ry + cnz*rz)/cl < 0.5) continue;      /* verkeerde kant */
+      var cx=(ax+p[i1]+p[i2])/3, cy=(ay+p[i1+1]+p[i2+1])/3, cz=(az+p[i1+2]+p[i2+2])/3;
+      var dd=(cx-doel.x)*(cx-doel.x) + (cy-doel.y)*(cy-doel.y) + (cz-doel.z)*(cz-doel.z);
+      if(dd<bestD){ bestD=dd; beste=f/3; }
+    }
+    ankers.push({ naam:doel.naam, tri:beste, u:1/3, v:1/3,
+                  rot:doel.rot, size:doel.size });
+  }
+  console.log('ankers: ' + ankers.map(function(a){ return a.naam+'#'+a.tri; }).join(', '));
+}
+
+/* ------------------------------------------------------------ lichaamsmaten
+   De measure-modifiers uit MakeHuman veranderen een omtrek of een afstand. Wat ze
+   in centimeters doen staat nergens in de data, dus meten we het aan de mesh: elke
+   maat heeft een vaste ring verts (of twee ankerpunten) die bij het bakken in de
+   neutrale stand is vastgelegd en daarna gewoon meebeweegt. */
+var EENHEID = 'cm';
+/* Maten die een mens van zichzelf kent. De rest is weergave. */
+var INTYPBAAR = { taille:true };
+function naarEenheid(cm){ return EENHEID === 'inch' ? cm/2.54 : cm; }
+function vanEenheid(v){ return EENHEID === 'inch' ? v*2.54 : v; }
+
+/* Omtrek van de convexe omhullende in het vlak loodrecht op `as`. */
+function omtrekVan(xyz, as){
+  var nx=as[0], ny=as[1], nz=as[2];
+  var hx = Math.abs(nz) < 0.9 ? 0 : 1, hy = 0, hz = Math.abs(nz) < 0.9 ? 1 : 0;
+  var ux = ny*hz - nz*hy, uy = nz*hx - nx*hz, uz = nx*hy - ny*hx;
+  var ul = Math.sqrt(ux*ux+uy*uy+uz*uz) || 1; ux/=ul; uy/=ul; uz/=ul;
+  var vx = ny*uz - nz*uy, vy = nz*ux - nx*uz, vz = nx*uy - ny*ux;
+  var pts = [], i;
+  for(i=0;i<xyz.length;i+=3){
+    pts.push([xyz[i]*ux + xyz[i+1]*uy + xyz[i+2]*uz,
+              xyz[i]*vx + xyz[i+1]*vy + xyz[i+2]*vz]);
+  }
+  pts.sort(function(a,b){ return a[0]-b[0] || a[1]-b[1]; });
+  function kruis(o,a,b){ return (a[0]-o[0])*(b[1]-o[1]) - (a[1]-o[1])*(b[0]-o[0]); }
+  function half(lijst){
+    var h = [], j;
+    for(j=0;j<lijst.length;j++){
+      while(h.length>=2 && kruis(h[h.length-2],h[h.length-1],lijst[j])<=0) h.pop();
+      h.push(lijst[j]);
+    }
+    return h;
+  }
+  var romp = half(pts).slice(0,-1).concat(half(pts.slice().reverse()).slice(0,-1));
+  if(romp.length < 3) return 0;
+  var som = 0;
+  for(i=0;i<romp.length;i++){
+    var a2 = romp[i], b2 = romp[(i+1)%romp.length];
+    som += Math.sqrt((a2[0]-b2[0])*(a2[0]-b2[0]) + (a2[1]-b2[1])*(a2[1]-b2[1]));
+  }
+  return som*100;
+}
+
+function maatVerts(sleutel){
+  var r = maatVan[sleutel];
+  if(ringen[r]) return ringen[r].verts;
+  if(afstanden[r]) return afstanden[r].a.concat(afstanden[r].b);
+  return null;
+}
+
+/* Maat in cm uit een al geblende puntenlijst (xyz op volgorde van maatVerts). */
+function maatUitXyz(sleutel, xyz){
+  var r = maatVan[sleutel];
+  if(ringen[r]) return omtrekVan(xyz, ringen[r].as);
+  var na = afstanden[r].a.length, i;
+  var ax=0, ay=0, az=0, bx=0, by=0, bz=0;
+  for(i=0;i<na;i++){ ax+=xyz[i*3]; ay+=xyz[i*3+1]; az+=xyz[i*3+2]; }
+  for(i=na;i<xyz.length/3;i++){ bx+=xyz[i*3]; by+=xyz[i*3+1]; bz+=xyz[i*3+2]; }
+  var nb = xyz.length/3 - na;
+  ax/=na; ay/=na; az/=na; bx/=nb; by/=nb; bz/=nb;
+  return Math.sqrt((ax-bx)*(ax-bx)+(ay-by)*(ay-by)+(az-bz)*(az-bz))*100;
+}
+
+/* Huidige maat, rechtstreeks uit de mesh. */
+function meetMaat(sleutel){
+  var verts = maatVerts(sleutel);
+  if(!verts) return 0;
+  var p = posAttr.array, xyz = new Float32Array(verts.length*3), i;
+  for(i=0;i<verts.length;i++){
+    xyz[i*3] = p[verts[i]*3];
+    xyz[i*3+1] = p[verts[i]*3+1];
+    xyz[i*3+2] = p[verts[i]*3+2];
+  }
+  return maatUitXyz(sleutel, xyz);
+}
+
+/* Maat bij een hypothetische sliderstand, zonder de mesh aan te raken. */
+function maatBij(sleutel, d){
+  var verts = maatVerts(sleutel);
+  if(!verts) return 0;
+  if(!maatBuf[sleutel]) maatBuf[sleutel] = maakDeelPlan(new Uint16Array(verts));
+  var oud = detailStand[sleutel];
+  detailStand[sleutel] = d;
+  var v = waardenRuw();
+  var w = gewichten(v.gender, v.muscle, v.weight, v.height);
+  var buf = blendDeel(maatBuf[sleutel], w);
+  detailStand[sleutel] = oud;
+  return maatUitXyz(sleutel, buf);
+}
+
+/* Zoek de sliderstand die de gevraagde maat oplevert. Zelfde secant als bij lengte. */
+function losMaatOp(sleutel, doelCm){
+  var d = detailStand[sleutel] || 0, cm, d2, cm2, i;
+  for(i=0;i<5;i++){
+    cm = maatBij(sleutel, d);
+    if(Math.abs(cm - doelCm) < 0.1) break;
+    d2 = Math.max(-1, Math.min(1, d + (cm < doelCm ? 0.2 : -0.2)));
+    if(d2 === d) break;
+    cm2 = maatBij(sleutel, d2);
+    if(Math.abs(cm2 - cm) < 1e-6) break;
+    d = Math.max(-1, Math.min(1, d + (doelCm - cm) * (d2 - d) / (cm2 - cm)));
+  }
+  return d;
+}
+
+/* ------------------------------------------------- fijnafstelling (details)
+   Losse modifiers uit MakeHuman: incr/decr-paren die je met een slider van -1 tot
+   +1 mengt. Ze staan naast de macro-assen, niet erin, dus je kunt bijvoorbeeld een
+   zwaar lichaam nemen en daar de taille apart op bijstellen. */
+function bouwDetailSliders(){
+  var houder = $('#fijn-rijen');
+  houder.innerHTML = '';
+  details.forEach(function(d){
+    detailStand[d.sleutel] = 0;
+    var rij = document.createElement('div');
+    rij.className = 'rij';
+    var lab = document.createElement('label');
+    lab.textContent = d.label;
+    var sl = document.createElement('input');
+    sl.type = 'range'; sl.min = -1; sl.max = 1; sl.step = 0.01; sl.value = 0;
+    var isMaat = !!maatVan[d.sleutel];
+    /* Alleen de taille is een maat die mensen van zichzelf kennen. De rest toont de
+       centimeters wel (dat geeft de slider betekenis) maar is niet in te typen:
+       een gok intypen in een veld dat op een tiende nauwkeurig oogt, is schijnprecisie. */
+    var invoerbaar = isMaat && INTYPBAAR[d.sleutel];
+    var uit;
+    if(invoerbaar){
+      uit = document.createElement('input');
+      uit.type = 'number'; uit.step = '0.5'; uit.className = 'w maat';
+      uit.addEventListener('change', function(){
+        if(!mesh) return;
+        var doel = vanEenheid(+uit.value);
+        sl.value = losMaatOp(d.sleutel, doel);
+        detailStand[d.sleutel] = +sl.value;
+        var v = waarden();
+        blend(v.gender, v.muscle, v.weight, v.height, true);
+        toonWaarden(); bouwAlleDecals();
+      });
+    } else {
+      uit = document.createElement('span');
+      uit.className = 'w'; uit.textContent = isMaat ? '-' : '0';
+    }
+    sl.addEventListener('input', function(){
+      detailStand[d.sleutel] = +sl.value;
+      if(!isMaat) uit.textContent = (+sl.value).toFixed(2).replace('0.', '.').replace('-.00', '0');
+      if(!mesh) return;
+      var v = waarden();
+      blend(v.gender, v.muscle, v.weight, v.height);
+      toonWaarden();
+      if(live) bouwAlleDecals(); else volgAnkers();
+    });
+    sl.addEventListener('change', function(){
+      if(mesh && !live) bouwAlleDecals();
+    });
+    rij.appendChild(lab); rij.appendChild(sl); rij.appendChild(uit);
+    houder.appendChild(rij);
+    detailEls[d.sleutel] = sl;
+    if(isMaat) maatEls[d.sleutel] = { el:uit, invoer:invoerbaar };
+  });
+}
+
+/* ------------------------------------------------------------------- UI */
+var sliders = { gender:$('#s-gender'), spier:$('#s-spier'), weight:$('#s-weight'),
+                lengte:$('#s-lengte') };
+
+/* De lengte-slider is ABSOLUUT in centimeters. MakeHuman's height-as is dat niet:
+   hij loopt van ongeveer 123 tot 244 cm, niet lineair, en de gender-, spier- en
+   gewicht-assen verschuiven de lengte ook. Daarom lossen we per blend op welke
+   height-waarde de gevraagde centimeters oplevert. Gevolg: aan gender draaien
+   verandert de vorm maar niet meer de lengte, en dat was de bedoeling. */
+/* 140 tot 210 (punt 12). De height-as haalt bij man 137 tot 244 cm, bij vrouw 123 tot 230. */
+var LENGTE_CM_MIN = 140, LENGTE_CM_MAX = 210;
+var huidigeHeight = 0.5;          /* startpunt voor de volgende oplossing */
+function lengteDoel(){ return LENGTE_CM_MIN + (+sliders.lengte.value)*(LENGTE_CM_MAX-LENGTE_CM_MIN); }
+
+/* De lengte hoeft niet uit de hele mesh te komen: alleen de kruin en de voetzolen
+   bepalen hem. Bij het laden pakken we de verts die daar in de buurt liggen, met
+   ruime marge, zodat de iteratie een paar honderd getallen doorrekent in plaats van
+   14.517 x 3. Scheelt op een traag toestel het verschil tussen soepel en hakkelen. */
+var uiterstenDp = null;
+function kiesUitersten(){
+  var p = basePos, n = p.length/3, ys = new Float32Array(n), i;
+  for(i=0;i<n;i++) ys[i] = p[i*3+1];
+  var srt = Array.prototype.slice.call(ys).sort(function(a,b){ return a-b; });
+  var laag = srt[Math.min(n-1, 400)], hoog = srt[Math.max(0, n-1-400)];
+  var uit = [];
+  for(i=0;i<n;i++){ if(ys[i] <= laag || ys[i] >= hoog) uit.push(i); }
+  uiterstenDp = maakDeelPlan(new Uint16Array(uit));
+}
+
+/* Lengte in cm voor een stand, zonder de mesh aan te raken. */
+function lengteBijHeight(gender, muscle, weight, height){
+  var w = gewichten(gender, muscle, weight, height);
+  var buf = blendDeel(uiterstenDp, w);
+  var lo = Infinity, hi = -Infinity, i, y;
+  for(i=1;i<buf.length;i+=3){
+    y = buf[i];
+    if(y < lo) lo = y;
+    if(y > hi) hi = y;
+  }
+  return (hi - lo) * 100;
+}
+
+/* Secant-iteratie vanaf de vorige oplossing. In de praktijk is een of twee stappen
+   genoeg, want de vorige stand ligt er dichtbij. */
+function losHeightOp(gender, muscle, weight, doelCm){
+  var h = losHeightOpVanaf(gender, muscle, weight, doelCm, huidigeHeight);
+  huidigeHeight = h;
+  return h;
+}
+function losHeightOpVanaf(gender, muscle, weight, doelCm, start){
+  var h = start, cm, h2, cm2, i;
+  for(i=0; i<4; i++){
+    cm = lengteBijHeight(gender, muscle, weight, h);
+    if(Math.abs(cm - doelCm) < 0.15) break;
+    h2 = Math.max(0, Math.min(1, h + (cm < doelCm ? 0.04 : -0.04)));
+    if(h2 === h) break;
+    cm2 = lengteBijHeight(gender, muscle, weight, h2);
+    if(Math.abs(cm2 - cm) < 1e-6) break;
+    h = Math.max(0, Math.min(1, h + (doelCm - cm) * (h2 - h) / (cm2 - cm)));
+  }
+  meting.lengteIters = i + 1;
+  return h;
+}
+
+/* De bouw-slider IS de spiermassa; de gewicht-as wordt opgelost zodat het aantal
+   kilo's blijft staan. Zo verandert de bouw wel de vorm maar niet het gewicht. */
+function bouwStand(){
+  /* Bewust GEEN zorgTabel hier: die kost ongeveer 40 ms en zou midden in het slepen
+     van de gender- of lengteslider toeslaan. Tijdens het slepen is de tabel dus even
+     verouderd en klopt het gewicht een kilo of wat niet; bij het loslaten wordt hij
+     ververst en klopt het weer. */
+  var m = +sliders.spier.value, doel = +sliders.weight.value;
+  var w = losGewichtOp(m, doel);
+  /* Wat de gewicht-as niet haalt, vult vet aan. Zet vetF, want de weging leest hem. */
+  aanvulling = (vetKorr && vetKorr.m === m && vetKorr.kg === doel && vetKorr.tabel === gewTabel)
+    ? vetKorr.f : vetSchatting(m, w, doel);
+  vetF = Math.min(VET_MAX, aanvulling);
+  extraZwaar = Math.max(0, aanvulling - VET_MAX);
+  return { muscle:m, weight:w };
+}
+function waardenRuw(){
+  var b = bouwStand();
+  return { gender:+sliders.gender.value, muscle:b.muscle,
+           weight:b.weight, height:huidigeHeight };
+}
+function waarden(){
+  var g = +sliders.gender.value, b = bouwStand();
+  return { gender:g, muscle:b.muscle, weight:b.weight,
+           height: losHeightOp(g, b.muscle, b.weight, lengteDoel()) };
+}
+function toonWaarden(){
+  for(var mk in maatEls){
+    var me = maatEls[mk];
+    if(me.invoer){
+      if(document.activeElement !== me.el) me.el.value = naarEenheid(meetMaat(mk)).toFixed(1);
+    } else {
+      me.el.textContent = naarEenheid(meetMaat(mk)).toFixed(0) + (EENHEID === 'cm' ? '' : '"');
+    }
+  }
+  $('#w-gender').textContent = (+sliders.gender.value).toFixed(2).slice(1);
+  $('#w-spier').textContent  = (+sliders.spier.value).toFixed(2).slice(1);
+  var echtKg = gewichtKg(), gevraagd = +sliders.weight.value;
+  /* Niet elk gewicht kan bij elke bouw: veel kilo's met veel spiermassa valt buiten
+     wat MakeHuman aankan. Dan klemt de as en tonen we wat er werkelijk staat. */
+  $('#w-weight').textContent = Math.round(echtKg) + ' kg' +
+    (Math.abs(echtKg - gevraagd) > 2 ? ' *' : '');
+  $('#w-lengte').textContent = mesh ? Math.round(lichaamsLengte()) + ' cm' : '-';
+}
+/* Cupmaat en stevigheid gaan niet via `sliders`: ze zitten in cupStand, want de
+   weging leest ze rechtstreeks. */
+['cup', 'firm'].forEach(function(k){
+  var el = $('#s-' + k), sleutel = (k === 'cup') ? 'cupsize' : 'firmness';
+  el.addEventListener('input', function(){
+    cupStand[sleutel] = +el.value;
+    $('#w-' + k).textContent = (+el.value).toFixed(2).slice(1);
+    if(!mesh) return;
+    var v = waarden();
+    blend(v.gender, v.muscle, v.weight, v.height);
+    toonWaarden();
+    if(live) bouwAlleDecals(); else volgAnkers();
+  });
+  el.addEventListener('change', function(){ if(mesh && !live) bouwAlleDecals(); });
+});
+$('#eenheid').addEventListener('click', function(e){
+  e.preventDefault();
+  EENHEID = (EENHEID === 'cm') ? 'inch' : 'cm';
+  this.textContent = EENHEID;
+  if(mesh) toonWaarden();
+});
+
+Object.keys(sliders).forEach(function(k){
+  sliders[k].addEventListener('input', function(){
+    if(!mesh) return;
+    var v = waarden();
+    blend(v.gender, v.muscle, v.weight, v.height);
+    toonWaarden();                            /* na de blend: leest de nieuwe lengte */
+    if(live) bouwAlleDecals(); else volgAnkers();
+  });
+  sliders[k].addEventListener('change', function(){
+    if(!mesh) return;
+    if(k === 'gender' || k === 'lengte'){
+      /* De gewichtstabel hoort bij een gender en een lengte, en wordt daarom hier
+         ververst: bij het loslaten, niet tijdens het slepen. */
+      var v0 = waarden();
+      zorgTabel(v0.gender, v0.height);
+      var v1 = waarden();
+      blend(v1.gender, v1.muscle, v1.weight, v1.height, true);
+      vetBijstellen();
+      toonWaarden();
+    } else if(k === 'weight' || k === 'spier'){
+      vetBijstellen();
+      toonWaarden();
+    }
+    if(!live) bouwAlleDecals();               /* modus A: pas bij loslaten */
+  });
+});
+$('#b-live').addEventListener('click', function(){
+  live = !live;
+  if(live) this.classList.add('aan'); else this.classList.remove('aan');
+});
+$('#b-voor').addEventListener('click', function(){ baan.theta=0; baan.phi=Math.PI/2; zetCamera(); });
+$('#b-zij').addEventListener('click', function(){ baan.theta=Math.PI/2; baan.phi=Math.PI/2; zetCamera(); });
+$('#b-reset').addEventListener('click', function(){
+  sliders.gender.value = 0.5; sliders.spier.value = 0.5;
+  sliders.weight.value = 70; sliders.lengte.value = 0.5;
+  for(var dk in detailEls){ detailEls[dk].value = 0; detailStand[dk] = 0; }
+  cupStand.cupsize = 0.5; cupStand.firmness = 0.5;
+  $('#s-cup').value = 0.5; $('#s-firm').value = 0.5;
+  $('#w-cup').textContent = '.50'; $('#w-firm').textContent = '.50';
+  var v = waarden();
+  blend(v.gender, v.muscle, v.weight, v.height, true);
+  toonWaarden(); bouwAlleDecals();
+});
+$('#b-meet').addEventListener('click', function(){ alert(meet20()); });
+
+/* 20 blends over het hele bereik, voor een stabiel gemiddelde. */
+function meet20(){
+  var bl=[], nr=[], dc=[], i, t;
+  for(i=0;i<20;i++){
+    t = i/19;
+    blend(t, 1-t, (i%2)?t:1-t, 0.5);
+    bl.push(meting.blend); nr.push(meting.normalen);
+    bouwAlleDecals();
+    dc.push(meting.decals);
+  }
+  function stat(a){
+    var s = a.slice().sort(function(x,y){ return x-y; });
+    return { med:+s[10].toFixed(2), max:+s[19].toFixed(2) };
+  }
+  var b=stat(bl), n=stat(nr), d=stat(dc);
+  var tekst = 'METING 20 blends\n' +
+    '  blend     mediaan ' + b.med + ' ms  max ' + b.max + ' ms\n' +
+    '  normalen  mediaan ' + n.med + ' ms  max ' + n.max + ' ms\n' +
+    '  5 decals  mediaan ' + d.med + ' ms  max ' + d.max + ' ms\n' +
+    '  som       mediaan ' + (b.med + n.med + d.med).toFixed(2) + ' ms';
+  console.log(tekst);
+  var v = waarden(); blend(v.gender, v.muscle, v.weight, v.height, true); bouwAlleDecals();
+  return tekst;
+}
+
+/* ============================================================== i18n
+   Zelfde vorm als in het product: een tabel per taal en een tr(sleutel). Engels is
+   de standaardtaal; Brits Engels, samentrekkingen, geen dashes, rechte apostrof.
+   Alle generator-tekst loopt hierlangs, zodat dit blok zo de app in kan. */
+var I18N = {
+  nl: {
+    'gen.terug': 'Terug',
+    'gen.volgende': 'Volgende',
+    'gen.klaar': 'Klaar',
+    'gen.overslaan': 'Deze stap overslaan',
+    'gen.reset': 'Opnieuw',
+    'gen.inklappen': 'Model groter bekijken',
+    'gen.uitklappen': 'Vragen weer tonen',
+    'gen.meer': 'Meer instellen',
+    'gen.minder': 'Minder',
+
+    'gen.geslacht.kop': 'Welke vorm past bij jou?',
+    'gen.geslacht.sub': 'Dit bepaalt de basisvorm. Je kunt het later nog bijstellen.',
+    'gen.geslacht.vrouw': 'Vrouwelijk',
+    'gen.geslacht.vrouw_sub': 'Smallere schouders, bredere heupen',
+    'gen.geslacht.nb': 'Tussenin',
+    'gen.geslacht.nb_sub': 'Tussen beide in; verstel zelf waar',
+    'gen.geslacht.man': 'Mannelijk',
+    'gen.geslacht.man_sub': 'Bredere schouders, rechtere heupen',
+    'gen.leeftijd': 'Leeftijd',
+    'gen.jaar': '{n} jaar',
+    'gen.geslacht.links': 'smallere schouders, bredere heupen',
+    'gen.geslacht.rechts': 'bredere schouders, smallere heupen',
+    'gen.stapvan': 'Stap {n} van {m}',
+    'gen.kies_eerst': 'Kies eerst een basisvorm',
+    'aria.lengte': 'Lengte',
+    'aria.gewicht': 'Gewicht',
+    'aria.bouw': 'Bouw',
+    'aria.nb': 'Basisvorm',
+    'aria.min': 'Minder',
+    'aria.plus': 'Meer',
+    'aria.veelminder': 'veel minder',
+    'aria.minder': 'minder',
+    'aria.gemiddeld': 'gemiddeld',
+    'aria.meer': 'meer',
+    'aria.veelmeer': 'veel meer',
+    'aria.zachter': 'zachter',
+    'aria.gespierder': 'gespierder',
+
+    'gen.lengte.kop': 'Hoe lang ben je?',
+    'gen.lengte.sub': 'Zo staat de tattoo straks op de juiste schaal.',
+
+    'gen.gewicht.kop': 'Hoeveel weeg je?',
+    'gen.gewicht.sub': 'Een schatting is goed. Daarna kies je hoe het verdeeld is.',
+    'gen.gewicht.bouw': 'Hoe is dat gewicht verdeeld?',
+    'gen.gewicht.links': 'zachter',
+    'gen.gewicht.rechts': 'gespierder',
+    'gen.gewicht.klem': 'Verder dan {n} kg gaat het model hier niet.',
+
+    'gen.boven.kop': 'Bovenlichaam',
+    'gen.onder.kop': 'Onderlichaam',
+    'gen.deel.sub': 'Sleep tot het klopt. Overslaan mag ook.',
+
+    'mod.schouderbreedte': 'Schouders',
+    'mod.borstkas': 'Borstkas',
+    'mod.taille': 'Taille',
+    'mod.buik': 'Buik',
+    'mod.bovenarm': 'Bovenarm',
+    'mod.nek': 'Nek',
+    'mod.pols': 'Pols',
+    'mod.borstspier': 'Borstspier',
+    'mod.rugspier': 'Rugspier',
+    'mod.vShape': 'V-vorm',
+    'mod.buikTonus': 'Buik strak',
+    'mod.armenVet': 'Armen zacht',
+    'mod.armenSpier': 'Armen spier',
+    'mod.bovenarmlengte': 'Bovenarmlengte',
+    'mod.onderarmlengte': 'Onderarmlengte',
+    'mod.heupen': 'Heupen',
+    'mod.billen': 'Billen',
+    'mod.dij': 'Dij',
+    'mod.kuit': 'Kuit',
+    'mod.benenVet': 'Benen zacht',
+    'mod.benenSpier': 'Benen spier',
+    'mod.cupsize': 'Cupmaat',
+    'mod.firmness': 'Stevigheid'
+  },
+  en: {
+    'gen.terug': 'Back',
+    'gen.volgende': 'Next',
+    'gen.klaar': 'Done',
+    'gen.overslaan': 'Skip this step',
+    'gen.reset': 'Reset',
+    'gen.inklappen': 'Show the model larger',
+    'gen.uitklappen': 'Show the questions again',
+    'gen.meer': 'More settings',
+    'gen.minder': 'Fewer',
+
+    'gen.geslacht.kop': 'Which shape suits you?',
+    'gen.geslacht.sub': 'This sets the basic shape. You can adjust it later.',
+    'gen.geslacht.vrouw': 'Feminine',
+    'gen.geslacht.vrouw_sub': 'Narrower shoulders, wider hips',
+    'gen.geslacht.nb': 'In between',
+    'gen.geslacht.nb_sub': 'In between; set it where you want',
+    'gen.geslacht.man': 'Masculine',
+    'gen.geslacht.man_sub': 'Wider shoulders, straighter hips',
+    'gen.leeftijd': 'Age',
+    'gen.jaar': '{n} years',
+    'gen.geslacht.links': 'narrower shoulders, wider hips',
+    'gen.geslacht.rechts': 'wider shoulders, narrower hips',
+    'gen.stapvan': 'Step {n} of {m}',
+    'gen.kies_eerst': 'Choose a basic shape first',
+    'aria.lengte': 'Height',
+    'aria.gewicht': 'Weight',
+    'aria.bouw': 'Build',
+    'aria.nb': 'Basic shape',
+    'aria.min': 'Less',
+    'aria.plus': 'More',
+    'aria.veelminder': 'much less',
+    'aria.minder': 'less',
+    'aria.gemiddeld': 'average',
+    'aria.meer': 'more',
+    'aria.veelmeer': 'much more',
+    'aria.zachter': 'softer',
+    'aria.gespierder': 'more muscular',
+
+    'gen.lengte.kop': 'How tall are you?',
+    'gen.lengte.sub': 'This puts your tattoo on the right scale.',
+
+    'gen.gewicht.kop': 'How much do you weigh?',
+    'gen.gewicht.sub': 'A rough guess is fine. Then choose how it is spread.',
+    'gen.gewicht.bouw': 'How is that weight spread?',
+    'gen.gewicht.links': 'softer',
+    'gen.gewicht.rechts': 'more muscular',
+    'gen.gewicht.klem': "The model can't go past {n} kg here.",
+
+    'gen.boven.kop': 'Upper body',
+    'gen.onder.kop': 'Lower body',
+    'gen.deel.sub': 'Drag until it looks right. You can skip this.',
+
+    'mod.schouderbreedte': 'Shoulders',
+    'mod.borstkas': 'Chest',
+    'mod.taille': 'Waist',
+    'mod.buik': 'Belly',
+    'mod.bovenarm': 'Upper arm',
+    'mod.nek': 'Neck',
+    'mod.pols': 'Wrist',
+    'mod.borstspier': 'Chest muscle',
+    'mod.rugspier': 'Back muscle',
+    'mod.vShape': 'V-shape',
+    'mod.buikTonus': 'Firm belly',
+    'mod.armenVet': 'Soft arms',
+    'mod.armenSpier': 'Arm muscle',
+    'mod.bovenarmlengte': 'Upper arm length',
+    'mod.onderarmlengte': 'Forearm length',
+    'mod.heupen': 'Hips',
+    'mod.billen': 'Buttocks',
+    'mod.dij': 'Thigh',
+    'mod.kuit': 'Calf',
+    'mod.benenVet': 'Soft legs',
+    'mod.benenSpier': 'Leg muscle',
+    'mod.cupsize': 'Cup size',
+    'mod.firmness': 'Firmness'
+  }
+};
+
+var taal = 'en';        /* net als in het product: Engels tenzij de gebruiker kiest */
+function tr(sleutel){
+  var t = I18N[taal] || I18N.en;
+  return (t[sleutel] !== undefined) ? t[sleutel] : (I18N.en[sleutel] || sleutel);
+}
+function zetTaal(t){
+  taal = (t === 'nl') ? 'nl' : 'en';
+  document.documentElement.lang = taal;
+  if(!genEl().hidden) genNaarStap(GEN.stap);
+}
+
+/* ================================================== lichaamsgenerator
+   Vijf stappen: geslacht, lengte, gewicht, bovenlichaam, onderlichaam. Het model
+   blijft de hele tijd zichtbaar en past zich live aan, zodat je ziet wat je doet in
+   plaats van getallen te moeten vertrouwen.
+
+   De generator stuurt de bestaande sliders aan; die blijven de bron van waarheid.
+   Zo kan dit blok los de app in zonder dat de motor eronder verandert. */
+/* Standaardeenheden uit de taal van het toestel (punt 8): de VS in voet en ponden,
+   het VK in voet en stones, de rest metrisch. Omschakelen kan altijd. */
+var GEN_TAALTOESTEL = (navigator.language || '').toLowerCase();
+var GEN = {
+  stap: 0,
+  lengteEenheid: /^en-(us|gb)/.test(GEN_TAALTOESTEL) ? 'ft' : 'cm',
+  gewichtEenheid: /^en-us/.test(GEN_TAALTOESTEL) ? 'lb' : (/^en-gb/.test(GEN_TAALTOESTEL) ? 'st' : 'kg'),
+  gekozenGeslacht: null,
+  meerOpen: false
+};
+
+/* Welke detail-sliders bij welk lichaamsdeel horen, en wat je meteen ziet.
+   De rest zit achter "Meer instellen", zodat de eerste indruk kort blijft. */
+var GEN_GROEPEN = {
+  boven: {
+    primair: ['schouderbreedte', 'borstkas', 'taille', 'buik', 'bovenarm'],
+    meer: ['nek', 'pols', 'borstspier', 'rugspier', 'vShape', 'buikTonus',
+           'armenVet', 'armenSpier', 'bovenarmlengte', 'onderarmlengte']
+  },
+  onder: {
+    primair: ['heupen', 'billen', 'dij', 'kuit'],
+    meer: ['benenVet', 'benenSpier']
+  }
+};
+
+var GEN_STAPPEN = [
+  { id:'geslacht', kop:'gen.geslacht.kop', sub:'gen.geslacht.sub',
+    kader:'heel', theta:0.35 },
+  { id:'lengte', kop:'gen.lengte.kop', sub:'gen.lengte.sub',
+    kader:'heel', theta:0.2 },
+  { id:'gewicht', kop:'gen.gewicht.kop', sub:'gen.gewicht.sub',
+    kader:'heel', theta:0.35 },
+  { id:'boven', kop:'gen.boven.kop', sub:'gen.deel.sub', groep:'boven',
+    kader:'boven', theta:0.4 },
+  { id:'onder', kop:'gen.onder.kop', sub:'gen.deel.sub', groep:'onder',
+    kader:'onder', theta:0.4 }
+];
+
+function genEl(){ return $('#gen'); }
+
+function genNaarStap(n){
+  GEN.stap = Math.max(0, Math.min(GEN_STAPPEN.length-1, n));
+  GEN.meerOpen = false;
+  var st = GEN_STAPPEN[GEN.stap];
+  $('#gen-kop').textContent = tr(st.kop);
+  $('#gen-sub').textContent = tr(st.sub);
+  var vp = $('#gen-voortgang');
+  vp.innerHTML = '';
+  for(var i=0;i<GEN_STAPPEN.length;i++){
+    var b = document.createElement('i');
+    if(i <= GEN.stap) b.className = 'op';
+    vp.appendChild(b);
+  }
+  $('#gen-terug').hidden = (GEN.stap === 0);
+  $('#gen-terug').textContent = tr('gen.terug');
+  $('#gen-sla').textContent = tr('gen.overslaan');
+  $('#gen-herstel').textContent = tr('gen.reset');
+  $('#gen-door').textContent = tr(GEN.stap === GEN_STAPPEN.length-1 ? 'gen.klaar' : 'gen.volgende');
+  $('#gen-sla').hidden = !st.groep;
+  $('#gen-stapvan').textContent = tr('gen.stapvan')
+    .replace('{n}', GEN.stap + 1).replace('{m}', GEN_STAPPEN.length);
+  genKnopStaat();
+  genVulInhoud(st);
+  genKlap(false);
+  /* Bij een nieuwe stap de focus naar de kop, zodat een screenreader de vraag voorleest
+     in plaats van stil te blijven staan op een knop die net verdwenen is. */
+  if(GEN.gestart) $('#gen-kop').focus({ preventScroll:true });
+  GEN.gestart = true;
+  genCamera(st);
+  /* De paneelhoogte staat pas vast na de layout, dus nog een keer in de volgende frame. */
+  requestAnimationFrame(function(){ genCamera(st); });
+}
+
+/* Het paneel bedekt de onderste helft van het scherm, dus het model moet in wat
+   overblijft passen. In plaats van vaste camerastanden per stap rekenen we uit hoe
+   ver de camera moet staan en waar hij naar kijkt, op basis van de werkelijke
+   paneelhoogte. Zo klopt het kader ook op een kleiner scherm of als de tekst omloopt. */
+/* Op stap 1 kan Volgende pas na een keuze (punt 9). Eerst koos Volgende stil het
+   middenlichaam, zonder dat je dat zag. */
+function genKnopStaat(){
+  var geblokt = (GEN.stap === 0 && !GEN.gekozenGeslacht);
+  $('#gen-door').disabled = geblokt;
+  $('#gen-door').title = geblokt ? tr('gen.kies_eerst') : '';
+  $('#gen-door').setAttribute('aria-label', geblokt
+    ? tr('gen.volgende') + '. ' + tr('gen.kies_eerst') : $('#gen-door').textContent);
+}
+
+/* Een schuif met een naam en een waarde die een screenreader kan uitspreken (punt 4). */
+function genNoem(r, naam, tekstVanWaarde){
+  r.setAttribute('aria-label', naam);
+  var zet = function(){ r.setAttribute('aria-valuetext', tekstVanWaarde(+r.value)); };
+  r.addEventListener('input', zet);
+  zet();
+  return zet;
+}
+function genWoord(v){          /* -1..1 naar een woord */
+  return tr(v < -0.6 ? 'aria.veelminder' : v < -0.15 ? 'aria.minder' :
+            v <= 0.15 ? 'aria.gemiddeld' : v <= 0.6 ? 'aria.meer' : 'aria.veelmeer');
+}
+function genEinden(links, rechts){
+  var e = document.createElement('div');
+  e.className = 'gen-einden';
+  e.setAttribute('aria-hidden', 'true');
+  var a = document.createElement('span'), b = document.createElement('span');
+  a.textContent = links; b.textContent = rechts;
+  e.appendChild(a); e.appendChild(b);
+  return e;
+}
+/* Het grote getal met min- en plusknop ernaast (punt 6). Met trillende handen is een
+   schuif van 3,5 px per kilo niet op de kilo te raken; een tik wel. */
+function genGetalRij(toon, r, stap){
+  var rij = document.createElement('div');
+  rij.className = 'gen-getalrij';
+  function knop(teken, richting, sleutel){
+    var k = document.createElement('button');
+    k.type = 'button'; k.className = 'gen-stap';
+    k.textContent = teken;
+    k.setAttribute('aria-label', tr(sleutel));
+    k.addEventListener('click', function(){
+      var nieuw = Math.max(+r.min, Math.min(+r.max, +r.value + richting * stap()));
+      r.value = nieuw;
+      r.dispatchEvent(new Event('input'));
+      r.dispatchEvent(new Event('change'));
+    });
+    return k;
+  }
+  rij.appendChild(knop(String.fromCharCode(8722), -1, 'aria.min'));
+  rij.appendChild(toon);
+  rij.appendChild(knop('+', 1, 'aria.plus'));
+  return rij;
+}
+
+function modelBreedte(){
+  if(!mesh) return 1.5;
+  var p = posAttr.array, lo = Infinity, hi = -Infinity;
+  for(var i=0;i<p.length;i+=3){ if(p[i]<lo) lo=p[i]; if(p[i]>hi) hi=p[i]; }
+  return hi - lo;
+}
+function genCamera(st){
+  if(!st.kader) return;
+  var cm = mesh ? lichaamsLengte()/100 : 1.7;
+  var gebied = { heel:  [cm/2,        cm * 1.04],
+                 boven: [cm * 0.665,  cm * 0.40],   /* schouder tot heup */
+                 onder: [cm * 0.275,  cm * 0.62] }[st.kader];  /* heup tot voet */
+  var midY = gebied[0], hoogte = gebied[1];
+  var W = window.innerWidth, H = window.innerHeight;
+  var r = genEl().hidden ? null : genEl().getBoundingClientRect();
+  /* Liggend staat het paneel ernaast (zie de CSS): dan telt de vrije breedte, en
+     verschuift een view-offset het beeldmidden naar het midden van die strook. De
+     camera blijft zo op het model gericht, dus draaien blijft om het model heen. */
+  var opzij = !!r && r.left > W * 0.25 && r.height > H * 0.8;
+  /* De greep hangt 40 px boven het paneel; die strook houden we vrij van het model. */
+  var bezet = r ? r.height + 40 : 0;
+  var zicht = opzij ? 0.95 : Math.max(0.28, Math.min(0.95, (H - bezet) / H));
+  var beeldH = hoogte / (zicht * 0.9);                  /* 10% lucht eromheen */
+  if(opzij){
+    var vrij = r.left / W;
+    var breed = modelBreedte() * (st.kader === 'heel' ? 1 : 0.75);
+    beeldH = Math.max(beeldH, breed / (vrij * 0.9 * camera.aspect));
+    camera.setViewOffset(W, H, (W - r.left) / 2, 0, W, H);
+  } else if(camera.view && camera.view.enabled){
+    camera.clearViewOffset();
+  }
+  baan.r = beeldH / (2 * Math.tan(camera.fov * Math.PI / 360));
+  /* Het beeldmidden ligt op halve hoogte; het model moet in de bovenste strook, dus
+     kijkt de camera naar een punt daaronder. */
+  baan.doel.set(0, midY - (0.5 - zicht/2) * beeldH, 0);
+  baan.theta = (st.theta === undefined) ? 0.35 : st.theta;
+  baan.phi = Math.PI/2;
+  zetCamera();
+}
+
+function genVulInhoud(st){
+  GEN.naTabel = null;
+  var h = $('#gen-inhoud');
+  h.innerHTML = '';
+  if(st.id === 'geslacht') genGeslacht(h);
+  else if(st.id === 'lengte') genLengte(h);
+  else if(st.id === 'gewicht') genGewicht(h);
+  else genLichaamsdeel(h, st.groep);
+}
+
+/* ---- stap 1: basisvorm. De knoppen gebruiken VORMTAAL (vrouwelijk, tussenin,
+   mannelijk), geen identiteit: een non-binair persoon kan elk lichaam hebben, en een man
+   die een vrouwelijk lichaam kiest omdat dat past (bijvoorbeeld voor een topoperatie)
+   moet dat zonder label kunnen. De gender-as is continu; tussenin is het midden, met
+   een schuif om zelf te kiezen waar. */
+function genGeslacht(h){
+  var keuzes = [
+    { id:'vrouw', label:tr('gen.geslacht.vrouw'), sub:tr('gen.geslacht.vrouw_sub'), g:0 },
+    { id:'nb', label:tr('gen.geslacht.nb'), sub:tr('gen.geslacht.nb_sub'), g:0.5 },
+    { id:'man', label:tr('gen.geslacht.man'), sub:tr('gen.geslacht.man_sub'), g:1 }
+  ];
+  var doos = document.createElement('div');
+  doos.className = 'gen-keuzes';
+  keuzes.forEach(function(k){
+    var b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'gen-keuze' + (GEN.gekozenGeslacht === k.id ? ' actief' : '');
+    b.setAttribute('aria-pressed', GEN.gekozenGeslacht === k.id ? 'true' : 'false');
+    var sp = document.createElement('span');
+    sp.appendChild(document.createTextNode(k.label));
+    var sm = document.createElement('small');
+    sm.textContent = k.sub;
+    sp.appendChild(sm);
+    b.appendChild(sp);
+    b.addEventListener('click', function(){
+      GEN.gekozenGeslacht = k.id;
+      sliders.gender.value = k.g;
+      genPasToe(true);
+      genVulInhoud(GEN_STAPPEN[GEN.stap]);
+      genKnopStaat();
+      /* na het herbouwen de focus terug op de gekozen knop */
+      var terug = $('#gen-inhoud').querySelectorAll('.gen-keuze')[keuzes.indexOf(k)];
+      if(terug) terug.focus({ preventScroll:true });
+    });
+    doos.appendChild(b);
+  });
+  h.appendChild(doos);
+  if(GEN.gekozenGeslacht === 'nb') genFijnGender(h);
+  genLeeftijd(h);
+}
+/* Leeftijd (punt 11), in stap 1 omdat hij net als geslacht de basisvorm zet. */
+function genLeeftijd(h){
+  var rij = document.createElement('div');
+  rij.className = 'gen-leeftijd';
+  var lab = document.createElement('span');
+  lab.textContent = tr('gen.leeftijd');
+  var waarde = document.createElement('b');
+  rij.appendChild(lab); rij.appendChild(waarde);
+  var r = document.createElement('input');
+  r.type = 'range'; r.min = LEEFTIJD_MIN; r.max = LEEFTIJD_MAX; r.step = 1;
+  r.value = leeftijdJaar; r.className = 'gen-schuif';
+  function tekst(v){ return tr('gen.jaar').replace('{n}', Math.round(v)); }
+  genNoem(r, tr('gen.leeftijd'), tekst);
+  function toon(){ waarde.textContent = tekst(+r.value); }
+  r.addEventListener('input', function(){ leeftijdJaar = +r.value; toon(); genPasToe(false); });
+  r.addEventListener('change', function(){ leeftijdJaar = +r.value; genPasToe(true); });
+  toon();
+  h.appendChild(rij);
+  h.appendChild(r);
+}
+function genFijnGender(h){
+  var r = document.createElement('input');
+  r.type = 'range'; r.min = 0; r.max = 1; r.step = 0.01;
+  r.value = sliders.gender.value; r.className = 'gen-schuif';
+  genNoem(r, tr('aria.nb'), function(v){
+    return v < 0.35 ? tr('gen.geslacht.links') : v > 0.65 ? tr('gen.geslacht.rechts') : tr('aria.gemiddeld');
+  });
+  r.addEventListener('input', function(){ sliders.gender.value = r.value; genPasToe(false); });
+  r.addEventListener('change', function(){ genPasToe(true); });
+  h.appendChild(r);
+  h.appendChild(genEinden(tr('gen.geslacht.links'), tr('gen.geslacht.rechts')));
+}
+
+/* ---- stap 2: lengte, in centimeters of in voet en duim */
+function genLengte(h){
+  var toon = document.createElement('div');
+  toon.className = 'gen-getal';
+  var r = document.createElement('input');
+  r.type = 'range'; r.min = LENGTE_CM_MIN; r.max = LENGTE_CM_MAX; r.step = 'any';
+  r.value = Math.round(lichaamsLengte());
+  r.className = 'gen-schuif';
+  /* In voet en duim stapt de schuif per duim, niet per centimeter. */
+  function stapCm(){ return GEN.lengteEenheid === 'cm' ? 1 : 2.54; }
+  function snap(){
+    var st = stapCm();
+    r.value = (GEN.lengteEenheid === 'cm') ? Math.round(+r.value)
+                                           : Math.round(+r.value / st) * st;
+  }
+  function tekst(cm){
+    if(GEN.lengteEenheid === 'cm') return Math.round(cm) + ' cm';
+    var duim = Math.round(cm/2.54);
+    return Math.floor(duim/12) + ' ft ' + (duim % 12) + ' in';
+  }
+  var noem = genNoem(r, tr('aria.lengte'), tekst);
+  function ververs(){
+    var cm = +r.value;
+    toon.innerHTML = '';
+    toon.setAttribute('aria-hidden', 'true');
+    var b = document.createElement('b');
+    var sp = document.createElement('span');
+    if(GEN.lengteEenheid === 'cm'){
+      b.textContent = cm; sp.textContent = 'cm';
+    } else {
+      var duim = Math.round(cm/2.54);
+      b.textContent = Math.floor(duim/12) + String.fromCharCode(8217) +
+                      (duim % 12) + String.fromCharCode(8221);
+    }
+    toon.appendChild(b); toon.appendChild(sp);
+  }
+  h.appendChild(genGetalRij(toon, r, stapCm));
+  h.appendChild(genEenheden(['cm', 'ft'], GEN.lengteEenheid, function(e){
+    GEN.lengteEenheid = e; snap(); ververs(); noem();
+    r.dispatchEvent(new Event('change'));
+  }));
+  h.appendChild(r);
+  r.addEventListener('input', function(){
+    snap();
+    sliders.lengte.value = (+r.value - LENGTE_CM_MIN) / (LENGTE_CM_MAX - LENGTE_CM_MIN);
+    ververs(); genPasToe(false);
+  });
+  r.addEventListener('change', function(){
+    genPasToe(true); genCamera(GEN_STAPPEN[GEN.stap]);
+  });
+  ververs();
+}
+
+/* ---- stap 3: gewicht plus de verdeling ervan */
+function genGewicht(h){
+  var toon = document.createElement('div');
+  toon.className = 'gen-getal';
+  /* De schuif werkt in de gekozen eenheid (punt 8): per kilo, of per pond voor lb en
+     stones. Eerst stapte hij altijd per kilo, waardoor maar 101 van de 222 pondwaarden
+     tussen 88 en 309 te kiezen waren. */
+  var LB = 2.20462;
+  var r = document.createElement('input');
+  r.type = 'range'; r.className = 'gen-schuif';
+  var hint = document.createElement('p');
+  hint.className = 'gen-hint';
+  hint.setAttribute('aria-live', 'polite');
+  function inKg(){ return GEN.gewichtEenheid === 'kg' ? +r.value : +r.value / LB; }
+  function zetSchaal(kg){
+    /* Tot 180 kg (punt 13); boven 140 kwam het model eerst niet. */
+    if(GEN.gewichtEenheid === 'kg'){ r.min = 40; r.max = 180; r.step = 1; r.value = Math.round(kg); }
+    else { r.min = Math.round(40*LB); r.max = Math.round(180*LB); r.step = 1; r.value = Math.round(kg*LB); }
+  }
+  function tekst(){
+    var kg = inKg();
+    if(GEN.gewichtEenheid === 'kg') return Math.round(kg) + ' kg';
+    var lb = Math.round(kg*LB);
+    if(GEN.gewichtEenheid === 'lb') return lb + ' lb';
+    return Math.floor(lb/14) + ' st ' + (lb % 14) + ' lb';
+  }
+  zetSchaal(+sliders.weight.value || gewichtKg());
+  var noem = genNoem(r, tr('aria.gewicht'), tekst);
+  function ververs(){
+    var kg = inKg();
+    toon.innerHTML = '';
+    toon.setAttribute('aria-hidden', 'true');
+    var b = document.createElement('b');
+    var sp = document.createElement('span');
+    if(GEN.gewichtEenheid === 'st'){
+      var lb = Math.round(kg*LB);
+      b.textContent = Math.floor(lb/14);
+      sp.textContent = 'st ' + (lb % 14) + ' lb';
+    } else {
+      b.textContent = +r.value;
+      sp.textContent = GEN.gewichtEenheid;
+    }
+    toon.appendChild(b); toon.appendChild(sp);
+    var echt = gewichtKg();
+    hint.textContent = (Math.abs(echt - kg) > 2)
+      ? tr('gen.gewicht.klem').replace('{n}', Math.round(echt))
+      : '';
+  }
+  h.appendChild(genGetalRij(toon, r, function(){ return 1; }));
+  h.appendChild(genEenheden(['kg', 'lb', 'st'], GEN.gewichtEenheid, function(e){
+    var kg = inKg();
+    GEN.gewichtEenheid = e; zetSchaal(kg); ververs(); noem();
+  }));
+  h.appendChild(r);
+  h.appendChild(hint);
+
+  var lab = document.createElement('p');
+  lab.className = 'gen-sub';
+  lab.style.margin = '18px 0 0';
+  lab.textContent = tr('gen.gewicht.bouw');
+  lab.id = 'gen-bouwvraag';
+  h.appendChild(lab);
+  var b2 = document.createElement('input');
+  b2.type = 'range'; b2.min = 0; b2.max = 1; b2.step = 0.01;
+  b2.value = sliders.spier.value; b2.className = 'gen-schuif';
+  genNoem(b2, tr('aria.bouw'), function(v){
+    return v < 0.35 ? tr('aria.zachter') : v > 0.65 ? tr('aria.gespierder') : tr('aria.gemiddeld');
+  });
+  h.appendChild(b2);
+  h.appendChild(genEinden(tr('gen.gewicht.links'), tr('gen.gewicht.rechts')));
+
+  GEN.naTabel = ververs;
+  r.addEventListener('input', function(){ sliders.weight.value = inKg(); genPasToe(false); ververs(); });
+  r.addEventListener('change', function(){ genPasToe(true); ververs(); });
+  b2.addEventListener('input', function(){ sliders.spier.value = b2.value; genPasToe(false); ververs(); });
+  b2.addEventListener('change', function(){ genPasToe(true); ververs(); });
+  ververs();
+}
+
+function genEenheden(opties, actief, bij){
+  var doos = document.createElement('div');
+  doos.className = 'gen-eenheden';
+  opties.forEach(function(o){
+    var b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'gen-eenheid' + (o === actief ? ' actief' : '');
+    b.setAttribute('aria-pressed', o === actief ? 'true' : 'false');
+    b.textContent = o;
+    b.addEventListener('click', function(){
+      var alle = doos.querySelectorAll('.gen-eenheid');
+      for(var i=0;i<alle.length;i++){
+        alle[i].classList.remove('actief');
+        alle[i].setAttribute('aria-pressed', 'false');
+      }
+      b.classList.add('actief');
+      b.setAttribute('aria-pressed', 'true');
+      bij(o);
+    });
+    doos.appendChild(b);
+  });
+  return doos;
+}
+
+/* ---- stap 4 en 5: de fijnregeling per lichaamsdeel */
+function genLichaamsdeel(h, groep){
+  var g = GEN_GROEPEN[groep];
+  var rijen = document.createElement('div');
+  rijen.className = 'gen-rijen';
+  h.appendChild(rijen);
+  function vul(){
+    rijen.innerHTML = '';
+    var lijst = g.primair.concat(GEN.meerOpen ? g.meer : []);
+    if(groep === 'boven' && +sliders.gender.value < 0.7){
+      lijst = lijst.concat(GEN.meerOpen ? ['__cup', '__firm'] : ['__cup']);
+    }
+    for(var i=0;i<lijst.length;i++) rijen.appendChild(genRij(lijst[i]));
+  }
+  vul();
+  if(g.meer.length){
+    var meer = document.createElement('button');
+    meer.type = 'button'; meer.className = 'gen-meer';
+    meer.setAttribute('aria-expanded', 'false');
+    meer.textContent = tr('gen.meer');
+    meer.addEventListener('click', function(){
+      GEN.meerOpen = !GEN.meerOpen;
+      meer.setAttribute('aria-expanded', GEN.meerOpen ? 'true' : 'false');
+      meer.textContent = tr(GEN.meerOpen ? 'gen.minder' : 'gen.meer');
+      vul();
+    });
+    h.appendChild(meer);
+  }
+}
+
+function genRij(sleutel){
+  var rij = document.createElement('div');
+  rij.className = 'gen-rij';
+  var lab = document.createElement('label');
+  var sl = document.createElement('input');
+  /* 0,05 in plaats van 0,01: 40 stappen over de hele schuif in plaats van 200, dus
+     ongeveer 4,5 px per stap in plaats van 0,9 (punt 6). */
+  sl.type = 'range'; sl.step = 0.05;
+  sl.id = 'gen-sl-' + sleutel.replace(/^_+/, '');
+  lab.htmlFor = sl.id;
+  var meet = document.createElement('span');
+  meet.className = 'meet';
+
+  if(sleutel === '__cup' || sleutel === '__firm'){
+    var sk = (sleutel === '__cup') ? 'cupsize' : 'firmness';
+    var elId = (sleutel === '__cup') ? '#s-cup' : '#s-firm';
+    lab.textContent = tr('mod.' + sk);
+    sl.min = 0; sl.max = 1; sl.value = cupStand[sk];
+    genNoem(sl, tr('mod.' + sk), function(v){ return genWoord(v*2 - 1); });
+    sl.addEventListener('input', function(){
+      cupStand[sk] = +sl.value;
+      $(elId).value = sl.value;
+      genPasToe(false);
+    });
+    sl.addEventListener('change', function(){ genPasToe(true); });
+  } else {
+    lab.textContent = tr('mod.' + sleutel);
+    sl.min = -1; sl.max = 1; sl.value = detailStand[sleutel] || 0;
+    var isMaat = !!maatVan[sleutel];
+    var toonMeet = function(){
+      var cm = isMaat ? Math.round(meetMaat(sleutel)) : null;
+      meet.textContent = isMaat ? cm + ' cm' : '';
+      sl.setAttribute('aria-valuetext', genWoord(+sl.value) + (isMaat ? ', ' + cm + ' cm' : ''));
+    };
+    sl.addEventListener('input', function(){
+      detailStand[sleutel] = +sl.value;
+      if(detailEls[sleutel]) detailEls[sleutel].value = sl.value;
+      genPasToe(false); toonMeet();
+    });
+    sl.addEventListener('change', function(){ genPasToe(true); toonMeet(); });
+    toonMeet();
+  }
+  rij.appendChild(lab); rij.appendChild(sl); rij.appendChild(meet);
+  return rij;
+}
+
+/* Een wijziging doorvoeren. `af` betekent: de gebruiker heeft losgelaten, dus nu mag
+   het dure werk (decals herprojecteren, gewichtstabel verversen). */
+function genPasToe(af){
+  if(!mesh) return;
+  if(af){
+    var v0 = waarden();
+    zorgTabelLos(v0.gender, v0.height, function(){
+      genPasToe(true);
+      if(GEN.naTabel) GEN.naTabel();
+    });
+  }
+  var v = waarden();
+  blend(v.gender, v.muscle, v.weight, v.height, af);
+  /* Niet in stap 4/5: daar verandert de gebruiker zelf de vorm, en dat mag het gewicht
+     laten meebewegen in plaats van dat de aanvulling het wegcorrigeert. */
+  if(af && !(GEN_STAPPEN[GEN.stap] || {}).groep) vetBijstellen();
+  toonWaarden();
+  if(af) bouwAlleDecals(); else volgAnkers();
+}
+
+function genStart(){
+  genEl().hidden = false;
+  document.body.classList.add('genaan');
+  $('#paneel').classList.add('verstopt');
+  /* Waar elke stap naar terugvalt als je op Opnieuw tikt. Vastgelegd zodra de
+     generator opent, dus voor de stand waarmee het model geladen is. */
+  GEN.begin = {
+    gender: +sliders.gender.value,
+    lengte: +sliders.lengte.value,
+    gewicht: +sliders.weight.value,
+    bouw: +sliders.spier.value,
+    cupsize: cupStand.cupsize,
+    firmness: cupStand.firmness,
+    leeftijd: leeftijdJaar
+  };
+  genNaarStap(0);
+}
+
+/* Alleen de waarden van de huidige stap terugzetten. Bewust per stap: een knop die
+   alles wist is op stap 5 een ongeluk. */
+function genHerstel(){
+  var st = GEN_STAPPEN[GEN.stap], b = GEN.begin || {};
+  if(st.id === 'geslacht'){
+    GEN.gekozenGeslacht = null;
+    sliders.gender.value = (b.gender === undefined) ? 0.5 : b.gender;
+    leeftijdJaar = (b.leeftijd === undefined) ? 25 : b.leeftijd;
+  } else if(st.id === 'lengte'){
+    sliders.lengte.value = (b.lengte === undefined) ? 0.5 : b.lengte;
+  } else if(st.id === 'gewicht'){
+    sliders.weight.value = (b.gewicht === undefined) ? 70 : b.gewicht;
+    sliders.spier.value = (b.bouw === undefined) ? 0.5 : b.bouw;
+  } else if(st.groep){
+    var g = GEN_GROEPEN[st.groep];
+    g.primair.concat(g.meer).forEach(function(sleutel){
+      detailStand[sleutel] = 0;
+      if(detailEls[sleutel]) detailEls[sleutel].value = 0;
+    });
+    if(st.groep === 'boven'){
+      cupStand.cupsize = (b.cupsize === undefined) ? 0.5 : b.cupsize;
+      cupStand.firmness = (b.firmness === undefined) ? 0.5 : b.firmness;
+      $('#s-cup').value = cupStand.cupsize;
+      $('#s-firm').value = cupStand.firmness;
+    }
+  }
+  genPasToe(true);
+  genVulInhoud(st);
+  genKnopStaat();
+  genCamera(st);
+}
+/* Het paneel in- of uitklappen (punt 2). Ingeklapt blijft alleen de kop staan, zodat
+   je weet waar je was; het model krijgt de rest van het scherm. */
+function genKlap(dicht){
+  var g = genEl(), k = $('#gen-greep');
+  g.classList.toggle('ingeklapt', !!dicht);
+  k.setAttribute('aria-expanded', dicht ? 'false' : 'true');
+  k.setAttribute('aria-label', tr(dicht ? 'gen.uitklappen' : 'gen.inklappen'));
+  k.title = k.getAttribute('aria-label');
+}
+function genStop(){
+  if(camera.view && camera.view.enabled) camera.clearViewOffset();
+  genEl().hidden = true;
+  document.body.classList.remove('genaan');
+  $('#paneel').classList.remove('verstopt');
+}
+
+$('#gen-terug').addEventListener('click', function(){ genNaarStap(GEN.stap - 1); });
+$('#gen-greep').addEventListener('click', function(){
+  genKlap(!genEl().classList.contains('ingeklapt'));
+  genCamera(GEN_STAPPEN[GEN.stap]);
+});
+$('.gen-koprij').addEventListener('click', function(e){
+  if(!genEl().classList.contains('ingeklapt') || e.target.closest('button')) return;
+  genKlap(false);
+  genCamera(GEN_STAPPEN[GEN.stap]);
+});
+/* Draaien of een ander formaat: het kader hangt af van de paneelstand. */
+window.addEventListener('resize', function(){
+  if(!genEl().hidden) genCamera(GEN_STAPPEN[GEN.stap]);
+});
+$('#gen-herstel').addEventListener('click', genHerstel);
+$('#gen-sla').addEventListener('click', function(){ genNaarStap(GEN.stap + 1); });
+$('#gen-door').addEventListener('click', function(){
+  if(GEN.stap === GEN_STAPPEN.length - 1){
+    genStop();
+    baan.doel.set(0, 0.9, 0); baan.theta = 0; baan.r = 3.2; zetCamera();
+    return;
+  }
+  if(GEN.stap === 0 && !GEN.gekozenGeslacht) return;   /* knop staat dan ook uit */
+  genNaarStap(GEN.stap + 1);
+});
+$('#gen-taal').addEventListener('click', function(){
+  zetTaal(taal === 'en' ? 'nl' : 'en');
+  this.textContent = (taal === 'en') ? 'NL' : 'EN';
+});
+$('#gen-dev').addEventListener('click', function(){
+  if(genEl().hidden) genStart(); else genStop();
+});
+
+/* ----------------------------------------------------------------- lus */
+var frames=0, vorig=performance.now();
+function lus(){
+  requestAnimationFrame(lus);
+  renderer.render(scene, camera);
+  frames++;
+  var nu = performance.now();
+  if(nu - vorig >= 500){
+    meting.fps = frames * 1000 / (nu - vorig);
+    frames = 0; vorig = nu;
+    $('#hud').textContent =
+      'fps        ' + meting.fps.toFixed(0) + '\n' +
+      'blend      ' + meting.blend.toFixed(2) + ' ms\n' +
+      'normalen   ' + meting.normalen.toFixed(2) + ' ms\n' +
+      '5 decals   ' + meting.decals.toFixed(2) + ' ms\n' +
+      'modus      ' + (live ? 'B (decals live)' : 'A (decals bij loslaten)');
+  }
+}
+
+window.__spike = {
+  blend: function(g,m,w,h,gr){ blend(g,m,w,h,gr); },
+  grenzenBij: grenzenBij,
+  volgAnkers: volgAnkers,
+  zetCull: function(aan){ gebruikCull = !!aan; raster = null; },
+  cull: function(){ return gebruikCull; },
+  bouwAlleDecals: bouwAlleDecals,
+  meet20: meet20,
+  meting: meting,
+  ankers: function(){ return ankers; },
+  /* De decal-size staat al in meters, want het model staat op ware grootte. In cm is
+     het dus gewoon x100 - de vraag is of je dat getal ooit aan de gebruiker toont. */
+  decalCm: function(){
+    return ankers.map(function(a){ return { naam:a.naam, cm:+(a.size*100).toFixed(1) }; });
+  },
+  zetDecalCm: function(i, cm){
+    ankers[i].size = cm/100;
+    bouwAlleDecals();
+    return ankers[i].size*100;
+  },
+  /* m = spiermassa (1 = veel). h = een vaste height-waarde; laat 'm weg om de
+     lengte-slider te volgen, die absoluut in cm werkt. */
+  /* Voor de meetscripts: g/m/w zijn de RUWE MakeHuman-assen. De UI stuurt ze via
+     kilo's aan, dus we zetten de gewichtslider op wat die stand weegt. */
+  zetSliders: function(g,m,w,h){
+    sliders.gender.value=g; sliders.spier.value=m;
+    bouwGewichtTabel(g, h === undefined || h === null ? huidigeHeight : h);
+    sliders.weight.value = kgUitTabel(m, w);
+    if(h === undefined || h === null){
+      var v = waarden();
+      blend(v.gender, v.muscle, v.weight, v.height, true);
+    } else {
+      huidigeHeight = h;
+      blend(g, m, w, h, true);
+    }
+    toonWaarden(); bouwAlleDecals();
+  },
+  zetLengteCm: function(cm){
+    sliders.lengte.value = Math.max(0, Math.min(1,
+      (cm - LENGTE_CM_MIN) / (LENGTE_CM_MAX - LENGTE_CM_MIN)));
+    var vv = waarden();
+    bouwGewichtTabel(vv.gender, vv.height);     /* lengte bepaalt het volume */
+    var v = waarden();
+    blend(v.gender, v.muscle, v.weight, v.height, true);
+    toonWaarden(); bouwAlleDecals();
+    return lichaamsLengte();
+  },
+  lengte: function(){ return lichaamsLengte(); },
+  /* Omtrek in cm op een relatieve hoogte (0 = voeten, 1 = kruin). Neemt een dunne band
+     verts, gooit de armen eruit en legt er een convexe omhullende omheen. */
+  omtrek: function(yrel){
+    var p = posAttr.array, lo = Infinity, hi = -Infinity, i;
+    for(i=1;i<p.length;i+=3){ if(p[i]<lo) lo=p[i]; if(p[i]>hi) hi=p[i]; }
+    var y = lo + yrel*(hi-lo), band = 0.012*(hi-lo), pts = [];
+    for(i=0;i<p.length;i+=3){
+      if(Math.abs(p[i+1]-y) < band && Math.abs(p[i]) < 0.22) pts.push([p[i], p[i+2]]);
+    }
+    if(pts.length < 8) return 0;
+    pts.sort(function(a,b){ return a[0]-b[0] || a[1]-b[1]; });
+    function kruis(o,a,b){ return (a[0]-o[0])*(b[1]-o[1]) - (a[1]-o[1])*(b[0]-o[0]); }
+    var onder=[], boven=[], k;
+    for(i=0;i<pts.length;i++){
+      while(onder.length>=2 && kruis(onder[onder.length-2],onder[onder.length-1],pts[i])<=0) onder.pop();
+      onder.push(pts[i]);
+    }
+    for(i=pts.length-1;i>=0;i--){
+      while(boven.length>=2 && kruis(boven[boven.length-2],boven[boven.length-1],pts[i])<=0) boven.pop();
+      boven.push(pts[i]);
+    }
+    var romp = onder.slice(0,-1).concat(boven.slice(0,-1)), som = 0;
+    for(i=0;i<romp.length;i++){
+      var a = romp[i], b = romp[(i+1)%romp.length];
+      som += Math.sqrt((a[0]-b[0])*(a[0]-b[0]) + (a[1]-b[1])*(a[1]-b[1]));
+    }
+    return som*100;
+  },
+  zetDetail: function(sleutel, v){
+    if(!detailEls[sleutel]) return null;
+    detailEls[sleutel].value = v;
+    detailEls[sleutel].dispatchEvent(new Event('input'));
+    detailEls[sleutel].dispatchEvent(new Event('change'));
+    return v;
+  },
+  details: function(){ return details.map(function(d){ return d.sleutel; }); },
+  maten: function(){
+    var uit = {};
+    for(var k in maatVan) uit[k] = meetMaat(k);
+    return uit;
+  },
+  zetMaat: function(sleutel, cm){
+    var d = losMaatOp(sleutel, cm);
+    detailEls[sleutel].value = d;
+    detailStand[sleutel] = d;
+    var v = waarden();
+    blend(v.gender, v.muscle, v.weight, v.height, true);
+    toonWaarden(); bouwAlleDecals();
+    return { slider:d, bereikt:meetMaat(sleutel), geklemd:(d<=-1 || d>=1) };
+  },
+  zetEenheid: function(e){ EENHEID = e; toonWaarden(); },
+  leeftijd: function(){ return leeftijdJaar; },
+  tabelBezig: function(){ return !!tabelTaak; },
+  zetLeeftijd: function(j){
+    leeftijdJaar = Math.max(LEEFTIJD_MIN, Math.min(LEEFTIJD_MAX, j));
+    var v0 = waarden();
+    bouwGewichtTabel(v0.gender, v0.height);
+    var v = waarden();
+    blend(v.gender, v.muscle, v.weight, v.height, true);
+    toonWaarden(); bouwAlleDecals();
+    return leeftijdJaar;
+  },
+  zetSceneKleur: zetSceneKleur,
+  zetTaal: zetTaal,
+  genStop: genStop,
+  genNaar: function(n){ genNaarStap(n); return GEN.stap; },
+  zetEenheden: function(l, g){ GEN.lengteEenheid = l; GEN.gewichtEenheid = g; genNaarStap(GEN.stap); },
+  eenheden: function(){ return [GEN.lengteEenheid, GEN.gewichtEenheid]; },
+  genStart: genStart,
+  zetCup: function(c,f){
+    cupStand.cupsize=c; cupStand.firmness=f;
+    $('#s-cup').value=c; $('#s-firm').value=f;
+    var v=waarden(); blend(v.gender,v.muscle,v.weight,v.height,true);
+    toonWaarden(); bouwAlleDecals();
+  },
+  taal: function(){ return taal; },
+  gewichtKg: gewichtKg,
+  bouwTabel: function(){ return gewTabel; },
+  kgBereik: function(m){ return kgBereik(m); },
+  zetBouw: function(b){
+    var v0 = waarden();
+    bouwGewichtTabel(v0.gender, v0.height);
+    sliders.spier.value = b;
+    var v = waarden();
+    blend(v.gender, v.muscle, v.weight, v.height, true);
+    toonWaarden(); bouwAlleDecals();
+    return { kg:gewichtKg(), muscle:v.muscle, weight:v.weight };
+  },
+  zetGewichtKg: function(kg){
+    var v0 = waarden();
+    bouwGewichtTabel(v0.gender, v0.height);
+    sliders.weight.value = kg;
+    var v = waarden();
+    blend(v.gender, v.muscle, v.weight, v.height, true);
+    toonWaarden(); bouwAlleDecals();
+    return { kg:gewichtKg(), weight:v.weight };
+  },
+  maatVeld: function(sleutel){ var m = maatEls[sleutel];
+    return m.invoer ? +m.el.value : parseFloat(m.el.textContent); },
+  gewichtKg: gewichtKg,
+  bouwTabel: function(){ return gewTabel; },
+  kgBereik: function(m){ return kgBereik(m); },
+  zetBouw: function(b){
+    var v0 = waarden();
+    bouwGewichtTabel(v0.gender, v0.height);
+    sliders.spier.value = b;
+    var v = waarden();
+    blend(v.gender, v.muscle, v.weight, v.height, true);
+    toonWaarden(); bouwAlleDecals();
+    return { kg:gewichtKg(), muscle:v.muscle, weight:v.weight };
+  },
+  zetGewichtKg: function(kg){
+    var v0 = waarden();
+    bouwGewichtTabel(v0.gender, v0.height);
+    sliders.weight.value = kg;
+    var v = waarden();
+    blend(v.gender, v.muscle, v.weight, v.height, true);
+    toonWaarden(); bouwAlleDecals();
+    return { kg:gewichtKg(), weight:v.weight };
+  },
+  zetCamera: function(theta, phi, r){
+    baan.theta=theta; baan.phi=phi; if(r) baan.r=r; zetCamera();
+  },
+  zetDoel: function(x, y, z){ baan.doel.set(x, y, z); zetCamera(); },
+  /* Wereldpositie + oppervlakte van elke ankerdriehoek in de huidige stand.
+     De oppervlakte laat zien hoeveel de huid onder de tattoo rekt. */
+  ankerMeting: function(){
+    var uit = [];
+    for(var i=0;i<ankers.length;i++){
+      var f = ankers[i].tri*3, p = posAttr.array;
+      var i0=tris[f]*3, i1=tris[f+1]*3, i2=tris[f+2]*3;
+      var A=new THREE.Vector3(p[i0],p[i0+1],p[i0+2]);
+      var B=new THREE.Vector3(p[i1],p[i1+1],p[i1+2]);
+      var C=new THREE.Vector3(p[i2],p[i2+1],p[i2+2]);
+      var plek = ankerPlek(ankers[i]);
+      uit.push({ naam:ankers[i].naam, tri:ankers[i].tri,
+                 p:[+plek.p.x.toFixed(4), +plek.p.y.toFixed(4), +plek.p.z.toFixed(4)],
+                 n:[+plek.n.x.toFixed(3), +plek.n.y.toFixed(3), +plek.n.z.toFixed(3)],
+                 opp: +(B.clone().sub(A).cross(C.clone().sub(A)).length()/2).toFixed(8) });
+    }
+    return uit;
+  },
+  render: function(){ renderer.render(scene, camera); },
+  png: function(){ renderer.render(scene, camera); return renderer.domElement.toDataURL('image/png'); },
+  klaar: function(){ return !!mesh; }
+};
+})();
+</script>
+</body>
+</html>
