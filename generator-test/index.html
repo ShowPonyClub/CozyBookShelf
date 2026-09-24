@@ -597,7 +597,11 @@ function gewichten(gender, muscle, weight, height){
 /* ------------------------------------------------------------- CPU-blend */
 /* De body-mesh is dicht (0 randkanten), dus het volume is de som van getekende
    tetraeders vanaf de oorsprong. Lichaamsdichtheid ligt rond 1,01 kg/L. */
+/* Het gewicht van de zichtbare mesh wordt per frame op meerdere plekken gevraagd (hint,
+   sleepcorrectie, vet bijstellen); onthouden tot blend() of de overgang de mesh verandert. */
+var _kgMesh = null;
 function gewichtKg(buf){
+  if(!buf && _kgMesh !== null) return _kgMesh;
   var p = buf || posAttr.array, t = tris, som = 0, f;
   for(f=0; f<t.length; f+=3){
     var a=t[f]*3, b=t[f+1]*3, c=t[f+2]*3;
@@ -605,7 +609,9 @@ function gewichtKg(buf){
          - p[a+1]*(p[b]  *p[c+2] - p[b+2]*p[c])
          + p[a+2]*(p[b]  *p[c+1] - p[b+1]*p[c]);
   }
-  return Math.abs(som)/6 * 1000 * 1.01;      /* m3 -> liter -> kg */
+  var kg = Math.abs(som)/6 * 1000 * 1.01;    /* m3 -> liter -> kg */
+  if(!buf) _kgMesh = kg;
+  return kg;
 }
 
 /* --------------------------------------------------------------- bouw-as
@@ -624,6 +630,7 @@ var gewTabelVoor = null;      /* de gender/height waarvoor hij geldt */
 
 function blendPos(gender, muscle, weight, height, buf){
   var arr = buf || posAttr.array;
+  if(!buf) _kgMesh = null;
   arr.set(basePos);
   var w = gewichten(gender, muscle, weight, height);
   for(var k=0;k<targets.length;k++){
@@ -656,17 +663,18 @@ function tabelKlussen(gender, height){
   var klussen = [];
   /* Een meting bij vet-factor f. vetF is globaal (de weging leest hem), dus binnen de
      klus zetten en terugzetten, ook voor de lengte-iteratie. */
-  function meet(f, m, w, h, z){
+  function meet(f, m, w, hs, z){
     var was = vetF, wasZ = extraZwaar; vetF = f; extraZwaar = z || 0;
-    blendPos(gender, m, w, h, buf);
+    blendPos(gender, m, w, hs.h, buf);
     vetF = was; extraZwaar = wasZ;
-    return gewichtKg(buf);
+    return gewichtKg(buf) * hs.s * hs.s * hs.s;     /* volume schaalt met de derde macht */
   }
   function lengte(m, w){
     var was = vetF, wasZ = extraZwaar; vetF = 0; extraZwaar = 0;
     var h = losHeightOpVanaf(gender, m, w, doelCm, height);
+    var s = lengteSchaalVoor(lengteBijHeight(gender, m, w, h), doelCm);
     vetF = was; extraZwaar = wasZ;
-    return h;
+    return { h:h, s:s };
   }
   for(var mi=0; mi<GEW_N; mi++) (function(mi){
     var m = mi/(GEW_N-1), rij = [], hs = [], k1 = 0, k2 = 0;
@@ -688,7 +696,28 @@ function tabelKlussen(gender, height){
   })(mi);
   return { klussen:klussen, uit:uit };
 }
+/* Zolang de gewichtstabel bij een andere stand hoort (tijdens het slepen van geslacht, lengte
+   of leeftijd, of terwijl hij in stukjes gebouwd wordt), klopt de schatting niet: bij lengte
+   150 -> 195 cm werd het lichaam onderweg 46 kg te zwaar en schoot het bij loslaten terug
+   (toesteltest Bram 2026-09-24). Daarom meten we na elke blend het echte gewicht en corrigeren
+   we het doel voor de volgende frame. Kost een volumemeting (~0,5 ms). */
+var sleepKorr = 1, _sleepGemeten = 1, _sleepVorige = null;
+function sleepBijstellen(voorspel){
+  if(!gewTabel || !tabelVerouderd(gewTabelVoor, +sliders.gender.value)){
+    sleepKorr = 1; _sleepGemeten = 1; _sleepVorige = null; return;
+  }
+  var doel = +sliders.weight.value, kg = gewichtKg();
+  var geschat = doel / sleepKorr;
+  if(!(kg > 1 && geschat > 1)) return;
+  var gemeten = kg / geschat;
+  /* De meting hoort bij DEZE frame; de volgende frame staat de schuif alweer verder. Bij een
+     gelijkmatige sleep loopt de correctie dus een frame achter; die trend tellen we erbij op. */
+  var trend = (voorspel && _sleepVorige !== null) ? gemeten - _sleepVorige : 0;
+  _sleepVorige = gemeten; _sleepGemeten = gemeten;
+  sleepKorr = Math.max(0.5, Math.min(2, gemeten + trend));
+}
 function zetTabel(uit, ms){
+  sleepKorr = 1; _sleepVorige = null;
   gewTabel = uit.gewTabel;
   vetPlus = uit.vetPlus; vetPlus2 = uit.vetPlus2; vetPlus3 = uit.vetPlus3; vetMin = uit.vetMin;
   gewTabelVoor = uit.voor;
@@ -878,6 +907,14 @@ function lichaamsLengte(){
   return (hi-lo)*100;
 }
 
+/* Waar de lengte-as vastloopt, schalen we het hele lichaam gelijkmatig naar de gevraagde
+   lengte. Een oude, gespierde man haalt met MakeHuman's height-as geen 145 cm (hij blijft op
+   156), een zachte wel: de lengte versprong dan bij het schuiven aan de bouw (toesteltest
+   Bram 2026-09-24). Onder 0,2 cm verschil geen schaal: dat is de tolerantie van de iteratie. */
+function lengteSchaalVoor(cm, doelCm){
+  return (cm > 0 && Math.abs(cm - doelCm) > 0.2) ? doelCm / cm : 1;
+}
+var _schaal = null;        /* {g,m,w,h,s}: de schaal die bij deze stand hoort (uit waarden()) */
 function blend(gender, muscle, weight, height, metGrenzen){
   var t0 = performance.now();
   var arr = posAttr.array;
@@ -893,6 +930,11 @@ function blend(gender, muscle, weight, height, metGrenzen){
       arr[v+1] += g*val[o+1];
       arr[v+2] += g*val[o+2];
     }
+  }
+  _kgMesh = null;
+  var sc = _schaal;
+  if(sc && sc.s !== 1 && sc.g === gender && sc.m === muscle && sc.w === weight && sc.h === height){
+    for(var q=0; q<arr.length; q++) arr[q] *= sc.s;
   }
   posAttr.needsUpdate = true;
   meting.blend = performance.now() - t0;
@@ -1462,10 +1504,12 @@ function losHeightOp(gender, muscle, weight, doelCm){
   huidigeHeight = h;
   return h;
 }
+var _laatsteLengte = { h:NaN, cm:0 };   /* de laatst gemeten lengte, zie lengteBij() */
 function losHeightOpVanaf(gender, muscle, weight, doelCm, start){
   var h = start, cm, h2, cm2, i;
   for(i=0; i<4; i++){
     cm = lengteBijHeight(gender, muscle, weight, h);
+    _laatsteLengte = { h:h, cm:cm };
     if(Math.abs(cm - doelCm) < 0.15) break;
     h2 = Math.max(0, Math.min(1, h + (cm < doelCm ? 0.04 : -0.04)));
     if(h2 === h) break;
@@ -1485,10 +1529,13 @@ function bouwStand(){
      verouderd en klopt het gewicht een kilo of wat niet; bij het loslaten wordt hij
      ververst en klopt het weer. */
   var m = +sliders.spier.value, doel = +sliders.weight.value;
-  var w = losGewichtOp(m, doel);
+  /* Tijdens het slepen van geslacht, lengte of leeftijd hoort de tabel nog bij de oude stand;
+     sleepKorr (echt gewicht / geschat, gemeten na de vorige frame) houdt de kilo's dan toch vast. */
+  var doelTabel = doel / sleepKorr;
+  var w = losGewichtOp(m, doelTabel);
   /* Wat de gewicht-as niet haalt, vult vet aan. Zet vetF, want de weging leest hem. */
   aanvulling = (vetKorr && vetKorr.m === m && vetKorr.kg === doel && vetKorr.tabel === gewTabel)
-    ? vetKorr.f : vetSchatting(m, w, doel);
+    ? vetKorr.f : vetSchatting(m, w, doelTabel);
   vetF = Math.min(VET_MAX, aanvulling);
   extraZwaar = Math.max(0, aanvulling - VET_MAX);
   return { muscle:m, weight:w };
@@ -1499,11 +1546,19 @@ function waardenRuw(){
            weight:b.weight, height:huidigeHeight };
 }
 function waarden(){
-  var g = +sliders.gender.value, b = bouwStand();
-  return { gender:g, muscle:b.muscle, weight:b.weight,
-           height: losHeightOp(g, b.muscle, b.weight, lengteDoel()) };
+  var g = +sliders.gender.value, b = bouwStand(), doel = lengteDoel();
+  var h = losHeightOp(g, b.muscle, b.weight, doel);
+  /* meestal heeft de iteratie de lengte bij precies deze h al gemeten */
+  var cmH = (_laatsteLengte.h === h) ? _laatsteLengte.cm : lengteBijHeight(g, b.muscle, b.weight, h);
+  var s = lengteSchaalVoor(cmH, doel);
+  _schaal = { g:g, m:b.muscle, w:b.weight, h:h, s:s };
+  return { gender:g, muscle:b.muscle, weight:b.weight, height:h, schaal:s };
 }
 function toonWaarden(){
+  /* Het ruwe dev-paneel is verstopt zolang de generator open is: dan niet elke frame elf
+     omtrekken, het gewicht en de lengte uitrekenen voor iets wat niemand ziet (bij 6x CPU
+     scheelde dat bij de lengte-schuif ongeveer 8 ms per sleepframe). */
+  if($('#paneel').classList.contains('verstopt')) return;
   for(var mk in maatEls){
     var me = maatEls[mk];
     if(me.invoer){
@@ -1661,8 +1716,8 @@ var I18N = {
     'gen.lengte.sub': 'Zo staat de tattoo straks op de juiste schaal.',
 
     'gen.gewicht.kop': 'Hoeveel weeg je?',
-    'gen.gewicht.sub': 'Een schatting is goed. Daarna kies je hoe het verdeeld is.',
-    'gen.gewicht.bouw': 'Hoe is dat gewicht verdeeld?',
+    'gen.gewicht.sub': 'Een schatting is goed. Daarna kies je je bouw.',
+    'gen.gewicht.bouw': 'Hoe ben je gebouwd?',
     'gen.gewicht.links': 'zachter',
     'gen.gewicht.rechts': 'gespierder',
     'gen.gewicht.klem': 'Verder dan {n} kg gaat het model hier niet.',
@@ -1738,8 +1793,8 @@ var I18N = {
     'gen.lengte.sub': 'This puts your tattoo on the right scale.',
 
     'gen.gewicht.kop': 'How much do you weigh?',
-    'gen.gewicht.sub': 'A rough guess is fine. Then choose how it is spread.',
-    'gen.gewicht.bouw': 'How is that weight spread?',
+    'gen.gewicht.sub': 'A rough guess is fine. Then choose your build.',
+    'gen.gewicht.bouw': "What's your build?",
     'gen.gewicht.links': 'softer',
     'gen.gewicht.rechts': 'more muscular',
     'gen.gewicht.klem': "The model can't go past {n} kg here.",
@@ -2281,8 +2336,37 @@ function genRij(sleutel){
 
 /* Een wijziging doorvoeren. `af` betekent: de gebruiker heeft losgelaten, dus nu mag
    het dure werk (decals herprojecteren, gewichtstabel verversen). */
+/* Zachte overgang bij loslaten: de laatste correctie (sleepcorrectie, vet bijstellen, verse
+   tabel) is vaak nog een kilo of twee. Springen valt op (toesteltest Bram 2026-09-24),
+   overvloeien in 180 ms niet. De decals worden pas aan het eind opnieuw geprojecteerd. */
+var _overgang = null;
+function overvloei(vanaf){
+  var naar = Float32Array.from(posAttr.array), a = posAttr.array, max = 0;
+  for(var i=0; i<a.length; i++){ var d = Math.abs(a[i] - vanaf[i]); if(d > max) max = d; }
+  if(max < 0.002){ _overgang = null; bouwAlleDecals(); return; }     /* < 2 mm: niet te zien */
+  var token = {}, t0 = performance.now(), DUUR = 180;
+  _overgang = token;
+  function klaar(){
+    if(_overgang !== token) return;
+    _overgang = null;
+    posAttr.array.set(naar); posAttr.needsUpdate = true; _kgMesh = null;
+    normalenBij(); grenzenBij(); bouwAlleDecals();
+  }
+  function stap(){
+    if(_overgang !== token) return;
+    var f = Math.min(1, (performance.now() - t0) / DUUR); f = f * (2 - f);
+    for(var i=0; i<a.length; i++) a[i] = vanaf[i] + (naar[i] - vanaf[i]) * f;
+    posAttr.needsUpdate = true; _kgMesh = null; normalenBij(); volgAnkers();
+    if(f < 1) requestAnimationFrame(stap); else klaar();
+  }
+  a.set(vanaf); posAttr.needsUpdate = true; _kgMesh = null;
+  requestAnimationFrame(stap);
+  setTimeout(klaar, DUUR + 150);      /* vangnet: rAF staat stil in een verborgen tab */
+}
 function genPasToe(af){
   if(!mesh) return;
+  _overgang = null;                   /* een nieuwe wijziging breekt een lopende overgang af */
+  var vanaf = af ? Float32Array.from(posAttr.array) : null;
   if(af){
     var v0 = waarden();
     zorgTabelLos(v0.gender, v0.height, function(){
@@ -2295,8 +2379,18 @@ function genPasToe(af){
   /* Niet in stap 4/5: daar verandert de gebruiker zelf de vorm, en dat mag het gewicht
      laten meebewegen in plaats van dat de aanvulling het wegcorrigeert. */
   if(af && !(GEN_STAPPEN[GEN.stap] || {}).groep) vetBijstellen();
+  if(!af) sleepBijstellen(true);
+  else if(tabelTaak){
+    /* Losgelaten terwijl de tabel nog gebouwd wordt: de sleepcorrectie loopt een frame achter,
+       dus hier nog een keer bijstellen (een extra blend), anders volgt er toch een schokje. */
+    for(var i=0; i<2; i++){
+      var kWas = sleepKorr; sleepBijstellen();
+      if(Math.abs(sleepKorr - kWas) < 0.002) break;
+      v = waarden(); blend(v.gender, v.muscle, v.weight, v.height, true);
+    }
+  }
   toonWaarden();
-  if(af) bouwAlleDecals(); else volgAnkers();
+  if(af) overvloei(vanaf); else volgAnkers();
 }
 
 function genStart(){
@@ -2362,6 +2456,7 @@ function genStop(){
   genEl().hidden = true;
   document.body.classList.remove('genaan');
   $('#paneel').classList.remove('verstopt');
+  toonWaarden();                     /* het dev-paneel liep niet mee zolang het verstopt was */
 }
 
 $('#gen-terug').addEventListener('click', function(){ genNaarStap(GEN.stap - 1); });
@@ -2516,7 +2611,7 @@ window.__spike = {
   },
   zetEenheid: function(e){ EENHEID = e; toonWaarden(); },
   leeftijd: function(){ return leeftijdJaar; },
-  tabelBezig: function(){ return !!tabelTaak; },
+  tabelBezig: function(){ return !!tabelTaak || !!_overgang; },   /* ook een lopende overgang */
   zetLeeftijd: function(j){
     leeftijdJaar = Math.max(LEEFTIJD_MIN, Math.min(LEEFTIJD_MAX, j));
     var v0 = waarden();
