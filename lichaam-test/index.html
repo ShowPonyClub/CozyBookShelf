@@ -712,7 +712,7 @@ html.tweed-uit [data-i18n-html="uitleg.3d5"]{display:none}
 .add-kies-optie .ak-wip{margin-top:5px;font-size:.68rem;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--accent-diep)}
 .add-kies-annuleer{align-self:center;margin-top:2px}
 /* Onboarding stap 2: +-hint */
-#onb-terug{margin-top:4px}
+#onb-terug{margin-top:4px;margin-left:12px}   /* stond tegen 'Aan de slag' aan (UX-doorloop 2026-09-25) */
 
 /* ---- Tabs ---- */
 .tabs{display:flex;gap:2px;margin-bottom:14px;border-bottom:1px solid var(--rand)}
@@ -8897,6 +8897,9 @@ function modelBreedte(){
 }
 function genCamera(st){
   if(!st.kader || !HOST) return;
+  /* Uitgestelde aanroep (requestAnimationFrame in genNaarStap) na het sluiten: niet meer het kader van de laatste stap
+     zetten, de app heeft de camera dan al teruggezet (UX-doorloop 2026-09-25: na Klaar bleef het onderlichaam in beeld). */
+  if(genEl().hidden) return;
   /* Zoals in de spike, maar binnen het 3D-venster van de app (onder de kopbalk) in plaats van
      het hele scherm: W/H en het paneel tellen vanaf de rand van de stage. */
   var camera = HOST.camera(), sr = HOST.stageRect();
@@ -10411,7 +10414,7 @@ function createTattoo(overrides = {}) {
    ============================================================ */
 // App-versie (semver, handmatig ophogen bij een release). Bij een bump ook de
 // CACHE-naam in sw.js meebumpen, zodat clients de nieuwe build ophalen.
-const APP_VERSIE = '0.3.113';
+const APP_VERSIE = '0.3.114';
 
 /* Dev-haken die de CLOUD raken hangen alleen op een ontwikkelmachine aan window. Ze zijn geen
    lek op zichzelf (zonder XSS roept niemand ze aan, en CSP + esc() houden XSS tegen), maar ze
@@ -15243,7 +15246,7 @@ function toonOnboarding() {
   ov.hidden = false;
   laagOpenHistory('onboarding', rondOnboardingAf);   // ONB-1: Android-terug/edge-swipe sluit de intro i.p.v. de app
 }
-function rondOnboardingAf() {
+function rondOnboardingAf(blijf3D) {
   try { localStorage.setItem('tatties-onboarding-gedaan', '1'); } catch { /* geen vlag */ }
   const ov = document.getElementById('onboarding');
   if (ov) ov.hidden = true;
@@ -15252,7 +15255,7 @@ function rondOnboardingAf() {
   // naast de mini-stats, de tegels en de regel dat alles op dit toestel blijft. Wie meteen het
   // model in wordt gestuurd, krijgt juist het scherm met de meeste instructies en de minste
   // oriëntatie, en ziet het startscherm pas na een herstart.
-  if (typeof toonView === 'function') toonView('start');
+  if (typeof toonView === 'function' && !(blijf3D === true && huidigeView === '3d')) toonView('start');   // nieuw lichaam: in 3D blijven bij je lichaam
   if (persistMeldingUitgesteld) { persistMeldingUitgesteld = false; setTimeout(toonPersistMelding, 1200); }   // ONB-2
   // De zichtbare '+ tattoo toevoegen'-knop even highlighten zodat de vervolgactie opvalt.
   // Welke knop zichtbaar is hangt van de view af (kaart = #fab, startscherm = #start-nieuw, 3D = #t3d-add).
@@ -15700,7 +15703,10 @@ async function verwijderVoorbeelden() {
       const naarStap2 = () => { const s1 = $('#onb-stap1'), s2 = $('#onb-stap2'); if (s1) s1.hidden = true; if (s2) s2.hidden = false; if (intro) intro.hidden = false; };
       if (intro) intro.hidden = true;
       let ok = false;
-      try { ok = await window.__tattiesLichaamOpen({ kiesEerst: true, eersteKnop: 'gen.overslaan', na: naarStap2 }); } catch (e) { console.error(e); }
+      /* Na Klaar of Overslaan: intro af en in 3D blijven (UX-doorloop 2026-09-25). Het oude stap-2-scherm alleen nog als
+         de generator niet opent. */
+      const naar3D = () => { rondOnboardingAf(true); };
+      try { ok = await window.__tattiesLichaamOpen({ kiesEerst: true, eersteKnop: 'gen.overslaan', na: naar3D }); } catch (e) { console.error(e); }
       if (!ok) naarStap2();
     }); }   // Overslaan = afronden + onthouden (zelfde vlag)
   { const li = $('#onb-inloggen'); if (li) li.addEventListener('click', () => { rondOnboardingAf(); setTimeout(() => { try { openAccount(); } catch (_) {} }, 60); }); }   // al een account: intro sluiten, account-venster openen
@@ -16474,22 +16480,69 @@ async function verwijderVoorbeelden() {
      2 strak, 4 tailleband). Het masker hoort bij de topologie, dus hij past op elk lichaam uit de generator, ook vrouwelijk. */
   let _obMasker=null;
   function bouwOnderbroekLichaam(){
+    /* UX-doorloop 2026-09-25: hele driehoeken uit het masker gaven zaagtanden (tailleband, pijpen) en een gaatje in het
+       kruis. Nu levert het masker, twee ringen ruimer, alleen de kandidaat-driehoeken; de randen worden afgeknipt op vlakke
+       hoogtes die uit de maskerrand op DIT lichaam komen (mediaan van de randhoogtes: taille, en per been de pijp).
+       De tailleband is de strook van OB_BAND onder de taille. */
     const mesh=pickMeshes[0], G=migratieGeo(); if(!mesh || !mesh.geometry || !G || !G.onderbroek) return;
     if(!_obMasker){ const bin=atob(G.onderbroek); _obMasker=new Uint8Array(bin.length); for(let i=0;i<bin.length;i++) _obMasker[i]=bin.charCodeAt(i); }
     const M=_obMasker, bit=(underwear==='boxer') ? 1 : 2;
     mesh.updateWorldMatrix(true,false);
-    const g=mesh.geometry, pa=g.attributes.position, na=g.attributes.normal, idx=g.index.array, mw=mesh.matrixWorld;
+    const g=mesh.geometry, pa=g.attributes.position, na=g.attributes.normal, idx=g.index.array, mw=mesh.matrixWorld, nv=pa.count;
     const nm=new THREE.Matrix3().getNormalMatrix(mw), p=new THREE.Vector3(), n=new THREE.Vector3();
+    const P=new Float32Array(nv*3), N=new Float32Array(nv*3);
+    for(let j=0;j<nv;j++){ p.fromBufferAttribute(pa,j).applyMatrix4(mw); n.fromBufferAttribute(na,j).applyMatrix3(nm).normalize();
+      P[j*3]=p.x; P[j*3+1]=p.y; P[j*3+2]=p.z; N[j*3]=n.x; N[j*3+1]=n.y; N[j*3+2]=n.z; }
+    const inM=(j)=>(M[j]&bit)!==0;
+    // randhoogtes van het masker: boven de helft = taille, eronder per been (x-teken) = pijp
+    let ymin=Infinity, ymax=-Infinity;
+    for(let j=0;j<nv;j++) if(inM(j)){ const y=P[j*3+1]; if(y<ymin) ymin=y; if(y>ymax) ymax=y; }
+    if(!(ymax>ymin)) return;
+    const midY=(ymin+ymax)/2, boven=[], links=[], rechts=[], rand=new Uint8Array(nv);
+    for(let i=0;i<idx.length;i+=3){ const a=idx[i], b=idx[i+1], c=idx[i+2], s=inM(a)+inM(b)+inM(c);
+      if(s===1||s===2){ if(inM(a)) rand[a]=1; if(inM(b)) rand[b]=1; if(inM(c)) rand[c]=1; } }
+    for(let j=0;j<nv;j++) if(rand[j]){ const y=P[j*3+1]; if(y>midY) boven.push(y); else (P[j*3]>0 ? links : rechts).push(y); }
+    if(!boven.length || !links.length || !rechts.length) return;
+    const med=(a)=>{ a=a.slice().sort((q,r)=>q-r); return a[a.length>>1]; };
+    const taille=med(boven), pijpL=med(links), pijpR=med(rechts), OB_BAND=0.032;
+    // kandidaten: het masker plus twee ringen, zodat de vlakke rand overal op een driehoek valt (ook in een gaatje)
+    const ring=(set)=>{ const uit=new Uint8Array(nv);
+      for(let i=0;i<idx.length;i+=3){ const a=idx[i], b=idx[i+1], c=idx[i+2];
+        if(set[a]||set[b]||set[c]){ uit[a]=1; uit[b]=1; uit[c]=1; } } return uit; };
+    const m0=new Uint8Array(nv); for(let j=0;j<nv;j++) if(inM(j)) m0[j]=1;
+    const m2=ring(ring(m0));
+    const snij=(poly, f)=>{ const uit=[];
+      for(let i=0;i<poly.length;i++){ const a=poly[i], b=poly[(i+1)%poly.length], fa=f(a), fb=f(b);
+        if(fa>=0) uit.push(a);
+        if((fa>=0)!==(fb>=0)){ const s=fa/(fa-fb);
+          uit.push({ x:a.x+(b.x-a.x)*s, y:a.y+(b.y-a.y)*s, z:a.z+(b.z-a.z)*s, nx:a.nx+(b.nx-a.nx)*s, ny:a.ny+(b.ny-a.ny)*s, nz:a.nz+(b.nz-a.nz)*s }); } }
+      return uit; };
+    const punt=(j)=>({x:P[j*3],y:P[j*3+1],z:P[j*3+2],nx:N[j*3],ny:N[j*3+1],nz:N[j*3+2]});
     const OFF=0.004, HS=18, bodyP=[], bodyN=[], bodyUV=[], bP=[], bN=[];
-    for(let i=0;i<idx.length;i+=3){
-      const a=idx[i], b=idx[i+1], c=idx[i+2];
-      if(!((M[a]&bit) && (M[b]&bit) && (M[c]&bit))) continue;
-      const band=((M[a]&4)?1:0)+((M[b]&4)?1:0)+((M[c]&4)?1:0) >= 2;   // band is smaller dan een driehoek: twee van de drie hoeken volstaan
-      for(const j of [a,b,c]){
-        p.fromBufferAttribute(pa,j).applyMatrix4(mw); n.fromBufferAttribute(na,j).applyMatrix3(nm).normalize();
-        if(band){ bP.push(p.x+n.x*OFF,p.y+n.y*OFF,p.z+n.z*OFF); bN.push(n.x,n.y,n.z); }
-        else { bodyP.push(p.x+n.x*OFF,p.y+n.y*OFF,p.z+n.z*OFF); bodyN.push(n.x,n.y,n.z); bodyUV.push(p.x*HS, p.y*HS); }
-      }
+    /* Hartjes per vlak geprojecteerd (doos): voor- en achterkant plat van voren, de zijkanten plat van opzij. Alleen van
+       voren werden ze op de zijkant strepen; rond het lichaam (cilindrisch) gaf een waaier bij het kruis. De naad valt op de
+       hoek, zoals bij een echte boxer. */
+    const zet=(q, Pn, Nn, UV, u)=>{ const l=Math.hypot(q.nx,q.ny,q.nz)||1, nx=q.nx/l, ny=q.ny/l, nz=q.nz/l;
+      Pn.push(q.x+nx*OFF, q.y+ny*OFF, q.z+nz*OFF); Nn.push(nx,ny,nz); if(UV) UV.push(u, q.y*HS); };
+    const zetDriehoek=(a,b,c, Pn, Nn, UV, opzij)=>{
+      const u=(q)=>(opzij ? q.z : q.x)*HS;
+      zet(a,Pn,Nn,UV,u(a)); zet(b,Pn,Nn,UV,u(b)); zet(c,Pn,Nn,UV,u(c)); };
+    const vlakOpzij=(a,b,c)=>{ const ux=P[b*3]-P[a*3], uy=P[b*3+1]-P[a*3+1], uz=P[b*3+2]-P[a*3+2],
+      vx=P[c*3]-P[a*3], vy=P[c*3+1]-P[a*3+1], vz=P[c*3+2]-P[a*3+2];
+      const nx=uy*vz-uz*vy, nz=ux*vy-uy*vx; return Math.abs(nx)>Math.abs(nz); };
+    const onderBand=taille-OB_BAND;
+    for(let i=0;i<idx.length;i+=3){ const a=idx[i], b=idx[i+1], c=idx[i+2];
+      if(!(m2[a]&&m2[b]&&m2[c])) continue;
+      const cy=(P[a*3+1]+P[b*3+1]+P[c*3+1])/3, cx=(P[a*3]+P[b*3]+P[c*3])/3;
+      const tri=[punt(a),punt(b),punt(c)];
+      // stof: onder de band, en bij de benen boven de pijp van die kant
+      let poly=snij(tri, (q)=>onderBand-q.y);
+      if(poly.length>=3 && cy<midY){ const pijp=(cx>0)?pijpL:pijpR; poly=snij(poly, (q)=>q.y-pijp); }
+      const opzij=vlakOpzij(a,b,c);
+      if(poly.length>=3) for(let k=2;k<poly.length;k++) zetDriehoek(poly[0],poly[k-1],poly[k],bodyP,bodyN,bodyUV,opzij);
+      // tailleband: de strook tussen onderBand en taille
+      if(cy>midY){ let bp=snij(tri, (q)=>taille-q.y); if(bp.length>=3) bp=snij(bp, (q)=>q.y-onderBand);
+        if(bp.length>=3) for(let k=2;k<bp.length;k++) zetDriehoek(bp[0],bp[k-1],bp[k],bP,bN,null); }
     }
     if(!bodyP.length && !bP.length) return;
     const grp=new THREE.Group();
@@ -16503,6 +16556,7 @@ async function verwijderVoorbeelden() {
       bg.setAttribute('position',new THREE.Float32BufferAttribute(bP,3)); bg.setAttribute('normal',new THREE.Float32BufferAttribute(bN,3));
       const bmat=new THREE.MeshStandardMaterial({color:0x9aa0ad, roughness:0.5, metalness:0.0, side:THREE.DoubleSide, polygonOffset:true, polygonOffsetFactor:-3});
       const bm=new THREE.Mesh(bg,bmat); bm.renderOrder=2; grp.add(bm); }
+    grp.userData.obRand={ taille:+taille.toFixed(3), pijpL:+pijpL.toFixed(3), pijpR:+pijpR.toFixed(3) };
     underwearMesh=grp; body.add(grp);
   }
   function rebuildUnderwear(){
@@ -17966,6 +18020,23 @@ async function verwijderVoorbeelden() {
     zetLedeUI();
   }
   /* Een ledemaat isoleren: 'arm-links', 'arm-rechts', 'been-links', 'been-rechts' of 'hoofd'. */
+  /* Afstand waarop het hele losse deel in beeld past, vanuit de huidige kijkrichting (UX-doorloop 2026-09-25: de schuine arm
+     van het nieuwe lichaam liep met max(maat)*1,35 links en rechts het scherm uit). Per punt: de afstand waarop het net binnen
+     de horizontale en verticale kijkhoek valt, met ruimte voor de knoppen boven en de hintregel onder. */
+  function ledeKaderAfstand(groep, c){
+    const naarCam=new THREE.Vector3(Math.sin(phi)*Math.sin(theta), Math.cos(phi), Math.sin(phi)*Math.cos(theta)).normalize();
+    const rechts=new THREE.Vector3().crossVectors(new THREE.Vector3(0,1,0), naarCam);
+    if(rechts.lengthSq()<1e-6) rechts.set(1,0,0); rechts.normalize();
+    const op=new THREE.Vector3().crossVectors(naarCam, rechts).normalize();
+    const tV=Math.tan(camera.fov*Math.PI/360)*0.78, tH=Math.tan(camera.fov*Math.PI/360)*camera.aspect*0.8;
+    const v=new THREE.Vector3(); let d=0;
+    groep.traverse(o=>{ if(!o.isMesh || !o.geometry || !o.geometry.attributes.position) return;
+      const p=o.geometry.attributes.position.array;
+      for(let i=0;i<p.length;i+=3*5){ v.set(p[i]-c.x, p[i+1]-c.y, p[i+2]-c.z);
+        const z=v.dot(naarCam), dd=z+Math.max(Math.abs(v.dot(rechts))/tH, Math.abs(v.dot(op))/tV);
+        if(dd>d) d=dd; } });
+    return d;
+  }
   function isoleerLedemaat(deel){
     if(!pickMeshes.length || LEDE_DELEN.indexOf(deel)<0) return null;
     stopIsolatie();
@@ -18018,7 +18089,7 @@ async function verwijderVoorbeelden() {
     // deel staat daarmee vanzelf rechtop en gecentreerd in beeld.
     const c=box.getCenter(new THREE.Vector3()), maat=box.getSize(new THREE.Vector3());
     focusTo(c);
-    radiusGoal=Math.max(0.55, Math.max(maat.x,maat.y,maat.z)*1.35);
+    radiusGoal=Math.max(0.55, LICHAAM_GEN ? ledeKaderAfstand(groep, c) : Math.max(maat.x,maat.y,maat.z)*1.35);
     tik('tonen');
     return { tijden, deel, driehoeken:delen.reduce((s,d)=>s+d.driehoeken,0),
       deksels:delen.reduce((s,d)=>s+(d.deksels||0),0),
