@@ -1328,8 +1328,8 @@ html:not(.lichaam-gen) #inst-lichaam-open{display:none!important}
   .gen-getal b{font-size:var(--fs-2xl);font-weight:700;line-height:1;
     font-variant-numeric:tabular-nums}
   .gen-getal span{font-size:var(--fs-md);color:var(--gedempt)}
-  /* lengte (cm) en gewicht (kg, lb) zijn intypbaar: het getal zelf is een veld, met een stippellijn eronder als teken */
-  #gen .gen-getal-invoer{width:2.1em;padding:0 0 2px;margin:0;border:0;border-bottom:2px dashed var(--rand);border-radius:0;
+  /* lengte (cm) en gewicht (kg, lb) zijn intypbaar: het getal zelf is een veld (geen stippellijn, toesteltest eigenaar); bij focus een lijn */
+  #gen .gen-getal-invoer{width:2.1em;padding:0 0 2px;margin:0;border:0;border-bottom:2px solid transparent;border-radius:0;
     background:none;color:var(--tekst);text-align:center;font:700 var(--fs-2xl)/1 var(--serif);
     font-variant-numeric:tabular-nums;-webkit-appearance:none;appearance:none}
   #gen .gen-getal-invoer:focus{outline:none;border-bottom-color:var(--accent);border-bottom-style:solid}
@@ -10560,7 +10560,7 @@ function createTattoo(overrides = {}) {
    ============================================================ */
 // App-versie (semver, handmatig ophogen bij een release). Bij een bump ook de
 // CACHE-naam in sw.js meebumpen, zodat clients de nieuwe build ophalen.
-const APP_VERSIE = '0.3.116';
+const APP_VERSIE = '0.3.117';
 
 /* Dev-haken die de CLOUD raken hangen alleen op een ontwikkelmachine aan window. Ze zijn geen
    lek op zichzelf (zonder XSS roept niemand ze aan, en CSP + esc() houden XSS tegen), maar ze
