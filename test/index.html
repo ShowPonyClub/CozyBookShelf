@@ -533,6 +533,8 @@ main > section{animation:opkomen .3s ease both}
 .knop-sec.actief{background:var(--accent);border-color:var(--accent);color:var(--op-inkt)}
 .knop-sec.actief .ik{stroke:var(--op-inkt)}
 .detail-delen{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 0 14px;font-size:var(--fs-sm);line-height:1.35}
+.detail-plek{margin-top:18px}
+.detail-plek .detail-delen:last-child{margin-bottom:0}
 .detail-delen .knop-sec{flex:none}
 .knop-gevaar{color:var(--gevaar);border-color:var(--rand)}
 #fab{
@@ -1373,6 +1375,12 @@ html:not(.lichaam-gen) #inst-lichaam-open{display:none!important}
   /* De pagina staat stil zolang de generator open is, en de lijst geeft zijn scroll niet door (toesteltest 2026-09-25:
      scrollen in de lijst schoof de pagina met het model mee). */
   html.genaan, html.genaan body{overflow:hidden;overscroll-behavior:none}
+  /* Kopbalk weg in de generator (UX-doorloop 2026-09-25): het model krijgt de hoogte tot aan de statusbalk. De stage staat
+     dan vast over het hele scherm; de opkom-transform van de view moet weg, anders is 'fixed' relatief aan de view. */
+  html.genaan .app-header{visibility:hidden}
+  html.genaan #view-3d{transform:none!important;animation:none!important}
+  html.genaan #stage{position:fixed;left:0;right:0;top:env(safe-area-inset-top,0px);width:auto;margin:0;min-height:0;z-index:15;
+    height:calc(100vh - env(safe-area-inset-top,0px))!important;height:calc(100dvh - env(safe-area-inset-top,0px))!important}
   #gen{overscroll-behavior:contain}
   .gen-rijen{overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
   .gen-rijen{max-height:31vh;overflow-y:auto;border:1px solid var(--rand);border-radius:var(--r-md);
@@ -2143,6 +2151,15 @@ html.knipfull .cutmodal.cm-review .cm-bewerkbtn span{position:absolute;width:1px
   padding:calc(24px + env(safe-area-inset-top,0px)) calc(24px + env(safe-area-inset-right,0px)) calc(24px + env(safe-area-inset-bottom,0px)) calc(24px + env(safe-area-inset-left,0px))}
 [data-theme="dark"] .onboarding{background:radial-gradient(120% 55% at 50% -5%, #221D16 0%, var(--bg) 60%);background-color:var(--bg)}
 .onboarding[hidden]{display:none}
+/* Welkom met draaiend model (slice 4q): het vlak is doorzichtig, het 3D-model draait bovenin; tekst en knoppen in een
+   paneel onderaan. Kop en stage-knoppen van de app zijn zolang weg. */
+.onboarding.onb-model{background:none;align-items:flex-end;padding:0}
+.onboarding.onb-model .onboarding-kaart{max-width:none;width:100%;margin:0;box-sizing:border-box;gap:12px;
+  padding:34px max(24px,calc(50% - 180px)) calc(22px + env(safe-area-inset-bottom,0px));
+  background:linear-gradient(to bottom, rgba(239,228,208,0) 0, var(--bg) 30px, var(--bg) 100%)}
+[data-theme="dark"] .onboarding.onb-model .onboarding-kaart{background:linear-gradient(to bottom, rgba(24,21,17,0) 0, var(--bg) 30px, var(--bg) 100%)}
+html.onbmodel .app-header, html.onbmodel .stage-knoppen, html.onbmodel #t3d-add, html.onbmodel #hint,
+html.onbmodel #lege-hint-3d{visibility:hidden}
 /* ONB-3: margin:auto i.p.v. pure flex-centrering - een kaart hoger dan de viewport (landscape/split view)
    blijft dan volledig scrollbaar; gecentreerde flex-overflow knipt de bovenkant onbereikbaar af. */
 .onboarding-kaart{width:100%;max-width:340px;margin:auto;display:flex;flex-direction:column;gap:14px;text-align:center}
@@ -10107,7 +10124,7 @@ const I18N = {
     'woord.wensen':'wensen','woord.tattoos':'tattoos','woord.dag':'dag','woord.dagen':'dagen','mv.foto_s':"'s",
     'woord.notitiesopt':'Notities (optioneel)','woord.onbekendefout':'onbekende fout','eenheid.uur':'u','eenheid.min':'min',
     'stats.wissel_eenheid':'Tik om te wisselen tussen uren en minuten','inst.valuta':'Valuta',
-    /* LICHAAM-GEN-I18N-NL-BEGIN */'gen.terug':'Terug','gen.volgende':'Volgende','gen.klaar':'Klaar','gen.beeld':'Heel lichaam','gen.reset':'Opnieuw','gen.reset_zeker':'Zeker?','gen.meer':'Meer instellen','gen.minder':'Minder instellen','gen.geslacht.kop':'Welke vorm past bij jou?','gen.geslacht.sub':'Dit bepaalt de basisvorm. Je kunt het later nog bijstellen.','gen.geslacht.vrouw':'Vrouwelijk','gen.geslacht.vrouw_sub':'Smallere schouders, bredere heupen','gen.geslacht.nb':'Tussenin','gen.geslacht.nb_sub':'Tussen beide in; verstel zelf waar','gen.geslacht.man':'Mannelijk','gen.geslacht.man_sub':'Bredere schouders, rechtere heupen','gen.leeftijd':'Leeftijd','gen.jaar_eenheid':'jaar','gen.huid':'Huidskleur','gen.geslacht.links':'smallere schouders, bredere heupen','gen.geslacht.rechts':'bredere schouders, smallere heupen','gen.stapvan':'Stap {n} van {m}','gen.kies_eerst':'Kies eerst een vorm','aria.lengte':'Lengte','aria.gewicht':'Gewicht','aria.bouw':'Bouw','aria.nb':'Basisvorm','aria.min':'Minder','aria.plus':'Meer','aria.veelminder':'veel minder','aria.minder':'minder','aria.gemiddeld':'gemiddeld','aria.meer':'meer','aria.veelmeer':'veel meer','aria.zachter':'zachter','aria.gespierder':'gespierder','gen.lengte.kop':'Hoe lang ben je?','gen.lengte.sub':'Zo staat de tattoo straks op de juiste schaal.','gen.gewicht.kop':'Hoeveel weeg je?','gen.gewicht.sub':'Een schatting is goed. Daarna kies je je bouw.','gen.gewicht.bouw':'Bouw','gen.gewicht.links':'zachter','gen.gewicht.rechts':'gespierder','gen.gewicht.klem':'Verder dan {n} kg gaat het model hier niet.','gen.boven.kop':'Bovenlichaam','gen.onder.kop':'Onderlichaam','gen.deel.sub':'Sleep tot het klopt, of tik gewoon op Volgende.','mod.schouderbreedte':'Schouders','mod.borstkas':'Borstkas','mod.taille':'Taille','mod.buik':'Buik','mod.bovenarm':'Bovenarm','mod.nek':'Nek','mod.pols':'Pols','mod.borstspier':'Borstspier','mod.rugspier':'Rugspier','mod.vShape':'V-vorm','mod.buikTonus':'Buik strak','mod.armenVet':'Armen zacht','mod.armenSpier':'Armen spier','mod.bovenarmlengte':'Bovenarmlengte','mod.onderarmlengte':'Onderarmlengte','mod.heupen':'Heupen','mod.billen':'Billen','mod.dij':'Dij','mod.kuit':'Kuit','mod.benenVet':'Benen zacht','mod.benenSpier':'Benen spier','mod.cupsize':'Cupmaat','mod.firmness':'Stevigheid','gen.annuleer':'Annuleren','gen.overslaan':'Overslaan','onb.gen_sub':'Eerst je lichaam, dan staan je tattoos straks op de juiste plek.','onb.gen_maak':'Maak je lichaam','ui.lichaam_migratie':'We hebben een nieuw 3D-model. Kijk even of je tattoos goed staan.','ui.lichaam_migratie_mis':'{n} tattoo{s} niet overgezet naar het nieuwe model; ze staan wel in je collectie.','inst.lichaam_terug':'Tattoos terug naar het oude model','inst.lichaam_terug_vraag':'Alle overgezette tattoos terugzetten op hun oude plek en het nieuwe lichaamsmodel uitzetten?','toast.lichaam_terug':'{n} tattoo{s} teruggezet. De app laadt opnieuw.','ui.lichaam_tip':'Maak eerst je lichaam, dan kloppen de maat en de plek van je tattoos.','ui.lichaam_tip_migratie':'We hebben een nieuw 3D-model. Maak eerst je lichaam en kijk dan of je tattoos goed staan.','inst.lichaam_niet':'Nog niet gemaakt','detail.herplaats':'Opnieuw plaatsen','detail.herplaats_uitleg':'Staat hij niet goed? Plaats hem opnieuw op het model.','detail.herplaats_geen':'Staat nog niet op het model.','ui.tattoo_herplaatst':'Tattoo opnieuw geplaatst','ui.herplaats_hint':'Tik op de nieuwe plek. De oude plek zie je vaag.','inst.lichaam_aanpassen':'Lichaam aanpassen',/* LICHAAM-GEN-I18N-NL-EINDE */'inst.lichaam_gen':'Nieuw lichaamsmodel (test)','inst.lichaam_gen_uit':'Uit','inst.lichaam_gen_aan':'Aan','ui.lichaam_gen_kan_niet':'Dit toestel kan het nieuwe lichaamsmodel nog niet laden.','inst.onderbroek':'Onderbroek','onderbroek.geen':'Geen','onderbroek.boxer':'Boxer','onderbroek.brief':'Strak',
+    /* LICHAAM-GEN-I18N-NL-BEGIN */'gen.terug':'Terug','gen.volgende':'Volgende','gen.klaar':'Klaar','gen.beeld':'Heel lichaam','gen.reset':'Opnieuw','gen.reset_zeker':'Zeker?','gen.meer':'Meer instellen','gen.minder':'Minder instellen','gen.geslacht.kop':'Welke vorm past bij jou?','gen.geslacht.sub':'Dit bepaalt de basisvorm. Je kunt het later nog bijstellen.','gen.geslacht.vrouw':'Vrouwelijk','gen.geslacht.vrouw_sub':'Smallere schouders, bredere heupen','gen.geslacht.nb':'Tussenin','gen.geslacht.nb_sub':'Tussen beide in; verstel zelf waar','gen.geslacht.man':'Mannelijk','gen.geslacht.man_sub':'Bredere schouders, rechtere heupen','gen.leeftijd':'Leeftijd','gen.jaar_eenheid':'jaar','gen.huid':'Huidskleur','gen.geslacht.links':'smallere schouders, bredere heupen','gen.geslacht.rechts':'bredere schouders, smallere heupen','gen.stapvan':'Stap {n} van {m}','gen.kies_eerst':'Kies eerst een vorm','aria.lengte':'Lengte','aria.gewicht':'Gewicht','aria.bouw':'Bouw','aria.nb':'Basisvorm','aria.min':'Minder','aria.plus':'Meer','aria.veelminder':'veel minder','aria.minder':'minder','aria.gemiddeld':'gemiddeld','aria.meer':'meer','aria.veelmeer':'veel meer','aria.zachter':'zachter','aria.gespierder':'gespierder','gen.lengte.kop':'Hoe lang ben je?','gen.lengte.sub':'Zo staat de tattoo straks op de juiste schaal.','gen.gewicht.kop':'Hoeveel weeg je?','gen.gewicht.sub':'Een schatting is goed. Daarna kies je je bouw.','gen.gewicht.bouw':'Bouw','gen.gewicht.links':'zachter','gen.gewicht.rechts':'gespierder','gen.gewicht.klem':'Verder dan {n} kg gaat het model hier niet.','gen.boven.kop':'Bovenlichaam','gen.onder.kop':'Onderlichaam','gen.deel.sub':'Sleep tot het klopt, of tik gewoon op Volgende.','mod.schouderbreedte':'Schouders','mod.borstkas':'Borstkas','mod.taille':'Taille','mod.buik':'Buik','mod.bovenarm':'Bovenarm','mod.nek':'Nek','mod.pols':'Pols','mod.borstspier':'Borstspier','mod.rugspier':'Rugspier','mod.vShape':'V-vorm','mod.buikTonus':'Buik strak','mod.armenVet':'Armen zacht','mod.armenSpier':'Armen spier','mod.bovenarmlengte':'Bovenarmlengte','mod.onderarmlengte':'Onderarmlengte','mod.heupen':'Heupen','mod.billen':'Billen','mod.dij':'Dij','mod.kuit':'Kuit','mod.benenVet':'Benen zacht','mod.benenSpier':'Benen spier','mod.cupsize':'Cupmaat','mod.firmness':'Stevigheid','gen.annuleer':'Annuleren','gen.overslaan':'Overslaan','onb.gen_sub':'Eerst je lichaam, dan staan je tattoos straks op de juiste plek.','onb.gen_maak':'Maak je lichaam','ui.lichaam_migratie':'We hebben een nieuw 3D-model. Kijk even of je tattoos goed staan.','ui.lichaam_migratie_mis':'{n} tattoo{s} niet overgezet naar het nieuwe model; ze staan wel in je collectie.','inst.lichaam_terug':'Tattoos terug naar het oude model','inst.lichaam_terug_vraag':'Alle overgezette tattoos terugzetten op hun oude plek en het nieuwe lichaamsmodel uitzetten?','toast.lichaam_terug':'{n} tattoo{s} teruggezet. De app laadt opnieuw.','ui.lichaam_tip':'Maak eerst je lichaam, dan kloppen de maat en de plek van je tattoos.','ui.lichaam_tip_migratie':'We hebben een nieuw 3D-model. Maak eerst je lichaam en kijk dan of je tattoos goed staan.','inst.lichaam_niet':'Nog niet gemaakt','detail.herplaats':'Opnieuw plaatsen','detail.herplaats_uitleg':'Staat hij niet goed? Plaats hem opnieuw op het model.','detail.herplaats_geen':'Staat nog niet op het model.','ui.tattoo_herplaatst':'Tattoo opnieuw geplaatst','ui.herplaats_hint':'Tik op de nieuwe plek. De oude plek zie je vaag.','detail.plek':'Plek op het lichaam','inst.lichaam_aanpassen':'Lichaam aanpassen',/* LICHAAM-GEN-I18N-NL-EINDE */'inst.lichaam_gen':'Nieuw lichaamsmodel (test)','inst.lichaam_gen_uit':'Uit','inst.lichaam_gen_aan':'Aan','ui.lichaam_gen_kan_niet':'Dit toestel kan het nieuwe lichaamsmodel nog niet laden.','inst.onderbroek':'Onderbroek','onderbroek.geen':'Geen','onderbroek.boxer':'Boxer','onderbroek.brief':'Strak',
     'lijst.geenresultaten':'Geen resultaten voor je zoekopdracht.',
     'lijst.geenopzone':'Geen {soort} op {zone}.',
     'lijst.legewishlist':'Je wishlist is nog leeg - voeg je eerste droomtattoo toe.',
@@ -10300,7 +10317,7 @@ const I18N = {
     'woord.wensen':'wishes','woord.tattoos':'tattoos','woord.dag':'day','woord.dagen':'days','mv.foto_s':'s',
     'woord.notitiesopt':'Notes (optional)','woord.onbekendefout':'unknown error','eenheid.uur':'h','eenheid.min':'min',
     'stats.wissel_eenheid':'Tap to switch between hours and minutes','inst.valuta':'Currency',
-    /* LICHAAM-GEN-I18N-EN-BEGIN */'gen.terug':'Back','gen.volgende':'Next','gen.klaar':'Done','gen.beeld':'Whole body','gen.reset':'Reset','gen.reset_zeker':'Sure?','gen.meer':'More settings','gen.minder':'Fewer settings','gen.geslacht.kop':'Which shape suits you?','gen.geslacht.sub':'This sets the basic shape. You can adjust it later.','gen.geslacht.vrouw':'Feminine','gen.geslacht.vrouw_sub':'Narrower shoulders, wider hips','gen.geslacht.nb':'In between','gen.geslacht.nb_sub':'In between; set it where you want','gen.geslacht.man':'Masculine','gen.geslacht.man_sub':'Wider shoulders, straighter hips','gen.leeftijd':'Age','gen.jaar_eenheid':'years','gen.huid':'Skin tone','gen.geslacht.links':'narrower shoulders, wider hips','gen.geslacht.rechts':'wider shoulders, narrower hips','gen.stapvan':'Step {n} of {m}','gen.kies_eerst':'Choose a shape first','aria.lengte':'Height','aria.gewicht':'Weight','aria.bouw':'Build','aria.nb':'Basic shape','aria.min':'Less','aria.plus':'More','aria.veelminder':'much less','aria.minder':'less','aria.gemiddeld':'average','aria.meer':'more','aria.veelmeer':'much more','aria.zachter':'softer','aria.gespierder':'more muscular','gen.lengte.kop':'How tall are you?','gen.lengte.sub':'This puts your tattoo on the right scale.','gen.gewicht.kop':'How much do you weigh?','gen.gewicht.sub':'A rough guess is fine. Then choose your build.','gen.gewicht.bouw':'Build','gen.gewicht.links':'softer','gen.gewicht.rechts':'more muscular','gen.gewicht.klem':"The model can't go past {n} kg here.",'gen.boven.kop':'Upper body','gen.onder.kop':'Lower body','gen.deel.sub':'Drag until it looks right, or just tap Next.','mod.schouderbreedte':'Shoulders','mod.borstkas':'Chest','mod.taille':'Waist','mod.buik':'Belly','mod.bovenarm':'Upper arm','mod.nek':'Neck','mod.pols':'Wrist','mod.borstspier':'Chest muscle','mod.rugspier':'Back muscle','mod.vShape':'V-shape','mod.buikTonus':'Firm belly','mod.armenVet':'Soft arms','mod.armenSpier':'Arm muscle','mod.bovenarmlengte':'Upper arm length','mod.onderarmlengte':'Forearm length','mod.heupen':'Hips','mod.billen':'Buttocks','mod.dij':'Thigh','mod.kuit':'Calf','mod.benenVet':'Soft legs','mod.benenSpier':'Leg muscle','mod.cupsize':'Cup size','mod.firmness':'Firmness','gen.annuleer':'Cancel','gen.overslaan':'Skip','onb.gen_sub':'First your body, so your tattoos end up in the right place.','onb.gen_maak':'Create your body','ui.lichaam_migratie':"We've got a new 3D model. Have a quick look that your tattoos are in the right place.",'ui.lichaam_migratie_mis':"{n} tattoo{s} not moved to the new model; they're still in your collection.",'inst.lichaam_terug':'Move tattoos back to the old model','inst.lichaam_terug_vraag':'Put all moved tattoos back in their old place and switch off the new body model?','toast.lichaam_terug':'{n} tattoo{s} moved back. The app will reload.','ui.lichaam_tip':'Create your body first, so your tattoos get the right size and place.','ui.lichaam_tip_migratie':"We've got a new 3D model. Create your body first, then check that your tattoos are in the right place.",'inst.lichaam_niet':'Not created yet','detail.herplaats':'Place again','detail.herplaats_uitleg':'Not in the right spot? Place it on the model again.','detail.herplaats_geen':'Not on the model yet.','ui.tattoo_herplaatst':'Tattoo placed again','ui.herplaats_hint':'Tap the new spot. The old spot is shown faintly.','inst.lichaam_aanpassen':'Adjust body',/* LICHAAM-GEN-I18N-EN-EINDE */'inst.lichaam_gen':'New body model (test)','inst.lichaam_gen_uit':'Off','inst.lichaam_gen_aan':'On','ui.lichaam_gen_kan_niet':"This device can't load the new body model yet.",'inst.onderbroek':'Underwear','onderbroek.geen':'None','onderbroek.boxer':'Boxer','onderbroek.brief':'Brief',
+    /* LICHAAM-GEN-I18N-EN-BEGIN */'gen.terug':'Back','gen.volgende':'Next','gen.klaar':'Done','gen.beeld':'Whole body','gen.reset':'Reset','gen.reset_zeker':'Sure?','gen.meer':'More settings','gen.minder':'Fewer settings','gen.geslacht.kop':'Which shape suits you?','gen.geslacht.sub':'This sets the basic shape. You can adjust it later.','gen.geslacht.vrouw':'Feminine','gen.geslacht.vrouw_sub':'Narrower shoulders, wider hips','gen.geslacht.nb':'In between','gen.geslacht.nb_sub':'In between; set it where you want','gen.geslacht.man':'Masculine','gen.geslacht.man_sub':'Wider shoulders, straighter hips','gen.leeftijd':'Age','gen.jaar_eenheid':'years','gen.huid':'Skin tone','gen.geslacht.links':'narrower shoulders, wider hips','gen.geslacht.rechts':'wider shoulders, narrower hips','gen.stapvan':'Step {n} of {m}','gen.kies_eerst':'Choose a shape first','aria.lengte':'Height','aria.gewicht':'Weight','aria.bouw':'Build','aria.nb':'Basic shape','aria.min':'Less','aria.plus':'More','aria.veelminder':'much less','aria.minder':'less','aria.gemiddeld':'average','aria.meer':'more','aria.veelmeer':'much more','aria.zachter':'softer','aria.gespierder':'more muscular','gen.lengte.kop':'How tall are you?','gen.lengte.sub':'This puts your tattoo on the right scale.','gen.gewicht.kop':'How much do you weigh?','gen.gewicht.sub':'A rough guess is fine. Then choose your build.','gen.gewicht.bouw':'Build','gen.gewicht.links':'softer','gen.gewicht.rechts':'more muscular','gen.gewicht.klem':"The model can't go past {n} kg here.",'gen.boven.kop':'Upper body','gen.onder.kop':'Lower body','gen.deel.sub':'Drag until it looks right, or just tap Next.','mod.schouderbreedte':'Shoulders','mod.borstkas':'Chest','mod.taille':'Waist','mod.buik':'Belly','mod.bovenarm':'Upper arm','mod.nek':'Neck','mod.pols':'Wrist','mod.borstspier':'Chest muscle','mod.rugspier':'Back muscle','mod.vShape':'V-shape','mod.buikTonus':'Firm belly','mod.armenVet':'Soft arms','mod.armenSpier':'Arm muscle','mod.bovenarmlengte':'Upper arm length','mod.onderarmlengte':'Forearm length','mod.heupen':'Hips','mod.billen':'Buttocks','mod.dij':'Thigh','mod.kuit':'Calf','mod.benenVet':'Soft legs','mod.benenSpier':'Leg muscle','mod.cupsize':'Cup size','mod.firmness':'Firmness','gen.annuleer':'Cancel','gen.overslaan':'Skip','onb.gen_sub':'First your body, so your tattoos end up in the right place.','onb.gen_maak':'Create your body','ui.lichaam_migratie':"We've got a new 3D model. Have a quick look that your tattoos are in the right place.",'ui.lichaam_migratie_mis':"{n} tattoo{s} not moved to the new model; they're still in your collection.",'inst.lichaam_terug':'Move tattoos back to the old model','inst.lichaam_terug_vraag':'Put all moved tattoos back in their old place and switch off the new body model?','toast.lichaam_terug':'{n} tattoo{s} moved back. The app will reload.','ui.lichaam_tip':'Create your body first, so your tattoos get the right size and place.','ui.lichaam_tip_migratie':"We've got a new 3D model. Create your body first, then check that your tattoos are in the right place.",'inst.lichaam_niet':'Not created yet','detail.herplaats':'Place again','detail.herplaats_uitleg':'Not in the right spot? Place it on the model again.','detail.herplaats_geen':'Not on the model yet.','ui.tattoo_herplaatst':'Tattoo placed again','ui.herplaats_hint':'Tap the new spot. The old spot is shown faintly.','detail.plek':'Place on the body','inst.lichaam_aanpassen':'Adjust body',/* LICHAAM-GEN-I18N-EN-EINDE */'inst.lichaam_gen':'New body model (test)','inst.lichaam_gen_uit':'Off','inst.lichaam_gen_aan':'On','ui.lichaam_gen_kan_niet':"This device can't load the new body model yet.",'inst.onderbroek':'Underwear','onderbroek.geen':'None','onderbroek.boxer':'Boxer','onderbroek.brief':'Brief',
     'lijst.geenresultaten':'No results for your search.',
     'lijst.geenopzone':'No {soort} on {zone}.',
     'lijst.legewishlist':'Your wishlist is empty - add your first dream tattoo.',
@@ -10559,7 +10576,7 @@ function createTattoo(overrides = {}) {
    ============================================================ */
 // App-versie (semver, handmatig ophogen bij een release). Bij een bump ook de
 // CACHE-naam in sw.js meebumpen, zodat clients de nieuwe build ophalen.
-const APP_VERSIE = '0.3.117';
+const APP_VERSIE = '0.3.118';
 
 /* Dev-haken die de CLOUD raken hangen alleen op een ontwikkelmachine aan window. Ze zijn geen
    lek op zichzelf (zonder XSS roept niemand ze aan, en CSP + esc() houden XSS tegen), maar ze
@@ -14136,9 +14153,10 @@ function renderDetail() {
     const herplaatsHtml = kanHerplaatsen
       ? `<div class="detail-delen"><span class="gedempt">${tr(staatOpLichaam ? 'detail.herplaats_uitleg' : 'detail.herplaats_geen')}</span><button type="button" class="knop-sec" id="d-herplaats">${tr('detail.herplaats')}</button></div>`
       : '';
-    paneel = `${delenHtml}${herplaatsHtml}
-      <dl${detailToonExtra ? ' class="toon-leeg"' : ''}>${rijenHtml}${notitieHtml}</dl>
-      ${heeftLege ? `<button type="button" class="linkbtn" id="d-extra">${detailToonExtra ? tr('detail.extra_verbergen') : tr('detail.extra_tonen')}</button>` : ''}`;
+    const plekHtml = (delenHtml || herplaatsHtml) ? `<div class="detail-plek"><p class="sectiekop">${tr('detail.plek')}</p>${delenHtml}${herplaatsHtml}</div>` : '';
+    paneel = `<dl${detailToonExtra ? ' class="toon-leeg"' : ''}>${rijenHtml}${notitieHtml}</dl>
+      ${heeftLege ? `<button type="button" class="linkbtn" id="d-extra">${detailToonExtra ? tr('detail.extra_verbergen') : tr('detail.extra_tonen')}</button>` : ''}
+      ${plekHtml}`;
   } else if (detailTab === 'sessies') {
     const sessieItems = (t.sessies || []).map((s, i) => `
       <div class="sessie-item">
@@ -15390,12 +15408,16 @@ function toonOnboarding() {
   const s1 = document.getElementById('onb-stap1'), s2 = document.getElementById('onb-stap2');
   if (s1) s1.hidden = false; if (s2) s2.hidden = true;   // altijd op stap 1 beginnen
   ov.hidden = false;
+  if (typeof LICHAAM_GEN !== 'undefined' && LICHAAM_GEN && typeof window.__tattiesOnbModel === 'function') {   // welkom met draaiend model (slice 4q)
+    ov.classList.add('onb-model'); try { window.__tattiesOnbModel(true); } catch (e) { console.error(e); }
+  }
   laagOpenHistory('onboarding', rondOnboardingAf);   // ONB-1: Android-terug/edge-swipe sluit de intro i.p.v. de app
 }
 function rondOnboardingAf(blijf3D) {
   try { localStorage.setItem('tatties-onboarding-gedaan', '1'); } catch { /* geen vlag */ }
   const ov = document.getElementById('onboarding');
-  if (ov) ov.hidden = true;
+  if (ov) { ov.hidden = true; ov.classList.remove('onb-model'); }
+  if (typeof window.__tattiesOnbModel === 'function') window.__tattiesOnbModel(false);   // draaiend model stil (slice 4q)
   laagSluitHistory('onboarding');                    // no-op als 'terug' de entry al consumeerde
   // Op het startscherm landen, niet in de 3D-weergave. Daar staat de grote CTA met een label,
   // naast de mini-stats, de tegels en de regel dat alles op dit toestel blijft. Wie meteen het
@@ -15847,7 +15869,8 @@ async function verwijderVoorbeelden() {
   { const gm = $('#onb-gen-maak'); if (gm) gm.addEventListener('click', async () => {   // nieuw lichaam (2c): de generator is stap 1
       const intro = $('#onboarding');
       const naarStap2 = () => { const s1 = $('#onb-stap1'), s2 = $('#onb-stap2'); if (s1) s1.hidden = true; if (s2) s2.hidden = false; if (intro) intro.hidden = false; };
-      if (intro) intro.hidden = true;
+      if (intro) { intro.hidden = true; intro.classList.remove('onb-model'); }
+      if (typeof window.__tattiesOnbModel === 'function') window.__tattiesOnbModel(false);   // de generator neemt het model over
       let ok = false;
       /* Na Klaar of Overslaan: intro af en in 3D blijven (UX-doorloop 2026-09-25). Het oude stap-2-scherm alleen nog als
          de generator niet opent. */
@@ -16497,6 +16520,7 @@ async function verwijderVoorbeelden() {
      opnieuw - de breedte verandert namelijk niet als zo'n balk verschijnt of verdwijnt. */
   function pinStageHoogte(){
     if(!stage) return;
+    if(document.documentElement.classList.contains('genaan')) return;   // generator: stage staat vast over het scherm (slice 4o)
     // Venster op schermhoogte (2026-09-14): alles wat onder het scherm hangt (kop, marge) gaat eraf, zodat het model
     // de hele rest van het scherm krijgt. Op touch alleen herijken bij een breedtewissel (rotatie), niet bij in- en
     // uitschuivende browserbalken; op desktop bij elke resize.
@@ -16519,6 +16543,7 @@ async function verwijderVoorbeelden() {
   let _overloopT=0;
   function corrigeerStageOverloop(){
     if(!stage || !stage.clientWidth) return;
+    if(document.documentElement.classList.contains('genaan')) return;   // generator: stage staat vast over het scherm (slice 4o)
     const nu=performance.now(); if(nu-_overloopT<80) return; _overloopT=nu;
     const v=document.getElementById("view-3d"); if(!v || v.classList.contains("verborgen")) return;
     if(cutModal && cutModal.classList.contains("on")) return;   // knipmodal open: die heeft zijn eigen hoogte
@@ -16922,6 +16947,7 @@ async function verwijderVoorbeelden() {
   let genNa=null;   // terugmelding van wie de generator opende (onboarding: door naar stap 2)
   function genDicht(soort){
     if(typeof laagSluitHistory==="function") laagSluitHistory('lichaam');
+    resize();   // stage terug onder de kopbalk (slice 4o)
     resetView();
     const na=genNa; genNa=null; if(na){ try{ na(soort); }catch(e){ console.error(e); } }
   }
@@ -16983,6 +17009,7 @@ async function verwijderVoorbeelden() {
     zetGenTop();
     if(!_genResize){ _genResize=true; window.addEventListener("resize", ()=>{ if(genAan()) zetGenTop(); }); }
     if(!LichaamMotor.generator.open(genHost, lichaamOpgeslagen(), { kiesEerst:!!opties.kiesEerst, eersteKnop:opties.eersteKnop })) return false;
+    resize(); zetGenTop();   // stage staat nu vast over het scherm (kopbalk weg, slice 4o)
     genNa=opties.na||null;
     genFrames();
     if(typeof laagOpenHistory==="function") laagOpenHistory('lichaam', ()=>LichaamMotor.generator.annuleer());
@@ -18053,6 +18080,10 @@ async function verwijderVoorbeelden() {
         const keten=achter.reverse().concat(voor);
         if(keten.length<3) continue;
         const lus=keten.map(k=>plek.get(k));
+        /* Alleen de knip dichten, niet de eigen gaten van het model (ogen, mond): minstens de helft van de lus op een knipvlak. */
+        if(K.halfs && K.halfs.length){ let op=0;
+          for(const q of lus){ const pq={x:q[0],y:q[1],z:q[2]}; let m=Infinity; for(const f of K.halfs){ const v=Math.abs(f(pq)); if(v<m) m=v; } if(m<0.002) op++; }
+          if(op<lus.length*0.5) continue; }
         let cx=0, cy=0, cz=0;
         for(const q of lus){ cx+=q[0]; cy+=q[1]; cz+=q[2]; }
         cx/=lus.length; cy/=lus.length; cz/=lus.length;
@@ -18170,7 +18201,7 @@ async function verwijderVoorbeelden() {
     ledeDecals(false);
     body.remove(ledeActief.groep);
     ledeActief.groep.traverse(o=>{ if(o.isMesh){ if(o.geometry) o.geometry.dispose(); if(o.material&&o.material.dispose) o.material.dispose(); } });
-    skinMat.transparent=false; skinMat.opacity=1; skinMat.depthWrite=true; skinMat.needsUpdate=true;
+    skinMat.transparent=false; skinMat.opacity=1; skinMat.depthWrite=true; skinMat.polygonOffset=false; skinMat.needsUpdate=true;
     for(const dmesh of ledeActief_diepte){ if(dmesh.parent) dmesh.parent.remove(dmesh); if(dmesh.material) dmesh.material.dispose(); }   // diepte-voorpass weg (slice 4g)
     ledeActief_diepte=[];
     ledeActief=null;
@@ -18208,6 +18239,9 @@ async function verwijderVoorbeelden() {
       const mat=skinMat.clone();
       mat.transparent=false; mat.opacity=1; mat.depthWrite=true;
       mat.polygonOffset=true; mat.polygonOffsetFactor=-2;   // decals (-6) blijven er ruim voor liggen
+      /* Alleen de voorkant (slice 4n): dubbelzijdig staken de donkere binnenkanten aan de silhouetrand net uit, een dun donker
+         lijntje langs arm en hoofd. De knip zelf is dicht met het deksel. */
+      if(LICHAAM_GEN && LEDE_DEKSEL) mat.side=THREE.FrontSide;
       const mm=new THREE.Mesh(r.geo,mat); mm.renderOrder=1; groep.add(mm);
       /* Het dekseltje krijgt een eigen, gelijkmatig materiaal: als vlak stuk huid ving het nauwelijks
          licht (de lamp hangt bij de camera) en werd het bijna zwart. Nu een egale tint, iets donkerder
@@ -18234,10 +18268,12 @@ async function verwijderVoorbeelden() {
        al eerder getekend, dus waar de romp ervoor ligt schemert het er nog steeds doorheen. */
     if(LICHAAM_GEN){
       ledeActief_diepte=[];
-      const dm=new THREE.MeshBasicMaterial({ colorWrite:false, depthWrite:true, transparent:true, side:skinMat.side });
+      const dm=new THREE.MeshBasicMaterial({ colorWrite:false, depthWrite:true, transparent:true, side:skinMat.side,
+        polygonOffset:true, polygonOffsetFactor:2, polygonOffsetUnits:8 });   // zelfde duw als de romp (slice 4n)
       for(const mesh of pickMeshes){ const dmesh=new THREE.Mesh(mesh.geometry, dm); dmesh.renderOrder=-1; dmesh.frustumCulled=false; mesh.add(dmesh); ledeActief_diepte.push(dmesh); }
     }
     skinMat.opacity=Math.max(0.08, Math.min(0.22, LEDE_ROMP_OP+(1-Math.min(1,lum))*0.10));
+    skinMat.polygonOffset=true; skinMat.polygonOffsetFactor=2; skinMat.polygonOffsetUnits=8;   // romp achter het losse deel (slice 4n)
     skinMat.needsUpdate=true;
     ledeActief={ deel, groep, delen, box, decalOp:new Map() };
     zetLedeUI();
@@ -18291,9 +18327,29 @@ async function verwijderVoorbeelden() {
   }
   // Eerste 3D-opening: de bedieningshint een paar seconden tonen, daarna nooit meer (staat ook in de uitleg achter de (i)).
   let hintTimer=0;
+  /* Welkom (slice 4q): het model draait achter het paneel van de intro. De render-lus zet dan elke frame de camera
+     (ook als het model nog aan het laden is en daarna zijn beginstand zet). */
+  let onbDraai=false;
+  window.__tattiesOnbModel=function(aan){
+    aan=!!aan && LICHAAM_GEN;
+    if(aan===onbDraai) return;
+    onbDraai=aan;
+    document.documentElement.classList.toggle('onbmodel', aan);
+    if(aan){ theta=-0.35; show3D(); } else if(inited) resetView();
+  };
+  function onbCamera(){
+    /* Het model past in de ruimte boven het paneel (zoals genCamera): op een klein scherm vielen de benen er anders achter. */
+    const lang=(LICHAAM_GEN && LichaamMotor.geometry()) ? LichaamMotor.lengteCm()/100 : 1.75;
+    const sr=stage ? stage.getBoundingClientRect() : null, kaart=document.querySelector('#onboarding .onboarding-kaart');
+    const H=(sr && sr.height) || 600, kt=kaart ? kaart.getBoundingClientRect().top + 24 : (sr ? sr.bottom : H);
+    const zicht=Math.max(0.35, Math.min(1, (kt - (sr ? sr.top : 0)) / H));
+    const beeldH=lang*1.1/zicht;
+    theta+=0.006; phi=Math.PI/2; radius=beeldH/(2*Math.tan(camera.fov*Math.PI/360));
+    target.set(0, lang/2 - (1 - zicht)/2*beeldH, 0); targetGoal=null; radiusGoal=null; applyCam();
+  }
   function toonDraaiHintEenmalig(){
     let gezien=false; try{ gezien=localStorage.getItem('tatties-draaihint-gezien')==='1'; }catch(e){}
-    if(gezien || ledeActief) return;
+    if(gezien || ledeActief || onbDraai) return;   // achter het welkom (slice 4q) niet 'opmaken'
     const h=document.getElementById('hint'); if(!h) return;
     try{ localStorage.setItem('tatties-draaihint-gezien','1'); }catch(e){}
     h.classList.add('on');
@@ -21707,6 +21763,7 @@ function maakTatnetGL(json, canvas) {
       applyCam();
     }
     // selectie-ring is nu een op de huid geprojecteerde decal (buildSelRing) -> geen per-frame update nodig
+    if(onbDraai) onbCamera();   // welkom: model draait (slice 4q)
     if(key){ key.position.copy(camera.position); key.position.y+=1.5; key.position.x+=1.0; }
     renderer.render(scene,camera); requestAnimationFrame(loop);
   }
