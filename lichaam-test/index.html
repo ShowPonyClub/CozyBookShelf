@@ -1365,6 +1365,11 @@ html:not(.lichaam-gen) #inst-lichaam-open{display:none!important}
      Scrollschaduwen: de twee lokale verlopen (kaartkleur) schuiven mee met de inhoud en dekken de
      vaste schaduwen af zodra je aan de rand bent; zo zie je alleen een schaduw waar nog meer staat. */
   .gen-kaart{position:relative}
+  /* De pagina staat stil zolang de generator open is, en de lijst geeft zijn scroll niet door (toesteltest 2026-09-25:
+     scrollen in de lijst schoof de pagina met het model mee). */
+  html.genaan, html.genaan body{overflow:hidden;overscroll-behavior:none}
+  #gen{overscroll-behavior:contain}
+  .gen-rijen{overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
   .gen-rijen{max-height:31vh;overflow-y:auto;border:1px solid var(--rand);border-radius:var(--r-md);
     background:
       linear-gradient(var(--kaart) 30%, rgba(var(--kaart-rgb),0)) top / 100% 28px no-repeat local,
@@ -9496,6 +9501,29 @@ function genBind(){
   window.addEventListener('resize', function(){
     if(!genEl().hidden) genCamera(GEN_STAPPEN[GEN.stap]);
   });
+  /* Toesteltest eigenaar 2026-09-25: scrollen in de lijst van stap 4/5 schoof op de iPhone de pagina (met het model) mee.
+     In het paneel mag alleen de lijst scrollen (en een schuif slepen); elke andere veegbeweging wordt tegengehouden, en aan
+     het eind van de lijst ook (anders neemt iOS de pagina mee). */
+  var veegY = 0;
+  genEl().addEventListener('touchstart', function(e){ if(e.touches.length === 1) veegY = e.touches[0].clientY; }, { passive:true });
+  genEl().addEventListener('touchmove', function(e){
+    if(e.touches.length !== 1) return;
+    var t = e.target;
+    if(t && t.closest && t.closest('input[type=range]')) return;   /* schuif slepen: niet hinderen */
+    /* de lijst (staand) of de hele inhoud (liggend, dan scrollt #gen-inhoud) */
+    var lijst = null;
+    for(var el = t; el && el !== genEl(); el = el.parentElement){
+      if((el.classList && el.classList.contains('gen-rijen')) || el.id === 'gen-inhoud'){
+        if(el.scrollHeight > el.clientHeight + 1 && getComputedStyle(el).overflowY !== 'visible'){ lijst = el; break; }
+      }
+    }
+    if(lijst){
+      var dy = e.touches[0].clientY - veegY;
+      var bovenaan = lijst.scrollTop <= 0, onderaan = lijst.scrollTop + lijst.clientHeight >= lijst.scrollHeight - 1;
+      if(!((dy > 0 && bovenaan) || (dy < 0 && onderaan))) return;   /* de lijst kan zelf nog: laten scrollen */
+    }
+    if(e.cancelable) e.preventDefault();
+  }, { passive:false });
   $('#gen-herstel').addEventListener('click', genHerstel);
   $('#gen-door').addEventListener('click', function(){
     if(GEN.stap === GEN_STAPPEN.length - 1){ genKlaar(); return; }
@@ -10414,7 +10442,7 @@ function createTattoo(overrides = {}) {
    ============================================================ */
 // App-versie (semver, handmatig ophogen bij een release). Bij een bump ook de
 // CACHE-naam in sw.js meebumpen, zodat clients de nieuwe build ophalen.
-const APP_VERSIE = '0.3.114';
+const APP_VERSIE = '0.3.115';
 
 /* Dev-haken die de CLOUD raken hangen alleen op een ontwikkelmachine aan window. Ze zijn geen
    lek op zichzelf (zonder XSS roept niemand ze aan, en CSP + esc() houden XSS tegen), maar ze
