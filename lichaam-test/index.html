@@ -989,6 +989,7 @@ input[type=range]:focus{box-shadow:none;border:none}
 .sn-weg svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round}
 .start-account{display:flex;width:fit-content;align-items:center;gap:8px;margin:2px auto 4px;background:none;border:1px solid var(--rand);border-radius:999px;color:var(--gedempt);font:inherit;font-size:.85rem;font-weight:600;padding:9px 16px;cursor:pointer;min-height:44px;transition:color .14s,border-color .14s}
 .start-account .sa-icoon{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linejoin:round}
+#inst-lichaam-gen .inst-rij[hidden]{display:none}
 .start-account:hover{color:var(--tekst);border-color:var(--gedempt)}
 /* ============================================================
    Typografische hiërarchie
@@ -10634,7 +10635,7 @@ function createTattoo(overrides = {}) {
    ============================================================ */
 // App-versie (semver, handmatig ophogen bij een release). Bij een bump ook de
 // CACHE-naam in sw.js meebumpen, zodat clients de nieuwe build ophalen.
-const APP_VERSIE = '0.3.122';
+const APP_VERSIE = '0.3.123';
 
 /* Dev-haken die de CLOUD raken hangen alleen op een ontwikkelmachine aan window. Ze zijn geen
    lek op zichzelf (zonder XSS roept niemand ze aan, en CSP + esc() houden XSS tegen), maar ze
@@ -15692,7 +15693,12 @@ function openInstellingen() {
   navVoorInst = navActiefKey;                 // onthoud waar we waren
   zetNavActief('instellingen');               // tandwiel actief (inkt) terwijl het paneel open is
   { const lg = $('#inst-lichaam-gen');   // teststand: nieuw lichaamsmodel aan/uit
-    if (lg) { let dev = false; try { dev = localStorage.getItem('tatties-dev') === '1'; } catch (e) {}
+    if (lg) { let dev = false, terug = false; try { dev = localStorage.getItem('tatties-dev') === '1'; terug = localStorage.getItem('tatties-lichaam-gen') === '0'; } catch (e) {}
+      /* slice 5g: het vangnet voor iedereen met het nieuwe lichaam; de schakelaar in de teststand of na teruggaan */
+      const schak = lg.querySelector('#lichaam-gen-keuze'), vang = lg.querySelector('#inst-lichaam-terug');
+      const toonSchak = dev || terug, toonVang = LICHAAM_GEN;
+      if (schak) schak.closest('.inst-rij').hidden = !toonSchak;
+      if (vang) vang.closest('.inst-rij').hidden = !toonVang;
       lg.hidden = true;   // lichaam-test: de vlag staat vast aan
       lg.querySelectorAll('button[data-lichaam-gen]').forEach(b => b.classList.toggle('actief', (b.dataset.lichaamGen === '1') === LICHAAM_GEN)); } }
   { const ls = $('#inst-lichaam-status');   // opgeslagen lichaam in de gekozen eenheden, bv. '180 cm, 80 kg'
@@ -16911,7 +16917,7 @@ async function verwijderVoorbeelden() {
             w0:a.w0+(b.w0-a.w0)*s, w1:a.w1+(b.w1-a.w1)*s, w2:a.w2+(b.w2-a.w2)*s }); } }
       return uit; };
     const punt=(j,k)=>({x:P[j*3],y:P[j*3+1],z:P[j*3+2],nx:N[j*3],ny:N[j*3+1],nz:N[j*3+2], w0:+(k===0), w1:+(k===1), w2:+(k===2)});
-    const OFF=0.004, HS=18, bodyP=[], bodyN=[], bodyUV=[], bP=[], bN=[];
+    const OFF=0.006, HS=18, bodyP=[], bodyN=[], bodyUV=[], bP=[], bN=[];   // 6 mm: op de huid, niet erin (slice 5h)
     /* Hartjes per vlak geprojecteerd (doos): voor- en achterkant plat van voren, de zijkanten plat van opzij. Alleen van
        voren werden ze op de zijkant strepen; rond het lichaam (cilindrisch) gaf een waaier bij het kruis. De naad valt op de
        hoek, zoals bij een echte boxer. */
@@ -16926,8 +16932,13 @@ async function verwijderVoorbeelden() {
       vx=P[c*3]-P[a*3], vy=P[c*3+1]-P[a*3+1], vz=P[c*3+2]-P[a*3+2];
       const nx=uy*vz-uz*vy, nz=ux*vy-uy*vx; return Math.abs(nx)>Math.abs(nz); };
     const onderBand=taille-OB_BAND;
+    /* slice 5h: ook romp- en beendriehoeken tussen pijp en taille (anders een gat waar de maskerrand boven de vlakke pijp lag) */
+    const ZK=zoneKaart(), obZone=ZK ? ZK.namen.map(nm=>/^(buik|rug|borst|dij-)/.test(nm)) : null, laagY=Math.min(pijpL,pijpR)-0.01;
+    const obKand=(a,b,c)=>{ if(!obZone || !obZone[ZK.z[a]] || !obZone[ZK.z[b]] || !obZone[ZK.z[c]]) return false;
+      const ya=P[a*3+1], yb=P[b*3+1], yc=P[c*3+1];
+      return Math.max(ya,yb,yc)>=laagY && Math.min(ya,yb,yc)<=taille+0.005; };
     for(let i=0;i<idx.length;i+=3){ const a=idx[i], b=idx[i+1], c=idx[i+2];
-      if(!(m2[a]&&m2[b]&&m2[c])) continue;
+      if(!(m2[a]&&m2[b]&&m2[c]) && !obKand(a,b,c)) continue;
       const cy=(P[a*3+1]+P[b*3+1]+P[c*3+1])/3, cx=(P[a*3]+P[b*3]+P[c*3])/3;
       const tri=[punt(a,0),punt(b,1),punt(c,2)]; hier=[a,b,c];
       // stof: onder de band, en bij de benen boven de pijp van die kant
@@ -21943,7 +21954,7 @@ function maakTatnetGL(json, canvas) {
       let heeftLichaam=false, tipGezien=false, gemeld=false;
       try{ heeftLichaam=!!localStorage.getItem("tatties-lichaam"); tipGezien=localStorage.getItem("tatties-lichaam-tip")==="1";
         gemeld=localStorage.getItem("tatties-lichaam-migratie-gemeld")==="1"; }catch(e){}
-      if(LICHAAM_GEN && !heeftLichaam && !tipGezien && typeof toastMetActie==="function"){
+      if(LICHAAM_GEN && !heeftLichaam && !tipGezien && !onbDraai && !genAan() && typeof toastMetActie==="function"){   // niet achter het welkom (slice 5i)
         toastMetActie(tr(migTel.gedaan>0 ? 'ui.lichaam_tip_migratie' : 'ui.lichaam_tip'), tr('inst.lichaam_aanpassen'),
           ()=>{ if(typeof window.__tattiesLichaamOpen==="function") window.__tattiesLichaamOpen(); });
         try{ localStorage.setItem("tatties-lichaam-tip","1"); if(migTel.gedaan>0) localStorage.setItem("tatties-lichaam-migratie-gemeld","1"); }catch(e){}
