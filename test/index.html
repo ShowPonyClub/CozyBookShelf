@@ -10646,7 +10646,7 @@ function createTattoo(overrides = {}) {
    ============================================================ */
 // App-versie (semver, handmatig ophogen bij een release). Bij een bump ook de
 // CACHE-naam in sw.js meebumpen, zodat clients de nieuwe build ophalen.
-const APP_VERSIE = '0.3.125';
+const APP_VERSIE = '0.3.126';
 
 /* Dev-haken die de CLOUD raken hangen alleen op een ontwikkelmachine aan window. Ze zijn geen
    lek op zichzelf (zonder XSS roept niemand ze aan, en CSP + esc() houden XSS tegen), maar ze
@@ -15454,6 +15454,9 @@ function toonPersistMelding() {
   // een rare openingszin voor een app die belooft dat alles op je toestel blijft. Vlag pas
   // zetten als we 'm echt tonen, dus een volgende keer komt hij alsnog.
   if (!(typeof tattoos !== 'undefined' && tattoos && tattoos.length)) return;
+  { const st = (typeof window.__tattiesAccountStaat === 'function') ? window.__tattiesAccountStaat() : null;   // slice 5l
+    if (st && !st.bekend && !toonPersistMelding.gewacht) { toonPersistMelding.gewacht = true; setTimeout(toonPersistMelding, 1500); return; }
+    if ((st && st.ingelogd) || collectieEigenaar) return; }   // ingelogd: de cloud is de back-up
   try {
     if (localStorage.getItem('tatties-persist-melding')) return;
     localStorage.setItem('tatties-persist-melding', '1');
