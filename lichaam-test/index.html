@@ -838,6 +838,9 @@ input[type=range]:focus{box-shadow:none;border:none}
 #toast.zichtbaar{opacity:1;transform:translateX(-50%) translateY(0)}
 #toast.met-actie{pointer-events:auto;display:flex;align-items:center;gap:8px;padding:4px 4px 4px 16px;max-width:calc(100vw - 24px)}   /* tekst + knop + kruisje op een regel, ook op 375 px */
 #toast .toast-knop{margin-left:4px}
+#toast.met-actie.lang{flex-wrap:wrap;width:min(420px,calc(100vw - 24px));padding:12px 4px 4px 16px;row-gap:0}
+#toast.met-actie.lang > span{flex:1 1 100%;padding-right:12px;line-height:1.4}
+#toast.met-actie.lang .toast-knop{margin-left:auto}
 .toast-sluit{min-width:44px;min-height:44px;display:inline-flex;align-items:center;justify-content:center;background:none;border:0;padding:0;
   color:var(--toast-tekst);opacity:.7;font-size:1.35rem;line-height:1;cursor:pointer;border-radius:var(--r-sm,8px);}
 .toast-sluit:hover,.toast-sluit:focus-visible{opacity:1}
@@ -966,6 +969,9 @@ input[type=range]:focus{box-shadow:none;border:none}
 .start-podium{position:relative}
 .start-account.chip{position:absolute;top:0;right:0;z-index:1;margin:0;padding:8px 12px;font-size:.78rem;background:var(--bg)}
 .start-account.chip .sa-icoon{width:16px;height:16px}
+.start-account.chip.alleen-icoon{padding:8px 11px;gap:3px}
+.start-account.chip.alleen-icoon .sa-tekst{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.start-account.chip.alleen-icoon::after{content:'\2713';font-weight:700}
 .start-cta + .start-account{margin-top:-4px;color:var(--tekst)}   /* uitnodiging onder de rode knop: iets steviger dan de oude regel */
 .start-model{display:block;width:100%;height:clamp(180px,30vh,300px);margin:0 auto 14px;padding:0;background:none;border:0;
   cursor:pointer;-webkit-tap-highlight-color:transparent}
@@ -991,6 +997,8 @@ input[type=range]:focus{box-shadow:none;border:none}
 .start-account{display:flex;width:fit-content;align-items:center;gap:8px;margin:2px auto 4px;background:none;border:1px solid var(--rand);border-radius:999px;color:var(--gedempt);font:inherit;font-size:.85rem;font-weight:600;padding:9px 16px;cursor:pointer;min-height:44px;transition:color .14s,border-color .14s}
 .start-account .sa-icoon{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linejoin:round}
 #inst-lichaam-gen .inst-rij[hidden]{display:none}
+.inst-rij-kolom{flex-direction:column;align-items:flex-start;gap:8px}
+.inst-rij-kolom .inst-uitleg{padding:0}
 .start-account:hover{color:var(--tekst);border-color:var(--gedempt)}
 /* ============================================================
    Typografische hiërarchie
@@ -2214,6 +2222,7 @@ html.onbmodel #lege-hint-3d{visibility:hidden}
 .onb-skip:hover{color:var(--accent)}
 /* 'Al een account? Inloggen' onder de knoppen (2026-09-20): voor wie z'n collectie op een nieuw toestel terughaalt */
 .onb-acc-icoon{display:flex;justify-content:center}
+.onb-acc-login{margin:0}
 #onb-stap-account{display:flex;flex-direction:column;gap:14px}
 #onb-stap-account[hidden]{display:none}
 .onboarding.onb-vraag{background:rgba(0,0,0,.5)}   /* herinnering: kaart op het gedimde startscherm, geen vol scherm */
@@ -2777,8 +2786,9 @@ form label{text-transform:none;letter-spacing:.005em;font-size:.8rem;color:var(-
         <button type="button" data-lichaam-gen="1" data-i18n="inst.lichaam_gen_aan">Aan</button>
       </div>
     </div>
-    <div class="inst-rij inst-kaart-rij inst-kaart-rij-last">
+    <div class="inst-rij inst-kaart-rij inst-kaart-rij-last inst-rij-kolom">
       <button type="button" class="knop-sec" id="inst-lichaam-terug" data-i18n="inst.lichaam_terug">Tattoos terug naar het oude model</button>
+      <p class="inst-uitleg" data-i18n="inst.lichaam_terug_uitleg">Staan je tattoos niet goed op het nieuwe model? Zet ze terug op het oude.</p>
     </div>
   </div>
   <div class="inst-sectie" hidden>
@@ -2994,6 +3004,7 @@ form label{text-transform:none;letter-spacing:.005em;font-size:.8rem;color:var(-
       <p class="onboarding-sub" data-i18n="onb.account_sub">Met een account staat je collectie ook in de cloud. Nieuw toestel of je browser gewist? Dan ben je niets kwijt.</p>
       <button type="button" class="knop onboarding-start" id="onb-acc-maak" data-i18n="onb.account_maak">Maak een account</button>
       <button type="button" class="linkbtn onb-skip" id="onb-acc-later" data-i18n="onb.overslaan">Overslaan</button>
+      <p class="onb-login onb-acc-login"><span data-i18n="onb.al_account">Al een account?</span> <button type="button" id="onb-acc-inloggen" data-i18n="onb.inloggen">Inloggen</button></p>
     </div>
     <div id="onb-stap2" hidden>
       <h1 class="onboarding-titel" data-i18n="onb.stap2_titel">Je eerste tattoo toevoegen</h1>
@@ -10184,7 +10195,7 @@ const I18N = {
     'woord.wensen':'wensen','woord.tattoos':'tattoos','woord.dag':'dag','woord.dagen':'dagen','mv.foto_s':"'s",
     'woord.notitiesopt':'Notities (optioneel)','woord.onbekendefout':'onbekende fout','eenheid.uur':'u','eenheid.min':'min',
     'stats.wissel_eenheid':'Tik om te wisselen tussen uren en minuten','inst.valuta':'Valuta',
-    /* LICHAAM-GEN-I18N-NL-BEGIN */'gen.terug':'Terug','gen.volgende':'Volgende','gen.klaar':'Klaar','gen.beeld':'Heel lichaam','gen.reset':'Opnieuw','gen.reset_zeker':'Zeker?','gen.meer':'Meer instellen','gen.minder':'Minder instellen','gen.geslacht.kop':'Welke vorm past bij jou?','gen.geslacht.sub':'Dit bepaalt de basisvorm. Je kunt het later nog bijstellen.','gen.geslacht.vrouw':'Vrouwelijk','gen.geslacht.vrouw_sub':'Smallere schouders, bredere heupen','gen.geslacht.nb':'Tussenin','gen.geslacht.nb_sub':'Tussen beide in; verstel zelf waar','gen.geslacht.man':'Mannelijk','gen.geslacht.man_sub':'Bredere schouders, rechtere heupen','gen.leeftijd':'Leeftijd','gen.jaar_eenheid':'jaar','gen.huid':'Huidskleur','gen.geslacht.links':'smallere schouders, bredere heupen','gen.geslacht.rechts':'bredere schouders, smallere heupen','gen.stapvan':'Stap {n} van {m}','gen.kies_eerst':'Kies eerst een vorm','aria.lengte':'Lengte','aria.gewicht':'Gewicht','aria.bouw':'Bouw','aria.nb':'Basisvorm','aria.min':'Minder','aria.plus':'Meer','aria.veelminder':'veel minder','aria.minder':'minder','aria.gemiddeld':'gemiddeld','aria.meer':'meer','aria.veelmeer':'veel meer','aria.zachter':'zachter','aria.gespierder':'gespierder','gen.lengte.kop':'Hoe lang ben je?','gen.lengte.sub':'Zo staat de tattoo straks op de juiste schaal.','gen.gewicht.kop':'Hoeveel weeg je?','gen.gewicht.sub':'Een schatting is goed. Daarna kies je je bouw.','gen.gewicht.bouw':'Bouw','gen.gewicht.links':'zachter','gen.gewicht.rechts':'gespierder','gen.gewicht.klem':'Verder dan {n} kg gaat het model hier niet.','gen.boven.kop':'Bovenlichaam','gen.onder.kop':'Onderlichaam','gen.deel.sub':'Sleep tot het klopt, of tik gewoon op Volgende.','mod.schouderbreedte':'Schouders','mod.borstkas':'Borstkas','mod.taille':'Taille','mod.buik':'Buik','mod.bovenarm':'Bovenarm','mod.nek':'Nek','mod.pols':'Pols','mod.borstspier':'Borstspier','mod.rugspier':'Rugspier','mod.vShape':'V-vorm','mod.buikTonus':'Buik strak','mod.armenVet':'Armen zacht','mod.armenSpier':'Armen spier','mod.bovenarmlengte':'Bovenarmlengte','mod.onderarmlengte':'Onderarmlengte','mod.heupen':'Heupen','mod.billen':'Billen','mod.dij':'Dij','mod.kuit':'Kuit','mod.benenVet':'Benen zacht','mod.benenSpier':'Benen spier','mod.cupsize':'Cupmaat','mod.firmness':'Stevigheid','gen.annuleer':'Annuleren','gen.overslaan':'Overslaan','onb.gen_sub':'Eerst je lichaam, dan staan je tattoos straks op de juiste plek.','onb.gen_maak':'Maak je lichaam','ui.lichaam_migratie':'We hebben een nieuw 3D-model. Kijk even of je tattoos goed staan.','ui.lichaam_migratie_mis':'{n} tattoo{s} niet overgezet naar het nieuwe model; ze staan wel in je collectie.','inst.lichaam_terug':'Tattoos terug naar het oude model','inst.lichaam_terug_vraag':'Alle overgezette tattoos terugzetten op hun oude plek en het nieuwe lichaamsmodel uitzetten?','toast.lichaam_terug':'{n} tattoo{s} teruggezet. De app laadt opnieuw.','ui.lichaam_tip':'Maak eerst je lichaam, dan kloppen de maat en de plek van je tattoos.','ui.lichaam_tip_migratie':'We hebben een nieuw 3D-model. Maak eerst je lichaam en kijk dan of je tattoos goed staan.','inst.lichaam_niet':'Nog niet gemaakt','detail.herplaats':'Opnieuw plaatsen','detail.herplaats_uitleg':'Staat hij niet goed? Plaats hem opnieuw op het model.','detail.herplaats_geen':'Staat nog niet op het model.','ui.tattoo_herplaatst':'Tattoo opnieuw geplaatst','ui.herplaats_hint':'Tik op de nieuwe plek. De oude plek zie je vaag.','detail.plek':'Plek op het lichaam','start.lichaam_label':'Nieuw','start.lichaam_kop':'Maak je eigen lichaam','start.lichaam_uitleg':'Lengte, gewicht en bouw. Dan staan je tattoos op de juiste plek en maat.','start.model_aria':'Bekijk je lichaam in 3D','onb.account_titel':'Zet je collectie veilig','onb.account_sub':'Met een account staat je collectie ook in de cloud. Nieuw toestel of je browser gewist? Dan ben je niets kwijt.','onb.account_maak':'Maak een account','onb.account_later':'Later','inst.lichaam_aanpassen':'Lichaam aanpassen',/* LICHAAM-GEN-I18N-NL-EINDE */'inst.lichaam_gen':'Nieuw lichaamsmodel (test)','inst.lichaam_gen_uit':'Uit','inst.lichaam_gen_aan':'Aan','ui.lichaam_gen_kan_niet':'Dit toestel kan het nieuwe lichaamsmodel nog niet laden.','inst.onderbroek':'Onderbroek','onderbroek.geen':'Geen','onderbroek.boxer':'Boxer','onderbroek.brief':'Strak',
+    /* LICHAAM-GEN-I18N-NL-BEGIN */'gen.terug':'Terug','gen.volgende':'Volgende','gen.klaar':'Klaar','gen.beeld':'Heel lichaam','gen.reset':'Opnieuw','gen.reset_zeker':'Zeker?','gen.meer':'Meer instellen','gen.minder':'Minder instellen','gen.geslacht.kop':'Welke vorm past bij jou?','gen.geslacht.sub':'Dit bepaalt de basisvorm. Je kunt het later nog bijstellen.','gen.geslacht.vrouw':'Vrouwelijk','gen.geslacht.vrouw_sub':'Smallere schouders, bredere heupen','gen.geslacht.nb':'Tussenin','gen.geslacht.nb_sub':'Tussen beide in; verstel zelf waar','gen.geslacht.man':'Mannelijk','gen.geslacht.man_sub':'Bredere schouders, rechtere heupen','gen.leeftijd':'Leeftijd','gen.jaar_eenheid':'jaar','gen.huid':'Huidskleur','gen.geslacht.links':'smallere schouders, bredere heupen','gen.geslacht.rechts':'bredere schouders, smallere heupen','gen.stapvan':'Stap {n} van {m}','gen.kies_eerst':'Kies eerst een vorm','aria.lengte':'Lengte','aria.gewicht':'Gewicht','aria.bouw':'Bouw','aria.nb':'Basisvorm','aria.min':'Minder','aria.plus':'Meer','aria.veelminder':'veel minder','aria.minder':'minder','aria.gemiddeld':'gemiddeld','aria.meer':'meer','aria.veelmeer':'veel meer','aria.zachter':'zachter','aria.gespierder':'gespierder','gen.lengte.kop':'Hoe lang ben je?','gen.lengte.sub':'Zo staat de tattoo straks op de juiste schaal.','gen.gewicht.kop':'Hoeveel weeg je?','gen.gewicht.sub':'Een schatting is goed. Daarna kies je je bouw.','gen.gewicht.bouw':'Bouw','gen.gewicht.links':'zachter','gen.gewicht.rechts':'gespierder','gen.gewicht.klem':'Verder dan {n} kg gaat het model hier niet.','gen.boven.kop':'Bovenlichaam','gen.onder.kop':'Onderlichaam','gen.deel.sub':'Sleep tot het klopt, of tik gewoon op Volgende.','mod.schouderbreedte':'Schouders','mod.borstkas':'Borstkas','mod.taille':'Taille','mod.buik':'Buik','mod.bovenarm':'Bovenarm','mod.nek':'Nek','mod.pols':'Pols','mod.borstspier':'Borstspier','mod.rugspier':'Rugspier','mod.vShape':'V-vorm','mod.buikTonus':'Buik strak','mod.armenVet':'Armen zacht','mod.armenSpier':'Armen spier','mod.bovenarmlengte':'Bovenarmlengte','mod.onderarmlengte':'Onderarmlengte','mod.heupen':'Heupen','mod.billen':'Billen','mod.dij':'Dij','mod.kuit':'Kuit','mod.benenVet':'Benen zacht','mod.benenSpier':'Benen spier','mod.cupsize':'Cupmaat','mod.firmness':'Stevigheid','gen.annuleer':'Annuleren','gen.overslaan':'Overslaan','onb.gen_sub':'Eerst je lichaam, dan staan je tattoos straks op de juiste plek.','onb.gen_maak':'Maak je lichaam','ui.lichaam_migratie':'We hebben een nieuw 3D-model. Kijk even of je tattoos goed staan.','ui.lichaam_migratie_mis':'{n} tattoo{s} niet overgezet naar het nieuwe model; ze staan wel in je collectie.','inst.lichaam_terug':'Tattoos terug naar het oude model','inst.lichaam_terug_vraag':'Alle overgezette tattoos terugzetten op hun oude plek en het nieuwe lichaamsmodel uitzetten?','toast.lichaam_terug':'{n} tattoo{s} teruggezet. De app laadt opnieuw.','ui.lichaam_tip':'Maak eerst je lichaam, dan kloppen de maat en de plek van je tattoos.','ui.lichaam_tip_migratie':'We hebben een nieuw 3D-model. Maak eerst je lichaam en kijk dan of je tattoos goed staan.','inst.lichaam_niet':'Nog niet gemaakt','detail.herplaats':'Opnieuw plaatsen','detail.herplaats_uitleg':'Staat hij niet goed? Plaats hem opnieuw op het model.','detail.herplaats_geen':'Staat nog niet op het model.','ui.tattoo_herplaatst':'Tattoo opnieuw geplaatst','ui.herplaats_hint':'Tik op de nieuwe plek. De oude plek zie je vaag.','detail.plek':'Plek op het lichaam','start.lichaam_label':'Nieuw','start.lichaam_kop':'Maak je eigen lichaam','start.lichaam_uitleg':'Lengte, gewicht en bouw. Dan staan je tattoos op de juiste plek en maat.','start.model_aria':'Bekijk je lichaam in 3D','onb.account_titel':'Zet je collectie veilig','onb.account_sub':'Met een account staat je collectie ook in de cloud. Nieuw toestel of je browser gewist? Dan ben je niets kwijt.','onb.account_maak':'Maak een account','onb.account_later':'Later','inst.lichaam_terug_uitleg':'Staan je tattoos niet goed op het nieuwe model? Zet ze terug op het oude.','inst.lichaam_aanpassen':'Lichaam aanpassen',/* LICHAAM-GEN-I18N-NL-EINDE */'inst.lichaam_gen':'Nieuw lichaamsmodel (test)','inst.lichaam_gen_uit':'Uit','inst.lichaam_gen_aan':'Aan','ui.lichaam_gen_kan_niet':'Dit toestel kan het nieuwe lichaamsmodel nog niet laden.','inst.onderbroek':'Onderbroek','onderbroek.geen':'Geen','onderbroek.boxer':'Boxer','onderbroek.brief':'Strak',
     'lijst.geenresultaten':'Geen resultaten voor je zoekopdracht.',
     'lijst.geenopzone':'Geen {soort} op {zone}.',
     'lijst.legewishlist':'Je wishlist is nog leeg - voeg je eerste droomtattoo toe.',
@@ -10377,7 +10388,7 @@ const I18N = {
     'woord.wensen':'wishes','woord.tattoos':'tattoos','woord.dag':'day','woord.dagen':'days','mv.foto_s':'s',
     'woord.notitiesopt':'Notes (optional)','woord.onbekendefout':'unknown error','eenheid.uur':'h','eenheid.min':'min',
     'stats.wissel_eenheid':'Tap to switch between hours and minutes','inst.valuta':'Currency',
-    /* LICHAAM-GEN-I18N-EN-BEGIN */'gen.terug':'Back','gen.volgende':'Next','gen.klaar':'Done','gen.beeld':'Whole body','gen.reset':'Reset','gen.reset_zeker':'Sure?','gen.meer':'More settings','gen.minder':'Fewer settings','gen.geslacht.kop':'Which shape suits you?','gen.geslacht.sub':'This sets the basic shape. You can adjust it later.','gen.geslacht.vrouw':'Feminine','gen.geslacht.vrouw_sub':'Narrower shoulders, wider hips','gen.geslacht.nb':'In between','gen.geslacht.nb_sub':'In between; set it where you want','gen.geslacht.man':'Masculine','gen.geslacht.man_sub':'Wider shoulders, straighter hips','gen.leeftijd':'Age','gen.jaar_eenheid':'years','gen.huid':'Skin tone','gen.geslacht.links':'narrower shoulders, wider hips','gen.geslacht.rechts':'wider shoulders, narrower hips','gen.stapvan':'Step {n} of {m}','gen.kies_eerst':'Choose a shape first','aria.lengte':'Height','aria.gewicht':'Weight','aria.bouw':'Build','aria.nb':'Basic shape','aria.min':'Less','aria.plus':'More','aria.veelminder':'much less','aria.minder':'less','aria.gemiddeld':'average','aria.meer':'more','aria.veelmeer':'much more','aria.zachter':'softer','aria.gespierder':'more muscular','gen.lengte.kop':'How tall are you?','gen.lengte.sub':'This puts your tattoo on the right scale.','gen.gewicht.kop':'How much do you weigh?','gen.gewicht.sub':'A rough guess is fine. Then choose your build.','gen.gewicht.bouw':'Build','gen.gewicht.links':'softer','gen.gewicht.rechts':'more muscular','gen.gewicht.klem':"The model can't go past {n} kg here.",'gen.boven.kop':'Upper body','gen.onder.kop':'Lower body','gen.deel.sub':'Drag until it looks right, or just tap Next.','mod.schouderbreedte':'Shoulders','mod.borstkas':'Chest','mod.taille':'Waist','mod.buik':'Belly','mod.bovenarm':'Upper arm','mod.nek':'Neck','mod.pols':'Wrist','mod.borstspier':'Chest muscle','mod.rugspier':'Back muscle','mod.vShape':'V-shape','mod.buikTonus':'Firm belly','mod.armenVet':'Soft arms','mod.armenSpier':'Arm muscle','mod.bovenarmlengte':'Upper arm length','mod.onderarmlengte':'Forearm length','mod.heupen':'Hips','mod.billen':'Buttocks','mod.dij':'Thigh','mod.kuit':'Calf','mod.benenVet':'Soft legs','mod.benenSpier':'Leg muscle','mod.cupsize':'Cup size','mod.firmness':'Firmness','gen.annuleer':'Cancel','gen.overslaan':'Skip','onb.gen_sub':'First your body, so your tattoos end up in the right place.','onb.gen_maak':'Create your body','ui.lichaam_migratie':"We've got a new 3D model. Have a quick look that your tattoos are in the right place.",'ui.lichaam_migratie_mis':"{n} tattoo{s} not moved to the new model; they're still in your collection.",'inst.lichaam_terug':'Move tattoos back to the old model','inst.lichaam_terug_vraag':'Put all moved tattoos back in their old place and switch off the new body model?','toast.lichaam_terug':'{n} tattoo{s} moved back. The app will reload.','ui.lichaam_tip':'Create your body first, so your tattoos get the right size and place.','ui.lichaam_tip_migratie':"We've got a new 3D model. Create your body first, then check that your tattoos are in the right place.",'inst.lichaam_niet':'Not created yet','detail.herplaats':'Place again','detail.herplaats_uitleg':'Not in the right spot? Place it on the model again.','detail.herplaats_geen':'Not on the model yet.','ui.tattoo_herplaatst':'Tattoo placed again','ui.herplaats_hint':'Tap the new spot. The old spot is shown faintly.','detail.plek':'Place on the body','start.lichaam_label':'New','start.lichaam_kop':'Create your own body','start.lichaam_uitleg':'Height, weight and build. So your tattoos get the right place and size.','start.model_aria':'View your body in 3D','onb.account_titel':'Keep your collection safe','onb.account_sub':"With an account, your collection is also kept in the cloud. New device or cleared your browser? You won't lose a thing.",'onb.account_maak':'Create an account','onb.account_later':'Not now','inst.lichaam_aanpassen':'Adjust body',/* LICHAAM-GEN-I18N-EN-EINDE */'inst.lichaam_gen':'New body model (test)','inst.lichaam_gen_uit':'Off','inst.lichaam_gen_aan':'On','ui.lichaam_gen_kan_niet':"This device can't load the new body model yet.",'inst.onderbroek':'Underwear','onderbroek.geen':'None','onderbroek.boxer':'Boxer','onderbroek.brief':'Brief',
+    /* LICHAAM-GEN-I18N-EN-BEGIN */'gen.terug':'Back','gen.volgende':'Next','gen.klaar':'Done','gen.beeld':'Whole body','gen.reset':'Reset','gen.reset_zeker':'Sure?','gen.meer':'More settings','gen.minder':'Fewer settings','gen.geslacht.kop':'Which shape suits you?','gen.geslacht.sub':'This sets the basic shape. You can adjust it later.','gen.geslacht.vrouw':'Feminine','gen.geslacht.vrouw_sub':'Narrower shoulders, wider hips','gen.geslacht.nb':'In between','gen.geslacht.nb_sub':'In between; set it where you want','gen.geslacht.man':'Masculine','gen.geslacht.man_sub':'Wider shoulders, straighter hips','gen.leeftijd':'Age','gen.jaar_eenheid':'years','gen.huid':'Skin tone','gen.geslacht.links':'narrower shoulders, wider hips','gen.geslacht.rechts':'wider shoulders, narrower hips','gen.stapvan':'Step {n} of {m}','gen.kies_eerst':'Choose a shape first','aria.lengte':'Height','aria.gewicht':'Weight','aria.bouw':'Build','aria.nb':'Basic shape','aria.min':'Less','aria.plus':'More','aria.veelminder':'much less','aria.minder':'less','aria.gemiddeld':'average','aria.meer':'more','aria.veelmeer':'much more','aria.zachter':'softer','aria.gespierder':'more muscular','gen.lengte.kop':'How tall are you?','gen.lengte.sub':'This puts your tattoo on the right scale.','gen.gewicht.kop':'How much do you weigh?','gen.gewicht.sub':'A rough guess is fine. Then choose your build.','gen.gewicht.bouw':'Build','gen.gewicht.links':'softer','gen.gewicht.rechts':'more muscular','gen.gewicht.klem':"The model can't go past {n} kg here.",'gen.boven.kop':'Upper body','gen.onder.kop':'Lower body','gen.deel.sub':'Drag until it looks right, or just tap Next.','mod.schouderbreedte':'Shoulders','mod.borstkas':'Chest','mod.taille':'Waist','mod.buik':'Belly','mod.bovenarm':'Upper arm','mod.nek':'Neck','mod.pols':'Wrist','mod.borstspier':'Chest muscle','mod.rugspier':'Back muscle','mod.vShape':'V-shape','mod.buikTonus':'Firm belly','mod.armenVet':'Soft arms','mod.armenSpier':'Arm muscle','mod.bovenarmlengte':'Upper arm length','mod.onderarmlengte':'Forearm length','mod.heupen':'Hips','mod.billen':'Buttocks','mod.dij':'Thigh','mod.kuit':'Calf','mod.benenVet':'Soft legs','mod.benenSpier':'Leg muscle','mod.cupsize':'Cup size','mod.firmness':'Firmness','gen.annuleer':'Cancel','gen.overslaan':'Skip','onb.gen_sub':'First your body, so your tattoos end up in the right place.','onb.gen_maak':'Create your body','ui.lichaam_migratie':"We've got a new 3D model. Have a quick look that your tattoos are in the right place.",'ui.lichaam_migratie_mis':"{n} tattoo{s} not moved to the new model; they're still in your collection.",'inst.lichaam_terug':'Move tattoos back to the old model','inst.lichaam_terug_vraag':'Put all moved tattoos back in their old place and switch off the new body model?','toast.lichaam_terug':'{n} tattoo{s} moved back. The app will reload.','ui.lichaam_tip':'Create your body first, so your tattoos get the right size and place.','ui.lichaam_tip_migratie':"We've got a new 3D model. Create your body first, then check that your tattoos are in the right place.",'inst.lichaam_niet':'Not created yet','detail.herplaats':'Place again','detail.herplaats_uitleg':'Not in the right spot? Place it on the model again.','detail.herplaats_geen':'Not on the model yet.','ui.tattoo_herplaatst':'Tattoo placed again','ui.herplaats_hint':'Tap the new spot. The old spot is shown faintly.','detail.plek':'Place on the body','start.lichaam_label':'New','start.lichaam_kop':'Create your own body','start.lichaam_uitleg':'Height, weight and build. So your tattoos get the right place and size.','start.model_aria':'View your body in 3D','onb.account_titel':'Keep your collection safe','onb.account_sub':"With an account, your collection is also kept in the cloud. New device or cleared your browser? You won't lose a thing.",'onb.account_maak':'Create an account','onb.account_later':'Not now','inst.lichaam_terug_uitleg':'Tattoos not in the right place on the new model? Put them back on the old one.','inst.lichaam_aanpassen':'Adjust body',/* LICHAAM-GEN-I18N-EN-EINDE */'inst.lichaam_gen':'New body model (test)','inst.lichaam_gen_uit':'Off','inst.lichaam_gen_aan':'On','ui.lichaam_gen_kan_niet':"This device can't load the new body model yet.",'inst.onderbroek':'Underwear','onderbroek.geen':'None','onderbroek.boxer':'Boxer','onderbroek.brief':'Brief',
     'lijst.geenresultaten':'No results for your search.',
     'lijst.geenopzone':'No {soort} on {zone}.',
     'lijst.legewishlist':'Your wishlist is empty - add your first dream tattoo.',
@@ -10636,7 +10647,7 @@ function createTattoo(overrides = {}) {
    ============================================================ */
 // App-versie (semver, handmatig ophogen bij een release). Bij een bump ook de
 // CACHE-naam in sw.js meebumpen, zodat clients de nieuwe build ophalen.
-const APP_VERSIE = '0.3.124';
+const APP_VERSIE = '0.3.125';
 
 /* Dev-haken die de CLOUD raken hangen alleen op een ontwikkelmachine aan window. Ze zijn geen
    lek op zichzelf (zonder XSS roept niemand ze aan, en CSP + esc() houden XSS tegen), maar ze
@@ -12656,6 +12667,7 @@ function toastMetActie(tekst, label, fn) {
   const el = $('#toast'); toastActieTijd = performance.now();
   el.innerHTML = '<span></span><button id="toast-actie" class="toast-knop"></button><button id="toast-sluit" class="toast-sluit" type="button">\u00d7</button>';
   el.querySelector('span').textContent = tekst;
+  el.classList.toggle('lang', String(tekst).length > 48);   // lange melding: tekst over de volle breedte, knop eronder (slice 5k)
   const knop = $('#toast-actie');
   knop.textContent = label;
   knop.addEventListener('click', () => {
@@ -12889,7 +12901,7 @@ function toonStartModel() {
       src = localStorage.getItem('tatties-start-opname:' + DB_NAAM + ':src') || '';
       ids = JSON.parse(localStorage.getItem('tatties-start-opname:' + DB_NAAM + ':ids') || '[]'); } } catch (e) { src = ''; }
   const bekend = new Set(tattoos.map(t => t.id));
-  const ok = !!src && Array.isArray(ids) && ids.every(id => bekend.has(id));
+  const ok = !!src && Array.isArray(ids) && ids.every(id => bekend.has(id)) && window.innerHeight >= 520;   // laag scherm (liggend): geen model (slice 5k)
   if (ok && im.getAttribute('src') !== src) im.src = src;
   sm.hidden = !ok;
   if (wrap) wrap.classList.toggle('met-model', ok);
@@ -12908,6 +12920,8 @@ function zetStartLive(ok) {
   }, 0);
 }
 try { indexedDB.deleteDatabase('tatties-startbeeld-' + DB_NAAM); } catch (e) { /* het filmpje van 5f: niet meer nodig */ }
+{ let t = 0; window.addEventListener('resize', () => { clearTimeout(t);   // draaien/venster: model aan of uit, chipje opnieuw meten (slice 5k)
+    t = setTimeout(() => { if (huidigeView === 'start') toonStartModel(); }, 200); }); }
 /* Account-knop (slice 5b): ingelogd en met model als chipje rechtsboven het model, anders onder de rode knop. */
 function plaatsStartAccount() {
   const sr = $('#start-account'), wrap = $('#view-start .start-wrap'), podium = $('#start-podium'), cta = $('#start-nieuw');
@@ -12916,6 +12930,10 @@ function plaatsStartAccount() {
   sr.classList.toggle('chip', chip);
   if (chip) { if (sr.parentNode !== podium) podium.appendChild(sr); }
   else if (cta.nextElementSibling !== sr) cta.after(sr);
+  /* slice 5k: valt het chipje over het model (het hoofd staat in het midden), dan alleen het wolkje met een vinkje */
+  sr.classList.remove('alleen-icoon');
+  if (chip) { const c = sr.getBoundingClientRect(), p = podium.getBoundingClientRect();
+    if (p.width && c.left < p.left + p.width / 2 + 40) sr.classList.add('alleen-icoon'); }
 }
 
 function renderStart() {
@@ -15557,6 +15575,7 @@ function planAccountVraag() {
   accountVraagT = setTimeout(() => {
     try { if (localStorage.getItem('tatties-account-vraag') === '1' || localStorage.getItem('tatties-onboarding-gedaan') !== '1') return; } catch (e) { return; }
     if (huidigeView !== 'start' || !tattoos.some(t => t && !t.deleted) || !accountStapKan()) return;
+    { const sl = $('#start-lichaam'); if (sl && !sl.hidden) return; }   // niet samen met de Nieuw-kaart (slice 5k): een vraag tegelijk
     const ov = $('#onboarding'), am = $('#account-modal'), ip = $('#inst-paneel');
     if ((ov && !ov.hidden) || (am && !am.hidden) || (ip && ip.classList.contains('open'))) return;
     toonAccountStap('vraag');
@@ -15566,6 +15585,7 @@ window.__tattiesAccountVraag = () => { try { localStorage.removeItem('tatties-ac
 
 function rondOnboardingAf(blijf3D) {
   try { localStorage.setItem('tatties-onboarding-gedaan', '1'); } catch { /* geen vlag */ }
+  if (typeof LICHAAM_GEN !== 'undefined' && LICHAAM_GEN) { try { localStorage.setItem('tatties-lichaam-nieuws-weg', '1'); } catch (e) { /* geen opslag */ } }   // de nieuwe intro gezien: geen Nieuw-kaart (slice 5k)
   const ov = document.getElementById('onboarding');
   if (ov) { ov.hidden = true; ov.classList.remove('onb-model'); }
   if (typeof window.__tattiesOnbModel === 'function') window.__tattiesOnbModel(false);   // draaiend model stil (slice 4q)
@@ -16088,6 +16108,7 @@ async function verwijderVoorbeelden() {
   { const al = $('#onb-acc-later'); if (al) al.addEventListener('click', () => sluitAccountStap(false)); }
   { const ovv = $('#onboarding'); if (ovv) ovv.addEventListener('click', (e) => {   // herinnering: ernaast tikken = Later
       if (e.target === ovv && accountStapModus === 'vraag') sluitAccountStap(false); }); }
+  { const ai = $('#onb-acc-inloggen'); if (ai) ai.addEventListener('click', () => sluitAccountStap(true)); }   // het account-venster kan ook inloggen (slice 5k)
   { const terug = $('#onb-terug'); if (terug) terug.addEventListener('click', () => { const s1 = $('#onb-stap1'), s2 = $('#onb-stap2'); if (s1) s1.hidden = false; if (s2) s2.hidden = true; }); }
   $('#kaart-reset').addEventListener('click', () => { zetFilter(null); setTimeout(renderMarkers, 320); });
   document.querySelectorAll('#taal-keuze button[data-taal]').forEach((b) =>
