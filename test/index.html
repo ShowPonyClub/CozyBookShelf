@@ -971,6 +971,8 @@ input[type=range]:focus{box-shadow:none;border:none}
 .start-model[hidden]{display:none}
 .start-model img{display:block;height:100%;width:auto;max-width:100%;margin:0 auto;object-fit:contain}
 .start-model:active img{transform:scale(.98)}
+.start-model canvas{display:block;height:100%;width:auto;max-width:100%;margin:0 auto}
+.start-model canvas[hidden], .start-model img[hidden]{display:none}
 .start-wrap.met-model .start-tegel[data-ga="3d"]{display:none}   /* het beeld is de weg naar 3D */
 .start-nieuws{position:relative;display:flex;gap:8px;margin:4px 0 14px;padding:14px 44px 14px 16px;text-align:left;
   background:var(--kaart);border:1px solid var(--rand);border-radius:var(--r-md)}
@@ -2308,7 +2310,7 @@ form label{text-transform:none;letter-spacing:.005em;font-size:.8rem;color:var(-
         <h2 class="start-titel" data-i18n="start.titel">Welkom terug</h2>
         <p class="start-tagline" data-i18n="start.leeg_uitleg">Plan of bewaar je volgende tattoo.</p>
       </div>
-      <div class="start-podium" id="start-podium"><button type="button" class="start-model" id="start-model" hidden data-i18n-aria="start.model_aria" data-i18n-title="start.model_aria" aria-label="Bekijk je lichaam in 3D" title="Bekijk je lichaam in 3D"><img id="start-model-img" alt=""></button></div>
+      <div class="start-podium" id="start-podium"><button type="button" class="start-model" id="start-model" hidden data-i18n-aria="start.model_aria" data-i18n-title="start.model_aria" aria-label="Bekijk je lichaam in 3D" title="Bekijk je lichaam in 3D"><img id="start-model-img" alt=""><canvas id="start-model-draai" hidden></canvas></button></div>
       <div class="start-nieuws" id="start-lichaam" hidden>
         <div class="sn-tekst">
           <span class="sn-label" data-i18n="start.lichaam_label">Nieuw</span>
@@ -9182,7 +9184,9 @@ function genLengte(h){
   toon.className = 'gen-getal';
   var r = document.createElement('input');
   r.type = 'range'; r.min = LENGTE_CM_MIN; r.max = LENGTE_CM_MAX; r.step = 'any';
-  r.value = Math.round(lichaamsLengte());
+  /* De gevraagde lengte, niet de gemeten: na Reset wordt deze stap opnieuw opgebouwd terwijl het model nog naar de oude maat
+     overgaat, en dan bleef het getal op de oude lengte staan (toesteltest Bram 2026-09-28; gewicht las al de schuif). */
+  r.value = Math.round(lengteDoel());
   r.className = 'gen-schuif';
   /* In voet en duim stapt de schuif per duim, niet per centimeter. */
   function stapCm(){ return GEN.lengteEenheid === 'cm' ? 1 : 2.54; }
@@ -10629,7 +10633,7 @@ function createTattoo(overrides = {}) {
    ============================================================ */
 // App-versie (semver, handmatig ophogen bij een release). Bij een bump ook de
 // CACHE-naam in sw.js meebumpen, zodat clients de nieuwe build ophalen.
-const APP_VERSIE = '0.3.121';
+const APP_VERSIE = '0.3.122';
 
 /* Dev-haken die de CLOUD raken hangen alleen op een ontwikkelmachine aan window. Ze zijn geen
    lek op zichzelf (zonder XSS roept niemand ze aan, en CSP + esc() houden XSS tegen), maar ze
@@ -12887,8 +12891,69 @@ function toonStartModel() {
   sm.hidden = !ok;
   if (wrap) wrap.classList.toggle('met-model', ok);
   plaatsStartAccount();
+  if (ok) startDraai(ids); else stopDraai();   // slice 5f
 }
 window.__tattiesStartModel = toonStartModel;
+/* ---- Draaiend startbeeld (slice 5f): sprite uit een eigen kleine IndexedDB, afgespeeld in #start-model-draai ---- */
+const DRAAI_PERIODE = 12000;   // ms per rondje
+let draaiSprite = null, draaiGeladen = false, draaiLaadt = false, draaiRaf = 0, draaiT0 = 0, draaiLaatst = 0;
+function draaiDB() {
+  return new Promise((res, rej) => { const q = indexedDB.open('tatties-startbeeld-' + DB_NAAM, 1);
+    q.onupgradeneeded = () => q.result.createObjectStore('b'); q.onsuccess = () => res(q.result); q.onerror = () => rej(q.error); });
+}
+window.__tattiesStartDraaiBewaar = async (d) => {   // vanuit de 3D-module; null = weg
+  try { const db = await draaiDB();
+    await new Promise((res) => { const tx = db.transaction('b', 'readwrite'); const st = tx.objectStore('b');
+      if (d) st.put(d, 'draai'); else st.delete('draai'); tx.oncomplete = res; tx.onerror = res; tx.onabort = res; });
+    db.close(); } catch (e) { /* geen opslag: dan alleen het stilstaande beeld */ }
+  if (draaiSprite && draaiSprite.url) URL.revokeObjectURL(draaiSprite.url);
+  draaiSprite = null; draaiGeladen = false;
+};
+function stopDraai() {
+  if (draaiRaf) cancelAnimationFrame(draaiRaf); draaiRaf = 0;
+  const cv = $('#start-model-draai'), im = $('#start-model-img'); if (cv) cv.hidden = true; if (im) im.hidden = false;
+}
+function startDraai(ids) {
+  let rustig = false; try { rustig = matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) { /* oud */ }
+  if (rustig) { stopDraai(); return; }
+  if (!draaiGeladen) {
+    if (draaiLaadt) return; draaiLaadt = true;
+    (async () => {
+      let d = null;
+      try { const db = await draaiDB();
+        d = await new Promise((res) => { const q = db.transaction('b').objectStore('b').get('draai'); q.onsuccess = () => res(q.result || null); q.onerror = () => res(null); });
+        db.close(); } catch (e) { d = null; }
+      draaiGeladen = true; draaiLaadt = false;
+      if (!d || !d.blob) return;
+      const url = URL.createObjectURL(d.blob), img = new Image();
+      img.onload = () => { draaiSprite = Object.assign({}, d, { img, url }); toonStartModel(); };
+      img.onerror = () => URL.revokeObjectURL(url);
+      img.src = url;
+    })();
+    return;
+  }
+  const s = draaiSprite; if (!s) return;
+  if (!(s.ids || []).every(id => ids.indexOf(id) >= 0) || (s.ids || []).length !== ids.length) { stopDraai(); return; }   // hoort niet bij dit beeld
+  const cv = $('#start-model-draai'), im = $('#start-model-img'); if (!cv) return;
+  if (cv.width !== s.fw || cv.height !== s.fh) { cv.width = s.fw; cv.height = s.fh; cv.style.aspectRatio = s.fw + ' / ' + s.fh; }
+  if (!draaiRaf) { draaiTeken(cv, s, 0); draaiT0 = 0; draaiLaatst = 0; draaiRaf = requestAnimationFrame(draaiLus); }   // meteen frame 0: nooit een leeg canvas
+  cv.hidden = false; if (im) im.hidden = true;
+}
+function draaiTeken(cv, s, f) {   // frame f (mag een breuk zijn): zachte overgang naar het volgende
+  const i = Math.floor(f) % s.n, a = f - Math.floor(f), j = (i + 1) % s.n;
+  const x = cv.getContext('2d'), teken = (k) => x.drawImage(s.img, (k % s.kol) * s.fw, Math.floor(k / s.kol) * s.fh, s.fw, s.fh, 0, 0, s.fw, s.fh);
+  x.clearRect(0, 0, s.fw, s.fh); x.globalAlpha = 1; teken(i); if (a > 0.01) { x.globalAlpha = a; teken(j); } x.globalAlpha = 1;
+}
+function draaiLus(t) {
+  draaiRaf = 0;
+  const cv = $('#start-model-draai'), s = draaiSprite;
+  if (!cv || !s || cv.hidden || cv.offsetParent === null || document.hidden) return;   // niet in beeld: stoppen (toonStartModel start opnieuw)
+  draaiRaf = requestAnimationFrame(draaiLus);
+  if (t - draaiLaatst < 33) return;   // 30 beelden per seconde is genoeg
+  draaiLaatst = t; if (!draaiT0) draaiT0 = t;
+  draaiTeken(cv, s, ((t - draaiT0) / DRAAI_PERIODE * s.n) % s.n);
+}
+document.addEventListener('visibilitychange', () => { if (!document.hidden && huidigeView === 'start') toonStartModel(); });
 /* Account-knop (slice 5b): ingelogd en met model als chipje rechtsboven het model, anders onder de rode knop. */
 function plaatsStartAccount() {
   const sr = $('#start-account'), wrap = $('#view-start .start-wrap'), podium = $('#start-podium'), cta = $('#start-nieuw');
@@ -16841,15 +16906,18 @@ async function verwijderVoorbeelden() {
       for(let i=0;i<poly.length;i++){ const a=poly[i], b=poly[(i+1)%poly.length], fa=f(a), fb=f(b);
         if(fa>=0) uit.push(a);
         if((fa>=0)!==(fb>=0)){ const s=fa/(fa-fb);
-          uit.push({ x:a.x+(b.x-a.x)*s, y:a.y+(b.y-a.y)*s, z:a.z+(b.z-a.z)*s, nx:a.nx+(b.nx-a.nx)*s, ny:a.ny+(b.ny-a.ny)*s, nz:a.nz+(b.nz-a.nz)*s }); } }
+          uit.push({ x:a.x+(b.x-a.x)*s, y:a.y+(b.y-a.y)*s, z:a.z+(b.z-a.z)*s, nx:a.nx+(b.nx-a.nx)*s, ny:a.ny+(b.ny-a.ny)*s, nz:a.nz+(b.nz-a.nz)*s,
+            w0:a.w0+(b.w0-a.w0)*s, w1:a.w1+(b.w1-a.w1)*s, w2:a.w2+(b.w2-a.w2)*s }); } }
       return uit; };
-    const punt=(j)=>({x:P[j*3],y:P[j*3+1],z:P[j*3+2],nx:N[j*3],ny:N[j*3+1],nz:N[j*3+2]});
+    const punt=(j,k)=>({x:P[j*3],y:P[j*3+1],z:P[j*3+2],nx:N[j*3],ny:N[j*3+1],nz:N[j*3+2], w0:+(k===0), w1:+(k===1), w2:+(k===2)});
     const OFF=0.004, HS=18, bodyP=[], bodyN=[], bodyUV=[], bP=[], bN=[];
     /* Hartjes per vlak geprojecteerd (doos): voor- en achterkant plat van voren, de zijkanten plat van opzij. Alleen van
        voren werden ze op de zijkant strepen; rond het lichaam (cilindrisch) gaf een waaier bij het kruis. De naad valt op de
        hoek, zoals bij een echte boxer. */
+    const volgTW=new Map([[bodyP,{T:[],W:[]}],[bP,{T:[],W:[]}]]); let hier=[0,0,0];   // per hoekpunt: huiddriehoek + gewichten (slice 5d)
     const zet=(q, Pn, Nn, UV, u)=>{ const l=Math.hypot(q.nx,q.ny,q.nz)||1, nx=q.nx/l, ny=q.ny/l, nz=q.nz/l;
-      Pn.push(q.x+nx*OFF, q.y+ny*OFF, q.z+nz*OFF); Nn.push(nx,ny,nz); if(UV) UV.push(u, q.y*HS); };
+      Pn.push(q.x+nx*OFF, q.y+ny*OFF, q.z+nz*OFF); Nn.push(nx,ny,nz); if(UV) UV.push(u, q.y*HS);
+      const tw=volgTW.get(Pn); tw.T.push(hier[0],hier[1],hier[2]); tw.W.push(q.w0,q.w1,q.w2); };
     const zetDriehoek=(a,b,c, Pn, Nn, UV, opzij)=>{
       const u=(q)=>(opzij ? q.z : q.x)*HS;
       zet(a,Pn,Nn,UV,u(a)); zet(b,Pn,Nn,UV,u(b)); zet(c,Pn,Nn,UV,u(c)); };
@@ -16860,7 +16928,7 @@ async function verwijderVoorbeelden() {
     for(let i=0;i<idx.length;i+=3){ const a=idx[i], b=idx[i+1], c=idx[i+2];
       if(!(m2[a]&&m2[b]&&m2[c])) continue;
       const cy=(P[a*3+1]+P[b*3+1]+P[c*3+1])/3, cx=(P[a*3]+P[b*3]+P[c*3])/3;
-      const tri=[punt(a),punt(b),punt(c)];
+      const tri=[punt(a,0),punt(b,1),punt(c,2)]; hier=[a,b,c];
       // stof: onder de band, en bij de benen boven de pijp van die kant
       let poly=snij(tri, (q)=>onderBand-q.y);
       if(poly.length>=3 && cy<midY){ const pijp=(cx>0)?pijpL:pijpR; poly=snij(poly, (q)=>q.y-pijp); }
@@ -16875,15 +16943,43 @@ async function verwijderVoorbeelden() {
     if(bodyP.length){ const ng=new THREE.BufferGeometry();
       ng.setAttribute('position',new THREE.Float32BufferAttribute(bodyP,3)); ng.setAttribute('normal',new THREE.Float32BufferAttribute(bodyN,3));
       ng.setAttribute('uv',new THREE.Float32BufferAttribute(bodyUV,2));
-      const mat=new THREE.MeshStandardMaterial({color:0xffffff, roughness:0.6, metalness:0.0, side:THREE.DoubleSide, polygonOffset:true, polygonOffsetFactor:-2});
+      const mat=new THREE.MeshStandardMaterial({color:0xffffff, roughness:0.6, metalness:0.0, side:THREE.DoubleSide, polygonOffset:true, polygonOffsetFactor:-8});   // voor de tattoos (slice 5e)
       if(underwear==='boxer') mat.map=heartsTexture();
-      const mm=new THREE.Mesh(ng,mat); mm.renderOrder=1; grp.add(mm); }
+      const mm=new THREE.Mesh(ng,mat); mm.renderOrder=1; grp.add(mm);
+      mm.userData.volg={ T:Uint32Array.from(volgTW.get(bodyP).T), W:Float32Array.from(volgTW.get(bodyP).W), off:OFF }; }
     if(bP.length){ const bg=new THREE.BufferGeometry();
       bg.setAttribute('position',new THREE.Float32BufferAttribute(bP,3)); bg.setAttribute('normal',new THREE.Float32BufferAttribute(bN,3));
-      const bmat=new THREE.MeshStandardMaterial({color:0x9aa0ad, roughness:0.5, metalness:0.0, side:THREE.DoubleSide, polygonOffset:true, polygonOffsetFactor:-3});
-      const bm=new THREE.Mesh(bg,bmat); bm.renderOrder=2; grp.add(bm); }
+      const bmat=new THREE.MeshStandardMaterial({color:0x9aa0ad, roughness:0.5, metalness:0.0, side:THREE.DoubleSide, polygonOffset:true, polygonOffsetFactor:-9});   // voor de tattoos (slice 5e)
+      const bm=new THREE.Mesh(bg,bmat); bm.renderOrder=2; grp.add(bm);
+      bm.userData.volg={ T:Uint32Array.from(volgTW.get(bP).T), W:Float32Array.from(volgTW.get(bP).W), off:OFF }; }
     grp.userData.obRand={ taille:+taille.toFixed(3), pijpL:+pijpL.toFixed(3), pijpR:+pijpR.toFixed(3) };
     underwearMesh=grp; body.add(grp);
+  }
+  /* Tijdens slepen in de generator (slice 5d): de stof op de bewegende huid zetten via de onthouden driehoek en gewichten.
+     Geeft false als er niets te volgen is (oud model, of gebouwd zonder volg-gegevens): dan verbergt genVolg hem zoals vroeger. */
+  function volgOnderbroek(){
+    const mesh=pickMeshes[0]; if(!underwearMesh || !mesh || !mesh.geometry) return false;
+    mesh.updateWorldMatrix(true,false);
+    const pa=mesh.geometry.attributes.position.array, na=mesh.geometry.attributes.normal.array, e=mesh.matrixWorld.elements;
+    let ok=false;
+    underwearMesh.traverse(o=>{
+      const v=o.isMesh && o.userData && o.userData.volg; if(!v) return;
+      const P=o.geometry.attributes.position.array, Nn=o.geometry.attributes.normal.array, T=v.T, W=v.W, off=v.off;
+      if(T.length!==P.length) return;
+      for(let i=0;i<T.length;i+=3){
+        let x=0, y=0, z=0, nx=0, ny=0, nz=0;
+        for(let k=0;k<3;k++){ const j=T[i+k]*3, w=W[i+k];
+          x+=pa[j]*w; y+=pa[j+1]*w; z+=pa[j+2]*w; nx+=na[j]*w; ny+=na[j+1]*w; nz+=na[j+2]*w; }
+        let mx=e[0]*nx+e[4]*ny+e[8]*nz, my=e[1]*nx+e[5]*ny+e[9]*nz, mz=e[2]*nx+e[6]*ny+e[10]*nz;
+        const l=Math.hypot(mx,my,mz)||1; mx/=l; my/=l; mz/=l;
+        P[i]=e[0]*x+e[4]*y+e[8]*z+e[12]+mx*off; P[i+1]=e[1]*x+e[5]*y+e[9]*z+e[13]+my*off; P[i+2]=e[2]*x+e[6]*y+e[10]*z+e[14]+mz*off;
+        Nn[i]=mx; Nn[i+1]=my; Nn[i+2]=mz;
+      }
+      o.geometry.attributes.position.needsUpdate=true; o.geometry.attributes.normal.needsUpdate=true;
+      o.geometry.computeBoundingSphere(); ok=true;
+    });
+    if(ok) underwearMesh.visible=true;
+    return ok;
   }
   function rebuildUnderwear(){
     removeUnderwear();
@@ -16936,13 +17032,13 @@ async function verwijderVoorbeelden() {
       ng.setAttribute('position',new THREE.Float32BufferAttribute(bodyP,3));
       ng.setAttribute('normal',new THREE.Float32BufferAttribute(bodyN,3));
       ng.setAttribute('uv',new THREE.Float32BufferAttribute(bodyUV,2));
-      const mat=new THREE.MeshStandardMaterial({color:0xffffff, roughness:0.6, metalness:0.0, side:THREE.DoubleSide, polygonOffset:true, polygonOffsetFactor:-2});
+      const mat=new THREE.MeshStandardMaterial({color:0xffffff, roughness:0.6, metalness:0.0, side:THREE.DoubleSide, polygonOffset:true, polygonOffsetFactor:-8});   // voor de tattoos (slice 5e)
       if(underwear==='boxer') mat.map=heartsTexture();
       const mm=new THREE.Mesh(ng,mat); mm.renderOrder=1; grp.add(mm); }
     if(bP.length){ const bg=new THREE.BufferGeometry();
       bg.setAttribute('position',new THREE.Float32BufferAttribute(bP,3));
       bg.setAttribute('normal',new THREE.Float32BufferAttribute(bN,3));
-      const bmat=new THREE.MeshStandardMaterial({color:0x9aa0ad, roughness:0.5, metalness:0.0, side:THREE.DoubleSide, polygonOffset:true, polygonOffsetFactor:-3});
+      const bmat=new THREE.MeshStandardMaterial({color:0x9aa0ad, roughness:0.5, metalness:0.0, side:THREE.DoubleSide, polygonOffset:true, polygonOffsetFactor:-9});   // voor de tattoos (slice 5e)
       const bm=new THREE.Mesh(bg,bmat); bm.renderOrder=2; grp.add(bm); }
     underwearMesh=grp; body.add(grp);
   }
@@ -17075,7 +17171,7 @@ async function verwijderVoorbeelden() {
   function genFrames(){ for(const m of markers){ const b=markerBind(m); m.__genB0=b ? huidFrame(m.mesh||pickMeshes[0], b) : null; } }
   const _genInv=new THREE.Matrix4();
   function genVolg(){
-    if(underwearMesh) underwearMesh.visible=false;   // volgt pas bij loslaten (genHerbouw)
+    if(underwearMesh && !volgOnderbroek()) underwearMesh.visible=false;   // volgt de huid (slice 5d); exact herbouwd bij loslaten (genHerbouw)
     for(const m of markers){
       if(!m.obj || !m.__genB0) continue;
       const nu=huidFrame(m.mesh||pickMeshes[0], markerBind(m)); if(!nu) continue;
@@ -22027,19 +22123,79 @@ function maakTatnetGL(json, canvas) {
     c.getContext('2d').drawImage(vol, x0, sy, cw, ch, 0, 0, c.width, c.height);
     return c;
   }
-  function bewaarStartOpname(){
+  /* Draaiend startbeeld (slice 5f): 36 frames rond het lichaam op een raster; elke 4 frames even ademen, en afbreken als je
+     intussen terug naar 3D (of de generator) gaat. Bijgesneden op de vereniging van alle frames. */
+  const DRAAI_N=36, DRAAI_KOL=6;
+  async function maakDraaiSprite(){
+    if(!renderer || !scene || !modelRoot) return null;
+    const lang=(LICHAAM_GEN && LichaamMotor.geometry()) ? LichaamMotor.lengteCm()/100 : 1.8;
+    const W=372, H=560, th0=startOpnameHoek(), ph=Math.PI/2-0.06, ty=lang*0.5, rijen=Math.ceil(DRAAI_N/DRAAI_KOL);
+    const cam=new THREE.PerspectiveCamera(30, W/H, 0.05, 100);
+    const r=lang*1.25/(2*Math.tan(15*Math.PI/180));
+    const msaa=!!(renderer.capabilities.isWebGL2 && THREE.WebGLMultisampleRenderTarget);
+    const rt=msaa ? new THREE.WebGLMultisampleRenderTarget(W,H) : new THREE.WebGLRenderTarget(W,H);
+    if(msaa) rt.samples=Math.min(4, renderer.capabilities.maxSamples||4);
+    rt.texture.encoding=renderer.outputEncoding;
+    const ruw=document.createElement('canvas'); ruw.width=W*DRAAI_KOL; ruw.height=H*rijen;
+    const rx=ruw.getContext('2d'), id=rx.createImageData(W,H), buf=new Uint8Array(W*H*4);
+    let x0=W, x1=-1, y0=H, y1=-1, af=false;
+    try{
+      for(let f=0; f<DRAAI_N; f++){
+        if(actief3D || genAan()){ af=true; break; }   // terug in 3D: nu niet (de volgende keer opnieuw)
+        const th=th0+f*2*Math.PI/DRAAI_N;
+        cam.position.set(r*Math.sin(ph)*Math.sin(th), ty+r*Math.cos(ph), r*Math.sin(ph)*Math.cos(th)); cam.lookAt(0,ty,0); cam.updateMatrixWorld();
+        const bg=scene.background, ringWas=!!(selRing && selRing.visible), gv=!!(ground && ground.visible), kp=key ? key.position.clone() : null;
+        const cc=renderer.getClearColor(new THREE.Color()), ca=renderer.getClearAlpha();
+        scene.background=null; if(selRing) selRing.visible=false; if(ground) ground.visible=false;
+        if(key){ key.position.copy(cam.position); key.position.y+=1.5; key.position.x+=1.0; }
+        try{
+          renderer.setRenderTarget(rt); renderer.setClearColor(0x000000,0); renderer.clear(); renderer.render(scene,cam);
+          renderer.setRenderTarget(null); renderer.readRenderTargetPixels(rt,0,0,W,H,buf);
+        } finally { renderer.setRenderTarget(null); renderer.setClearColor(cc,ca); scene.background=bg;
+          if(selRing) selRing.visible=ringWas; if(ground) ground.visible=gv; if(key && kp) key.position.copy(kp); }
+        for(let y=0;y<H;y++){ const bron=(H-1-y)*W*4, doel=y*W*4;   // readPixels is bottom-up
+          for(let x=0;x<W;x++){ const i=bron+x*4, o=doel+x*4, a=buf[i+3];
+            if(a>0 && a<255){ const k=255/a; id.data[o]=Math.min(255,buf[i]*k); id.data[o+1]=Math.min(255,buf[i+1]*k); id.data[o+2]=Math.min(255,buf[i+2]*k); }
+            else { id.data[o]=buf[i]; id.data[o+1]=buf[i+1]; id.data[o+2]=buf[i+2]; }
+            id.data[o+3]=a;
+            if(a>16){ if(x<x0)x0=x; if(x>x1)x1=x; if(y<y0)y0=y; if(y>y1)y1=y; } } }
+        rx.putImageData(id, (f%DRAAI_KOL)*W, Math.floor(f/DRAAI_KOL)*H);
+        if(f%4===3) await new Promise(q=>setTimeout(q,0));
+      }
+    } finally { rt.dispose(); }
+    if(af || x1<0) return null;
+    const mg=Math.round(H*0.015); x0=Math.max(0,x0-mg); x1=Math.min(W-1,x1+mg); y0=Math.max(0,y0-mg); y1=Math.min(H-1,y1+mg);
+    const fw=x1-x0+1, fh=y1-y0+1;
+    const uit=document.createElement('canvas'); uit.width=fw*DRAAI_KOL; uit.height=fh*rijen; const ux=uit.getContext('2d');
+    for(let f=0; f<DRAAI_N; f++){ const kx=f%DRAAI_KOL, ky=Math.floor(f/DRAAI_KOL);
+      ux.drawImage(ruw, kx*W+x0, ky*H+y0, fw, fh, kx*fw, ky*fh, fw, fh); }
+    let blob=await new Promise(q=>uit.toBlob(q,'image/webp',0.85));
+    if(!blob || blob.type!=='image/webp') blob=await new Promise(q=>uit.toBlob(q,'image/png'));   // Safari maakt geen webp
+    if(!blob) return null;
+    const eerste=document.createElement('canvas'); eerste.width=fw; eerste.height=fh; eerste.getContext('2d').drawImage(uit,0,0,fw,fh,0,0,fw,fh);
+    return { blob, fw, fh, n:DRAAI_N, kol:DRAAI_KOL, eerste };
+  }
+  let startOpnameBezig=false;
+  async function bewaarStartOpname(){
     startOpnameT=0;
-    if(!LICHAAM_GEN || !inited || !modelRoot || glKapot || herstelLoopt || ledeActief || genAan() || onbDraai) return;
+    if(!LICHAAM_GEN || !inited || !modelRoot || glKapot || herstelLoopt || ledeActief || genAan() || onbDraai || startOpnameBezig) return;
     const vp=startOpnameVingerafdruk();
     let heeft=false; try{ heeft=!!localStorage.getItem(START_OPNAME+':src'); }catch(e){}
     if(vp===startOpnameVp && heeft) return;
-    const c=maakStartOpname(); if(!c) return;
-    let src=''; try{ src=c.toDataURL('image/webp',0.86); }catch(e){}
-    if(src.indexOf('data:image/webp')!==0) src=c.toDataURL('image/png');   // Safari maakt geen webp
-    const ids=[...new Set(markers.filter(m=>m.obj && m.obj.visible && m.rec).map(m=>m.rec.id))];
-    try{ localStorage.setItem(START_OPNAME+':src', src); localStorage.setItem(START_OPNAME+':ids', JSON.stringify(ids)); startOpnameVp=vp; }
-    catch(e){ try{ localStorage.removeItem(START_OPNAME+':src'); }catch(_){} }   // opslag vol: liever geen beeld dan een oud
-    if(typeof window.__tattiesStartModel==='function') window.__tattiesStartModel();
+    startOpnameBezig=true;
+    try{
+      const ids=[...new Set(markers.filter(m=>m.obj && m.obj.visible && m.rec).map(m=>m.rec.id))];
+      let d=null; try{ d=await maakDraaiSprite(); }catch(e){ console.error('draaibeeld mislukt', e); }
+      if(!d && (actief3D || genAan())) return;   // afgebroken: terug in 3D
+      const c=d ? d.eerste : maakStartOpname(); if(!c) return;   // stilstaand beeld = frame 0 (zelfde kader als het draaien)
+      let src=''; try{ src=c.toDataURL('image/webp',0.86); }catch(e){}
+      if(src.indexOf('data:image/webp')!==0) src=c.toDataURL('image/png');   // Safari maakt geen webp
+      try{ localStorage.setItem(START_OPNAME+':src', src); localStorage.setItem(START_OPNAME+':ids', JSON.stringify(ids)); startOpnameVp=vp; }
+      catch(e){ try{ localStorage.removeItem(START_OPNAME+':src'); }catch(_){} }   // opslag vol: liever geen beeld dan een oud
+      if(typeof window.__tattiesStartDraaiBewaar==='function')
+        await window.__tattiesStartDraaiBewaar(d ? { blob:d.blob, fw:d.fw, fh:d.fh, n:d.n, kol:d.kol, ids } : null);
+      if(typeof window.__tattiesStartModel==='function') window.__tattiesStartModel();
+    } finally { startOpnameBezig=false; }
   }
   { const pauze=window.__tatties3DPauze;   // 3D verlaten: opname plannen (niet vanuit de generator, het welkom of een plaatsstand)
     window.__tatties3DPauze=function(){
