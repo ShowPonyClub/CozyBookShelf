@@ -971,8 +971,9 @@ input[type=range]:focus{box-shadow:none;border:none}
 .start-model[hidden]{display:none}
 .start-model img{display:block;height:100%;width:auto;max-width:100%;margin:0 auto;object-fit:contain}
 .start-model:active img{transform:scale(.98)}
-.start-model canvas{display:block;height:100%;width:auto;max-width:100%;margin:0 auto}
-.start-model canvas[hidden], .start-model img[hidden]{display:none}
+.start-model{position:relative}
+.start-model img{transition:opacity .5s}
+.start-model canvas.start-live{position:absolute;inset:0;width:100%!important;height:100%!important;pointer-events:none;transition:opacity .5s}
 .start-wrap.met-model .start-tegel[data-ga="3d"]{display:none}   /* het beeld is de weg naar 3D */
 .start-nieuws{position:relative;display:flex;gap:8px;margin:4px 0 14px;padding:14px 44px 14px 16px;text-align:left;
   background:var(--kaart);border:1px solid var(--rand);border-radius:var(--r-md)}
@@ -2311,7 +2312,7 @@ form label{text-transform:none;letter-spacing:.005em;font-size:.8rem;color:var(-
         <h2 class="start-titel" data-i18n="start.titel">Welkom terug</h2>
         <p class="start-tagline" data-i18n="start.leeg_uitleg">Plan of bewaar je volgende tattoo.</p>
       </div>
-      <div class="start-podium" id="start-podium"><button type="button" class="start-model" id="start-model" hidden data-i18n-aria="start.model_aria" data-i18n-title="start.model_aria" aria-label="Bekijk je lichaam in 3D" title="Bekijk je lichaam in 3D"><img id="start-model-img" alt=""><canvas id="start-model-draai" hidden></canvas></button></div>
+      <div class="start-podium" id="start-podium"><button type="button" class="start-model" id="start-model" hidden data-i18n-aria="start.model_aria" data-i18n-title="start.model_aria" aria-label="Bekijk je lichaam in 3D" title="Bekijk je lichaam in 3D"><img id="start-model-img" alt=""></button></div>
       <div class="start-nieuws" id="start-lichaam" hidden>
         <div class="sn-tekst">
           <span class="sn-label" data-i18n="start.lichaam_label">Nieuw</span>
@@ -10634,7 +10635,7 @@ function createTattoo(overrides = {}) {
    ============================================================ */
 // App-versie (semver, handmatig ophogen bij een release). Bij een bump ook de
 // CACHE-naam in sw.js meebumpen, zodat clients de nieuwe build ophalen.
-const APP_VERSIE = '0.3.123';
+const APP_VERSIE = '0.3.124';
 
 /* Dev-haken die de CLOUD raken hangen alleen op een ontwikkelmachine aan window. Ze zijn geen
    lek op zichzelf (zonder XSS roept niemand ze aan, en CSP + esc() houden XSS tegen), maar ze
@@ -12892,69 +12893,20 @@ function toonStartModel() {
   sm.hidden = !ok;
   if (wrap) wrap.classList.toggle('met-model', ok);
   plaatsStartAccount();
-  if (ok) startDraai(ids); else stopDraai();   // slice 5f
+  zetStartLive(ok);   // slice 5j: live draaien
 }
 window.__tattiesStartModel = toonStartModel;
-/* ---- Draaiend startbeeld (slice 5f): sprite uit een eigen kleine IndexedDB, afgespeeld in #start-model-draai ---- */
-const DRAAI_PERIODE = 12000;   // ms per rondje
-let draaiSprite = null, draaiGeladen = false, draaiLaadt = false, draaiRaf = 0, draaiT0 = 0, draaiLaatst = 0;
-function draaiDB() {
-  return new Promise((res, rej) => { const q = indexedDB.open('tatties-startbeeld-' + DB_NAAM, 1);
-    q.onupgradeneeded = () => q.result.createObjectStore('b'); q.onsuccess = () => res(q.result); q.onerror = () => rej(q.error); });
-}
-window.__tattiesStartDraaiBewaar = async (d) => {   // vanuit de 3D-module; null = weg
-  try { const db = await draaiDB();
-    await new Promise((res) => { const tx = db.transaction('b', 'readwrite'); const st = tx.objectStore('b');
-      if (d) st.put(d, 'draai'); else st.delete('draai'); tx.oncomplete = res; tx.onerror = res; tx.onabort = res; });
-    db.close(); } catch (e) { /* geen opslag: dan alleen het stilstaande beeld */ }
-  if (draaiSprite && draaiSprite.url) URL.revokeObjectURL(draaiSprite.url);
-  draaiSprite = null; draaiGeladen = false;
-};
-function stopDraai() {
-  if (draaiRaf) cancelAnimationFrame(draaiRaf); draaiRaf = 0;
-  const cv = $('#start-model-draai'), im = $('#start-model-img'); if (cv) cv.hidden = true; if (im) im.hidden = false;
-}
-function startDraai(ids) {
+/* ---- Live draaien op het startscherm (slice 5j): de 3D-module leent het canvas uit aan #start-model ---- */
+function zetStartLive(ok) {
+  if (typeof window.__tatties3DStartLive !== 'function') return;
   let rustig = false; try { rustig = matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) { /* oud */ }
-  if (rustig) { stopDraai(); return; }
-  if (!draaiGeladen) {
-    if (draaiLaadt) return; draaiLaadt = true;
-    (async () => {
-      let d = null;
-      try { const db = await draaiDB();
-        d = await new Promise((res) => { const q = db.transaction('b').objectStore('b').get('draai'); q.onsuccess = () => res(q.result || null); q.onerror = () => res(null); });
-        db.close(); } catch (e) { d = null; }
-      draaiGeladen = true; draaiLaadt = false;
-      if (!d || !d.blob) return;
-      const url = URL.createObjectURL(d.blob), img = new Image();
-      img.onload = () => { draaiSprite = Object.assign({}, d, { img, url }); toonStartModel(); };
-      img.onerror = () => URL.revokeObjectURL(url);
-      img.src = url;
-    })();
-    return;
-  }
-  const s = draaiSprite; if (!s) return;
-  if (!(s.ids || []).every(id => ids.indexOf(id) >= 0) || (s.ids || []).length !== ids.length) { stopDraai(); return; }   // hoort niet bij dit beeld
-  const cv = $('#start-model-draai'), im = $('#start-model-img'); if (!cv) return;
-  if (cv.width !== s.fw || cv.height !== s.fh) { cv.width = s.fw; cv.height = s.fh; cv.style.aspectRatio = s.fw + ' / ' + s.fh; }
-  if (!draaiRaf) { draaiTeken(cv, s, 0); draaiT0 = 0; draaiLaatst = 0; draaiRaf = requestAnimationFrame(draaiLus); }   // meteen frame 0: nooit een leeg canvas
-  cv.hidden = false; if (im) im.hidden = true;
+  if (!ok || rustig) { window.__tatties3DStartLive(null); return; }
+  setTimeout(() => {   // na toonView (die pauzeert de 3D-module aan het eind)
+    const sm = $('#start-model');
+    if (huidigeView === 'start' && sm && !sm.hidden) window.__tatties3DStartLive(sm);
+  }, 0);
 }
-function draaiTeken(cv, s, f) {   // frame f (mag een breuk zijn): zachte overgang naar het volgende
-  const i = Math.floor(f) % s.n, a = f - Math.floor(f), j = (i + 1) % s.n;
-  const x = cv.getContext('2d'), teken = (k) => x.drawImage(s.img, (k % s.kol) * s.fw, Math.floor(k / s.kol) * s.fh, s.fw, s.fh, 0, 0, s.fw, s.fh);
-  x.clearRect(0, 0, s.fw, s.fh); x.globalAlpha = 1; teken(i); if (a > 0.01) { x.globalAlpha = a; teken(j); } x.globalAlpha = 1;
-}
-function draaiLus(t) {
-  draaiRaf = 0;
-  const cv = $('#start-model-draai'), s = draaiSprite;
-  if (!cv || !s || cv.hidden || cv.offsetParent === null || document.hidden) return;   // niet in beeld: stoppen (toonStartModel start opnieuw)
-  draaiRaf = requestAnimationFrame(draaiLus);
-  if (t - draaiLaatst < 33) return;   // 30 beelden per seconde is genoeg
-  draaiLaatst = t; if (!draaiT0) draaiT0 = t;
-  draaiTeken(cv, s, ((t - draaiT0) / DRAAI_PERIODE * s.n) % s.n);
-}
-document.addEventListener('visibilitychange', () => { if (!document.hidden && huidigeView === 'start') toonStartModel(); });
+try { indexedDB.deleteDatabase('tatties-startbeeld-' + DB_NAAM); } catch (e) { /* het filmpje van 5f: niet meer nodig */ }
 /* Account-knop (slice 5b): ingelogd en met model als chipje rechtsboven het model, anders onder de rode knop. */
 function plaatsStartAccount() {
   const sr = $('#start-account'), wrap = $('#view-start .start-wrap'), podium = $('#start-podium'), cta = $('#start-nieuw');
@@ -16516,6 +16468,7 @@ async function verwijderVoorbeelden() {
   let inited=false, el=null, stage=null;
   let glKapot=false;   // PLAT-13: WebGL-init faalde (blocklisted GPU/webview) -> 3D-ingangen blokkeren met melding i.p.v. leeg podium
   let actief3D=true;            // false als de 3D-view verborgen is -> renderlus slaat het tekenen over
+  let startLive=null, hersteldOoit=false, uitgesteldeMelding=null;   // slice 5j: canvas uitgeleend aan het startscherm
   let currentGender="man", loadToken=0, meldAndereModel=false;   // meld: LOGIC-5, gezet bij een gender-wissel
   // Lichaamsvorm-presets (geslacht x vorm). Nu: alle vormen -> het huidige GLB van dat geslacht
   // (placeholder). Echte modellen later: vul SHAPE_NODES[`${gender}-${shape}`] met een eigen <script>-node-id.
@@ -16790,6 +16743,7 @@ async function verwijderVoorbeelden() {
     if(h>cur+1){ stage.style.setProperty("--stage-h", h+"px"); if(renderer) resize(); }
   }
   function resize(){ if(!renderer||!stage)return;
+    if(startLive){ startLiveMaat(); return; }   // canvas staat op het startscherm (slice 5j)
     pinStageHoogte();
     // Bewerkbalk gedockt onder het model: render-hoogte krimpt met de balkhoogte, zodat de
     // tattoo/het lichaam niet meer onder de balk verdwijnt (alles blijft binnen de stage -> geen scroll).
@@ -21935,7 +21889,7 @@ function maakTatnetGL(json, canvas) {
       if(performance.now()-_laatsteYield>12){ await frameAdem(); _laatsteYield=performance.now(); if(token!==undefined && token!==loadToken){ zetLaadVoortgang(0,0); return; } }
     }
     zetLaadVoortgang(0,0);   // label terug naar 'Laden…'
-    herstelLoopt=false;
+    herstelLoopt=false; hersteldOoit=true;
     if(typeof renderMarkers==="function"){ try{renderMarkers();}catch(_){} }
     // Herstel-melding ('N tattoos hersteld') bewust uitgezet - zie 'later'-lijst (hele herstel-feature evalueren).
     // LOGIC-5: na een gender-WISSEL uitleggen dat tattoos van het andere model hier verborgen
@@ -21946,6 +21900,7 @@ function maakTatnetGL(json, canvas) {
         ((t.positie3d.gender||"man")!==currentGender))?1:0),0);
       if(verborgen>0) toast(tr('ui.ander_model_verborgen').replace('{n}', verborgen).replace('{s}', verborgen === 1 ? '' : 's'));
     }
+    const _melding=((gedaan, mislukt)=>()=>{ const migTel={gedaan, mislukt};   // slice 5j: op het startscherm pas bij de eerste keer 3D
     if(migTel.mislukt>0) toast(tr('ui.lichaam_migratie_mis').replace('{n}', migTel.mislukt).replace('{s}', migTel.mislukt === 1 ? '' : 's'));
     else {
       /* Tip (toesteltest Bram 2026-09-25): wie nog geen eigen lichaam heeft (intro overgeslagen, of overgezet van het oude
@@ -21961,6 +21916,8 @@ function maakTatnetGL(json, canvas) {
         toast(tr('ui.lichaam_migratie')); try{ localStorage.setItem("tatties-lichaam-migratie-gemeld","1"); }catch(e){}
       }
     }
+    })(migTel.gedaan, migTel.mislukt);
+    if(startLive) uitgesteldeMelding=_melding; else _melding();
     if(migTel.gedaan>0) console.info("migratie: "+migTel.gedaan+" overgezet, "+migTel.mislukt+" niet");
   }
   // Eén 3D-decal verwijderen (na verwijderen van een tattoo via detail/2D); host roept dit aan.
@@ -22028,7 +21985,8 @@ function maakTatnetGL(json, canvas) {
   };
 
   /* ---- render-lus ---- */
-  function loop(){
+  function loop(t){
+    if(startLive){ startLiveFrame(t); requestAnimationFrame(loop); return; }   // startscherm (slice 5j)
     if(!actief3D){ requestAnimationFrame(loop); return; }   // 3D-view verborgen: niet renderen
     if(targetGoal || radiusGoal!=null){
       if(targetGoal){ target.lerp(targetGoal,0.18); if(target.distanceTo(targetGoal)<0.002){ target.copy(targetGoal); targetGoal=null; } }
@@ -22134,79 +22092,19 @@ function maakTatnetGL(json, canvas) {
     c.getContext('2d').drawImage(vol, x0, sy, cw, ch, 0, 0, c.width, c.height);
     return c;
   }
-  /* Draaiend startbeeld (slice 5f): 36 frames rond het lichaam op een raster; elke 4 frames even ademen, en afbreken als je
-     intussen terug naar 3D (of de generator) gaat. Bijgesneden op de vereniging van alle frames. */
-  const DRAAI_N=36, DRAAI_KOL=6;
-  async function maakDraaiSprite(){
-    if(!renderer || !scene || !modelRoot) return null;
-    const lang=(LICHAAM_GEN && LichaamMotor.geometry()) ? LichaamMotor.lengteCm()/100 : 1.8;
-    const W=372, H=560, th0=startOpnameHoek(), ph=Math.PI/2-0.06, ty=lang*0.5, rijen=Math.ceil(DRAAI_N/DRAAI_KOL);
-    const cam=new THREE.PerspectiveCamera(30, W/H, 0.05, 100);
-    const r=lang*1.25/(2*Math.tan(15*Math.PI/180));
-    const msaa=!!(renderer.capabilities.isWebGL2 && THREE.WebGLMultisampleRenderTarget);
-    const rt=msaa ? new THREE.WebGLMultisampleRenderTarget(W,H) : new THREE.WebGLRenderTarget(W,H);
-    if(msaa) rt.samples=Math.min(4, renderer.capabilities.maxSamples||4);
-    rt.texture.encoding=renderer.outputEncoding;
-    const ruw=document.createElement('canvas'); ruw.width=W*DRAAI_KOL; ruw.height=H*rijen;
-    const rx=ruw.getContext('2d'), id=rx.createImageData(W,H), buf=new Uint8Array(W*H*4);
-    let x0=W, x1=-1, y0=H, y1=-1, af=false;
-    try{
-      for(let f=0; f<DRAAI_N; f++){
-        if(actief3D || genAan()){ af=true; break; }   // terug in 3D: nu niet (de volgende keer opnieuw)
-        const th=th0+f*2*Math.PI/DRAAI_N;
-        cam.position.set(r*Math.sin(ph)*Math.sin(th), ty+r*Math.cos(ph), r*Math.sin(ph)*Math.cos(th)); cam.lookAt(0,ty,0); cam.updateMatrixWorld();
-        const bg=scene.background, ringWas=!!(selRing && selRing.visible), gv=!!(ground && ground.visible), kp=key ? key.position.clone() : null;
-        const cc=renderer.getClearColor(new THREE.Color()), ca=renderer.getClearAlpha();
-        scene.background=null; if(selRing) selRing.visible=false; if(ground) ground.visible=false;
-        if(key){ key.position.copy(cam.position); key.position.y+=1.5; key.position.x+=1.0; }
-        try{
-          renderer.setRenderTarget(rt); renderer.setClearColor(0x000000,0); renderer.clear(); renderer.render(scene,cam);
-          renderer.setRenderTarget(null); renderer.readRenderTargetPixels(rt,0,0,W,H,buf);
-        } finally { renderer.setRenderTarget(null); renderer.setClearColor(cc,ca); scene.background=bg;
-          if(selRing) selRing.visible=ringWas; if(ground) ground.visible=gv; if(key && kp) key.position.copy(kp); }
-        for(let y=0;y<H;y++){ const bron=(H-1-y)*W*4, doel=y*W*4;   // readPixels is bottom-up
-          for(let x=0;x<W;x++){ const i=bron+x*4, o=doel+x*4, a=buf[i+3];
-            if(a>0 && a<255){ const k=255/a; id.data[o]=Math.min(255,buf[i]*k); id.data[o+1]=Math.min(255,buf[i+1]*k); id.data[o+2]=Math.min(255,buf[i+2]*k); }
-            else { id.data[o]=buf[i]; id.data[o+1]=buf[i+1]; id.data[o+2]=buf[i+2]; }
-            id.data[o+3]=a;
-            if(a>16){ if(x<x0)x0=x; if(x>x1)x1=x; if(y<y0)y0=y; if(y>y1)y1=y; } } }
-        rx.putImageData(id, (f%DRAAI_KOL)*W, Math.floor(f/DRAAI_KOL)*H);
-        if(f%4===3) await new Promise(q=>setTimeout(q,0));
-      }
-    } finally { rt.dispose(); }
-    if(af || x1<0) return null;
-    const mg=Math.round(H*0.015); x0=Math.max(0,x0-mg); x1=Math.min(W-1,x1+mg); y0=Math.max(0,y0-mg); y1=Math.min(H-1,y1+mg);
-    const fw=x1-x0+1, fh=y1-y0+1;
-    const uit=document.createElement('canvas'); uit.width=fw*DRAAI_KOL; uit.height=fh*rijen; const ux=uit.getContext('2d');
-    for(let f=0; f<DRAAI_N; f++){ const kx=f%DRAAI_KOL, ky=Math.floor(f/DRAAI_KOL);
-      ux.drawImage(ruw, kx*W+x0, ky*H+y0, fw, fh, kx*fw, ky*fh, fw, fh); }
-    let blob=await new Promise(q=>uit.toBlob(q,'image/webp',0.85));
-    if(!blob || blob.type!=='image/webp') blob=await new Promise(q=>uit.toBlob(q,'image/png'));   // Safari maakt geen webp
-    if(!blob) return null;
-    const eerste=document.createElement('canvas'); eerste.width=fw; eerste.height=fh; eerste.getContext('2d').drawImage(uit,0,0,fw,fh,0,0,fw,fh);
-    return { blob, fw, fh, n:DRAAI_N, kol:DRAAI_KOL, eerste };
-  }
-  let startOpnameBezig=false;
-  async function bewaarStartOpname(){
+  function bewaarStartOpname(){
     startOpnameT=0;
-    if(!LICHAAM_GEN || !inited || !modelRoot || glKapot || herstelLoopt || ledeActief || genAan() || onbDraai || startOpnameBezig) return;
+    if(!LICHAAM_GEN || !inited || !modelRoot || glKapot || herstelLoopt || ledeActief || genAan() || onbDraai) return;
     const vp=startOpnameVingerafdruk();
     let heeft=false; try{ heeft=!!localStorage.getItem(START_OPNAME+':src'); }catch(e){}
     if(vp===startOpnameVp && heeft) return;
-    startOpnameBezig=true;
-    try{
-      const ids=[...new Set(markers.filter(m=>m.obj && m.obj.visible && m.rec).map(m=>m.rec.id))];
-      let d=null; try{ d=await maakDraaiSprite(); }catch(e){ console.error('draaibeeld mislukt', e); }
-      if(!d && (actief3D || genAan())) return;   // afgebroken: terug in 3D
-      const c=d ? d.eerste : maakStartOpname(); if(!c) return;   // stilstaand beeld = frame 0 (zelfde kader als het draaien)
-      let src=''; try{ src=c.toDataURL('image/webp',0.86); }catch(e){}
-      if(src.indexOf('data:image/webp')!==0) src=c.toDataURL('image/png');   // Safari maakt geen webp
-      try{ localStorage.setItem(START_OPNAME+':src', src); localStorage.setItem(START_OPNAME+':ids', JSON.stringify(ids)); startOpnameVp=vp; }
-      catch(e){ try{ localStorage.removeItem(START_OPNAME+':src'); }catch(_){} }   // opslag vol: liever geen beeld dan een oud
-      if(typeof window.__tattiesStartDraaiBewaar==='function')
-        await window.__tattiesStartDraaiBewaar(d ? { blob:d.blob, fw:d.fw, fh:d.fh, n:d.n, kol:d.kol, ids } : null);
-      if(typeof window.__tattiesStartModel==='function') window.__tattiesStartModel();
-    } finally { startOpnameBezig=false; }
+    const c=maakStartOpname(); if(!c) return;
+    let src=''; try{ src=c.toDataURL('image/webp',0.86); }catch(e){}
+    if(src.indexOf('data:image/webp')!==0) src=c.toDataURL('image/png');   // Safari maakt geen webp
+    const ids=[...new Set(markers.filter(m=>m.obj && m.obj.visible && m.rec).map(m=>m.rec.id))];
+    try{ localStorage.setItem(START_OPNAME+':src', src); localStorage.setItem(START_OPNAME+':ids', JSON.stringify(ids)); startOpnameVp=vp; }
+    catch(e){ try{ localStorage.removeItem(START_OPNAME+':src'); }catch(_){} }   // opslag vol: liever geen beeld dan een oud
+    if(typeof window.__tattiesStartModel==='function') window.__tattiesStartModel();
   }
   { const pauze=window.__tatties3DPauze;   // 3D verlaten: opname plannen (niet vanuit de generator, het welkom of een plaatsstand)
     window.__tatties3DPauze=function(){
@@ -22215,6 +22113,58 @@ function maakTatnetGL(json, canvas) {
       if(neem){ clearTimeout(startOpnameT); startOpnameT=setTimeout(bewaarStartOpname, 120); }
     }; }
   window.__tattiesStartOpname=()=>{ startOpnameVp=''; bewaarStartOpname(); };   // dev: nu opnieuw maken
+  /* ---- Live op het startscherm (slice 5j) ---- */
+  const START_RONDJE=16;   // seconden per rondje (zoals het welkom)
+  function startLiveMaat(){
+    const s=startLive; if(!s || !renderer) return;
+    const r=s.host.getBoundingClientRect(), w=Math.max(40,Math.round(r.width)), h=Math.max(40,Math.round(r.height));
+    if(w===s.w && h===s.h) return;
+    s.w=w; s.h=h; renderer.setSize(w,h); camera.aspect=w/h; camera.fov=30; camera.updateProjectionMatrix();
+  }
+  window.__tatties3DStartLive=function(host){
+    if(!host){ stopStartLive(); return false; }
+    if(!LICHAAM_GEN || glKapot || genAan() || onbDraai) return false;
+    if(startLive && startLive.host===host) return true;
+    if(startLive) stopStartLive();
+    initEngine(); if(glKapot || !renderer || !scene) return false;
+    const cv=renderer.domElement;
+    startLive={ host, w:0, h:0, na:cv.nextSibling, t:0, getoond:false, zicht:true, bg:scene.background,
+      gv:!!(ground && ground.visible), cc:renderer.getClearColor(new THREE.Color()), ca:renderer.getClearAlpha() };
+    cv.classList.add('start-live'); cv.style.opacity='0'; host.appendChild(cv);
+    scene.background=null; renderer.setClearColor(0x000000,0);
+    if(ground) ground.visible=false; if(selRing) selRing.visible=false;
+    theta=startOpnameHoek(); phi=Math.PI/2-0.06;   // begint waar het stilstaande beeld staat
+    startLiveMaat();
+    if('IntersectionObserver' in window){ startLive.io=new IntersectionObserver(e=>{ if(startLive) startLive.zicht=e[e.length-1].isIntersecting; }); startLive.io.observe(host); }
+    return true;
+  };
+  function stopStartLive(){
+    const s=startLive; if(!s) return; startLive=null;
+    if(s.io) s.io.disconnect();
+    const cv=renderer.domElement; cv.classList.remove('start-live'); cv.style.opacity='';
+    if(stage) stage.insertBefore(cv, (s.na && s.na.parentNode===stage) ? s.na : null);
+    const im=s.host.querySelector('img'); if(im) im.style.opacity='';
+    scene.background=s.bg; zetSceneKleur(); renderer.setClearColor(s.cc, s.ca); if(ground) ground.visible=s.gv;
+    resetView(); resize();
+  }
+  function startLiveFrame(t){
+    const s=startLive; t=t||performance.now();
+    const dt=s.t ? Math.min(0.1,(t-s.t)/1000) : 0; s.t=t;
+    if(!s.zicht || document.hidden) return;   // niet in beeld: niet tekenen
+    startLiveMaat();
+    const lang=(LICHAAM_GEN && LichaamMotor.geometry()) ? LichaamMotor.lengteCm()/100 : 1.8;
+    theta+=dt*2*Math.PI/START_RONDJE; phi=Math.PI/2-0.06;
+    const beeldH=Math.max(lang*1.04, lang*1.0/(s.w/s.h));   // zelfde kader als het stilstaande beeld; brede A-houding past ook
+    radius=beeldH/(2*Math.tan(camera.fov*Math.PI/360)); target.set(0,lang/2,0); targetGoal=null; radiusGoal=null; applyCam();
+    if(key){ key.position.copy(camera.position); key.position.y+=1.5; key.position.x+=1.0; }
+    renderer.render(scene,camera);
+    if(!s.getoond && modelRoot && hersteldOoit && !herstelLoopt){   // pas als het model met alle tattoos er staat: zacht over
+      s.getoond=true; renderer.domElement.style.opacity='1';
+      const im=s.host.querySelector('img'); if(im) im.style.opacity='0'; }
+  }
+  { const pauze=window.__tatties3DPauze;   // naar een andere weergave dan start: canvas terug
+    window.__tatties3DPauze=function(){ if(typeof huidigeView==='undefined' || huidigeView!=='start') stopStartLive(); pauze(); }; }
+  window.__tattiesStartLiveDbg=()=>startLive && { w:startLive.w, h:startLive.h, getoond:startLive.getoond, zicht:startLive.zicht, theta };
   /* Zachte schaduwvlek onder het model: alpha 1 in het midden, 0 aan de rand. Tegen de donkere studio-achtergrond viel een
      vlakke schijf niet op, op papier wel (grijs vlak met een harde rand). */
   function vloerTextuur(){
@@ -22250,7 +22200,7 @@ function maakTatnetGL(json, canvas) {
     target=new THREE.Vector3(0,0.95,0);
     // PLAT-13: renderer-creatie kan gooien (WebGL uit/blocklisted). Vroeger bleef inited=true
     // staan -> permanent stil falen terwijl de +-flow gewoon de fotokiezer opende.
-    try{ renderer=new THREE.WebGLRenderer({antialias:true}); }
+    try{ renderer=new THREE.WebGLRenderer({antialias:true, alpha:true}); }   // alpha: doorzichtig op het startscherm (slice 5j)
     catch(e){ console.error(e); inited=false; glKapot=true; window.__tatties3DKapot=true; return; }
     renderer.setPixelRatio(Math.min(devicePixelRatio,2));
     renderer.outputEncoding=THREE.sRGBEncoding;
@@ -22317,6 +22267,7 @@ function maakTatnetGL(json, canvas) {
     if(typeof zetNavActief==="function") zetNavActief(actief);   // host: precies één van de 5 nav-knoppen actief
   }
   function show3D(){
+    if(startLive) stopStartLive();   // canvas terug in de stage (slice 5j)
     actief3D=true;
     /* De 3D-weergave verbergt de host-views zelf en ging dus niet door toonView(). Daardoor bleef
        een openstaande detail-laag hangen (met z'n history-entry) en bleef huidigeView op 'detail'
@@ -22344,6 +22295,7 @@ function maakTatnetGL(json, canvas) {
     }
     requestAnimationFrame(resize);
     toonDraaiHintEenmalig();
+    if(uitgesteldeMelding){ const f=uitgesteldeMelding; uitgesteldeMelding=null; setTimeout(f,500); }   // herstelmelding van het startscherm (slice 5j)
   }
   function show2D(){
     actief3D=false;
