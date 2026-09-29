@@ -10646,7 +10646,7 @@ function createTattoo(overrides = {}) {
    ============================================================ */
 // App-versie (semver, handmatig ophogen bij een release). Bij een bump ook de
 // CACHE-naam in sw.js meebumpen, zodat clients de nieuwe build ophalen.
-const APP_VERSIE = '0.3.127';
+const APP_VERSIE = '0.3.128';
 
 /* Dev-haken die de CLOUD raken hangen alleen op een ontwikkelmachine aan window. Ze zijn geen
    lek op zichzelf (zonder XSS roept niemand ze aan, en CSP + esc() houden XSS tegen), maar ze
@@ -19011,6 +19011,27 @@ async function verwijderVoorbeelden() {
   // Basis-alphaTest van een decal: 0.5 bij multiply (blend negeert alpha), 0.03 bij normale blending (alpha = inkt)
   function decalAlphaBasis(mul){ return mul ? 0.5 : 0.03; }
   // Doorzichtigheid van een geplaatst decal (alphaTest meeschalen, anders verdwijnt het bij lage opaciteit)
+  /* slice 5p: tattoo rustig laten verschijnen (herstel). Stopt als iets anders intussen de opacity zet (dekking, ledemaat los). */
+  const infaden=new Set(); let infadeLaatst=0, infadeRaf=0;
+  function decalInfaden(obj){
+    const m=obj && obj.material; if(!m) return;
+    const nu=performance.now(), start=Math.max(nu, infadeLaatst+140); infadeLaatst=start;
+    const f={ obj, doel:m.opacity, start, laatst:0 };
+    m.opacity=0; m.alphaTest=0.01; m.needsUpdate=true;   // een keer: tijdens het invloeien verandert alleen de opacity
+    infaden.add(f);
+    if(!infadeRaf) infadeRaf=requestAnimationFrame(infadeLus);
+  }
+  function infadeLus(){
+    infadeRaf=0; const nu=performance.now();
+    for(const f of [...infaden]){
+      const m=f.obj.material;
+      if(!f.obj.parent || !m || Math.abs(m.opacity-f.laatst)>1e-4){ infaden.delete(f); continue; }
+      const k=Math.max(0, Math.min(1, (nu-f.start)/700));
+      if(k>=1){ zetDecalOpacity(f.obj, f.doel); infaden.delete(f); continue; }
+      f.laatst=f.doel*k*k*(3-2*k); m.opacity=f.laatst;
+    }
+    if(infaden.size) infadeRaf=requestAnimationFrame(infadeLus);
+  }
   function zetDecalOpacity(obj, op){
     if(!obj || !obj.material) return;
     op=Math.max(0.05, Math.min(1, +op||1));
@@ -21942,6 +21963,7 @@ function maakTatnetGL(json, canvas) {
     const _wens=(t.status==='wens');
     obj.visible = !_wens || toonGepland;                                   // geplande alleen tonen als de toggle aanstaat
     zetDecalOpacity(obj, (isFinite(+t.opacity)?Math.max(0.2,Math.min(1,+t.opacity)):1)*(_wens?0.5:1));   // geplande gedimd (50%)
+    decalInfaden(obj);   // slice 5p: rustig verschijnen
     // Eén bron van waarheid: koppel de marker aan het host-`tattoos`-object (niet de DB-kopie `t`),
     // zodat 2D-bewerkingen (slepen) en 3D-`persistEdit` op hetzelfde record werken en niet uiteenlopen.
     const recRef=(typeof tattoos!=="undefined" && Array.isArray(tattoos)) ? (tattoos.find(x=>x.id===t.id)||t) : t;
@@ -22151,9 +22173,8 @@ function maakTatnetGL(json, canvas) {
   let startOpnameVp='', startOpnameT=0, herstelLoopt=false;
   const START_OPNAME='tatties-start-opname:'+(typeof DB_NAAM!=='undefined' ? DB_NAAM : 'tatties');
   function startOpnameVingerafdruk(){
-    const d=[currentGender, underwear, skinMat ? skinMat.color.getHexString() : ''];
+    const d=['v2', currentGender, underwear, skinMat ? skinMat.color.getHexString() : '', startOpnameHoek().toFixed(2)];   // slice 5p: beeld zonder tattoos
     try{ d.push(localStorage.getItem('tatties-lichaam')||''); }catch(e){}
-    for(const m of markers) if(m.obj) d.push((m.rec&&m.rec.id)+'/'+((m.deel&&m.deel.id)||'')+'/'+(m.obj.geometry&&m.obj.geometry.uuid)+'/'+m.obj.visible+'/'+(m.obj.material&&m.obj.material.opacity));
     return d.join('|');
   }
   function startOpnameHoek(){
@@ -22183,6 +22204,7 @@ function maakTatnetGL(json, canvas) {
     const bg=scene.background, ringWas=!!(selRing && selRing.visible), kp=key ? key.position.clone() : null, gv=!!(ground && ground.visible);
     const cc=renderer.getClearColor(new THREE.Color()), ca=renderer.getClearAlpha();
     scene.background=null; if(selRing) selRing.visible=false; if(ground) ground.visible=false;
+    const mz=markers.map(m=>!!(m.obj && m.obj.visible)); markers.forEach(m=>{ if(m.obj) m.obj.visible=false; });   // slice 5p: lichaam zonder tattoos
     if(key){ key.position.copy(cam.position); key.position.y+=1.5; key.position.x+=1.0; }   // zoals de render-lus
     let buf=null;
     try{
@@ -22191,7 +22213,8 @@ function maakTatnetGL(json, canvas) {
       buf=new Uint8Array(W*H*4); renderer.readRenderTargetPixels(rt,0,0,W,H,buf);
     }catch(e){ console.error('startopname mislukt', e); buf=null; }
     finally{ renderer.setRenderTarget(null); rt.dispose(); renderer.setClearColor(cc,ca); scene.background=bg;
-      if(selRing) selRing.visible=ringWas; if(ground) ground.visible=gv; if(key && kp) key.position.copy(kp); }
+      if(selRing) selRing.visible=ringWas; if(ground) ground.visible=gv; if(key && kp) key.position.copy(kp);
+      markers.forEach((m,i)=>{ if(m.obj) m.obj.visible=mz[i]; }); }
     if(!buf) return null;
     const c=document.createElement('canvas'); c.width=W; c.height=H;
     const x=c.getContext('2d'), id=x.createImageData(W,H);
@@ -22209,13 +22232,15 @@ function maakTatnetGL(json, canvas) {
     if(!LICHAAM_GEN || !inited || !modelRoot || glKapot || herstelLoopt || ledeActief || genAan() || onbDraai) return;
     const vp=startOpnameVingerafdruk();
     let heeft=false; try{ heeft=!!localStorage.getItem(START_OPNAME+':src'); }catch(e){}
-    if(vp===startOpnameVp && heeft) return;
+    let vpOud=''; try{ vpOud=localStorage.getItem(START_OPNAME+':vp')||''; }catch(e){}
+    if((vp===startOpnameVp || vp===vpOud) && heeft) return;   // slice 5p: vingerafdruk ook over sessies heen
     const c=maakStartOpname(); if(!c) return;
     let src=''; try{ src=c.toDataURL('image/webp',0.86); }catch(e){}
     if(src.indexOf('data:image/webp')!==0) src=c.toDataURL('image/png');   // Safari maakt geen webp
     const ids=[...new Set(markers.filter(m=>m.obj && m.obj.visible && m.rec).map(m=>m.rec.id))];
     try{ localStorage.setItem(START_OPNAME+':src', src); localStorage.setItem(START_OPNAME+':ids', JSON.stringify(ids)); startOpnameVp=vp;
-      if(startOpnameHoekNu!==null) localStorage.setItem(START_OPNAME+':hoek', String(startOpnameHoekNu)); }   // live begint op deze hoek (slice 5n)
+      if(startOpnameHoekNu!==null) localStorage.setItem(START_OPNAME+':hoek', String(startOpnameHoekNu));   // live begint op deze hoek (slice 5n)
+      localStorage.setItem(START_OPNAME+':vp', vp); }
     catch(e){ try{ localStorage.removeItem(START_OPNAME+':src'); }catch(_){} }   // opslag vol: liever geen beeld dan een oud
     if(typeof window.__tattiesStartModel==='function') window.__tattiesStartModel();
   }
@@ -22264,7 +22289,8 @@ function maakTatnetGL(json, canvas) {
     const s=startLive; t=t||performance.now();
     const dt=s.t ? Math.min(0.1,(t-s.t)/1000) : 0; s.t=t;
     if(!s.zicht || document.hidden) return;   // niet in beeld: niet tekenen
-    if(!(modelRoot && hersteldOoit && !herstelLoopt)) return;   // slice 5n: niets tekenen zolang het model laadt (het stilstaande beeld staat er)
+    if(!(modelRoot && (herstelLoopt || hersteldOoit))) return;   // slice 5p: zodra het lichaam er is; de tattoos verschijnen daarna rustig
+    if(hersteldOoit && !herstelLoopt && !s.opnameGepland){ s.opnameGepland=true; setTimeout(bewaarStartOpname, 2500); }   // beeld bijwerken als het veranderd is
     startLiveMaat();
     const lang=(LICHAAM_GEN && LichaamMotor.geometry()) ? LichaamMotor.lengteCm()/100 : 1.8;
     if(!s.getoond){   // begin op de hoek van het stilstaande beeld, en draai pas na de overgang
