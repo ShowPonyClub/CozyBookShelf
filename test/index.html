@@ -2104,6 +2104,9 @@ html.knipfull .cutmodal.cm-review .cm-bewerkbtn span{position:absolute;width:1px
    eenmalige draaihint aan staat blijft de pil weg (doorloop 2026-09-21). */
 #view-3d #lege-hint-3d{left:max(12px,env(safe-area-inset-left,0px));right:74px;bottom:calc(14px + env(safe-area-inset-bottom,0px));transform:none;max-width:none;}
 #view-3d:has(#hint.on) #lege-hint-3d{display:none;}
+@media (orientation:landscape){   /* liggend: compact links, zodat de voeten in het midden vrij blijven (slice 5q) */
+  #view-3d #lege-hint-3d, #view-3d #hint{right:auto;max-width:min(340px,38vw);}
+}
 .cutmodal .cm-veld{display:flex;flex-direction:column;gap:4px;font-size:var(--fs-sm);color:var(--gedempt);margin:8px 0 0;}
 /* Accentkleur: swatch naast de tekst (rij) i.p.v. eronder */
 .cutmodal .cm-accent-veld{flex-direction:row;align-items:center;justify-content:space-between;gap:14px;}
@@ -10646,7 +10649,7 @@ function createTattoo(overrides = {}) {
    ============================================================ */
 // App-versie (semver, handmatig ophogen bij een release). Bij een bump ook de
 // CACHE-naam in sw.js meebumpen, zodat clients de nieuwe build ophalen.
-const APP_VERSIE = '0.3.128';
+const APP_VERSIE = '0.3.129';
 
 /* Dev-haken die de CLOUD raken hangen alleen op een ontwikkelmachine aan window. Ze zijn geen
    lek op zichzelf (zonder XSS roept niemand ze aan, en CSP + esc() houden XSS tegen), maar ze
@@ -16588,9 +16591,17 @@ async function verwijderVoorbeelden() {
       toast(tr('toast.opname_bewaard'));
     } finally { opnameBezig=false; }
   }
+  /* slice 5q: beginstand. Staand de vaste CAM0; liggend het hele lichaam op ~86% van de canvashoogte. */
+  function camBegin(){
+    const w=stage ? stage.clientWidth : 0, h=stage ? stage.clientHeight : 0;
+    if(!(camera && w>h*1.15)) return { radius:CAM0.radius, ty:CAM0.ty };
+    const lang=(LICHAAM_GEN && LichaamMotor.geometry()) ? LichaamMotor.lengteCm()/100 : 1.8;
+    return { radius:(lang/0.86)/(2*Math.tan(camera.fov*Math.PI/360)), ty:lang*0.5 };
+  }
   function resetView(){
-    targetGoal=null; radiusGoal=null; radius=CAM0.radius; theta=CAM0.theta; phi=CAM0.phi;
-    target.set(CAM0.tx,CAM0.ty,CAM0.tz); applyCam();
+    const b=camBegin();
+    targetGoal=null; radiusGoal=null; radius=b.radius; theta=CAM0.theta; phi=CAM0.phi;
+    target.set(CAM0.tx,b.ty,CAM0.tz); applyCam();
   }
   let selRingOn=false;
   function showSel(b){ selRingOn=!!b; buildSelRing(); }
@@ -16781,10 +16792,15 @@ async function verwijderVoorbeelden() {
     // zichtbaar mee. Daarom ijken we de schaal alleen opnieuw bij een BEWUSTE layoutwissel: de eerste
     // render, een andere breedte (rotatie/venster) of de bewerkbalk die aan/uit gaat. Verandert alleen
     // de hoogte, dan corrigeert de fov dat, zodat het model even groot op het scherm blijft.
-    if(!hIjk || w!==wIjk || ebH!==ebIjk){ hIjk=h; wIjk=w; ebIjk=ebH; }
+    if(!hIjk || w!==wIjk || ebH!==ebIjk || w>h*1.15){ hIjk=h; wIjk=w; ebIjk=ebH; }   // liggend: altijd (slice 5q)
     const fov=2*Math.atan(Math.tan(FOV_BASIS*Math.PI/360)*(h/hIjk))*180/Math.PI;
     renderer.setSize(w,h); camera.aspect=w/h; camera.fov=Math.max(15,Math.min(80,fov));
-    camera.updateProjectionMatrix(); }
+    camera.updateProjectionMatrix();
+    /* slice 5q: telefoon gedraaid (staand <-> liggend): terug naar de beginstand van die stand */
+    const ligt=w>h*1.15;
+    if(ligt!==ligtWas){ const eerst=(ligtWas===null); ligtWas=ligt;
+      if(!eerst && actief3D && modelRoot && !editDecal && !ledeActief && !genAan() && !onbDraai && !plaatsModus) resetView(); } }
+  let ligtWas=null;
 
   /* ---- model laden ---- */
   function b64ToBuffer(b64){ const bin=atob(b64), len=bin.length, bytes=new Uint8Array(len);
@@ -16825,7 +16841,7 @@ async function verwijderVoorbeelden() {
     root.traverse(o=>{ if(o.isMesh){ if(!o.geometry.attributes.normal) o.geometry.computeVertexNormals();
       o.material=activeSkin; pickMeshes.push(o); }});
     orthoCal=null; if(!LICHAAM_GEN) computeOrthoCal();   // SLICE 1: ortho-kalibratie verversen voor dit model (nieuw lichaam: nog geen 2D)
-    radius=3.2; theta=0; phi=1.35; target.set(0,0.95,0); applyCam();
+    resetView();   // beginstand (liggend eigen kader, slice 5q)
     try{ rebuildUnderwear(); }catch(e){ console.error("onderbroek opbouwen mislukt",e); }   // onderbroek opnieuw plaatsen na (her)laden model
     // Houding pas NA computeOrthoCal: de 2D-kaart hoort op de rusthouding gekalibreerd te zijn.
     if(!LICHAAM_GEN){ try{ poseZet((POSE_AAN&&poseVoorkeur())?POSE_MAX:0); zetPoseKnop(); }catch(e){ console.error("houding zetten mislukt",e); } }   // houding hoort bij het oude model
@@ -18636,7 +18652,7 @@ async function verwijderVoorbeelden() {
   function heelLichaam(){
     if(!ledeActief) return;
     stopIsolatie();
-    targetGoal=new THREE.Vector3(CAM0.tx,CAM0.ty,CAM0.tz); radiusGoal=CAM0.radius;   // soepel terug
+    { const b=camBegin(); targetGoal=new THREE.Vector3(CAM0.tx,b.ty,CAM0.tz); radiusGoal=b.radius; }   // soepel terug (liggend: eigen kader, slice 5q)
   }
   /* De knip van alle delen alvast meten zodra het model geladen is, met een adempauze ertussen.
      De meting is het trage deel van een tik (op deze machine 40 tot 80 ms per deel); vooruit meten
