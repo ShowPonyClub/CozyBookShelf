@@ -1220,6 +1220,9 @@ form label,
 .t3d-editbar .eb-blend .ik{width:16px;height:16px;flex:none;}
 /* Uitleg-popover in de bewerkbalk (zelfde stijl als de tool-legenda in de uitsnede-modal) */
 .t3d-editbar{position:absolute;}   /* containing block voor .eb-legend (was al absolute gepositioneerd) */
+.t3d-editbar .eb-samen{margin:0 auto}   /* slice 5v: eigen regel boven de knoppen, midden */
+.t3d-editbar .eb-samen[hidden]{display:none}
+.t3d-editbar .eb-samen .seg-btn{min-height:36px;font-size:var(--fs-xs)}
 .t3d-editbar .eb-legend{position:absolute;left:8px;right:8px;bottom:100%;margin-bottom:10px;z-index:9;
   background:var(--kaart);border:1px solid var(--rand);border-radius:var(--r-md);padding:6px;
   box-shadow:0 10px 30px rgba(0,0,0,.32);display:flex;flex-direction:column;gap:2px;max-height:50vh;overflow:auto;}
@@ -2541,6 +2544,10 @@ form label{text-transform:none;letter-spacing:.005em;font-size:.8rem;color:var(-
            Knop wijzigen/toevoegen? Alleen HIER. Verschil 2D: geen .eb-blend + eigen opacity-slider-id (in de kloon-code). -->
       <div id="editbar" class="t3d-editbar">
         <div class="eb-title">Tattoo</div>
+        <div class="seg-toggle eb-samen" id="eb-samen" role="group" data-i18n-aria="eb.samen_label" aria-label="Wat beweegt er" hidden>
+          <button type="button" class="seg-btn" data-samen="hele" data-i18n="eb.hele_tattoo">Hele tattoo</button>
+          <button type="button" class="seg-btn" data-samen="deel" data-i18n="eb.dit_deel">Dit deel</button>
+        </div>
         <div class="eb-legend" hidden role="group" data-i18n-aria="ui.knop_uitleg" aria-label="Wat doen de knoppen?"></div>
         <div class="eb-btns">
           <button type="button" data-act="help" class="eb-help" aria-pressed="false" data-i18n-title="ui.knop_uitleg" data-i18n-aria="ui.knop_uitleg" title="Wat doen de knoppen?" aria-label="Wat doen de knoppen?"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5"/><path d="M12 7.6h.01"/></svg></button>
@@ -8192,18 +8199,60 @@ function zetTabel(uit, ms){
   vetKorr = null;
   meting.gewTabel = ms;
 }
+/* Tatties slice 5u (opstarttijd): de tabel bewaren. Hij hangt alleen af van het model, de rekencode en de stand
+   (vorm, lengte, leeftijd, cup, stevigheid, details); bij elke app-start is dat je opgeslagen lichaam, en de bouw kostte op
+   een telefoon ~0,8 s. Sleutel = alles waar hij van afhangt, plus een vingerafdruk van het model en van de code die rekent,
+   zodat een ander model of andere rekenregels vanzelf een nieuwe tabel geven. Een tabel in de opslag (localStorage). */
+var TABEL_OPSLAG = 'tatties-gewtabel', TABEL_OPSLAG_V = 1, _tabelFp = null;
+function hashTekst(s, h){
+  h = (h === undefined ? 2166136261 : h) >>> 0;
+  for(var i=0; i<s.length; i++) h = Math.imul(h ^ s.charCodeAt(i), 16777619) >>> 0;
+  return h;
+}
+function tabelFp(){
+  if(_tabelFp) return _tabelFp;
+  var h = 2166136261 >>> 0, i;
+  for(i=0; i<basePos.length; i+=97) h = Math.imul(h ^ Math.round(basePos[i]*1e5), 16777619) >>> 0;
+  for(i=0; i<targets.length; i+=7) h = Math.imul(h ^ targets[i].idx.length, 16777619) >>> 0;
+  var code = [gewichten, blendPos, tabelKlussen, gewichtKg, armLeeftijd, leeftijdAs, losHeightOpVanaf, lengteSchaalVoor, lengteBijHeight]
+    .map(function(f){ return String(f); }).join('|') + JSON.stringify([VET_VROUW, VET_MAN, VET2_VROUW, VET2_MAN, VET_KAP, GEW_N]);
+  _tabelFp = TABEL_OPSLAG_V + ':' + basePos.length + ':' + targets.length + ':' + h.toString(36) + ':' + hashTekst(code).toString(36);
+  return _tabelFp;
+}
+function tabelSleutel(gender, height){
+  var d = {}, ks = Object.keys(detailStand).sort();
+  for(var i=0; i<ks.length; i++) if(detailStand[ks[i]]) d[ks[i]] = +(+detailStand[ks[i]]).toFixed(5);
+  return JSON.stringify([tabelFp(), +(+gender).toFixed(5), +(+height).toFixed(5), +lengteDoel().toFixed(3), leeftijdJaar,
+    +(+cupStand.cupsize).toFixed(5), +(+cupStand.firmness).toFixed(5), d]);
+}
+function tabelUitOpslag(sleutel){
+  try{
+    var r = JSON.parse(localStorage.getItem(TABEL_OPSLAG) || 'null');
+    if(r && r.k === sleutel && r.uit && r.uit.gewTabel && r.uit.gewTabel.length === GEW_N) return r.uit;
+  }catch(e){}
+  return null;
+}
+function tabelNaarOpslag(sleutel, uit){
+  try{ localStorage.setItem(TABEL_OPSLAG, JSON.stringify({ k:sleutel, uit:uit })); }catch(e){}
+}
 function bouwGewichtTabel(gender, height){
   var t0 = performance.now();
   tabelTaak = null;                   /* een lopende bouw in stukjes vervalt */
+  var sleutel = tabelSleutel(gender, height), bewaard = tabelUitOpslag(sleutel);
+  if(bewaard){ zetTabel(bewaard, performance.now() - t0); meting.gewTabelUitOpslag = true; return; }
   var k = tabelKlussen(gender, height);
   for(var i=0; i<k.klussen.length; i++) k.klussen[i]();
   zetTabel(k.uit, performance.now() - t0);
+  meting.gewTabelUitOpslag = false;
+  tabelNaarOpslag(sleutel, k.uit);
 }
 /* In stukjes: per beurt zoveel klussen als in 8 ms passen. Tot hij klaar is blijft de
    oude tabel gelden (het gewicht wijkt dan even een kilo of wat af, zoals tijdens het
    slepen); daarna roept hij `klaar` aan om het gewicht opnieuw toe te passen. */
 var tabelTaak = null;
 function bouwGewichtTabelLos(gender, height, klaar){
+  var sleutel = tabelSleutel(gender, height), bewaard = tabelUitOpslag(sleutel);   /* slice 5u */
+  if(bewaard){ tabelTaak = null; zetTabel(bewaard, 0); if(klaar) setTimeout(klaar, 0); return; }
   var k = tabelKlussen(gender, height);
   var taak = { k:k, i:0, werk:0 };
   tabelTaak = taak;
@@ -8215,6 +8264,7 @@ function bouwGewichtTabelLos(gender, height, klaar){
     if(taak.i < k.klussen.length){ setTimeout(stap, 0); return; }
     tabelTaak = null;
     zetTabel(k.uit, taak.werk);
+    tabelNaarOpslag(sleutel, k.uit);   /* slice 5u */
     if(klaar) klaar();
   }
   /* setTimeout en geen requestAnimationFrame: die staat stil in een verborgen tab,
@@ -8736,6 +8786,9 @@ function waarden(){
    (iOS 16.4+); zonder die API geeft kanLaden() false en blijft de app op het oude model. */
 function kanLaden(){ return typeof DecompressionStream === 'function' && typeof Response === 'function'; }
 function b64NaarBytes(b64){
+  /* Tatties slice 5u: de ingebouwde omzetting waar die er is (Safari 18.2+, Chrome 140+); de lus hieronder kostte op een
+     telefoon ~0,4 s voor het model. */
+  if(typeof Uint8Array.fromBase64 === 'function'){ try{ return Uint8Array.fromBase64(b64.trim()); }catch(e){} }
   var bin = atob(b64), u8 = new Uint8Array(bin.length);
   for(var i=0; i<bin.length; i++) u8[i] = bin.charCodeAt(i);
   return u8;
@@ -10201,6 +10254,12 @@ const I18N = {
     'deel.film_klaar':'Je filmpje is klaar','deel.film_delen':'Delen','deel.film_bewaren':'Bewaren',
     'toast.film_mislukt':'Filmpje maken is niet gelukt','toast.film_wacht':'Even geduld, je tattoos worden nog geladen',
     'toast.film_bewaard':'Filmpje bewaard',
+    'eb.samen_label':'Wat beweegt er','eb.hele_tattoo':'Hele tattoo','eb.dit_deel':'Dit deel',
+    'deel.titel':'Delen','deel.foto':'Foto','deel.foto_sub':'Het model zoals je het nu ziet','deel.film':'Draaiend filmpje',
+    'deel.film_sub':'Je hele lichaam een rondje rond, voor TikTok of Instagram','deel.film_bezig':'Filmpje maken: {p}%',
+    'deel.film_klaar':'Je filmpje is klaar','deel.film_delen':'Delen','deel.film_bewaren':'Bewaren',
+    'toast.film_mislukt':'Filmpje maken is niet gelukt','toast.film_wacht':'Even geduld, je tattoos worden nog geladen',
+    'toast.film_bewaard':'Filmpje bewaard',
     'ui.reset':'Reset','ui.uitleg_knop':'Uitleg','ui.deel_opname':'Delen','toast.opname_mislukt':'Opname maken is niet gelukt','toast.opname_bewaard':'Opname bewaard','ui.knop_uitleg':'Wat doen de knoppen?','ui.info':'Info','ui.gereedschap':'Gereedschap',
     'inst.vorm.binnenkort':'Binnenkort','ui.bouw2d_kop':'Nog in aanbouw','ui.bouw2d_sub':'Gebruik zolang het 3D-model.',
     'aria.volledigoverzicht':'Volledig overzicht','aria.welkom':'Welkom',
@@ -10394,6 +10453,12 @@ const I18N = {
     'ui.geen_foto_bewaard':'No original photo saved for this tattoo','ui.pas_aan_sla_op':'Adjust the cut-out and save',
     'ui.foto_niet_geladen':'Could not load the photo','ui.knip_terug_vraag':'You were cutting out a tattoo. Carry on where you left off?','ui.knip_terug_ja':'Carry on','ui.knip_terug_klaar':'Your cut-out is back',
     'ui.geen_afbeelding':'Please choose an image (not another file type)','ui.foto_te_groot':'Photo too large (max 30 MB)','ui.foto_mislukt':'Could not process the photo',
+    'deel.titel':'Share','deel.foto':'Photo','deel.foto_sub':'The model as you see it now','deel.film':'Spinning video',
+    'deel.film_sub':'Your whole body in one spin, for TikTok or Instagram','deel.film_bezig':'Making your video: {p}%',
+    'deel.film_klaar':'Your video is ready','deel.film_delen':'Share','deel.film_bewaren':'Save',
+    'toast.film_mislukt':"Couldn't make the video",'toast.film_wacht':'Hang on, your tattoos are still loading',
+    'toast.film_bewaard':'Video saved',
+    'eb.samen_label':'What moves','eb.hele_tattoo':'Whole tattoo','eb.dit_deel':'This part',
     'deel.titel':'Share','deel.foto':'Photo','deel.foto_sub':'The model as you see it now','deel.film':'Spinning video',
     'deel.film_sub':'Your whole body in one spin, for TikTok or Instagram','deel.film_bezig':'Making your video: {p}%',
     'deel.film_klaar':'Your video is ready','deel.film_delen':'Share','deel.film_bewaren':'Save',
@@ -10694,7 +10759,7 @@ function createTattoo(overrides = {}) {
    ============================================================ */
 // App-versie (semver, handmatig ophogen bij een release). Bij een bump ook de
 // CACHE-naam in sw.js meebumpen, zodat clients de nieuwe build ophalen.
-const APP_VERSIE = '0.3.132';
+const APP_VERSIE = '0.3.133';
 
 /* Dev-haken die de CLOUD raken hangen alleen op een ontwikkelmachine aan window. Ze zijn geen
    lek op zichzelf (zonder XSS roept niemand ze aan, en CSP + esc() houden XSS tegen), maar ze
@@ -15942,6 +16007,7 @@ async function verwijderVoorbeelden() {
       const kloon = bron.cloneNode(true);
       kloon.id = 'editbar2d';
       const blend = kloon.querySelector('.eb-blend'); if (blend) blend.remove();   // 2D heeft geen in-huid-blend
+      const samen = kloon.querySelector('.eb-samen'); if (samen) samen.remove();   // slice 5v: delen alleen in 3D (en geen dubbel id)
       const op = kloon.querySelector('input[type="range"]'); if (op) op.id = 'eb2d-opacity';
       slot.replaceWith(kloon);
     } }
@@ -16812,7 +16878,18 @@ async function verwijderVoorbeelden() {
   }
   // Selectie-ring als op de huid geprojecteerde decal: midden = zwaartepunt van de uitsnede,
   // ovaal op de echte omvang, en hij plakt op het model (volgt de welving, geen vliegende schijf).
-  function buildSelRing(){
+  /* slice 5v: bij "Hele tattoo" ook een ring om de andere delen (dezelfde bouw, per deel) */
+  let ringenExtra=[];
+  function ringenExtraWeg(){ for(const r of ringenExtra){ body.remove(r); if(r.geometry) r.geometry.dispose(); if(r.material){ if(r.material.map) r.material.map.dispose(); r.material.dispose(); } } ringenExtra=[]; }
+  function bouwRingenExtra(){
+    ringenExtraWeg();
+    if(!selRingOn || !editDecal || !groepAan()) return;
+    const echt=editDecal, hoofd=selRing;
+    try{ for(const q of groepLeden()){ editDecal=q; selRing=null; buildSelRingKern(); if(selRing) ringenExtra.push(selRing); } }
+    finally{ editDecal=echt; selRing=hoofd; }
+  }
+  function buildSelRing(){ buildSelRingKern(); bouwRingenExtra(); }
+  function buildSelRingKern(){
     if(selRing){ body.remove(selRing); if(selRing.geometry)selRing.geometry.dispose();
       if(selRing.material){ if(selRing.material.map)selRing.material.map.dispose(); selRing.material.dispose(); } selRing=null; }
     if(!selRingOn || !editDecal) return;
@@ -19249,7 +19326,7 @@ async function verwijderVoorbeelden() {
   /* slice 5r: doorkijk. Het deel dat je bewerkt is half doorzichtig (en ligt boven de andere delen van die tattoo), zodat je het
      op het vorige deel laat aansluiten. Alleen bij een tattoo met meer dan een deel op het model. */
   const DOORKIJK=0.5;
-  function doorkijkAan(m){ return !!(m && m===editDecal && m.obj && markers.some(q=>q!==m && q.id===m.id && q.obj)); }
+  function doorkijkAan(m){ return !!(m && m===editDecal && groepModus==='deel' && m.obj && markers.some(q=>q!==m && q.id===m.id && q.obj)); }   // alleen bij "Dit deel" (5v)
   function markerOpacity(m){
     const op=Math.max(0.05, Math.min(1, +(m && m.rec && m.rec.opacity)||1));
     return doorkijkAan(m) ? Math.min(op, DOORKIJK) : op;
@@ -19367,7 +19444,7 @@ async function verwijderVoorbeelden() {
       if(ledeActief) ledeDecalSplits(m);
       plaatsData=null; plaatsModus=false; verbergBanner(); if(window.__plaatsHintUit) window.__plaatsHintUit();
       if(typeof renderMarkers==="function"){ try{renderMarkers();}catch(_){} }
-      enterEditDecal(m); pasBlendOpNieuw(m);
+      enterEditDecal(m, 'deel'); pasBlendOpNieuw(m);   // net geplaatst: alleen dit deel (aansluiten, met doorkijk), slice 5v
       toastMetActie(tr('ui.deel_geplaatst'), tr('ui.deel_nog_een'), ()=>{ if(editDecal===m) exitEditDecal(); openCutModalAdd('3d', rec); });   // doorketenen: deel 3, 4, ...
       if(rec.status==='wens' && typeof window.__tattiesNaStatus==='function') window.__tattiesNaStatus('wens');
       if(typeof window.__tattiesNaBewerk==="function") window.__tattiesNaBewerk(rec.id);   // detailpagina: telling bijwerken
@@ -19448,7 +19525,8 @@ async function verwijderVoorbeelden() {
       persistEdit(m);   // opgeloste blend (inkt-auto -> zwart/kleur) + 2D-PNG uit de nieuwe textuur (sync2D) opslaan
     }).catch(()=>{});
   }
-  function enterEditDecal(m){
+  function enterEditDecal(m, modus){
+    groepModus=(modus==='deel') ? 'deel' : 'hele'; groepLay=null;   // slice 5v: dubbeltik = hele tattoo, net geplaatst deel = dit deel
     const vorigEdit=editDecal;
     editDecal=m; editHist=[];                 // verse undo-geschiedenis per bewerksessie
     if(vorigEdit && vorigEdit!==m) zetDoorkijk(vorigEdit);   // vorige tattoo weer op zijn gewone dekking (5r)
@@ -19460,7 +19538,7 @@ async function verwijderVoorbeelden() {
     { const a=document.getElementById("t3d-add"); if(a) a.style.display="none"; }   // + knop weg tijdens bewerken
     const op3=document.getElementById("eb3d-opacity"); if(op3) op3.value=Math.round(((m.rec&&m.rec.opacity!=null)?m.rec.opacity:1)*100);
     const h=document.getElementById("hint"); if(h)h.style.display="none";
-    setLockUI(); setBlendUI(); showSel(true);
+    setLockUI(); setBlendUI(); setSamenUI(); showSel(true);
     resize();   // render boven de gedockte balk laten passen
     // De balk heeft zelf een hint (.eb-hint), maar alleen op touch; op desktop staat die op
     // display:none en gelden de tooltips. Alleen daar is deze melding nog nodig - anders
@@ -19469,6 +19547,7 @@ async function verwijderVoorbeelden() {
       if (!coarse) toast(tr('ui.aanpas_hint')); }
   }
   function exitEditDecal(){
+    if(editDecal && groepAan()) for(const q of groepLeden()) persistEdit(q);   // slice 5v: de andere delen ook opslaan
     const m=editDecal; editDecal=null; showSel(false);
     zetDoorkijk(m);   // weer de gewone dekking (5r)
     const eb=document.getElementById("editbar"); if(eb)eb.classList.remove("on");
@@ -19477,25 +19556,109 @@ async function verwijderVoorbeelden() {
     resize();   // render weer op volle hoogte
     if(m) persistEdit(m);
   }
+  /* ---- slice 5v: delen samen verplaatsen ---- */
+  let groepModus='hele', groepLay=null;
+  function groepLeden(){ return editDecal ? markers.filter(q=>q!==editDecal && q.id===editDecal.id && q.obj) : []; }
+  function groepAan(){ return groepModus==='hele' && groepLeden().length>0; }
+  function setSamenUI(){
+    const w=document.querySelector('#editbar .eb-samen'); if(!w) return;
+    const meer=!!editDecal && markers.some(q=>q!==editDecal && q.id===editDecal.id && q.obj);
+    w.hidden=!meer;
+    w.querySelectorAll('[data-samen]').forEach(b=>{ const aan=b.dataset.samen===groepModus; b.classList.toggle('actief', aan); b.setAttribute('aria-pressed', String(aan)); });
+  }
+  function zetGroepModus(mo){
+    if(!editDecal || (mo!=='hele' && mo!=='deel') || mo===groepModus) return;
+    groepModus=mo; groepLay=null; zetDoorkijk(editDecal); setSamenUI(); buildSelRing(); tril(8);
+  }
+  const _gH=new THREE.Object3D(), _gX=new THREE.Vector3(), _gY=new THREE.Vector3(), _gZ=new THREE.Vector3(), _gT=new THREE.Vector3();
+  function decalAssen(point, normal, rot){   // x- en y-as van de decal (zoals de helper in makeImage)
+    _gH.position.copy(point); _gH.up.set(0,1,0); _gH.lookAt(_gT.copy(point).add(normal)); _gH.rotateZ((rot||0)*Math.PI/180); _gH.updateMatrixWorld();
+    _gH.matrixWorld.extractBasis(_gX,_gY,_gZ); return [_gX.clone(), _gY.clone()];
+  }
+  function groepExp(vg, m, rMax){   // exp-map vanaf het anker, frame = de assen van de anker-decal
+    const [X,Y]=decalAssen(m.point, m.normal, m.rot||0);
+    let t=(m.tri>=0) ? m.tri : triBijPunt(m.mesh||pickMeshes[0], m.point, m.normal); if(!(t>=0)) return null;
+    return expMap(vg, [vg.fv[t*3],vg.fv[t*3+1],vg.fv[t*3+2]], [m.point.x,m.point.y,m.point.z], [X.x,X.y,X.z], [Y.x,Y.y,Y.z], rMax);
+  }
+  function groepMeet(m){
+    const leden=groepLeden(); if(!leden.length) return null;
+    const mesh=m.mesh||pickMeshes[0], vg=vertexGraafFor(mesh); if(!vg) return null;
+    let rMax=0.05; for(const q of leden) rMax=Math.max(rMax, m.point.distanceTo(q.point)*1.8+0.03);
+    const em=groepExp(vg, m, rMax); if(!em) return null;
+    const fr=vg._s.fr, pos=vg.pos, lid=[], A=new THREE.Vector3(), B=new THREE.Vector3(), C=new THREE.Vector3(), w=new THREE.Vector3();
+    for(const q of leden){
+      if((q.mesh||pickMeshes[0])!==mesh) continue;
+      const t=(q.tri>=0) ? q.tri : triBijPunt(mesh, q.point, q.normal); if(!(t>=0)) continue;
+      const vs=[vg.fv[t*3],vg.fv[t*3+1],vg.fv[t*3+2]]; if(!vs.every(v=>em.d[v]<Infinity)) continue;
+      A.fromArray(pos, vs[0]*3); B.fromArray(pos, vs[1]*3); C.fromArray(pos, vs[2]*3);
+      try{ THREE.Triangle.getBarycoord(q.point, A, B, C, w); }catch(e){ continue; }
+      const ws=[w.x,w.y,w.z]; if(!ws.every(isFinite)) continue;
+      let u=0, v=0, vi=vs[0], wm=-1; for(let k=0;k<3;k++){ u+=ws[k]*em.uv[vs[k]*2]; v+=ws[k]*em.uv[vs[k]*2+1]; if(ws[k]>wm){ wm=ws[k]; vi=vs[k]; } }
+      const [qX]=decalAssen(q.point, q.normal, q.rot||0);
+      const a=Math.atan2(qX.x*fr[vi*6+3]+qX.y*fr[vi*6+4]+qX.z*fr[vi*6+5], qX.x*fr[vi*6]+qX.y*fr[vi*6+1]+qX.z*fr[vi*6+2]);
+      lid.push({ q, u, v, a, size:q.size||0.09, rot:q.rot||0 });
+    }
+    return { anker:m, size0:m.size||0.09, rot0:m.rot||0, lid };
+  }
+  function groepZet(m, lay){
+    if(!lay || !lay.lid.length) return;
+    const mesh=m.mesh||pickMeshes[0], vg=vertexGraafFor(mesh); if(!vg) return;
+    const f=(m.size||0.09)/lay.size0;
+    let rMax=0.05; for(const l of lay.lid) rMax=Math.max(rMax, Math.hypot(l.u,l.v)*f*1.6+0.03);
+    const em=groepExp(vg, m, rMax); if(!em) return;
+    const fv=vg.fv, pos=vg.pos, nrm=vg.nrm, uv=em.uv, d=em.d, fr=vg._s.fr, F=fv.length/3, doel=[];
+    for(const l of lay.lid){
+      const tu=l.u*f, tv=l.v*f; let best=null, bd=Infinity;
+      for(let i=0;i<F;i++){ const a=fv[i*3], b=fv[i*3+1], c=fv[i*3+2];
+        if(!(d[a]<Infinity && d[b]<Infinity && d[c]<Infinity)) continue;
+        const ua=uv[a*2], va=uv[a*2+1], ub=uv[b*2], vb=uv[b*2+1], uc=uv[c*2], vc=uv[c*2+1];
+        if((tu<ua&&tu<ub&&tu<uc)||(tu>ua&&tu>ub&&tu>uc)||(tv<va&&tv<vb&&tv<vc)||(tv>va&&tv>vb&&tv>vc)) continue;
+        const den=(vb-vc)*(ua-uc)+(uc-ub)*(va-vc); if(Math.abs(den)<1e-14) continue;
+        const w0=((vb-vc)*(tu-uc)+(uc-ub)*(tv-vc))/den, w1=((vc-va)*(tu-uc)+(ua-uc)*(tv-vc))/den, w2=1-w0-w1;
+        if(w0<-1e-6||w1<-1e-6||w2<-1e-6) continue;
+        const dd=d[a]*w0+d[b]*w1+d[c]*w2; if(dd<bd){ bd=dd; best={ i, a, b, c, w:[w0,w1,w2] }; } }
+      if(!best) continue;   // doel valt buiten de huid: dit deel blijft staan
+      const vs=[best.a,best.b,best.c], P=new THREE.Vector3(), N=new THREE.Vector3(); let vi=vs[0], wm=-1;
+      for(let k=0;k<3;k++){ const q=vs[k], wk=best.w[k]; P.x+=wk*pos[q*3]; P.y+=wk*pos[q*3+1]; P.z+=wk*pos[q*3+2];
+        N.x+=wk*nrm[q*3]; N.y+=wk*nrm[q*3+1]; N.z+=wk*nrm[q*3+2]; if(wk>wm){ wm=wk; vi=q; } }
+      N.normalize();
+      /* Draaiing: de eigen draaiing plus wat het anker gedraaid is. Het meegedragen frame van de exp-map hangt af van de route
+         over de gebogen huid (borst: 14 graden verdraaid na 13 cm schuiven), dus niet dat. */
+      const rot=(((l.rot + (m.rot||0) - lay.rot0)%360)+360)%360;
+      doel.push({ q:l.q, P, N, tri:best.i, rot, size:clamp(l.size*f, 0.03, 0.40) });
+    }
+    ringenExtraWeg();   // tijdens het gebaar geen ringen om de andere delen (bij loslaten weer)
+    for(const g of doel){ const q=g.q; if(!markers.includes(q)) continue;
+      q.point=g.P; q.normal=g.N; q.mesh=mesh; q.tri=g.tri; q.rot=g.rot; q.size=g.size; rebuildMarker(q); }
+  }
+  function groepVoor(){ if(!groepAan()){ groepLay=null; return; } if(!groepLay || groepLay.anker!==editDecal) groepLay=groepMeet(editDecal); }
+  function groepNa(){ if(groepLay && groepAan()) groepZet(editDecal, groepLay); }
+  window.__tattiesGroepDbg={ modus:()=>groepModus, zet:zetGroepModus, leden:()=>groepLeden().length };
   function moveDecalTo(x,y){
     if(!editDecal||editDecal.locked) return;
     const s=surfaceAt(x,y); if(!s) return;
     if(editDecal.point.distanceTo(s.point)<0.004) return;   // throttle
+    groepVoor();   // slice 5v: ligging van de andere delen vastleggen (eerste stap van een gebaar)
     editDecal.point=s.point; editDecal.normal=s.normal; editDecal.mesh=s.mesh; editDecal.tri=(s.tri>=0?s.tri:-1);
-    rebuildMarker(editDecal);
+    rebuildMarker(editDecal); groepNa();
   }
-  function scaleDecal(f){ if(!editDecal||editDecal.locked)return; editDecal.size=clamp((editDecal.size||0.09)*f,0.03,0.40); rebuildMarker(editDecal); }
-  function rotateDecal(deg){ if(!editDecal||editDecal.locked)return; editDecal.rot=(((editDecal.rot||0)+deg)%360+360)%360; rebuildMarker(editDecal); }
+  function scaleDecal(f){ if(!editDecal||editDecal.locked)return; groepVoor(); editDecal.size=clamp((editDecal.size||0.09)*f,0.03,0.40); rebuildMarker(editDecal); groepNa(); }
+  function rotateDecal(deg){ if(!editDecal||editDecal.locked)return; groepVoor(); editDecal.rot=(((editDecal.rot||0)+deg)%360+360)%360; rebuildMarker(editDecal); groepNa(); }
   /* ---- Undo voor tattoo-bewerken (positie/schaal/draai), stap voor stap per bewerksessie ---- */
   let editHist=[];
-  function snapEdit(m){ if(!m||!m.point) return; editHist.push({point:m.point.clone(), normal:m.normal&&m.normal.clone(), mesh:m.mesh, size:m.size, rot:m.rot}); if(editHist.length>60) editHist.shift(); }
+  function snapEdit(m){ if(!m||!m.point) return; editHist.push({point:m.point.clone(), normal:m.normal&&m.normal.clone(), mesh:m.mesh, size:m.size, rot:m.rot, tri:m.tri,
+    groep:(m===editDecal && groepAan()) ? groepLeden().map(q=>({ q, point:q.point.clone(), normal:q.normal&&q.normal.clone(), mesh:q.mesh, size:q.size, rot:q.rot, tri:q.tri })) : null });   // slice 5v: ook de andere delen
+    if(editHist.length>60) editHist.shift(); }
   function undoEdit(){
     if(!editDecal||editDecal.locked) return;
     if(!editHist.length){ toast(tr('ui.niets_ongedaan')); return; }
     const s=editHist.pop();
     editDecal.point=s.point.clone(); if(s.normal) editDecal.normal=s.normal.clone(); editDecal.mesh=s.mesh;
     editDecal.size=s.size; editDecal.rot=s.rot;
-    rebuildMarker(editDecal); persistEdit(editDecal); toast(tr('ui.teruggezet'));
+    rebuildMarker(editDecal);
+    if(s.groep){ for(const g of s.groep){ const q=g.q; if(!markers.includes(q)) continue;   // slice 5v: de andere delen mee terug
+      q.point=g.point.clone(); if(g.normal) q.normal=g.normal.clone(); q.mesh=g.mesh; q.size=g.size; q.rot=g.rot; q.tri=g.tri; rebuildMarker(q); } }
+    groepLay=null; persistEdit(editDecal); toast(tr('ui.teruggezet'));
   }
   /* 3D-positie omzetten naar een plek op de 2D-lichaamskaart (viewBox 0..200 x 0..398) */
   function project3DTo2D(p, side){
@@ -19746,6 +19909,7 @@ async function verwijderVoorbeelden() {
   }
   function persistEdit(m){
     if(!m||!m.rec) return;
+    if(m===editDecal){ groepLay=null; if(groepAan()){ for(const q of groepLeden()) persistEdit(q); bouwRingenExtra(); } }   // slice 5v
     const D=deelVan(m); const P=D.positie3d||(D.positie3d={});
     const mesh=m.mesh||pickMeshes[0];
     zetBind(P, mesh, m.point, m.normal, m.rot||0, (m.tri>=0?m.tri:-1));
@@ -19824,6 +19988,7 @@ async function verwijderVoorbeelden() {
     const eb=document.getElementById("editbar"); if(!eb) return;
     eb.querySelectorAll("button").forEach(b=>{ b.onclick=async()=>{
       const a=b.dataset.act;
+      if(b.dataset.samen){ zetGroepModus(b.dataset.samen); return; }   // slice 5v: Hele tattoo / Dit deel
       if(a==="help"){ if(window.__tattiesEditLegend) window.__tattiesEditLegend('#editbar'); return; }
       if(a==="info"){ const rec=editDecal&&editDecal.rec; exitEditDecal(); if(rec&&typeof openDetail==="function") openDetail(rec.id, 'info', '3d'); return; }
       if(a==="edit"){ const rec=editDecal&&editDecal.rec;
@@ -19833,13 +19998,14 @@ async function verwijderVoorbeelden() {
         else { exitEditDecal(); if(rec&&typeof openFormulier==="function") openFormulier(rec.id); }     // terugval: geen bewaarde foto
         return; }
       if(a==="del"){ const m=editDecal; const rec=m&&m.rec; if(!rec) return;
-        if(m.deel){   // een extra deel: alleen dat deel weg, het record en de andere delen blijven
+        if(m.deel && groepModus==='deel'){   // "Dit deel" op een extra deel: alleen dat deel weg (bij "Hele tattoo": alles, slice 5v)
           const vraag=tr('ui.deel_verwijder_vraag').replace('{naam}', String(rec.naam||'').trim());
           const ok=(typeof window.__tattiesConfirm==='function') ? await window.__tattiesConfirm(vraag) : window.confirm(vraag);
           if(!ok) return;
           await verwijderDeel(m); return; }
         if(!(await bevestigVerwijderen(rec && rec.naam))) return;
-        exitEditDecal(); await verwijderMetUndo(rec); return; }
+        markers.forEach(q=>{ if(q.id===rec.id) clearTimeout(q._persistT); });   // slice 5v: geen uitgestelde opslag meer (schreef het record na het verwijderen terug)
+        exitEditUI(); await verwijderMetUndo(rec); return; }
       if(a==="done"){ exitEditDecal(); if(window.__tattiesHerhaalSrc){ const s=window.__tattiesHerhaalSrc; window.__tattiesHerhaalSrc=null; openCutModalAddMetFoto(s,'3d'); }   // D6(a): na ✓ volgende uitsnede
         else if(volgendDeelVan){ const r=volgendDeelVan; volgendDeelVan=null; openCutModalAdd('3d', r); }   // ketting: volgende deel van dezelfde tattoo
         return; }
@@ -22060,13 +22226,36 @@ function maakTatnetGL(json, canvas) {
   function texLees(sleutel){ return texDb().then(db=> db ? new Promise(res=>{ try{ const q=db.transaction('t').objectStore('t').get(sleutel);
     q.onsuccess=()=>res(q.result||null); q.onerror=()=>res(null); }catch(e){ res(null); } }) : null); }
   function texSchrijf(sleutel, v){ return texDb().then(db=>{ if(!db) return; try{ db.transaction('t','readwrite').objectStore('t').put(v, sleutel); }catch(e){ /* vol of weg: dan niet */ } }); }
+  /* slice 5u: voorraad. restore3D leest de cache van alle tattoos tegelijk en laat ze tegelijk decoderen; textuurVoor pakt het
+     klaarstaande beeld (het herstel wachtte eerst per tattoo op IndexedDB en daarna op het decoderen). */
+  const texVoorraad=new Map();
+  function texLeesBeeld(sleutel){
+    return texLees(sleutel).then(e=>{ if(!(e && e.blob)) return null;
+      if(typeof createImageBitmap!=='function') return { e, bmp:null };
+      return createImageBitmap(e.blob).then(bmp=>({ e, bmp }), ()=>({ e, bmp:null })); }).catch(()=>null);
+  }
+  function texVoorraadLeeg(){
+    for(const p of texVoorraad.values()) p.then(r=>{ if(r && r.bmp && r.bmp.close) r.bmp.close(); });
+    texVoorraad.clear();
+  }
+  function texVooraf(list){
+    texVoorraadLeeg();
+    for(const t of list){ if(!t || t.deleted) continue;
+      const dragers=[[t.id, t]].concat(beeldDelen(t).map(d=>[t.id+':'+d.id, d]));
+      for(const [s, dr] of dragers){ const P=dr.positie3d, k=dr.kunst3d;
+        if(!P || !P.point || (P.gender||'man')!==currentGender || !(k && k.srcUrl)) continue;
+        texVoorraad.set(s, texLeesBeeld(s)); } }
+  }
   /* De textuur van een tattoo(deel): uit de cache als de vingerafdruk klopt, anders maken (rebuildTextureFromKunst) en bewaren. */
   async function textuurVoor(sleutel, k){
     if(!k || !k.srcUrl) return rebuildTextureFromKunst(k);
-    const fp=texVingerafdruk(k), e=await texLees(sleutel);
+    const fp=texVingerafdruk(k), vr=texVoorraad.get(sleutel); let e=null, klaarBmp=null;
+    if(vr){ texVoorraad.delete(sleutel); const r=await vr; if(r){ e=r.e; klaarBmp=r.bmp; } }   // slice 5u: uit de voorraad
+    else e=await texLees(sleutel);
+    if(klaarBmp && !(e && e.blob && (e.fpVoor===fp || e.fpNa===fp))){ if(klaarBmp.close) klaarBmp.close(); klaarBmp=null; }
     if(e && e.blob && (e.fpVoor===fp || e.fpNa===fp)){
       try{
-        const bmp=(typeof createImageBitmap==='function') ? await createImageBitmap(e.blob)
+        const bmp=klaarBmp ? klaarBmp : (typeof createImageBitmap==='function') ? await createImageBitmap(e.blob)
           : await new Promise((res,rej)=>{ const i=new Image(); i.onload=()=>res(i); i.onerror=rej; i.src=URL.createObjectURL(e.blob); });
         const c=document.createElement('canvas'); c.width=bmp.width; c.height=bmp.height; c.getContext('2d').drawImage(bmp,0,0);
         if(bmp.close) bmp.close();
@@ -22234,6 +22423,7 @@ function maakTatnetGL(json, canvas) {
     catch(e){ console.error(e); list = (typeof tattoos!=="undefined"?tattoos:[]); }
     ttMerk('tt-gelezen');
     if(token!==undefined && token!==loadToken) return;
+    texVooraf(list);   // slice 5u: textuurcache voor alle tattoos tegelijk lezen en decoderen
     migTel.gedaan=0; migTel.mislukt=0; herstelLoopt=true;   // geen startscherm-opname van een half herstel (slice 5a)
     // Progressief: decals in kleine batches bouwen en tussendoor naar de render-loop yielden,
     // zodat de UI niet bevriest en de voortgang ('Laden… X/N') zichtbaar is bij veel tattoos.
@@ -22251,6 +22441,7 @@ function maakTatnetGL(json, canvas) {
     }
     zetLaadVoortgang(0,0);   // label terug naar 'Laden…'
     herstelLoopt=false; hersteldOoit=true;
+    texVoorraadLeeg();   // slice 5u: wat niet gebruikt is (ander model, mislukt) opruimen
     if(typeof renderMarkers==="function"){ try{renderMarkers();}catch(_){} }
     ttMerk('tt-herstel-eind');
     if(token===undefined || token===loadToken) texOpruimen();   // slice 5o
@@ -22578,6 +22769,7 @@ function maakTatnetGL(json, canvas) {
     catch(e){ console.error(e); inited=false; glKapot=true; window.__tatties3DKapot=true; return; }
     renderer.setPixelRatio(Math.min(devicePixelRatio,2));
     renderer.outputEncoding=THREE.sRGBEncoding;
+    renderer.debug.checkShaderErrors=devStand();   // slice 5u: foutlog per shader alleen in de teststand (liet de GPU wachten)
     stage.appendChild(renderer.domElement); el=renderer.domElement;
     el.setAttribute('role','img'); el.setAttribute('aria-label', tr('ui.stage_aria_solo'));   // de stage zelf is een groep (knoppen erin), het canvas is het beeld
     // PLAT-3: WebGL-context-verlies (low-end/geheugendruk). three r128 herstelt GL-state
