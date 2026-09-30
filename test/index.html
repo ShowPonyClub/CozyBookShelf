@@ -13,7 +13,7 @@
      (alleen een echte HTTP-header telt, en die kan GitHub Pages niet zetten; de console meldt
      dat ook). Hij blijft staan voor het geval de app ooit achter een host met headers komt.
      De werkende bescherming tegen clickjacking staat in het eerste inline script hieronder. -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src data:; connect-src 'self' https://uhrbvwwiovefrpscgweo.supabase.co wss://uhrbvwwiovefrpscgweo.supabase.co; worker-src 'self' blob:; manifest-src data:; base-uri 'none'; form-action 'none'; frame-ancestors 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src blob:; font-src data:; connect-src 'self' https://uhrbvwwiovefrpscgweo.supabase.co wss://uhrbvwwiovefrpscgweo.supabase.co; worker-src 'self' blob:; manifest-src data:; base-uri 'none'; form-action 'none'; frame-ancestors 'none'">
 <title>Tatties</title>
 
 <!-- Thema zo vroeg mogelijk zetten (voorkomt een lichte flits bij donker thema) -->
@@ -712,6 +712,14 @@ html.tweed-uit [data-i18n-html="uitleg.3d5"]{display:none}
 .add-kies-optie .ak-sub{font-size:.82rem;color:var(--gedempt)}
 .add-kies-optie .ak-wip{margin-top:5px;font-size:.68rem;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--accent-diep)}
 .add-kies-annuleer{align-self:center;margin-top:2px}
+/* slice 5s: deelkeuze + draaiend filmpje */
+.deel-keuze{display:flex;flex-direction:column;gap:10px}
+.deel-filmvak{display:flex;flex-direction:column;align-items:center;gap:8px}
+.deel-filmvak[hidden]{display:none}
+.film-beeld{height:min(52vh,420px);aspect-ratio:9/16;border-radius:var(--r-md);overflow:hidden;background:var(--bg);border:1px solid var(--rand)}
+.film-beeld canvas,.film-beeld video{display:block;width:100%;height:100%;object-fit:contain}
+.film-voortgang{margin:0;font-size:.85rem;color:var(--gedempt);font-variant-numeric:tabular-nums}
+#deel-film-delen{align-self:stretch}
 /* Onboarding stap 2: +-hint */
 #onb-terug{margin-top:4px;margin-left:12px}   /* stond tegen 'Aan de slag' aan (UX-doorloop 2026-09-25) */
 
@@ -2978,6 +2986,28 @@ form label{text-transform:none;letter-spacing:.005em;font-size:.8rem;color:var(-
       <span class="ak-wip" data-i18n="start.kies_2d_wip">Under construction</span>
     </button>
     <button type="button" class="linkbtn add-kies-annuleer" id="add-kies-annuleer" data-i18n="form.annuleren">Annuleren</button>
+  </div>
+</div>
+
+<div id="deel-kies" class="add-kies" hidden role="dialog" aria-modal="true" data-i18n-aria="deel.titel" aria-label="Delen">
+  <div class="add-kies-kaart">
+    <p class="add-kies-titel" id="deel-titel" data-i18n="deel.titel">Delen</p>
+    <div id="deel-keuze" class="deel-keuze">
+      <button type="button" class="add-kies-optie" id="deel-foto">
+        <span class="ak-titel" data-i18n="deel.foto">Foto</span>
+        <span class="ak-sub" data-i18n="deel.foto_sub">Het model zoals je het nu ziet</span>
+      </button>
+      <button type="button" class="add-kies-optie" id="deel-film">
+        <span class="ak-titel" data-i18n="deel.film">Draaiend filmpje</span>
+        <span class="ak-sub" data-i18n="deel.film_sub">Je hele lichaam een rondje rond, voor TikTok of Instagram</span>
+      </button>
+    </div>
+    <div id="deel-filmvak" class="deel-filmvak" hidden>
+      <div id="film-beeld" class="film-beeld"></div>
+      <p id="film-voortgang" class="film-voortgang" aria-live="polite"></p>
+    </div>
+    <button type="button" class="knop" id="deel-film-delen" hidden data-i18n="deel.film_delen">Delen</button>
+    <button type="button" class="linkbtn add-kies-annuleer" id="deel-annuleer" data-i18n="form.annuleren">Annuleren</button>
   </div>
 </div>
 
@@ -10098,7 +10128,7 @@ const I18N = {
     'uitleg.3d2':'<strong>Draaien:</strong> sleep met je vinger of muis om het model rond te draaien. Tik op een arm of been om dat deel apart te bekijken; <strong>Heel lichaam</strong> (rechtsboven) zet alles terug in de beginstand. Met <strong>Wishlist</strong> (linksboven) toon je ook je wens-tattoos.',
     'uitleg.3d3':'<strong>Tattoo toevoegen:</strong> tik op + (rechtsonder), kies een foto, knip de tattoo uit en geef een naam → Op het model plaatsen. Tik daarna op het model waar hij moet komen. <strong>Tip:</strong> het makkelijkst is om één tattoo tegelijk toe te voegen, maar je kunt er ook meerdere uit één foto knippen (knop "+ Nog een" na het plaatsen).',
     'uitleg.3d4':'<strong>Bewerken:</strong> dubbeltik op een geplaatste tattoo. Sleep om te verplaatsen, knijp om te schalen en te draaien. In de balk eronder zitten het potlood (opnieuw uitknippen), het slot en de prullenbak.',
-    'uitleg.3d5':'<strong>Wisselen:</strong> gebruik de 2D/3D-knop bovenaan voor de platte lichaamskaart.','uitleg.3d6':'<strong>Delen:</strong> tik op de deelknop (pijl omhoog, rechtsboven) om de weergave zoals je die nu ziet als afbeelding te delen, bijvoorbeeld met je artiest.',
+    'uitleg.3d5':'<strong>Wisselen:</strong> gebruik de 2D/3D-knop bovenaan voor de platte lichaamskaart.','uitleg.3d6':'<strong>Delen:</strong> tik op de deelknop (pijl omhoog, rechtsboven) voor een foto van de weergave zoals je die nu ziet, bijvoorbeeld voor je artiest, of een draaiend filmpje van je hele lichaam.',
     'uitleg.titel2d':'Zo werkt de 2D-kaart',
     'uitleg.2d1':'<strong>Tattoo toevoegen:</strong> tik op + (rechtsonder), kies een foto, knip de tattoo uit en geef een naam → Plaatsen. Tik daarna op de kaart waar hij moet komen. <strong>Tip:</strong> het makkelijkst is om één tattoo tegelijk toe te voegen, maar je kunt er ook meerdere uit één foto knippen (knop "+ Nog een" na het plaatsen).',
     'uitleg.2d2':'<strong>Bijstellen:</strong> versleep om te verplaatsen, knijp/draai met twee vingers om te schalen en roteren - of gebruik de knoppen in het bewerkmenu.',
@@ -10161,7 +10191,12 @@ const I18N = {
     'ui.geen_foto_bewaard':'Geen originele foto bewaard voor deze tattoo','ui.pas_aan_sla_op':'Pas de uitsnede aan en sla op',
     'ui.foto_niet_geladen':'Kon de foto niet laden','ui.knip_terug_vraag':'Je was een tattoo aan het uitsnijden. Verdergaan waar je gebleven was?','ui.knip_terug_ja':'Verdergaan','ui.knip_terug_klaar':'Je uitsnede staat er weer',
     'ui.geen_afbeelding':'Kies een afbeelding (geen ander bestandstype)','ui.foto_te_groot':'Foto te groot (max 30 MB)','ui.foto_mislukt':'Kon de foto niet verwerken',
-    'ui.reset':'Reset','ui.uitleg_knop':'Uitleg','ui.deel_opname':'Opname delen','toast.opname_mislukt':'Opname maken is niet gelukt','toast.opname_bewaard':'Opname bewaard','ui.knop_uitleg':'Wat doen de knoppen?','ui.info':'Info','ui.gereedschap':'Gereedschap',
+    'deel.titel':'Delen','deel.foto':'Foto','deel.foto_sub':'Het model zoals je het nu ziet','deel.film':'Draaiend filmpje',
+    'deel.film_sub':'Je hele lichaam een rondje rond, voor TikTok of Instagram','deel.film_bezig':'Filmpje maken: {p}%',
+    'deel.film_klaar':'Je filmpje is klaar','deel.film_delen':'Delen','deel.film_bewaren':'Bewaren',
+    'toast.film_mislukt':'Filmpje maken is niet gelukt','toast.film_wacht':'Even geduld, je tattoos worden nog geladen',
+    'toast.film_bewaard':'Filmpje bewaard',
+    'ui.reset':'Reset','ui.uitleg_knop':'Uitleg','ui.deel_opname':'Delen','toast.opname_mislukt':'Opname maken is niet gelukt','toast.opname_bewaard':'Opname bewaard','ui.knop_uitleg':'Wat doen de knoppen?','ui.info':'Info','ui.gereedschap':'Gereedschap',
     'inst.vorm.binnenkort':'Binnenkort','ui.bouw2d_kop':'Nog in aanbouw','ui.bouw2d_sub':'Gebruik zolang het 3D-model.',
     'aria.volledigoverzicht':'Volledig overzicht','aria.welkom':'Welkom',
     'ui.tik_achtergrond':'Tik op de achtergrond in de foto','ui.pipet_uit':'Pipet uit',
@@ -10291,7 +10326,7 @@ const I18N = {
     'uitleg.3d2':'<strong>Rotate:</strong> drag with your finger or mouse to turn the model. Tap an arm or leg to view that part on its own; <strong>Whole body</strong> (top right) resets everything to the starting view. <strong>Wishlist</strong> (top left) also shows your wish tattoos.',
     'uitleg.3d3':'<strong>Add a tattoo:</strong> tap + (bottom right), pick a photo, cut the tattoo out and give it a name → Place on the model. Then tap the model where it should go. <strong>Tip:</strong> it\'s easiest to add one tattoo at a time, but you can also cut several from one photo (the "+ Another" button after placing).',
     'uitleg.3d4':'<strong>Edit:</strong> double-tap a placed tattoo. Drag to move, pinch to scale and rotate. The bar below has the pencil (cut out again), the lock and the bin.',
-    'uitleg.3d5':'<strong>Switch:</strong> use the 2D/3D button at the top for the flat body map.','uitleg.3d6':'<strong>Share:</strong> tap the share button (arrow up, top right) to share the view as you see it now as an image, for example with your artist.',
+    'uitleg.3d5':'<strong>Switch:</strong> use the 2D/3D button at the top for the flat body map.','uitleg.3d6':'<strong>Share:</strong> tap the share button (arrow up, top right) for a photo of the view as you see it now, for example for your artist, or a spinning video of your whole body.',
     'uitleg.titel2d':'How the 2D map works',
     'uitleg.2d1':'<strong>Add a tattoo:</strong> tap + (bottom right), pick a photo, cut the tattoo out and give it a name → Place. Then tap the map where it should go. <strong>Tip:</strong> it\'s easiest to add one tattoo at a time, but you can also cut several from one photo (the "+ Another" button after placing).',
     'uitleg.2d2':'<strong>Fine-tune:</strong> drag to move, pinch/twist with two fingers to scale and rotate - or use the buttons in the edit menu.',
@@ -10354,7 +10389,12 @@ const I18N = {
     'ui.geen_foto_bewaard':'No original photo saved for this tattoo','ui.pas_aan_sla_op':'Adjust the cut-out and save',
     'ui.foto_niet_geladen':'Could not load the photo','ui.knip_terug_vraag':'You were cutting out a tattoo. Carry on where you left off?','ui.knip_terug_ja':'Carry on','ui.knip_terug_klaar':'Your cut-out is back',
     'ui.geen_afbeelding':'Please choose an image (not another file type)','ui.foto_te_groot':'Photo too large (max 30 MB)','ui.foto_mislukt':'Could not process the photo',
-    'ui.reset':'Reset','ui.uitleg_knop':'Help','ui.deel_opname':'Share snapshot','toast.opname_mislukt':'Could not create the snapshot','toast.opname_bewaard':'Snapshot saved','ui.knop_uitleg':'What do the buttons do?','ui.info':'Info','ui.gereedschap':'Tools',
+    'deel.titel':'Share','deel.foto':'Photo','deel.foto_sub':'The model as you see it now','deel.film':'Spinning video',
+    'deel.film_sub':'Your whole body in one spin, for TikTok or Instagram','deel.film_bezig':'Making your video: {p}%',
+    'deel.film_klaar':'Your video is ready','deel.film_delen':'Share','deel.film_bewaren':'Save',
+    'toast.film_mislukt':"Couldn't make the video",'toast.film_wacht':'Hang on, your tattoos are still loading',
+    'toast.film_bewaard':'Video saved',
+    'ui.reset':'Reset','ui.uitleg_knop':'Help','ui.deel_opname':'Share','toast.opname_mislukt':'Could not create the snapshot','toast.opname_bewaard':'Snapshot saved','ui.knop_uitleg':'What do the buttons do?','ui.info':'Info','ui.gereedschap':'Tools',
     'inst.vorm.binnenkort':'Coming soon','ui.bouw2d_kop':'Under construction','ui.bouw2d_sub':'Use the 3D model for now.',
     'aria.volledigoverzicht':'Full overview','aria.welkom':'Welcome',
     'ui.tik_achtergrond':'Tap the background in the photo','ui.pipet_uit':'Eyedropper off',
@@ -10649,7 +10689,7 @@ function createTattoo(overrides = {}) {
    ============================================================ */
 // App-versie (semver, handmatig ophogen bij een release). Bij een bump ook de
 // CACHE-naam in sw.js meebumpen, zodat clients de nieuwe build ophalen.
-const APP_VERSIE = '0.3.130';
+const APP_VERSIE = '0.3.131';
 
 /* Dev-haken die de CLOUD raken hangen alleen op een ontwikkelmachine aan window. Ze zijn geen
    lek op zichzelf (zonder XSS roept niemand ze aan, en CSP + esc() houden XSS tegen), maar ze
@@ -16591,6 +16631,136 @@ async function verwijderVoorbeelden() {
       toast(tr('toast.opname_bewaard'));
     } finally { opnameBezig=false; }
   }
+  /* ---- slice 5s: draaiend filmpje (9:16, een rondje, logo onderin) ---- */
+  const FILM={ W:720, H:1280, FPS:30, SEC:6 };
+  let film=null, filmUit=null;   // film = lopende opname; filmUit = {blob, url, naam, type} van de laatste
+  function filmKan(){ return !!(window.MediaRecorder && HTMLCanvasElement.prototype.captureStream && filmMime()!==null); }
+  function filmMime(){
+    if(!window.MediaRecorder) return null;
+    for(const t of ['video/mp4;codecs=avc1','video/mp4','video/webm;codecs=vp9','video/webm']){ try{ if(MediaRecorder.isTypeSupported(t)) return t; }catch(e){} }
+    return '';   // laat de browser kiezen
+  }
+  function openDeelKies(){
+    const ov=document.getElementById('deel-kies'); if(!ov || !ov.hidden) return;
+    zetDeelKies('keuze'); ov.hidden=false;
+    if(typeof laagOpenHistory==='function') laagOpenHistory('deel', sluitDeelKies);
+  }
+  function sluitDeelKies(){
+    const ov=document.getElementById('deel-kies'); if(!ov || ov.hidden) return;
+    if(film) film.stop=true;   // lopende opname afbreken
+    ov.hidden=true;
+    if(filmUit){ URL.revokeObjectURL(filmUit.url); filmUit=null; }
+    const fb=document.getElementById('film-beeld'); if(fb) fb.textContent='';
+    if(typeof laagSluitHistory==='function') laagSluitHistory('deel');
+  }
+  function zetDeelKies(stand){   // 'keuze' | 'bezig' | 'klaar'
+    const $i=id=>document.getElementById(id);
+    $i('deel-keuze').hidden=(stand!=='keuze'); $i('deel-filmvak').hidden=(stand==='keuze'); $i('deel-film-delen').hidden=(stand!=='klaar');
+    $i('deel-titel').textContent=tr(stand==='klaar' ? 'deel.film_klaar' : stand==='bezig' ? 'deel.film' : 'deel.titel');
+    $i('deel-annuleer').textContent=tr(stand==='klaar' ? 'aria.sluiten' : 'form.annuleren');
+    if(stand==='klaar') $i('deel-film-delen').textContent=tr((navigator.share && navigator.canShare) ? 'deel.film_delen' : 'deel.film_bewaren');
+  }
+  /* Kader: het hele lichaam plus de armen (A-houding) in 9:16, bij elke draaihoek. */
+  function filmKader(){
+    const lang=(LICHAAM_GEN && LichaamMotor.geometry()) ? LichaamMotor.lengteCm()/100 : 1.8;
+    let rMax=0.3; const v=new THREE.Vector3();
+    for(const ms of pickMeshes){ const p=ms.geometry && ms.geometry.attributes.position; if(!p) continue; ms.updateMatrixWorld();
+      for(let i=0;i<p.count;i+=3){ v.fromBufferAttribute(p,i).applyMatrix4(ms.matrixWorld); rMax=Math.max(rMax, Math.hypot(v.x,v.z)); } }
+    const beeldH=Math.max(lang*1.12, 2*rMax*1.08/(FILM.W/FILM.H));
+    return { lang, r: beeldH/(2*Math.tan(15*Math.PI/180)) };
+  }
+  let filmLogo=null;
+  function filmLogoBeeld(){
+    if(filmLogo) return filmLogo;
+    const src=document.querySelector('.merk-logo'); if(!src || !src.src) return null;
+    filmLogo=new Image(); filmLogo.src=src.src; return filmLogo;
+  }
+  function filmLogoTeken(x){
+    const im=filmLogoBeeld(); if(!im || !im.complete || !im.naturalWidth) return;
+    const lw=Math.round(FILM.W*0.30), lh=Math.round(lw*im.naturalHeight/im.naturalWidth), px=22, py=14;
+    const bw=lw+2*px, bh=lh+2*py, bx=Math.round((FILM.W-bw)/2), by=FILM.H-bh-56;
+    x.save(); x.shadowColor='rgba(0,0,0,.18)'; x.shadowBlur=10; x.shadowOffsetY=2; x.fillStyle='#faf4e8';
+    x.beginPath(); if(x.roundRect) x.roundRect(bx,by,bw,bh,18); else x.rect(bx,by,bw,bh); x.fill(); x.restore();
+    x.drawImage(im, bx+px, by+py, lw, lh);
+  }
+  async function startFilm(){
+    if(film || !renderer || !scene || !modelRoot) return;
+    if(herstelLoopt || !hersteldOoit){ toast(tr('toast.film_wacht')); return; }
+    if(editDecal) exitEditDecal();
+    if(ledeActief) stopIsolatie();
+    const fc=document.createElement('canvas'); fc.width=FILM.W; fc.height=FILM.H; const fx=fc.getContext('2d');
+    const fb=document.getElementById('film-beeld'); if(fb){ fb.textContent=''; fb.appendChild(fc); }
+    zetDeelKies('bezig');
+    const vg=document.getElementById('film-voortgang'); if(vg) vg.textContent=tr('deel.film_bezig').replace('{p}','0');
+    filmLogoBeeld();
+    const k=filmKader(), cam=new THREE.PerspectiveCamera(30, FILM.W/FILM.H, 0.05, 100);
+    const th0=startOpnameHoek(), ph=Math.PI/2-0.06, ty=k.lang*0.5;
+    const cv=renderer.domElement, prWas=renderer.getPixelRatio(), ringWas=!!(selRing && selRing.visible);
+    const f={ stop:false }; film=f;
+    cv.style.visibility='hidden'; if(selRing) selRing.visible=false;
+    renderer.setPixelRatio(1); renderer.setSize(FILM.W, FILM.H, false);
+    const teken=(hoek)=>{
+      cam.position.set(k.r*Math.sin(ph)*Math.sin(hoek), ty+k.r*Math.cos(ph), k.r*Math.sin(ph)*Math.cos(hoek)); cam.lookAt(0,ty,0);
+      if(key){ key.position.copy(cam.position); key.position.y+=1.5; key.position.x+=1.0; }
+      renderer.render(scene, cam);
+      fx.drawImage(cv, 0, 0, FILM.W, FILM.H);   // zelfde taak als de render: de tekenbuffer is er nog
+      filmLogoTeken(fx);
+    };
+    let rec=null, blob=null;
+    const herstel=()=>{
+      film=null; cv.style.visibility=''; renderer.setPixelRatio(prWas); resize();
+      if(selRing) selRing.visible=ringWas && !!editDecal;
+    };
+    try{
+      teken(th0);
+      const mime=filmMime(), stream=fc.captureStream(FILM.FPS), delen=[];
+      rec=new MediaRecorder(stream, Object.assign({ videoBitsPerSecond: 6000000 }, mime ? { mimeType: mime } : {}));
+      rec.ondataavailable=e=>{ if(e.data && e.data.size) delen.push(e.data); };
+      const klaar=new Promise(res=>{ rec.onstop=res; });
+      rec.start(250);
+      const t0=performance.now(), duur=FILM.SEC*1000; let laatstP=-1;
+      await new Promise(res=>{
+        const stap=()=>{
+          if(f.stop || document.hidden){ f.stop=true; res(); return; }
+          const u=Math.min(1,(performance.now()-t0)/duur);
+          teken(th0 + u*2*Math.PI); f.n=(f.n||0)+1;
+          const p=Math.round(u*100); if(p!==laatstP && vg){ laatstP=p; vg.textContent=tr('deel.film_bezig').replace('{p}', p); }
+          if(u>=1){ res(); return; }
+          requestAnimationFrame(stap);
+        };
+        requestAnimationFrame(stap);
+      });
+      rec.stop(); await klaar; stream.getTracks().forEach(t=>t.stop());
+      herstel();
+      if(f.stop) return;   // afgebroken (Annuleren, terug of app naar de achtergrond)
+      const type=(rec.mimeType || mime || 'video/webm').split(';')[0];
+      blob=new Blob(delen, { type });
+      if(!blob.size) throw new Error('leeg filmpje');
+      const naam='tatties-'+new Date().toISOString().slice(0,10)+(type.indexOf('mp4')>=0 ? '.mp4' : '.webm');
+      filmUit={ blob, url:URL.createObjectURL(blob), naam, type, beelden:f.n||0, ms:Math.round(performance.now()-t0) };
+      if(fb){ const vd=document.createElement('video'); vd.src=filmUit.url; vd.muted=true; vd.loop=true; vd.autoplay=true; vd.playsInline=true;
+        vd.setAttribute('playsinline',''); fb.textContent=''; fb.appendChild(vd); try{ vd.play().catch(()=>{}); }catch(e){} }
+      if(vg) vg.textContent='';
+      zetDeelKies('klaar'); tril(12);
+    }catch(e){
+      console.error('filmpje mislukt', e);
+      try{ if(rec && rec.state!=='inactive') rec.stop(); }catch(_){}
+      if(film===f) herstel();
+      sluitDeelKies(); toast(tr('toast.film_mislukt'));
+    }
+  }
+  async function deelFilm(){
+    const u=filmUit; if(!u) return;
+    const file=(typeof File!=='undefined') ? new File([u.blob], u.naam, { type:u.type }) : null;
+    if(file && navigator.share && navigator.canShare && navigator.canShare({ files:[file] })){
+      try{ await navigator.share({ files:[file], title:'Tatties' }); tril(12); return; }
+      catch(e){ if(e && e.name==='AbortError') return; }   // geannuleerd = klaar; andere fout -> bewaren
+    }
+    const a=document.createElement('a'); a.href=u.url; a.download=u.naam; document.body.appendChild(a); a.click(); a.remove();
+    toast(tr('toast.film_bewaard'));
+  }
+  window.__tattiesFilmDbg={ start:()=>{ openDeelKies(); return startFilm(); }, uit:()=>filmUit && { type:filmUit.type, size:filmUit.blob.size, naam:filmUit.naam, url:filmUit.url, beelden:filmUit.beelden, ms:filmUit.ms },
+    blob:()=>filmUit && filmUit.blob, bezig:()=>!!film, kan:filmKan, mime:filmMime };
   /* slice 5q: beginstand. Staand de vaste CAM0; liggend het hele lichaam op ~86% van de canvashoogte. */
   function camBegin(){
     const w=stage ? stage.clientWidth : 0, h=stage ? stage.clientHeight : 0;
@@ -22162,6 +22332,7 @@ function maakTatnetGL(json, canvas) {
   /* ---- render-lus ---- */
   function loop(t){
     if(startLive){ startLiveFrame(t); requestAnimationFrame(loop); return; }   // startscherm (slice 5j)
+    if(film){ requestAnimationFrame(loop); return; }   // filmpje neemt het canvas even over (slice 5s)
     if(!actief3D){ requestAnimationFrame(loop); return; }   // 3D-view verborgen: niet renderen
     if(targetGoal || radiusGoal!=null){
       if(targetGoal){ target.lerp(targetGoal,0.18); if(target.distanceTo(targetGoal)<0.002){ target.copy(targetGoal); targetGoal=null; } }
@@ -22414,7 +22585,13 @@ function maakTatnetGL(json, canvas) {
     body=new THREE.Group(); scene.add(body);
     // selectie-ring wordt on-demand als huid-decal gebouwd (buildSelRing), niet meer als platte ring vooraf
     const rb=document.getElementById("t3d-reset"); if(rb) rb.onclick=()=>{ stopIsolatie(); resetView(); };
-    { const db=document.getElementById("t3d-deel"); if(db) db.onclick=()=>{ deelOpname(); }; }
+    { const db=document.getElementById("t3d-deel"); if(db) db.onclick=()=>{ if(filmKan()) openDeelKies(); else deelOpname(); }; }   // slice 5s: foto of filmpje
+    { const b=(id,f)=>{ const e=document.getElementById(id); if(e) e.addEventListener('click', f); };
+      b('deel-foto', ()=>{ sluitDeelKies(); deelOpname(); });
+      b('deel-film', ()=>{ startFilm(); });
+      b('deel-annuleer', ()=>{ sluitDeelKies(); });
+      b('deel-film-delen', ()=>{ deelFilm(); });
+      const ov=document.getElementById('deel-kies'); if(ov) ov.addEventListener('click', e=>{ if(e.target===ov) sluitDeelKies(); }); }
     { const ib=document.getElementById("t3d-info"); if(ib) ib.onclick=openUitleg3D;
       const sb2=document.getElementById("t3d-uitleg-sluit"); if(sb2) sb2.onclick=sluitUitleg3D;
       const ov=document.getElementById("t3d-uitleg-overlay"); if(ov) ov.addEventListener("click", e=>{ if(e.target===ov) sluitUitleg3D(); }); }
