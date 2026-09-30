@@ -10650,7 +10650,7 @@ function createTattoo(overrides = {}) {
    ============================================================ */
 // App-versie (semver, handmatig ophogen bij een release). Bij een bump ook de
 // CACHE-naam in sw.js meebumpen, zodat clients de nieuwe build ophalen.
-const APP_VERSIE = '0.3.129';
+const APP_VERSIE = '0.3.130';
 
 /* Dev-haken die de CLOUD raken hangen alleen op een ontwikkelmachine aan window. Ze zijn geen
    lek op zichzelf (zonder XSS roept niemand ze aan, en CSP + esc() houden XSS tegen), maar ze
@@ -16817,7 +16817,9 @@ async function verwijderVoorbeelden() {
   /* Alleen de UI van de 3D-aanpasmodus sluiten (editbar/hint/+-knop herstellen). Bewust UI-only
      (geen dispose/save) zodat het ook veilig kan bij de START van een gender-wissel, vóór het async laden. */
   function exitEditUI(){
+    const wasEdit=editDecal;
     editDecal=null; showSel(false);   // timers worden per marker geclear'd in disposeMarker
+    zetDoorkijk(wasEdit);   // weer de gewone dekking (5r)
     const eb=document.getElementById("editbar"); if(eb)eb.classList.remove("on");
     const h=document.getElementById("hint"); if(h)h.style.display="";
     const a=document.getElementById("t3d-add"); if(a) a.style.display="";   // +-knop terug (was verborgen tijdens bewerken)
@@ -19055,6 +19057,20 @@ async function verwijderVoorbeelden() {
     const basis=decalAlphaBasis(obj.material.blending===THREE.MultiplyBlending);
     obj.material.opacity=op; obj.material.alphaTest=basis*op; obj.material.transparent=true; obj.material.needsUpdate=true;
   }
+  /* slice 5r: doorkijk. Het deel dat je bewerkt is half doorzichtig (en ligt boven de andere delen van die tattoo), zodat je het
+     op het vorige deel laat aansluiten. Alleen bij een tattoo met meer dan een deel op het model. */
+  const DOORKIJK=0.5;
+  function doorkijkAan(m){ return !!(m && m===editDecal && m.obj && markers.some(q=>q!==m && q.id===m.id && q.obj)); }
+  function markerOpacity(m){
+    const op=Math.max(0.05, Math.min(1, +(m && m.rec && m.rec.opacity)||1));
+    return doorkijkAan(m) ? Math.min(op, DOORKIJK) : op;
+  }
+  function zetDoorkijk(m){
+    if(!m || !m.obj) return;
+    m.obj.renderOrder=((m.rec&&m.rec.stapel)||0)+(doorkijkAan(m)?0.5:0);
+    if(ledeActief){ ledeActief.decalOp.set(m, markerOpacity(m)); ledeDecalSplits(m); }
+    else zetDecalOpacity(m.obj, markerOpacity(m));
+  }
 
   /* ---- raycast naar het oppervlak ---- */
   const ray=new THREE.Raycaster(), nd=new THREE.Vector2();
@@ -19227,8 +19243,8 @@ async function verwijderVoorbeelden() {
       if(m.obj.geometry)m.obj.geometry.dispose();
       if(m.obj.material&&m.obj.material.dispose)m.obj.material.dispose(); }
     m.obj=makeImage(m.point,m.normal,m.rot||0,m.size||0.09,m.tex,m.mesh||pickMeshes[0],recMul(deelVan(m)));
-    if(m.obj) m.obj.renderOrder=(m.rec&&m.rec.stapel)||0;   // stapelvolgorde bij overlap
-    zetDecalOpacity(m.obj, m.rec && m.rec.opacity);
+    if(m.obj) m.obj.renderOrder=((m.rec&&m.rec.stapel)||0)+(doorkijkAan(m)?0.5:0);   // stapelvolgorde bij overlap (bewerkt deel erboven, 5r)
+    zetDecalOpacity(m.obj, markerOpacity(m));   // doorkijk blijft tijdens slepen/schalen/draaien (5r)
     if(ledeActief){ if(ledeActief.decalOp.has(m)) ledeActief.decalOp.delete(m); ledeDecalSplits(m); }
     if(m===editDecal && selRingOn) buildSelRing();   // selectie-ring soepel meeschalen/-draaien/-verplaatsen (per frame; ring-box is klein -> goedkoop)
   }
@@ -19244,7 +19260,10 @@ async function verwijderVoorbeelden() {
     }).catch(()=>{});
   }
   function enterEditDecal(m){
+    const vorigEdit=editDecal;
     editDecal=m; editHist=[];                 // verse undo-geschiedenis per bewerksessie
+    if(vorigEdit && vorigEdit!==m) zetDoorkijk(vorigEdit);   // vorige tattoo weer op zijn gewone dekking (5r)
+    zetDoorkijk(m);
     // Inzoomen op wat je bewerkt (UX-doorloop 2026-09-14): na plaatsen bleef het hele lichaam in beeld en was de
     // nieuwe tattoo een stipje, terwijl de balk het model nog kleiner maakte. Zelfde beweging als tikken op kale huid.
     if(m && m.point){ focusTo(m.point); radiusGoal=Math.min(radius,1.3); }
@@ -19262,6 +19281,7 @@ async function verwijderVoorbeelden() {
   }
   function exitEditDecal(){
     const m=editDecal; editDecal=null; showSel(false);
+    zetDoorkijk(m);   // weer de gewone dekking (5r)
     const eb=document.getElementById("editbar"); if(eb)eb.classList.remove("on");
     { const a=document.getElementById("t3d-add"); if(a) a.style.display=""; }   // + knop terug
     const h=document.getElementById("hint"); if(h)h.style.display="";
@@ -19658,8 +19678,8 @@ async function verwijderVoorbeelden() {
     { const op3=document.getElementById("eb3d-opacity"); if(op3) op3.addEventListener("input",()=>{
         if(!editDecal) return;
         const v=Math.max(0.2, Math.min(1,(+op3.value||100)/100));
-        markers.forEach(x=>{ if(x.id===editDecal.id && x.obj) zetDecalOpacity(x.obj, v); });   // dekking is per record: alle delen mee
         if(editDecal.rec) editDecal.rec.opacity=v;
+        markers.forEach(x=>{ if(x.id===editDecal.id && x.obj) zetDecalOpacity(x.obj, markerOpacity(x)); });   // dekking is per record: alle delen mee (bewerkt deel houdt zijn doorkijk, 5r)
         clearTimeout(op3._sv); op3._sv=setTimeout(()=>{ persistEdit(editDecal); },250);
       }); }
   }
@@ -22135,8 +22155,9 @@ function maakTatnetGL(json, canvas) {
          deel hoort gedimd te blijven en een tattoo over de knip gesplitst. Deze functie loopt ook via
          renderMarkers (o.a. na het plaatsen van een nieuwe tattoo), dus zonder dit sprong de hele
          collectie daar terug naar vol. */
-      if(ledeActief){ ledeActief.decalOp.set(m, op); ledeDecalSplits(m); }
-      else zetDecalOpacity(m.obj, op); });
+      const opD=doorkijkAan(m) ? Math.min(op, DOORKIJK) : op;   // bewerkt deel houdt zijn doorkijk (5r)
+      if(ledeActief){ ledeActief.decalOp.set(m, opD); ledeDecalSplits(m); }
+      else zetDecalOpacity(m.obj, opD); });
   };
 
   /* ---- render-lus ---- */
