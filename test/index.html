@@ -10759,7 +10759,7 @@ function createTattoo(overrides = {}) {
    ============================================================ */
 // App-versie (semver, handmatig ophogen bij een release). Bij een bump ook de
 // CACHE-naam in sw.js meebumpen, zodat clients de nieuwe build ophalen.
-const APP_VERSIE = '0.3.137';
+const APP_VERSIE = '0.3.138';
 
 /* Dev-haken die de CLOUD raken hangen alleen op een ontwikkelmachine aan window. Ze zijn geen
    lek op zichzelf (zonder XSS roept niemand ze aan, en CSP + esc() houden XSS tegen), maar ze
@@ -21672,10 +21672,11 @@ function maakTatnetGL(json, canvas) {
   // token dus uit de computed style.
   function accentRgb(){ try{ return (getComputedStyle(document.documentElement).getPropertyValue('--accent-rgb')||'').trim() || '34,26,18'; }catch(e){ return '34,26,18'; } }
   function drawLasso(){
-    const vak=prevVak(); const cv=lassoCanvas; cv.width=vak.w; cv.height=vak.h;
-    const ctx=cv.getContext("2d"); ctx.clearRect(0,0,cv.width,cv.height);
+    const vak=prevVak(); const cv=lassoCanvas, dpr=Math.min(window.devicePixelRatio||1, 3);   // slice 6a: scherp op de echte schermresolutie
+    cv.width=Math.round(vak.w*dpr); cv.height=Math.round(vak.h*dpr);
+    const ctx=cv.getContext("2d"); ctx.setTransform(dpr,0,0,dpr,0,0); ctx.clearRect(0,0,vak.w,vak.h);
     if(!origImg || cutModal.classList.contains("cm-review") || cutModal.classList.contains("cm-gegevens")) return;   // review/gegevens: geen lasso-punten tonen
-    const r=viewRect(cv.width,cv.height,beeldDims().w,beeldDims().h);
+    const r=viewRect(vak.w,vak.h,beeldDims().w,beeldDims().h);
     // D6(a) verbetering 3: eerder geknipte uitsnedes uit dezelfde foto vaag tonen (alleen bij gelijke oriëntatie)
     if(vorigeLassos && vorigeLassos.length){
       vorigeLassos.forEach(v=>{ if(!v||!v.pts||v.pts.length<3) return;
@@ -21694,14 +21695,17 @@ function maakTatnetGL(json, canvas) {
     if(lassoPts.length<1) return;
     ctx.beginPath();
     lassoPts.forEach((p,i)=>{ const X=r.left+p.nx*r.w, Y=r.top+p.ny*r.h; i?ctx.lineTo(X,Y):ctx.moveTo(X,Y); });
-    if(lassoPts.length>=3){ ctx.closePath(); ctx.fillStyle="rgba("+accentRgb()+",.14)"; ctx.fill(); }
-    ctx.lineWidth=2; ctx.lineJoin="round"; ctx.strokeStyle="#CE2727"; ctx.stroke();
+    if(lassoPts.length>=3) ctx.closePath();   // slice 6a: geen vulling meer (buiten de lijn is al gedimd), zoals de ring op het model
+    const rood=(getComputedStyle(document.documentElement).getPropertyValue('--rood').trim())||"#CE2727", LW=4;
+    ctx.lineWidth=LW; ctx.lineJoin="round"; ctx.lineCap="round"; ctx.strokeStyle=rood;
+    if(!drawingFree) ctx.setLineDash([LW*2.4, LW*1.7]);   // zelfde stippeling als ringTex; tijdens het tekenen doorgetrokken
+    ctx.stroke(); ctx.setLineDash([]);
     // sleep-handles op elk punt, alleen in de Points-stand: in Freehand zijn het geen handvatten (een nieuwe aanraking begint
     // een nieuwe lijn) en bij een vloeiende lijn was de omcirkeling bijna alleen puntjes (toesteltest 2026-09-20)
     if(cutModus!=='punten') return;   // standnamen: 'vrij' | 'punten' (doorloop 2026-09-21: stond op 'punt', dus nooit getekend)
     lassoPts.forEach((p,i)=>{ const X=r.left+p.nx*r.w, Y=r.top+p.ny*r.h;
-      ctx.beginPath(); ctx.arc(X,Y, i===lassoDragIdx?7:5, 0, Math.PI*2);
-      ctx.fillStyle="#CE2727"; ctx.fill(); ctx.lineWidth=2; ctx.strokeStyle="#fff"; ctx.stroke(); });
+      ctx.beginPath(); ctx.arc(X,Y, i===lassoDragIdx?9:7, 0, Math.PI*2);   // slice 6a: iets groter bij de dikkere lijn
+      ctx.fillStyle=rood; ctx.fill(); ctx.lineWidth=2.5; ctx.strokeStyle="#fff"; ctx.stroke(); });
   }
   function ptFrom(e){
     const b=cutPrev.getBoundingClientRect(), r=viewRect(b.width,b.height,beeldDims().w,beeldDims().h);
