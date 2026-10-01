@@ -10760,7 +10760,7 @@ function createTattoo(overrides = {}) {
    ============================================================ */
 // App-versie (semver, handmatig ophogen bij een release). Bij een bump ook de
 // CACHE-naam in sw.js meebumpen, zodat clients de nieuwe build ophalen.
-const APP_VERSIE = '0.3.135';
+const APP_VERSIE = '0.3.136';
 
 /* Dev-haken die de CLOUD raken hangen alleen op een ontwikkelmachine aan window. Ze zijn geen
    lek op zichzelf (zonder XSS roept niemand ze aan, en CSP + esc() houden XSS tegen), maar ze
@@ -13014,7 +13014,7 @@ function toonStartModel() {
       src = localStorage.getItem('tatties-start-opname:' + DB_NAAM + ':src') || '';
       ids = JSON.parse(localStorage.getItem('tatties-start-opname:' + DB_NAAM + ':ids') || '[]'); } } catch (e) { src = ''; }
   const bekend = new Set(tattoos.map(t => t.id));
-  const ok = !!src && Array.isArray(ids) && ids.every(id => bekend.has(id)) && window.innerHeight >= 520;   // laag scherm (liggend): geen model (slice 5k)
+  const ok = !!src && window.innerHeight >= 520;   // laag scherm (liggend): geen model (slice 5k); geen id-controle meer: het beeld heeft geen tattoos (fix 2026-10-01)
   if (ok && im.getAttribute('src') !== src) im.src = src;
   sm.hidden = !ok;
   if (wrap) wrap.classList.toggle('met-model', ok);
@@ -19670,11 +19670,15 @@ async function verwijderVoorbeelden() {
     _sM.multiply(_sB.makeTranslation(-b.p.x, -b.p.y, -b.p.z));
     return _sM;
   }
+  const _sC=new THREE.Matrix4(), _sD=new THREE.Matrix4(), _sE=new THREE.Matrix4();   // slice 5z
   function snelZet(obj, M){ if(!obj || !obj._bouwBasis) return; obj.matrixAutoUpdate=false; obj.matrix.multiplyMatrices(M, obj._bouwBasis); obj.matrixWorldNeedsUpdate=true; }
   function snelVolg(){
     const m=editDecal; if(!m) return;
     if(!m._bouw || !m.obj){ herbouwNu(); return; }
-    const M=snelMatrix(m); snelZet(m.obj, M); if(selRing) snelZet(selRing, M);
+    const M=snelMatrix(m);
+    { const c=camera.position, d=c.distanceTo(m.point), delta=Math.min(0.02, Math.max(0.004, 0.003+0.06*(m.size||0.09)));   // slice 5z
+      if(d>delta*3){ const k=1-delta/d; _sC.makeTranslation(c.x,c.y,c.z).multiply(_sD.makeScale(k,k,k)).multiply(_sE.makeTranslation(-c.x,-c.y,-c.z)); M.premultiply(_sC); } }
+    snelZet(m.obj, M); if(selRing) snelZet(selRing, M);
     if(groepLay && groepAan()){ ringenExtraWeg(); for(const l of groepLay.lid){ if(l.q.obj) snelZet(l.q.obj, M); } }   // de andere delen bewegen als een geheel mee
     clearTimeout(herbouwT);
     if(performance.now()-herbouwLaatst>HERBOUW_MAX) herbouwNu(); else herbouwT=setTimeout(herbouwNu, HERBOUW_RUST);
