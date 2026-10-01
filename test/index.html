@@ -10759,7 +10759,7 @@ function createTattoo(overrides = {}) {
    ============================================================ */
 // App-versie (semver, handmatig ophogen bij een release). Bij een bump ook de
 // CACHE-naam in sw.js meebumpen, zodat clients de nieuwe build ophalen.
-const APP_VERSIE = '0.3.133';
+const APP_VERSIE = '0.3.134';
 
 /* Dev-haken die de CLOUD raken hangen alleen op een ontwikkelmachine aan window. Ze zijn geen
    lek op zichzelf (zonder XSS roept niemand ze aan, en CSP + esc() houden XSS tegen), maar ze
@@ -19346,7 +19346,11 @@ async function verwijderVoorbeelden() {
     ray.setFromCamera(nd,camera); return ray.intersectObjects(pickMeshes,true);
   }
   function surfaceAt(x,y){
-    const hits=rayTo(x,y); if(!hits.length) return null;
+    let hits=rayTo(x,y); if(!hits.length) return null;
+    if(!ledeActief){   // slice 5w: door de naad op de middenlijn geglipt? dan een fractie verschoven opnieuw
+      const afgewend=q=>!!(q && q.face) && q.face.normal.clone().transformDirection(q.object.matrixWorld).dot(ray.ray.direction)>0;
+      if(afgewend(hits[0])){ const h2=rayTo(x+0.6, y+0.35); if(h2.length && !afgewend(h2[0])) hits=h2; else rayTo(x,y); }
+    }
     let h=hits[0];
     // Ledemaat geisoleerd: de doorzichtige romp mag geen treffers meer opvangen, anders plaats je
     // een tattoo op de romp die er alleen maar voor hangt.
@@ -19930,6 +19934,35 @@ async function verwijderVoorbeelden() {
   /* Een extra deel verwijderen (het eerste deel is het record zelf en loopt via verwijderMetUndo). Eerst het record
      vol in RAM: de deel-bronfoto moet in het deel-object zitten, anders is hij na 'ongedaan maken' weg (de DB heeft het
      deel dan al niet meer, dus de merge-guard kan hem niet terughalen). */
+  /* slice 5w: het eerste deel (het record zelf) weg terwijl er andere delen zijn: het volgende deel wordt het eerste. */
+  async function verwijderEersteDeel(m){
+    const rec=m&&m.rec; if(!rec || m.deel) return;
+    const q=markers.find(x=>x!==m && x.id===rec.id && x.deel); if(!q) return;
+    if(typeof volledigInRam==="function") await volledigInRam(rec.id);   // bronfoto's in RAM: voor de ongedaan-kopie en de opslag
+    const VELDEN=['positie3d','kunst3d','delen','kunst','positie','zijde','lichaamsdeel'], oud={};
+    for(const k of VELDEN) oud[k]=(rec[k]===undefined) ? undefined : JSON.parse(JSON.stringify(rec[k]));
+    const nieuw=q.deel, nieuwId=nieuw.id;
+    markers.forEach(x=>{ if(x.id===rec.id) clearTimeout(x._persistT); });
+    rec.positie3d=nieuw.positie3d; rec.kunst3d=nieuw.kunst3d;
+    rec.delen=(rec.delen||[]).filter(d=>d && d.id!==nieuwId);
+    exitEditUI(); verwijderMarker(m);
+    q.deel=null; q.rec=rec;
+    persistEdit(q); clearTimeout(q._persistT);   // binding, zone en 2D-kaart van het nieuwe eerste deel; zelf meteen opslaan
+    try{ await saveTattoo(rec); }catch(e){ console.error(e); toast(tr('toast.opslaanmislukt')+(e&&e.message?e.message:tr('ui.fout'))); return; }
+    if(typeof tattoos!=="undefined" && Array.isArray(tattoos)){ const j=tattoos.findIndex(t=>t.id===rec.id); if(j>=0) tattoos[j]=rec; }
+    onthoudFp(q);
+    if(typeof renderMarkers==="function"){ try{renderMarkers();}catch(_){} }
+    if(typeof window.__tattiesNaBewerk==="function") window.__tattiesNaBewerk(rec.id);
+    toastMetActie(tr('toast.deelverwijderd'), tr('toast.ongedaan'), async()=>{
+      for(const k of VELDEN){ if(oud[k]===undefined) delete rec[k]; else rec[k]=oud[k]; }
+      const terug=(rec.delen||[]).find(d=>d && d.id===nieuwId) || null;
+      if(markers.includes(q)){ clearTimeout(q._persistT); q.deel=terug; onthoudFp(q); }
+      try{ await saveTattoo(rec); }catch(e){ console.error(e); toast(tr('toast.opslaanmislukt')+(e&&e.message?e.message:tr('ui.fout'))); return; }
+      try{ await herstelDeel(rec, null); }catch(e){ console.error(e); }
+      if(typeof renderMarkers==="function"){ try{renderMarkers();}catch(_){} }
+      if(typeof window.__tattiesNaBewerk==="function") window.__tattiesNaBewerk(rec.id);
+    });
+  }
   async function verwijderDeel(m){
     const rec=m&&m.rec, deel=m&&m.deel; if(!rec||!deel) return;
     if(typeof volledigInRam==="function") await volledigInRam(rec.id);
@@ -19998,6 +20031,11 @@ async function verwijderVoorbeelden() {
         else { exitEditDecal(); if(rec&&typeof openFormulier==="function") openFormulier(rec.id); }     // terugval: geen bewaarde foto
         return; }
       if(a==="del"){ const m=editDecal; const rec=m&&m.rec; if(!rec) return;
+        if(!m.deel && groepModus==='deel' && markers.some(q=>q!==m && q.id===rec.id && q.deel)){   // slice 5w: eerste deel apart
+          const vraag=tr('ui.deel_verwijder_vraag').replace('{naam}', String(rec.naam||'').trim());
+          const ok=(typeof window.__tattiesConfirm==='function') ? await window.__tattiesConfirm(vraag) : window.confirm(vraag);
+          if(!ok) return;
+          await verwijderEersteDeel(m); return; }
         if(m.deel && groepModus==='deel'){   // "Dit deel" op een extra deel: alleen dat deel weg (bij "Hele tattoo": alles, slice 5v)
           const vraag=tr('ui.deel_verwijder_vraag').replace('{naam}', String(rec.naam||'').trim());
           const ok=(typeof window.__tattiesConfirm==='function') ? await window.__tattiesConfirm(vraag) : window.confirm(vraag);
