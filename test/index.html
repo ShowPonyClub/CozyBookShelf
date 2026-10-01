@@ -2577,7 +2577,7 @@ form label{text-transform:none;letter-spacing:.005em;font-size:.8rem;color:var(-
     <div id="t3d-uitleg">
       <ol>
         <li data-i18n-html="uitleg.3d1"><strong>Model kiezen:</strong> stel man of vrouw en je huidskleur in via Instellingen (tandwiel rechtsboven).</li>
-        <li data-i18n-html="uitleg.3d2"><strong>Draaien:</strong> sleep met je vinger of muis om het model rond te draaien. Tik op een arm of been om dat deel apart te bekijken; <strong>Heel lichaam</strong> (rechtsboven) zet alles terug in de beginstand. Met <strong>Wishlist</strong> (linksboven) toon je ook je wens-tattoos.</li>
+        <li data-i18n-html="uitleg.3d2"><strong>Draaien:</strong> sleep met je vinger of muis om het model rond te draaien. Tik op een arm of been om dat deel apart te bekijken; <strong>Heel lichaam</strong> (rechtsboven) zet alles terug in de beginstand. Draai met twee vingers om het beeld te kantelen. Met <strong>Wishlist</strong> (linksboven) toon je ook je wens-tattoos.</li>
         <li data-i18n-html="uitleg.3d3"><strong>Tattoo toevoegen:</strong> tik op &#43; (rechtsonder), kies een foto, knip uit en geef een naam → Toevoegen. Tik daarna op het model waar hij moet komen. <strong>Tip:</strong> het makkelijkst is om één tattoo tegelijk toe te voegen, maar je kunt er ook meerdere uit één foto knippen (knop "+ Nog een" na het plaatsen).</li>
         <li data-i18n-html="uitleg.3d4"><strong>Bewerken:</strong> dubbeltik op een geplaatste tattoo. Sleep om te verplaatsen, knijp om te schalen en te draaien. In de balk eronder zitten het potlood (opnieuw uitsnijden), het slot en de prullenbak.</li>
         <li data-i18n-html="uitleg.3d5"><strong>Wisselen:</strong> gebruik de 2D/3D-knop bovenaan voor de platte lichaamskaart.</li>
@@ -10183,7 +10183,7 @@ const I18N = {
     'sv.collectie':'Collectie','sv.wishlist':'Wishlist',
     'uitleg.titel3d':'Zo werkt de 3D-weergave',
     'uitleg.3d1':'<strong>Model kiezen:</strong> kies mannelijk of vrouwelijk en je huidskleur via Instellingen (tandwiel rechtsboven).',
-    'uitleg.3d2':'<strong>Draaien:</strong> sleep met je vinger of muis om het model rond te draaien. Tik op een arm of been om dat deel apart te bekijken; <strong>Heel lichaam</strong> (rechtsboven) zet alles terug in de beginstand. Met <strong>Wishlist</strong> (linksboven) toon je ook je wens-tattoos.',
+    'uitleg.3d2':'<strong>Draaien:</strong> sleep met je vinger of muis om het model rond te draaien. Tik op een arm of been om dat deel apart te bekijken; <strong>Heel lichaam</strong> (rechtsboven) zet alles terug in de beginstand. Draai met twee vingers om het beeld te kantelen. Met <strong>Wishlist</strong> (linksboven) toon je ook je wens-tattoos.',
     'uitleg.3d3':'<strong>Tattoo toevoegen:</strong> tik op + (rechtsonder), kies een foto, knip de tattoo uit en geef een naam → Op het model plaatsen. Tik daarna op het model waar hij moet komen. <strong>Tip:</strong> het makkelijkst is om één tattoo tegelijk toe te voegen, maar je kunt er ook meerdere uit één foto knippen (knop "+ Nog een" na het plaatsen).',
     'uitleg.3d4':'<strong>Bewerken:</strong> dubbeltik op een geplaatste tattoo. Sleep om te verplaatsen, knijp om te schalen en te draaien. In de balk eronder zitten het potlood (opnieuw uitknippen), het slot en de prullenbak.',
     'uitleg.3d5':'<strong>Wisselen:</strong> gebruik de 2D/3D-knop bovenaan voor de platte lichaamskaart.','uitleg.3d6':'<strong>Delen:</strong> tik op de deelknop (pijl omhoog, rechtsboven) voor een foto van de weergave zoals je die nu ziet, bijvoorbeeld voor je artiest, of een draaiend filmpje van je hele lichaam.',
@@ -10387,7 +10387,7 @@ const I18N = {
     'sv.collectie':'Collection','sv.wishlist':'Wishlist',
     'uitleg.titel3d':'How the 3D view works',
     'uitleg.3d1':'<strong>Pick a model:</strong> choose masculine or feminine and your skin tone via Settings (gear, top right).',
-    'uitleg.3d2':'<strong>Rotate:</strong> drag with your finger or mouse to turn the model. Tap an arm or leg to view that part on its own; <strong>Whole body</strong> (top right) resets everything to the starting view. <strong>Wishlist</strong> (top left) also shows your wish tattoos.',
+    'uitleg.3d2':'<strong>Rotate:</strong> drag with your finger or mouse to turn the model. Tap an arm or leg to view that part on its own; <strong>Whole body</strong> (top right) resets everything to the starting view. Twist with two fingers to tilt the view. <strong>Wishlist</strong> (top left) also shows your wish tattoos.',
     'uitleg.3d3':'<strong>Add a tattoo:</strong> tap + (bottom right), pick a photo, cut the tattoo out and give it a name → Place on the model. Then tap the model where it should go. <strong>Tip:</strong> it\'s easiest to add one tattoo at a time, but you can also cut several from one photo (the "+ Another" button after placing).',
     'uitleg.3d4':'<strong>Edit:</strong> double-tap a placed tattoo. Drag to move, pinch to scale and rotate. The bar below has the pencil (cut out again), the lock and the bin.',
     'uitleg.3d5':'<strong>Switch:</strong> use the 2D/3D button at the top for the flat body map.','uitleg.3d6':'<strong>Share:</strong> tap the share button (arrow up, top right) for a photo of the view as you see it now, for example for your artist, or a spinning video of your whole body.',
@@ -10759,7 +10759,7 @@ function createTattoo(overrides = {}) {
    ============================================================ */
 // App-versie (semver, handmatig ophogen bij een release). Bij een bump ook de
 // CACHE-naam in sw.js meebumpen, zodat clients de nieuwe build ophalen.
-const APP_VERSIE = '0.3.134';
+const APP_VERSIE = '0.3.135';
 
 /* Dev-haken die de CLOUD raken hangen alleen op een ontwikkelmachine aan window. Ze zijn geen
    lek op zichzelf (zonder XSS roept niemand ze aan, en CSP + esc() houden XSS tegen), maar ze
@@ -16642,7 +16642,7 @@ async function verwijderVoorbeelden() {
   let pickMeshes=[];
   let orthoCal=null, orthoRT=null;   // SLICE 1: ortho-projectie-kalibratie + offscreen render-target (parallel aan de bestaande 2D-kaart)
   const markers=[];                 // {id, obj} - geplaatste decals (runtime)
-  let radius=3.2, theta=0, phi=1.35;
+  let radius=3.2, theta=0, phi=1.35, rol=0;   // rol: kanteling van het beeld (twee vingers draaien, slice 5x)
   const CAM0={radius:3.2, theta:0, phi:1.35, tx:0, ty:0.95, tz:0};
   let targetGoal=null;            // doel voor soepel focussen
   let radiusGoal=null;           // doel-zoom bij focussen op een lichaamsdeel
@@ -16855,6 +16855,7 @@ async function verwijderVoorbeelden() {
     return { radius:(lang/0.86)/(2*Math.tan(camera.fov*Math.PI/360)), ty:lang*0.5 };
   }
   function resetView(){
+    rol=0;   // slice 5x: Beginstand = ook weer rechtop
     const b=camBegin();
     targetGoal=null; radiusGoal=null; radius=b.radius; theta=CAM0.theta; phi=CAM0.phi;
     target.set(CAM0.tx,b.ty,CAM0.tz); applyCam();
@@ -16928,6 +16929,7 @@ async function verwijderVoorbeelden() {
     const ring=makeImage(cPoint, cNormal, editDecal.rot||0, rx*2, tex, cMesh, false);
     if(ring){ ring.renderOrder=1000; const m=ring.material;
       if(m){ m.alphaTest=0.18; m.depthTest=true; m.depthWrite=false; m.polygonOffset=true; m.polygonOffsetFactor=-12; m.needsUpdate=true; }
+      ring.updateMatrix(); ring._bouwBasis=ring.matrix.clone();   // slice 5y: volgt de decal tijdens het slepen
       selRing=ring; }
   }
   function showLoading(b){ const el2=document.getElementById("t3d-loading"); if(el2) el2.classList.toggle("on",!!b); }
@@ -16989,7 +16991,17 @@ async function verwijderVoorbeelden() {
       target.y+radius*Math.cos(phi),
       target.z+radius*Math.sin(phi)*Math.cos(theta));
     camera.lookAt(target);
+    const hk=document.documentElement.classList;
+    if(rol && !startLive && !hk.contains('genaan') && !hk.contains('onbmodel')) camera.rotateZ(rol);   // slice 5x: gekanteld beeld (niet op het startscherm, in de generator of het welkom)
   }
+  /* slice 5x: draaien met een vinger, omgerekend naar het gekantelde beeld (veeg rechts = draai naar rechts op het scherm) */
+  function baanVeeg(dx,dy){
+    const c=Math.cos(rol), s=Math.sin(rol), ux=dx*c+dy*s, uy=-dx*s+dy*c;
+    theta-=ux*0.008; phi=Math.max(0.15,Math.min(3.0,phi-uy*0.008)); applyCam();
+  }
+  const ROL_DREMPEL=10*Math.PI/180, ROL_KLIK=6*Math.PI/180;
+  let twistSom=0, rolAan=false;
+  function rolNorm(a){ a=a%(2*Math.PI); if(a>Math.PI) a-=2*Math.PI; else if(a<-Math.PI) a+=2*Math.PI; return a; }
   const FOV_BASIS=45;              // fov waarop de schaal geijkt is (= startwaarde van de camera)
   let hIjk=0, wIjk=-1, ebIjk=-1;   // renderhoogte/breedte/balkhoogte waarop die ijking hoort
   let pinW=-1;                     // breedte waarop de vaste veldhoogte gemeten is
@@ -17083,6 +17095,7 @@ async function verwijderVoorbeelden() {
   /* Alleen de UI van de 3D-aanpasmodus sluiten (editbar/hint/+-knop herstellen). Bewust UI-only
      (geen dispose/save) zodat het ook veilig kan bij de START van een gender-wissel, vóór het async laden. */
   function exitEditUI(){
+    herbouwAf();   // slice 5y
     const wasEdit=editDecal;
     editDecal=null; showSel(false);   // timers worden per marker geclear'd in disposeMarker
     zetDoorkijk(wasEdit);   // weer de gewone dekking (5r)
@@ -18920,7 +18933,7 @@ async function verwijderVoorbeelden() {
   }
   function heelLichaam(){
     if(!ledeActief) return;
-    stopIsolatie();
+    stopIsolatie(); rol=0;   // slice 5x
     { const b=camBegin(); targetGoal=new THREE.Vector3(CAM0.tx,b.ty,CAM0.tz); radiusGoal=b.radius; }   // soepel terug (liggend: eigen kader, slice 5q)
   }
   /* De knip van alle delen alvast meten zodra het model geladen is, met een adempauze ertussen.
@@ -19515,6 +19528,8 @@ async function verwijderVoorbeelden() {
     m.obj=makeImage(m.point,m.normal,m.rot||0,m.size||0.09,m.tex,m.mesh||pickMeshes[0],recMul(deelVan(m)));
     if(m.obj) m.obj.renderOrder=((m.rec&&m.rec.stapel)||0)+(doorkijkAan(m)?0.5:0);   // stapelvolgorde bij overlap (bewerkt deel erboven, 5r)
     zetDecalOpacity(m.obj, markerOpacity(m));   // doorkijk blijft tijdens slepen/schalen/draaien (5r)
+    if(m.obj){ m.obj.updateMatrix(); m.obj._bouwBasis=m.obj.matrix.clone();   // slice 5y: bouwstand, voor het snelle volgen
+      m._bouw={ p:m.point.clone(), n:m.normal.clone().normalize(), rot:m.rot||0, size:m.size||0.09 }; }
     if(ledeActief){ if(ledeActief.decalOp.has(m)) ledeActief.decalOp.delete(m); ledeDecalSplits(m); }
     if(m===editDecal && selRingOn) buildSelRing();   // selectie-ring soepel meeschalen/-draaien/-verplaatsen (per frame; ring-box is klein -> goedkoop)
   }
@@ -19531,6 +19546,7 @@ async function verwijderVoorbeelden() {
   }
   function enterEditDecal(m, modus){
     groepModus=(modus==='deel') ? 'deel' : 'hele'; groepLay=null;   // slice 5v: dubbeltik = hele tattoo, net geplaatst deel = dit deel
+    herbouwAf();   // slice 5y: de vorige tattoo eerst afmaken
     const vorigEdit=editDecal;
     editDecal=m; editHist=[];                 // verse undo-geschiedenis per bewerksessie
     if(vorigEdit && vorigEdit!==m) zetDoorkijk(vorigEdit);   // vorige tattoo weer op zijn gewone dekking (5r)
@@ -19551,6 +19567,7 @@ async function verwijderVoorbeelden() {
       if (!coarse) toast(tr('ui.aanpas_hint')); }
   }
   function exitEditDecal(){
+    herbouwAf();   // slice 5y
     if(editDecal && groepAan()) for(const q of groepLeden()) persistEdit(q);   // slice 5v: de andere delen ook opslaan
     const m=editDecal; editDecal=null; showSel(false);
     zetDoorkijk(m);   // weer de gewone dekking (5r)
@@ -19638,16 +19655,45 @@ async function verwijderVoorbeelden() {
   function groepVoor(){ if(!groepAan()){ groepLay=null; return; } if(!groepLay || groepLay.anker!==editDecal) groepLay=groepMeet(editDecal); }
   function groepNa(){ if(groepLay && groepAan()) groepZet(editDecal, groepLay); }
   window.__tattiesGroepDbg={ modus:()=>groepModus, zet:zetGroepModus, leden:()=>groepLeden().length };
+  /* ---- slice 5y: soepel volgen ---- */
+  const HERBOUW_RUST=110, HERBOUW_MAX=900;
+  let herbouwT=0, herbouwLaatst=0;
+  const _sQ=new THREE.Quaternion(), _sN=new THREE.Vector3(), _sA=new THREE.Matrix4(), _sB=new THREE.Matrix4(), _sM=new THREE.Matrix4();
+  function snelMatrix(m){   // van de bouwstand naar de huidige stand: T(p) . Q(n0->n) . R(n0, drot) . S(f) . T(-p0)
+    const b=m._bouw; if(!b) return null;
+    _sN.copy(m.normal).normalize(); _sQ.setFromUnitVectors(b.n, _sN);
+    _sM.makeTranslation(m.point.x, m.point.y, m.point.z);
+    _sM.multiply(_sA.makeRotationFromQuaternion(_sQ));
+    _sM.multiply(_sA.makeRotationAxis(b.n, ((m.rot||0)-b.rot)*Math.PI/180));
+    const f=(m.size||0.09)/b.size; _sM.multiply(_sA.makeScale(f,f,f));
+    _sM.multiply(_sB.makeTranslation(-b.p.x, -b.p.y, -b.p.z));
+    return _sM;
+  }
+  function snelZet(obj, M){ if(!obj || !obj._bouwBasis) return; obj.matrixAutoUpdate=false; obj.matrix.multiplyMatrices(M, obj._bouwBasis); obj.matrixWorldNeedsUpdate=true; }
+  function snelVolg(){
+    const m=editDecal; if(!m) return;
+    if(!m._bouw || !m.obj){ herbouwNu(); return; }
+    const M=snelMatrix(m); snelZet(m.obj, M); if(selRing) snelZet(selRing, M);
+    if(groepLay && groepAan()){ ringenExtraWeg(); for(const l of groepLay.lid){ if(l.q.obj) snelZet(l.q.obj, M); } }   // de andere delen bewegen als een geheel mee
+    clearTimeout(herbouwT);
+    if(performance.now()-herbouwLaatst>HERBOUW_MAX) herbouwNu(); else herbouwT=setTimeout(herbouwNu, HERBOUW_RUST);
+  }
+  function herbouwNu(){
+    clearTimeout(herbouwT); herbouwT=0; herbouwLaatst=performance.now();
+    const m=editDecal; if(!m) return;
+    rebuildMarker(m); groepNa();
+  }
+  function herbouwAf(){ if(herbouwT) herbouwNu(); }   // nog een herbouw in de wacht: nu doen (loslaten, opslaan, afsluiten)
   function moveDecalTo(x,y){
     if(!editDecal||editDecal.locked) return;
     const s=surfaceAt(x,y); if(!s) return;
-    if(editDecal.point.distanceTo(s.point)<0.004) return;   // throttle
+    if(editDecal.point.distanceTo(s.point)<0.0008) return;   // slice 5y: geen sprongen van 4 mm meer (de decal volgt nu goedkoop)
     groepVoor();   // slice 5v: ligging van de andere delen vastleggen (eerste stap van een gebaar)
     editDecal.point=s.point; editDecal.normal=s.normal; editDecal.mesh=s.mesh; editDecal.tri=(s.tri>=0?s.tri:-1);
-    rebuildMarker(editDecal); groepNa();
+    snelVolg();   // slice 5y: meteen tonen, de echte geometrie volgt als de vinger stilstaat
   }
-  function scaleDecal(f){ if(!editDecal||editDecal.locked)return; groepVoor(); editDecal.size=clamp((editDecal.size||0.09)*f,0.03,0.40); rebuildMarker(editDecal); groepNa(); }
-  function rotateDecal(deg){ if(!editDecal||editDecal.locked)return; groepVoor(); editDecal.rot=(((editDecal.rot||0)+deg)%360+360)%360; rebuildMarker(editDecal); groepNa(); }
+  function scaleDecal(f){ if(!editDecal||editDecal.locked)return; groepVoor(); editDecal.size=clamp((editDecal.size||0.09)*f,0.03,0.40); snelVolg(); }   // slice 5y
+  function rotateDecal(deg){ if(!editDecal||editDecal.locked)return; groepVoor(); editDecal.rot=(((editDecal.rot||0)+deg)%360+360)%360; snelVolg(); }
   /* ---- Undo voor tattoo-bewerken (positie/schaal/draai), stap voor stap per bewerksessie ---- */
   let editHist=[];
   function snapEdit(m){ if(!m||!m.point) return; editHist.push({point:m.point.clone(), normal:m.normal&&m.normal.clone(), mesh:m.mesh, size:m.size, rot:m.rot, tri:m.tri,
@@ -19913,6 +19959,7 @@ async function verwijderVoorbeelden() {
   }
   function persistEdit(m){
     if(!m||!m.rec) return;
+    if(m===editDecal) herbouwAf();   // slice 5y: eerst de echte geometrie (en de plek van de andere delen)
     if(m===editDecal){ groepLay=null; if(groepAan()){ for(const q of groepLeden()) persistEdit(q); bouwRingenExtra(); } }   // slice 5v
     const D=deelVan(m); const P=D.positie3d||(D.positie3d={});
     const mesh=m.mesh||pickMeshes[0];
@@ -20093,7 +20140,7 @@ async function verwijderVoorbeelden() {
       const dx=e.clientX-lastX,dy=e.clientY-lastY;lastX=e.clientX;lastY=e.clientY;
       if(Math.hypot(e.clientX-downX,e.clientY-downY)>TAP_PX)moved=true;
       if(editDecal && decalDrag){ if(!gSnap){snapEdit(editDecal);gSnap=true;} moveDecalTo(e.clientX,e.clientY); return; }   // alleen verslepen als je op de tattoo begon
-      theta-=dx*0.008;phi=Math.max(0.15,Math.min(3.0,phi-dy*0.008));applyCam();});
+      baanVeeg(dx,dy);});   // slice 5x: rekening houden met een gekanteld beeld
     el.addEventListener("pointerup",e=>{ if(e.pointerType==="touch")return;
       if(editDecal){ const did=moved&&decalDrag; drag=false; if(did) persistEdit(editDecal); return; }   // alleen opslaan als de tattoo zelf verplaatst is, niet na orbit/zoom
       const wasTap=!moved && performance.now()-t0<TAP_MS; drag=false;
@@ -20122,20 +20169,24 @@ async function verwijderVoorbeelden() {
       if(e.touches.length===1){drag=true;moved=false;t0=performance.now();
         lastX=downX=e.touches[0].clientX;lastY=downY=e.touches[0].clientY;
         decalDrag = (editDecal && !editDecal.locked) ? onEditDecal(e.touches[0].clientX,e.touches[0].clientY) : false; gSnap=false;}   // op de (ontgrendelde) tattoo? -> verslepen, anders model draaien
-      else if(e.touches.length===2){drag=false;pinchD=dist2(e);pinchA=angle2(e);pinchMid=mid2(e);
+      else if(e.touches.length===2){drag=false;pinchD=dist2(e);pinchA=angle2(e);pinchMid=mid2(e); twistSom=0; rolAan=false;
         const m=mid2(e); pinchModel = (editDecal && !editDecal.locked) ? onEditDecal(m.x,m.y) : false; gSnap=false;}},{passive:false});   // knijpen op de (ontgrendelde) tattoo? -> schalen, anders lichaam zoomen
     el.addEventListener("touchmove",e=>{ e.preventDefault();
       if(e.touches.length===1&&drag){const x=e.touches[0].clientX,y=e.touches[0].clientY;
         const dx=x-lastX,dy=y-lastY;lastX=x;lastY=y;
         if(Math.hypot(x-downX,y-downY)>TAP_PX)moved=true;
         if(editDecal && decalDrag){ if(!gSnap){snapEdit(editDecal);gSnap=true;} moveDecalTo(x,y); return; }   // alleen verslepen als je op de tattoo begon
-        theta-=dx*0.008;phi=Math.max(0.15,Math.min(3.0,phi-dy*0.008));applyCam();}
+        baanVeeg(dx,dy);}   // slice 5x: rekening houden met een gekanteld beeld
       else if(e.touches.length===2){const d=dist2(e),a=angle2(e),m2=mid2(e);
         if(editDecal && pinchModel){ if(!gSnap){snapEdit(editDecal);gSnap=true;} if(pinchD) scaleDecal(d/pinchD); if(pinchA!=null) rotateDecal(-(a-pinchA)*180/Math.PI); pinchD=d; pinchA=a; pinchMid=m2; return; }
         if(pinchD) radius=Math.max(0.3,Math.min(7,radius*(pinchD/d)));
         if(pinchMid) panTarget(m2.x-pinchMid.x, m2.y-pinchMid.y);
-        pinchD=d; pinchMid=m2; applyCam();}},{passive:false});
+        if(pinchA!=null){ const da=rolNorm(a-pinchA); twistSom+=da;   // slice 5x: draaien met twee vingers kantelt het beeld
+          if(!rolAan && Math.abs(twistSom)>ROL_DREMPEL) rolAan=true;
+          if(rolAan) rol=rolNorm(rol+da); }
+        pinchD=d; pinchA=a; pinchMid=m2; applyCam();}},{passive:false});
     el.addEventListener("touchend",e=>{
+      if(rolAan && e.touches.length<2){ rolAan=false; if(Math.abs(rol)<ROL_KLIK){ rol=0; applyCam(); } }   // slice 5x: bijna rechtop = rechtop
       const ct=e.changedTouches[0], wasTap=drag&&!moved&&performance.now()-t0<TAP_MS;
       if(editDecal){ const did=(moved&&decalDrag)||pinchModel; drag=false;pinchD=0;pinchA=null;pinchMid=null;pinchModel=false; if(did) persistEdit(editDecal); return; }   // opslaan alleen na tattoo verplaatsen/schalen, niet na orbit/zoom/pan
       if(wasTap&&ct&&!genAan()){
