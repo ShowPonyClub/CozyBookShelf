@@ -10759,7 +10759,7 @@ function createTattoo(overrides = {}) {
    ============================================================ */
 // App-versie (semver, handmatig ophogen bij een release). Bij een bump ook de
 // CACHE-naam in sw.js meebumpen, zodat clients de nieuwe build ophalen.
-const APP_VERSIE = '0.3.138';
+const APP_VERSIE = '0.3.139';
 
 /* Dev-haken die de CLOUD raken hangen alleen op een ontwikkelmachine aan window. Ze zijn geen
    lek op zichzelf (zonder XSS roept niemand ze aan, en CSP + esc() houden XSS tegen), maar ze
@@ -21698,8 +21698,7 @@ function maakTatnetGL(json, canvas) {
     if(lassoPts.length>=3) ctx.closePath();   // slice 6a: geen vulling meer (buiten de lijn is al gedimd), zoals de ring op het model
     const rood=(getComputedStyle(document.documentElement).getPropertyValue('--rood').trim())||"#CE2727", LW=4;
     ctx.lineWidth=LW; ctx.lineJoin="round"; ctx.lineCap="round"; ctx.strokeStyle=rood;
-    if(!drawingFree) ctx.setLineDash([LW*2.4, LW*1.7]);   // zelfde stippeling als ringTex; tijdens het tekenen doorgetrokken
-    ctx.stroke(); ctx.setLineDash([]);
+    ctx.stroke();   // altijd een vaste lijn (eigenaar: bij scherpe randjes zie je precies waar de knip loopt)
     // sleep-handles op elk punt, alleen in de Points-stand: in Freehand zijn het geen handvatten (een nieuwe aanraking begint
     // een nieuwe lijn) en bij een vloeiende lijn was de omcirkeling bijna alleen puntjes (toesteltest 2026-09-20)
     if(cutModus!=='punten') return;   // standnamen: 'vrij' | 'punten' (doorloop 2026-09-21: stond op 'punt', dus nooit getekend)
