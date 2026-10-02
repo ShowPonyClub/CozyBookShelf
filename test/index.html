@@ -10319,7 +10319,7 @@ function sdfGrad(S, x, y, z){
 }
 
 /* Vingerafdruk van de lichaamsvorm (steekproef van de vertices, op 0,1 mm) + lengte: dezelfde vorm = dezelfde rustvorm. */
-var GIDS_VERSIE = 'g1';   /* ophogen als de strengen anders gebouwd of gesimuleerd worden */
+var GIDS_VERSIE = 'g2';   /* ophogen als de strengen anders gebouwd of gesimuleerd worden */
 function vormSleutel(pos, lengteCm){
   var h = 2166136261 >>> 0;
   for(var i=0; i<pos.length; i+=111){ var v = Math.round(pos[i]*10000) | 0; h = Math.imul(h ^ v, 16777619) >>> 0; }
@@ -10363,6 +10363,13 @@ function maakGids(mesh, zones, lengteCm, cache){
   var _wp = [0,0,0], _wn = [0,0,0];
 
   var lokken = [], np = 0, Pp, Pv, Prest, Pr, Pk;
+  /* Terug naar huis (2026-10-02): na een zwiep bleef soms een streng aan de andere kant van de schouder hangen (zwaarte + de
+     zwakke vormveer aan het eind tegen de botsing in evenwicht; tests/haar_zwiep.js: 10 van 18 zwiepen, tot 20 cm). Komt een
+     streng die ver van zijn rustvorm hangt in een venster van THUIS_WACHT niet dichterbij (hij trilt op de huid, dus niet de
+     snelheid maar de voortgang), dan groeit een extra veer naar de rustvorm (Lk) en botst hij niet tot hij weer dichtbij is (de
+     haarvertices blijven via duwUit buiten de huid). Bij gewoon zwaaien en terugzakken komt hij dichterbij: geen invloed. */
+  var Lk = null, Lvast = null, Lvrij = null, Lver0 = null;
+  var THUIS_VER = 0.02, THUIS_VRIJ = 0.008, THUIS_WACHT = 0.3, THUIS_STAP = 0.003, THUIS_K = 0.06;
   function* bouwLokken(){
     var rg = rnd(11);
     lokken = []; np = 0;
@@ -10379,6 +10386,7 @@ function maakGids(mesh, zones, lengteCm, cache){
     });
     Pp = new Float32Array(np*3); Pv = new Float32Array(np*3); Prest = new Float32Array(np*3);
     Pr = new Float32Array(np); Pk = new Float32Array(np);
+    Lk = new Float32Array(lokken.length); Lvast = new Float32Array(lokken.length); Lvrij = new Uint8Array(lokken.length); Lver0 = new Float32Array(lokken.length);
     lokken.forEach(function(L){
       wortelBasis(L.w, _wp, _wn);
       var rx = _wp[0], ry = _wp[1], rz = _wp[2], nx = _wn[0], ny = _wn[1], nz = _wn[2];
@@ -10480,13 +10488,14 @@ function maakGids(mesh, zones, lengteCm, cache){
               Pp[c] += fx*q*wc; Pp[c+1] += fy*q*wc; Pp[c+2] += fz*q*wc;
               Pp[b] -= fx*q*wd; Pp[b+1] -= fy*q*wd; Pp[b+2] -= fz*q*wd; }
           }
-          var kk = rust ? 0 : Pk[L.start+i];   /* vormveer naar de rustvorm (in het lichaamsframe) */
+          var kk = rust ? 0 : Math.max(Pk[L.start+i], Lk[li]);   /* vormveer naar de rustvorm (in het lichaamsframe); Lk = terug naar huis */
           if(kk){ Pp[b] += (Prest[b]-Pp[b])*kk; Pp[b+1] += (Prest[b+1]-Pp[b+1])*kk; Pp[b+2] += (Prest[b+2]-Pp[b+2])*kk; }
         }
       }
     }
     for(li=0; li<lokken.length; li++){
       L = lokken[li];
+      if(!rust && Lvrij[li]) continue;   /* op weg naar huis: door de schouder heen */
       for(i=1;i<L.n;i++){
         p = (L.start+i)*3;
         if(botsing(p, Pr[L.start+i])){ Pv[p] += (Pp[p]-Pv[p])*WRIJVING; Pv[p+1] += (Pp[p+1]-Pv[p+1])*WRIJVING; Pv[p+2] += (Pp[p+2]-Pv[p+2])*WRIJVING; }
@@ -10502,6 +10511,24 @@ function maakGids(mesh, zones, lengteCm, cache){
   }
 
   var thetaWas = null, tegoed = 0, draaiTegoed = 0, _as = new THREE.Vector3();
+  function thuis(t){   /* per beeld: per streng de gemiddelde afstand tot de rustvorm, en of die in het venster afneemt */
+    for(var li=0; li<lokken.length; li++){
+      var L = lokken[li], ver = 0;
+      for(var i=1;i<L.n;i++){ var p = (L.start+i)*3;
+        ver += Math.sqrt((Pp[p]-Prest[p])*(Pp[p]-Prest[p]) + (Pp[p+1]-Prest[p+1])*(Pp[p+1]-Prest[p+1]) + (Pp[p+2]-Prest[p+2])*(Pp[p+2]-Prest[p+2])); }
+      ver /= (L.n-1);
+      if(Lk[li] > 0){   /* onderweg: tot hij dichtbij is, dan weer gewoon */
+        if(ver < THUIS_VRIJ){ Lk[li] = 0; Lvast[li] = 0; Lvrij[li] = 0; }
+        else Lk[li] = Math.min(THUIS_K, Lk[li] + THUIS_K*t*4);
+      } else if(ver > THUIS_VER){
+        if(Lvast[li] === 0) Lver0[li] = ver;
+        Lvast[li] += t;
+        if(Lvast[li] >= THUIS_WACHT){
+          if(ver > Lver0[li] - THUIS_STAP){ Lk[li] = THUIS_K*0.1; Lvrij[li] = 1; }   /* komt niet dichterbij: naar huis */
+          Lvast[li] = 0; }
+      } else Lvast[li] = 0;
+    }
+  }
   return {
     lengte: lengteCm,
     stap: function(dt, theta){
@@ -10512,11 +10539,11 @@ function maakGids(mesh, zones, lengteCm, cache){
       _as.set(0, 0, 0); mesh.worldToLocal(_as); asX = _as.x; asZ = _as.z;
       tegoed = Math.min(tegoed + dt, 4*H);
       var n = Math.floor(tegoed/H);
-      if(n){ tegoed -= n*H; var per = draaiTegoed/n; draaiTegoed = 0; for(var i=0;i<n;i++) substap(per, false); }
+      if(n){ tegoed -= n*H; var per = draaiTegoed/n; draaiTegoed = 0; for(var i=0;i<n;i++) substap(per, false); thuis(n*H); }
       return n;
     },
     herbouwStappen: herbouwStappen,
-    deeltjes: function(){ return { Pp:Pp, Prest:Prest, np:np }; },
+    deeltjes: function(){ return { Pp:Pp, Pv:Pv, Prest:Prest, np:np, lokken:lokken, Lk:Lk, Lvast:Lvast, Lvrij:Lvrij }; },
     /* punten dichter dan r bij de huid of erin naar buiten duwen (zelfde afstandsveld als de kettingen) */
     duwUit: function(arr, n, r){
       var geduwd = 0;
@@ -10538,6 +10565,8 @@ function maakGids(mesh, zones, lengteCm, cache){
       for(var q=0;q<np*3;q+=3){ var dx = Pp[q]-snap[q], dy = Pp[q+1]-snap[q+1], dz = Pp[q+2]-snap[q+2], d = dx*dx+dy*dy+dz*dz; if(d > m) m = d; }
       return Math.sqrt(m);
     },
+    /* een streng is op weg naar huis of wordt bekeken: dan niet als stil gelden (het kapsel zou de simulatie stilzetten) */
+    thuisBezig: function(){ if(!Lk) return false; for(var li=0; li<Lk.length; li++) if(Lk[li] > 0 || Lvast[li] > 0) return true; return false; },
     momentopname: function(snap){ if(!snap || snap.length !== np*3) snap = new Float32Array(np*3); snap.set(Pp); return snap; },
     info: function(){ return lokken.length + ' strengen, ' + np + ' punten' + (vanCache ? ' (rustvorm bewaard)' : ''); }
   };
@@ -10668,13 +10697,14 @@ function maakKapsel(mesh, zones, D, opties){
       if(!gids.stap(dt*TEMPO, theta)) return true;
       volg(); gids.duwUit(hpos, n, DUW_R); teken(false);
       if(++venster >= 30){   /* elke 30 beelden: minder dan 0,5 mm verschoven = stil (onzichtbaar), tot er weer iets draait */
-        venster = 0; rustig = gids.verschuiving(snap) < 0.0005; snap = gids.momentopname(snap);
+        venster = 0; rustig = gids.verschuiving(snap) < 0.0005 && !gids.thuisBezig(); snap = gids.momentopname(snap);
       }
       return true;
     },
     zet: function(o){ if(o && o.kleur) zetKleur(o.kleur); },
     dispose: function(){ g.dispose(); mat.dispose(); },
     meting: meting,
+    gids: function(){ return gids; },   /* dev: strengen meten (tests/haar_zwiep.js) */
     info: function(){ return D.naam + ': ' + n + ' vertices, ' + (D.index.length/3) + ' driehoeken; ' + (gids ? gids.info() : '') +
       '; strengen ' + meting.gidsMs.toFixed(0) + ' ms, binden ' + meting.bindMs.toFixed(0) + ' ms'; }
   };
@@ -11409,7 +11439,7 @@ function createTattoo(overrides = {}) {
    ============================================================ */
 // App-versie (semver, handmatig ophogen bij een release). Bij een bump ook de
 // CACHE-naam in sw.js meebumpen, zodat clients de nieuwe build ophalen.
-const APP_VERSIE = '0.3.145';
+const APP_VERSIE = '0.3.146';
 
 /* Dev-haken die de CLOUD raken hangen alleen op een ontwikkelmachine aan window. Ze zijn geen
    lek op zichzelf (zonder XSS roept niemand ze aan, en CSP + esc() houden XSS tegen), maar ze
@@ -17425,6 +17455,7 @@ async function verwijderVoorbeelden() {
   }
   /* ---- slice 5s: draaiend filmpje (9:16, een rondje, logo onderin) ---- */
   const FILM={ W:720, H:1280, FPS:30, SEC:6 };
+  const FILM_PAPIER='#EFE4D0';   // achtergrond van het filmpje: papier (licht thema), keuze eigenaar 2026-10-02
   let film=null, filmUit=null;   // film = lopende opname; filmUit = {blob, url, naam, type} van de laatste
   function filmKan(){ return !!(window.MediaRecorder && HTMLCanvasElement.prototype.captureStream && filmMime()!==null); }
   function filmMime(){
@@ -17489,6 +17520,7 @@ async function verwijderVoorbeelden() {
     const th0=startOpnameHoek(), ph=Math.PI/2-0.06, ty=k.lang*0.5;
     const cv=renderer.domElement, prWas=renderer.getPixelRatio(), ringWas=!!(selRing && selRing.visible);
     const f={ stop:false }; film=f;
+    const bgWas=scene.background; scene.background=new THREE.Color(FILM_PAPIER);   // vaste papierkleur, ook in donker thema (merk)
     cv.style.visibility='hidden'; if(selRing) selRing.visible=false;
     renderer.setPixelRatio(1); renderer.setSize(FILM.W, FILM.H, false);
     const teken=(hoek)=>{
@@ -17501,7 +17533,7 @@ async function verwijderVoorbeelden() {
     };
     let rec=null, blob=null;
     const herstel=()=>{
-      film=null; cv.style.visibility=''; renderer.setPixelRatio(prWas); resize();
+      film=null; scene.background=bgWas; cv.style.visibility=''; renderer.setPixelRatio(prWas); resize();
       if(selRing) selRing.visible=ringWas && !!editDecal;
     };
     try{
@@ -17553,7 +17585,7 @@ async function verwijderVoorbeelden() {
     toast(tr('toast.film_bewaard'));
   }
   window.__tattiesFilmDbg={ start:()=>{ openDeelKies(); return startFilm(); }, uit:()=>filmUit && { type:filmUit.type, size:filmUit.blob.size, naam:filmUit.naam, url:filmUit.url, beelden:filmUit.beelden, ms:filmUit.ms },
-    blob:()=>filmUit && filmUit.blob, bezig:()=>!!film, kan:filmKan, mime:filmMime };
+    blob:()=>filmUit && filmUit.blob, bezig:()=>!!film, kan:filmKan, mime:filmMime, papier:FILM_PAPIER, sceneBg:()=>scene && scene.background && scene.background.getHexString() };
   /* slice 5q: beginstand. Staand de vaste CAM0; liggend het hele lichaam op ~86% van de canvashoogte. */
   function camBegin(){
     const w=stage ? stage.clientWidth : 0, h=stage ? stage.clientHeight : 0;
@@ -17797,6 +17829,7 @@ async function verwijderVoorbeelden() {
     for(let i=0;i<len;i++) bytes[i]=bin.charCodeAt(i); return bytes.buffer; }
   function disposeMarker(m){
     clearTimeout(m._persistT);
+    if(m._naadTex){ m._naadTex.dispose(); m._naadTex=null; } naadPlan(m.id);   // de andere delen opnieuw (geen overlap meer)
     ledeDecalTerug(m);   // tweede helft van een gesplitste tattoo mee opruimen   // nog-lopende debounced save afbreken (marker verdwijnt)
     if(m.obj){ body.remove(m.obj);
       if(m.obj.geometry) m.obj.geometry.dispose();
@@ -18183,7 +18216,7 @@ async function verwijderVoorbeelden() {
     }
   }
   function genHerbouw(){
-    for(const mesh of pickMeshes){ mesh.__faceGrid=null; mesh.__straal=null; mesh.__straalBouw=null; mesh.__ledeScan=null; mesh.__ledeKnip=null; }   // wereldposities zijn veranderd
+    for(const mesh of pickMeshes){ mesh.__faceGrid=null; mesh.__faceGridBouw=null; mesh.__vgBouw=null; mesh.__straal=null; mesh.__straalBouw=null; mesh.__ledeScan=null; mesh.__ledeKnip=null; }   // wereldposities zijn veranderd
     for(const m of markers){
       const b=markerBind(m); if(!b) continue;
       const ub=uitBind(m.mesh||pickMeshes[0], b); if(!ub) continue;
@@ -18205,6 +18238,7 @@ async function verwijderVoorbeelden() {
     resetView();
     uiterlijkNaLichaam();   // generator dicht: het haar weer met physics op het (nieuwe) lichaam
     planStraalRaster();
+    uiterlijkNaLichaam();   // generator dicht: het haar weer met physics op het (nieuwe) lichaam
     const na=genNa; genNa=null; if(na){ try{ na(soort); }catch(e){ console.error(e); } }
   }
   function zetGenTop(){ if(stage) document.documentElement.style.setProperty('--gen-top', Math.max(0, stage.getBoundingClientRect().top)+'px'); }
@@ -18505,8 +18539,16 @@ async function verwijderVoorbeelden() {
   // mesh met dezelfde matrixWorld. De gereduceerde geometry staat in dezelfde lokale ruimte als de
   // bron, dus DecalGeometry past mesh.matrixWorld correct toe.
   const FGRID_CELL=0.08;   // celgrootte (m) van het wereld-voxelraster
+  /* Opstarttijd ronde 3 (2026-10-02): het raster bestaat ook als stappen (generator). faceGridFor maakt het in een keer af
+     (ook een half afgemaakte achtergrondbouw), planGraaf bouwt het na het herstel in stukjes van ~6 ms: met de geometriecache
+     is het bij het opstarten niet meer nodig, pas bij bewerken of een nieuwe tattoo. */
   function faceGridFor(mesh){
     if(mesh.__faceGrid) return mesh.__faceGrid;
+    const it=mesh.__faceGridBouw || faceGridStappen(mesh); mesh.__faceGridBouw=null;
+    let r; do { r=it.next(); } while(!r.done);
+    return r.value;
+  }
+  function* faceGridStappen(mesh){
     const g=mesh.geometry, posA=g&&g.attributes&&g.attributes.position;
     if(!posA) return null;
     mesh.updateWorldMatrix(true,false);
@@ -18532,6 +18574,7 @@ async function verwijderVoorbeelden() {
       let arr=cells.get(key); if(!arr){ arr=[]; cells.set(key,arr); } arr.push(fi);
       // buur-relatie via gedeelde (afgeronde) vertexpositie -> oppervlak-adjacentie voor de geodetische cull
       for(const k of [ka,kb,kc]){ let va2=vmap.get(k); if(!va2){ va2=[]; vmap.set(k,va2); } va2.push(fi); }
+      if(i%1500===0) yield;
     }
     return (mesh.__faceGrid={ cells, faces, vmap, maxR:Math.sqrt(maxR) });
   }
@@ -18952,7 +18995,7 @@ async function verwijderVoorbeelden() {
       }
       pos.needsUpdate=true; if(nor) nor.needsUpdate=true;
       g.computeBoundingSphere(); g.computeBoundingBox();
-      mesh.__faceGrid=null; mesh.__straal=null; mesh.__straalBouw=null; mesh.__ledeScan=null; mesh.__ledeKnip=null;   // wereldposities zijn veranderd
+      mesh.__faceGrid=null; mesh.__faceGridBouw=null; mesh.__vgBouw=null; mesh.__straal=null; mesh.__straalBouw=null; mesh.__ledeScan=null; mesh.__ledeKnip=null;   // wereldposities zijn veranderd
     }
     poseHoek=hoek||0;
   }
@@ -20122,15 +20165,82 @@ async function verwijderVoorbeelden() {
   }
   // Vertex-graaf per mesh op de canonieke vertices van faceGridFor (1,25 mm-rooster: naden gelast), wereldposities.
   // Hangt aan het faceGrid en verdwijnt daarmee bij een houdingswissel (wereldposities veranderen).
+  /* ---- Geometriecache (opstarttijd ronde 3, 2026-10-02) ----
+     De afgewerkte decal-geometrie (wikkel) per tattoo(deel) in de textuur-database (sleutel 'g:'+id[:deel]), met als vingerafdruk de
+     code van de geometrie-functies, het lichaam (alle vertexposities + wereldmatrix), plek, draaiing, maat en verhouding. Gemeten
+     (13 tattoos, 4x CPU): geometrie 1,06 s, waarvan 0,45 s raster + graaf (eenmalig) en 0,42 s exp-map + bouwen. */
+  const GEO_VERSIE=1;   // ophogen als gegevens buiten de code de geometrie veranderen (zonekaart, model)
+  let _geoCodeFp=null;
+  function geoCodeFp(){
+    if(_geoCodeFp) return _geoCodeFp;
+    const s=[faceGridStappen, vertexGraafStappen, graafUitDriehoeken, expMap, bouwDecalUitExpMap, expDecalGeo].map(f=>String(f)).join('|')
+      +'|'+FGRID_CELL+'|'+GEO_VERSIE+'|'+(LICHAAM_GEN?1:0);
+    let h=2166136261>>>0; for(let i=0;i<s.length;i++){ h^=s.charCodeAt(i); h=Math.imul(h,16777619)>>>0; }
+    return (_geoCodeFp=h.toString(36)+'.'+s.length.toString(36));
+  }
+  function meshFp(mesh){
+    const a=mesh.geometry && mesh.geometry.attributes.position; if(!a) return '?';
+    if(!(mesh.__geoFp && mesh.__geoFp.a===a && mesh.__geoFp.v===a.version)){
+      const arr=a.array, u=new Uint32Array(arr.buffer, arr.byteOffset, arr.length); let h=2166136261>>>0;
+      for(let i=0;i<u.length;i++){ h^=u[i]; h=Math.imul(h,16777619)>>>0; }
+      mesh.__geoFp={ a, v:a.version, h:h.toString(36)+'.'+a.count };
+    }
+    mesh.updateWorldMatrix(true,false);
+    return mesh.__geoFp.h+'.'+mesh.matrixWorld.elements.map(x=>+x.toFixed(6)).join(',');
+  }
+  function geoFp(mesh, point, normal, rot, size, tex){
+    if(!mesh || !decalWikkel) return null;
+    const asp=(tex && tex.image && tex.image.width) ? tex.image.height/tex.image.width : 1, f=(x)=>(+x).toFixed(6);
+    return [geoCodeFp(), meshFp(mesh), f(point.x), f(point.y), f(point.z), f(normal.x), f(normal.y), f(normal.z), f(rot), f(size), asp.toFixed(6)].join('|');
+  }
+  const geoVoorraad=new Map();
+  async function geoUitCache(sleutel, fp){
+    if(!fp) return null;
+    const vr=geoVoorraad.get(sleutel); geoVoorraad.delete(sleutel);
+    const e=await (vr || texLees('g:'+sleutel));
+    if(!(e && e.fp===fp && e.P && e.N && e.U && e.P.length)) return null;
+    const g=new THREE.BufferGeometry();
+    g.setAttribute('position', new THREE.Float32BufferAttribute(e.P,3));
+    g.setAttribute('normal', new THREE.Float32BufferAttribute(e.N,3));
+    g.setAttribute('uv', new THREE.Float32BufferAttribute(e.U,2));
+    g.__wikkel=true; ttTijd.geoCache=(ttTijd.geoCache||0)+1;
+    return g;
+  }
+  function geoNaarCache(sleutel, fp, obj){
+    const g=obj && obj.geometry; if(!fp || !g || !g.__wikkel) return;
+    const p=g.attributes.position, n=g.attributes.normal, u=g.attributes.uv; if(!p || !n || !u) return;
+    texSchrijf('g:'+sleutel, { fp, P:p.array, N:n.array, U:u.array });
+  }
+  /* raster + graaf na het herstel op de achtergrond (stukjes van ~6 ms), zodat de eerste tik op een tattoo niet wacht */
+  function planGraaf(){ setTimeout(async ()=>{
+    for(const mesh of pickMeshes){
+      if(!mesh || mesh.__faceGrid && mesh.__faceGrid.vg) continue;
+      let t0=performance.now();
+      try{
+        if(!mesh.__faceGrid){ const it=mesh.__faceGridBouw || (mesh.__faceGridBouw=faceGridStappen(mesh));
+          for(;;){ if(mesh.__faceGridBouw!==it) return; const r=it.next(); if(r.done){ mesh.__faceGridBouw=null; break; }
+            if(performance.now()-t0>6){ await frameAdem(); t0=performance.now(); } } }
+        const grid=mesh.__faceGrid; if(!grid || grid.vg) continue;
+        const b=(mesh.__vgBouw && mesh.__vgBouw.grid===grid) ? mesh.__vgBouw : (mesh.__vgBouw={ grid, it:vertexGraafStappen(mesh, grid) });
+        for(;;){ if(mesh.__vgBouw!==b) return; const r=b.it.next(); if(r.done){ mesh.__vgBouw=null; break; }
+          if(performance.now()-t0>6){ await frameAdem(); t0=performance.now(); } }
+      }catch(e){ console.error(e); mesh.__faceGridBouw=null; mesh.__vgBouw=null; }
+    } }, 1500); }
   function vertexGraafFor(mesh){
     const grid=faceGridFor(mesh); if(!grid || !grid.faces) return null;
     if(grid.vg) return grid.vg;
+    const it=(mesh.__vgBouw && mesh.__vgBouw.grid===grid) ? mesh.__vgBouw.it : vertexGraafStappen(mesh, grid); mesh.__vgBouw=null;
+    let r; do { r=it.next(); } while(!r.done);
+    return r.value;
+  }
+  function* vertexGraafStappen(mesh, grid){
     const posA=mesh.geometry.attributes.position, m=mesh.matrixWorld, faces=grid.faces;
     const ids=new Map(), P=[], fv=new Int32Array(faces.length*3), v=new THREE.Vector3(), bron=[];
     for(let i=0;i<faces.length;i++){ const f=faces[i], tri=[f.a,f.b,f.c];
       for(let k=0;k<3;k++){ const key=f.vk[k]; let id=ids.get(key);
         if(id===undefined){ id=P.length/3; ids.set(key,id); v.fromBufferAttribute(posA,tri[k]).applyMatrix4(m); P.push(v.x,v.y,v.z); bron.push(tri[k]); }
-        fv[i*3+k]=id; } }
+        fv[i*3+k]=id; }
+      if(i%3000===2999) yield; }
     const vg=graafUitDriehoeken(new Float32Array(P), fv);
     /* Nieuw lichaam (slice 4c): per knoop het ledemaat uit de zonekaart (0 romp, 1/2 arm, 3/4 been). expMap stapt nooit
        rechtstreeks van het ene ledemaat naar een ander: bij een zwaar lichaam raken de dijen elkaar en sprong een tattoo op
@@ -20145,7 +20255,7 @@ async function verwijderVoorbeelden() {
   // Wikkel-geometry voor makeImage (wereldcoordinaten, zoals DecalGeometry). null = geen graaf/zaad -> projectie-terugval.
   const _wX=new THREE.Vector3(), _wY=new THREE.Vector3(), _wZ=new THREE.Vector3();
   function expDecalGeo(mesh, point, normal, helper, size){
-    const grid=faceGridFor(mesh), vg=grid && vertexGraafFor(mesh); if(!vg) return null;
+    const _tg=performance.now(), grid=faceGridFor(mesh), vg=grid && vertexGraafFor(mesh); ttTijd.graaf=(ttTijd.graaf||0)+performance.now()-_tg; if(!vg) return null;
     const MG=grid.maxR||FGRID_CELL, faces=grid.faces, R=Math.max(0.03, 3*MG), nrm=vg.nrm, fv=vg.fv;
     // zaad: dichtste driehoek bij het plaatspunt waarvan de normaal dezelfde kant op wijst (aan de binnenkant van de
     // bovenarm ligt de borst soms dichterbij dan de arm zelf: selectiering belandde daar, toesteltest 2026-09-20);
@@ -20168,17 +20278,19 @@ async function verwijderVoorbeelden() {
     if(seed<0) return null;
     helper.matrixWorld.extractBasis(_wX,_wY,_wZ);
     const hx=size.x/2, hy=size.y/2, rMax=(Math.hypot(hx,hy)+2*MG)*1.2;   // padlengte overschat de geodeet iets: marge
+    const _te=performance.now();
     const em=expMap(vg, [vg.fv[seed*3],vg.fv[seed*3+1],vg.fv[seed*3+2]], [point.x,point.y,point.z],
                     [_wX.x,_wX.y,_wX.z], [_wY.x,_wY.y,_wY.z], rMax);
     em.rGuard=Math.hypot(hx,hy)+2*MG;
-    const out=bouwDecalUitExpMap(vg, em, hx, hy); if(!out.P.length) return null;
+    const _tb=performance.now(); ttTijd.exp=(ttTijd.exp||0)+_tb-_te;
+    const out=bouwDecalUitExpMap(vg, em, hx, hy); ttTijd.bouw=(ttTijd.bouw||0)+performance.now()-_tb; if(!out.P.length) return null;
     const g=new THREE.BufferGeometry();
     g.setAttribute('position', new THREE.Float32BufferAttribute(out.P,3));
     g.setAttribute('normal', new THREE.Float32BufferAttribute(out.N,3));
     g.setAttribute('uv', new THREE.Float32BufferAttribute(out.U,2));
     g.__wikkel=true; return g;
   }
-  function makeImage(point, normal, rotDeg, sizeM, tex, mesh, mul){
+  function makeImage(point, normal, rotDeg, sizeM, tex, mesh, mul, geoVooraf){
     const aspect=(tex&&tex.image&&tex.image.width) ? (tex.image.height/tex.image.width) : 1;
     // Multiply-blend: lichte huid in de foto verdwijnt (×onderlaag = ongewijzigd), donkere inkt
     // zakt in de model-huid. Zo hoeft de huid niet pixel-perfect uitgesneden te worden.
@@ -20201,7 +20313,7 @@ async function verwijderVoorbeelden() {
         // Culling: alleen nabije driehoeken projecteren (val terug op de volledige mesh als er niets is)
         // Geodetische cull (blijft op het aaneengesloten lichaamsdeel); val terug op box-cull, dan volledige mesh.
         // Wikkel-decal (exp-map) eerst: wikkelt om het lichaamsdeel. null -> orthografische projectie zoals voorheen.
-        let geo=decalWikkel ? expDecalGeo(mesh, point, normal, helper, size) : null;
+        let geo=geoVooraf || (decalWikkel ? expDecalGeo(mesh, point, normal, helper, size) : null);   // geoVooraf: uit de geometriecache
         if(!geo){
           const rg=connectedDecalGeo(mesh, point, size, helper.rotation) || localDecalGeo(mesh, point, size, helper.rotation);
           if(rg){
@@ -20269,10 +20381,146 @@ async function verwijderVoorbeelden() {
   }
   function zetDoorkijk(m){
     if(!m || !m.obj) return;
-    m.obj.renderOrder=((m.rec&&m.rec.stapel)||0)+(doorkijkAan(m)?0.5:0);
+    m.obj.renderOrder=decalOrde(m); naadPlan(m.id);   // naad: uit tijdens "Dit deel", weer aan erna
     if(ledeActief){ ledeActief.decalOp.set(m, markerOpacity(m)); ledeDecalSplits(m); }
     else zetDecalOpacity(m.obj, markerOpacity(m));
   }
+
+  /* ---- Naad tussen delen (2026-10-02): zachte overgang in de overlap ----
+     Per deel een alpha-masker in zijn eigen uv (alphaMap). Waar een ander deel van dezelfde tattoo eronder ligt, vloeit het bovenste
+     deel langs zijn rand in (verloop over NAAD_BAND van de kleinste maat), daarna vloeit het onderste deel weg (zelfde breedte; samen
+     nooit breder dan de overlap), zodat er geen dubbele lijnen staan als de delen net niet kloppen. Midden in het verloop zijn beide vol (inkt
+     die precies op elkaar ligt wordt niet lichter). Volgorde vast: latere delen boven (decalOrde). Uit tijdens "Dit deel" (doorkijk:
+     dan wil je beide zien) en met window.__naadAan=false. Dev: window.__tattiesNaad. */
+  const NAAD_RES=128, NAAD_BAND=0.15, NAAD_MIN=0.006, NAAD_MAX=0.025;
+  function deelVolg(m){
+    if(!m || !m.deel || !m.rec) return 0;
+    const ds=beeldDelen(m.rec); let i=ds.indexOf(m.deel); if(i<0) i=ds.findIndex(d=>d.id===m.deel.id);
+    return i>=0 ? i+1 : 1;
+  }
+  function decalOrde(m){ return ((m && m.rec && m.rec.stapel)||0) + Math.min(40, deelVolg(m))*0.01 + (doorkijkAan(m)?0.5:0); }
+  const naadWacht=new Set(); let naadT=0;
+  function naadPlan(id){ if(id==null) return; naadWacht.add(id); clearTimeout(naadT); naadT=setTimeout(naadLoop, 150); }
+  function naadLoop(){
+    naadT=0; const it=naadWacht.values().next(); if(it.done) return;
+    naadWacht.delete(it.value);
+    try{ naadVoor(it.value); }catch(e){ console.error('naad', e); }
+    if(naadWacht.size) naadT=setTimeout(naadLoop, 0);   // een tattoo per beurt
+  }
+  function naadZet(m, tex){
+    if(m._naadTex && m._naadTex!==tex) m._naadTex.dispose();
+    m._naadTex=tex||null;
+    for(const o of [m.obj, m.__ledeHelft]){ if(!o || !o.material) continue;
+      if(o.material.alphaMap!==(tex||null)){ o.material.alphaMap=tex||null; o.material.needsUpdate=true; } }
+  }
+  // steun = binnen de lasso (de uitsnede), in de textuur (bounding box van de lasso); rij j = v (onder = 0)
+  function naadLasso(m, W, H){
+    const D=deelVan(m), L=D && D.kunst3d && D.kunst3d.lasso, s=new Uint8Array(W*H);
+    if(!L || L.length<3){ s.fill(1); return s; }
+    let mnx=1,mny=1,mxx=0,mxy=0; for(const p of L){ mnx=Math.min(mnx,p.nx); mny=Math.min(mny,p.ny); mxx=Math.max(mxx,p.nx); mxy=Math.max(mxy,p.ny); }
+    if(!(mxx>mnx && mxy>mny)){ s.fill(1); return s; }
+    const c=document.createElement('canvas'); c.width=W; c.height=H; const x=c.getContext('2d',{willReadFrequently:true});
+    x.beginPath(); L.forEach((p,i)=>{ const X=(p.nx-mnx)/(mxx-mnx)*W, Y=(p.ny-mny)/(mxy-mny)*H; i?x.lineTo(X,Y):x.moveTo(X,Y); }); x.closePath(); x.fill();
+    const d=x.getImageData(0,0,W,H).data;
+    for(let j=0;j<H;j++) for(let i=0;i<W;i++) s[j*W+i]=d[((H-1-j)*W+i)*4+3]>=128 ? 1 : 0;
+    return s;
+  }
+  // de decal gerasterd in zijn eigen uv: per texel het wereldpunt (gaatjes tussen dunne driehoeken dichtgezet)
+  function naadRaster(m){
+    const g=m.__ledeHeel || (m.obj && m.obj.geometry); if(!g) return null;
+    const pos=g.attributes.position, uvA=g.attributes.uv, im=m.tex && m.tex.image; if(!pos || !uvA || !im || !im.width) return null;
+    const asp=im.height/im.width, W=asp<=1 ? NAAD_RES : Math.max(8,Math.round(NAAD_RES/asp)), H=asp<=1 ? Math.max(8,Math.round(NAAD_RES*asp)) : NAAD_RES;
+    m.obj.updateMatrixWorld(true); const me=m.obj.matrixWorld.elements, pa=pos.array, ua=uvA.array, nV=pos.count;
+    const wx=new Float32Array(nV), wy=new Float32Array(nV), wz=new Float32Array(nV);
+    for(let v=0;v<nV;v++){ const X=pa[v*3], Y=pa[v*3+1], Z=pa[v*3+2];
+      wx[v]=me[0]*X+me[4]*Y+me[8]*Z+me[12]; wy[v]=me[1]*X+me[5]*Y+me[9]*Z+me[13]; wz[v]=me[2]*X+me[6]*Y+me[10]*Z+me[14]; }
+    const N=W*H, P=new Float32Array(N*3), heeft=new Uint8Array(N), idx=g.index ? g.index.array : null, nT=idx ? idx.length/3 : nV/3;
+    for(let t=0;t<nT;t++){ const a=idx?idx[t*3]:t*3, b=idx?idx[t*3+1]:t*3+1, c=idx?idx[t*3+2]:t*3+2;
+      const ax=ua[a*2]*W-0.5, ay=ua[a*2+1]*H-0.5, bx=ua[b*2]*W-0.5, by=ua[b*2+1]*H-0.5, cx=ua[c*2]*W-0.5, cy=ua[c*2+1]*H-0.5;
+      const den=(by-cy)*(ax-cx)+(cx-bx)*(ay-cy); if(Math.abs(den)<1e-12) continue;
+      const i0=Math.max(0,Math.ceil(Math.min(ax,bx,cx))), i1=Math.min(W-1,Math.floor(Math.max(ax,bx,cx)));
+      const j0=Math.max(0,Math.ceil(Math.min(ay,by,cy))), j1=Math.min(H-1,Math.floor(Math.max(ay,by,cy)));
+      for(let j=j0;j<=j1;j++) for(let i=i0;i<=i1;i++){
+        const w0=((by-cy)*(i-cx)+(cx-bx)*(j-cy))/den, w1=((cy-ay)*(i-cx)+(ax-cx)*(j-cy))/den, w2=1-w0-w1;
+        if(w0<-1e-6 || w1<-1e-6 || w2<-1e-6) continue;
+        const k=j*W+i; heeft[k]=1;
+        P[k*3]=w0*wx[a]+w1*wx[b]+w2*wx[c]; P[k*3+1]=w0*wy[a]+w1*wy[b]+w2*wy[c]; P[k*3+2]=w0*wz[a]+w1*wz[b]+w2*wz[c]; } }
+    for(let ronde=0; ronde<2; ronde++){ const nieuw=[];   // gaatjes: minstens 3 van de 4 buren gevuld
+      for(let j=0;j<H;j++) for(let i=0;i<W;i++){ const k=j*W+i; if(heeft[k]) continue;
+        let n=0, sx=0, sy=0, sz=0; for(const [di,dj] of [[1,0],[-1,0],[0,1],[0,-1]]){ const ii=i+di, jj=j+dj; if(ii<0||jj<0||ii>=W||jj>=H) continue;
+          const q=jj*W+ii; if(!heeft[q]) continue; n++; sx+=P[q*3]; sy+=P[q*3+1]; sz+=P[q*3+2]; }
+        if(n>=3) nieuw.push([k, sx/n, sy/n, sz/n]); }
+      for(const [k,x,y,z] of nieuw){ heeft[k]=1; P[k*3]=x; P[k*3+1]=y; P[k*3+2]=z; } }
+    const lasso=naadLasso(m, W, H), steun=new Uint8Array(N); for(let k=0;k<N;k++) steun[k]=heeft[k]&lasso[k];
+    const cel=(m.size||0.09)/W;   // meter per texel (de textuur volgt de verhouding van de uitsnede)
+    return { m, W, H, P, heeft, steun, cel, maat:Math.min(m.size||0.09, (m.size||0.09)*asp), hash:null };
+  }
+  // ruimtelijke hash op de texelpunten (vaste tabel, ketens)
+  function naadHash(B){
+    if(B.hash) return B.hash;
+    const c=B.cel*2, M=1<<15, kop=new Int32Array(M).fill(-1), volg=new Int32Array(B.W*B.H).fill(-1), P=B.P;
+    const sl=(x,y,z)=>((Math.floor(x/c)*73856093) ^ (Math.floor(y/c)*19349663) ^ (Math.floor(z/c)*83492791)) & (M-1);
+    for(let k=0;k<B.W*B.H;k++){ if(!B.heeft[k]) continue; const h=sl(P[k*3],P[k*3+1],P[k*3+2]); volg[k]=kop[h]; kop[h]=k; }
+    B.hash={ c, M, kop, volg }; return B.hash;
+  }
+  // per texel van A: ligt daar een stuk van B binnen B's lasso? (1 = ja, 0 = nee/onbekend)
+  function naadDekking(A, B){
+    const H=naadHash(B), c=H.c, Mk=H.M-1, r=1.2*Math.max(A.cel, B.cel), r2=r*r, PB=B.P, PA=A.P, cov=new Uint8Array(A.W*A.H); let iets=false;
+    for(let k=0;k<A.W*A.H;k++){ if(!A.heeft[k]) continue;
+      const x=PA[k*3], y=PA[k*3+1], z=PA[k*3+2], gx=Math.floor(x/c), gy=Math.floor(y/c), gz=Math.floor(z/c);
+      let best=r2, bi=-1;
+      for(let dx=-1;dx<=1;dx++) for(let dy=-1;dy<=1;dy++) for(let dz=-1;dz<=1;dz++){
+        for(let q=H.kop[(((gx+dx)*73856093) ^ ((gy+dy)*19349663) ^ ((gz+dz)*83492791)) & Mk]; q>=0; q=H.volg[q]){
+          const ex=PB[q*3]-x, ey=PB[q*3+1]-y, ez=PB[q*3+2]-z, d=ex*ex+ey*ey+ez*ez; if(d<best){ best=d; bi=q; } } }
+      if(bi>=0 && B.steun[bi]){ cov[k]=1; iets=true; } }
+    return iets ? cov : null;
+  }
+  // afstand (in texels, chamfer 1/1,41) van elk texel tot het dichtstbijzijnde texel buiten 'binnen'; rand van het raster telt als buiten als randBuiten
+  function naadAfstand(binnen, W, H, randBuiten){
+    const D=new Float32Array(W*H), INF=1e9, S=Math.SQRT2;
+    for(let k=0;k<W*H;k++) D[k]=binnen[k] ? INF : 0;
+    const rand=randBuiten ? 0.5 : INF;
+    for(let j=0;j<H;j++) for(let i=0;i<W;i++){ const k=j*W+i; if(!D[k]) continue; let d=D[k];
+      d=Math.min(d, i>0 ? D[k-1]+1 : rand, j>0 ? D[k-W]+1 : rand, (i>0&&j>0) ? D[k-W-1]+S : rand, (i<W-1&&j>0) ? D[k-W+1]+S : rand); D[k]=d; }
+    for(let j=H-1;j>=0;j--) for(let i=W-1;i>=0;i--){ const k=j*W+i; if(!D[k]) continue; let d=D[k];
+      d=Math.min(d, i<W-1 ? D[k+1]+1 : rand, j<H-1 ? D[k+W]+1 : rand, (i<W-1&&j<H-1) ? D[k+W+1]+S : rand, (i>0&&j<H-1) ? D[k+W-1]+S : rand); D[k]=d; }
+    return D;
+  }
+  function naadTextuur(A, mult){
+    const d=new Uint8Array(A.W*A.H*4);
+    for(let k=0;k<A.W*A.H;k++){ const v=Math.round(Math.max(0,Math.min(1,mult[k]))*255); d[k*4]=v; d[k*4+1]=v; d[k*4+2]=v; d[k*4+3]=255; }
+    const t=new THREE.DataTexture(d, A.W, A.H, THREE.RGBAFormat); t.magFilter=THREE.LinearFilter; t.minFilter=THREE.LinearFilter; t.generateMipmaps=false; t.needsUpdate=true;
+    return t;
+  }
+  function naadZacht(x){ x=Math.max(0, Math.min(1, x)); return x*x*(3-2*x); }
+  function naadVoor(id){
+    const alle=markers.filter(q=>q.id===id);
+    for(const m of alle) if(m.obj) m.obj.renderOrder=decalOrde(m);
+    const delen=alle.filter(q=>q.obj && q.tex && q.tex.image && !recMul(deelVan(q)));
+    const uit=window.__naadAan===false || delen.length<2 || (editDecal && editDecal.id===id && groepModus==='deel');
+    if(uit){ for(const m of alle) naadZet(m, null); return; }
+    const R=delen.map(naadRaster), dEigen=R.map(A=>A ? naadAfstand(A.steun, A.W, A.H, true) : null);
+    for(let a=0;a<delen.length;a++){
+      const A=R[a]; if(!A){ naadZet(delen[a], null); continue; }
+      const N=A.W*A.H, mult=new Float32Array(N).fill(1); let iets=false;
+      for(let b=0;b<delen.length;b++){ if(b===a || !R[b]) continue; const B=R[b];
+        const cov=naadDekking(A, B); if(!cov) continue;
+        const binnenB=new Uint8Array(N); for(let k=0;k<N;k++) binnenB[k]=(cov[k] || !A.heeft[k]) ? 1 : 0;   // buiten mijn raster = onbekend, geen rand
+        const dB=naadAfstand(binnenB, A.W, A.H, false), dA=dEigen[a];
+        const va=deelVolg(delen[a]), vb=deelVolg(delen[b]), boven = va>vb || (va===vb && a>b);
+        const F=Math.max(NAAD_MIN, Math.min(NAAD_MAX, NAAD_BAND*Math.min(A.maat, B.maat)))/A.cel;   // in texels
+        for(let k=0;k<N;k++){ if(!A.steun[k] || !cov[k]) continue;
+          const w=dA[k]+dB[k], Fe=Math.min(2*F, w), t=Fe>0 ? Math.max(0, Math.min(1, (boven ? dA[k] : dB[k])/Fe)) : 1;
+          const f=boven ? naadZacht(2*t) : 1-naadZacht(2*t-1);   // eerste helft: bovenste vloeit in, tweede helft: onderste vloeit weg
+          if(f<0.999){ mult[k]*=f; iets=true; } } }
+      naadZet(delen[a], iets ? naadTextuur(A, mult) : null);
+    }
+  }
+  window.__tattiesNaad={ nu:()=>{ clearTimeout(naadT); naadT=0; const ids=new Set(markers.map(m=>m.id)); for(const id of naadWacht) ids.add(id); naadWacht.clear();
+      const t0=performance.now(); for(const id of ids) naadVoor(id); return Math.round((performance.now()-t0)*10)/10; },
+    info:(m)=>{ const t=m && m._naadTex; if(!t) return null; const d=t.image.data; let mn=255, n0=0, nd=0; for(let i=1;i<d.length;i+=4){ mn=Math.min(mn,d[i]); if(d[i]<255) nd++; if(d[i]===0) n0++; }
+      return { W:t.image.width, H:t.image.height, min:mn/255, verlaagd:nd, nul:n0, orde:m.obj && m.obj.renderOrder }; },
+    plan:naadPlan, voor:naadVoor };
 
   /* ---- raycast naar het oppervlak ---- */
   const ray=new THREE.Raycaster(), nd=new THREE.Vector2();
@@ -20446,14 +20694,15 @@ async function verwijderVoorbeelden() {
         + '|' + rec.opacity + '|' + (rec.status || '') + '|' + (rec.stapel || 0);
     }catch(e){ return '?'; }   // onserialiseerbaar record: geen rebuild uitlokken
   }
-  function onthoudFp(m){ if(m) m._fp = decalVingerafdruk(m.rec, m.deel); }
+  function onthoudFp(m){ if(m){ m._fp = decalVingerafdruk(m.rec, m.deel); naadPlan(m.id); } }   // naad: na elke nieuwe/herstelde decal
   function rebuildMarker(m){
     ledeDecalTerug(m);   // eventuele splitsing over de knip eerst terugdraaien
     if(m.obj){ body.remove(m.obj);
       if(m.obj.geometry)m.obj.geometry.dispose();
       if(m.obj.material&&m.obj.material.dispose)m.obj.material.dispose(); }
     m.obj=makeImage(m.point,m.normal,m.rot||0,m.size||0.09,m.tex,m.mesh||pickMeshes[0],recMul(deelVan(m)));
-    if(m.obj) m.obj.renderOrder=((m.rec&&m.rec.stapel)||0)+(doorkijkAan(m)?0.5:0);   // stapelvolgorde bij overlap (bewerkt deel erboven, 5r)
+    if(m.obj){ m.obj.renderOrder=decalOrde(m); if(m._naadTex) m.obj.material.alphaMap=m._naadTex; }   // stapelvolgorde bij overlap (bewerkt deel erboven, 5r; latere delen boven) + naad-masker houden tot het opnieuw berekend is
+    naadPlan(m.id);
     zetDecalOpacity(m.obj, markerOpacity(m));   // doorkijk blijft tijdens slepen/schalen/draaien (5r)
     if(m.obj){ m.obj.updateMatrix(); m.obj._bouwBasis=m.obj.matrix.clone();   // slice 5y: bouwstand, voor het snelle volgen
       m._bouw={ p:m.point.clone(), n:m.normal.clone().normalize(), rot:m.rot||0, size:m.size||0.09 }; }
@@ -23441,10 +23690,10 @@ function maakTatnetGL(json, canvas) {
       q.onupgradeneeded=()=>q.result.createObjectStore('t'); q.onsuccess=()=>res(q.result); q.onerror=()=>res(null); }catch(e){ res(null); } });
     return texDbP;
   }
-  function texVingerafdruk(k){
+  function texVingerafdruk(k, versie){
     const s=k.srcUrl||''; let h=2166136261>>>0;
     for(let i=0;i<s.length;i+=31){ h^=s.charCodeAt(i); h=Math.imul(h,16777619)>>>0; }
-    const rest=JSON.stringify([TEX_VERSIE, s.length, k.lasso||[], k.wand||[], k.wandKeep||null, k.erase||[], !!k.flipH, k.rot90||0,
+    const rest=JSON.stringify([versie||TEX_VERSIE, s.length, k.lasso||[], k.wand||[], k.wandKeep||null, k.erase||[], !!k.flipH, k.rot90||0,
       k.bg!==false, k.bgColor||null, k.thresh, k.spread, k.huidMethode||null, k.blend||null, k.aiMask ? k.aiMask.length : 0,
       (k.tatnet && k.tatnet.png) ? k.tatnet.png.length : 0, !!(window.__tattiesTatnet && window.__tattiesTatnet.aan), window.__matteLokaal===false]);
     for(let i=0;i<rest.length;i++){ h^=rest.charCodeAt(i); h=Math.imul(h,16777619)>>>0; }
@@ -23463,7 +23712,7 @@ function maakTatnetGL(json, canvas) {
   }
   function texVoorraadLeeg(){
     for(const p of texVoorraad.values()) p.then(r=>{ if(r && r.bmp && r.bmp.close) r.bmp.close(); });
-    texVoorraad.clear();
+    texVoorraad.clear(); geoVoorraad.clear();
   }
   function texVooraf(list){
     texVoorraadLeeg();
@@ -23471,7 +23720,7 @@ function maakTatnetGL(json, canvas) {
       const dragers=[[t.id, t]].concat(beeldDelen(t).map(d=>[t.id+':'+d.id, d]));
       for(const [s, dr] of dragers){ const P=dr.positie3d, k=dr.kunst3d;
         if(!P || !P.point || (P.gender||'man')!==currentGender || !(k && k.srcUrl)) continue;
-        texVoorraad.set(s, texLeesBeeld(s)); } }
+        texVoorraad.set(s, texLeesBeeld(s)); geoVoorraad.set(s, texLees('g:'+s)); } }
   }
   /* De textuur van een tattoo(deel): uit de cache als de vingerafdruk klopt, anders maken (rebuildTextureFromKunst) en bewaren. */
   async function textuurVoor(sleutel, k){
@@ -23480,7 +23729,8 @@ function maakTatnetGL(json, canvas) {
     if(vr){ texVoorraad.delete(sleutel); const r=await vr; if(r){ e=r.e; klaarBmp=r.bmp; } }   // slice 5u: uit de voorraad
     else e=await texLees(sleutel);
     if(klaarBmp && !(e && e.blob && (e.fpVoor===fp || e.fpNa===fp))){ if(klaarBmp.close) klaarBmp.close(); klaarBmp=null; }
-    if(e && e.blob && (e.fpVoor===fp || e.fpNa===fp)){
+    const oud=!!(e && e.blob && !(e.fpVoor===fp || e.fpNa===fp) && texOudeVersie(k, e));   // na een update: oude textuur eerst
+    if(e && e.blob && (e.fpVoor===fp || e.fpNa===fp || oud)){
       try{
         const bmp=klaarBmp ? klaarBmp : (typeof createImageBitmap==='function') ? await createImageBitmap(e.blob)
           : await new Promise((res,rej)=>{ const i=new Image(); i.onload=()=>res(i); i.onerror=rej; i.src=URL.createObjectURL(e.blob); });
@@ -23488,7 +23738,8 @@ function maakTatnetGL(json, canvas) {
         if(bmp.close) bmp.close();
         if(e.blend) k.blend=e.blend; if(e.inktAuto) k.inktAuto=e.inktAuto; if(e.tatnet && !k.tatnet) k.tatnet=e.tatnet;   // wat de verwerking ook zou zetten
         const tex=new THREE.CanvasTexture(c); tex.encoding=THREE.sRGBEncoding; tex.anisotropy=maxAniso(); tex.needsUpdate=true;
-        ttTijd.cache=(ttTijd.cache||0)+1;
+        if(oud){ ttTijd.texOud=(ttTijd.texOud||0)+1; texLater.set(sleutel, { k, fp }); }   // later vernieuwen (texVersStap)
+        else ttTijd.cache=(ttTijd.cache||0)+1;
         return tex;
       }catch(err){ /* kapot beeld: gewoon opnieuw maken */ }
     }
@@ -23500,13 +23751,57 @@ function maakTatnetGL(json, canvas) {
     }
     return tex;
   }
+  /* ---- Na een update (opstarttijd ronde 3, 2026-10-02) ----
+     Een hogere TEX_VERSIE maakte bij de eerste start alle texturen opnieuw tijdens het herstel (13 tattoos: 17 s bij 1x, 109 s bij
+     4x CPU tot alles er stond). Nu: een cache-item van een oudere versie (vingerafdruk met die versie) wordt eerst gebruikt en de
+     tattoo staat er meteen; daarna vernieuwt texVersStap ze een voor een op de achtergrond, alleen als er even niets gebeurt
+     (geen aanraking in 2,5 s, niet tijdens herstel, bewerken, plaatsen, generator of filmpje). */
+  function texOudeVersie(k, e){
+    for(let v=TEX_VERSIE-1; v>=1; v--){ const f=texVingerafdruk(k, v); if(e.fpVoor===f || e.fpNa===f) return true; }
+    return false;
+  }
+  async function textuurVers(sleutel, k){   // opnieuw maken en bewaren (staart van textuurVoor)
+    const fp=texVingerafdruk(k), tex=await rebuildTextureFromKunst(k);
+    if(tex && tex.image && tex.image.toBlob){ const fpNa=texVingerafdruk(k);
+      tex.image.toBlob(b=>{ if(b) texSchrijf(sleutel, { fpVoor:fp, fpNa, blob:b, blend:k.blend||null, inktAuto:k.inktAuto||null, tatnet:k.tatnet||null }); }, 'image/png'); }
+    return tex;
+  }
+  const texLater=new Map(); let texVersT=0, texLaatsteTik=0, texVersGedaan=0;
+  addEventListener('pointerdown', ()=>{ texLaatsteTik=performance.now(); }, { capture:true, passive:true });
+  function planTexVers(ms){ if(texVersT || !texLater.size) return; texVersT=setTimeout(texVersStap, ms||2500); }
+  async function texVersStap(){
+    texVersT=0; if(!texLater.size) return;
+    if(performance.now()-texLaatsteTik<2500 || herstelLoopt || editDecal || plaatsModus || film || genAan() || document.hidden){ planTexVers(1500); return; }
+    const [sleutel, item]=texLater.entries().next().value; texLater.delete(sleutel);
+    const ms=markers.filter(m=>m.id+(m.deel ? ':'+m.deel.id : '')===sleutel && m.tex);
+    const D=ms.length ? deelVan(ms[0]) : null, k=item.k, H=D && D.kunst3d;   // k = de volle kopie uit het herstel; H = het (lichte) record in RAM
+    const zonderSrc=(o)=>{ const c=Object.assign({}, o); delete c.srcUrl; delete c.tex2D; return JSON.stringify(c); };
+    if(H && zonderSrc(H)===zonderSrc(k) && texVingerafdruk(k)===item.fp){   // intussen bewerkt (andere uitsnede/blend): dat bouwt zelf opnieuw
+      try{
+        const blendVoor=k.blend, tatVoor=!!k.tatnet;
+        const tex=await textuurVers(sleutel, k);
+        if(tex){ for(const m of ms){ const oudT=m.tex; m.tex=tex;
+            for(const o of [m.obj, m.__ledeHelft]) if(o && o.material){ o.material.map=tex; o.material.needsUpdate=true; }
+            if(oudT && oudT!==tex && oudT.dispose) oudT.dispose(); }
+          const m=ms[0], rec=m.rec;
+          if(rec && (k.blend!==blendVoor || (!tatVoor && k.tatnet))){   // opgeloste blend / inktgebied naar het record (zoals bij het herstel)
+            H.blend=k.blend; if(k.tatnet) H.tatnet=k.tatnet; if(k.inktAuto) H.inktAuto=k.inktAuto;
+            try{ await saveTattoo(rec, true); }catch(e){ console.error(e); } }
+          if(rec && !m.deel && H.blend==='inkt-kleur' && ((H.tex2D)|0)<TEX_VERSIE){   // 2D-plaatje uit de nieuwe textuur (zoals bij het herstel)
+            H.tex2D=TEX_VERSIE; const P=rec.positie3d||{}; sync2D(rec, m.point, P.side||'voor', m.rot||0, m.size||0.09, tex);
+            try{ await saveTattoo(rec); }catch(e){ console.error(e); } }
+          texVersGedaan++; ttTijd.texVers=texVersGedaan; }
+      }catch(e){ console.error('textuur vernieuwen', e); }
+    }
+    if(texLater.size) planTexVers(600); else if(texVersGedaan) ttMerk('tt-tex-vers');
+  }
   /* Na een volledig herstel: cache-items van tattoos die er niet meer zijn weg (een keer per sessie). */
   function texOpruimen(){
     if(texOpgeruimd) return; texOpgeruimd=true;
     const houd=new Set(); for(const m of markers) houd.add(m.id+(m.deel ? ':'+m.deel.id : ''));
     if(typeof tattoos!=='undefined' && Array.isArray(tattoos)) for(const t of tattoos){ houd.add(t.id); for(const d of (t.delen||[])) houd.add(t.id+':'+d.id); }
     texDb().then(db=>{ if(!db) return; try{ const st=db.transaction('t','readwrite').objectStore('t'), q=st.getAllKeys();
-      q.onsuccess=()=>{ for(const k of (q.result||[])) if(!houd.has(k)) st.delete(k); }; }catch(e){ /* niets */ } });
+      q.onsuccess=()=>{ for(const k of (q.result||[])) if(!houd.has(String(k).replace(/^g:/,''))) st.delete(k); }; }catch(e){ /* niets */ } });   // 'g:' = geometrie van dezelfde tattoo
   }
   window.__tattiesTexCache={ vingerafdruk:texVingerafdruk, wis:()=>texDb().then(db=>{ if(db) db.transaction('t','readwrite').objectStore('t').clear(); }) };   // dev
   // Bij herstel weten we het punt+normaal maar niet op welke mesh ze liggen.
@@ -23598,9 +23893,13 @@ function maakTatnetGL(json, canvas) {
       // gezocht, en met gedraaide armen hoort een rustpose-punt daar niet meer bij.
       bindNieuw=zetBind(P, mesh, point, normal, rot, -1);
     }
+    const gSl=t.id+(deel ? ':'+deel.id : ''), gFp=geoFp(mesh, point, normal, rot, P.size||0.09, tex);
+    let gC=null; try{ gC=await geoUitCache(gSl, gFp); }catch(e){ gC=null; }   // opstarttijd ronde 3: geometrie uit de cache
+    if(token!==undefined && token!==loadToken){ if(gC) gC.dispose(); return false; }
     const _tt1=performance.now();
-    const obj=makeImage(point,normal,rot,P.size||0.09,tex,mesh,recMul(D));
+    const obj=makeImage(point,normal,rot,P.size||0.09,tex,mesh,recMul(D),gC);
     ttTijd.geo+=performance.now()-_tt1; ttTijd.n++;
+    if(!gC) geoNaarCache(gSl, gFp, obj);
     if(!obj) return false;
     obj.renderOrder=(t.stapel)||0;
     const _wens=(t.status==='wens');
@@ -23675,6 +23974,8 @@ function maakTatnetGL(json, canvas) {
     herstelLoopt=false; hersteldOoit=true;
     planUiterlijk();   // haar en bril pas na de tattoos (opstarttijd)
     planStraalRaster();   // snelle straal klaarzetten, niet pas bij de eerste aanraking
+    planGraaf();   // raster + graaf voor bewerken (met de geometriecache niet meer nodig bij het opstarten)
+    planTexVers();   // na een update: oude texturen op de achtergrond vernieuwen
     texVoorraadLeeg();   // slice 5u: wat niet gebruikt is (ander model, mislukt) opruimen
     if(typeof renderMarkers==="function"){ try{renderMarkers();}catch(_){} }
     ttMerk('tt-herstel-eind');
@@ -23989,6 +24290,7 @@ function maakTatnetGL(json, canvas) {
     addMetFoto:(src)=>openCutModalAddMetFoto(src,'3d'),
     zetFotoDbg:(src)=>new Promise((res,rej)=>{ const im=new Image(); im.onload=()=>{ zetCutFoto(im); res(true); }; im.onerror=rej; im.src=src; }),   // foto in de al open modal (deel-stand blijft)
     editDecal:()=>editDecal,
+    texOpnieuw:(m)=>rebuildTextureFromKunst(deelVan(m).kunst3d).then(tex=>{ if(m.tex && m.tex!==tex && m.tex.dispose) m.tex.dispose(); m.tex=tex; rebuildMarker(m); return true; }),
     // Sturing voor scenario-tests (echte flow, alleen de invoer is gescript): camera, lasso, tik om te plaatsen, verslepen, 3D-punt naar scherm.
     camDbg:(o)=>{ o=o||{}; if(o.theta!=null) theta=o.theta; if(o.phi!=null) phi=o.phi; if(o.radius!=null) radius=o.radius; if(o.target) target.set(o.target[0],o.target[1],o.target[2]); targetGoal=null; radiusGoal=null; applyCam(); },
     lassoDbg:(pts)=>{ lassoPts=(pts||[]).map(q=>({nx:q[0],ny:q[1]})); drawLasso(); updateCutout(); },
@@ -24090,7 +24392,7 @@ function maakTatnetGL(json, canvas) {
     huidigeView='3d';
     cancelPlaatsModus();   // een lopende (2D-)plaatsstand annuleren bij binnenkomst in 3D
     { const a=document.getElementById("t3d-add"); if(a) a.style.display=""; }   // + knop weer zichtbaar bij binnenkomst
-    markers.forEach(m=>{ if(m.obj) m.obj.renderOrder=(m.rec&&m.rec.stapel)||0; });   // stapelvolgorde uit 2D overnemen
+    markers.forEach(m=>{ if(m.obj) m.obj.renderOrder=decalOrde(m); });   // stapelvolgorde uit 2D overnemen
     hideHostViews();
     const v=document.getElementById("view-3d"); if(v)v.classList.remove("verborgen");
     markeerViewKnop("3d");
