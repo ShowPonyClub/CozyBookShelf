@@ -11402,7 +11402,7 @@ function createTattoo(overrides = {}) {
    ============================================================ */
 // App-versie (semver, handmatig ophogen bij een release). Bij een bump ook de
 // CACHE-naam in sw.js meebumpen, zodat clients de nieuwe build ophalen.
-const APP_VERSIE = '0.3.143';
+const APP_VERSIE = '0.3.144';
 
 /* Dev-haken die de CLOUD raken hangen alleen op een ontwikkelmachine aan window. Ze zijn geen
    lek op zichzelf (zonder XSS roept niemand ze aan, en CSP + esc() houden XSS tegen), maar ze
@@ -20008,6 +20008,12 @@ async function verwijderVoorbeelden() {
       fr[v*6+3]=by*rz-bz*ry; fr[v*6+4]=bz*rx-bx*rz; fr[v*6+5]=bx*ry-by*rx;
     };
     const n0=[e1[1]*e2[2]-e1[2]*e2[1], e1[2]*e2[0]-e1[0]*e2[2], e1[0]*e2[1]-e1[1]*e2[0]];
+    /* 2026-10-02 (zware dijen): begint de tattoo op een ledemaat, dan mag hij alleen dat ledemaat en de romp raken. Via het kruis
+       (romp) liep een grote binnendij-tattoo anders door op het andere been. Een tattoo die op de romp begint mag op beide door. */
+    let zaadDeel=0;
+    if(vg.deel){ const tel=[0,0,0,0,0,0,0,0]; for(let i=0;i<zaad.length;i++){ const v=zaad[i]; if(v>=0 && v<n) tel[vg.deel[v]&7]++; }
+      let best=0; for(let c=1;c<8;c++) if(tel[c]>best){ best=tel[c]; zaadDeel=c; }
+      if(tel[0]>best) zaadDeel=0; }
     for(let i=0;i<zaad.length;i++){ const v=zaad[i]; if(!(v>=0 && v<n)) continue;
       const wx=pos[v*3]-p[0], wy=pos[v*3+1]-p[1], wz=pos[v*3+2]-p[2];
       uv[v*2]=wx*e1[0]+wy*e1[1]+wz*e1[2]; uv[v*2+1]=wx*e2[0]+wy*e2[1]+wz*e2[2];
@@ -20024,6 +20030,7 @@ async function verwijderVoorbeelden() {
         // bovenarm en heup naast een onderarm-tattoo).
         if(nx*nrm[v*3]+ny*nrm[v*3+1]+nz*nrm[v*3+2]<0) continue;
         if(vg.deel && vg.deel[u] && vg.deel[v] && vg.deel[u]!==vg.deel[v]) continue;   // nooit van ledemaat naar ledemaat (slice 4c)
+        if(zaadDeel && vg.deel[v] && vg.deel[v]!==zaadDeel) continue;   // en ook niet via de romp naar een ander ledemaat
         let wx=pos[v*3]-ux, wy=pos[v*3+1]-uy, wz=pos[v*3+2]-uz;
         const nd=du+Math.sqrt(wx*wx+wy*wy+wz*wz); if(nd>rMax || nd>=d[v]) continue;
         const dn=wx*nx+wy*ny+wz*nz; wx-=nx*dn; wy-=ny*dn; wz-=nz*dn;   // sprong op het raakvlak van u
