@@ -1221,8 +1221,12 @@ form label,
 .t3d-editbar .eb-blend .ik{width:16px;height:16px;flex:none;}
 /* Uitleg-popover in de bewerkbalk (zelfde stijl als de tool-legenda in de uitsnede-modal) */
 .t3d-editbar{position:absolute;}   /* containing block voor .eb-legend (was al absolute gepositioneerd) */
-.t3d-editbar .eb-samen{margin:0 auto}   /* slice 5v: eigen regel boven de knoppen, midden */
-.t3d-editbar .eb-samen[hidden]{display:none}
+.t3d-editbar .eb-samenrij{display:flex;justify-content:center;align-items:center;gap:8px;flex-wrap:wrap;padding:0 30px}   /* 30px: vrij van de (i) linksboven */   /* slice 5v + Sluit aan: eigen regel boven de knoppen */
+.t3d-editbar .eb-samenrij[hidden],.t3d-editbar .eb-sluitaan[hidden]{display:none}
+.t3d-editbar .eb-sluitaan{min-height:36px;padding:0 14px;border-radius:999px;border:1px solid var(--accent);background:transparent;color:var(--accent);font-weight:700;font-size:var(--fs-xs);cursor:pointer}
+.t3d-editbar .eb-sluitaan:active{background:rgba(var(--accent-rgb),.14)}
+.t3d-editbar .eb-sluitaan.bezig{opacity:.55;pointer-events:none}
+.t3d-editbar .eb-samen{margin:0}
 .t3d-editbar .eb-samen .seg-btn{min-height:36px;font-size:var(--fs-xs)}
 .t3d-editbar .eb-legend{position:absolute;left:8px;right:8px;bottom:100%;margin-bottom:10px;z-index:9;
   background:var(--kaart);border:1px solid var(--rand);border-radius:var(--r-md);padding:6px;
@@ -2555,9 +2559,12 @@ form label{text-transform:none;letter-spacing:.005em;font-size:.8rem;color:var(-
            Knop wijzigen/toevoegen? Alleen HIER. Verschil 2D: geen .eb-blend + eigen opacity-slider-id (in de kloon-code). -->
       <div id="editbar" class="t3d-editbar">
         <div class="eb-title">Tattoo</div>
-        <div class="seg-toggle eb-samen" id="eb-samen" role="group" data-i18n-aria="eb.samen_label" aria-label="Wat beweegt er" hidden>
+        <div class="eb-samenrij" hidden>
+        <div class="seg-toggle eb-samen" id="eb-samen" role="group" data-i18n-aria="eb.samen_label" aria-label="Wat beweegt er">
           <button type="button" class="seg-btn" data-samen="hele" data-i18n="eb.hele_tattoo">Hele tattoo</button>
           <button type="button" class="seg-btn" data-samen="deel" data-i18n="eb.dit_deel">Dit deel</button>
+        </div>
+        <button type="button" class="eb-sluitaan" data-act="sluitaan" hidden data-i18n="eb.sluit_aan" data-i18n-title="eb.sluit_aan_uitleg" data-i18n-aria="eb.sluit_aan_uitleg" title="Leg dit deel precies aan op het andere deel" aria-label="Leg dit deel precies aan op het andere deel">Sluit aan</button>
         </div>
         <div class="eb-legend" hidden role="group" data-i18n-aria="ui.knop_uitleg" aria-label="Wat doen de knoppen?"></div>
         <div class="eb-btns">
@@ -10898,7 +10905,7 @@ const I18N = {
     'deel.film_klaar':'Je filmpje is klaar','deel.film_delen':'Delen','deel.film_bewaren':'Bewaren',
     'toast.film_mislukt':'Filmpje maken is niet gelukt','toast.film_wacht':'Even geduld, je tattoos worden nog geladen',
     'toast.film_bewaard':'Filmpje bewaard',
-    'eb.samen_label':'Wat beweegt er','eb.hele_tattoo':'Hele tattoo','eb.dit_deel':'Dit deel',
+    'eb.samen_label':'Wat beweegt er','eb.hele_tattoo':'Hele tattoo','eb.dit_deel':'Dit deel','eb.sluit_aan':'Sluit aan','eb.sluit_aan_uitleg':'Leg dit deel precies aan op het andere deel','ui.sluit_aan_al':'Dit deel sluit al aan.','ui.sluit_aan_ok':'Aangesloten. Klopt het niet? Tik op Ongedaan maken.','ui.sluit_aan_overlap':'Leg het deel eerst een stukje over het andere deel, dan kan het aansluiten.','ui.sluit_aan_patroon':'Geen duidelijk passend patroon gevonden. Schuif het deel iets dichter naar de goede plek en probeer opnieuw.',
     'deel.titel':'Delen','deel.foto':'Foto','deel.foto_sub':'Het model zoals je het nu ziet','deel.film':'Draaiend filmpje',
     'deel.film_sub':'Je hele lichaam een rondje rond, voor TikTok of Instagram','deel.film_bezig':'Filmpje maken: {p}%',
     'deel.film_klaar':'Je filmpje is klaar','deel.film_delen':'Delen','deel.film_bewaren':'Bewaren',
@@ -11102,7 +11109,7 @@ const I18N = {
     'deel.film_klaar':'Your video is ready','deel.film_delen':'Share','deel.film_bewaren':'Save',
     'toast.film_mislukt':"Couldn't make the video",'toast.film_wacht':'Hang on, your tattoos are still loading',
     'toast.film_bewaard':'Video saved',
-    'eb.samen_label':'What moves','eb.hele_tattoo':'Whole tattoo','eb.dit_deel':'This part',
+    'eb.samen_label':'What moves','eb.hele_tattoo':'Whole tattoo','eb.dit_deel':'This part','eb.sluit_aan':'Line up','eb.sluit_aan_uitleg':'Line this part up exactly with the other part','ui.sluit_aan_al':'This part already lines up.','ui.sluit_aan_ok':"Lined up. Not right? Tap Undo.",'ui.sluit_aan_overlap':'Move the part a little over the other part first, then it can line up.','ui.sluit_aan_patroon':"Couldn't find a clear matching pattern. Move the part a bit closer to the right spot and try again.",
     'deel.titel':'Share','deel.foto':'Photo','deel.foto_sub':'The model as you see it now','deel.film':'Spinning video',
     'deel.film_sub':'Your whole body in one spin, for TikTok or Instagram','deel.film_bezig':'Making your video: {p}%',
     'deel.film_klaar':'Your video is ready','deel.film_delen':'Share','deel.film_bewaren':'Save',
@@ -11403,7 +11410,7 @@ function createTattoo(overrides = {}) {
    ============================================================ */
 // App-versie (semver, handmatig ophogen bij een release). Bij een bump ook de
 // CACHE-naam in sw.js meebumpen, zodat clients de nieuwe build ophalen.
-const APP_VERSIE = '0.3.144';
+const APP_VERSIE = '0.3.145';
 
 /* Dev-haken die de CLOUD raken hangen alleen op een ontwikkelmachine aan window. Ze zijn geen
    lek op zichzelf (zonder XSS roept niemand ze aan, en CSP + esc() houden XSS tegen), maar ze
@@ -16707,7 +16714,7 @@ async function verwijderVoorbeelden() {
       const kloon = bron.cloneNode(true);
       kloon.id = 'editbar2d';
       const blend = kloon.querySelector('.eb-blend'); if (blend) blend.remove();   // 2D heeft geen in-huid-blend
-      const samen = kloon.querySelector('.eb-samen'); if (samen) samen.remove();   // slice 5v: delen alleen in 3D (en geen dubbel id)
+      const samen = kloon.querySelector('.eb-samenrij'); if (samen) samen.remove();   // slice 5v: delen alleen in 3D (en geen dubbel id)
       const op = kloon.querySelector('input[type="range"]'); if (op) op.id = 'eb2d-opacity';
       slot.replaceWith(kloon);
     } }
@@ -20505,7 +20512,8 @@ async function verwijderVoorbeelden() {
   function setSamenUI(){
     const w=document.querySelector('#editbar .eb-samen'); if(!w) return;
     const meer=!!editDecal && markers.some(q=>q!==editDecal && q.id===editDecal.id && q.obj);
-    w.hidden=!meer;
+    const rij=w.closest('.eb-samenrij'); if(rij) rij.hidden=!meer;
+    const sa=document.querySelector('#editbar .eb-sluitaan'); if(sa) sa.hidden=!(meer && groepModus==='deel');
     w.querySelectorAll('[data-samen]').forEach(b=>{ const aan=b.dataset.samen===groepModus; b.classList.toggle('actief', aan); b.setAttribute('aria-pressed', String(aan)); });
   }
   function zetGroepModus(mo){
@@ -20517,6 +20525,178 @@ async function verwijderVoorbeelden() {
     _gH.position.copy(point); _gH.up.set(0,1,0); _gH.lookAt(_gT.copy(point).add(normal)); _gH.rotateZ((rot||0)*Math.PI/180); _gH.updateMatrixWorld();
     _gH.matrixWorld.extractBasis(_gX,_gY,_gZ); return [_gX.clone(), _gY.clone()];
   }
+
+  /* ---- Sluit aan (2026-10-02): het bewerkte deel automatisch aanleggen op de andere delen van dezelfde tattoo ----
+     Raster van punten in het raakvlak van het deel; per punt een straal van bovenaf op de andere delen (echte decal, uv ->
+     textuur) en op dit deel (uv nu, lokaal affien benaderd). Gezocht wordt de verschuiving, draaiing en schaal van dit deel
+     waarbij de beelden in de overlap het best kloppen (normale kruiscorrelatie, grof naar fijn). Dev: window.__tattiesSluitAan. */
+  const _saRay=new THREE.Raycaster(), _saO=new THREE.Vector3(), _saD=new THREE.Vector3();   // _saRay: alleen nog voor saOpHuid
+  const _saPix=new WeakMap();
+  /* helderheid samengesteld over wit + alpha, verkleind tot ongeveer de maat van een meetcel (maxDim px): anders vallen dunne lijnen
+     willekeurig wel of niet op een meetpunt en wordt de score ruis. Verkleinen in stappen van de helft = nette middeling. */
+  function saPixels(tex, maxDim){
+    const im=tex && tex.image; if(!im || !im.width) return null;
+    maxDim=Math.max(16, Math.min(512, Math.round(maxDim||256)));
+    let per=_saPix.get(im); if(!per){ per=new Map(); _saPix.set(im, per); }
+    let r=per.get(maxDim); if(r) return r;
+    const s=Math.min(1, maxDim/Math.max(im.width, im.height)), w=Math.max(2,Math.round(im.width*s)), h=Math.max(2,Math.round(im.height*s));
+    let bron=im, bw=im.width, bh=im.height;
+    while(bw/2>=w*1.01 && bh/2>=h*1.01){ const t=document.createElement('canvas'); t.width=Math.round(bw/2); t.height=Math.round(bh/2);
+      const tx=t.getContext('2d'); tx.imageSmoothingEnabled=true; tx.imageSmoothingQuality='high'; tx.drawImage(bron,0,0,t.width,t.height); bron=t; bw=t.width; bh=t.height; }
+    const c=document.createElement('canvas'); c.width=w; c.height=h; const x=c.getContext('2d',{willReadFrequently:true}); x.imageSmoothingEnabled=true; x.imageSmoothingQuality='high'; x.drawImage(bron,0,0,w,h);
+    const d=x.getImageData(0,0,w,h).data, L=new Float32Array(w*h), A=new Float32Array(w*h);
+    for(let i=0;i<w*h;i++){ const a=d[i*4+3]/255, l=(0.299*d[i*4]+0.587*d[i*4+1]+0.114*d[i*4+2])/255; A[i]=a; L[i]=a*l+(1-a); }
+    r={ w, h, L, A }; per.set(maxDim, r); return r;
+  }
+  function saMonster(P, u, v){   // bilineair; v=1 = bovenkant van het beeld (CanvasTexture flipY)
+    if(!(u>=0 && u<=1 && v>=0 && v<=1)) return -1;
+    const fx=u*(P.w-1), fy=(1-v)*(P.h-1), x0=fx|0, y0=fy|0, x1=Math.min(P.w-1,x0+1), y1=Math.min(P.h-1,y0+1), tx=fx-x0, ty=fy-y0;
+    const a=P.L[y0*P.w+x0]*(1-tx)+P.L[y0*P.w+x1]*tx, b=P.L[y1*P.w+x0]*(1-tx)+P.L[y1*P.w+x1]*tx;
+    return a*(1-ty)+b*ty;
+  }
+  /* Mini-render van een decal op het raster in het raakvlak (van bovenaf, diepte-buffer): per cel de uv van de bovenste voorkant-
+     driehoek. Veel sneller dan een straal per cel (duizenden driehoeken x duizenden cellen). */
+  function saRaster(obj, S, G, Z, cb){
+    const g=obj.geometry, pos=g.attributes.position, uvA=g.attributes.uv; if(!pos || !uvA) return;
+    obj.updateMatrixWorld(true); const me=obj.matrixWorld.elements, P=pos.array, UV=uvA.array, idx=g.index ? g.index.array : null;
+    const nV=pos.count, px=new Float32Array(nV), py=new Float32Array(nV), pz=new Float32Array(nV);
+    const e1=S.e1, e2=S.e2, n=S.n, p=S.p, L=S.L, f=G/(2*L);
+    for(let v=0;v<nV;v++){ const X=P[v*3], Y=P[v*3+1], Z0=P[v*3+2];
+      const wx=me[0]*X+me[4]*Y+me[8]*Z0+me[12]-p.x, wy=me[1]*X+me[5]*Y+me[9]*Z0+me[13]-p.y, wz=me[2]*X+me[6]*Y+me[10]*Z0+me[14]-p.z;
+      px[v]=(wx*e1.x+wy*e1.y+wz*e1.z+L)*f-0.5; py[v]=(wx*e2.x+wy*e2.y+wz*e2.z+L)*f-0.5; pz[v]=wx*n.x+wy*n.y+wz*n.z; }
+    const nT=idx ? idx.length/3 : nV/3;
+    for(let t=0;t<nT;t++){ const a=idx?idx[t*3]:t*3, b=idx?idx[t*3+1]:t*3+1, c=idx?idx[t*3+2]:t*3+2;
+      const ax=px[a], ay=py[a], bx=px[b], by=py[b], cx=px[c], cy=py[c];
+      const den=(by-cy)*(ax-cx)+(cx-bx)*(ay-cy); if(Math.abs(den)<1e-12) continue;
+      const i0=Math.max(0,Math.ceil(Math.min(ax,bx,cx))), i1=Math.min(G-1,Math.floor(Math.max(ax,bx,cx)));
+      const j0=Math.max(0,Math.ceil(Math.min(ay,by,cy))), j1=Math.min(G-1,Math.floor(Math.max(ay,by,cy)));
+      for(let j=j0;j<=j1;j++) for(let i=i0;i<=i1;i++){
+        const w0=((by-cy)*(i-cx)+(cx-bx)*(j-cy))/den, w1=((cy-ay)*(i-cx)+(ax-cx)*(j-cy))/den, w2=1-w0-w1;
+        if(w0<-1e-6 || w1<-1e-6 || w2<-1e-6) continue;
+        const z=w0*pz[a]+w1*pz[b]+w2*pz[c], k=j*G+i; if(z<=Z[k]) continue; Z[k]=z;
+        cb(k, w0*UV[a*2]+w1*UV[b*2]+w2*UV[c*2], w0*UV[a*2+1]+w1*UV[b*2+1]+w2*UV[c*2+1]); } }
+  }
+  function saMeet(m, G, draaipunt){
+    const anderen=markers.filter(q=>q!==m && q.id===m.id && q.obj && q.obj.visible && q.tex);
+    if(!anderen.length || !m.obj || !m.tex) return null;
+    const [e1,e2]=decalAssen(m.point, m.normal, m.rot), n=m.normal.clone().normalize(), p=m.point.clone();
+    const asp=(m.tex.image && m.tex.image.width) ? m.tex.image.height/m.tex.image.width : 1;
+    const L=0.75*Math.max(m.size, m.size*asp)*1.5;
+    const S0={ e1, e2, n, p, L };
+    const X=new Float32Array(G*G), Y=new Float32Array(G*G), VA=new Float32Array(G*G).fill(-1), BU=new Float32Array(G*G).fill(NaN), BV=new Float32Array(G*G).fill(NaN);
+    for(let j=0;j<G;j++) for(let i=0;i<G;i++){ const k=j*G+i; X[k]=(i+0.5)/G*2*L-L; Y[k]=(j+0.5)/G*2*L-L; }
+    const ZA=new Float32Array(G*G).fill(-Infinity);
+    const cel=2*L/G, resVan=(q)=>{ const a=(q.tex.image && q.tex.image.width) ? q.tex.image.height/q.tex.image.width : 1; return 1.5*Math.max(q.size, q.size*a)/cel; };
+    for(const q of anderen){ const P=saPixels(q.tex, resVan(q)); if(P) saRaster(q.obj, S0, G, ZA, (k,u,v)=>{ VA[k]=saMonster(P,u,v); }); }
+    saRaster(m.obj, S0, G, new Float32Array(G*G).fill(-Infinity), (k,u,v)=>{ BU[k]=u; BV[k]=v; });
+    // affien (x,y) -> (u,v) van dit deel uit de punten die het nu bedekt (kleinste kwadraten)
+    let s00=0,s01=0,s02=0,s11=0,s12=0,s22=0,ru0=0,ru1=0,ru2=0,rv0=0,rv1=0,rv2=0,nb=0;
+    for(let k=0;k<G*G;k++){ if(!(BU[k]===BU[k])) continue; const x=X[k], y=Y[k]; nb++;
+      s00++; s01+=x; s02+=y; s11+=x*x; s12+=x*y; s22+=y*y; ru0+=BU[k]; ru1+=BU[k]*x; ru2+=BU[k]*y; rv0+=BV[k]; rv1+=BV[k]*x; rv2+=BV[k]*y; }
+    if(nb<12) return null;
+    const M3=[[s00,s01,s02],[s01,s11,s12],[s02,s12,s22]];
+    const los=(b)=>{ const a=M3.map((r,i)=>r.concat([b[i]])); for(let c=0;c<3;c++){ let pv=c; for(let r=c+1;r<3;r++) if(Math.abs(a[r][c])>Math.abs(a[pv][c])) pv=r;
+        const t=a[c]; a[c]=a[pv]; a[pv]=t; if(Math.abs(a[c][c])<1e-12) return null; for(let r=0;r<3;r++){ if(r===c) continue; const f=a[r][c]/a[c][c]; for(let q=c;q<4;q++) a[r][q]-=f*a[c][q]; } }
+      return [a[0][3]/a[0][0], a[1][3]/a[1][1], a[2][3]/a[2][2]]; };
+    const fu=los([ru0,ru1,ru2]), fv=los([rv0,rv1,rv2]); if(!fu || !fv) return null;
+    // draaipunt: zwaartepunt van wat de andere delen dichtbij dit deel bedekken (daar zit de overlap)
+    let cx=0, cy=0, cn=0; const rr=(0.8*m.size)*(0.8*m.size);
+    for(let k=0;k<G*G;k++){ if(VA[k]<0) continue; if(X[k]*X[k]+Y[k]*Y[k]>rr) continue; cx+=X[k]; cy+=Y[k]; cn++; }
+    if(cn){ cx/=cn; cy/=cn; }
+    if(draaipunt){ cx=draaipunt[0]; cy=draaipunt[1]; }   // fijne stap: zelfde draaipunt als de grove, anders passen de parameters niet
+    return { G, X, Y, VA, fu, fv, PB:saPixels(m.tex, resVan(m)), e1, e2, n, L, p, size:m.size, asp, cx, cy };
+  }
+  function saScore(S, dx, dy, th, sc, stap){
+    const c=Math.cos(-th), s=Math.sin(-th), fu=S.fu, fv=S.fv, P=S.PB, N=S.G*S.G, ox=S.cx, oy=S.cy;   // draaien/schalen om het midden van de overlap
+    let n=0, sa=0, sb=0, saa=0, sbb=0, sab=0;
+    for(let k=0;k<N;k+=stap){ const va=S.VA[k]; if(va<0) continue;
+      const x0=(S.X[k]-ox-dx)/sc, y0=(S.Y[k]-oy-dy)/sc, x=c*x0-s*y0+ox, y=s*x0+c*y0+oy;
+      const vb=saMonster(P, fu[0]+fu[1]*x+fu[2]*y, fv[0]+fv[1]*x+fv[2]*y); if(vb<0) continue;
+      n++; sa+=va; sb+=vb; saa+=va*va; sbb+=vb*vb; sab+=va*vb; }
+    if(n<20) return { ncc:-1, n };
+    const ma=sa/n, mb=sb/n, va=saa/n-ma*ma, vb=sbb/n-mb*mb;
+    if(va<1e-5 || vb<1e-5) return { ncc:-1, n };
+    return { ncc:(sab/n-ma*mb)/Math.sqrt(va*vb), n };
+  }
+  /* rangschikken: bij een bijna gelijke overeenkomst de kleinste correctie (een overlapstrook van 1-2 cm bepaalt draaiing en schaal
+     zwak; anders springt een tweede druk tussen bijna gelijke standen) */
+  const saWaarde=(b)=>b.ncc-0.12*Math.abs(b.th)-0.25*Math.abs(Math.log(b.sc));
+  function sluitAanBereken(m){
+    const S=saMeet(m, 96); if(!S) return { ok:false, reden:'geen' };
+    const nMin=Math.max(60, Math.round(S.G*S.G*0.015));   // overlap minstens ~1,5% van het raster (een strook van 1-2 cm)
+    const nul=saScore(S,0,0,0,1,1);
+    let best={ dx:0, dy:0, th:0, sc:1, ncc:nul.n>=nMin?nul.ncc:-1, n:nul.n };
+    const R=0.3*S.size, st0=S.size/16;
+    const kand=[];
+    for(let sc of [0.9,0.95,1,1.05,1.1]) for(let thg=-16; thg<=16; thg+=2) for(let dx=-R; dx<=R+1e-9; dx+=st0) for(let dy=-R; dy<=R+1e-9; dy+=st0){
+      const r=saScore(S,dx,dy,thg*Math.PI/180,sc,5); if(r.n*5>=nMin) kand.push({ dx, dy, th:thg*Math.PI/180, sc, ncc:r.ncc, n:r.n*5 }); }
+    kand.sort((a,b)=>saWaarde(b)-saWaarde(a));
+    const start=[]; for(const k of kand){ if(start.length>=8) break;   // de beste, onderling verschillend
+      if(start.some(q=>Math.abs(q.dx-k.dx)<=st0*1.01 && Math.abs(q.dy-k.dy)<=st0*1.01 && Math.abs(q.th-k.th)<=0.04 && q.sc===k.sc)) continue; start.push(k); }
+    for(const k0 of start){
+      let b=k0, sd=st0/2, sth=1*Math.PI/180, ssc=0.025;
+      for(let ronde=0; ronde<5; ronde++){
+        const b0=b;
+        for(const a of [-1,0,1]) for(const q of [-1,0,1]) for(const t of [-1,0,1]) for(const z of [-1,0,1]){
+          const r=saScore(S, b0.dx+a*sd, b0.dy+q*sd, b0.th+t*sth, b0.sc*(1+z*ssc), 1);
+          const c={ dx:b0.dx+a*sd, dy:b0.dy+q*sd, th:b0.th+t*sth, sc:b0.sc*(1+z*ssc), ncc:r.ncc, n:r.n };
+          if(r.n>=nMin && saWaarde(c)>saWaarde(b)) b=c; }
+        sd/=2; sth/=2; ssc/=2; }
+      if(saWaarde(b)>saWaarde(best)) best=b; }
+    // polijsten op een fijner raster (minder vervaging): scherpere piek voor draaiing en schaal
+    const S2=saMeet(m, 144, [S.cx, S.cy]);
+    if(S2 && best.ncc>-1){ const nMin2=Math.round(nMin*2.25); let b=best, b2=saScore(S2,b.dx,b.dy,b.th,b.sc,1); b={ dx:b.dx, dy:b.dy, th:b.th, sc:b.sc, ncc:b2.ncc, n:b2.n };
+      let sd=st0/32, sth=0.25*Math.PI/180, ssc=0.004;
+      for(let ronde=0; ronde<4; ronde++){ const b0=b;
+        for(const a of [-1,0,1]) for(const q of [-1,0,1]) for(const t of [-1,0,1]) for(const z of [-1,0,1]){
+          const r=saScore(S2, b0.dx+a*sd, b0.dy+q*sd, b0.th+t*sth, b0.sc*(1+z*ssc), 1);
+          const c={ dx:b0.dx+a*sd, dy:b0.dy+q*sd, th:b0.th+t*sth, sc:b0.sc*(1+z*ssc), ncc:r.ncc, n:r.n };
+          if(r.n>=nMin2 && saWaarde(c)>saWaarde(b)) b=c; }
+        if(b===b0){ sd/=2; sth/=2; ssc/=2; } }
+      best={ dx:b.dx, dy:b.dy, th:b.th, sc:b.sc, ncc:best.ncc, n:best.n, fijn:b.ncc }; }
+    best.nul=nul.ncc; best.nulN=nul.n; best.nMin=nMin; best.S=S;
+    best.ok = best.n>=nMin && best.ncc>=SA_MIN_NCC;
+    if(!best.ok) best.reden = (best.n<nMin) ? 'overlap' : 'patroon';
+    return best;
+  }
+  const SA_MIN_NCC=0.5;
+  // een punt in het raakvlak (x,y) terug op de huid: straal van bovenaf, treffer met een normaal aan dezelfde kant
+  function saOpHuid(S, x, y){
+    const mesh=pickMeshes[0]; if(!mesh) return null;
+    _saO.copy(S.p).addScaledVector(S.e1,x).addScaledVector(S.e2,y).addScaledVector(S.n,0.12); _saD.copy(S.n).negate();
+    _saRay.set(_saO,_saD); _saRay.near=0; _saRay.far=0.5;
+    _saRay.ray.near0=0; _saRay.ray.far0=0.5;
+    const hits=(LICHAAM_GEN && pickMeshes.length===1 && window.__raySnel!==false) ? (straalSnel(mesh,_saRay.ray)||[]) : _saRay.intersectObject(mesh,true);
+    for(const h of hits){ if(!h.face) continue; const nn=h.face.normal.clone().transformDirection(h.object.matrixWorld).normalize();
+      if(nn.dot(S.n)>0.2) return { point:h.point.clone(), normal:nn, mesh:h.object, tri:(h.faceIndex!==undefined?h.faceIndex:-1) }; }
+    return null;
+  }
+  async function sluitAan(m){
+    m=m||editDecal; if(!m || m.locked) return { ok:false, reden:'geen' };
+    herbouwAf();
+    let res=sluitAanBereken(m);
+    if(!res.ok) return res;
+    if(res.nulN>=res.nMin && !(res.ncc>res.nul+0.01)) return { ok:true, al:true, ncc:res.ncc, nul:res.nul };   // sluit al aan: niets verplaatsen
+    snapEdit(m);
+    for(let ronde=0; ronde<2; ronde++){   // tweede ronde vanaf de nieuwe plek: kromming van de huid
+      const S=res.S, ct=Math.cos(res.th), st=Math.sin(res.th);
+      const mx=S.cx+res.dx-res.sc*(ct*S.cx-st*S.cy), my=S.cy+res.dy-res.sc*(st*S.cx+ct*S.cy);   // nieuw midden van het deel
+      const h=saOpHuid(S, mx, my); if(!h) break;
+      m.point=h.point; m.normal=h.normal; m.mesh=h.mesh; m.tri=h.tri;
+      m.rot=((((m.rot||0)+res.th*180/Math.PI)%360)+360)%360; m.size=clamp(m.size*res.sc,0.03,0.40);
+      rebuildMarker(m);
+      if(ronde===1) break;
+      const r2=sluitAanBereken(m);
+      if(!r2.ok || !(r2.ncc>r2.nul+0.005) || (Math.hypot(r2.dx,r2.dy)<0.0005 && Math.abs(r2.th)<0.002 && Math.abs(r2.sc-1)<0.003)) break;   // alleen bijstellen als het duidelijk beter wordt
+      res=r2; }
+    persistEdit(m);
+    return { ok:true, ncc:res.ncc, nul:res.nul };
+  }
+  window.__tattiesSluitAan={ bereken:(m)=>{ const r=sluitAanBereken(m||editDecal); delete r.S; return r; }, sluit:sluitAan,
+    /* test: een punt (x,y) in het raakvlak van een plek terug op de huid, en een deel exact neerleggen */
+    opHuid:(point, normal, rot, x, y)=>{ const [e1,e2]=decalAssen(point, normal, rot); return saOpHuid({ p:point, e1, e2, n:normal.clone().normalize() }, x, y); },
+    score:(dx,dy,thGr,sc)=>{ const S=saMeet(editDecal,96); return S ? saScore(S,dx,dy,thGr*Math.PI/180,sc,1) : null; },
+    plaats:(m, point, normal, rot, size)=>{ m.point=point.clone(); m.normal=normal.clone(); m.rot=rot; m.size=size; rebuildMarker(m); } };
   function groepExp(vg, m, rMax){   // exp-map vanaf het anker, frame = de assen van de anker-decal
     const [X,Y]=decalAssen(m.point, m.normal, m.rot||0);
     let t=(m.tri>=0) ? m.tri : triBijPunt(m.mesh||pickMeshes[0], m.point, m.normal); if(!(t>=0)) return null;
@@ -21027,6 +21207,14 @@ async function verwijderVoorbeelden() {
         else if(volgendDeelVan){ const r=volgendDeelVan; volgendDeelVan=null; openCutModalAdd('3d', r); }   // ketting: volgende deel van dezelfde tattoo
         return; }
       if(a==="undo"){ undoEdit(); return; }
+      if(a==="sluitaan"){ const knop=document.querySelector('#editbar .eb-sluitaan'); if(knop) knop.classList.add('bezig');
+        await frameAdem();
+        let r=null; try{ r=await sluitAan(editDecal); }catch(e){ console.error('sluit aan', e); r={ ok:false, reden:'fout' }; }
+        if(knop) knop.classList.remove('bezig');
+        if(r && r.ok && r.al) toast(tr('ui.sluit_aan_al'));
+        else if(r && r.ok){ tril(12); toast(tr('ui.sluit_aan_ok')); }
+        else toast(tr(r && r.reden==='patroon' ? 'ui.sluit_aan_patroon' : 'ui.sluit_aan_overlap'));
+        return; }
       if(a==="lock"){ if(editDecal){ editDecal.locked=!editDecal.locked; setLockUI();
         toast(editDecal.locked?tr('ui.vergrendeld'):tr('ui.ontgrendeld')); persistEdit(editDecal); } return; }
       if(a==="blend"){ const m=editDecal; const rec=m&&deelVan(m); if(rec){ rec.kunst3d=rec.kunst3d||{};   // bij een deel: dat deel
