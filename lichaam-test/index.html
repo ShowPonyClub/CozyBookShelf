@@ -1522,7 +1522,7 @@ html.lichaam-gen #inst-onderbroek-sectie{border-bottom:1px solid var(--rand)}
   .gen-stap:active{background:var(--accent);color:var(--op-inkt);border-color:var(--accent)}
 
   /* Volgende zonder keuze (punt 9): geen rood, want er is nog niets te doen */
-  .gen-door:disabled{background:var(--veldbg);color:var(--gedempt);border-color:var(--rand);
+  .gen-door:disabled,.gen-door.wacht{background:var(--veldbg);color:var(--gedempt);border-color:var(--rand);
     box-shadow:none;cursor:default}
 
   /* alleen voor screenreaders */
@@ -1968,6 +1968,7 @@ html.knipfull .cutmodal.cm-fullcut.cm-gegevens .cm-links .cm-geenfoto{display:no
 html.knipfull .cutmodal.cm-fullcut.cm-gegevens .cm-veldenkaart #cmNaam{display:block;width:auto;margin:0;}
 /* De naam is verplicht; aria-invalid werd al gezet maar was nergens te zien. */
 .cutmodal #cmNaam[aria-invalid="true"]{border-color:var(--invalid);}
+.cutmodal #cmNaam[aria-invalid="true"]::placeholder{color:var(--invalid);opacity:1}
 html.knipfull .cutmodal.cm-fullcut.cm-gegevens .cm-veldenkaart #cmInfo,
 html.knipfull .cutmodal.cm-fullcut.cm-gegevens .cm-veldenkaart .cm-choose-rij{margin:0;}
 /* knoppenbalk: vast onderaan, buiten de scroll, met ruimte voor de home-indicator */
@@ -2102,9 +2103,10 @@ html.knipfull .cutmodal.cm-review .cm-bewerkbtn span{position:absolute;width:1px
   box-shadow:0 2px 10px rgba(0,0,0,.3);text-align:center;}
 #t3d-banner[hidden],#t2d-banner[hidden]{display:none;}
 /* Plaats-hint: pulserende tik-indicator midden op het model/de kaart tijdens plaatsen */
-#plaats-hint{position:fixed;left:50%;top:46%;transform:translate(-50%,-50%);z-index:40;pointer-events:none;display:flex;flex-direction:column;align-items:center;gap:14px}
+#plaats-hint{position:fixed;left:0;right:0;top:auto;bottom:calc(22px + env(safe-area-inset-bottom,0px));z-index:40;pointer-events:none;display:flex;flex-direction:column;align-items:center;gap:10px}   /* UX 2026-10-02: tekst en Annuleren onderaan, niet op de romp (tikken op de buik annuleerde) */
+#plaats-hint .ph-ring{position:fixed;left:calc(50% - 15px);top:calc(46% - 15px)}   /* de ring blijft midden op het model */
 #plaats-hint[hidden]{display:none}
-#plaats-hint.herplaats{top:auto;bottom:calc(22px + env(safe-area-inset-bottom,0px));transform:translateX(-50%)}   /* opnieuw plaatsen: niet op de romp */
+#plaats-hint.herplaats{top:auto;bottom:calc(22px + env(safe-area-inset-bottom,0px))}   /* opnieuw plaatsen: niet op de romp */
 #plaats-hint.herplaats .ph-ring{display:none}
 /* De hint zelf laat tikken door naar het model (pointer-events:none hierboven); de
    annuleerknop moet ze juist opvangen, vandaar auto. Zonder zichtbare uitweg was de
@@ -2530,7 +2532,7 @@ form label{text-transform:none;letter-spacing:.005em;font-size:.8rem;color:var(-
   <section id="view-3d" class="verborgen">
     <div id="stage" role="group" data-i18n-aria="ui.stage_aria" aria-label="3D-lichaamsmodel; gebruik de 2D-knop bovenaan voor de toegankelijke platte kaart">
       <!-- Knoppen als overlay in het venster (2026-09-14): het model krijgt de ruimte van de oude balk erboven -->
-      <button id="gen-beeld" type="button" data-i18n-aria="gen.beeld" data-i18n-title="gen.beeld" aria-label="Heel lichaam" title="Heel lichaam"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="4.6" r="2"/><path d="M12 7v7"/><path d="M5 9.5h14"/><path d="M9 21l3-7 3 7"/></svg></button>
+      <button id="gen-beeld" type="button" data-i18n-aria="gen.beeld" data-i18n-title="gen.beeld" aria-label="Heel lichaam" title="Heel lichaam"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8V5a1 1 0 0 1 1-1h3"/><path d="M16 4h3a1 1 0 0 1 1 1v3"/><path d="M20 16v3a1 1 0 0 1-1 1h-3"/><path d="M8 20H5a1 1 0 0 1-1-1v-3"/><circle cx="12" cy="8.2" r="1.4"/><path d="M12 10.2v3.8"/><path d="M9.6 11.6h4.8"/><path d="M10.4 17.2l1.6-3.2 1.6 3.2"/></svg></button>
       <div class="stage-knoppen">
         <div class="sk-links">
       <button type="button" id="toon-gepland-3d" class="gepland-toggle" aria-pressed="false" data-i18n-aria="ui.toon_gepland" aria-label="Geplande tattoos tonen">
@@ -2543,7 +2545,7 @@ form label{text-transform:none;letter-spacing:.005em;font-size:.8rem;color:var(-
       </button>
         </div>
         <div class="sk-rechts">
-          <button type="button" id="t3d-reset" data-i18n-title="ui.beginstand" data-i18n-aria="ui.beginstand" title="Beginstand" aria-label="Beginstand"><svg class="ik ik-reset" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12a8 8 0 1 0 2.3-5.6"/><path d="M3 4v4h4"/></svg><svg class="ik ik-lichaam" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="4.6" r="2"/><path d="M12 7v7"/><path d="M5 9.5h14"/><path d="M9 21l3-7 3 7"/></svg></button>
+          <button type="button" id="t3d-reset" data-i18n-title="ui.beginstand" data-i18n-aria="ui.beginstand" title="Beginstand" aria-label="Beginstand"><svg class="ik ik-reset" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12a8 8 0 1 0 2.3-5.6"/><path d="M3 4v4h4"/></svg><svg class="ik ik-lichaam" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8V5a1 1 0 0 1 1-1h3"/><path d="M16 4h3a1 1 0 0 1 1 1v3"/><path d="M20 16v3a1 1 0 0 1-1 1h-3"/><path d="M8 20H5a1 1 0 0 1-1-1v-3"/><circle cx="12" cy="8.2" r="1.4"/><path d="M12 10.2v3.8"/><path d="M9.6 11.6h4.8"/><path d="M10.4 17.2l1.6-3.2 1.6 3.2"/></svg></button>
           <button type="button" id="t3d-deel" data-i18n-title="ui.deel_opname" data-i18n-aria="ui.deel_opname" title="Opname delen" aria-label="Opname delen"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15V4"/><path d="M8 8l4-4 4 4"/><path d="M5 12v7a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-7"/></svg></button>
           <button type="button" id="t3d-info" data-i18n-title="ui.uitleg_knop" data-i18n-aria="ui.uitleg_knop" title="Uitleg" aria-label="Uitleg"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5"/><path d="M12 7.6h.01"/></svg></button>
         </div>
@@ -8733,7 +8735,7 @@ function losMaatOp(sleutel, doelCm){
    height-waarde de gevraagde centimeters oplevert. Gevolg: aan gender draaien
    verandert de vorm maar niet meer de lengte, en dat was de bedoeling. */
 /* 140 tot 210 (punt 12). De height-as haalt bij man 137 tot 244 cm, bij vrouw 123 tot 230. */
-var LENGTE_CM_MIN = 140, LENGTE_CM_MAX = 210;
+var LENGTE_CM_MIN = 140, LENGTE_CM_MAX = 210, LENGTE_KADER_CM = 205;
 var huidigeHeight = 0.5;          /* startpunt voor de volgende oplossing */
 function lengteDoel(){ return LENGTE_CM_MIN + (+sliders.lengte.value)*(LENGTE_CM_MAX-LENGTE_CM_MIN); }
 
@@ -9079,6 +9081,7 @@ function genNaarStap(n){
 function genKnopStaat(){
   var geblokt = (GEN.stap === 0 && !GEN.gekozenGeslacht);
   $('#gen-door').disabled = false;
+  $('#gen-door').classList.toggle('wacht', geblokt);   /* UX 2026-10-02: oogt uitgeschakeld tot er een vorm is; tikken legt nog steeds uit waarom */
   $('#gen-door').title = geblokt ? tr('gen.kies_eerst') : '';
   $('#gen-door').setAttribute('aria-label', geblokt
     ? tr('gen.volgende') + '. ' + tr('gen.kies_eerst') : $('#gen-door').textContent);
@@ -9169,6 +9172,9 @@ function genCamera(st){
      het hele scherm: W/H en het paneel tellen vanaf de rand van de stage. */
   var camera = HOST.camera(), sr = HOST.stageRect();
   var cm = geo ? lichaamsLengte()/100 : 1.7;
+  /* Lengte-stap (UX-doorloop 2026-10-02): een vast kader van LENGTE_KADER_CM, anders kadert de camera elke lengte even groot in
+     en zie je niet dat het lichaam groeit of krimpt. Voeten blijven op de vloer, het hoofd komt hoger of lager. */
+  if(st.id === 'lengte') cm = Math.max(cm, LENGTE_KADER_CM/100);
   /* heel: strakker dan in de spike (toesteltest eigenaar 2026-09-25: "het lichaam is nogal klein"); de voeten staan
      op de vloer en het hoofd heeft genoeg aan de 5% lucht hieronder. */
   var gebied = { heel:  [cm/2,        cm * 1.0],
@@ -10899,7 +10905,7 @@ const I18N = {
     'ui.cut_hint':'Tik rondom de tattoo om punten te plaatsen; sleep een punt om bij te stellen.',
     'ui.snij_vrij':'Vrij tekenen','ui.snij_punten':'Punten',
     'ui.opaciteit':'Dekking','ui.draaien90':'90° draaien','ui.cut_tip':'Tip: knijp om in te zoomen, knip rond de tattoo en stel bij het plaatsen de dekking in.',
-    'ui.cut_hint_vrij':'Tik op Magic cut, of teken zelf een lijn rond de tattoo.','ui.cut_hint_vrij_zonder':'Teken met je vinger een lijn rond de tattoo.','ui.cut_hint_ai':'AI-uitsnede toegepast. Verfijn eventueel met de gum, of tik ✓ om door te gaan.',
+    'ui.cut_hint_vrij':'Tik op Magic cut, of teken zelf een lijn rond de tattoo.','ui.cut_hint_vrij_zonder':'Teken met je vinger een lijn rond de tattoo.','ui.cut_hint_klaar':'Klopt de lijn? Tik op het vinkje. Of teken opnieuw.','ui.cut_hint_ai':'AI-uitsnede toegepast. Verfijn eventueel met de gum, of tik ✓ om door te gaan.',
     'ui.cut_hint_punten':'Tik rondom de tattoo om punten te zetten; sleep een punt om bij te stellen.',
     'ui.gevoeligheid':'Gevoeligheid - sleep tot de huid weg is','ui.zachte_randen':'Zachte randen meenemen',
     'ui.huid_weghalen':'Huid weghalen','ui.huid_methode':'Methode','ui.huid_kleur':'Kleur','ui.huid_helder':'Helderheid',
@@ -11103,7 +11109,7 @@ const I18N = {
     'ui.cut_hint':'Tap around the tattoo to place points; drag a point to adjust.',
     'ui.snij_vrij':'Freehand','ui.snij_punten':'Points',
     'ui.opaciteit':'Opacity','ui.draaien90':'Rotate 90°','ui.cut_tip':'Tip: pinch to zoom in, cut around the tattoo, then set its opacity when placing.',
-    'ui.cut_hint_vrij':'Tap Magic cut, or draw a line around the tattoo yourself.','ui.cut_hint_vrij_zonder':'Draw a line around the tattoo with your finger.','ui.cut_hint_ai':'AI cut-out applied. Refine with the eraser if needed, or tap ✓ to continue.',
+    'ui.cut_hint_vrij':'Tap Magic cut, or draw a line around the tattoo yourself.','ui.cut_hint_vrij_zonder':'Draw a line around the tattoo with your finger.','ui.cut_hint_klaar':'Line looks right? Tap the tick. Or draw again.','ui.cut_hint_ai':'AI cut-out applied. Refine with the eraser if needed, or tap ✓ to continue.',
     'ui.cut_hint_punten':'Tap around the tattoo to place points; drag a point to adjust.',
     'ui.gevoeligheid':'Sensitivity - drag until the skin is gone','ui.zachte_randen':'Include soft edges',
     'ui.huid_weghalen':'Remove skin','ui.huid_methode':'Method','ui.huid_kleur':'Colour','ui.huid_helder':'Brightness',
@@ -11440,7 +11446,7 @@ function createTattoo(overrides = {}) {
    ============================================================ */
 // App-versie (semver, handmatig ophogen bij een release). Bij een bump ook de
 // CACHE-naam in sw.js meebumpen, zodat clients de nieuwe build ophalen.
-const APP_VERSIE = '0.3.146';
+const APP_VERSIE = '0.3.147';
 
 /* Dev-haken die de CLOUD raken hangen alleen op een ontwikkelmachine aan window. Ze zijn geen
    lek op zichzelf (zonder XSS roept niemand ze aan, en CSP + esc() houden XSS tegen), maar ze
@@ -16412,6 +16418,7 @@ function toonAccountStap(modus, verder) {
   if (later) { const k = modus === 'vraag' ? 'onb.account_later' : 'onb.overslaan'; later.setAttribute('data-i18n', k); later.textContent = tr(k); }
   stap.hidden = false; ov.hidden = false; ov.classList.toggle('onb-vraag', modus === 'vraag');
   { const r = $('#onb-acc-risico'); if (r) r.hidden = true; }
+  if (modus !== 'vraag') { try { sessionStorage.setItem('tatties-account-intro', '1'); } catch (e) { /* geen opslag */ } }   // UX 2026-10-02: niet twee keer in een sessie
   if (modus === 'vraag') { accountVraagNu = true; if (opslagRisico) zetAccountRisico(); }   // slice 5t: opslagmelding in de vraag
   if (modus === 'vraag') {
     try { localStorage.setItem('tatties-account-vraag', '1'); } catch (e) { /* geen opslag */ }
@@ -16440,6 +16447,7 @@ function planAccountVraag() {
   clearTimeout(accountVraagT);
   accountVraagT = setTimeout(() => {
     try { if (localStorage.getItem('tatties-account-vraag') === '1' || localStorage.getItem('tatties-onboarding-gedaan') !== '1') return; } catch (e) { return; }
+    try { if (sessionStorage.getItem('tatties-account-intro') === '1') return; } catch (e) { /* geen opslag */ }   // net in de intro gevraagd: een volgende sessie
     if (huidigeView !== 'start' || !tattoos.some(t => t && !t.deleted) || !accountStapKan()) return;
     { const sl = $('#start-lichaam'); if (sl && !sl.hidden) return; }   // niet samen met de Nieuw-kaart (slice 5k): een vraag tegelijk
     const ov = $('#onboarding'), am = $('#account-modal'), ip = $('#inst-paneel');
@@ -21608,7 +21616,7 @@ async function verwijderVoorbeelden() {
     const h=document.getElementById('cmHint');
     // Zonder Magic cut-knop (zie MAGIC_CUT_AAN) mag de hint er ook niet naar wijzen.
     const vrijHint=MAGIC_CUT_AAN?'ui.cut_hint_vrij':'ui.cut_hint_vrij_zonder';
-    if(h) h.textContent=tr(cutModus==='vrij'?vrijHint:'ui.cut_hint_punten');
+    if(h) h.textContent=tr(lassoPts.length>=3 ? 'ui.cut_hint_klaar' : cutModus==='vrij'?vrijHint:'ui.cut_hint_punten');   // UX 2026-10-02: lijn staat er = volgende stap
     stapelFullcutOverlays();   // hint-hoogte kan gewijzigd zijn
   }
   let huidMethode='kleur';   // 'kleur' = huidskleur prikken, 'helder' = helderheidsdrempel
@@ -22127,9 +22135,11 @@ async function verwijderVoorbeelden() {
     { const bb=document.getElementById("cmBewerkBadge"); if(bb) bb.hidden=!(b && (pendingEdit||pendingEdit2D)); }   // 'Bewerken'-badge: alleen in de knipfase van een bewerk-flow
     zetFullcut(b);   // foto in beeld = schermvullend knippen (vlag-afhankelijk); 'Volgende' onthult naam/details
     if(b){ const adv=document.getElementById("cmAdvTools"), tt=document.getElementById("cmToolsToggle");
-           // Verfijn-tools (punten/rotatie/spiegel/toverstaf/gum): stand onthouden, standaard OPEN.
-           // Altijd-dichtklappen verstopte juist de correctie-tools die je bij een echte huidfoto nodig hebt.
-           let open=true; try{ open = localStorage.getItem('tatties-kniptools-open') !== '0'; }catch(e){}
+           // Verfijn-tools (punten/rotatie/spiegel/toverstaf/gum): stand onthouden. Standaard DICHT sinds de UX-doorloop van
+           // 2026-10-02 (keuze eigenaar): voor een eerste keer is de lijn trekken genoeg, open bedekte het paneel een kwart van de foto.
+           // Wie ze een keer opent, krijgt ze daarna open (de stand wordt onthouden).
+           let open=false; try{ open = localStorage.getItem('tatties-kniptools-open') === '1'; }catch(e){}
+           { const nm=document.getElementById('cmNaam'); if(nm){ nm.removeAttribute('aria-invalid'); nm.placeholder=tr('ui.naam_ph'); } }   // verse sessie: geen oude naam-melding
            if(adv) adv.hidden=!open; if(tt) tt.setAttribute("aria-expanded", open?"true":"false"); }
     if(cmPlaceBtn) cmPlaceBtn.style.display=b?"":"none";
     { const meerW=document.querySelector(".cm-meer-wrap"), bewerk=!!(pendingEdit||pendingEdit2D);
@@ -23027,6 +23037,7 @@ function maakTatnetGL(json, canvas) {
   }
   function updateCutout(){
     if(!origImg) return;
+    { const h=document.getElementById('cmHint'), k=tr('ui.cut_hint_klaar'); if(h && ((lassoPts.length>=3) !== (h.textContent===k))) zetSnijModusUI(); }   // hint volgt de lijn
     planKnipBewaren();   // lasso/toverstaf/gum gewijzigd: staat vers houden voor een herstart
     if(!baseCanvas) rebuildBase();
     const shown=clippedCanvas(); if(!shown) return;
@@ -23476,7 +23487,7 @@ function maakTatnetGL(json, canvas) {
         const rec=pendingEdit2D;
         const {naam,info,status}=leesModalDetails();
         if(!naam){ const naamEl=document.getElementById("cmNaam"); toast(tr('ui.naam_verplicht'));
-          if(naamEl){ naamEl.setAttribute('aria-invalid','true'); naamEl.focus(); naamEl.addEventListener('input',()=>naamEl.removeAttribute('aria-invalid'),{once:true}); }
+          if(naamEl){ naamEl.setAttribute('aria-invalid','true'); naamEl.placeholder=tr('ui.naam_verplicht'); naamEl.focus(); naamEl.addEventListener('input',()=>{ naamEl.removeAttribute('aria-invalid'); naamEl.placeholder=tr('ui.naam_ph'); },{once:true}); }
           return; }
         cutModal.classList.remove("on"); cutHistoryOpruimen(); pendingEdit2D=null;
         const k3=bouwKunst3d();
@@ -23505,8 +23516,8 @@ function maakTatnetGL(json, canvas) {
         const deel=deelVoor;   // jigsaw: extra deel -> naam en status van het bestaande record, geen invoer
         const {naam,info,status}= deel ? { naam:(deel.naam||'Tattoo'), info:{}, status:(deel.status||'gezet') } : leesModalDetails();
         if(!naam){ const naamEl=document.getElementById("cmNaam"); toast(tr('ui.naam_verplicht'));
-          if(naamEl){ naamEl.setAttribute('aria-invalid','true'); naamEl.focus();
-            naamEl.addEventListener('input',()=>naamEl.removeAttribute('aria-invalid'),{once:true}); }
+          if(naamEl){ naamEl.setAttribute('aria-invalid','true'); naamEl.placeholder=tr('ui.naam_verplicht'); naamEl.focus();
+            naamEl.addEventListener('input',()=>{ naamEl.removeAttribute('aria-invalid'); naamEl.placeholder=tr('ui.naam_ph'); },{once:true}); }
           return; }
         const herhaal=plaatsHerhaal; plaatsHerhaal=false;   // D6(a): na plaatsen cut heropenen met dezelfde foto?
         const ketting=plaatsKetting && !deel; plaatsKetting=false;   // '+ Nog een deel': na plaatsen + ✓ door naar het volgende deel
@@ -23559,7 +23570,7 @@ function maakTatnetGL(json, canvas) {
         const m=pendingEdit;
         const {naam,info,status}=leesModalDetails();
         if(!naam){ const naamEl=document.getElementById("cmNaam"); toast(tr('ui.naam_verplicht'));
-          if(naamEl){ naamEl.setAttribute('aria-invalid','true'); naamEl.focus(); naamEl.addEventListener('input',()=>naamEl.removeAttribute('aria-invalid'),{once:true}); }
+          if(naamEl){ naamEl.setAttribute('aria-invalid','true'); naamEl.placeholder=tr('ui.naam_verplicht'); naamEl.focus(); naamEl.addEventListener('input',()=>{ naamEl.removeAttribute('aria-invalid'); naamEl.placeholder=tr('ui.naam_ph'); },{once:true}); }
           return; }
         cutModal.classList.remove("on"); cutHistoryOpruimen(); pendingEdit=null;
         if(m.tex && m.tex!==imgTexture && m.tex.dispose) m.tex.dispose();   // oude textuur vrijgeven
