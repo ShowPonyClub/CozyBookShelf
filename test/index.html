@@ -11402,7 +11402,7 @@ function createTattoo(overrides = {}) {
    ============================================================ */
 // App-versie (semver, handmatig ophogen bij een release). Bij een bump ook de
 // CACHE-naam in sw.js meebumpen, zodat clients de nieuwe build ophalen.
-const APP_VERSIE = '0.3.142';
+const APP_VERSIE = '0.3.143';
 
 /* Dev-haken die de CLOUD raken hangen alleen op een ontwikkelmachine aan window. Ze zijn geen
    lek op zichzelf (zonder XSS roept niemand ze aan, en CSP + esc() houden XSS tegen), maar ze
@@ -18176,7 +18176,7 @@ async function verwijderVoorbeelden() {
     }
   }
   function genHerbouw(){
-    for(const mesh of pickMeshes){ mesh.__faceGrid=null; mesh.__ledeScan=null; mesh.__ledeKnip=null; }   // wereldposities zijn veranderd
+    for(const mesh of pickMeshes){ mesh.__faceGrid=null; mesh.__straal=null; mesh.__straalBouw=null; mesh.__ledeScan=null; mesh.__ledeKnip=null; }   // wereldposities zijn veranderd
     for(const m of markers){
       const b=markerBind(m); if(!b) continue;
       const ub=uitBind(m.mesh||pickMeshes[0], b); if(!ub) continue;
@@ -18197,6 +18197,7 @@ async function verwijderVoorbeelden() {
     resize();   // stage terug onder de kopbalk (slice 4o)
     resetView();
     uiterlijkNaLichaam();   // generator dicht: het haar weer met physics op het (nieuwe) lichaam
+    planStraalRaster();
     const na=genNa; genNa=null; if(na){ try{ na(soort); }catch(e){ console.error(e); } }
   }
   function zetGenTop(){ if(stage) document.documentElement.style.setProperty('--gen-top', Math.max(0, stage.getBoundingClientRect().top)+'px'); }
@@ -18526,6 +18527,93 @@ async function verwijderVoorbeelden() {
       for(const k of [ka,kb,kc]){ let va2=vmap.get(k); if(!va2){ va2=[]; vmap.set(k,va2); } va2.push(fi); }
     }
     return (mesh.__faceGrid={ cells, faces, vmap, maxR:Math.sqrt(maxR) });
+  }
+  /* ---- Snelle straal op het nieuwe lichaam (2026-10-02, slepen op de telefoon) ----
+     three.js test elke straal tegen alle ~27.000 driehoeken (~2 ms, ~7,5 ms bij 4x CPU, per vingerbeweging). Hier een vast raster
+     (cel 3 cm) met per cel de driehoeken waarvan de bounding box hem raakt (CSR: start/lijst), plus de driehoekhoeken in wereld-
+     coordinaten; de straal loopt cel voor cel (Amanatides-Woo) en test alleen die driehoeken. `mesh.__straal`, ongeldig op dezelfde
+     plekken als het faceGrid (lichaamsvorm, houding). Geeft hetzelfde terug als intersectObjects (gesorteerde treffers met point,
+     distance, face.normal in objectruimte, faceIndex, object). Uit met window.__raySnel=false. */
+  const STRAAL_CEL=0.03;
+  /* vooraf bouwen in stukjes (max ~6 ms per beeld): het startscherm draait dan gewoon door; is de straal eerder nodig, dan maakt
+     straalRaster de lopende opbouw in een keer af */
+  function planStraalRaster(){ setTimeout(async ()=>{ if(!(LICHAAM_GEN && pickMeshes.length===1 && !genAan())) return;
+    const mesh=pickMeshes[0]; if(mesh.__straal) return;
+    const it=mesh.__straalBouw || (mesh.__straalBouw=straalRasterStappen(mesh)); let t0=performance.now();
+    try{ for(;;){ if(mesh.__straalBouw!==it) return; const r=it.next(); if(r.done){ mesh.__straalBouw=null; return; }
+      if(performance.now()-t0>6){ await frameAdem(); t0=performance.now(); } } }
+    catch(e){ console.error(e); mesh.__straalBouw=null; } }, 800); }
+  function straalRaster(mesh){
+    if(mesh.__straal) return mesh.__straal;
+    const it=mesh.__straalBouw || straalRasterStappen(mesh); mesh.__straalBouw=null;
+    let r; do { r=it.next(); } while(!r.done);
+    return mesh.__straal;
+  }
+  function* straalRasterStappen(mesh){
+    const g=mesh.geometry, posA=g&&g.attributes&&g.attributes.position; if(!posA) return null;
+    const idx=g.index, cnt=idx?idx.count:posA.count, nT=(cnt/3)|0;
+    mesh.updateWorldMatrix(true,false);
+    const m=mesh.matrixWorld.elements, P=posA.array, tv=new Float32Array(nT*9);
+    let x0=Infinity,y0=Infinity,z0=Infinity,x1=-Infinity,y1=-Infinity,z1=-Infinity;
+    for(let t=0;t<nT;t++){ if(t%4000===3999) yield; for(let k=0;k<3;k++){ const v=(idx?idx.getX(t*3+k):t*3+k)*3, X=P[v], Y=P[v+1], Z=P[v+2], o=t*9+k*3;
+      const wx=m[0]*X+m[4]*Y+m[8]*Z+m[12], wy=m[1]*X+m[5]*Y+m[9]*Z+m[13], wz=m[2]*X+m[6]*Y+m[10]*Z+m[14];
+      tv[o]=wx; tv[o+1]=wy; tv[o+2]=wz;
+      if(wx<x0)x0=wx; if(wx>x1)x1=wx; if(wy<y0)y0=wy; if(wy>y1)y1=wy; if(wz<z0)z0=wz; if(wz>z1)z1=wz; } }
+    x0-=1e-4; y0-=1e-4; z0-=1e-4;
+    const C=STRAAL_CEL, nx=Math.floor((x1-x0)/C)+1, ny=Math.floor((y1-y0)/C)+1, nz=Math.floor((z1-z0)/C)+1, nc=nx*ny*nz;
+    const tel=new Int32Array(nc+1);
+    const bereik=(t,f)=>{ const o=t*9;
+      const ax=Math.min(tv[o],tv[o+3],tv[o+6]), bx=Math.max(tv[o],tv[o+3],tv[o+6]);
+      const ay=Math.min(tv[o+1],tv[o+4],tv[o+7]), by=Math.max(tv[o+1],tv[o+4],tv[o+7]);
+      const az=Math.min(tv[o+2],tv[o+5],tv[o+8]), bz=Math.max(tv[o+2],tv[o+5],tv[o+8]);
+      const i0=Math.max(0,Math.floor((ax-x0)/C)), i1=Math.min(nx-1,Math.floor((bx-x0)/C));
+      const j0=Math.max(0,Math.floor((ay-y0)/C)), j1=Math.min(ny-1,Math.floor((by-y0)/C));
+      const k0=Math.max(0,Math.floor((az-z0)/C)), k1=Math.min(nz-1,Math.floor((bz-z0)/C));
+      for(let k=k0;k<=k1;k++) for(let j=j0;j<=j1;j++) for(let i=i0;i<=i1;i++) f((k*ny+j)*nx+i); };
+    for(let t=0;t<nT;t++){ bereik(t,c=>{ tel[c+1]++; }); if(t%4000===3999) yield; }
+    for(let c=0;c<nc;c++) tel[c+1]+=tel[c];
+    const vul=tel.slice(0,nc), lijst=new Int32Array(tel[nc]);
+    for(let t=0;t<nT;t++){ bereik(t,c=>{ lijst[vul[c]++]=t; }); if(t%4000===3999) yield; }
+    mesh.__straal={ tv, nT, x0, y0, z0, x1, y1, z1, nx, ny, nz, C, start:tel, lijst, stempel:new Int32Array(nT), ronde:0 };
+  }
+  const _snA=new THREE.Vector3(), _snB=new THREE.Vector3(), _snC=new THREE.Vector3();
+  function straalSnel(mesh, r){
+    const R=straalRaster(mesh); if(!R) return null;
+    const ox=r.origin.x, oy=r.origin.y, oz=r.origin.z, dx=r.direction.x, dy=r.direction.y, dz=r.direction.z;
+    // straal tegen de box van het raster (slab)
+    let tmin=0, tmax=Infinity;
+    for(const [o,d,a,b] of [[ox,dx,R.x0,R.x1],[oy,dy,R.y0,R.y1],[oz,dz,R.z0,R.z1]]){
+      if(Math.abs(d)<1e-12){ if(o<a||o>b) return []; continue; }
+      let t1=(a-o)/d, t2=(b-o)/d; if(t1>t2){ const w=t1; t1=t2; t2=w; }
+      if(t1>tmin) tmin=t1; if(t2<tmax) tmax=t2; if(tmin>tmax) return []; }
+    const C=R.C, px=ox+dx*tmin, py=oy+dy*tmin, pz=oz+dz*tmin;
+    let i=Math.min(R.nx-1,Math.max(0,Math.floor((px-R.x0)/C))), j=Math.min(R.ny-1,Math.max(0,Math.floor((py-R.y0)/C))), k=Math.min(R.nz-1,Math.max(0,Math.floor((pz-R.z0)/C)));
+    const si=dx>0?1:-1, sj=dy>0?1:-1, sk=dz>0?1:-1;
+    const tdx=Math.abs(dx)>1e-12?C/Math.abs(dx):Infinity, tdy=Math.abs(dy)>1e-12?C/Math.abs(dy):Infinity, tdz=Math.abs(dz)>1e-12?C/Math.abs(dz):Infinity;
+    let txm=Math.abs(dx)>1e-12?(R.x0+(i+(dx>0?1:0))*C-ox)/dx:Infinity, tym=Math.abs(dy)>1e-12?(R.y0+(j+(dy>0?1:0))*C-oy)/dy:Infinity, tzm=Math.abs(dz)>1e-12?(R.z0+(k+(dz>0?1:0))*C-oz)/dz:Infinity;
+    const tv=R.tv, st=R.stempel, ronde=++R.ronde, voor=(mesh.material && mesh.material.side===THREE.FrontSide), achter=(mesh.material && mesh.material.side===THREE.BackSide);
+    const treffers=[];
+    for(;;){
+      const c=(k*R.ny+j)*R.nx+i;
+      for(let e=R.start[c]; e<R.start[c+1]; e++){ const t=R.lijst[e]; if(st[t]===ronde) continue; st[t]=ronde;
+        const o=t*9, e1x=tv[o+3]-tv[o], e1y=tv[o+4]-tv[o+1], e1z=tv[o+5]-tv[o+2], e2x=tv[o+6]-tv[o], e2y=tv[o+7]-tv[o+1], e2z=tv[o+8]-tv[o+2];
+        const hx=dy*e2z-dz*e2y, hy=dz*e2x-dx*e2z, hz=dx*e2y-dy*e2x, det=e1x*hx+e1y*hy+e1z*hz;
+        if(Math.abs(det)<1e-12) continue;
+        if(voor && det<0) continue; if(achter && det>0) continue;   // zoals three.js: voorkant = tegen de klok in vanaf de straal
+        const inv=1/det, sx=ox-tv[o], sy=oy-tv[o+1], sz=oz-tv[o+2], u=(sx*hx+sy*hy+sz*hz)*inv; if(u<0||u>1) continue;
+        const qx=sy*e1z-sz*e1y, qy=sz*e1x-sx*e1z, qz=sx*e1y-sy*e1x, v=(dx*qx+dy*qy+dz*qz)*inv; if(v<0||u+v>1) continue;
+        const tt=(e2x*qx+e2y*qy+e2z*qz)*inv; if(tt<r.near0 || tt>r.far0) continue;
+        treffers.push({ t, tt }); }
+      if(txm<tym && txm<tzm){ if(txm>tmax) break; i+=si; if(i<0||i>=R.nx) break; txm+=tdx; }
+      else if(tym<tzm){ if(tym>tmax) break; j+=sj; if(j<0||j>=R.ny) break; tym+=tdy; }
+      else { if(tzm>tmax) break; k+=sk; if(k<0||k>=R.nz) break; tzm+=tdz; }
+    }
+    treffers.sort((a,b)=>a.tt-b.tt);
+    const g=mesh.geometry, posA=g.attributes.position, idx=g.index;
+    return treffers.map(h=>{ const a=idx?idx.getX(h.t*3):h.t*3, b=idx?idx.getX(h.t*3+1):h.t*3+1, c=idx?idx.getX(h.t*3+2):h.t*3+2;
+      _snA.fromBufferAttribute(posA,a); _snB.fromBufferAttribute(posA,b); _snC.fromBufferAttribute(posA,c);
+      const n=new THREE.Vector3(); THREE.Triangle.getNormal(_snA,_snB,_snC,n);
+      return { distance:h.tt, point:new THREE.Vector3(ox+dx*h.tt, oy+dy*h.tt, oz+dz*h.tt), face:{ a, b, c, normal:n, materialIndex:0 }, faceIndex:h.t, object:mesh }; });
   }
   // Gereduceerde (lokale) BufferGeometry met alleen driehoeken die de decal-box raken, of null.
   // Broad-phase: voxel-cellen binnen de box-diagonaal-bol. Narrow-phase: centroid in de
@@ -18857,7 +18945,7 @@ async function verwijderVoorbeelden() {
       }
       pos.needsUpdate=true; if(nor) nor.needsUpdate=true;
       g.computeBoundingSphere(); g.computeBoundingBox();
-      mesh.__faceGrid=null; mesh.__ledeScan=null; mesh.__ledeKnip=null;   // wereldposities zijn veranderd
+      mesh.__faceGrid=null; mesh.__straal=null; mesh.__straalBouw=null; mesh.__ledeScan=null; mesh.__ledeKnip=null;   // wereldposities zijn veranderd
     }
     poseHoek=hoek||0;
   }
@@ -20177,7 +20265,11 @@ async function verwijderVoorbeelden() {
   function rayTo(x,y){
     const r=el.getBoundingClientRect();
     nd.x=((x-r.left)/r.width)*2-1; nd.y=-((y-r.top)/r.height)*2+1;
-    ray.setFromCamera(nd,camera); return ray.intersectObjects(pickMeshes,true);
+    ray.setFromCamera(nd,camera);
+    if(LICHAAM_GEN && pickMeshes.length===1 && window.__raySnel!==false){   // snelle straal over een raster (2026-10-02)
+      ray.ray.near0=ray.near; ray.ray.far0=ray.far;
+      try{ const h=straalSnel(pickMeshes[0], ray.ray); if(h) return h; }catch(e){ console.error("snelle straal", e); window.__raySnel=false; } }
+    return ray.intersectObjects(pickMeshes,true);
   }
   function surfaceAt(x,y){
     let hits=rayTo(x,y); if(!hits.length) return null;
@@ -23387,6 +23479,7 @@ function maakTatnetGL(json, canvas) {
     zetLaadVoortgang(0,0);   // label terug naar 'Laden…'
     herstelLoopt=false; hersteldOoit=true;
     planUiterlijk();   // haar en bril pas na de tattoos (opstarttijd)
+    planStraalRaster();   // snelle straal klaarzetten, niet pas bij de eerste aanraking
     texVoorraadLeeg();   // slice 5u: wat niet gebruikt is (ander model, mislukt) opruimen
     if(typeof renderMarkers==="function"){ try{renderMarkers();}catch(_){} }
     ttMerk('tt-herstel-eind');
