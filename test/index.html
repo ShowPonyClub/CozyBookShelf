@@ -11402,7 +11402,7 @@ function createTattoo(overrides = {}) {
    ============================================================ */
 // App-versie (semver, handmatig ophogen bij een release). Bij een bump ook de
 // CACHE-naam in sw.js meebumpen, zodat clients de nieuwe build ophalen.
-const APP_VERSIE = '0.3.141';
+const APP_VERSIE = '0.3.142';
 
 /* Dev-haken die de CLOUD raken hangen alleen op een ontwikkelmachine aan window. Ze zijn geen
    lek op zichzelf (zonder XSS roept niemand ze aan, en CSP + esc() houden XSS tegen), maar ze
@@ -20509,9 +20509,16 @@ async function verwijderVoorbeelden() {
     rebuildMarker(m); groepNa();
   }
   function herbouwAf(){ if(herbouwT) herbouwNu(); }   // nog een herbouw in de wacht: nu doen (loslaten, opslaan, afsluiten)
+  /* Tester 2026-10-02: met een losse ledemaat kon een tattoo niet naar een ander lichaamsdeel. Blijft de vinger een paar bewegingen
+     buiten het losse deel maar wel op het (doorzichtige) lichaam, dan stopt het los-bekijken en volgt de tattoo naar dat deel. */
+  let ledeRandTel=0;
+  const LEDE_RAND_STAPPEN=4;
   function moveDecalTo(x,y){
     if(!editDecal||editDecal.locked) return;
-    const s=surfaceAt(x,y); if(!s) return;
+    let s=surfaceAt(x,y);
+    if(!s && ledeActief && rayTo(x,y).length){ if(++ledeRandTel>=LEDE_RAND_STAPPEN){ ledeRandTel=0; stopIsolatie(); s=surfaceAt(x,y); } }
+    else ledeRandTel=0;
+    if(!s) return;
     if(editDecal.point.distanceTo(s.point)<0.0008) return;   // slice 5y: geen sprongen van 4 mm meer (de decal volgt nu goedkoop)
     groepVoor();   // slice 5v: ligging van de andere delen vastleggen (eerste stap van een gebaar)
     editDecal.point=s.point; editDecal.normal=s.normal; editDecal.mesh=s.mesh; editDecal.tri=(s.tri>=0?s.tri:-1);
@@ -22167,6 +22174,20 @@ function maakTatnetGL(json, canvas) {
       const A=new Float32Array(N);
       for(let i=0;i<N;i++){ if(p[i*4+3]<16) continue; A[i]=Math.max(0,Math.min(1,(DE[i]-7)/19)); }
       ontspikkel(A,W,H);
+      /* Tatnet als controle (tester 2026-10-02: kleurstuk met lichtblauwe lucht en witte geest werd vaag en verloor een stuk lucht).
+         De matte neemt de lichtste pixels als huid; is dat lichte inkt, dan vervaagt hij wat Tatnet als tattoo ziet. Binnen het
+         Tatnet-gebied blijft een pixel daarom dekkend (foto-kleur), tenzij hij zelf huidkleur heeft of lijkt op een huidkleurige
+         lokale huidschatting. Gemeten op 55 TSSD-kleurfoto's (bbox +25%, echte inktMatte + Tatnet): gemist 15,1 -> 11,9% (20 beter,
+         0 slechter), lek 12,5 -> 14,2% (3 slechter: zwarte stukken die als kleur gelden). Zwart ongewijzigd.
+         Runtime-schakelaar window.__matteKleurGebied=false = oud gedrag. */
+      if(gebied && window.__matteKleurGebied!==false){
+        const lp=[0,0,0], lq=[0,0,0];
+        const huidTint=(L)=>{ const c=Math.hypot(L[1],L[2]), hoek=Math.atan2(L[2],L[1])*180/Math.PI; return c>=5 && c<=35 && hoek>=10 && hoek<=90 && L[0]>=25; };
+        for(let i=0;i<N;i++){ const g=Math.max(0,Math.min(1,(gebied[i]-0.5)/0.3)); if(g<=A[i]) continue; const o=i*4;
+          _lab(p[o],p[o+1],p[o+2],lp); _lab(hd[o],hd[o+1],hd[o+2],lq);
+          const dL=lp[0]-lq[0], da=lp[1]-lq[1], db=lp[2]-lq[2];
+          const huid=huidTint(lp) || (huidTint(lq) && dL*dL+da*da+db*db<144);   // zelf huidkleur, of lijkt op een huidkleurige omgeving
+          if(!huid) A[i]=g; } }
       for(let i=0;i<N;i++){ const o=i*4; if(p[o+3]<16){ p[o+3]=0; continue; }
         const a=Math.max(0,Math.min(1,A[i]*1.1-0.04));
         if(randMatte){ const wb=randW[i]; p[o+3]=Math.round((a*wb+(1-wb))*p[o+3]); continue; }   // band: huid weg, binnenin de foto
@@ -23125,7 +23146,7 @@ function maakTatnetGL(json, canvas) {
     });
   }
   /* ---- Textuurcache (slice 5o) ---- */
-  const TEX_VERSIE=1;   // ophogen als de matte, Tatnet of de uitsnede-verwerking anders gaat rekenen
+  const TEX_VERSIE=2;   // ophogen als de matte, Tatnet of de uitsnede-verwerking anders gaat rekenen (2: kleur-matte houdt het Tatnet-gebied, 2026-10-02)
   const TEX_DB='tatties-textuur-'+(typeof DB_NAAM!=='undefined' ? DB_NAAM : 'tatties');
   let texDbP=null, texOpgeruimd=false;
   function texDb(){
@@ -23185,6 +23206,7 @@ function maakTatnetGL(json, canvas) {
       }catch(err){ /* kapot beeld: gewoon opnieuw maken */ }
     }
     const tex=await rebuildTextureFromKunst(k);
+    if(tex) tex.__vers=true;   // net berekend (niet uit de cache): het herstel kan het 2D-plaatje eenmalig verversen
     if(tex && tex.image && tex.image.toBlob){
       const fpNa=texVingerafdruk(k);   // na de verwerking (blend opgelost, inktgebied erbij): ook daarop treffen
       tex.image.toBlob(b=>{ if(b) texSchrijf(sleutel, { fpVoor:fp, fpNa, blob:b, blend:k.blend||null, inktAuto:k.inktAuto||null, tatnet:k.tatnet||null }); }, 'image/png');
@@ -23309,7 +23331,11 @@ function maakTatnetGL(json, canvas) {
     // Ouder record: 2D-velden bijvullen. Check op de VOLLE DB-kopie `t` - het in-RAM
     // record (recRef) is licht (kunst.src gestript), anders zou dit elke 3D-load voor
     // álle tattoos draaien en schrijven.
-    const magSync=!deel && (!t.positie || !t.kunst || !t.kunst.src);   // 2D-kaart volgt alleen het eerste deel
+    /* 2026-10-02: de kleur-matte rekent anders (TEX_VERSIE 2); het 2D-plaatje (detailpagina, kaart) van een kleur-inkt-tattoo eenmalig
+       uit de nieuwe textuur halen, anders blijft daar de oude, vervaagde versie staan. */
+    const ververs2D=!deel && !!(tex && tex.__vers) && !!k3 && k3===D.kunst3d && k3.blend==='inkt-kleur' && ((recRef.kunst3d && recRef.kunst3d.tex2D)|0)<TEX_VERSIE;
+    if(ververs2D && recRef.kunst3d) recRef.kunst3d.tex2D=TEX_VERSIE;
+    const magSync=!deel && (!t.positie || !t.kunst || !t.kunst.src || ververs2D);   // 2D-kaart volgt alleen het eerste deel
     // De 2D-kaart hoort altijd de rusthouding te tonen, ook als de armen nu wijd staan.
     const rustPt=(ubRust?ubRust.point:point), rustRot=(ubRust?ubRust.rot:rot);
     if(magSync) sync2D(recRef, rustPt, P.side||"voor", rustRot, P.size||0.09, tex);
@@ -23665,7 +23691,7 @@ function maakTatnetGL(json, canvas) {
     return new THREE.CanvasTexture(c);
   }
   // Dev-haakje (preview/console): decal-culling direct kunnen meten zonder UI-flow. Geen product-pad.
-  window.__tattiesDecalDbg = { inktMatte, enterEditDecal, faceGridFor, connectedDecalGeo, localDecalGeo, meshAtPoint, sceneRef:()=>scene, modelRef:()=>modelRoot,
+  window.__tattiesDecalDbg = { inktMatte, tatnetGebied, enterEditDecal, faceGridFor, connectedDecalGeo, localDecalGeo, meshAtPoint, sceneRef:()=>scene, modelRef:()=>modelRoot,
     stateRef:()=>({ inited, currentGender, meldAndereModel, actief3D, plaatsModus, plaatsDataAan: !!plaatsData, plaatsTex: !!(plaatsData && plaatsData.tex) }),
     cameraRef:()=>camera, rendererRef:()=>renderer,   // schaal-/fov-metingen (zie resize)
     bindDbg:{ maakBind, uitBind, triBijPunt, triAantal, triWereld, surfaceAt, markersRef:()=>markers },
