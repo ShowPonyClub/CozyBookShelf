@@ -11445,7 +11445,7 @@ function createTattoo(overrides = {}) {
    ============================================================ */
 // App-versie (semver, handmatig ophogen bij een release). Bij een bump ook de
 // CACHE-naam in sw.js meebumpen, zodat clients de nieuwe build ophalen.
-const APP_VERSIE = '0.3.148';
+const APP_VERSIE = '0.3.149';
 
 /* Dev-haken die de CLOUD raken hangen alleen op een ontwikkelmachine aan window. Ze zijn geen
    lek op zichzelf (zonder XSS roept niemand ze aan, en CSP + esc() houden XSS tegen), maar ze
@@ -22583,7 +22583,7 @@ function maakTatnetGL(json, canvas) {
   let _kleurNet=null, _kleurKapot=false;
   function kleurNet(){
     if(_kleurNet || _kleurKapot) return _kleurNet;
-    try{ const el=document.getElementById('kleur-model'); if(!el) throw new Error('geen kleur-model');
+    try{ const el=document.getElementById('kleur-model'); if(!el){ if(document.readyState==='loading') return null; throw new Error('geen kleur-model'); }   // modelblok staat na het app-script: tijdens het laden nog niet kapot verklaren
       const u=JSON.parse(el.textContent), bs=atob(u.w), q=new Int8Array(bs.length), L={}; for(let i=0;i<bs.length;i++) q[i]=(bs.charCodeAt(i)<<24)>>24;
       for(const l of u.layers){ const w=new Float32Array(l.n), per=l.n/l.shape[0];
         for(let o=0;o<l.shape[0];o++){ const s=l.scale[o]; for(let j=0;j<per;j++) w[o*per+j]=q[l.off+o*per+j]*s; }
