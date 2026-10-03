@@ -10782,6 +10782,142 @@ return { KLEUREN:KLEUREN, kanLaden:kanLaden, ontpak:ontpak, maakKapsel:maakKapse
          lsCache:lsCache, _gids:maakGids };
 })();
 /* LICHAAM-HAAR-EINDE */
+/* WELKOM-FLASH-BEGIN */
+/* Welkom-tattoos (2026-10-03): vijf eigen getekende flash-ontwerpen voor het draaiende model op het welkomscherm.
+   Klassiek lijnwerk, zwart met wat rood. Elk ontwerp is een SVG met klassen: .k = zwart vlak, .r = rood vlak, .l = lijn.
+   stand 'lijn' laat alleen de lijnen zien (eerst gezet), 'vol' alles (ingekleurd). Huid = transparant (maskers).
+   Door apply_welkom.py tussen WELKOM-FLASH-BEGIN/EINDE in tatties-3d.html gezet. Voorbeeld: tools/welkom/voorbeeld.html. */
+const WelkomFlash = (function(){
+  const ZWART = '#1b1715', ROOD = '#b8242a';
+  const stijl = (stand) => '<style>.l{fill:none;stroke:' + ZWART + ';stroke-width:5;stroke-linejoin:round;stroke-linecap:round}' +
+    '.k{fill:' + (stand === 'lijn' ? 'none' : ZWART) + '}.r{fill:' + (stand === 'lijn' ? 'none' : ROOD) + '}' +
+    '.kl{fill:none;stroke:' + (stand === 'lijn' ? 'none' : ZWART) + ';stroke-linecap:round;stroke-linejoin:round}</style>';
+
+  // Nautische ster: per punt een zwarte en een rode helft.
+  function ster(){
+    const c = 100, R = 92, r = 38, p = (a, s) => [c + s * Math.cos(a), c + s * Math.sin(a)].map(v => v.toFixed(1)).join(',');
+    let zw = '', ro = '', rand = 'M';
+    for (let k = 0; k < 5; k++) {
+      const a = -Math.PI / 2 + k * 2 * Math.PI / 5, ai = a - Math.PI / 5, an = a + Math.PI / 5;
+      zw += 'M' + c + ',' + c + 'L' + p(ai, r) + 'L' + p(a, R) + 'Z';
+      ro += 'M' + c + ',' + c + 'L' + p(a, R) + 'L' + p(an, r) + 'Z';
+      rand += (k ? 'L' : '') + p(a, R) + 'L' + p(an, r);
+    }
+    let spaken = '';
+    for (let k = 0; k < 5; k++) { const a = -Math.PI / 2 + k * 2 * Math.PI / 5; spaken += 'M' + c + ',' + c + 'L' + p(a, R) + 'M' + c + ',' + c + 'L' + p(a + Math.PI / 5, r); }
+    return { vb: [0, 0, 200, 200], romp: '<path class="k" d="' + zw + '"/><path class="r" d="' + ro + '"/>' +
+      '<path class="l" d="' + spaken + '" style="stroke-width:3"/><path class="l" d="' + rand + 'Z"/>' };
+  }
+
+  // Hart met lint 'MOM'.
+  const HART = 'M100,182 C40,138 8,104 18,64 C28,26 78,18 100,54 C122,18 172,26 182,64 C192,104 160,138 100,182 Z';
+  const LINT = 'M34,84 Q100,70 166,84 L166,118 Q100,104 34,118 Z';
+  const hart = {
+    vb: [0, 0, 200, 200],
+    defs: '<mask id="m-lint"><rect x="0" y="0" width="200" height="200" fill="#fff"/><path d="' + LINT + '" fill="#000"/>' +
+      '<path d="M34,88 L4,92 L16,106 L4,122 L34,122 Z M166,88 L196,92 L184,106 L196,122 L166,122 Z" fill="#000"/></mask>',
+    romp:
+      '<g mask="url(#m-lint)"><path class="r" d="' + HART + '"/><path class="kl" d="M44,72 C46,56 60,46 74,48" style="stroke-width:7"/>' +
+      '<path class="kl" d="M100,170 C130,148 158,124 168,98" style="stroke-width:9"/><path class="l" d="' + HART + '"/></g>' +
+      // lintuiteinden (achter), plooi zwart
+      '<path class="l" d="M34,88 L4,92 L16,106 L4,122 L34,122"/><path class="l" d="M166,88 L196,92 L184,106 L196,122 L166,122"/>' +
+      '<path class="k" d="M34,118 L34,122 L24,112 Z M166,118 L166,122 L176,112 Z"/>' +
+      '<path class="l" d="' + LINT + '"/>' +
+      // letters
+      '<path class="l" d="M56,108 L57,88 L68,101 L79,86 L80,106" style="stroke-width:5.5"/>' +
+      '<ellipse class="l" cx="100" cy="95" rx="10.5" ry="11" style="stroke-width:5.5"/>' +
+      '<path class="l" d="M120,106 L121,86 L132,101 L143,88 L144,108" style="stroke-width:5.5"/>'
+  };
+
+  // Anker met rood touw.
+  const anker = {
+    vb: [0, 0, 200, 210],
+    romp:
+      '<circle class="l" cx="100" cy="24" r="13" style="stroke-width:7"/>' +
+      '<path class="k" d="M58,46 L142,46 Q150,52 142,58 L58,58 Q50,52 58,46 Z"/>' +
+      '<circle class="k" cx="54" cy="52" r="8"/><circle class="k" cx="146" cy="52" r="8"/>' +
+      '<path class="k" d="M94,37 L106,37 L106,178 L94,178 Z"/>' +
+      '<path class="kl" d="M40,128 Q46,180 100,184 Q154,180 160,128" style="stroke-width:13"/>' +
+      '<path class="k" d="M24,138 L40,104 L58,132 Q40,126 24,138 Z M176,138 L160,104 L142,132 Q160,126 176,138 Z M88,180 L100,200 L112,180 Z"/>' +
+      '<path class="l" d="M58,46 L142,46 Q150,52 142,58 L58,58 Q50,52 58,46 Z M94,37 L94,46 M106,37 L106,46 M94,58 L94,178 M106,58 L106,178 ' +
+      'M24,138 L40,104 L58,132 M176,138 L160,104 L142,132 M88,180 L100,200 L112,180 M40,128 Q46,180 100,184 Q154,180 160,128"/>' +
+      '<circle class="l" cx="54" cy="52" r="8"/><circle class="l" cx="146" cy="52" r="8"/>' +
+      // touw: zwart onder, rood erop
+      '<path class="kl" d="M100,36 C146,52 146,80 100,92 C54,104 54,128 100,140 C146,152 146,170 116,176" style="stroke-width:12"/>' +
+      '<path d="M100,36 C146,52 146,80 100,92 C54,104 54,128 100,140 C146,152 146,170 116,176" class="touw"/>'
+  };
+
+  // Roos met twee bladeren (bovenaanzicht, kelk met spiraal, gekrulde voorste bloemblaadjes).
+  const ROOS = 'M100,30 C80,26 58,36 52,50 C40,54 36,70 42,84 C36,100 46,122 64,132 C80,142 120,142 136,132 C154,122 164,100 158,84 C164,70 160,54 148,50 C142,36 120,26 100,30 Z';
+  const BLAD = 'M66,124 C50,112 24,120 8,150 C32,162 60,152 66,124 Z M134,124 C150,112 176,120 192,150 C168,162 140,152 134,124 Z';
+  const roos = {
+    vb: [0, 0, 200, 170],
+    defs: '<mask id="m-nerf"><rect x="0" y="0" width="200" height="170" fill="#fff"/>' +
+      '<path d="M64,128 C46,134 28,142 14,149 M136,128 C154,134 172,142 186,149 M46,134 L40,124 M34,140 L26,132 M154,134 L160,124 M166,140 L174,132" stroke="#000" stroke-width="3" stroke-linecap="round" fill="none"/></mask>' +
+      '<mask id="m-bloem"><rect x="0" y="0" width="200" height="170" fill="#fff"/><path d="' + ROOS + '" fill="#000"/></mask>',
+    romp:
+      '<path class="k" d="' + BLAD + '" mask="url(#m-nerf)"/>' +
+      '<path class="l" d="' + BLAD + '" mask="url(#m-bloem)"/>' +
+      '<path class="r" d="' + ROOS + '"/>' +
+      // diepte: donkere plooien in de kelk
+      '<path class="k" d="M62,96 C78,114 122,114 138,96 C124,106 76,106 62,96 Z"/>' +
+      '<path class="k" d="M80,80 C88,92 112,92 120,80 C112,86 88,86 80,80 Z"/>' +
+      '<path class="k" d="M66,50 C80,40 120,40 134,50 C120,46 80,46 66,50 Z"/>' +
+      '<path class="l" d="' + ROOS + '"/>' +
+      '<path class="l" d="M100,60 C113,56 121,67 113,76 C105,84 90,79 92,68 C94,60 106,58 108,66"/>' +
+      '<path class="l" d="M84,56 C70,64 72,90 98,92 M116,56 C130,64 128,90 102,92"/>' +
+      '<path class="l" d="M62,70 C60,104 140,104 138,70"/>' +
+      '<path class="l" d="M48,96 C66,124 134,124 152,96"/>' +
+      '<path class="l" d="M66,48 C82,38 118,38 134,48"/>' +
+      '<path class="l" d="M52,50 C60,58 62,64 62,70 M148,50 C140,58 138,64 138,70"/>' +
+      '<path class="l" d="M42,84 C46,90 48,94 48,96 M158,84 C154,90 152,94 152,96"/>'
+  };
+
+  // Zwaluw (vliegend naar links).
+  const zwaluw = {
+    vb: [0, 0, 210, 160],
+    defs: '<mask id="m-veer"><rect x="0" y="0" width="210" height="160" fill="#fff"/>' +
+      '<path d="M96,44 L134,36 M106,52 L148,42 M118,58 L158,52 M104,104 L130,128 M114,100 L146,130 M126,96 L160,136" stroke="#000" stroke-width="3.5" stroke-linecap="round" fill="none"/>' +
+      '<circle cx="42" cy="58" r="4" fill="#000"/></mask>',
+    romp:
+      '<g mask="url(#m-veer)">' +
+      '<path class="k" d="M66,54 C86,24 130,8 184,6 C150,24 124,48 106,70 Z"/>' +
+      '<path class="k" d="M84,94 C104,120 134,142 182,150 C154,128 136,108 124,94 Z"/>' +
+      '<path class="k" d="M130,80 L204,66 L162,90 L200,118 L130,96 Z"/>' +
+      '<path class="r" d="M30,70 C44,92 86,104 136,94 L136,82 C104,72 72,62 52,46 C36,48 28,58 30,70 Z"/>' +
+      '<path class="k" d="M52,46 C78,50 108,62 136,80 L136,86 C110,80 82,72 58,68 C42,66 36,52 52,46 Z"/>' +
+      '<circle class="k" cx="46" cy="60" r="16"/>' +
+      '<path class="k" d="M32,56 L12,62 L32,68 Z"/></g>' +
+      '<path class="l" d="M66,54 C86,24 130,8 184,6 C150,24 124,48 106,70 M84,94 C104,120 134,142 182,150 C154,128 136,108 124,94 ' +
+      'M130,80 L204,66 L162,90 L200,118 L130,96 M32,56 L12,62 L32,68 M30,70 C44,92 86,104 136,94 M52,46 C78,50 108,62 136,80"/>' +
+      '<circle class="l" cx="46" cy="60" r="16" style="stroke-width:4"/>'
+  };
+
+  const ONTWERPEN = { zwaluw, roos, anker, hart, ster: ster() };
+  function svg(id, stand){
+    const o = ONTWERPEN[id]; if (!o) return '';
+    const [x, y, w, h] = o.vb;
+    let romp = o.romp;
+    if (id === 'anker') romp = romp.replace('class="touw"', 'style="fill:none;stroke:' + (stand === 'lijn' ? 'none' : ROOD) + ';stroke-width:6;stroke-linecap:round"');
+    return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="' + [x - 6, y - 6, w + 12, h + 12].join(' ') + '" width="' + (w + 12) + '" height="' + (h + 12) + '">' +
+      stijl(stand) + (o.defs ? '<defs>' + o.defs + '</defs>' : '') + romp + '</svg>';
+  }
+  // Canvas met het ontwerp (px = langste zijde). Promise.
+  function canvas(id, stand, px){
+    px = px || 512;
+    const o = ONTWERPEN[id]; if (!o) return Promise.reject(new Error('onbekend ontwerp ' + id));
+    const w = o.vb[2] + 12, h = o.vb[3] + 12, s = px / Math.max(w, h);
+    return new Promise((ok, mis) => {
+      const img = new Image();
+      img.onload = () => { const c = document.createElement('canvas'); c.width = Math.round(w * s); c.height = Math.round(h * s);
+        const x = c.getContext('2d'); x.drawImage(img, 0, 0, c.width, c.height); ok(c); };
+      img.onerror = () => mis(new Error('ontwerp ' + id));
+      img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg(id, stand));
+    });
+  }
+  return { ids: Object.keys(ONTWERPEN), svg, canvas, ZWART, ROOD };
+})();
+/* WELKOM-FLASH-EINDE */
 /* ============================================================
    STAP 1 - DATAMODEL
    ============================================================ */
@@ -11447,7 +11583,7 @@ function createTattoo(overrides = {}) {
    ============================================================ */
 // App-versie (semver, handmatig ophogen bij een release). Bij een bump ook de
 // CACHE-naam in sw.js meebumpen, zodat clients de nieuwe build ophalen.
-const APP_VERSIE = '0.3.150';
+const APP_VERSIE = '0.3.151';
 
 /* Dev-haken die de CLOUD raken hangen alleen op een ontwikkelmachine aan window. Ze zijn geen
    lek op zichzelf (zonder XSS roept niemand ze aan, en CSP + esc() houden XSS tegen), maar ze
@@ -16400,7 +16536,7 @@ function toonOnboarding() {
   { const sa = document.getElementById('onb-stap-account'); if (sa) sa.hidden = true; }   // slice 5c
   ov.hidden = false;
   if (typeof LICHAAM_GEN !== 'undefined' && LICHAAM_GEN && typeof window.__tattiesOnbModel === 'function') {   // welkom met draaiend model (slice 4q)
-    ov.classList.add('onb-model'); try { window.__tattiesOnbModel(true); } catch (e) { console.error(e); }
+    ov.classList.add('onb-model'); try { window.__tattiesOnbModel(true, { welkom: true }); } catch (e) { console.error(e); }   // levendiger welkom (2026-10-03)
   }
   laagOpenHistory('onboarding', rondOnboardingAf);   // ONB-1: Android-terug/edge-swipe sluit de intro i.p.v. de app
 }
@@ -18302,7 +18438,8 @@ async function verwijderVoorbeelden() {
      welkom, startscherm, filmpje), niet met sprongen van de camera (beginstand, heel lichaam, naar een tattoo). */
   let haarObj=null, brilObj=null, haarPak=null, uiterlijkBezig=false, uiterlijkOpnieuw=false, haarHerbouwT=0;
   let haarDraai=0, haarDraaiWas=0, haarTheta=0, haarT=0, uiterlijkFades=[];
-  function uiterlijkKeuze(){ return LichaamHaar.normaliseer(lichaamLees()); }
+  let welkom=null;   // levendiger welkom (2026-10-03): tijdelijke stand, zie welkomAan
+  function uiterlijkKeuze(){ const U=LichaamHaar.normaliseer(lichaamLees()); if(welkom) U.bril={ aan:true }; return U; }   // welkom: zonnebril, niets opgeslagen
   function uiterlijkHaarWeg(){ if(!haarObj) return; if(haarObj.groep.parent) haarObj.groep.parent.remove(haarObj.groep); haarObj.dispose(); haarObj=null; }
   function uiterlijkBrilWeg(){ if(!brilObj) return; if(brilObj.groep.parent) brilObj.groep.parent.remove(brilObj.groep); brilObj.dispose(); brilObj=null; }
   function uiterlijkWeg(){ uiterlijkHaarWeg(); uiterlijkBrilWeg(); uiterlijkFades=[]; }
@@ -19855,8 +19992,9 @@ async function verwijderVoorbeelden() {
   /* Welkom (slice 4q): het model draait achter het paneel van de intro. De render-lus zet dan elke frame de camera
      (ook als het model nog aan het laden is en daarna zijn beginstand zet). */
   let onbDraai=false;
-  window.__tattiesOnbModel=function(aan){
+  window.__tattiesOnbModel=function(aan, opties){
     aan=!!aan && LICHAAM_GEN;
+    if(aan && opties && opties.welkom) welkomAan(); else welkomUit();   // levendiger welkom: alleen op het eerste scherm
     if(aan===onbDraai) return;
     onbDraai=aan;
     document.documentElement.classList.toggle('onbmodel', aan);
@@ -19864,6 +20002,138 @@ async function verwijderVoorbeelden() {
     resize();   // stage vast over het scherm (aan) of terug onder de kop (uit)
   };
   window.__tattiesDraaiHint=()=>toonDraaiHintEenmalig();   // na de intro (slice 4s)
+  /* ---- Levendiger welkom (2026-10-03, apply_welkom.py; idee eigenaar) ----
+     Het draaiende model op het eerste welkomscherm krijgt de zonnebril (bril 29, via uiterlijkKeuze), de hartjesonderbroek (underwear
+     tijdelijk 'boxer') en vijf eigen getekende flash-tattoos (welkom_flash.js). Die verschijnen een voor een zodra hun kant naar je toe
+     draait: eerst het lijnwerk, dan de kleur, en ze blijven staan. Niets wordt opgeslagen: de tattoos zijn losse meshes (niet in markers),
+     onderbroek en bril gaan terug in welkomUit (__tattiesOnbModel(false): Maak je lichaam, Overslaan, rondOnboardingAf). Niet als er al
+     echte tattoos zijn (introductie opnieuw). Eerste indruk niet trager: textuur pas na het herstel, decals pas als de graaf klaar is
+     (planGraaf) en hooguit een per beurt. Dev: window.__tattiesWelkomDbg. */
+  const WELKOM_PLEKKEN=[   // dir = kant waar de huid naar wijst (model kijkt naar +z, 'links' = +x); y = hoogteband (deel van de lengte)
+    { id:'zwaluw', zone:'borst', dir:[-0.3,0.3,1], drempel:0.9, y:[0.76,0.82], size:0.15, rot:-12 },
+    { id:'roos', zone:'onderarm-links', naar:'bovenarm-links', t:0.3, dir:[0,0.4,1], drempel:0.35, size:0.09, rot:-35 },
+    { id:'hart', zone:'bovenarm-rechts', dir:[-0.7,0.3,0.6], drempel:0.8, size:0.10, rot:0 },
+    { id:'anker', zone:'onderarm-rechts', naar:'bovenarm-rechts', t:0.3, dir:[0,0.4,1], drempel:0.35, size:0.075, rot:-35 },
+    { id:'ster', zone:'rug', dir:[0.3,0.2,-1], drempel:0.85, y:[0.74,0.8], size:0.11, rot:8 } ];
+  const WELKOM_WACHT=600, WELKOM_TUSSEN=1400, WELKOM_LIJN=650, WELKOM_KLEUR=800, WELKOM_OP=0.94, WELKOM_ZICHT=0.35;
+  function welkomAan(){
+    if(welkom || !LICHAAM_GEN || typeof WelkomFlash==='undefined') return;
+    if(typeof tattoos!=='undefined' && Array.isArray(tattoos) && tattoos.some(t=>t && !t.deleted)) return;   // al een collectie: niet aankleden
+    welkom={ tex:{}, plek:{}, stukken:[], gedaan:new Set(), start:0, laatst:0, obWas:underwear };
+    try{ performance.mark('tw-aan'); }catch(e){}
+    if(underwear!=='boxer'){ underwear='boxer'; if(inited && pickMeshes.length){ try{ rebuildUnderwear(); }catch(e){ console.error(e); } } }
+    if(inited && pickMeshes.length) uiterlijkBouw();   // anders na het herstel (planUiterlijk)
+  }
+  function welkomUit(){
+    const W=welkom; if(!W) return;
+    welkom=null;
+    for(const s of W.stukken){
+      for(const o of [s.lijn, s.vol]) if(o){ if(o.parent) o.parent.remove(o); o.material.dispose(); }
+      if(s.vol && s.vol.geometry) s.vol.geometry.dispose();
+    }
+    for(const k in W.tex){ W.tex[k].lijn.dispose(); W.tex[k].vol.dispose(); }
+    if(underwear!==W.obWas){ underwear=W.obWas; if(inited && pickMeshes.length){ try{ rebuildUnderwear(); }catch(e){ console.error(e); } } }
+    if(inited && pickMeshes.length) uiterlijkBouw();   // bril weer volgens de instellingen
+  }
+  function welkomTex(c){ const t=new THREE.CanvasTexture(c); t.encoding=THREE.sRGBEncoding; t.anisotropy=maxAniso(); t.needsUpdate=true; return t; }
+  async function welkomLaad(W){
+    for(const P of WELKOM_PLEKKEN){
+      if(W!==welkom) return;
+      try{
+        const [l, v]=await Promise.all([WelkomFlash.canvas(P.id, 'lijn', 512), WelkomFlash.canvas(P.id, 'vol', 512)]);
+        if(W!==welkom) return;
+        W.tex[P.id]={ lijn:welkomTex(l), vol:welkomTex(v) };
+      }catch(e){ console.error('welkom', e); }
+      await frameAdem();
+    }
+  }
+  /* Plek op DIT lichaam: het midden van de zone (binnen de hoogteband; met naar/t een stuk richting het midden van een buurzone),
+     dan de dichtste vertex van de zone die naar dir wijst. */
+  function welkomPlek(P){
+    const mesh=pickMeshes[0], K=zoneKaart(); if(!mesh || !K) return null;
+    const zi=K.namen.indexOf(P.zone); if(zi<0) return null;
+    const pos=mesh.geometry.attributes.position.array, nor=mesh.geometry.attributes.normal.array;
+    const lang=LichaamMotor.lengteCm()/100, y0=P.y ? P.y[0]*lang : -Infinity, y1=P.y ? P.y[1]*lang : Infinity;
+    const d=new THREE.Vector3().fromArray(P.dir).normalize();
+    let cx=0, cy=0, cz=0, n=0;
+    for(let i=0;i<K.z.length;i++) if(K.z[i]===zi && pos[i*3+1]>=y0 && pos[i*3+1]<=y1){ cx+=pos[i*3]; cy+=pos[i*3+1]; cz+=pos[i*3+2]; n++; }
+    if(!n) return null;
+    cx/=n; cy/=n; cz/=n;
+    const zn=P.naar ? K.namen.indexOf(P.naar) : -1;
+    if(zn>=0){ let ax=0, ay=0, az=0, m=0;
+      for(let i=0;i<K.z.length;i++) if(K.z[i]===zn){ ax+=pos[i*3]; ay+=pos[i*3+1]; az+=pos[i*3+2]; m++; }
+      if(m){ cx+=(ax/m-cx)*P.t; cy+=(ay/m-cy)*P.t; cz+=(az/m-cz)*P.t; } }
+    let best=-1, bd=Infinity;
+    for(let i=0;i<K.z.length;i++){
+      if(K.z[i]!==zi || pos[i*3+1]<y0 || pos[i*3+1]>y1 || nor[i*3]*d.x+nor[i*3+1]*d.y+nor[i*3+2]*d.z<=P.drempel) continue;
+      const dx=pos[i*3]-cx, dy=pos[i*3+1]-cy, dz=pos[i*3+2]-cz, q=dx*dx+dy*dy+dz*dz; if(q<bd){ bd=q; best=i; } }
+    if(best<0) return null;
+    mesh.updateWorldMatrix(true,false);
+    return { point:new THREE.Vector3(pos[best*3],pos[best*3+1],pos[best*3+2]).applyMatrix4(mesh.matrixWorld),
+             normal:new THREE.Vector3(nor[best*3],nor[best*3+1],nor[best*3+2]).transformDirection(mesh.matrixWorld).normalize() };
+  }
+  function welkomZet(W, P, t){
+    const mesh=pickMeshes[0], p=W.plek[P.id], tx=W.tex[P.id], _t0=performance.now();
+    W.gedaan.add(P.id); W.laatst=t;
+    let vol=null; try{ vol=makeImage(p.point, p.normal, P.rot, P.size, tx.vol, mesh, false); }catch(e){ console.error('welkom', e); }
+    if(!vol) return;
+    const lijn=new THREE.Mesh(vol.geometry, vol.material.clone()); lijn.material.map=tx.lijn;
+    body.add(lijn); lijn.renderOrder=0.1; vol.renderOrder=0.2;
+    for(const o of [lijn, vol]){ o.material.opacity=0; o.material.alphaTest=0.01; o.material.needsUpdate=true; o.visible=false; o.userData.welkom=true; }   // daarna alleen de opacity (geen hercompileren)
+    W.stukken.push({ id:P.id, lijn, vol, t0:t, ms:Math.round(performance.now()-_t0) });
+    if(W.stukken.length===1){ try{ performance.mark('tw-eerste'); }catch(e){} }
+    if(W.gedaan.size===WELKOM_PLEKKEN.length){ try{ performance.mark('tw-alle'); }catch(e){} }
+  }
+  /* Graaf in stukjes van ~5 ms (zelfde generators en velden als planGraaf, die dan niets meer te doen heeft), zodat de eerste
+     tattoo niet op de achtergrondbouw wacht en niet midden in een beeld de hele graaf bouwt. */
+  function welkomGraaf(mesh){
+    const t0=performance.now();
+    try{
+      if(!mesh.__faceGrid){
+        const it=mesh.__faceGridBouw || (mesh.__faceGridBouw=faceGridStappen(mesh));
+        while(performance.now()-t0<5){ const r=it.next(); if(r.done){ if(mesh.__faceGridBouw===it) mesh.__faceGridBouw=null; break; } }
+        if(!mesh.__faceGrid) return false;
+      }
+      const grid=mesh.__faceGrid; if(grid.vg) return true;
+      const b=(mesh.__vgBouw && mesh.__vgBouw.grid===grid) ? mesh.__vgBouw : (mesh.__vgBouw={ grid, it:vertexGraafStappen(mesh, grid) });
+      while(performance.now()-t0<5){ const r=b.it.next(); if(r.done){ if(mesh.__vgBouw===b) mesh.__vgBouw=null; break; } }
+      return !!grid.vg;
+    }catch(e){ console.error('welkom graaf', e); return true; }   // fout: makeImage bouwt zelf (of valt terug)
+  }
+  function welkomStap(t){
+    const W=welkom; if(!W || !modelRoot || !pickMeshes.length || !hersteldOoit || herstelLoopt || genAan()) return;
+    if(!W.start){ W.start=t+WELKOM_WACHT; welkomLaad(W); return; }
+    const gl=u=>{ u=Math.max(0, Math.min(1, u)); return u*u*(3-2*u); };
+    for(const s of W.stukken){
+      if(s.klaar) continue;
+      if(!s.vol.visible){ s.vol.visible=true; if(s.lijn) s.lijn.visible=true; s.t0=t; continue; }   // bouwen en (eerste keer) shader compileren niet in hetzelfde beeld
+      const u=t-s.t0, a=gl(u/WELKOM_LIJN), b=gl((u-WELKOM_LIJN*0.85)/WELKOM_KLEUR);
+      if(s.lijn) s.lijn.material.opacity=WELKOM_OP*a;
+      s.vol.material.opacity=WELKOM_OP*b;
+      if(b>=1){ s.klaar=true; if(s.lijn){ body.remove(s.lijn); s.lijn.material.dispose(); s.lijn=null; } }
+    }
+    if(W.gedaan.size>=WELKOM_PLEKKEN.length) return;
+    if(!welkomGraaf(pickMeshes[0]) && t<W.start+6000) return;   // graaf nog niet klaar: eerst die (in stukjes)
+    if(t<W.start || (W.laatst && t-W.laatst<WELKOM_TUSSEN)) return;
+    for(const P of WELKOM_PLEKKEN){   // in lijstvolgorde: de eerste die naar je toe kijkt (zwaluw op de borst eerst)
+      if(W.gedaan.has(P.id) || !W.tex[P.id]) continue;
+      if(!(P.id in W.plek)) W.plek[P.id]=welkomPlek(P);
+      const p=W.plek[P.id]; if(!p){ W.gedaan.add(P.id); continue; }
+      if(_wX.copy(camera.position).sub(p.point).normalize().dot(p.normal)>WELKOM_ZICHT){ welkomZet(W, P, t); break; }
+    }
+  }
+  window.__tattiesWelkomDbg={
+    info:()=>welkom ? { gedaan:[...welkom.gedaan], stukken:welkom.stukken.map(s=>({ id:s.id, klaar:!!s.klaar, op:+s.vol.material.opacity.toFixed(2), ms:s.ms })),
+      tex:Object.keys(welkom.tex), start:Math.round(welkom.start), onderbroek:underwear, bril:!!brilObj } : null,
+    plek:(id)=>{ const P=WELKOM_PLEKKEN.find(q=>q.id===id); const p=P && welkomPlek(P); return p ? { point:p.point.toArray(), normal:p.normal.toArray() } : null; },
+    alles:()=>{ const W=welkom; if(!W) return false; const t=performance.now();   // opnames: alles meteen
+      for(const P of WELKOM_PLEKKEN){ if(W.gedaan.has(P.id) || !W.tex[P.id]) continue; if(!(P.id in W.plek)) W.plek[P.id]=welkomPlek(P); if(W.plek[P.id]) welkomZet(W, P, t-5000); }
+      return W.gedaan.size; },
+    zet:(id, eig)=>{ const P=WELKOM_PLEKKEN.find(q=>q.id===id); if(P) Object.assign(P, eig); return P; },
+    opnieuw:()=>{ const W=welkom; if(!W) return false; for(const s of W.stukken){ for(const o of [s.lijn, s.vol]) if(o){ if(o.parent) o.parent.remove(o); o.material.dispose(); } }
+      W.stukken=[]; W.gedaan.clear(); W.plek={}; W.laatst=0; return true; },
+    hoek:(th)=>{ if(th!=null) theta=+th; return theta; },
+    aan:()=>welkomAan(), uit:()=>welkomUit() };
   function onbCamera(){
     /* Het model past in de ruimte boven het paneel (zoals genCamera): op een klein scherm vielen de benen er anders achter. */
     const lang=(LICHAAM_GEN && LichaamMotor.geometry()) ? LichaamMotor.lengteCm()/100 : 1.75;
@@ -24167,6 +24437,7 @@ function maakTatnetGL(json, canvas) {
     }
     // selectie-ring is nu een op de huid geprojecteerde decal (buildSelRing) -> geen per-frame update nodig
     if(onbDraai) onbCamera();   // welkom: model draait (slice 4q)
+    if(welkom) welkomStap(t);   // welkom: tattoos verschijnen (2026-10-03)
     if(key){ key.position.copy(camera.position); key.position.y+=1.5; key.position.x+=1.0; }
     haarStap(t);   // haar en bril (2026-10-01)
     renderer.render(scene,camera); requestAnimationFrame(loop);
