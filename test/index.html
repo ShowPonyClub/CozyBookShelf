@@ -11583,7 +11583,7 @@ function createTattoo(overrides = {}) {
    ============================================================ */
 // App-versie (semver, handmatig ophogen bij een release). Bij een bump ook de
 // CACHE-naam in sw.js meebumpen, zodat clients de nieuwe build ophalen.
-const APP_VERSIE = '0.3.151';
+const APP_VERSIE = '0.3.152';
 
 /* Dev-haken die de CLOUD raken hangen alleen op een ontwikkelmachine aan window. Ze zijn geen
    lek op zichzelf (zonder XSS roept niemand ze aan, en CSP + esc() houden XSS tegen), maar ze
@@ -24820,12 +24820,12 @@ function maakTatnetGL(json, canvas) {
   if(typeof toonView==="function"){
     const _origToonView=toonView;
     toonView=function(naam){
-      if(bootRedirect && naam==="home"){ bootRedirect=false; _origToonView("start"); return; }
+      if(bootRedirect && naam==="home"){ bootRedirect=false; if(huidigeView==="home" || huidigeView==="start") _origToonView("start"); return; }   // al elders heen (welkom-model, 3D, generator): blijven
       return _origToonView.apply(this,arguments);
     };
   }
   // Meteen de juiste weergave tonen (voorkomt een flits). Idempotent.
-  function ensureStart(){ try{ bindCutUI(); if(typeof toonView==="function") toonView("start"); }catch(e){ console.error(e); } }
+  function ensureStart(){ try{ bindCutUI(); if(typeof toonView==="function" && (huidigeView==="home" || huidigeView==="start")) toonView("start"); }catch(e){ console.error(e); } }   // alleen bij het opstarten: load kan na het welkom-model of een tik naar 3D komen
   if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",ensureStart);
   else ensureStart();
   window.addEventListener("load",ensureStart);
