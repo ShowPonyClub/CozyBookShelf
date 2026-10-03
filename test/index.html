@@ -2096,6 +2096,18 @@ html.knipfull .cutmodal.cm-review .cm-bewerkbtn span{position:absolute;width:1px
   display:flex;align-items:center;justify-content:center;background:var(--rood);color:var(--op-accent);border:2px solid var(--rood-diep);box-shadow:3px 3px 0 var(--rood-diep);
   font-size:28px;line-height:1;cursor:pointer;}
 #t3d-add:active{transform:scale(.97)}
+/* Precies verschuiven (2026-10-03): kruis van vier ronde knoppen linksonder, net boven de bewerkbalk (--duw-b zet resize) */
+.t3d-duw{position:absolute;left:max(12px,env(safe-area-inset-left,0px));bottom:calc(var(--duw-b,96px) + env(safe-area-inset-bottom,0px));z-index:6;
+  display:grid;grid-template-columns:repeat(3,44px);grid-template-rows:repeat(3,44px);grid-template-areas:". op ." "links . rechts" ". neer .";
+  -webkit-user-select:none;user-select:none;-webkit-touch-callout:none;}
+.t3d-duw[hidden]{display:none;}
+.t3d-duw button{width:40px;height:40px;margin:2px;padding:0;border-radius:50%;background:var(--kaart);border:1px solid var(--rand);color:var(--tekst);
+  display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.22);touch-action:none;font-family:inherit;}
+.t3d-duw button[data-duw="op"]{grid-area:op;} .t3d-duw button[data-duw="neer"]{grid-area:neer;}
+.t3d-duw button[data-duw="links"]{grid-area:links;} .t3d-duw button[data-duw="rechts"]{grid-area:rechts;}
+.t3d-duw button:hover,.t3d-duw button.druk{border-color:var(--accent);color:var(--accent);}
+.t3d-duw button .ik{width:20px;height:20px;}
+.t3d-duw.slot button{opacity:.4;cursor:default;}
 #t3d-add[hidden]{display:none;}
 #t3d-banner,#t2d-banner{position:absolute;left:50%;top:64px;transform:translateX(-50%);z-index:7;max-width:90%;   /* onder de overlay-knoppen */
   background:var(--accent);color:var(--op-inkt);font-size:var(--fs-sm);font-weight:600;padding:8px 14px;border-radius:999px;
@@ -2554,6 +2566,13 @@ form label{text-transform:none;letter-spacing:.005em;font-size:.8rem;color:var(-
       <div id="t3d-banner" hidden></div>
       <div id="lege-hint-3d" class="lege-hint" data-i18n="ui.lege_cta" hidden>Nog geen tattoos - tik op + om er een toe te voegen</div>
       <button id="t3d-add" data-i18n-aria="fab.nieuw" data-i18n-title="fab.nieuw" aria-label="Nieuwe tattoo" title="Nieuwe tattoo">+</button>
+      <!-- Precies verschuiven (2026-10-03): vier pijltjes zolang een tattoo geselecteerd is -->
+      <div id="t3d-duw" class="t3d-duw" role="group" data-i18n-aria="eb.duw_label" aria-label="Precies verschuiven" hidden>
+        <button type="button" data-duw="op" data-i18n-title="eb.duw_op" data-i18n-aria="eb.duw_op" title="Omhoog" aria-label="Omhoog"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 15l6-6 6 6"/></svg></button>
+        <button type="button" data-duw="links" data-i18n-title="eb.duw_links" data-i18n-aria="eb.duw_links" title="Naar links" aria-label="Naar links"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg></button>
+        <button type="button" data-duw="rechts" data-i18n-title="eb.duw_rechts" data-i18n-aria="eb.duw_rechts" title="Naar rechts" aria-label="Naar rechts"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>
+        <button type="button" data-duw="neer" data-i18n-title="eb.duw_neer" data-i18n-aria="eb.duw_neer" title="Omlaag" aria-label="Omlaag"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      </div>
       <div id="t3d-loading"><div class="t3d-spin"></div><span data-i18n="ui.laden">Laden&#8230;</span></div>
       <!-- Hintregel: eenmalig zichtbaar bij de eerste 3D-opening (vervaagt), en zolang een ledemaat los staat -->
       <div id="hint" data-i18n="ui.draai_hint">Sleep om te draaien &middot; dubbeltik op de huid om een tattoo te plaatsen</div>
@@ -11078,6 +11097,7 @@ const I18N = {
     'deel.film_klaar':'Je filmpje is klaar','deel.film_delen':'Delen','deel.film_bewaren':'Bewaren',
     'toast.film_mislukt':'Filmpje maken is niet gelukt','toast.film_wacht':'Even geduld, je tattoos worden nog geladen',
     'toast.film_bewaard':'Filmpje bewaard',
+    'eb.duw_label':'Precies verschuiven','eb.duw_op':'Omhoog','eb.duw_neer':'Omlaag','eb.duw_links':'Naar links','eb.duw_rechts':'Naar rechts',
     'eb.samen_label':'Wat beweegt er','eb.hele_tattoo':'Hele tattoo','eb.dit_deel':'Dit deel','eb.sluit_aan':'Sluit aan','eb.sluit_aan_uitleg':'Leg dit deel precies aan op het andere deel','ui.sluit_aan_al':'Dit deel sluit al aan.','ui.sluit_aan_ok':'Aangesloten. Klopt het niet? Tik op Ongedaan maken.','ui.sluit_aan_overlap':'Leg het deel eerst een stukje over het andere deel, dan kan het aansluiten.','ui.sluit_aan_patroon':'Geen duidelijk passend patroon gevonden. Schuif het deel iets dichter naar de goede plek en probeer opnieuw.',
     'deel.titel':'Delen','deel.foto':'Foto','deel.foto_sub':'Het model zoals je het nu ziet','deel.film':'Draaiend filmpje',
     'deel.film_sub':'Je hele lichaam een rondje rond, voor TikTok of Instagram','deel.film_bezig':'Filmpje maken: {p}%',
@@ -11282,6 +11302,7 @@ const I18N = {
     'deel.film_klaar':'Your video is ready','deel.film_delen':'Share','deel.film_bewaren':'Save',
     'toast.film_mislukt':"Couldn't make the video",'toast.film_wacht':'Hang on, your tattoos are still loading',
     'toast.film_bewaard':'Video saved',
+    'eb.duw_label':'Nudge','eb.duw_op':'Up','eb.duw_neer':'Down','eb.duw_links':'Left','eb.duw_rechts':'Right',
     'eb.samen_label':'What moves','eb.hele_tattoo':'Whole tattoo','eb.dit_deel':'This part','eb.sluit_aan':'Line up','eb.sluit_aan_uitleg':'Line this part up exactly with the other part','ui.sluit_aan_al':'This part already lines up.','ui.sluit_aan_ok':"Lined up. Not right? Tap Undo.",'ui.sluit_aan_overlap':'Move the part a little over the other part first, then it can line up.','ui.sluit_aan_patroon':"Couldn't find a clear matching pattern. Move the part a bit closer to the right spot and try again.",
     'deel.titel':'Share','deel.foto':'Photo','deel.foto_sub':'The model as you see it now','deel.film':'Spinning video',
     'deel.film_sub':'Your whole body in one spin, for TikTok or Instagram','deel.film_bezig':'Making your video: {p}%',
@@ -11583,7 +11604,7 @@ function createTattoo(overrides = {}) {
    ============================================================ */
 // App-versie (semver, handmatig ophogen bij een release). Bij een bump ook de
 // CACHE-naam in sw.js meebumpen, zodat clients de nieuwe build ophalen.
-const APP_VERSIE = '0.3.152';
+const APP_VERSIE = '0.3.153';
 
 /* Dev-haken die de CLOUD raken hangen alleen op een ontwikkelmachine aan window. Ze zijn geen
    lek op zichzelf (zonder XSS roept niemand ze aan, en CSP + esc() houden XSS tegen), maar ze
@@ -17954,6 +17975,7 @@ async function verwijderVoorbeelden() {
     // tattoo/het lichaam niet meer onder de balk verdwijnt (alles blijft binnen de stage -> geen scroll).
     const eb=document.getElementById("editbar");
     const ebH=(eb&&eb.classList.contains("on")) ? eb.offsetHeight+12 : 0;
+    if(stage) stage.style.setProperty('--duw-b', (ebH+14)+'px');   // pijltjes net boven de bewerkbalk (2026-10-03)
     const w=stage.clientWidth||320, h=Math.max(220,(stage.clientHeight||420)-ebH);
     // Bij een vaste verticale fov schaalt het beeld recht mee met de renderhoogte. Op mobiel
     // verandert die hoogte tijdens het scrollen (browserbalk schuift in/uit), en dan zoomt het model
@@ -17993,6 +18015,7 @@ async function verwijderVoorbeelden() {
     const h=document.getElementById("hint"); if(h)h.style.display="";
     const a=document.getElementById("t3d-add"); if(a) a.style.display="";   // +-knop terug (was verborgen tijdens bewerken)
     resize();   // render weer op volle hoogte
+    duwStop(); zetDuwUI();   // pijltjes weg (2026-10-03)
   }
   function clearMarkers(){
     // Aanpasmodus afsluiten vóór het weggooien van markers, anders blijft de editbar
@@ -21016,6 +21039,7 @@ async function verwijderVoorbeelden() {
     const h=document.getElementById("hint"); if(h)h.style.display="none";
     setLockUI(); setBlendUI(); setSamenUI(); showSel(true);
     resize();   // render boven de gedockte balk laten passen
+    zetDuwUI();   // pijltjes (2026-10-03)
     // De balk heeft zelf een hint (.eb-hint), maar alleen op touch; op desktop staat die op
     // display:none en gelden de tooltips. Alleen daar is deze melding nog nodig - anders
     // stonden er twee regels tegelijk die hetzelfde zeggen in andere woorden.
@@ -21031,6 +21055,7 @@ async function verwijderVoorbeelden() {
     { const a=document.getElementById("t3d-add"); if(a) a.style.display=""; }   // + knop terug
     const h=document.getElementById("hint"); if(h)h.style.display="";
     resize();   // render weer op volle hoogte
+    duwStop(); zetDuwUI();   // pijltjes weg (2026-10-03)
     if(m) persistEdit(m);
   }
   /* ---- slice 5v: delen samen verplaatsen ---- */
@@ -21334,6 +21359,83 @@ async function verwijderVoorbeelden() {
   }
   function scaleDecal(f){ if(!editDecal||editDecal.locked)return; groepVoor(); editDecal.size=clamp((editDecal.size||0.09)*f,0.03,0.40); snelVolg(); }   // slice 5y
   function rotateDecal(deg){ if(!editDecal||editDecal.locked)return; groepVoor(); editDecal.rot=(((editDecal.rot||0)+deg)%360+360)%360; snelVolg(); }
+  /* ---- Precies verschuiven met pijltjes (2026-10-03, apply_duw.py; vraag eigenaar) ----
+     Vier pijltjes linksonder zolang een tattoo geselecteerd is. Richting = op het scherm (camera-assen, dus ook gedraaid of gekanteld),
+     geprojecteerd op het raakvlak van de huid; de stap landt met een korte straal langs de normaal weer op de huid (ook als de tattoo
+     opzij of achter zit). Tik = duwMaat (minstens 3 schermpixels, 1,5-5 mm), vasthouden = herhalen (na DUW_SNEL in dubbele stappen). Desktop: pijltjestoetsen. Ongedaan per
+     druk (snapEdit), opslaan bij loslaten (persistEdit). Met "Hele tattoo" gaan de andere delen mee (groepVoor/snelVolg). */
+  const DUW_STAP=0.0015, DUW_PX=3, DUW_MAX=0.005, DUW_WACHT=350, DUW_TEMPO=90, DUW_SNEL=1500;
+  function duwMaat(){   // minstens DUW_PX schermpixels (anders zie je een tik niet als je uitgezoomd bent), 1,5 tot 5 mm
+    const m=editDecal; if(!m || !m.point || !el) return DUW_STAP;
+    const d=camera.position.distanceTo(m.point), h=el.clientHeight || 600;
+    const mPerPx=2*d*Math.tan(camera.fov*Math.PI/360)/h;
+    return Math.max(DUW_STAP, Math.min(DUW_MAX, DUW_PX*mPerPx));
+  }
+  let duwT=0, duwKnop=null, duwToetsT=0;
+  const _dV=new THREE.Vector3(), _dR=new THREE.Vector3(), _dU=new THREE.Vector3(), _dO=new THREE.Vector3(), _dRc=new THREE.Raycaster();
+  function zetDuwUI(){
+    const p=document.getElementById('t3d-duw'); if(!p) return;
+    const aan=!!editDecal && actief3D && !plaatsModus && !genAan();
+    p.hidden=!aan; p.classList.toggle('slot', !!(editDecal && editDecal.locked));
+  }
+  function duwStap(dx, dy, stap){
+    const m=editDecal; if(!m || m.locked || !m.point || !m.normal || !pickMeshes.length) return false;
+    camera.updateMatrixWorld();
+    _dR.setFromMatrixColumn(camera.matrixWorld, 0); _dU.setFromMatrixColumn(camera.matrixWorld, 1);
+    const n=m.normal.clone().normalize();
+    _dV.copy(_dR).multiplyScalar(dx).addScaledVector(_dU, dy);   // dy +1 = omhoog op het scherm
+    _dV.addScaledVector(n, -_dV.dot(n));
+    if(_dV.lengthSq()<0.04) return false;   // die schermrichting staat (bijna) loodrecht op de huid
+    _dV.normalize();
+    _dO.copy(m.point).addScaledVector(_dV, stap).addScaledVector(n, 0.012);
+    _dRc.set(_dO, n.clone().negate()); _dRc.near=0; _dRc.far=0.03;
+    const h=_dRc.intersectObjects(pickMeshes, true).find(q=>!ledeActief || opGeisoleerdDeel(q.point));
+    if(!h) return false;
+    const nn=h.face ? h.face.normal.clone().transformDirection(h.object.matrixWorld).normalize() : n;
+    if(nn.dot(n)<0.3) return false;   // binnenkant of een ander lichaamsdeel geraakt
+    groepVoor();   // ligging van de andere delen (Hele tattoo)
+    m.point=h.point.clone(); m.normal=nn; m.mesh=h.object; m.tri=(h.faceIndex!==undefined ? h.faceIndex : -1);
+    snelVolg();
+    return true;
+  }
+  const DUW_RICHTING={ op:[0,1], neer:[0,-1], links:[-1,0], rechts:[1,0] };
+  function duwStart(e){
+    const b=e.target.closest && e.target.closest('[data-duw]'); const d=b && DUW_RICHTING[b.dataset.duw];
+    if(!d) return;
+    e.preventDefault(); e.stopPropagation();
+    if(!editDecal || editDecal.locked){ if(editDecal) toast(tr('ui.vergrendeld')); return; }
+    duwStop();
+    try{ b.setPointerCapture(e.pointerId); }catch(_){}
+    duwKnop=b; b.classList.add('druk');
+    snapEdit(editDecal);
+    duwStap(d[0], d[1], duwMaat());
+    const t0=performance.now();
+    const herhaal=()=>{ if(duwKnop!==b) return; duwStap(d[0], d[1], duwMaat()*(performance.now()-t0>DUW_SNEL ? 2 : 1)); duwT=setTimeout(herhaal, DUW_TEMPO); };
+    duwT=setTimeout(herhaal, DUW_WACHT);
+  }
+  function duwStop(){
+    clearTimeout(duwT); duwT=0;
+    if(!duwKnop) return;
+    duwKnop.classList.remove('druk'); duwKnop=null;
+    if(editDecal) persistEdit(editDecal);
+  }
+  { const p=document.getElementById('t3d-duw');
+    if(p){
+      p.addEventListener('pointerdown', duwStart);
+      for(const ev of ['pointerup','pointercancel','lostpointercapture']) p.addEventListener(ev, duwStop);
+      p.addEventListener('contextmenu', e=>e.preventDefault());   // lang drukken: geen menu
+    } }
+  document.addEventListener('keydown', (e)=>{   // desktop: pijltjestoetsen verschuiven de geselecteerde tattoo
+    if(!editDecal || editDecal.locked || !actief3D || plaatsModus || e.altKey || e.ctrlKey || e.metaKey) return;
+    const k={ ArrowUp:'op', ArrowDown:'neer', ArrowLeft:'links', ArrowRight:'rechts' }[e.key]; if(!k) return;
+    const t=e.target; if(t && (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName))) return;
+    e.preventDefault();
+    if(!e.repeat) snapEdit(editDecal);
+    const d=DUW_RICHTING[k]; duwStap(d[0], d[1], duwMaat()*(e.shiftKey ? 4 : 1));
+    clearTimeout(duwToetsT); duwToetsT=setTimeout(()=>{ if(editDecal) persistEdit(editDecal); }, 400);
+  });
+  window.__tattiesDuwDbg={ stap:(r, n)=>{ const d=DUW_RICHTING[r]; let ok=0; if(editDecal) snapEdit(editDecal); for(let i=0;i<(n||1);i++) ok+=duwStap(d[0], d[1], DUW_STAP)?1:0; if(editDecal) persistEdit(editDecal); return ok; },
+    zicht:()=>{ const p=document.getElementById('t3d-duw'); return !!p && !p.hidden; } };
   /* ---- Undo voor tattoo-bewerken (positie/schaal/draai), stap voor stap per bewerksessie ---- */
   let editHist=[];
   function snapEdit(m){ if(!m||!m.point) return; editHist.push({point:m.point.clone(), normal:m.normal&&m.normal.clone(), mesh:m.mesh, size:m.size, rot:m.rot, tri:m.tri,
@@ -21692,6 +21794,7 @@ async function verwijderVoorbeelden() {
   }
   // (verwijderen uit de bewerkbalk is weggehaald; dat loopt nu via de detailpagina - #d-verwijder)
   function setLockUI(){
+    zetDuwUI();   // vergrendeld: pijltjes uitgegrijsd
     const eb=document.getElementById("editbar"); if(!eb) return;
     const lb=eb.querySelector('[data-act="lock"]');
     const locked=!!(editDecal&&editDecal.locked);
