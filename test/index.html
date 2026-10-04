@@ -11972,7 +11972,7 @@ function createTattoo(overrides = {}) {
    ============================================================ */
 // App-versie (semver, handmatig ophogen bij een release). Bij een bump ook de
 // CACHE-naam in sw.js meebumpen, zodat clients de nieuwe build ophalen.
-const APP_VERSIE = '0.3.164';
+const APP_VERSIE = '0.3.165';
 
 /* Dev-haken die de CLOUD raken hangen alleen op een ontwikkelmachine aan window. Ze zijn geen
    lek op zichzelf (zonder XSS roept niemand ze aan, en CSP + esc() houden XSS tegen), maar ze
@@ -18504,12 +18504,17 @@ async function verwijderVoorbeelden() {
     const bouwBikini=()=>{
       /* model naar de referentie van eigenaar (2026-10-04): broekje laag in het midden en hoger op de heup, hoge V-uitsnijding;
          top zonder band: grote driehoekige cups met een ronde onderkant, dun touwtje ertussen, dun bandje om de rug, dunne nektouwtjes */
-      const BK={ top:0.062, heupOp:0.045, zij:0.025, kruis:-0.02, kruisB:0.014, lies:0.55, touw:0.0021, rug:0.003, dip:0.008 };
+      const BK={ top:0.062, heupOp:0.045, zij:0.025, kruis:0.025, kruisB:0.014, lies:0.55, touw:0.0021, rug:0.003, dip:0.008 };
       const zn=ZK ? ZK.namen : [], zi=(nm)=>zn.indexOf(nm);
       const zBorst=zi('borst'), zBuik=zi('buik'), zRug=zi('rug'), zHals=zi('hoofd-nek');
       const romp=(j)=>{ const z=ZK.z[j]; return z===zBorst || z===zBuik || z===zRug; };
       // broekje: kruis = laagste maskerpunt bij de middenlijn; beenrand schuin omhoog naar de heup
-      let kruisY=Infinity; for(let j=0;j<nv;j++) if(inM(j) && Math.abs(P[j*3])<0.02 && P[j*3+1]<kruisY) kruisY=P[j*3+1];
+      /* kruis = laagste rompPUNT (zonekaart buik/rug) bij de middenlijn. Het laagste maskerpunt lag op de binnenkant van de dijen,
+         6-7 cm te laag: het kruisstuk hing dan tussen de dijen (toesteltest eigenaar, v0.3.164). Zonder zonekaart het masker. */
+      let kruisY=Infinity;
+      if(ZK){ const zb=ZK.namen.indexOf('buik'), zr=ZK.namen.indexOf('rug');
+        for(let j=0;j<nv;j++){ const z=ZK.z[j]; if((z===zb || z===zr) && Math.abs(P[j*3])<0.02 && P[j*3+1]<kruisY) kruisY=P[j*3+1]; } }
+      if(!(kruisY<Infinity)) for(let j=0;j<nv;j++) if(inM(j) && Math.abs(P[j*3])<0.02 && P[j*3+1]<kruisY) kruisY=P[j*3+1];
       // heupbreedte van dit lichaam (maskerpunten net onder de taille): de vorm schaalt mee, het zijstrookje is altijd BK.zij
       let heupB=0; for(let j=0;j<nv;j++) if(inM(j) && Math.abs(P[j*3+1]-(taille-0.05))<0.015) heupB=Math.max(heupB, Math.abs(P[j*3]));
       const heupX=Math.max(0.1, heupB*0.95), zijTop=taille-BK.top+BK.heupOp, been=(zijTop-BK.zij-(kruisY-BK.kruis))/heupX;
@@ -18522,8 +18527,6 @@ async function verwijderVoorbeelden() {
       const beenRand=(t)=>(q)=>q.y-(kruisY-BK.kruis+liesH*Math.pow(Math.min(1, Math.max(0, t*q.x-BK.kruisB)/(heupX-BK.kruisB)), BK.lies));
       for(let i=0;i<idx.length;i+=3){ const a=idx[i], b=idx[i+1], c=idx[i+2];
         if(!(m2[a]&&m2[b]&&m2[c]) && !obKand(a,b,c)) continue;
-        // onderkant tussen de benen (huid wijst omlaag): geen stof, daar gaf hij kreukels en een rommelige punt (toesteltest eigenaar)
-        if(N[a*3+1]+N[b*3+1]+N[c*3+1]<-1.5 && Math.abs(P[a*3])<0.07 && P[a*3+1]<kruisY+0.05) continue;
         hier=[a,b,c]; let poly=snij([punt(a,0),punt(b,1),punt(c,2)], broekRand);
         const opzij=vlakOpzij(a,b,c);
         if(poly.length>=3) for(const t of [1,-1]){ let h=snij(poly, (q)=>t*q.x); if(h.length>=3) h=snij(h, beenRand(t));
