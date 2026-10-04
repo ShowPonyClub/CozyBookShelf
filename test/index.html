@@ -11622,7 +11622,7 @@ function createTattoo(overrides = {}) {
    ============================================================ */
 // App-versie (semver, handmatig ophogen bij een release). Bij een bump ook de
 // CACHE-naam in sw.js meebumpen, zodat clients de nieuwe build ophalen.
-const APP_VERSIE = '0.3.156';
+const APP_VERSIE = '0.3.157';
 
 /* Dev-haken die de CLOUD raken hangen alleen op een ontwikkelmachine aan window. Ze zijn geen
    lek op zichzelf (zonder XSS roept niemand ze aan, en CSP + esc() houden XSS tegen), maar ze
@@ -21439,6 +21439,7 @@ async function verwijderVoorbeelden() {
     if(!res.ok) return res;
     if(res.nulN>=res.nMin && !(res.ncc>res.nul+0.01) && !(opt.hoek && m.proj)) return { ok:true, al:true, ncc:res.ncc, nul:res.nul };   // sluit al aan: niets verplaatsen
     snapEdit(m);
+    const terug={ point:m.point.clone(), normal:m.normal&&m.normal.clone(), mesh:m.mesh, tri:m.tri, rot:m.rot, size:m.size, proj:m.proj||null };
     const log=[], nul0=res.nul;
     if(res.ncc>res.nul+0.01 || !(res.nulN>=res.nMin)) res=saToepas(m, res, log);
     for(let it=0; breed && it<4; it++){   // breed: vanaf de nieuwe plek opnieuw (nieuw raakvlak), om een rond been heen
@@ -21448,18 +21449,23 @@ async function verwijderVoorbeelden() {
     let hoek=null;
     if(opt.hoek && m.proj){ hoek=hoekVerfijn(m); log.push({ hoek:!!(hoek && hoek.proj), ncc:hoek && +(hoek.ncc||0).toFixed(3) });
       if(hoek && hoek.proj && hoek.res && hoek.res.ok && hoek.res.ncc>hoek.res.nul+0.005) res=saToepas(m, hoek.res, log); }
+    const na=saMeet(m, 96), sNa=na ? saScore(na,0,0,0,1,1) : null, beter=!!(sNa && sNa.ncc>nul0+0.05);
+    if(opt.alleenBeter && !beter){   // automatisch: niet duidelijk beter = stil terug waar het lag (meting delen_echt: kleine verslechtering)
+      m.point=terug.point; if(terug.normal) m.normal=terug.normal; m.mesh=terug.mesh; m.tri=terug.tri; m.rot=terug.rot; m.size=terug.size; m.proj=terug.proj;
+      editHist.pop(); rebuildMarker(m); persistEdit(m);
+      return { ok:true, al:true, terug:true, ncc:res.ncc, nul:nul0, na:sNa ? sNa.ncc : null, beter:false, log };
+    }
     persistEdit(m);
-    const na=saMeet(m, 96), sNa=na ? saScore(na,0,0,0,1,1) : null;
-    return { ok:true, ncc:res.ncc, nul:nul0, na:sNa ? sNa.ncc : null, beter:!!(sNa && sNa.ncc>nul0+0.05), hoek:hoek ? { gekozen:!!hoek.proj, tel:hoek.tel } : null, log };
+    return { ok:true, ncc:res.ncc, nul:nul0, na:sNa ? sNa.ncc : null, beter, hoek:hoek ? { gekozen:!!hoek.proj, tel:hoek.tel } : null, log };
   }
   /* Automatisch aansluiten na het plaatsen (2026-10-03): alleen als er andere delen op het model staan; zonder duidelijke overeenkomst
      blijft het deel waar je het neerlegde. Geeft true als het deel verplaatst is. */
   async function autoAansluiten(m){
-    if(!m || window.__autoAansluiten===false || !markers.some(q=>q!==m && q.id===m.id && q.obj)) return false;
+    if(!m || window.__autoAansluiten!==true || !markers.some(q=>q!==m && q.id===m.id && q.obj)) return false;   // standaard UIT (meting delen_echt 2026-10-04: per saldo slechter); aan met window.__autoAansluiten=true
     if(groepModus!=='deel') zetGroepModus('deel');
     toast(tr('ui.auto_bezig'));
     await frameAdem(); await frameAdem();
-    let r=null; try{ r=await sluitAan(m, { breed:false, hoek:true }); }catch(e){ console.error('aansluiten', e); }   // klein bijstellen + kijkhoek; grof leg jij hem met de voorvertoning
+    let r=null; try{ r=await sluitAan(m, { breed:false, hoek:true, alleenBeter:true }); }catch(e){ console.error('aansluiten', e); }   // klein bijstellen + kijkhoek; grof leg jij hem met de voorvertoning
     window.__autoLaatste=r;
     return !!(r && r.ok && !r.al && r.beter);   // alleen 'aangesloten' melden als de overlap echt beter klopt
   }
