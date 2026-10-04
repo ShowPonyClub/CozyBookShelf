@@ -11623,7 +11623,7 @@ function createTattoo(overrides = {}) {
    ============================================================ */
 // App-versie (semver, handmatig ophogen bij een release). Bij een bump ook de
 // CACHE-naam in sw.js meebumpen, zodat clients de nieuwe build ophalen.
-const APP_VERSIE = '0.3.158';
+const APP_VERSIE = '0.3.159';
 
 /* Dev-haken die de CLOUD raken hangen alleen op een ontwikkelmachine aan window. Ze zijn geen
    lek op zichzelf (zonder XSS roept niemand ze aan, en CSP + esc() houden XSS tegen), maar ze
@@ -24856,7 +24856,8 @@ function maakTatnetGL(json, canvas) {
   window.__tattiesSetUnderwear3D = setUnderwear;
   window.__tattiesGetUnderwear3D = ()=>underwear;
   window.__tattiesSetSkin3D = setSkin3D;
-  window.__tatties3DPauze = function(){ actief3D=false; if(genAan()) LichaamMotor.generator.annuleer(); };   // renderlus pauzeren als een host-view wordt getoond
+  window.__tatties3DPauze = function(){ actief3D=false; if(genAan()) LichaamMotor.generator.annuleer();
+    if(editDecal){ try{ exitEditDecal(); }catch(e){ console.warn('bewerkstand sluiten', e); } } };   // 2026-10-04: anders stond de bewerkbalk nog open bij terugkomst (haar weg, geen +)   // renderlus pauzeren als een host-view wordt getoond
   /* Scene-achtergrond = de papierkleur van het thema. Via getComputedStyle, want canvas/WebGL kent geen CSS-variabelen
      (valkuil v0.3.47: var(--..) in een canvas-kleur gaf een zwart vlak). Host roept dit aan bij een themawissel. */
   function zetSceneKleur(){
