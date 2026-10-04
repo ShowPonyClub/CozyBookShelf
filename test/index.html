@@ -2856,6 +2856,14 @@ form label{text-transform:none;letter-spacing:.005em;font-size:.8rem;color:var(-
         <button type="button" data-haar="1" data-i18n="inst.haar_aan">Aan</button>
       </div>
     </div>
+    <div class="inst-rij inst-kaart-rij inst-uiterlijk" id="inst-kapsel-rij">
+      <p class="inst-label" data-i18n="inst.kapsel">Kapsel</p>
+      <div class="silhouet-keuze" id="kapsel-keuze" role="group" data-i18n-aria="inst.kapsel" aria-label="Kapsel">
+        <button type="button" data-kapsel="013" data-i18n="kapsel.013">Lang</button>
+        <button type="button" data-kapsel="buzz" data-i18n="kapsel.buzz">Millimeter</button>
+        <button type="button" data-kapsel="afro" data-i18n="kapsel.afro">Afro</button>
+      </div>
+    </div>
     <div class="inst-rij inst-kaart-rij inst-uiterlijk" id="inst-haarkleur-rij">
       <p class="inst-label" data-i18n="inst.haarkleur">Haarkleur</p>
       <div class="haar-kleuren" id="haar-kleuren" role="group" data-i18n-aria="inst.haarkleur" aria-label="Haarkleur">
@@ -8519,6 +8527,72 @@ function lengteSchaalVoor(cm, doelCm){
   return (cm > 0 && Math.abs(cm - doelCm) > 0.005) ? doelCm / cm : 1;
 }
 var _schaal = null;        /* {g,m,w,h,s}: de schaal die bij deze stand hoort (uit waarden()) */
+
+/* ------------------------------------------------------------ sixpack
+   Tatties 2026-10-04 (vraag eigenaar): bij heel gespierd en weinig vet een zichtbare sixpack. MakeHuman's gespierde hoek
+   heeft maar een vaag reliefje op de buik. Hier een eigen vervorming per vertex, in coordinaten van de BASISMESH
+   (navel y 1,012; onderkant borst ~1,14; de basismesh is 1,667 m): drie rijen van twee bulten boven de navel, een
+   zachtere onder de navel, de lijn in het midden iets dieper. Langs de normaal van de basismesh; vastgemaakt aan de
+   vertexnummers, dus hij schaalt mee met elk lichaam en tattoos/onderbroek gaan mee. Alleen in de zichtbare blend
+   (niet in blendPos: de gewichtstabel, lengte en de migratie rekenen zonder). Sterkte = spier x (geen vet). */
+var SIXPACK = { A:0.016, vrouw:0.7, rijen:[0.93, 1.017, 1.056, 1.096, 1.137], onder:0.45, wOnder:0.068, wBoven:0.085,
+                lijn:0.006, groef:0.25, plat:0.4, tussen:0.6, tBreed:0.007, spier0:0.6, spier1:0.95, vet1:0.35 };
+var spIdx = null, spVal = null;
+function spPar(){
+  var p = SIXPACK, o = (typeof window !== 'undefined') && window.__sixpackParam;   /* dev: parameters proberen */
+  if(!o) return p;
+  var r = {}, k; for(k in p) r[k] = p[k]; for(k in o) r[k] = o[k];
+  return r;
+}
+function glad(a, b, x){ var t = Math.max(0, Math.min(1, (x - a) / (b - a))); return t*t*(3 - 2*t); }
+function sixpackVorm(P){
+  var p = P || SIXPACK, R = p.rijen, n = basePos.length/3, i, f;
+  /* normalen van de basismesh, op de gelaste topologie (zoals normalenBij) */
+  var acc = new Float32Array(nWeld*3);
+  for(f=0; f<tris.length; f+=3){
+    var i0=tris[f]*3, i1=tris[f+1]*3, i2=tris[f+2]*3, b=basePos;
+    var e1x=b[i1]-b[i0], e1y=b[i1+1]-b[i0+1], e1z=b[i1+2]-b[i0+2];
+    var e2x=b[i2]-b[i0], e2y=b[i2+1]-b[i0+1], e2z=b[i2+2]-b[i0+2];
+    var cx=e1y*e2z-e1z*e2y, cy=e1z*e2x-e1x*e2z, cz=e1x*e2y-e1y*e2x;
+    for(var q=0; q<3; q++){ var w=weld[tris[f+q]]*3; acc[w]+=cx; acc[w+1]+=cy; acc[w+2]+=cz; }
+  }
+  var idx = [], val = [];
+  for(i=0; i<n; i++){
+    var x = basePos[i*3], y = basePos[i*3+1], z = basePos[i*3+2], ax = Math.abs(x);
+    if(z <= 0.05 || y < R[0] || y > R[R.length-1] || ax > p.wBoven) continue;
+    var W = p.wOnder + (p.wBoven - p.wOnder) * Math.max(0, Math.min(1, (y - R[0]) / (R[R.length-1] - R[0])));
+    if(ax >= W) continue;
+    var h = 0;
+    for(var r=0; r<R.length-1; r++){
+      if(y < R[r] || y > R[r+1]) continue;
+      var u = (y - R[r]) / (R[r+1] - R[r]), t = Math.max(0, Math.min(1, (ax - p.lijn) / (W - p.lijn)));
+      h = (r === 0 ? p.onder : 1) * Math.pow(Math.sin(Math.PI*u), p.plat) * Math.pow(Math.sin(Math.PI*t), p.plat);
+    }
+    h -= p.groef * Math.exp(-(x*x) / (p.lijn*p.lijn)) * glad(R[0], R[1], y);
+    for(var k=1; k<R.length-1; k++)                  /* de dwarse groeven tussen de rijen */
+      h -= p.tussen * Math.exp(-(y-R[k])*(y-R[k]) / (p.tBreed*p.tBreed)) * Math.sin(Math.PI * Math.min(1, ax / W));
+    if(Math.abs(h) < 1e-4) continue;
+    var s = weld[i]*3, nx = acc[s], ny = acc[s+1], nz = acc[s+2], l = Math.sqrt(nx*nx+ny*ny+nz*nz) || 1;
+    idx.push(i); val.push(p.A*h*nx/l, p.A*h*ny/l, p.A*h*nz/l);
+  }
+  return { idx:Uint32Array.from(idx), val:Float32Array.from(val) };
+}
+function sixpackSterkte(gender, muscle){
+  if(typeof window !== 'undefined' && window.__sixpack === false) return 0;
+  var p = spPar();
+  var s = glad(p.spier0, p.spier1, muscle) * (1 - glad(0, p.vet1, Math.max(0, vetF))) * (1 - Math.min(1, extraZwaar*4));
+  return s * (p.vrouw + (1 - p.vrouw) * Math.max(0, Math.min(1, gender)));
+}
+function sixpackBij(arr, gender, muscle){
+  var s = sixpackSterkte(gender, muscle);
+  if(s < 1e-3) return;
+  var P = (typeof window !== 'undefined') && window.__sixpackParam;
+  if(!spIdx || P !== spVal.par){ var v = sixpackVorm(P ? spPar() : null); spIdx = v.idx; spVal = v.val; spVal.par = P; }
+  for(var j=0; j<spIdx.length; j++){
+    var o = spIdx[j]*3, q = j*3;
+    arr[o] += s*spVal[q]; arr[o+1] += s*spVal[q+1]; arr[o+2] += s*spVal[q+2];
+  }
+}
 function blend(gender, muscle, weight, height, metGrenzen){
   var t0 = performance.now();
   var arr = posAttr.array;
@@ -8535,6 +8609,7 @@ function blend(gender, muscle, weight, height, metGrenzen){
       arr[v+2] += g*val[o+2];
     }
   }
+  sixpackBij(arr, gender, muscle);
   _kgMesh = null;
   var sc = _schaal;
   if(sc && sc.s !== 1 && sc.g === gender && sc.m === muscle && sc.w === weight && sc.h === height){
@@ -8972,7 +9047,8 @@ function normaliseer(L){
     for(var k in L.details){ var v = klem(L.details[k], -1, 1, 0); if(v) uit.details[k] = v; }
   }
   /* Tatties 2026-10-01: haar en bril (lichaam_haar.js) horen bij het lichaam en gaan zo mee in de cloud-sync */
-  if(L.haar && typeof L.haar === 'object') uit.haar = { aan: L.haar.aan === true, kleur: /^(zwart|bruin|blond|rood)$/.test(L.haar.kleur) ? L.haar.kleur : 'bruin' };
+  if(L.haar && typeof L.haar === 'object') uit.haar = { aan: L.haar.aan === true, kleur: /^(zwart|bruin|blond|rood)$/.test(L.haar.kleur) ? L.haar.kleur : 'bruin',
+    stijl: /^(013|buzz|afro)$/.test(L.haar.stijl) ? L.haar.stijl : '013' };   /* 2026-10-04: buzz cut en afro */
   if(L.bril && typeof L.bril === 'object') uit.bril = { aan: L.bril.aan === true };
   if(L.eigen === false) uit.eigen = false;   /* alleen haar/bril gekozen, het lichaam zelf is het standaardlichaam */
   return uit;
@@ -10275,14 +10351,15 @@ function meetHoofd(pos, zones){
   return { top:top, x:(x0+x1)/2, z:(z0+z1)/2, s:(z1 - z0)/0.189 };
 }
 /* f per vertex (> 0 = hoofdhuid). Een keer bij maken; daarna vast (bevroren nummering). */
-function haarlijnVeld(pos, nor, zones, K){
+function haarlijnVeld(pos, nor, zones, K, kruin){   /* kruin: de schil-kapsels houden ook de kruin (daar is rl klein) */
   var n = zones.length, f = new Float32Array(n);
   for(var i=0;i<n;i++){
     if(zones[i] !== 0){ f[i] = -1; continue; }
     var x = pos[i*3] - K.x, y = pos[i*3+1], z = pos[i*3+2] - K.z;
     var rl = Math.sqrt(x*x + z*z);
-    if(rl < 0.042*K.s || (nor[i*3]*x + nor[i*3+2]*z)/(rl || 1) < -0.2){ f[i] = -1; continue; }   /* binnenkant mond/keel */
-    var h = (K.top - y)/K.s, az = Math.atan2(x, z)*180/Math.PI;
+    var h = (K.top - y)/K.s;
+    if((!kruin || h > 0.06) && (rl < 0.042*K.s || (nor[i*3]*x + nor[i*3+2]*z)/(rl || 1) < -0.2)){ f[i] = -1; continue; }   /* binnenkant mond/keel */
+    var az = Math.atan2(x, z)*180/Math.PI;
     var lijn = haarlijn(az) - h;
     var oor = Math.max(0.073 - Math.abs(x)/K.s, 0.08 - h, h - 0.15);   /* oren blijven vrij */
     f[i] = Math.min(lijn, oor*2.5) * K.s;
@@ -10789,10 +10866,229 @@ function maakBril(mesh, D){
   return { groep:obj, herbouw:herbouw, dispose:function(){ g.dispose(); mat.forEach(function(m){ m.dispose(); }); } };
 }
 
-/* Opgeslagen keuze (in het lichaam-object, localStorage 'tatties-lichaam'): haar:{aan, kleur}, bril:{aan}. */
+/* ============================================================ BUZZ CUT EN AFRO (2026-10-04, vraag eigenaar)
+   Procedureel op de hoofdhuid, zonder extra data: een schil over de huid binnen de haarlijn (haarlijnVeld, dezelfde lijn als
+   het kapsel), op de lijn f = 0 precies afgeknipt en daarna verfijnd. Elke schilvertex hangt barycentrisch aan een
+   lichaamsdriehoek, dus hij volgt elk lichaam uit de generator. Geen physics.
+   - Buzz cut: 1 mm boven de huid, half doorzichtig met een zachte haarlijn, fijne korrel in de shader.
+   - Afro: de schil radiaal opgeblazen vanuit het midden van de schedel, gladgestreken (Taubin) tot een bol, met krullen als
+     lage bulten in de vorm en als reliëf in de shader. */
+var STIJLEN = ['013', 'buzz', 'afro'];
+var BUZZ = { dik:0.0012, rand:0.010, dekking:0.80, korrel:900, korrelSterk:0.45, verfijn:1 };
+var AFRO = { dik:0.060, band:0.035, verfijn:2, glad:30, nek:[0.10, 0.20, 0.35], voor:0.40, laag:[0.03, 0.16, 0.70], op:0.12,
+             krul:0.006, krulSchaal:45,
+             korrel:260, korrelSterk:0.45, relief:0.0035, ruwheid:0.95 };
+
+/* De hoofdhuid als schil: punten (lichaamsdriehoek + barycentrisch) en driehoeken, afgeknipt op f = 0, `verfijn` keer in vieren. */
+function huidSchil(geo, f, verfijn){
+  var idx = geo.index.array, weld = geo.attributes._weld ? geo.attributes._weld.array : null;
+  var ri = [], rw = [], sleutels = new Map(), tris = [];
+  function wid(v){ return weld ? weld[v] : v; }
+  function punt(sleutel, a, b, c, w0, w1, w2){
+    var k = sleutels.get(sleutel); if(k !== undefined) return k;
+    k = ri.length/3; ri.push(a, b, c); rw.push(w0, w1, w2); sleutels.set(sleutel, k); return k;
+  }
+  /* driehoek in de schil; hoeken = barycentrisch in lichaamsdriehoek (a, b, c) */
+  function zet(a, b, c, P, niveau){
+    if(niveau <= 0){ tris.push(P[0].k, P[1].k, P[2].k); return; }
+    var m = [];
+    for(var e=0; e<3; e++){
+      var p = P[e], q = P[(e+1)%3], lo = Math.min(p.k, q.k), hi = Math.max(p.k, q.k);
+      var w = [(p.w[0]+q.w[0])/2, (p.w[1]+q.w[1])/2, (p.w[2]+q.w[2])/2];
+      m.push({ w:w, k:punt('m'+lo+'_'+hi, a, b, c, w[0], w[1], w[2]) });
+    }
+    zet(a, b, c, [P[0], m[0], m[2]], niveau-1); zet(a, b, c, [m[0], P[1], m[1]], niveau-1);
+    zet(a, b, c, [m[2], m[1], P[2]], niveau-1); zet(a, b, c, [m[0], m[1], m[2]], niveau-1);
+  }
+  for(var i=0; i<idx.length; i+=3){
+    var v = [idx[i], idx[i+1], idx[i+2]], fv = [f[v[0]], f[v[1]], f[v[2]]];
+    if(fv[0] <= 0 && fv[1] <= 0 && fv[2] <= 0) continue;
+    var poly = [];
+    for(var e=0; e<3; e++){
+      var e2 = (e+1)%3;
+      if(fv[e] > 0){ var w = [0,0,0]; w[e] = 1; poly.push({ w:w, k:punt('v'+wid(v[e]), v[0], v[1], v[2], w[0], w[1], w[2]) }); }
+      if((fv[e] > 0) !== (fv[e2] > 0)){
+        /* snijpunt, altijd vanaf het laagste weld-nummer berekend: beide buurdriehoeken krijgen hetzelfde punt */
+        var lo = wid(v[e]) < wid(v[e2]) ? e : e2, hi = lo === e ? e2 : e, t = fv[lo]/(fv[lo] - fv[hi]);
+        var ws = [0,0,0]; ws[lo] = 1 - t; ws[hi] = t;
+        poly.push({ w:ws, k:punt('e'+wid(v[lo])+'_'+wid(v[hi]), v[0], v[1], v[2], ws[0], ws[1], ws[2]) });
+      }
+    }
+    for(var j=1; j+1<poly.length; j++) zet(v[0], v[1], v[2], [poly[0], poly[j], poly[j+1]], verfijn);
+  }
+  return { n:ri.length/3, ri:Int32Array.from(ri), rw:Float32Array.from(rw), index:Uint32Array.from(tris) };
+}
+/* punten, normalen en f van de schil op het huidige lichaam */
+function schilOpLichaam(S, geo, f, uitP, uitN, uitF){
+  var P = geo.attributes.position.array, N = geo.attributes.normal.array;
+  for(var k=0; k<S.n; k++){
+    var a = S.ri[k*3]*3, b = S.ri[k*3+1]*3, c = S.ri[k*3+2]*3, w0 = S.rw[k*3], w1 = S.rw[k*3+1], w2 = S.rw[k*3+2];
+    var nx = w0*N[a] + w1*N[b] + w2*N[c], ny = w0*N[a+1] + w1*N[b+1] + w2*N[c+1], nz = w0*N[a+2] + w1*N[b+2] + w2*N[c+2];
+    var nl = Math.sqrt(nx*nx + ny*ny + nz*nz) || 1;
+    uitP[k*3] = w0*P[a] + w1*P[b] + w2*P[c]; uitP[k*3+1] = w0*P[a+1] + w1*P[b+1] + w2*P[c+1]; uitP[k*3+2] = w0*P[a+2] + w1*P[b+2] + w2*P[c+2];
+    uitN[k*3] = nx/nl; uitN[k*3+1] = ny/nl; uitN[k*3+2] = nz/nl;
+    if(uitF) uitF[k] = w0*f[a/3] + w1*f[b/3] + w2*f[c/3];
+  }
+}
+function glad01(a, b, x){ var t = klem((x - a)/(b - a), 0, 1); return t*t*(3 - 2*t); }
+/* waarde-ruis 0..1 (krullen in de vorm) */
+function hash3(i, j, k){ var h = (Math.imul(i, 374761393) + Math.imul(j, 668265263) + Math.imul(k, 1274126177)) | 0;
+  h = Math.imul(h ^ (h >>> 13), 1274126177); return ((h ^ (h >>> 16)) >>> 0)/4294967296; }
+function ruis3(x, y, z){
+  var i = Math.floor(x), j = Math.floor(y), k = Math.floor(z), u = x-i, v = y-j, w = z-k;
+  u = u*u*(3-2*u); v = v*v*(3-2*v); w = w*w*(3-2*w);
+  function l(a, b, t){ return a + (b-a)*t; }
+  return l(l(l(hash3(i,j,k), hash3(i+1,j,k), u), l(hash3(i,j+1,k), hash3(i+1,j+1,k), u), v),
+           l(l(hash3(i,j,k+1), hash3(i+1,j,k+1), u), l(hash3(i,j+1,k+1), hash3(i+1,j+1,k+1), u), v), w);
+}
+/* korrel (kleur) en eventueel reliëf (normaal) in de shader, op de lokale positie: geen textuur nodig */
+function korrelShader(mat, schaal, sterk, relief){
+  var S = schaal.toFixed(1), K = sterk.toFixed(3), R = (relief || 0).toFixed(5);
+  mat.onBeforeCompile = function(sh){
+    sh.vertexShader = sh.vertexShader.replace('#include <common>', '#include <common>\nvarying vec3 vKorrel;')
+      .replace('#include <begin_vertex>', '#include <begin_vertex>\nvKorrel = position * ' + S + ';');
+    sh.fragmentShader = sh.fragmentShader.replace('#include <common>', '#include <common>\nvarying vec3 vKorrel;\n' +
+      'float kHash(vec3 p){ p = fract(p*0.3183099 + 0.1); p *= 17.0; return fract(p.x*p.y*p.z*(p.x + p.y + p.z)); }\n' +
+      'float kRuis(vec3 x){ vec3 i = floor(x), f = fract(x); f = f*f*(3.0 - 2.0*f);\n' +
+      '  return mix(mix(mix(kHash(i), kHash(i + vec3(1,0,0)), f.x), mix(kHash(i + vec3(0,1,0)), kHash(i + vec3(1,1,0)), f.x), f.y),\n' +
+      '             mix(mix(kHash(i + vec3(0,0,1)), kHash(i + vec3(1,0,1)), f.x), mix(kHash(i + vec3(0,1,1)), kHash(i + vec3(1,1,1)), f.x), f.y), f.z); }\n' +
+      'vec3 kRelief(vec3 p, vec3 n, vec2 d, float fd){ vec3 sx = dFdx(p), sy = dFdy(p), r1 = cross(sy, n), r2 = cross(n, sx);\n' +
+      '  float det = dot(sx, r1)*fd; return normalize(abs(det)*n - sign(det)*(d.x*r1 + d.y*r2)); }')
+      .replace('#include <color_fragment>', '#include <color_fragment>\nfloat kr = kRuis(vKorrel) * 0.65 + kRuis(vKorrel * 2.7) * 0.35;\n' +
+        /* kleiner dan een pixel (van ver): korrel en reliëf vloeien weg, anders wordt het flikkerende ruis */
+        'float kv = 1.0 - smoothstep(0.25, 0.8, length(fwidth(vKorrel)));\n' +
+        'diffuseColor.rgb *= 1.0 - ' + K + ' * mix(0.5, kr, kv);')
+      .replace('#include <normal_fragment_maps>', '#include <normal_fragment_maps>\n' +
+        (relief ? 'float kh = kr * kv * ' + R + '; normal = kRelief(-vViewPosition, normal, vec2(dFdx(kh), dFdy(kh)), faceDirection);' : ''));
+  };
+  mat.customProgramCacheKey = function(){ return 'korrel:' + S + ':' + K + ':' + R; };
+  mat.extensions = { derivatives:true };
+}
+
+function maakSchilKapsel(mesh, zones, stijl, opties){
+  opties = opties || {};
+  var geo = mesh.geometry, afro = stijl === 'afro', C = afro ? AFRO : BUZZ;
+  var K = meetHoofd(geo.attributes.position.array, zones);
+  var fV = haarlijnVeld(geo.attributes.position.array, geo.attributes.normal.array, zones, K, true);
+  var S = huidSchil(geo, fV, C.verfijn), n = S.n;
+  var hp = new Float32Array(n*3), bp = new Float32Array(n*3), bn = new Float32Array(n*3), bf = new Float32Array(n);
+  var g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.BufferAttribute(hp, 3));
+  g.setAttribute('normal', new THREE.BufferAttribute(new Float32Array(n*3), 3));
+  g.setIndex(new THREE.BufferAttribute(S.index, 1));
+  var mat;
+  if(afro){
+    mat = new THREE.MeshStandardMaterial({ color:0x4a2e1c, roughness:C.ruwheid, metalness:0, side:THREE.DoubleSide });
+    korrelShader(mat, C.korrel, C.korrelSterk, C.relief);
+  } else {
+    g.setAttribute('color', new THREE.BufferAttribute(new Float32Array(n*4), 4));
+    mat = new THREE.MeshStandardMaterial({ color:0x4a2e1c, roughness:0.9, metalness:0, vertexColors:true, transparent:true,
+      depthWrite:false, polygonOffset:true, polygonOffsetFactor:-2, polygonOffsetUnits:-4 });
+    korrelShader(mat, C.korrel, C.korrelSterk, 0);
+  }
+  var obj = new THREE.Mesh(g, mat); obj.frustumCulled = false; obj.name = 'kapsel'; obj.renderOrder = afro ? 0 : 1;
+  function zetKleur(naam){ mat.color.set(KLEUREN[naam] || KLEUREN.bruin).convertSRGBToLinear(); }
+  zetKleur(opties.kleur);
+
+  /* buren voor het gladstrijken (alleen de afro) */
+  var burenStart = null, buren = null;
+  if(afro){
+    var sets = []; for(var q=0; q<n; q++) sets.push(new Set());
+    for(var t=0; t<S.index.length; t+=3){ var a = S.index[t], b = S.index[t+1], c = S.index[t+2];
+      sets[a].add(b); sets[a].add(c); sets[b].add(a); sets[b].add(c); sets[c].add(a); sets[c].add(b); }
+    burenStart = new Int32Array(n+1); var tot = 0; for(q=0; q<n; q++){ burenStart[q] = tot; tot += sets[q].size; } burenStart[n] = tot;
+    buren = new Int32Array(tot); for(q=0; q<n; q++){ var o = burenStart[q]; sets[q].forEach(function(x){ buren[o++] = x; }); }
+  }
+  var tmp = afro ? new Float32Array(n*3) : null, los = afro ? new Float32Array(n) : null;
+
+  function bereken(){
+    schilOpLichaam(S, geo, fV, bp, bn, bf);
+    var i;
+    if(!afro){
+      var col = g.attributes.color.array, rand = C.rand*K.s;
+      for(i=0; i<n; i++){
+        var al = glad01(0, rand, bf[i]);
+        hp[i*3] = bp[i*3] + bn[i*3]*C.dik*al; hp[i*3+1] = bp[i*3+1] + bn[i*3+1]*C.dik*al; hp[i*3+2] = bp[i*3+2] + bn[i*3+2]*C.dik*al;
+        col[i*4] = 1; col[i*4+1] = 1; col[i*4+2] = 1; col[i*4+3] = C.dekking*al;
+      }
+      g.attributes.color.needsUpdate = true;
+      return;
+    }
+    /* afro: radiaal vanuit het midden van de schedel; dun aan de haarlijn, dunner in de nek en aan het voorhoofd */
+    var cx = K.x, cy = K.top - 0.095*K.s, cz = K.z - 0.01*K.s, dik = C.dik*K.s, band = C.band*K.s;
+    for(i=0; i<n; i++){
+      var px = bp[i*3], py = bp[i*3+1], pz = bp[i*3+2], dx = px - cx, dy = py - cy, dz = pz - cz, dl = Math.sqrt(dx*dx + dy*dy + dz*dz) || 1;
+      var rx = dx/dl*0.75 + bn[i*3]*0.25, ry = dy/dl*0.75 + bn[i*3+1]*0.25 + C.op, rz = dz/dl*0.75 + bn[i*3+2]*0.25, rl = Math.sqrt(rx*rx + ry*ry + rz*rz) || 1;
+      var h = (K.top - py)/K.s, achter = pz < K.z ? 1 : 0;
+      var nek = 1 - (1 - C.nek[2]) * glad01(C.nek[0], C.nek[1], h) * achter;
+      var voor = 1 - (1 - C.voor) * glad01(0.03, 0.09, h) * (pz > K.z ? 1 : 0) * glad01(0.0, 0.05*K.s, pz - K.z);
+      var laag = 1 - (1 - C.laag[2]) * glad01(C.laag[0], C.laag[1], h);   /* dikker bovenop, dunner naar de oren: rond i.p.v. een paddenstoel */
+      var d = dik * glad01(0, band, bf[i]) * nek * voor * laag;
+      los[i] = glad01(0, band*0.6, bf[i]);
+      hp[i*3] = px + rx/rl*d; hp[i*3+1] = py + ry/rl*d; hp[i*3+2] = pz + rz/rl*d;
+    }
+    /* Taubin: gladstrijken zonder te krimpen; de haarlijn blijft vast */
+    for(var it=0; it<C.glad; it++){
+      var lam = (it & 1) ? -0.53 : 0.5;
+      for(i=0; i<n; i++){
+        var s0 = burenStart[i], s1 = burenStart[i+1], mx = 0, my = 0, mz = 0;
+        for(var e=s0; e<s1; e++){ var bj = buren[e]*3; mx += hp[bj]; my += hp[bj+1]; mz += hp[bj+2]; }
+        var m = (s1 - s0) || 1, kk = lam*los[i];
+        tmp[i*3] = hp[i*3] + (mx/m - hp[i*3])*kk; tmp[i*3+1] = hp[i*3+1] + (my/m - hp[i*3+1])*kk; tmp[i*3+2] = hp[i*3+2] + (mz/m - hp[i*3+2])*kk;
+      }
+      hp.set(tmp);
+    }
+    /* krullen: lage bulten langs de richting vanuit het midden; nooit onder de huid */
+    var ks = C.krulSchaal/K.s;
+    for(i=0; i<n; i++){
+      var qx = hp[i*3] - cx, qy = hp[i*3+1] - cy, qz = hp[i*3+2] - cz, ql = Math.sqrt(qx*qx + qy*qy + qz*qz) || 1;
+      var b0 = bp[i*3], b1 = bp[i*3+1], b2 = bp[i*3+2];
+      var kr = (ruis3(b0*ks, b1*ks, b2*ks)*0.7 + ruis3(b0*ks*2.3 + 7, b1*ks*2.3, b2*ks*2.3)*0.3 - 0.5) * 2 * C.krul*K.s * los[i];
+      hp[i*3] += qx/ql*kr; hp[i*3+1] += qy/ql*kr; hp[i*3+2] += qz/ql*kr;
+      var ux = hp[i*3] - b0, uy = hp[i*3+1] - b1, uz = hp[i*3+2] - b2, un = ux*bn[i*3] + uy*bn[i*3+1] + uz*bn[i*3+2], min = 0.0015*los[i];
+      if(un < min){ hp[i*3] += bn[i*3]*(min - un); hp[i*3+1] += bn[i*3+1]*(min - un); hp[i*3+2] += bn[i*3+2]*(min - un); }
+    }
+  }
+  function teken(normalen){
+    g.attributes.position.needsUpdate = true;
+    if(normalen){
+      if(afro) g.computeVertexNormals();
+      else { g.attributes.normal.array.set(bn); g.attributes.normal.needsUpdate = true; }
+      g.computeBoundingSphere();
+    }
+  }
+  var bouwt = false, versie = 0, meting = { ms:0 };
+  function* herbouwStappen(){
+    var v0 = ++versie; bouwt = true;
+    try{
+      yield;
+      var t0 = performance.now();
+      bereken(); teken(true);
+      meting.ms = performance.now() - t0;
+      return v0 === versie;
+    } finally { if(v0 === versie) bouwt = false; }
+  }
+  function herbouw(){ var it = herbouwStappen(), r; do { r = it.next(); } while(!r.done); return r.value; }
+  function stijf(normalen){ versie++; bouwt = false; bereken(); teken(normalen !== false || afro); }
+  if(!opties.uitgesteld) herbouw();
+  return {
+    groep: obj, stijl: stijl,
+    herbouw: herbouw, herbouwStappen: herbouwStappen, stijf: stijf,
+    verouderd: function(){ return false; }, bouwt: function(){ return bouwt; },
+    stap: function(){ return false; },   /* geen physics */
+    zet: function(o){ if(o && o.kleur) zetKleur(o.kleur); },
+    dispose: function(){ g.dispose(); mat.dispose(); },
+    meting: meting, gids: function(){ return null; },
+    info: function(){ return stijl + ': ' + n + ' vertices, ' + (S.index.length/3) + ' driehoeken; ' + meting.ms.toFixed(0) + ' ms'; }
+  };
+}
+
+/* Opgeslagen keuze (in het lichaam-object, localStorage 'tatties-lichaam'): haar:{aan, kleur, stijl}, bril:{aan}.
+   stijl: '013' (het CGTrader-kapsel, ook voor oude keuzes zonder stijl), 'buzz' of 'afro'. */
 function normaliseer(L){
   var h = (L && L.haar && typeof L.haar === 'object') ? L.haar : {}, b = (L && L.bril && typeof L.bril === 'object') ? L.bril : {};
-  return { haar:{ aan:h.aan === true, kleur:KLEUREN[h.kleur] ? h.kleur : 'bruin' }, bril:{ aan:b.aan === true } };
+  return { haar:{ aan:h.aan === true, kleur:KLEUREN[h.kleur] ? h.kleur : 'bruin', stijl:STIJLEN.indexOf(h.stijl) >= 0 ? h.stijl : '013' },
+           bril:{ aan:b.aan === true } };
 }
 
 /* Rustvorm-cache in localStorage (een sleutel: alleen het laatste lichaam), float32 als base64 (~29 KB). */
@@ -10810,7 +11106,8 @@ var lsCache = {
   }
 };
 
-return { KLEUREN:KLEUREN, kanLaden:kanLaden, ontpak:ontpak, maakKapsel:maakKapsel, maakBril:maakBril, normaliseer:normaliseer,
+return { KLEUREN:KLEUREN, STIJLEN:STIJLEN, kanLaden:kanLaden, ontpak:ontpak, maakKapsel:maakKapsel, maakSchilKapsel:maakSchilKapsel,
+         maakBril:maakBril, normaliseer:normaliseer,
          lsCache:lsCache, _gids:maakGids };
 })();
 /* LICHAAM-HAAR-EINDE */
@@ -11156,7 +11453,7 @@ const I18N = {
     'woord.wensen':'wensen','woord.tattoos':'tattoos','woord.dag':'dag','woord.dagen':'dagen','mv.foto_s':"'s",
     'woord.notitiesopt':'Notities (optioneel)','woord.onbekendefout':'onbekende fout','eenheid.uur':'u','eenheid.min':'min',
     'stats.wissel_eenheid':'Tik om te wisselen tussen uren en minuten','inst.valuta':'Valuta',
-    /* LICHAAM-GEN-I18N-NL-BEGIN */'gen.terug':'Terug','gen.volgende':'Volgende','gen.klaar':'Klaar','gen.beeld':'Heel lichaam','gen.reset':'Opnieuw','gen.reset_zeker':'Zeker?','gen.meer':'Meer instellen','gen.minder':'Minder instellen','gen.geslacht.kop':'Welke vorm past bij jou?','gen.geslacht.sub':'Dit bepaalt de basisvorm. Je kunt het later nog bijstellen.','gen.geslacht.vrouw':'Vrouwelijk','gen.geslacht.vrouw_sub':'Smallere schouders, bredere heupen','gen.geslacht.nb':'Tussenin','gen.geslacht.nb_sub':'Tussen beide in; verstel zelf waar','gen.geslacht.man':'Mannelijk','gen.geslacht.man_sub':'Bredere schouders, rechtere heupen','gen.leeftijd':'Leeftijd','gen.jaar_eenheid':'jaar','gen.huid':'Huidskleur','gen.geslacht.links':'smallere schouders, bredere heupen','gen.geslacht.rechts':'bredere schouders, smallere heupen','gen.stapvan':'Stap {n} van {m}','gen.kies_eerst':'Kies eerst een vorm','aria.lengte':'Lengte','aria.gewicht':'Gewicht','aria.bouw':'Bouw','aria.nb':'Basisvorm','aria.min':'Minder','aria.plus':'Meer','aria.veelminder':'veel minder','aria.minder':'minder','aria.gemiddeld':'gemiddeld','aria.meer':'meer','aria.veelmeer':'veel meer','aria.zachter':'zachter','aria.gespierder':'gespierder','gen.lengte.kop':'Hoe lang ben je?','gen.lengte.sub':'Zo staat de tattoo straks op de juiste schaal.','gen.gewicht.kop':'Hoeveel weeg je?','gen.gewicht.sub':'Een schatting is goed. Daarna kies je je bouw.','gen.gewicht.bouw':'Bouw','gen.gewicht.links':'zachter','gen.gewicht.rechts':'gespierder','gen.gewicht.klem':'Verder dan {n} kg gaat het model hier niet.','gen.boven.kop':'Bovenlichaam','gen.onder.kop':'Onderlichaam','gen.deel.sub':'Sleep tot het klopt, of tik gewoon op Volgende.','mod.schouderbreedte':'Schouders','mod.borstkas':'Borstkas','mod.taille':'Taille','mod.buik':'Buik','mod.bovenarm':'Bovenarm','mod.nek':'Nek','mod.pols':'Pols','mod.borstspier':'Borstspier','mod.rugspier':'Rugspier','mod.vShape':'V-vorm','mod.buikTonus':'Buik strak','mod.armenVet':'Armen zacht','mod.armenSpier':'Armen spier','mod.bovenarmlengte':'Bovenarmlengte','mod.onderarmlengte':'Onderarmlengte','mod.heupen':'Heupen','mod.billen':'Billen','mod.dij':'Dij','mod.kuit':'Kuit','mod.benenVet':'Benen zacht','mod.benenSpier':'Benen spier','mod.cupsize':'Cupmaat','mod.firmness':'Stevigheid','gen.annuleer':'Annuleren','gen.overslaan':'Overslaan','onb.gen_sub':'Eerst je lichaam, dan staan je tattoos straks op de juiste plek.','onb.gen_maak':'Maak je lichaam','ui.lichaam_migratie':'We hebben een nieuw 3D-model. Kijk even of je tattoos goed staan.','ui.lichaam_migratie_mis':'{n} tattoo{s} niet overgezet naar het nieuwe model; ze staan wel in je collectie.','inst.lichaam_terug':'Tattoos terug naar het oude model','inst.lichaam_terug_vraag':'Alle overgezette tattoos terugzetten op hun oude plek en het nieuwe lichaamsmodel uitzetten?','toast.lichaam_terug':'{n} tattoo{s} teruggezet. De app laadt opnieuw.','ui.lichaam_tip':'Maak eerst je lichaam, dan kloppen de maat en de plek van je tattoos.','ui.lichaam_tip_migratie':'We hebben een nieuw 3D-model. Maak eerst je lichaam en kijk dan of je tattoos goed staan.','inst.lichaam_niet':'Nog niet gemaakt','detail.herplaats':'Opnieuw plaatsen','detail.herplaats_uitleg':'Staat hij niet goed? Plaats hem opnieuw op het model.','detail.herplaats_geen':'Staat nog niet op het model.','ui.tattoo_herplaatst':'Tattoo opnieuw geplaatst','ui.herplaats_hint':'Tik op de nieuwe plek. De oude plek zie je vaag.','detail.plek':'Plek op het lichaam','start.lichaam_label':'Nieuw','start.lichaam_kop':'Maak je eigen lichaam','start.lichaam_uitleg':'Lengte, gewicht en bouw. Dan staan je tattoos op de juiste plek en maat.','start.model_aria':'Bekijk je lichaam in 3D','onb.account_titel':'Zet je collectie veilig','onb.account_sub':'Met een account staat je collectie ook in de cloud. Nieuw toestel of je browser gewist? Dan ben je niets kwijt.','onb.account_maak':'Maak een account','onb.account_later':'Later','onb.account_risico':'Zonder account kan je browser de opslag van deze app wissen.','inst.lichaam_terug_uitleg':'Staan je tattoos niet goed op het nieuwe model? Zet ze terug op het oude.','inst.haar':'Haar','inst.haar_uit':'Uit','inst.haar_aan':'Aan','inst.haarkleur':'Haarkleur','haar.zwart':'Zwart','haar.bruin':'Bruin','haar.blond':'Blond','haar.rood':'Rood','inst.bril':'Bril','inst.bril_uit':'Uit','inst.bril_aan':'Aan','inst.lichaam_aanpassen':'Lichaam aanpassen',/* LICHAAM-GEN-I18N-NL-EINDE */'onb.account_gratis':'Maak nu een account, dan houd je later alles gratis.','inst.lichaam_gen':'Nieuw lichaamsmodel (test)','inst.lichaam_gen_uit':'Uit','inst.lichaam_gen_aan':'Aan','ui.lichaam_gen_kan_niet':'Dit toestel kan het nieuwe lichaamsmodel nog niet laden.','inst.onderbroek':'Onderbroek','onderbroek.geen':'Geen','onderbroek.boxer':'Boxer','onderbroek.brief':'Strak',
+    /* LICHAAM-GEN-I18N-NL-BEGIN */'gen.terug':'Terug','gen.volgende':'Volgende','gen.klaar':'Klaar','gen.beeld':'Heel lichaam','gen.reset':'Opnieuw','gen.reset_zeker':'Zeker?','gen.meer':'Meer instellen','gen.minder':'Minder instellen','gen.geslacht.kop':'Welke vorm past bij jou?','gen.geslacht.sub':'Dit bepaalt de basisvorm. Je kunt het later nog bijstellen.','gen.geslacht.vrouw':'Vrouwelijk','gen.geslacht.vrouw_sub':'Smallere schouders, bredere heupen','gen.geslacht.nb':'Tussenin','gen.geslacht.nb_sub':'Tussen beide in; verstel zelf waar','gen.geslacht.man':'Mannelijk','gen.geslacht.man_sub':'Bredere schouders, rechtere heupen','gen.leeftijd':'Leeftijd','gen.jaar_eenheid':'jaar','gen.huid':'Huidskleur','gen.geslacht.links':'smallere schouders, bredere heupen','gen.geslacht.rechts':'bredere schouders, smallere heupen','gen.stapvan':'Stap {n} van {m}','gen.kies_eerst':'Kies eerst een vorm','aria.lengte':'Lengte','aria.gewicht':'Gewicht','aria.bouw':'Bouw','aria.nb':'Basisvorm','aria.min':'Minder','aria.plus':'Meer','aria.veelminder':'veel minder','aria.minder':'minder','aria.gemiddeld':'gemiddeld','aria.meer':'meer','aria.veelmeer':'veel meer','aria.zachter':'zachter','aria.gespierder':'gespierder','gen.lengte.kop':'Hoe lang ben je?','gen.lengte.sub':'Zo staat de tattoo straks op de juiste schaal.','gen.gewicht.kop':'Hoeveel weeg je?','gen.gewicht.sub':'Een schatting is goed. Daarna kies je je bouw.','gen.gewicht.bouw':'Bouw','gen.gewicht.links':'zachter','gen.gewicht.rechts':'gespierder','gen.gewicht.klem':'Verder dan {n} kg gaat het model hier niet.','gen.boven.kop':'Bovenlichaam','gen.onder.kop':'Onderlichaam','gen.deel.sub':'Sleep tot het klopt, of tik gewoon op Volgende.','mod.schouderbreedte':'Schouders','mod.borstkas':'Borstkas','mod.taille':'Taille','mod.buik':'Buik','mod.bovenarm':'Bovenarm','mod.nek':'Nek','mod.pols':'Pols','mod.borstspier':'Borstspier','mod.rugspier':'Rugspier','mod.vShape':'V-vorm','mod.buikTonus':'Buik strak','mod.armenVet':'Armen zacht','mod.armenSpier':'Armen spier','mod.bovenarmlengte':'Bovenarmlengte','mod.onderarmlengte':'Onderarmlengte','mod.heupen':'Heupen','mod.billen':'Billen','mod.dij':'Dij','mod.kuit':'Kuit','mod.benenVet':'Benen zacht','mod.benenSpier':'Benen spier','mod.cupsize':'Cupmaat','mod.firmness':'Stevigheid','gen.annuleer':'Annuleren','gen.overslaan':'Overslaan','onb.gen_sub':'Eerst je lichaam, dan staan je tattoos straks op de juiste plek.','onb.gen_maak':'Maak je lichaam','ui.lichaam_migratie':'We hebben een nieuw 3D-model. Kijk even of je tattoos goed staan.','ui.lichaam_migratie_mis':'{n} tattoo{s} niet overgezet naar het nieuwe model; ze staan wel in je collectie.','inst.lichaam_terug':'Tattoos terug naar het oude model','inst.lichaam_terug_vraag':'Alle overgezette tattoos terugzetten op hun oude plek en het nieuwe lichaamsmodel uitzetten?','toast.lichaam_terug':'{n} tattoo{s} teruggezet. De app laadt opnieuw.','ui.lichaam_tip':'Maak eerst je lichaam, dan kloppen de maat en de plek van je tattoos.','ui.lichaam_tip_migratie':'We hebben een nieuw 3D-model. Maak eerst je lichaam en kijk dan of je tattoos goed staan.','inst.lichaam_niet':'Nog niet gemaakt','detail.herplaats':'Opnieuw plaatsen','detail.herplaats_uitleg':'Staat hij niet goed? Plaats hem opnieuw op het model.','detail.herplaats_geen':'Staat nog niet op het model.','ui.tattoo_herplaatst':'Tattoo opnieuw geplaatst','ui.herplaats_hint':'Tik op de nieuwe plek. De oude plek zie je vaag.','detail.plek':'Plek op het lichaam','start.lichaam_label':'Nieuw','start.lichaam_kop':'Maak je eigen lichaam','start.lichaam_uitleg':'Lengte, gewicht en bouw. Dan staan je tattoos op de juiste plek en maat.','start.model_aria':'Bekijk je lichaam in 3D','onb.account_titel':'Zet je collectie veilig','onb.account_sub':'Met een account staat je collectie ook in de cloud. Nieuw toestel of je browser gewist? Dan ben je niets kwijt.','onb.account_maak':'Maak een account','onb.account_later':'Later','onb.account_risico':'Zonder account kan je browser de opslag van deze app wissen.','inst.lichaam_terug_uitleg':'Staan je tattoos niet goed op het nieuwe model? Zet ze terug op het oude.','inst.haar':'Haar','inst.haar_uit':'Uit','inst.haar_aan':'Aan','inst.haarkleur':'Haarkleur','inst.kapsel':'Kapsel','kapsel.013':'Lang','kapsel.buzz':'Millimeter','kapsel.afro':'Afro','haar.zwart':'Zwart','haar.bruin':'Bruin','haar.blond':'Blond','haar.rood':'Rood','inst.bril':'Bril','inst.bril_uit':'Uit','inst.bril_aan':'Aan','inst.lichaam_aanpassen':'Lichaam aanpassen',/* LICHAAM-GEN-I18N-NL-EINDE */'onb.account_gratis':'Maak nu een account, dan houd je later alles gratis.','inst.lichaam_gen':'Nieuw lichaamsmodel (test)','inst.lichaam_gen_uit':'Uit','inst.lichaam_gen_aan':'Aan','ui.lichaam_gen_kan_niet':'Dit toestel kan het nieuwe lichaamsmodel nog niet laden.','inst.onderbroek':'Onderbroek','onderbroek.geen':'Geen','onderbroek.boxer':'Boxer','onderbroek.brief':'Strak',
     'lijst.geenresultaten':'Geen resultaten voor je zoekopdracht.',
     'lijst.geenopzone':'Geen {soort} op {zone}.',
     'lijst.legewishlist':'Je wishlist is nog leeg - voeg je eerste droomtattoo toe.',
@@ -11364,7 +11661,7 @@ const I18N = {
     'woord.wensen':'wishes','woord.tattoos':'tattoos','woord.dag':'day','woord.dagen':'days','mv.foto_s':'s',
     'woord.notitiesopt':'Notes (optional)','woord.onbekendefout':'unknown error','eenheid.uur':'h','eenheid.min':'min',
     'stats.wissel_eenheid':'Tap to switch between hours and minutes','inst.valuta':'Currency',
-    /* LICHAAM-GEN-I18N-EN-BEGIN */'gen.terug':'Back','gen.volgende':'Next','gen.klaar':'Done','gen.beeld':'Whole body','gen.reset':'Reset','gen.reset_zeker':'Sure?','gen.meer':'More settings','gen.minder':'Fewer settings','gen.geslacht.kop':'Which shape suits you?','gen.geslacht.sub':'This sets the basic shape. You can adjust it later.','gen.geslacht.vrouw':'Feminine','gen.geslacht.vrouw_sub':'Narrower shoulders, wider hips','gen.geslacht.nb':'In between','gen.geslacht.nb_sub':'In between; set it where you want','gen.geslacht.man':'Masculine','gen.geslacht.man_sub':'Wider shoulders, straighter hips','gen.leeftijd':'Age','gen.jaar_eenheid':'years','gen.huid':'Skin tone','gen.geslacht.links':'narrower shoulders, wider hips','gen.geslacht.rechts':'wider shoulders, narrower hips','gen.stapvan':'Step {n} of {m}','gen.kies_eerst':'Choose a shape first','aria.lengte':'Height','aria.gewicht':'Weight','aria.bouw':'Build','aria.nb':'Basic shape','aria.min':'Less','aria.plus':'More','aria.veelminder':'much less','aria.minder':'less','aria.gemiddeld':'average','aria.meer':'more','aria.veelmeer':'much more','aria.zachter':'softer','aria.gespierder':'more muscular','gen.lengte.kop':'How tall are you?','gen.lengte.sub':'This puts your tattoo on the right scale.','gen.gewicht.kop':'How much do you weigh?','gen.gewicht.sub':'A rough guess is fine. Then choose your build.','gen.gewicht.bouw':'Build','gen.gewicht.links':'softer','gen.gewicht.rechts':'more muscular','gen.gewicht.klem':"The model can't go past {n} kg here.",'gen.boven.kop':'Upper body','gen.onder.kop':'Lower body','gen.deel.sub':'Drag until it looks right, or just tap Next.','mod.schouderbreedte':'Shoulders','mod.borstkas':'Chest','mod.taille':'Waist','mod.buik':'Belly','mod.bovenarm':'Upper arm','mod.nek':'Neck','mod.pols':'Wrist','mod.borstspier':'Chest muscle','mod.rugspier':'Back muscle','mod.vShape':'V-shape','mod.buikTonus':'Firm belly','mod.armenVet':'Soft arms','mod.armenSpier':'Arm muscle','mod.bovenarmlengte':'Upper arm length','mod.onderarmlengte':'Forearm length','mod.heupen':'Hips','mod.billen':'Buttocks','mod.dij':'Thigh','mod.kuit':'Calf','mod.benenVet':'Soft legs','mod.benenSpier':'Leg muscle','mod.cupsize':'Cup size','mod.firmness':'Firmness','gen.annuleer':'Cancel','gen.overslaan':'Skip','onb.gen_sub':'First your body, so your tattoos end up in the right place.','onb.gen_maak':'Create your body','ui.lichaam_migratie':"We've got a new 3D model. Have a quick look that your tattoos are in the right place.",'ui.lichaam_migratie_mis':"{n} tattoo{s} not moved to the new model; they're still in your collection.",'inst.lichaam_terug':'Move tattoos back to the old model','inst.lichaam_terug_vraag':'Put all moved tattoos back in their old place and switch off the new body model?','toast.lichaam_terug':'{n} tattoo{s} moved back. The app will reload.','ui.lichaam_tip':'Create your body first, so your tattoos get the right size and place.','ui.lichaam_tip_migratie':"We've got a new 3D model. Create your body first, then check that your tattoos are in the right place.",'inst.lichaam_niet':'Not created yet','detail.herplaats':'Place again','detail.herplaats_uitleg':'Not in the right spot? Place it on the model again.','detail.herplaats_geen':'Not on the model yet.','ui.tattoo_herplaatst':'Tattoo placed again','ui.herplaats_hint':'Tap the new spot. The old spot is shown faintly.','detail.plek':'Place on the body','start.lichaam_label':'New','start.lichaam_kop':'Create your own body','start.lichaam_uitleg':'Height, weight and build. So your tattoos get the right place and size.','start.model_aria':'View your body in 3D','onb.account_titel':'Keep your collection safe','onb.account_sub':"With an account, your collection is also kept in the cloud. New device or cleared your browser? You won't lose a thing.",'onb.account_maak':'Create an account','onb.account_later':'Not now','onb.account_risico':"Without an account, your browser may clear this app's storage.",'inst.lichaam_terug_uitleg':'Tattoos not in the right place on the new model? Put them back on the old one.','inst.haar':'Hair','inst.haar_uit':'Off','inst.haar_aan':'On','inst.haarkleur':'Hair colour','haar.zwart':'Black','haar.bruin':'Brown','haar.blond':'Blonde','haar.rood':'Red','inst.bril':'Glasses','inst.bril_uit':'Off','inst.bril_aan':'On','inst.lichaam_aanpassen':'Adjust body',/* LICHAAM-GEN-I18N-EN-EINDE */'onb.account_gratis':"Create an account now and you'll keep everything free later.",'inst.lichaam_gen':'New body model (test)','inst.lichaam_gen_uit':'Off','inst.lichaam_gen_aan':'On','ui.lichaam_gen_kan_niet':"This device can't load the new body model yet.",'inst.onderbroek':'Underwear','onderbroek.geen':'None','onderbroek.boxer':'Boxer','onderbroek.brief':'Brief',
+    /* LICHAAM-GEN-I18N-EN-BEGIN */'gen.terug':'Back','gen.volgende':'Next','gen.klaar':'Done','gen.beeld':'Whole body','gen.reset':'Reset','gen.reset_zeker':'Sure?','gen.meer':'More settings','gen.minder':'Fewer settings','gen.geslacht.kop':'Which shape suits you?','gen.geslacht.sub':'This sets the basic shape. You can adjust it later.','gen.geslacht.vrouw':'Feminine','gen.geslacht.vrouw_sub':'Narrower shoulders, wider hips','gen.geslacht.nb':'In between','gen.geslacht.nb_sub':'In between; set it where you want','gen.geslacht.man':'Masculine','gen.geslacht.man_sub':'Wider shoulders, straighter hips','gen.leeftijd':'Age','gen.jaar_eenheid':'years','gen.huid':'Skin tone','gen.geslacht.links':'narrower shoulders, wider hips','gen.geslacht.rechts':'wider shoulders, narrower hips','gen.stapvan':'Step {n} of {m}','gen.kies_eerst':'Choose a shape first','aria.lengte':'Height','aria.gewicht':'Weight','aria.bouw':'Build','aria.nb':'Basic shape','aria.min':'Less','aria.plus':'More','aria.veelminder':'much less','aria.minder':'less','aria.gemiddeld':'average','aria.meer':'more','aria.veelmeer':'much more','aria.zachter':'softer','aria.gespierder':'more muscular','gen.lengte.kop':'How tall are you?','gen.lengte.sub':'This puts your tattoo on the right scale.','gen.gewicht.kop':'How much do you weigh?','gen.gewicht.sub':'A rough guess is fine. Then choose your build.','gen.gewicht.bouw':'Build','gen.gewicht.links':'softer','gen.gewicht.rechts':'more muscular','gen.gewicht.klem':"The model can't go past {n} kg here.",'gen.boven.kop':'Upper body','gen.onder.kop':'Lower body','gen.deel.sub':'Drag until it looks right, or just tap Next.','mod.schouderbreedte':'Shoulders','mod.borstkas':'Chest','mod.taille':'Waist','mod.buik':'Belly','mod.bovenarm':'Upper arm','mod.nek':'Neck','mod.pols':'Wrist','mod.borstspier':'Chest muscle','mod.rugspier':'Back muscle','mod.vShape':'V-shape','mod.buikTonus':'Firm belly','mod.armenVet':'Soft arms','mod.armenSpier':'Arm muscle','mod.bovenarmlengte':'Upper arm length','mod.onderarmlengte':'Forearm length','mod.heupen':'Hips','mod.billen':'Buttocks','mod.dij':'Thigh','mod.kuit':'Calf','mod.benenVet':'Soft legs','mod.benenSpier':'Leg muscle','mod.cupsize':'Cup size','mod.firmness':'Firmness','gen.annuleer':'Cancel','gen.overslaan':'Skip','onb.gen_sub':'First your body, so your tattoos end up in the right place.','onb.gen_maak':'Create your body','ui.lichaam_migratie':"We've got a new 3D model. Have a quick look that your tattoos are in the right place.",'ui.lichaam_migratie_mis':"{n} tattoo{s} not moved to the new model; they're still in your collection.",'inst.lichaam_terug':'Move tattoos back to the old model','inst.lichaam_terug_vraag':'Put all moved tattoos back in their old place and switch off the new body model?','toast.lichaam_terug':'{n} tattoo{s} moved back. The app will reload.','ui.lichaam_tip':'Create your body first, so your tattoos get the right size and place.','ui.lichaam_tip_migratie':"We've got a new 3D model. Create your body first, then check that your tattoos are in the right place.",'inst.lichaam_niet':'Not created yet','detail.herplaats':'Place again','detail.herplaats_uitleg':'Not in the right spot? Place it on the model again.','detail.herplaats_geen':'Not on the model yet.','ui.tattoo_herplaatst':'Tattoo placed again','ui.herplaats_hint':'Tap the new spot. The old spot is shown faintly.','detail.plek':'Place on the body','start.lichaam_label':'New','start.lichaam_kop':'Create your own body','start.lichaam_uitleg':'Height, weight and build. So your tattoos get the right place and size.','start.model_aria':'View your body in 3D','onb.account_titel':'Keep your collection safe','onb.account_sub':"With an account, your collection is also kept in the cloud. New device or cleared your browser? You won't lose a thing.",'onb.account_maak':'Create an account','onb.account_later':'Not now','onb.account_risico':"Without an account, your browser may clear this app's storage.",'inst.lichaam_terug_uitleg':'Tattoos not in the right place on the new model? Put them back on the old one.','inst.haar':'Hair','inst.haar_uit':'Off','inst.haar_aan':'On','inst.haarkleur':'Hair colour','inst.kapsel':'Hairstyle','kapsel.013':'Long','kapsel.buzz':'Buzz cut','kapsel.afro':'Afro','haar.zwart':'Black','haar.bruin':'Brown','haar.blond':'Blonde','haar.rood':'Red','inst.bril':'Glasses','inst.bril_uit':'Off','inst.bril_aan':'On','inst.lichaam_aanpassen':'Adjust body',/* LICHAAM-GEN-I18N-EN-EINDE */'onb.account_gratis':"Create an account now and you'll keep everything free later.",'inst.lichaam_gen':'New body model (test)','inst.lichaam_gen_uit':'Off','inst.lichaam_gen_aan':'On','ui.lichaam_gen_kan_niet':"This device can't load the new body model yet.",'inst.onderbroek':'Underwear','onderbroek.geen':'None','onderbroek.boxer':'Boxer','onderbroek.brief':'Brief',
     'lijst.geenresultaten':'No results for your search.',
     'lijst.geenopzone':'No {soort} on {zone}.',
     'lijst.legewishlist':'Your wishlist is empty - add your first dream tattoo.',
@@ -11623,7 +11920,7 @@ function createTattoo(overrides = {}) {
    ============================================================ */
 // App-versie (semver, handmatig ophogen bij een release). Bij een bump ook de
 // CACHE-naam in sw.js meebumpen, zodat clients de nieuwe build ophalen.
-const APP_VERSIE = '0.3.159';
+const APP_VERSIE = '0.3.160';
 
 /* Dev-haken die de CLOUD raken hangen alleen op een ontwikkelmachine aan window. Ze zijn geen
    lek op zichzelf (zonder XSS roept niemand ze aan, en CSP + esc() houden XSS tegen), maar ze
@@ -12510,6 +12807,8 @@ function markeerUiterlijk() {
   document.querySelectorAll('#haar-kleuren button[data-haarkleur]').forEach(b => {
     const aan = b.dataset.haarkleur === U.haar.kleur; b.classList.toggle('actief', aan); b.setAttribute('aria-pressed', aan ? 'true' : 'false'); });
   const kr = document.getElementById('inst-haarkleur-rij'); if (kr) kr.classList.toggle('verborgen', !U.haar.aan);
+  document.querySelectorAll('#kapsel-keuze button[data-kapsel]').forEach(b => b.classList.toggle('actief', b.dataset.kapsel === U.haar.stijl));
+  const kp = document.getElementById('inst-kapsel-rij'); if (kp) kp.classList.toggle('verborgen', !U.haar.aan);
 }
 /* Lichaam in de cloud-sync (slice 3b, 2026-09-25): een rij per account in de tabel `profiel`
    (supabase/migrations/20260925_lichaam_profiel.sql, RLS: alleen de eigen rij). Het lichaam is de
@@ -18512,7 +18811,7 @@ async function verwijderVoorbeelden() {
     if(!U.haar.aan) uiterlijkHaarWeg();
     if(!U.bril.aan) uiterlijkBrilWeg();
     if(haarObj && haarObj.mesh===mesh) haarObj.zet({ kleur:U.haar.kleur });
-    const nodigHaar=U.haar.aan && !(haarObj && haarObj.mesh===mesh), nodigBril=U.bril.aan && !(brilObj && brilObj.mesh===mesh);
+    const nodigHaar=U.haar.aan && !(haarObj && haarObj.mesh===mesh && haarObj.stijl===U.haar.stijl), nodigBril=U.bril.aan && !(brilObj && brilObj.mesh===mesh);
     if(!nodigHaar && !nodigBril) return;
     uiterlijkBezig=true;
     try{
@@ -18521,7 +18820,10 @@ async function verwijderVoorbeelden() {
       if(nodigBril){ uiterlijkBrilWeg(); brilObj=LichaamHaar.maakBril(mesh, D.bril); brilObj.mesh=mesh; modelRoot.add(brilObj.groep); uiterlijkInfaden(brilObj.groep); }
       if(nodigHaar){   // eerst de bril (direct), dan het haar (0,5-1 s, verdeeld over beelden)
         uiterlijkHaarWeg();
-        const obj=LichaamHaar.maakKapsel(mesh, Z.z, D.haar, { kleur:U.haar.kleur, uitgesteld:true, cache:LichaamHaar.lsCache }); obj.mesh=mesh;
+        const obj=U.haar.stijl==='013'   // buzz cut en afro (2026-10-04): procedureel op de hoofdhuid, geen physics
+          ? LichaamHaar.maakKapsel(mesh, Z.z, D.haar, { kleur:U.haar.kleur, uitgesteld:true, cache:LichaamHaar.lsCache })
+          : LichaamHaar.maakSchilKapsel(mesh, Z.z, U.haar.stijl, { kleur:U.haar.kleur, uitgesteld:true });
+        obj.mesh=mesh; obj.stijl=U.haar.stijl;
         obj.nieuw=true; obj.groep.visible=false; haarObj=obj; modelRoot.add(obj.groep);   // onzichtbaar tot de eerste opbouw klaar is
         await haarOpbouw(obj);
       }
@@ -18591,7 +18893,7 @@ async function verwijderVoorbeelden() {
   function uiterlijkTag(){   // voor de vingerafdruk van het startbeeld; '?' = gekozen maar nog niet opgebouwd
     if(!LICHAAM_GEN || typeof LichaamHaar==="undefined") return '';
     const U=uiterlijkKeuze();
-    return (U.haar.aan ? 'h'+U.haar.kleur+(haarObj && !haarObj.nieuw ? '' : '?') : '')+(U.bril.aan ? 'b'+(brilObj ? '' : '?') : '');
+    return (U.haar.aan ? 'h'+(U.haar.stijl==='013' ? '' : U.haar.stijl)+U.haar.kleur+(haarObj && !haarObj.nieuw && haarObj.stijl===U.haar.stijl ? '' : '?') : '')+(U.bril.aan ? 'b'+(brilObj ? '' : '?') : '');
   }
   window.__tatties3DUiterlijk=function(){ if(!LICHAAM_GEN || !inited) return false; uiterlijkBouw(); return true; };
   window.__tattiesHaarDbg={ haar:()=>haarObj, bril:()=>brilObj, bouw:uiterlijkBouw, bezig:()=>uiterlijkBezig, tag:uiterlijkTag,
@@ -25189,6 +25491,8 @@ function maakTatnetGL(json, canvas) {
     if(ub){ setUnderwear(ub.dataset.onderbroek); markOnderbroekKnop(); return; }
     const hb=e.target.closest("#haar-keuze button[data-haar]");   // haar en bril (2026-10-01)
     if(hb){ zetUiterlijk({ haar:{ aan:hb.dataset.haar==="1" } }); return; }
+    const ks=e.target.closest("#kapsel-keuze button[data-kapsel]");   // buzz cut en afro (2026-10-04)
+    if(ks){ zetUiterlijk({ haar:{ aan:true, stijl:ks.dataset.kapsel } }); return; }
     const hk=e.target.closest("#haar-kleuren button[data-haarkleur]");
     if(hk){ zetUiterlijk({ haar:{ aan:true, kleur:hk.dataset.haarkleur } }); return; }
     const bb=e.target.closest("#bril-keuze button[data-bril]");
