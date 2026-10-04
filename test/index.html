@@ -11622,7 +11622,7 @@ function createTattoo(overrides = {}) {
    ============================================================ */
 // App-versie (semver, handmatig ophogen bij een release). Bij een bump ook de
 // CACHE-naam in sw.js meebumpen, zodat clients de nieuwe build ophalen.
-const APP_VERSIE = '0.3.155';
+const APP_VERSIE = '0.3.156';
 
 /* Dev-haken die de CLOUD raken hangen alleen op een ontwikkelmachine aan window. Ze zijn geen
    lek op zichzelf (zonder XSS roept niemand ze aan, en CSP + esc() houden XSS tegen), maar ze
@@ -18533,6 +18533,16 @@ async function verwijderVoorbeelden() {
     }
   }
   function planUiterlijk(){ setTimeout(()=>{ uiterlijkBouw(); }, 60); }
+  /* Haar en bril eerst (2026-10-04, vraag eigenaar): restore3D wacht hierop voordat de tattoos verschijnen, hooguit UITERLIJK_WACHT ms. */
+  const UITERLIJK_WACHT=2500;
+  async function uiterlijkEerst(){
+    if(!LICHAAM_GEN || typeof LichaamHaar==="undefined" || !modelRoot || !pickMeshes.length) return;
+    const U=uiterlijkKeuze(); if(!(U.haar.aan || U.bril.aan)) return;
+    const t0=performance.now(), klaar=()=>!uiterlijkBezig && (!U.haar.aan || (haarObj && !haarObj.nieuw)) && (!U.bril.aan || !!brilObj);
+    if(!uiterlijkBezig) uiterlijkBouw();
+    while(!klaar() && performance.now()-t0<UITERLIJK_WACHT) await frameAdem();
+    ttMerk('tt-uiterlijk');
+  }
   /* De opbouw van het haar loopt in stappen (generator); per beeld hooguit ~8 ms, zodat het model blijft draaien. Een nieuwe
      opbouw (of een ander haarObj) breekt de lopende af. */
   let haarBouwToken=0;
@@ -23225,6 +23235,7 @@ function maakTatnetGL(json, canvas) {
   const KLEUR_DREMPEL=0.2;   // kans >= drempel = kleur (bij twijfel kleur; gekozen op de dev-set van de training)
   const MATTE_STD={z0:0.96,z1:0.64,k0:4.0,k1:19,hMax:90};   // drempels van de inkt-matte (apply_matte_param.py)
   const KLEUR_STERK=0.005, KLEUR_LOS=0.15;   // zwart/kleur-drempels met Tatnet-gebied (waren 0,02 / 0,30)
+  const TEKENING_PAPIER=0.45, TEKENING_HUID=0.08;   // tekening op papier herkennen (2026-10-04, apply_tekening.py)
   function inktMatte(canvas, modus, gebied){
     const W=canvas.width, H=canvas.height; if(!W||!H) return null;
     const x=canvas.getContext('2d',{willReadFrequently:true});
@@ -23241,6 +23252,18 @@ function maakTatnetGL(json, canvas) {
     const lum=new Float32Array(n2), hist=new Uint32Array(256); let cnt=0;
     for(let i=0;i<n2;i++){ const o=i*4; if(q[o+3]<16){ lum[i]=-1; continue; } const L=0.299*q[o]+0.587*q[o+1]+0.114*q[o+2]; lum[i]=L; hist[L|0]++; cnt++; }
     if(cnt<50) return null;
+    /* Tekening op papier (2026-10-04): veel licht, neutraal papier en bijna geen huidtint -> het Tatnet-gebied niet gebruiken (Tatnet
+       kent huid, geen papier: bij zwarte tekst op wit vielen letters weg). De lichtste pixels (het papier) zijn dan de "huid". */
+    let tekening=false;
+    if(gebied && window.__tekeningHerkennen!==false){
+      let pap=0, huid=0;
+      for(let i=0;i<n2;i++){ if(lum[i]<0) continue; const o=i*4, r=q[o], g=q[o+1], b=q[o+2], mx=Math.max(r,g,b), mn=Math.min(r,g,b);
+        if(lum[i]>=200 && mx-mn<=22){ pap++; continue; }
+        if(mx===r && mx-mn>=12 && lum[i]>60){ const sat=(mx-mn)/Math.max(mx,1), hue=60*(g-b)/(mx-mn); if(hue>=8 && hue<=48 && sat>=0.12 && sat<=0.75) huid++; } }
+      tekening = pap>=cnt*TEKENING_PAPIER && huid<cnt*TEKENING_HUID;
+      if(tekening) gebied=null;
+    }
+    window.__matteTekening=tekening;   // dev: was de laatste uitsnede een tekening
     let acc=0, dr=0; for(let L=0;L<256;L++){ acc+=hist[L]; if(acc>=cnt*0.55){ dr=L; break; } }
     const wgt=new Float32Array(n2);
     for(let i=0;i<n2;i++) wgt[i]=lum[i]<0?0:Math.max(0,Math.min(1,(lum[i]-dr*0.85)/(dr*0.15+1e-6)));
@@ -24346,7 +24369,7 @@ function maakTatnetGL(json, canvas) {
     });
   }
   /* ---- Textuurcache (slice 5o) ---- */
-  const TEX_VERSIE=3;   // ophogen als de matte, Tatnet of de uitsnede-verwerking anders gaat rekenen (2: kleur-matte houdt het Tatnet-gebied, 2026-10-02; 3: matte-drempels 0,96 / k0 4 + kleur-model, 2026-10-03)
+  const TEX_VERSIE=4;   // 4: tekening op papier (2026-10-04); ophogen als de matte, Tatnet of de uitsnede-verwerking anders gaat rekenen (2: kleur-matte houdt het Tatnet-gebied, 2026-10-02; 3: matte-drempels 0,96 / k0 4 + kleur-model, 2026-10-03)
   const TEX_DB='tatties-textuur-'+(typeof DB_NAAM!=='undefined' ? DB_NAAM : 'tatties');
   let texDbP=null, texOpgeruimd=false;
   function texDb(){
@@ -24620,6 +24643,8 @@ function maakTatnetGL(json, canvas) {
     if(token!==undefined && token!==loadToken) return;
     texVooraf(list);   // slice 5u: textuurcache voor alle tattoos tegelijk lezen en decoderen
     migTel.gedaan=0; migTel.mislukt=0; herstelLoopt=true;   // geen startscherm-opname van een half herstel (slice 5a)
+    try{ await uiterlijkEerst(); }catch(e){ console.error('uiterlijk', e); }   // haar en bril eerst, daarna de tattoos (2026-10-04)
+    if(token!==undefined && token!==loadToken){ herstelLoopt=false; return; }
     // Progressief: decals in kleine batches bouwen en tussendoor naar de render-loop yielden,
     // zodat de UI niet bevriest en de voortgang ('Laden… X/N') zichtbaar is bij veel tattoos.
     const total=list.reduce((n,t)=>n+((t&&!t.deleted)?1:0),0);
@@ -24636,7 +24661,7 @@ function maakTatnetGL(json, canvas) {
     }
     zetLaadVoortgang(0,0);   // label terug naar 'Laden…'
     herstelLoopt=false; hersteldOoit=true;
-    planUiterlijk();   // haar en bril pas na de tattoos (opstarttijd)
+    planUiterlijk();   // vangnet: haar en bril staan er normaal al (uiterlijkEerst)
     planStraalRaster();   // snelle straal klaarzetten, niet pas bij de eerste aanraking
     planGraaf();   // raster + graaf voor bewerken (met de geometriecache niet meer nodig bij het opstarten)
     planTexVers();   // na een update: oude texturen op de achtergrond vernieuwen
