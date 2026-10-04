@@ -8534,10 +8534,14 @@ var _schaal = null;        /* {g,m,w,h,s}: de schaal die bij deze stand hoort (u
    (navel y 1,012; onderkant borst ~1,14; de basismesh is 1,667 m): drie rijen van twee bulten boven de navel, een
    zachtere onder de navel, de lijn in het midden iets dieper. Langs de normaal van de basismesh; vastgemaakt aan de
    vertexnummers, dus hij schaalt mee met elk lichaam en tattoos/onderbroek gaan mee. Alleen in de zichtbare blend
-   (niet in blendPos: de gewichtstabel, lengte en de migratie rekenen zonder). Sterkte = spier x (geen vet). */
-var SIXPACK = { A:0.016, vrouw:0.7, rijen:[0.93, 1.017, 1.056, 1.096, 1.137], onder:0.45, wOnder:0.068, wBoven:0.085,
+   (niet in blendPos: de gewichtstabel, lengte en de migratie rekenen zonder). Sterkte = spier x (geen vet).
+   Shader (2026-10-04, toesteltest eigenaar: hoekig): de buik van het model heeft randen van ~26 mm, de rijen liggen ~40 mm uit
+   elkaar, dus als vorm wordt het facetwerk. Nu tekent het huidmateriaal de sixpack per pixel als reliëf (sixpackShader:
+   dezelfde hoogtefunctie in GLSL op de basismesh-coordinaten, attribuut spBasis, sterkte in spUni); de vorm doet alleen nog
+   `vorm` x A mee (0 = alleen reliëf). */
+var SIXPACK = { vorm:0, As:0.002, platS:1.3, envZij:0.4, envOnder:0.03, envBoven:0.035, onderS:0.3, tussenS:0.45, tBreedS:0.011, A:0.016, vrouw:0.7, rijen:[0.93, 1.017, 1.056, 1.096, 1.137], onder:0.45, wOnder:0.068, wBoven:0.085,
                 lijn:0.006, groef:0.25, plat:0.4, tussen:0.6, tBreed:0.007, spier0:0.6, spier1:0.95, vet1:0.35 };
-var spIdx = null, spVal = null;
+var spIdx = null, spVal = null, spUni = { value:0 };
 function spPar(){
   var p = SIXPACK, o = (typeof window !== 'undefined') && window.__sixpackParam;   /* dev: parameters proberen */
   if(!o) return p;
@@ -8585,6 +8589,8 @@ function sixpackSterkte(gender, muscle){
 }
 function sixpackBij(arr, gender, muscle){
   var s = sixpackSterkte(gender, muscle);
+  spUni.value = s < 1e-3 ? 0 : s;   /* het reliëf in de shader */
+  s *= spPar().vorm;
   if(s < 1e-3) return;
   var P = (typeof window !== 'undefined') && window.__sixpackParam;
   if(!spIdx || P !== spVal.par){ var v = sixpackVorm(P ? spPar() : null); spIdx = v.idx; spVal = v.val; spVal.par = P; }
@@ -8593,6 +8599,49 @@ function sixpackBij(arr, gender, muscle){
     arr[o] += s*spVal[q]; arr[o+1] += s*spVal[q+1]; arr[o+2] += s*spVal[q+2];
   }
 }
+/* Sixpack als reliëf in een MeshStandardMaterial (onBeforeCompile van het huidmateriaal). Zelfde hoogte als sixpackVorm, met
+   een zachter profiel (platS) en de middenlijn ook bovenaan uitlopend. Zonder spBasis (oude modellen) is de basis 0: geen reliëf. */
+function sixpackShader(sh){
+  var p = spPar(), R = p.rijen, N = R.length - 1;
+  var f = function(x){ var t = (+x).toFixed(5); return t.indexOf('.') < 0 ? t + '.0' : t; };
+  sh.uniforms.spS = spUni;
+  sh.vertexShader = sh.vertexShader
+    .replace('#include <common>', '#include <common>\nattribute vec3 spBasis;\nvarying vec3 vSpB;')
+    .replace('#include <begin_vertex>', '#include <begin_vertex>\nvSpB = spBasis;');
+  var rij = '', tus = '', r, k;
+  for(r=0; r<N; r++)
+    rij += '  if(y >= ' + f(R[r]) + ' && y <= ' + f(R[r+1]) + ') h = ' + f(r === 0 ? p.onderS : 1) +
+           ' * pow(max(sin(PI*(y - ' + f(R[r]) + ')/' + f(R[r+1] - R[r]) + '), 0.0), ' + f(p.platS) + ') * st;\n';
+  for(k=1; k<N; k++)
+    tus += '  h -= ' + f(p.tussenS) + ' * exp(-(y - ' + f(R[k]) + ')*(y - ' + f(R[k]) + ')/' + f(p.tBreedS*p.tBreedS) +
+           ') * sin(PI*min(1.0, ax/W));\n';
+  var R0 = f(R[0]), RN = f(R[N]);
+  var code = [
+    'uniform float spS;',
+    'varying vec3 vSpB;',
+    'float spGl(float a, float b, float x){ float t = clamp((x - a)/(b - a), 0.0, 1.0); return t*t*(3.0 - 2.0*t); }',
+    'float spH(vec3 b){',
+    '  float x = b.x, y = b.y, ax = abs(x);',
+    '  if(b.z <= 0.05 || y < ' + R0 + ' || y > ' + RN + ' || ax > ' + f(p.wBoven) + ') return 0.0;',
+    '  float W = ' + f(p.wOnder) + ' + ' + f(p.wBoven - p.wOnder) + ' * clamp((y - ' + R0 + ')/' + f(R[N] - R[0]) + ', 0.0, 1.0);',
+    '  if(ax >= W) return 0.0;',
+    '  float st = pow(max(sin(PI*clamp((ax - ' + f(p.lijn) + ')/(W - ' + f(p.lijn) + '), 0.0, 1.0)), 0.0), ' + f(p.platS) + ');',
+    '  float h = 0.0;',
+    rij + '  h -= ' + f(p.groef) + ' * exp(-(x*x)/' + f(p.lijn*p.lijn) + ') * spGl(' + R0 + ', ' + f(R[1]) + ', y) * (1.0 - spGl(' + f(R[N-1]) + ', ' + RN + ', y));',
+    /* in de buik laten uitlopen (eigenaar: 'alsof het erop gezet is'): naar de zijkant en naar boven/onder zacht weg */
+    tus + '  h *= (1.0 - spGl(' + f(p.envZij) + '*W, W, ax)) * spGl(' + R0 + ', ' + f(R[0] + p.envOnder) + ', y) * (1.0 - spGl(' + f(R[N] - p.envBoven) + ', ' + RN + ', y));',
+    '  return h;',
+    '}',
+    'vec3 spRelief(vec3 p, vec3 n, vec2 d, float fd){ vec3 sx = dFdx(p), sy = dFdy(p), r1 = cross(sy, n), r2 = cross(n, sx);',
+    '  float det = dot(sx, r1)*fd; return normalize(abs(det)*n - sign(det)*(d.x*r1 + d.y*r2)); }'
+  ].join('\n');
+  sh.fragmentShader = sh.fragmentShader
+    .replace('#include <common>', '#include <common>\n' + code)
+    .replace('#include <normal_fragment_maps>', '#include <normal_fragment_maps>\n' +
+      'float spHh = spS * ' + f(p.As) + ' * spH(vSpB);\n' +
+      'normal = spRelief(-vViewPosition, normal, vec2(dFdx(spHh), dFdy(spHh)), faceDirection);');
+}
+function sixpackSleutel(){ var p = spPar(); return 'sp:' + [p.As, p.platS, p.tussenS, p.tBreedS, p.envZij, p.envOnder, p.envBoven, p.onderS, p.rijen.join(','), p.onder, p.wOnder, p.wBoven, p.lijn, p.groef, p.tussen, p.tBreed].join(':'); }
 function blend(gender, muscle, weight, height, metGrenzen){
   var t0 = performance.now();
   var arr = posAttr.array;
@@ -8985,6 +9034,7 @@ function klaar(p){
   posAttr = geo.attributes.position;
   norAttr = geo.attributes.normal;
   basePos = new Float32Array(posAttr.array);
+  geo.setAttribute('spBasis', new THREE.BufferAttribute(basePos, 3));   /* sixpack-reliëf: basismesh-coordinaten per vertex */
   tris = geo.index.array;
   weld = p.weld;
   nWeld = 0;
@@ -10038,6 +10088,7 @@ return {
   ontpakTpak: ontpakTpak,
   neutraal: neutraal,
   geometry: function(){ return geo; },
+  sixpackShader: sixpackShader, sixpackSleutel: sixpackSleutel,   /* sixpack als reliëf in het huidmateriaal */
   gewichtKg: function(){ return gewichtKg(); },
   lengteCm: function(){ return lichaamsLengte(); },
   meetMaat: meetMaat,
@@ -11920,7 +11971,7 @@ function createTattoo(overrides = {}) {
    ============================================================ */
 // App-versie (semver, handmatig ophogen bij een release). Bij een bump ook de
 // CACHE-naam in sw.js meebumpen, zodat clients de nieuwe build ophalen.
-const APP_VERSIE = '0.3.160';
+const APP_VERSIE = '0.3.161';
 
 /* Dev-haken die de CLOUD raken hangen alleen op een ontwikkelmachine aan window. Ze zijn geen
    lek op zichzelf (zonder XSS roept niemand ze aan, en CSP + esc() houden XSS tegen), maar ze
@@ -25400,6 +25451,12 @@ function maakTatnetGL(json, canvas) {
     const pb=document.getElementById("t3d-pose");
     if(pb){ if(!POSE_AAN) pb.hidden=true; else pb.onclick=()=>poseWissel(poseHoek===0); }
     skinMat=new THREE.MeshStandardMaterial({color:0xe2b48f, roughness:0.78, metalness:0.0, side:THREE.DoubleSide});
+    if(typeof LichaamMotor!=="undefined" && LichaamMotor.sixpackShader){   // sixpack als reliëf per pixel (2026-10-04): het model is te grof voor de vorm
+      skinMat.onBeforeCompile=(sh)=>{ LichaamMotor.sixpackShader(sh); };
+      skinMat.customProgramCacheKey=()=>LichaamMotor.sixpackSleutel();
+      skinMat.extensions={ derivatives:true };
+      window.__tattiesSixpackShader=()=>{ skinMat.needsUpdate=true; };   // dev: na een nieuw window.__sixpackParam
+    }
     activeSkin=skinMat;
     loader=new THREE.GLTFLoader();   // GEEN DRACO (ingebed model is pure-geometry GLB)
     bindControls();
