@@ -11972,7 +11972,7 @@ function createTattoo(overrides = {}) {
    ============================================================ */
 // App-versie (semver, handmatig ophogen bij een release). Bij een bump ook de
 // CACHE-naam in sw.js meebumpen, zodat clients de nieuwe build ophalen.
-const APP_VERSIE = '0.3.162';
+const APP_VERSIE = '0.3.163';
 
 /* Dev-haken die de CLOUD raken hangen alleen op een ontwikkelmachine aan window. Ze zijn geen
    lek op zichzelf (zonder XSS roept niemand ze aan, en CSP + esc() houden XSS tegen), maar ze
@@ -18504,7 +18504,7 @@ async function verwijderVoorbeelden() {
     const bouwBikini=()=>{
       /* model naar de referentie van eigenaar (2026-10-04): broekje laag in het midden en hoger op de heup, hoge V-uitsnijding;
          top zonder band: grote driehoekige cups met een ronde onderkant, dun touwtje ertussen, dun bandje om de rug, dunne nektouwtjes */
-      const BK={ top:0.062, heupOp:0.045, zij:0.025, kruis:0.006, touw:0.0021, rug:0.003, dip:0.014 };
+      const BK={ top:0.062, heupOp:0.045, zij:0.025, kruis:-0.02, touw:0.0021, rug:0.003, dip:0.008 };
       const zn=ZK ? ZK.namen : [], zi=(nm)=>zn.indexOf(nm);
       const zBorst=zi('borst'), zBuik=zi('buik'), zRug=zi('rug'), zHals=zi('hoofd-nek');
       const romp=(j)=>{ const z=ZK.z[j]; return z===zBorst || z===zBuik || z===zRug; };
@@ -18514,14 +18514,56 @@ async function verwijderVoorbeelden() {
       let heupB=0; for(let j=0;j<nv;j++) if(inM(j) && Math.abs(P[j*3+1]-(taille-0.05))<0.015) heupB=Math.max(heupB, Math.abs(P[j*3]));
       const heupX=Math.max(0.1, heupB*0.95), zijTop=taille-BK.top+BK.heupOp, been=(zijTop-BK.zij-(kruisY-BK.kruis))/heupX;
       const broekRand=(q)=>taille-BK.top+BK.heupOp*Math.min(1, Math.pow(Math.abs(q.x)/heupX, 2))-q.y;   // glimlach: laag in het midden
-      const beenRand=(q)=>q.y-(kruisY-BK.kruis+been*Math.abs(q.x));   // V naar het kruis, hoog op de heup
+      /* V naar het kruis, hoog op de heup. Per helft (x >= 0 / x <= 0) een rechte lijn: met |x| knipte een driehoek over het midden
+         scheef af en bleef er een spleet in het kruis (toesteltest eigenaar). */
+      const beenRand=(t)=>(q)=>q.y-(kruisY-BK.kruis+been*t*q.x);
       for(let i=0;i<idx.length;i+=3){ const a=idx[i], b=idx[i+1], c=idx[i+2];
         if(!(m2[a]&&m2[b]&&m2[c]) && !obKand(a,b,c)) continue;
+        // onderkant tussen de benen (huid wijst omlaag): geen stof, daar gaf hij kreukels en een rommelige punt (toesteltest eigenaar)
+        if(N[a*3+1]+N[b*3+1]+N[c*3+1]<-1.5 && Math.abs(P[a*3])<0.07 && P[a*3+1]<kruisY+0.05) continue;
         hier=[a,b,c]; let poly=snij([punt(a,0),punt(b,1),punt(c,2)], broekRand);
-        if(poly.length>=3) poly=snij(poly, beenRand);
         const opzij=vlakOpzij(a,b,c);
-        if(poly.length>=3) for(let k=2;k<poly.length;k++) zetDriehoek(poly[0],poly[k-1],poly[k],bodyP,bodyN,bodyUV,opzij);
+        if(poly.length>=3) for(const t of [1,-1]){ let h=snij(poly, (q)=>t*q.x); if(h.length>=3) h=snij(h, beenRand(t));
+          if(h.length>=3) for(let k=2;k<h.length;k++) zetDriehoek(h[0],h[k-1],h[k],bodyP,bodyN,bodyUV,opzij); }
       }
+      /* Strak trekken (toesteltest eigenaar: de stof zakte in de groef van het kruis en de bilnaad, een lijn/kreukels in het midden).
+         De stof als samenhangend net (punten op 0,1 mm samengevoegd) rond het midden gladstrijken: elk punt naar het gemiddelde van
+         zijn buren, nooit de huid in (niet achter zijn eigen raakvlak), randpunten blijven vast. Zo spant hij over holtes zoals echte
+         stof en blijven bollingen staan. Gewicht naar de zijkant (GLAD_X) zacht af. Dev: window.__bikiniGlad=false. */
+      const GLAD_X=0.075, strak=()=>{
+        const sl=(i)=>Math.round(bodyP[i]*1e4)+','+Math.round(bodyP[i+1]*1e4)+','+Math.round(bodyP[i+2]*1e4);
+        const id=new Map(), eerste=[], vi=new Int32Array(bodyP.length/3);
+        for(let i=0;i<bodyP.length;i+=3){ const k=sl(i); let v=id.get(k); if(v===undefined){ v=eerste.length; id.set(k,v); eerste.push(i); } vi[i/3]=v; }
+        const nV=eerste.length, buren=Array.from({length:nV},()=>[]), rand=new Uint8Array(nV), ribben=new Map();
+        for(let t=0;t<vi.length;t+=3) for(let e=0;e<3;e++){ const a=vi[t+e], b=vi[t+(e+1)%3]; if(a===b) continue;
+          if(buren[a].indexOf(b)<0) buren[a].push(b); if(buren[b].indexOf(a)<0) buren[b].push(a);
+          const k=a<b ? a*nV+b : b*nV+a; ribben.set(k,(ribben.get(k)||0)+1); }
+        ribben.forEach((n,k)=>{ if(n===1){ rand[Math.floor(k/nV)]=1; rand[k%nV]=1; } });
+        const X=new Float32Array(nV*3), O=new Float32Array(nV*3), N0=new Float32Array(nV*3), W=new Float32Array(nV), T=new Float32Array(nV*3);
+        for(let v=0;v<nV;v++){ const i=eerste[v]; for(let k=0;k<3;k++){ X[v*3+k]=O[v*3+k]=bodyP[i+k]; N0[v*3+k]=bodyN[i+k]; }
+          const u=Math.min(1, Math.abs(X[v*3])/GLAD_X); W[v]=rand[v] ? 0 : 1-u*u*(3-2*u); }
+        for(let it=0; it<60; it++){
+          for(let v=0;v<nV;v++){ T[v*3]=X[v*3]; T[v*3+1]=X[v*3+1]; T[v*3+2]=X[v*3+2]; if(!(W[v]>0) || !buren[v].length) continue;
+            let mx=0, my=0, mz=0; for(const b of buren[v]){ mx+=X[b*3]; my+=X[b*3+1]; mz+=X[b*3+2]; } const n=buren[v].length, k=0.6*W[v];
+            let x=X[v*3]+(mx/n-X[v*3])*k, y=X[v*3+1]+(my/n-X[v*3+1])*k, z=X[v*3+2]+(mz/n-X[v*3+2])*k;
+            const d=(x-O[v*3])*N0[v*3]+(y-O[v*3+1])*N0[v*3+1]+(z-O[v*3+2])*N0[v*3+2];
+            if(d<0){ x-=N0[v*3]*d; y-=N0[v*3+1]*d; z-=N0[v*3+2]*d; }   // niet de huid in
+            T[v*3]=x; T[v*3+1]=y; T[v*3+2]=z; }
+          X.set(T); }
+        // normalen opnieuw uit de vlakken (gladgestreken deel), elders de huidnormaal
+        const NN=new Float32Array(nV*3);
+        for(let t=0;t<vi.length;t+=3){ const a=vi[t]*3, b=vi[t+1]*3, c=vi[t+2]*3;
+          const ux=X[b]-X[a], uy=X[b+1]-X[a+1], uz=X[b+2]-X[a+2], wx=X[c]-X[a], wy=X[c+1]-X[a+1], wz=X[c+2]-X[a+2];
+          let nx=uy*wz-uz*wy, ny=uz*wx-ux*wz, nz=ux*wy-uy*wx;
+          if(nx*N0[a]+ny*N0[a+1]+nz*N0[a+2]<0){ nx=-nx; ny=-ny; nz=-nz; }
+          for(const q of [a,b,c]){ NN[q]+=nx; NN[q+1]+=ny; NN[q+2]+=nz; } }
+        for(let j=0;j<vi.length;j++){ const v=vi[j], i=j*3, w=W[v];
+          bodyP[i]=X[v*3]; bodyP[i+1]=X[v*3+1]; bodyP[i+2]=X[v*3+2];
+          if(w>0){ const l=Math.hypot(NN[v*3],NN[v*3+1],NN[v*3+2])||1;
+            const nx=bodyN[i]*(1-w)+NN[v*3]/l*w, ny=bodyN[i+1]*(1-w)+NN[v*3+1]/l*w, nz=bodyN[i+2]*(1-w)+NN[v*3+2]/l*w, m=Math.hypot(nx,ny,nz)||1;
+            bodyN[i]=nx/m; bodyN[i+1]=ny/m; bodyN[i+2]=nz/m; } }
+      };
+      if(window.__bikiniGlad!==false) strak();
       if(!ZK) return;
       // top: de hoogtes volgen de lichaamslengte (gemeten: borsttop 0,73, halskuil 0,885); de top = het verste punt naar voren
       let voetY=Infinity, kruinY=-Infinity;
@@ -18546,13 +18588,13 @@ async function verwijderVoorbeelden() {
         if(Math.abs(bi.x)<0.014) bi.x=s*0.014;
         const xm=(bi.x+bo.x)/2, hw=Math.abs(bo.x-bi.x)/2;
         const onder=(q)=>{ const u=(q.x-xm)/hw; return q.y-(yu-BK.dip*Math.max(0, 1-u*u)); };   // ronde onderkant
-        cups.push({s, tx, ty, tz, yu, bi, bo, ap, onder});
+        cups.push({s, tx, ty, tz, yu, bi, bo, ap, onder, top:best, kand:[]});
       }
       // lijn door p1 en p2: >= 0 aan de kant van ref
       const kant=(p1,p2,ref)=>{ const f=(q)=>(p2.x-p1.x)*(q.y-p1.y)-(p2.y-p1.y)*(q.x-p1.x), t=f(ref)>=0 ? 1 : -1; return (q)=>t*f(q); };
       const strook=(A,B,hw)=>{ const L=Math.hypot(B.x-A.x,B.y-A.y), ux=(B.x-A.x)/L, uy=(B.y-A.y)/L;
         return [(q)=>hw-((q.x-A.x)*-uy+(q.y-A.y)*ux), (q)=>hw+((q.x-A.x)*-uy+(q.y-A.y)*ux), (q)=>(q.x-A.x)*ux+(q.y-A.y)*uy+0.004, (q)=>L-((q.x-A.x)*ux+(q.y-A.y)*uy)]; };
-      const yBand=Math.min(cups[0].yu, cups[1].yu), yRug=(cups[0].yu+cups[1].yu)/2+0.022, zVoor=Math.min(cups[0].tz, cups[1].tz)-0.06;
+      const yBand=Math.min(cups[0].yu, cups[1].yu), yRug=(cups[0].yu+cups[1].yu)/2+0.004, zVoor=Math.min(cups[0].tz, cups[1].tz)-0.085;
       const knip=(poly, fs)=>{ for(const f of fs){ if(poly.length<3) return poly; poly=snij(poly,f); } return poly; };
       for(let i=0;i<idx.length;i+=3){ const a=idx[i], b=idx[i+1], c=idx[i+2];
         const za=ZK.z[a]; if(!(romp(a)||za===zHals) ) continue;
@@ -18560,14 +18602,17 @@ async function verwijderVoorbeelden() {
         const nzc=N[a*3+2]+N[b*3+2]+N[c*3+2], tri=[punt(a,0),punt(b,1),punt(c,2)]; hier=[a,b,c];
         const zc=(P[a*3+2]+P[b*3+2]+P[c*3+2])/3;
         // cups: voorkant, niet dieper dan 7 cm achter de top
-        if(romp(a) && nzc>-0.6) for(const C of cups){
-          if(zc<C.tz-0.1 || (P[a*3]*C.s<0 && P[b*3]*C.s<0 && P[c*3]*C.s<0)) continue;
-          const p=knip(tri, [kant(C.bi,C.ap,C.bo), kant(C.bo,C.ap,C.bi), C.onder, (q)=>q.x*C.s, (q)=>q.z-(C.tz-0.07)]);   // diepte afknippen, geen zaagrand
-          if(p.length>=3) for(let k=2;k<p.length;k++) zetDriehoek(p[0],p[k-1],p[k],bodyP,bodyN,bodyUV,false);
+        if(romp(a) && nzc>-0.3) for(const C of cups){   // ook de zijkant van de borst (de cup loopt eromheen)
+          if(zc<C.tz-0.11 || (P[a*3]*C.s<0 && P[b*3]*C.s<0 && P[c*3]*C.s<0)) continue;
+          const p=knip(tri, [kant(C.bi,C.ap,C.bo), kant(C.bo,C.ap,C.bi), C.onder, (q)=>q.x*C.s, (q)=>q.z-(C.tz-0.085)]);   // diepte afknippen, geen zaagrand
+          if(p.length>=3) C.kand.push({ a, b, c, p });   // eerst verzamelen: alleen het stuk dat aan de top vastzit telt
         }
         // dun bandje om de rug (alleen achter de cups langs) en een touwtje tussen de cups
-        if(romp(a) && romp(b) && romp(c)){ let p=knip(tri, [(q)=>yRug+BK.rug-q.y, (q)=>q.y-(yRug-BK.rug), (q)=>zVoor-q.z]);
+        if(romp(a) && romp(b) && romp(c)){ const strip=[(q)=>yRug+BK.rug-q.y, (q)=>q.y-(yRug-BK.rug)];
+          let p=knip(tri, strip.concat([(q)=>zVoor-q.z]));   // achter de cups langs
           if(p.length>=3) for(let k=2;k<p.length;k++) zetDriehoek(p[0],p[k-1],p[k],bP,bN,null);
+          for(const C of cups){ p=knip(tri, strip.concat([(q)=>q.z-zVoor, (q)=>C.s*q.x-(Math.abs(C.bo.x)-0.006)]));   // zijkant: vanaf de buitenhoek van de cup
+            if(p.length>=3) for(let k=2;k<p.length;k++) zetDriehoek(p[0],p[k-1],p[k],bP,bN,null); }
           if(nzc>0) { p=knip(tri, strook({x:cups[0].bi.x, y:cups[0].yu+0.004}, {x:cups[1].bi.x, y:cups[1].yu+0.004}, BK.touw));
             if(p.length>=3) for(let k=2;k<p.length;k++) zetDriehoek(p[0],p[k-1],p[k],bP,bN,null); } }
         // nektouwtjes: van de punt van de cup naar de zijkant van de hals (voor- en bovenkant, niet de rug)
@@ -18575,6 +18620,19 @@ async function verwijderVoorbeelden() {
           const p=knip(tri, strook(C.ap, {x:C.s*0.056, y:halsY-0.012}, BK.touw));
           if(p.length>=3) for(let k=2;k<p.length;k++) zetDriehoek(p[0],p[k-1],p[k],bP,bN,null);
         }
+      }
+      /* Cups: alleen de stof die aan de borsttop vastzit (doorlopen over gedeelde hoekpunten). Bij een gespierd lichaam bolde de
+         zijkant bij de oksel binnen de driehoek weer naar voren en kwamen er losse stukjes (toesteltest eigenaar). */
+      const sleutel=(j)=>Math.round(P[j*3]*1e4)+','+Math.round(P[j*3+1]*1e4)+','+Math.round(P[j*3+2]*1e4);
+      for(const C of cups){ if(!C.kand.length) continue;
+        const per=new Map(); C.kand.forEach((t,ti)=>{ for(const j of [t.a,t.b,t.c]){ const k=sleutel(j); if(!per.has(k)) per.set(k,[]); per.get(k).push(ti); } });
+        let start=-1, bd=Infinity; C.kand.forEach((t,ti)=>{ const cx=(P[t.a*3]+P[t.b*3]+P[t.c*3])/3-P[C.top*3], cy=(P[t.a*3+1]+P[t.b*3+1]+P[t.c*3+1])/3-P[C.top*3+1];
+          const d=cx*cx+cy*cy; if(d<bd){ bd=d; start=ti; } });
+        const gezien=new Uint8Array(C.kand.length), rij=[start]; gezien[start]=1;
+        while(rij.length){ const t=C.kand[rij.pop()];
+          for(const j of [t.a,t.b,t.c]) for(const u of per.get(sleutel(j))) if(!gezien[u]){ gezien[u]=1; rij.push(u); } }
+        C.kand.forEach((t,ti)=>{ if(!gezien[ti]) return; hier=[t.a,t.b,t.c]; const p=t.p;
+          for(let k=2;k<p.length;k++) zetDriehoek(p[0],p[k-1],p[k],bodyP,bodyN,bodyUV,false); });
       }
     };
     if(bikini) bouwBikini(); else
