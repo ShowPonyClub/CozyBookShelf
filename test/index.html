@@ -11972,7 +11972,7 @@ function createTattoo(overrides = {}) {
    ============================================================ */
 // App-versie (semver, handmatig ophogen bij een release). Bij een bump ook de
 // CACHE-naam in sw.js meebumpen, zodat clients de nieuwe build ophalen.
-const APP_VERSIE = '0.3.165';
+const APP_VERSIE = '0.3.166';
 
 /* Dev-haken die de CLOUD raken hangen alleen op een ontwikkelmachine aan window. Ze zijn geen
    lek op zichzelf (zonder XSS roept niemand ze aan, en CSP + esc() houden XSS tegen), maar ze
@@ -18504,7 +18504,7 @@ async function verwijderVoorbeelden() {
     const bouwBikini=()=>{
       /* model naar de referentie van eigenaar (2026-10-04): broekje laag in het midden en hoger op de heup, hoge V-uitsnijding;
          top zonder band: grote driehoekige cups met een ronde onderkant, dun touwtje ertussen, dun bandje om de rug, dunne nektouwtjes */
-      const BK={ top:0.062, heupOp:0.045, zij:0.025, kruis:0.025, kruisB:0.014, lies:0.55, touw:0.0021, rug:0.003, dip:0.008 };
+      const BK={ top:0.062, heupOp:0.045, achterOp:0.035, zij:0.025, kruis:0.025, kruisB:0.014, lies:0.55, touw:0.0021, rug:0.003, dip:0.008 };
       const zn=ZK ? ZK.namen : [], zi=(nm)=>zn.indexOf(nm);
       const zBorst=zi('borst'), zBuik=zi('buik'), zRug=zi('rug'), zHals=zi('hoofd-nek');
       const romp=(j)=>{ const z=ZK.z[j]; return z===zBorst || z===zBuik || z===zRug; };
@@ -18518,7 +18518,10 @@ async function verwijderVoorbeelden() {
       // heupbreedte van dit lichaam (maskerpunten net onder de taille): de vorm schaalt mee, het zijstrookje is altijd BK.zij
       let heupB=0; for(let j=0;j<nv;j++) if(inM(j) && Math.abs(P[j*3+1]-(taille-0.05))<0.015) heupB=Math.max(heupB, Math.abs(P[j*3]));
       const heupX=Math.max(0.1, heupB*0.95), zijTop=taille-BK.top+BK.heupOp, been=(zijTop-BK.zij-(kruisY-BK.kruis))/heupX;
-      const broekRand=(q)=>taille-BK.top+BK.heupOp*Math.min(1, Math.pow(Math.abs(q.x)/heupX, 2))-q.y;   // glimlach: laag in het midden
+      /* glimlach: laag in het midden. Achter in het midden BK.achterOp hoger (toesteltest eigenaar v0.3.165: anders zie je de bilnaad);
+         voor/achter via de huidnormaal, met een zachte overgang op de zijkant. */
+      const broekRand=(q)=>{ const h=Math.min(1, Math.pow(Math.abs(q.x)/heupX, 2)), l=Math.hypot(q.nx,q.ny,q.nz)||1, a=Math.min(1, Math.max(0, (0.15-q.nz/l)/0.6));
+        return taille-BK.top+BK.heupOp*h+BK.achterOp*a*a*(3-2*a)*(1-h)-q.y; };
       /* V naar het kruis, hoog op de heup. Per helft (x >= 0 / x <= 0) een rechte lijn: met |x| knipte een driehoek over het midden
          scheef af en bleef er een spleet in het kruis (toesteltest eigenaar). */
       /* Toesteltest eigenaar (v0.3.163): de rechte V lag bij het kruis over de binnenkant van de dijen. Nu volgt de rand de lies: een smal
