@@ -160,8 +160,8 @@
   @media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto}}
 </style>
 <link rel="preload" as="script" href="3d/assets/three-bundle.js">
-<link rel="preload" as="fetch" href="3d/assets/body-male.glb" crossorigin>
-<link rel="preload" as="fetch" href="3d/assets/body-female.glb" crossorigin>
+<link rel="preload" as="fetch" href="3d/assets/body-man.glb" crossorigin>
+<link rel="preload" as="fetch" href="3d/assets/body-vrouw.glb" crossorigin>
 <style id="hero3d-css">
   .hero{min-height:640px}
   #hero3d{position:absolute;inset:0;z-index:0;pointer-events:none}
@@ -288,71 +288,103 @@
   });
 })();
 </script>
-<script>window.__CFG={"man": [{"k": "skull_roses", "x": 0.0, "y": 1.34, "w": 0.3128, "h": 0.34}, {"k": "tribal_dragon", "x": 0.25, "y": 1.28, "w": 0.1092, "h": 0.2}, {"k": "snake", "x": 0.0, "y": 1.06, "w": 0.34, "h": 0.1667}], "woman": [{"k": "skull_dagger", "x": 0.0, "y": 1.33, "w": 0.203, "h": 0.32}, {"k": "butterfly", "x": 0.0, "y": 1.03, "w": 0.3, "h": 0.0828}, {"k": "tribal_swirl", "x": 0.25, "y": 1.28, "w": 0.0684, "h": 0.2}, {"k": "dragon_clouds", "x": 0.12, "y": 0.6, "w": 0.2252, "h": 0.32}], "male": "3d/assets/body-male.glb", "female": "3d/assets/body-female.glb", "tat": {"snake": "3d/assets/tat-snake.webp", "skull_roses": "3d/assets/tat-skull_roses.webp", "dragon_clouds": "3d/assets/tat-dragon_clouds.webp", "tribal_dragon": "3d/assets/tat-tribal_dragon.webp", "skull_dagger": "3d/assets/tat-skull_dagger.webp", "tribal_swirl": "3d/assets/tat-tribal_swirl.webp", "butterfly": "3d/assets/tat-butterfly.webp"}};</script>
+<script>window.__CFG={"man":"3d/assets/body-man.glb","vrouw":"3d/assets/body-vrouw.glb","hart":"3d/assets/hart.png","tat":"3d/assets/tat-"};</script>
 <script src="3d/assets/three-bundle.js"></script>
 <script>
+/* 3D-hero (2026-10-04, apply_landing_hero.py in Tatties): de twee lichamen komen uit de app (LichaamMotor), met de onderbroek
+   en de tattoos als wikkel-decal (zelfde geometrie als in de app, gebakken door tools/landing/bake_hero.js). De tattoos zijn
+   inktlagen (wit = huid, grijs = arcering) en worden belicht als de huid, zodat ze erin opgaan. Ze vloeien een voor een in. */
 (function(){
   var host=document.getElementById('hero3d'); if(!host||!window.THREE) return;
   var CFG=window.__CFG;
   var renderer,scene,camera,skin,loader,texLoader,groups=[],running=false,inited=false,onscreen=false,faded=false;
-  var scrolling=false,scrollT,lastT=0;
-  var fades=[], fadeIdx=0;
-  var TEX={}; function getTex(k){if(!TEX[k]){var t=texLoader.load(CFG.tat[k]);t.anisotropy=8;t.encoding=THREE.sRGBEncoding;TEX[k]=t;}return TEX[k];}
-  function decalMat(k){return new THREE.MeshBasicMaterial({map:getTex(k),transparent:true,opacity:0,premultipliedAlpha:true,blending:THREE.CustomBlending,blendEquation:THREE.AddEquation,blendSrc:THREE.DstColorFactor,blendDst:THREE.OneMinusSrcAlphaFactor,polygonOffset:true,polygonOffsetFactor:-4,depthWrite:false});}
-  var ray=new THREE.Raycaster(), dummy=new THREE.Object3D();
-  function placeDecal(G,meshes,it){
-    ray.set(new THREE.Vector3(it.x,it.y,3),new THREE.Vector3(0,0,-1));
-    var hit=ray.intersectObjects(meshes,true)[0]; if(!hit||!hit.face)return;
-    var mesh=hit.object,n=hit.face.normal.clone().transformDirection(mesh.matrixWorld).normalize();
-    dummy.position.copy(hit.point); dummy.lookAt(hit.point.clone().add(n));
-    var g=new THREE.DecalGeometry(mesh,hit.point,dummy.rotation,new THREE.Vector3(it.w,it.h,0.4));
-    var d=new THREE.Mesh(g,decalMat(it.k)); G.add(d);
-    fades.push({m:d.material, start:performance.now()+600+(fadeIdx++)*260});
-  }
-  function xOffset(){var half=camera.position.z*Math.tan(THREE.MathUtils.degToRad(camera.fov/2))*camera.aspect;return Math.min(Math.max(half*0.6,0.7),1.9);}
-  function onGltf(side,placements){return function(gltf){
-    var G=new THREE.Group(); var root=gltf.scene||gltf.scenes[0];
-    var box=new THREE.Box3().setFromObject(root),size=new THREE.Vector3();box.getSize(size);
-    root.scale.setScalar(size.y>0?1.8/size.y:1);
-    var b2=new THREE.Box3().setFromObject(root),c=new THREE.Vector3();b2.getCenter(c);
-    root.position.x-=c.x; root.position.z-=c.z; root.position.y-=b2.min.y;
-    var meshes=[]; root.traverse(function(o){if(o.isMesh){if(!o.geometry.attributes.normal)o.geometry.computeVertexNormals();o.material=skin;meshes.push(o);}});
-    G.add(root); scene.add(G); G.updateMatrixWorld(true);
-    placements.forEach(function(it){try{placeDecal(G,meshes,it);}catch(e){}});
-    G.userData.side=side; G.position.x=side*xOffset(); groups.push(G);
+  var scrolling=false,scrollT,lastT=0,klaarT=0;
+  var fades=[];
+  var INKT_OP=0.94;
+  function tex(url,herhaal){var t=texLoader.load(url);t.encoding=THREE.sRGBEncoding;t.anisotropy=Math.min(8,renderer.capabilities.getMaxAnisotropy());
+    if(herhaal){t.wrapS=t.wrapT=THREE.RepeatWrapping;} return t;}
+  function inktMat(k){return new THREE.MeshStandardMaterial({map:tex(CFG.tat+k+'.webp'),transparent:true,opacity:0,roughness:0.78,metalness:0,
+    depthWrite:false,polygonOffset:true,polygonOffsetFactor:-4,polygonOffsetUnits:-4});}
+  /* Nieuw ontwerp uitproberen: half doorzichtig met een rode stippellijn (zoals de selectie in de app) */
+  function wensTex(k){ var c=document.createElement('canvas'), t=new THREE.CanvasTexture(c); t.encoding=THREE.sRGBEncoding;
+    var im=new Image(); im.onload=function(){ var W=im.width,H=im.height; c.width=W; c.height=H; var x=c.getContext('2d');
+      x.globalAlpha=0.7; x.drawImage(im,0,0); x.globalAlpha=1;
+      var lw=Math.max(4,Math.max(W,H)*0.03), r=Math.min(W,H)*0.12, i=lw/2+3;
+      x.strokeStyle='#CE2727'; x.lineWidth=lw; x.setLineDash([lw*2.4,lw*1.6]); x.lineCap='round';
+      x.beginPath(); if(x.roundRect) x.roundRect(i,i,W-2*i,H-2*i,r); else x.rect(i,i,W-2*i,H-2*i); x.stroke();
+      t.needsUpdate=true; }; im.src=CFG.tat+k+'.webp'; return t; }
+  function xOffset(){var half=camera.position.z*Math.tan(THREE.MathUtils.degToRad(camera.fov/2))*camera.aspect;return Math.min(Math.max(half*0.6,0.75),1.9);}
+  function onGltf(side){return function(gltf){
+    var G=new THREE.Group(), root=gltf.scene||gltf.scenes[0], tats=[], wens=[];
+    root.traverse(function(o){ if(!o.isMesh) return; var n=o.name||(o.parent&&o.parent.name)||'';
+      if(n==='lichaam'){ o.material=skin; }
+      else if(n==='stof'||n==='band'||n==='top'){ var kl=(o.userData&&o.userData.kleur)||(n==='band'?'#9aa0ad':'#ffffff');
+        o.material=new THREE.MeshStandardMaterial({color:new THREE.Color(kl).convertSRGBToLinear(),roughness:n==='band'?0.5:n==='top'?0.95:0.7,metalness:0,side:THREE.DoubleSide,
+          polygonOffset:true,polygonOffsetFactor:n==='band'?-9:-8,polygonOffsetUnits:n==='band'?-9:-8});
+        if(n==='stof'&&o.geometry.attributes.uv&&side<0) o.material.map=tex(CFG.hart,true);
+        o.renderOrder=n==='band'?2:1; }
+      else if(n.indexOf('tat-')===0){ o.material=inktMat(n.slice(4)); o.renderOrder=0.5; tats.push(o); }
+      else if(n.indexOf('wens-')===0){ var m=n.match(/^wens-(\d+)-(.+)$/); if(!m) return; wens.push({i:+m[1], k:m[2], o:o});
+        o.material=new THREE.MeshStandardMaterial({map:wensTex(m[2]),transparent:true,opacity:0,roughness:0.78,metalness:0,depthWrite:false,
+          polygonOffset:true,polygonOffsetFactor:-5,polygonOffsetUnits:-5}); o.renderOrder=0.6; o.visible=false;
+        var echt=new THREE.Mesh(o.geometry,inktMat(m[2])); echt.renderOrder=0.55; echt.visible=false; o.parent.add(echt); o.userData.echt=echt; } });
+    wens.sort(function(a,b){return a.i-b.i;});
+    var b=new THREE.Box3().setFromObject(root),c=new THREE.Vector3(); b.getCenter(c);
+    root.position.x-=c.x; root.position.z-=c.z; root.position.y-=b.min.y;
+    G.add(root); scene.add(G);
+    G.userData.side=side; G.userData.tats=tats; G.userData.wens=wens; G.position.x=side*xOffset(); groups.push(G);
+    if(groups.length===2) planFades();
   };}
+  /* Een voor een, om en om per lichaam, zoals de tattoos in de app invloeien (smoothstep). */
+  function planFades(){ var t0=performance.now()+900, i=0, a=groups[0].userData.tats, b=groups[1].userData.tats, n=Math.max(a.length,b.length);
+    for(var j=0;j<n;j++){ [a[j],b[j]].forEach(function(m){ if(m) fades.push({m:m.material,start:t0+(i++)*550}); }); }
+    wensT0=t0+i*550+900; }
+  /* Daarna, per lichaam (de tweede 1,6 s later): het nieuwe ontwerp op een paar plekken, een ander ontwerp, dan gezet; herhaalt. */
+  var wensT0=0, STAP=2300, IN=450, UIT=450, ZET=700, BLIJF=5200;
+  function gl(u){u=u<0?0:u>1?1:u;return u*u*(3-2*u);}
+  function wensStap(G,now){ var W=G.userData.wens; if(!W.length||!wensT0) return;
+    var n=W.length, cyc=(n-1)*STAP+IN+1300+ZET+BLIJF+UIT, t=now-wensT0-(G.userData.side>0?1600:0); if(t<0) return; t=t%cyc;
+    for(var j=0;j<n;j++){ var w=W[j], o=w.o, e=o.userData.echt, s=j*STAP, a=0, b=0;
+      if(j<n-1){ var u=t-s; if(u>0&&u<STAP) a=Math.min(gl(u/IN), 1-gl((u-(STAP-UIT))/UIT)); }
+      else { var u2=t-s, z=IN+1300; if(u2>0){ a=u2<z?gl(u2/IN):1-gl((u2-z)/ZET); b=u2<z?0:gl((u2-z)/ZET); if(u2>z+ZET+BLIJF) b=1-gl((u2-z-ZET-BLIJF)/UIT); } }
+      o.material.opacity=a; o.visible=a>0.002; e.material.opacity=INKT_OP*b; e.visible=b>0.002; } }
   function resize(){var W=host.clientWidth,H=host.clientHeight||640;camera.aspect=W/H;camera.updateProjectionMatrix();renderer.setSize(W,H);
     for(var i=0;i<groups.length;i++)groups[i].position.x=groups[i].userData.side*xOffset();}
   function init(){
     if(inited) return; inited=true;
     var W=host.clientWidth,H=host.clientHeight||640;
-    renderer=new THREE.WebGLRenderer({antialias:false,alpha:true,powerPreference:'low-power'});
-    renderer.setPixelRatio(Math.min(devicePixelRatio,1)); renderer.setSize(W,H);
+    renderer=new THREE.WebGLRenderer({antialias:true,alpha:true,powerPreference:'low-power'});
+    renderer.setPixelRatio(Math.min(devicePixelRatio,1.5)); renderer.setSize(W,H);
     renderer.outputEncoding=THREE.sRGBEncoding;
     var cv=renderer.domElement; cv.style.opacity='0'; cv.style.transition='opacity .7s ease'; host.appendChild(cv);
-    scene=new THREE.Scene(); camera=new THREE.PerspectiveCamera(32,W/H,0.1,100); camera.position.set(0,0.95,5.0); camera.lookAt(0,0.95,0);
+    scene=new THREE.Scene(); camera=new THREE.PerspectiveCamera(32,W/H,0.1,100); camera.position.set(0,0.92,5.0); camera.lookAt(0,0.92,0);
     var hemi=new THREE.HemisphereLight(0xfff4e6,0x9a7b5e,1.0); scene.add(hemi);
     var dl=new THREE.DirectionalLight(0xffffff,0.75); dl.position.set(1.5,3,2.5); scene.add(dl);
     var mq=window.matchMedia&&matchMedia('(prefers-color-scheme: dark)');
     function licht(){var d=!!(mq&&mq.matches);hemi.intensity=d?0.55:0.8;dl.intensity=d?0.45:0.6;}
     licht(); if(mq&&mq.addEventListener)mq.addEventListener('change',licht);
-    skin=new THREE.MeshStandardMaterial({color:0xE3BD9C,roughness:0.86,metalness:0.0});
+    skin=new THREE.MeshStandardMaterial({color:0xe2b48f,roughness:0.78,metalness:0.0});
     loader=new THREE.GLTFLoader(); texLoader=new THREE.TextureLoader();
     var draco=new THREE.DRACOLoader(); draco.setDecoderPath('3d/assets/draco/'); loader.setDRACOLoader(draco);
-    loader.load(CFG.male,onGltf(-1,CFG.man),undefined,function(e){console.error(e);});
-    loader.load(CFG.female,onGltf(1,CFG.woman),undefined,function(e){console.error(e);});
+    loader.load(CFG.man,onGltf(-1),undefined,function(e){console.error(e);});
+    loader.load(CFG.vrouw,onGltf(1),undefined,function(e){console.error(e);});
     addEventListener('resize',resize);
   }
   function loop(){ if(!running) return; requestAnimationFrame(loop);
     var now=performance.now();
-    if(scrolling || now-lastT<40) return;
+    if(scrolling || now-lastT<33) return;
     var dt=Math.min(now-lastT,50); lastT=now;
-    for(var i=0;i<groups.length;i++)groups[i].rotation.y+=0.008*(dt/16.67)*(groups[i].userData.side<0?1:-1);
-    for(var j=0;j<fades.length;j++){ var f=fades[j]; if(f.done) continue; var t=(now-f.start)/1600; if(t<0)t=0; if(t>=1){t=1;f.done=true;} f.m.opacity=t*0.85; }
+    for(var i=0;i<groups.length;i++)groups[i].rotation.y+=0.007*(dt/16.67)*(groups[i].userData.side<0?1:-1);
+    for(var g=0;g<groups.length;g++) wensStap(groups[g],now);
+    for(var j=0;j<fades.length;j++){ var f=fades[j]; if(f.done) continue; var t=(now-f.start)/900; if(t<0)t=0; if(t>=1){t=1;f.done=true;} f.m.opacity=INKT_OP*t*t*(3-2*t); }
     renderer.render(scene,camera);
-    if(!faded && groups.length){ faded=true; renderer.domElement.style.opacity='1'; } }
+    if(!faded && groups.length===2){ faded=true; renderer.domElement.style.opacity='1'; } }
   function start(){ init(); if(running) return; running=true; loop(); }
   function stop(){ running=false; }
+  window.__hero3d={ groups:function(){return groups;}, hoek:function(a){for(var i=0;i<groups.length;i++)groups[i].rotation.y=a*(groups[i].userData.side<0?1:-1);
+    fades.forEach(function(f){f.done=true;f.m.opacity=INKT_OP;}); renderer.render(scene,camera); return groups.length;},
+    wens:function(ms){ wensT0=performance.now()-ms; for(var g=0;g<groups.length;g++) wensStap(groups[g],performance.now()); renderer.render(scene,camera); },
+    cam:function(p,t){camera.position.fromArray(p);camera.lookAt(t[0],t[1],t[2]);renderer.render(scene,camera);} };
   var iob=new IntersectionObserver(function(es){ onscreen=es[0].isIntersecting; if(onscreen) start(); else stop(); },{threshold:0.02});
   iob.observe(host);
   addEventListener('scroll',function(){ scrolling=true; clearTimeout(scrollT); scrollT=setTimeout(function(){ scrolling=false; },160); },{passive:true});
