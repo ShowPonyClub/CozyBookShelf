@@ -307,13 +307,10 @@
     if(herhaal){t.wrapS=t.wrapT=THREE.RepeatWrapping;} return t;}
   function inktMat(k){return new THREE.MeshStandardMaterial({map:tex(CFG.tat+k+'.webp'),transparent:true,opacity:0,roughness:0.78,metalness:0,
     depthWrite:false,polygonOffset:true,polygonOffsetFactor:-4,polygonOffsetUnits:-4});}
-  /* Nieuw ontwerp uitproberen: half doorzichtig met een rode stippellijn (zoals de selectie in de app) */
+  /* Nieuw ontwerp uitproberen: alleen het ontwerp, iets doorzichtig (geen rode stippellijn: eigenaar 2026-10-04) */
   function wensTex(k){ var c=document.createElement('canvas'), t=new THREE.CanvasTexture(c); t.encoding=THREE.sRGBEncoding;
     var im=new Image(); im.onload=function(){ var W=im.width,H=im.height; c.width=W; c.height=H; var x=c.getContext('2d');
       x.globalAlpha=0.7; x.drawImage(im,0,0); x.globalAlpha=1;
-      var lw=Math.max(4,Math.max(W,H)*0.03), r=Math.min(W,H)*0.12, i=lw/2+3;
-      x.strokeStyle='#CE2727'; x.lineWidth=lw; x.setLineDash([lw*2.4,lw*1.6]); x.lineCap='round';
-      x.beginPath(); if(x.roundRect) x.roundRect(i,i,W-2*i,H-2*i,r); else x.rect(i,i,W-2*i,H-2*i); x.stroke();
       t.needsUpdate=true; }; im.src=CFG.tat+k+'.webp'; return t; }
   function xOffset(){var half=camera.position.z*Math.tan(THREE.MathUtils.degToRad(camera.fov/2))*camera.aspect;return Math.min(Math.max(half*0.6,0.75),1.9);}
   function onGltf(side){return function(gltf){
