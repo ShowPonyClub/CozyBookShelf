@@ -2130,6 +2130,7 @@ html.knipfull .cutmodal.cm-review .cm-bewerkbtn span{position:absolute;width:1px
 /* Delen plaatsen vanuit de kijkhoek (2026-10-03): voorvertoning midden op het canvas, knop Plaatsen boven Annuleren */
 .plaats-proj{position:absolute;z-index:5;pointer-events:none;opacity:.55;outline:2px dashed var(--rood);outline-offset:2px;}
 .plaats-proj[hidden]{display:none;}
+.plaats-proj.ctx{outline:none;}
 #plaats-hint.proj .ph-ring{display:none}
 #plaats-hint.proj .ph-tekst{white-space:normal;text-align:center;max-width:min(340px,calc(100vw - 32px));border-radius:var(--r-lg);line-height:1.35}
 #plaats-proj-ok{pointer-events:auto;min-height:44px;padding:0 26px;border-radius:999px;background:var(--rood);color:var(--op-accent);
@@ -11110,7 +11111,7 @@ const I18N = {
     'toast.film_mislukt':'Filmpje maken is niet gelukt','toast.film_wacht':'Even geduld, je tattoos worden nog geladen',
     'toast.film_bewaard':'Filmpje bewaard',
     'ui.auto_bezig':'Aansluiten op het andere deel','ui.auto_ok':'Deel geplaatst en aangesloten \u2713','ui.auto_ok_eerste':'Deel aangesloten. Leg het eerste deel ook zo, dan sluiten ze nog beter aan.',
-    'ui.proj_hint':'Draai en zoom het model tot het lichaam onder de foto ligt zoals op je foto. Tik dan op Plaatsen.','ui.proj_plaats':'Plaatsen',
+    'ui.proj_hint':'Draai en zoom het model tot het onder je foto ligt: leg de randen van je been of arm op die van het model. Tik dan op Plaatsen.','ui.proj_plaats':'Plaatsen',
     'ui.proj_midden':'Zet het lichaam onder het midden van de foto en probeer opnieuw.','ui.proj_eerste':'Deel geplaatst. Leg het eerste deel ook zo, dan sluiten ze beter aan.','ui.proj_eerste_knop':'Eerste deel',
     'eb.duw_label':'Precies verschuiven','eb.duw_op':'Omhoog','eb.duw_neer':'Omlaag','eb.duw_links':'Naar links','eb.duw_rechts':'Naar rechts',
     'eb.samen_label':'Wat beweegt er','eb.hele_tattoo':'Hele tattoo','eb.dit_deel':'Dit deel','eb.sluit_aan':'Sluit aan','eb.sluit_aan_uitleg':'Leg dit deel precies aan op het andere deel','ui.sluit_aan_al':'Dit deel sluit al aan.','ui.sluit_aan_ok':'Aangesloten. Klopt het niet? Tik op Ongedaan maken.','ui.sluit_aan_overlap':'Leg het deel eerst een stukje over het andere deel, dan kan het aansluiten.','ui.sluit_aan_patroon':'Geen duidelijk passend patroon gevonden. Schuif het deel iets dichter naar de goede plek en probeer opnieuw.',
@@ -11318,7 +11319,7 @@ const I18N = {
     'toast.film_mislukt':"Couldn't make the video",'toast.film_wacht':'Hang on, your tattoos are still loading',
     'toast.film_bewaard':'Video saved',
     'ui.auto_bezig':'Lining up with the other part','ui.auto_ok':'Part placed and lined up \u2713','ui.auto_ok_eerste':'Part lined up. Place the first part this way too, so they line up even better.',
-    'ui.proj_hint':"Rotate and zoom the model until the body under the photo lines up like in your photo. Then tap Place.",'ui.proj_plaats':'Place',
+    'ui.proj_hint':"Rotate and zoom the model until it lines up with your photo: put the edges of your leg or arm on the model's edges. Then tap Place.",'ui.proj_plaats':'Place',
     'ui.proj_midden':'Put the body under the middle of the photo and try again.','ui.proj_eerste':'Part placed. Place the first part this way too, so they line up better.','ui.proj_eerste_knop':'First part',
     'eb.duw_label':'Nudge','eb.duw_op':'Up','eb.duw_neer':'Down','eb.duw_links':'Left','eb.duw_rechts':'Right',
     'eb.samen_label':'What moves','eb.hele_tattoo':'Whole tattoo','eb.dit_deel':'This part','eb.sluit_aan':'Line up','eb.sluit_aan_uitleg':'Line this part up exactly with the other part','ui.sluit_aan_al':'This part already lines up.','ui.sluit_aan_ok':"Lined up. Not right? Tap Undo.",'ui.sluit_aan_overlap':'Move the part a little over the other part first, then it can line up.','ui.sluit_aan_patroon':"Couldn't find a clear matching pattern. Move the part a bit closer to the right spot and try again.",
@@ -11622,7 +11623,7 @@ function createTattoo(overrides = {}) {
    ============================================================ */
 // App-versie (semver, handmatig ophogen bij een release). Bij een bump ook de
 // CACHE-naam in sw.js meebumpen, zodat clients de nieuwe build ophalen.
-const APP_VERSIE = '0.3.157';
+const APP_VERSIE = '0.3.158';
 
 /* Dev-haken die de CLOUD raken hangen alleen op een ontwikkelmachine aan window. Ze zijn geen
    lek op zichzelf (zonder XSS roept niemand ze aan, en CSP + esc() houden XSS tegen), maar ze
@@ -21071,9 +21072,56 @@ async function verwijderVoorbeelden() {
      zoals op je foto; Plaatsen (of een tik) projecteert hem vanaf de camera: punt onder het midden, v = naar de camera, D = afstand,
      maat = breedte van de voorvertoning in het vlak door het punt, draaiing = camera-omhoog t.o.v. het raakframe. */
   let projRect=null;
+  /* Hoekhulp stap 1 (2026-10-04, apply_proj_context.py): de foto rondom de uitsnede vaag over het hele canvas, zodat je de rand
+     van je been/arm op die van het model legt (waar de tattoo tussen de randen zit verraadt de kijkhoek). projCtx = { full (foto,
+     gedraaid/gespiegeld), lasso, b (bbox van de lasso in full-pixels, niet afgerond), img (de uitsnede), sleutel (canvasmaat) }. */
+  let projCtx=null;
+  const PROJ_CTX_B=0.4, PROJ_CTX_H=0.36, PROJ_CTX_DIM=0.55;   // uitsnede t.o.v. het canvas; foto eromheen op 55% (x de 55% van het beeld)
+  function projTekenCtx(cv, r, sr, asp){
+    const c=projCtx;
+    let w=r.width*PROJ_CTX_B, h=w*asp; if(h>r.height*PROJ_CTX_H){ h=r.height*PROJ_CTX_H; w=h/asp; }
+    projRect={ w, h };
+    cv.style.left=(r.left-sr.left)+'px'; cv.style.top=(r.top-sr.top)+'px'; cv.style.width=r.width+'px'; cv.style.height=r.height+'px';
+    const sleutel=Math.round(r.width)+'x'+Math.round(r.height)+'x'+Math.round(w);
+    if(c.sleutel===sleutel) return; c.sleutel=sleutel;
+    const dpr=Math.min(2, window.devicePixelRatio||1), W=Math.max(1,Math.round(r.width*dpr)), H=Math.max(1,Math.round(r.height*dpr));
+    const k=document.createElement('canvas'); k.width=W; k.height=H; const x=k.getContext('2d');
+    const s=w*dpr/c.b.w, mx=W/2, my=H/2, bx=c.b.x+c.b.w/2, by=c.b.y+c.b.h/2;   // fotopixel -> canvas: mx + (p-bx)*s
+    x.globalAlpha=PROJ_CTX_DIM; x.drawImage(c.full, mx-bx*s, my-by*s, c.full.width*s, c.full.height*s); x.globalAlpha=1;
+    x.beginPath(); c.lasso.forEach((p,i)=>{ const X=mx+(p.nx*c.full.width-bx)*s, Y=my+(p.ny*c.full.height-by)*s; if(i) x.lineTo(X,Y); else x.moveTo(X,Y); }); x.closePath();
+    x.save(); x.clip(); x.clearRect(0,0,W,H); x.restore();   // binnen de lijn alleen de uitsnede zelf (zoals voorheen)
+    x.drawImage(c.img, mx-w*dpr/2, my-h*dpr/2, w*dpr, h*dpr);
+    let rood='#c8382c'; try{ rood=getComputedStyle(document.documentElement).getPropertyValue('--rood').trim() || rood; }catch(_){}
+    x.setLineDash([6*dpr, 5*dpr]); x.lineWidth=2*dpr; x.strokeStyle=rood; x.stroke();
+    cv.src=k.toDataURL('image/png');
+  }
+  function projLaadCtx(d){   // foto eromheen laden (async); tot dan de gewone voorvertoning
+    const k=d && d.kunst3d, img=d && d.tex && d.tex.image;
+    if(window.__projContext===false || !k || !k.srcUrl || !k.lasso || k.lasso.length<3 || !img || !img.width) return;
+    const im=new Image();
+    im.onload=()=>{ try{
+      if(plaatsData!==d || !d.proj) return;
+      const scl=Math.min(1, 1200/Math.max(im.naturalWidth, im.naturalHeight)), FW=Math.max(1,Math.round(im.naturalWidth*scl)), FH=Math.max(1,Math.round(im.naturalHeight*scl));
+      const R=((k.rot90||0)%4+4)%4, oddR=(R&1)===1, OW=oddR?FH:FW, OH=oddR?FW:FH;   // zelfde draaiing/spiegeling als rebuildTextureFromKunst
+      const full=document.createElement('canvas'); full.width=OW; full.height=OH; const fx=full.getContext('2d');
+      fx.translate(OW/2,OH/2); fx.rotate(R*Math.PI/2); if(k.flipH) fx.scale(-1,1); fx.drawImage(im,-FW/2,-FH/2,FW,FH);
+      let mnx=1,mny=1,mxx=0,mxy=0; k.lasso.forEach(p=>{ mnx=Math.min(mnx,p.nx); mny=Math.min(mny,p.ny); mxx=Math.max(mxx,p.nx); mxy=Math.max(mxy,p.ny); });
+      if(mxx-mnx<=0 || mxy-mny<=0) return;
+      projCtx={ full, lasso:k.lasso.slice(), b:{ x:mnx*OW, y:mny*OH, w:(mxx-mnx)*OW, h:(mxy-mny)*OH }, img, sleutel:'' };
+      const cv=document.getElementById('plaats-proj'); if(cv) cv.classList.add('ctx');
+      projUIMaat();
+    }catch(e){ console.warn('voorvertoning met foto eromheen', e); projCtx=null; } };
+    im.src=k.srcUrl;
+  }
+  function projUitsnedeRect(){   // schermrechthoek van de uitsnede in de voorvertoning (tests, dev)
+    const cv=document.getElementById('plaats-proj'); if(!cv || cv.hidden || !projRect) return null;
+    const r=cv.getBoundingClientRect(); if(!projCtx) return { left:r.left, top:r.top, width:r.width, height:r.height };
+    return { left:r.left+(r.width-projRect.w)/2, top:r.top+(r.height-projRect.h)/2, width:projRect.w, height:projRect.h };
+  }
   function projUIMaat(){
     const cv=document.getElementById('plaats-proj'); if(!cv || cv.hidden || !el || !stage) return;
     const r=el.getBoundingClientRect(), sr=stage.getBoundingClientRect(), asp=+cv.dataset.asp || 1;
+    if(projCtx){ projTekenCtx(cv, r, sr, asp); return; }
     let w=r.width*0.72, h=w*asp; if(h>r.height*0.55){ h=r.height*0.55; w=h/asp; }
     cv.style.width=w+'px'; cv.style.height=h+'px';
     cv.style.left=(r.left-sr.left+(r.width-w)/2)+'px'; cv.style.top=(r.top-sr.top+(r.height-h)/2)+'px';
@@ -21084,7 +21132,8 @@ async function verwijderVoorbeelden() {
     const cv=document.getElementById('plaats-proj'), ph=document.getElementById('plaats-hint'), ok=document.getElementById('plaats-proj-ok');
     const im=d.tex && d.tex.image;
     if(cv && im && im.width){ const c=document.createElement('canvas'); c.width=Math.min(800, im.width); c.height=Math.round(c.width*im.height/im.width);
-      c.getContext('2d').drawImage(im,0,0,c.width,c.height); cv.src=c.toDataURL('image/png'); cv.dataset.asp=String(im.height/im.width); cv.hidden=false; projUIMaat(); }
+      c.getContext('2d').drawImage(im,0,0,c.width,c.height); cv.src=c.toDataURL('image/png'); cv.dataset.asp=String(im.height/im.width); cv.hidden=false; projUIMaat();
+      projLaadCtx(d); }   // hoekhulp: daarna de foto eromheen
     if(ph){ ph.classList.add('proj'); const t=ph.querySelector('.ph-tekst'); if(t) t.textContent=tr('ui.proj_hint'); }
     if(ok) ok.hidden=false;
     if(d.deelVoor && !d.herplaats){   // extra deel: camera naar het vorige deel, daar moet hij op aansluiten
@@ -21094,7 +21143,7 @@ async function verwijderVoorbeelden() {
   }
   function projUIUit(){
     const cv=document.getElementById('plaats-proj'), ph=document.getElementById('plaats-hint'), ok=document.getElementById('plaats-proj-ok');
-    if(cv){ cv.hidden=true; cv.removeAttribute('src'); } if(ok) ok.hidden=true; projRect=null;
+    if(cv){ cv.hidden=true; cv.removeAttribute('src'); cv.classList.remove('ctx'); } if(ok) ok.hidden=true; projRect=null; projCtx=null;
     if(ph && ph.classList.contains('proj')){ ph.classList.remove('proj'); const t=ph.querySelector('.ph-tekst');
       if(t) t.textContent=tr(ph.classList.contains('herplaats') ? 'ui.herplaats_hint' : 'ui.plaats_hint'); }
   }
@@ -21133,7 +21182,8 @@ async function verwijderVoorbeelden() {
     rebuildMarker(m); persistEdit(m); return true;
   }
   { const ok=document.getElementById('plaats-proj-ok'); if(ok) ok.addEventListener('click', ()=>{ projPlaats(); }); }
-  window.__tattiesProjDbg={ plaats:projPlaats, opnieuw:projOpnieuw, bereken:projBereken, aan:()=>!!(plaatsData && plaatsData.proj), rect:()=>projRect, geo:projDecalGeo, frame:projFrame };
+  window.__tattiesProjDbg={ plaats:projPlaats, opnieuw:projOpnieuw, bereken:projBereken, aan:()=>!!(plaatsData && plaatsData.proj), rect:()=>projRect, geo:projDecalGeo, frame:projFrame,
+    uitsnedeRect:projUitsnedeRect, ctx:()=>!!projCtx };
 
 
   /* ---- aanpas-modus voor een geplaatste tattoo ---- */
