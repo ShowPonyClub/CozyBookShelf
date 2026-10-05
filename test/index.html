@@ -620,6 +620,13 @@ main > section{animation:opkomen .3s ease both}
 .detail-plek{margin-top:18px}
 .detail-plek .detail-delen:last-child{margin-bottom:0}
 .detail-delen .knop-sec{flex:none}
+/* Thumbnails per deel (2026-10-05): kleine uitsnedes op papier, nummer rechtsonder */
+.delen-thumbs{display:flex;flex-wrap:wrap;gap:8px;margin:-4px 0 14px}
+.deel-thumb{position:relative;margin:0;width:64px;height:64px;border-radius:var(--r-sm);background:#f3ece0;border:1px solid var(--rand);   /* papier in beide thema's, zoals .detail-kunst */
+  display:flex;align-items:center;justify-content:center;overflow:hidden}
+.deel-thumb img{max-width:56px;max-height:56px;object-fit:contain}
+.deel-thumb figcaption{position:absolute;right:4px;bottom:2px;font-size:.7rem;font-weight:700;color:#6b5d48;font-variant-numeric:tabular-nums}
+.deel-thumb:not(.met-beeld) figcaption{position:static;font-size:.9rem}
 .knop-gevaar{color:var(--gevaar);border-color:var(--rand)}
 #fab{
   position:absolute;right:14px;bottom:14px;z-index:6;flex:none;
@@ -11796,7 +11803,7 @@ const I18N = {
     'ui.tattoo_toevoegen':'Tattoo toevoegen','ui.tattoo_aanpassen':'Tattoo aanpassen','ui.bewerken':'Bewerken',
     'ui.nog_een_deel':'+ Volgend deel','ui.nog_een_deel_uitleg':'Past de tattoo niet in een foto? Plaats dit deel en kies daarna de foto van het volgende deel','ui.deel_ketting_hint':'Plaats dit deel en tik op ✓ - daarna kies je de foto van het volgende deel','ui.deel_nog_een':'Nog een deel',
     'ui.deel_toevoegen':'Deel toevoegen','ui.deel_kies_kop':'Nog een deel van {naam} - kies een foto','ui.deel_badge':'Deel van {naam}','ui.deel_geplaatst':'Deel geplaatst ✓',
-    'detail.delen':'Op het model in {n} delen','detail.delen_uitleg':'Past de tattoo niet in een foto? Voeg een deel toe.',
+    'detail.delen':'Op het model in {n} delen','detail.deel_n':'Deel {n}','detail.delen_uitleg':'Past de tattoo niet in een foto? Voeg een deel toe.',
     'ui.beginstand':'Heel lichaam','ui.laden':'Laden…','ui.vergrendelen':'Vergrendelen','ui.verwijderen':'Verwijderen',
     'ui.huidblend':'Alleen de inkt of met huid','ui.huidblend_kort':'In huid','ui.eb_met_huid':'Met huid','ui.eb_inkt':'Inkt','ui.eb_inkt_zwart':'Inkt: zwart','ui.eb_inkt_kleur':'Inkt: kleur','ui.blend_aan':'In huid geblend','ui.blend_uit':'Met huid, zoals de foto','ui.inkt_zwart':'Alleen de inkt, zwart','ui.inkt_kleur':'Alleen de inkt, in kleur',
     'ui.aanpassen_bijknippen':'Aanpassen','ui.klaar':'Klaar','ui.kleiner':'Kleiner','ui.groter':'Groter','ui.sluiten_bevestig':'Uitsnede weggooien? Je niet-opgeslagen werk gaat verloren.','ui.sluiten_ja':'Weggooien',
@@ -12016,7 +12023,7 @@ const I18N = {
     'ui.tattoo_toevoegen':'Add tattoo','ui.tattoo_aanpassen':'Edit tattoo','ui.bewerken':'Editing',
     'ui.nog_een_deel':'+ Next part','ui.nog_een_deel_uitleg':'Does the tattoo not fit in one photo? Place this part, then pick the photo of the next part','ui.deel_ketting_hint':'Position this part and tap ✓ - then pick the photo of the next part','ui.deel_nog_een':'Another part',
     'ui.deel_toevoegen':'Add a part','ui.deel_kies_kop':'Another part of {naam} - pick a photo','ui.deel_badge':'Part of {naam}','ui.deel_geplaatst':'Part placed ✓',
-    'detail.delen':'On the model in {n} parts','detail.delen_uitleg':'Does the tattoo not fit in one photo? Add a part.',
+    'detail.delen':'On the model in {n} parts','detail.deel_n':'Part {n}','detail.delen_uitleg':'Does the tattoo not fit in one photo? Add a part.',
     'ui.beginstand':'Whole body','ui.laden':'Loading…','ui.vergrendelen':'Lock','ui.verwijderen':'Delete',
     'ui.huidblend':'Ink only or with skin','ui.huidblend_kort':'In skin','ui.eb_met_huid':'With skin','ui.eb_inkt':'Ink','ui.eb_inkt_zwart':'Ink: black','ui.eb_inkt_kleur':'Ink: colour','ui.blend_aan':'Blended into skin','ui.blend_uit':'With skin, as photographed','ui.inkt_zwart':'Ink only, black','ui.inkt_kleur':'Ink only, in colour',
     'ui.aanpassen_bijknippen':'Edit','ui.klaar':'Done','ui.kleiner':'Smaller','ui.groter':'Bigger','ui.sluiten_bevestig':'Discard your cut-out? Unsaved work will be lost.','ui.sluiten_ja':'Discard',
@@ -12352,7 +12359,7 @@ function createTattoo(overrides = {}) {
    ============================================================ */
 // App-versie (semver, handmatig ophogen bij een release). Bij een bump ook de
 // CACHE-naam in sw.js meebumpen, zodat clients de nieuwe build ophalen.
-const APP_VERSIE = '0.3.180';
+const APP_VERSIE = '0.3.181';
 
 /* Dev-haken die de CLOUD raken hangen alleen op een ontwikkelmachine aan window. Ze zijn geen
    lek op zichzelf (zonder XSS roept niemand ze aan, en CSP + esc() houden XSS tegen), maar ze
@@ -16151,6 +16158,18 @@ async function verwijderSubItem(t, veld, wat, toastKey) {
 /* Geeft false als het record er niet (meer) is; openDetail mag de detailweergave dan niet
    tonen. Deed hij dat wel, dan zette toonView('detail') de terugval naar het startscherm
    weer om en bleef de gebruiker op een volledig leeg scherm achter, zonder terugknop. */
+/* Thumbnails per deel: de decal op het model, anders de textuurcache van de 3D-module; geen van beide (nog niet hersteld op dit toestel) = voor het eerste
+   deel de 2D-uitsnede, anders blijft alleen het nummer staan. */
+async function vulDeelThumbs(t) {
+  const figs = document.querySelectorAll('#view-detail .deel-thumb');
+  for (const [i, f] of [...figs].entries()) {
+    let src = null;
+    try { if (typeof window.__tattiesDeelBeeld === 'function') src = await window.__tattiesDeelBeeld(f.dataset.sleutel); } catch { /* geen beeld */ }
+    if (!src && i === 0 && t.kunst && t.kunst.src) src = t.kunst.src;
+    if (!src || !f.isConnected) continue;
+    const im = f.querySelector('img'); im.src = src; im.hidden = false; f.classList.add('met-beeld');
+  }
+}
 function renderDetail() {
   const t = tattoos.find(x => x.id === detailId);
   const view = $('#view-detail');
@@ -16186,8 +16205,13 @@ function renderDetail() {
     const heeftLege = rijen.some(r => r.leeg);
     // Delen (jigsaw): alleen bij een tattoo die op het model staat. Eerste deel = het record zelf.
     const nDelen = 1 + beeldDelen(t).length;
+    // Thumbnails per deel (2026-10-05): een rij kleine uitsnedes, gevuld door vulDeelThumbs (textuurcache)
+    const thumbsHtml = nDelen > 1
+      ? `<div class="delen-thumbs">${[t.id].concat(beeldDelen(t).map(d => t.id + ':' + d.id)).map((s, i) =>
+          `<figure class="deel-thumb" data-sleutel="${esc(s)}"><img alt="${esc(tr('detail.deel_n').replace('{n}', i + 1))}" hidden><figcaption>${i + 1}</figcaption></figure>`).join('')}</div>`
+      : '';
     const delenHtml = (t.positie3d && t.positie3d.point)
-      ? `<div class="detail-delen"><span class="gedempt">${nDelen > 1 ? tr('detail.delen').replace('{n}', nDelen) : tr('detail.delen_uitleg')}</span><button type="button" class="knop-sec" id="d-deel">${tr('ui.deel_toevoegen')}</button></div>`
+      ? `<div class="detail-delen"><span class="gedempt">${nDelen > 1 ? tr('detail.delen').replace('{n}', nDelen) : tr('detail.delen_uitleg')}</span><button type="button" class="knop-sec" id="d-deel">${tr('ui.deel_toevoegen')}</button></div>${thumbsHtml}`
       : '';
     /* Opnieuw plaatsen (slice 4e, nieuw lichaam): vangnet voor een tattoo die na de migratie niet goed staat of geen plek heeft. */
     const kanHerplaatsen = (typeof LICHAAM_GEN !== 'undefined' && LICHAAM_GEN) && ((t.kunst3d && t.kunst3d.srcUrl) || (t.kunst && t.kunst.src));
@@ -16334,6 +16358,7 @@ function renderDetail() {
       $('#btn-3d').click();
       setTimeout(() => { if (typeof window.__tattiesDeelToevoegen === 'function') window.__tattiesDeelToevoegen(t); }, 60);
     }); }
+  vulDeelThumbs(t);
   $('#d-verwijder').addEventListener('click', async (e) => {
     const btn = e.currentTarget; if (btn.disabled) return; btn.disabled = true;   // dubbelklik-race voorkomen
     if (!(await bevestigVerwijderen(t && t.naam))) { btn.disabled = false; return; }   // geannuleerd: knop weer vrijgeven
@@ -19249,6 +19274,42 @@ async function verwijderVoorbeelden() {
     const obKand=(a,b,c)=>{ if(!obZone || !obZone[ZK.z[a]] || !obZone[ZK.z[b]] || !obZone[ZK.z[c]]) return false;
       const ya=P[a*3+1], yb=P[b*3+1], yc=P[c*3+1];
       return Math.max(ya,yb,yc)>=laagY && Math.min(ya,yb,yc)<=taille+0.005; };
+    /* Strak trekken (bikini 2026-10-04): zie de uitleg in de functie. randGlad: randpunten mogen langs
+       hun rand meeschuiven. Uitleg bij de aanroep in bouwBikini. Voor de boxer geprobeerd (2026-10-05): vervormt de hartjes. */
+    const strak=(PP, NN0, gladX, randGlad)=>{   // PP/NN0: losse driehoeken (posities/normalen), worden aangepast
+      const sl=(i)=>Math.round(PP[i]*1e4)+','+Math.round(PP[i+1]*1e4)+','+Math.round(PP[i+2]*1e4);
+      const id=new Map(), eerste=[], vi=new Int32Array(PP.length/3);
+      for(let i=0;i<PP.length;i+=3){ const k=sl(i); let v=id.get(k); if(v===undefined){ v=eerste.length; id.set(k,v); eerste.push(i); } vi[i/3]=v; }
+      const nV=eerste.length, buren=Array.from({length:nV},()=>[]), rand=new Uint8Array(nV), ribben=new Map();
+      for(let t=0;t<vi.length;t+=3) for(let e=0;e<3;e++){ const a=vi[t+e], b=vi[t+(e+1)%3]; if(a===b) continue;
+        if(buren[a].indexOf(b)<0) buren[a].push(b); if(buren[b].indexOf(a)<0) buren[b].push(a);
+        const k=a<b ? a*nV+b : b*nV+a; ribben.set(k,(ribben.get(k)||0)+1); }
+      ribben.forEach((n,k)=>{ if(n===1){ rand[Math.floor(k/nV)]=1; rand[k%nV]=1; } });
+      const X=new Float32Array(nV*3), O=new Float32Array(nV*3), N0=new Float32Array(nV*3), W=new Float32Array(nV), T=new Float32Array(nV*3);
+      for(let v=0;v<nV;v++){ const i=eerste[v]; for(let k=0;k<3;k++){ X[v*3+k]=O[v*3+k]=PP[i+k]; N0[v*3+k]=NN0[i+k]; }
+        const u=Math.min(1, Math.abs(X[v*3])/gladX); W[v]=(rand[v] && !randGlad) ? 0 : 1-u*u*(3-2*u); }
+      for(let it=0; it<60; it++){
+        for(let v=0;v<nV;v++){ T[v*3]=X[v*3]; T[v*3+1]=X[v*3+1]; T[v*3+2]=X[v*3+2]; if(!(W[v]>0) || !buren[v].length) continue;
+          const br=rand[v] ? buren[v].filter(b=>rand[b]) : buren[v]; if(!br.length) continue;   // rand: alleen langs de rand (de lijn blijft een lijn)
+          let mx=0, my=0, mz=0; for(const b of br){ mx+=X[b*3]; my+=X[b*3+1]; mz+=X[b*3+2]; } const n=br.length, k=0.6*W[v];
+          let x=X[v*3]+(mx/n-X[v*3])*k, y=X[v*3+1]+(my/n-X[v*3+1])*k, z=X[v*3+2]+(mz/n-X[v*3+2])*k;
+          const d=(x-O[v*3])*N0[v*3]+(y-O[v*3+1])*N0[v*3+1]+(z-O[v*3+2])*N0[v*3+2];
+          if(d<0){ x-=N0[v*3]*d; y-=N0[v*3+1]*d; z-=N0[v*3+2]*d; }   // niet de huid in
+          T[v*3]=x; T[v*3+1]=y; T[v*3+2]=z; }
+        X.set(T); }
+      // normalen opnieuw uit de vlakken (gladgestreken deel), elders de huidnormaal
+      const NN=new Float32Array(nV*3);
+      for(let t=0;t<vi.length;t+=3){ const a=vi[t]*3, b=vi[t+1]*3, c=vi[t+2]*3;
+        const ux=X[b]-X[a], uy=X[b+1]-X[a+1], uz=X[b+2]-X[a+2], wx=X[c]-X[a], wy=X[c+1]-X[a+1], wz=X[c+2]-X[a+2];
+        let nx=uy*wz-uz*wy, ny=uz*wx-ux*wz, nz=ux*wy-uy*wx;
+        if(nx*N0[a]+ny*N0[a+1]+nz*N0[a+2]<0){ nx=-nx; ny=-ny; nz=-nz; }
+        for(const q of [a,b,c]){ NN[q]+=nx; NN[q+1]+=ny; NN[q+2]+=nz; } }
+      for(let j=0;j<vi.length;j++){ const v=vi[j], i=j*3, w=W[v];
+        PP[i]=X[v*3]; PP[i+1]=X[v*3+1]; PP[i+2]=X[v*3+2];
+        if(w>0){ const l=Math.hypot(NN[v*3],NN[v*3+1],NN[v*3+2])||1;
+          const nx=NN0[i]*(1-w)+NN[v*3]/l*w, ny=NN0[i+1]*(1-w)+NN[v*3+1]/l*w, nz=NN0[i+2]*(1-w)+NN[v*3+2]/l*w, m=Math.hypot(nx,ny,nz)||1;
+          NN0[i]=nx/m; NN0[i+1]=ny/m; NN0[i+2]=nz/m; } }
+    };
     /* Bikini (2026-10-04, apply_bikini.py): eigen opbouw met dezelfde hulpjes (snij, punt, zetDriehoek, volg-gegevens). */
     const bikini=underwear==='bikini';
     const bouwBikini=()=>{
@@ -19289,40 +19350,7 @@ async function verwijderVoorbeelden() {
          De stof als samenhangend net (punten op 0,1 mm samengevoegd) rond het midden gladstrijken: elk punt naar het gemiddelde van
          zijn buren, nooit de huid in (niet achter zijn eigen raakvlak), randpunten blijven vast. Zo spant hij over holtes zoals echte
          stof en blijven bollingen staan. Gewicht naar de zijkant (GLAD_X) zacht af. Dev: window.__bikiniGlad=false. */
-      const GLAD_X=0.075, strak=()=>{
-        const sl=(i)=>Math.round(bodyP[i]*1e4)+','+Math.round(bodyP[i+1]*1e4)+','+Math.round(bodyP[i+2]*1e4);
-        const id=new Map(), eerste=[], vi=new Int32Array(bodyP.length/3);
-        for(let i=0;i<bodyP.length;i+=3){ const k=sl(i); let v=id.get(k); if(v===undefined){ v=eerste.length; id.set(k,v); eerste.push(i); } vi[i/3]=v; }
-        const nV=eerste.length, buren=Array.from({length:nV},()=>[]), rand=new Uint8Array(nV), ribben=new Map();
-        for(let t=0;t<vi.length;t+=3) for(let e=0;e<3;e++){ const a=vi[t+e], b=vi[t+(e+1)%3]; if(a===b) continue;
-          if(buren[a].indexOf(b)<0) buren[a].push(b); if(buren[b].indexOf(a)<0) buren[b].push(a);
-          const k=a<b ? a*nV+b : b*nV+a; ribben.set(k,(ribben.get(k)||0)+1); }
-        ribben.forEach((n,k)=>{ if(n===1){ rand[Math.floor(k/nV)]=1; rand[k%nV]=1; } });
-        const X=new Float32Array(nV*3), O=new Float32Array(nV*3), N0=new Float32Array(nV*3), W=new Float32Array(nV), T=new Float32Array(nV*3);
-        for(let v=0;v<nV;v++){ const i=eerste[v]; for(let k=0;k<3;k++){ X[v*3+k]=O[v*3+k]=bodyP[i+k]; N0[v*3+k]=bodyN[i+k]; }
-          const u=Math.min(1, Math.abs(X[v*3])/GLAD_X); W[v]=rand[v] ? 0 : 1-u*u*(3-2*u); }
-        for(let it=0; it<60; it++){
-          for(let v=0;v<nV;v++){ T[v*3]=X[v*3]; T[v*3+1]=X[v*3+1]; T[v*3+2]=X[v*3+2]; if(!(W[v]>0) || !buren[v].length) continue;
-            let mx=0, my=0, mz=0; for(const b of buren[v]){ mx+=X[b*3]; my+=X[b*3+1]; mz+=X[b*3+2]; } const n=buren[v].length, k=0.6*W[v];
-            let x=X[v*3]+(mx/n-X[v*3])*k, y=X[v*3+1]+(my/n-X[v*3+1])*k, z=X[v*3+2]+(mz/n-X[v*3+2])*k;
-            const d=(x-O[v*3])*N0[v*3]+(y-O[v*3+1])*N0[v*3+1]+(z-O[v*3+2])*N0[v*3+2];
-            if(d<0){ x-=N0[v*3]*d; y-=N0[v*3+1]*d; z-=N0[v*3+2]*d; }   // niet de huid in
-            T[v*3]=x; T[v*3+1]=y; T[v*3+2]=z; }
-          X.set(T); }
-        // normalen opnieuw uit de vlakken (gladgestreken deel), elders de huidnormaal
-        const NN=new Float32Array(nV*3);
-        for(let t=0;t<vi.length;t+=3){ const a=vi[t]*3, b=vi[t+1]*3, c=vi[t+2]*3;
-          const ux=X[b]-X[a], uy=X[b+1]-X[a+1], uz=X[b+2]-X[a+2], wx=X[c]-X[a], wy=X[c+1]-X[a+1], wz=X[c+2]-X[a+2];
-          let nx=uy*wz-uz*wy, ny=uz*wx-ux*wz, nz=ux*wy-uy*wx;
-          if(nx*N0[a]+ny*N0[a+1]+nz*N0[a+2]<0){ nx=-nx; ny=-ny; nz=-nz; }
-          for(const q of [a,b,c]){ NN[q]+=nx; NN[q+1]+=ny; NN[q+2]+=nz; } }
-        for(let j=0;j<vi.length;j++){ const v=vi[j], i=j*3, w=W[v];
-          bodyP[i]=X[v*3]; bodyP[i+1]=X[v*3+1]; bodyP[i+2]=X[v*3+2];
-          if(w>0){ const l=Math.hypot(NN[v*3],NN[v*3+1],NN[v*3+2])||1;
-            const nx=bodyN[i]*(1-w)+NN[v*3]/l*w, ny=bodyN[i+1]*(1-w)+NN[v*3+1]/l*w, nz=bodyN[i+2]*(1-w)+NN[v*3+2]/l*w, m=Math.hypot(nx,ny,nz)||1;
-            bodyN[i]=nx/m; bodyN[i+1]=ny/m; bodyN[i+2]=nz/m; } }
-      };
-      if(window.__bikiniGlad!==false) strak();
+      if(window.__bikiniGlad!==false) strak(bodyP, bodyN, 0.075, false);
       if(!ZK) return;
       // top: de hoogtes volgen de lichaamslengte (gemeten: borsttop 0,73, halskuil 0,885); de top = het verste punt naar voren
       let voetY=Infinity, kruinY=-Infinity;
@@ -24704,9 +24732,18 @@ function maakTatnetGL(json, canvas) {
   }
   window.__tattiesKleur={ kans:kleurKans, voorspel:kleurVoorspel, net:kleurNet, invoer:kleurInvoer, laatste:null };
   const KLEUR_DREMPEL=0.2;   // kans >= drempel = kleur (bij twijfel kleur; gekozen op de dev-set van de training)
+  /* Drempel per huidhelderheid (2026-10-05): lichte kleur op lichte huid werd zwart, zwart op donkere huid kleur. logit(drempel) =
+     KLEUR_HUID.c0 + KLEUR_HUID.c1 * (60 - L*)/20: bij L 80 0,11, bij 60 0,16, bij 40 0,24, bij 20 0,33. Afgesteld op TSSD + synthetische
+     set (kleur kwijt telt 3x): synth zwart/kleur 76,9 -> 80,9%, TSSD 90,2 -> 89,8% maar gewogen beter. Uit: window.__kleurHuid=false. */
+  const KLEUR_HUID={ c0:-1.64, c1:0.5 };
+  function kleurDrempel(huidL){
+    if(window.__kleurHuid===false || !isFinite(huidL)) return KLEUR_DREMPEL;
+    const z=KLEUR_HUID.c0+KLEUR_HUID.c1*(60-huidL)/20; return 1/(1+Math.exp(-z));
+  }
   const MATTE_STD={z0:0.96,z1:0.64,k0:4.0,k1:19,hMax:90};   // drempels van de inkt-matte (apply_matte_param.py)
   const KLEUR_STERK=0.005, KLEUR_LOS=0.15;   // zwart/kleur-drempels met Tatnet-gebied (waren 0,02 / 0,30)
   const TEKENING_PAPIER=0.45, TEKENING_HUID=0.08;   // tekening op papier herkennen (2026-10-04, apply_tekening.py)
+  const MATTE_GEBIED_MIN=0.01, MATTE_OVER_MIN=0.01;   // vangnetten (2026-10-05): Tatnet-gebied < 1% = niet gebruiken; < 1% inkt over = geen matte
   function inktMatte(canvas, modus, gebied){
     const W=canvas.width, H=canvas.height; if(!W||!H) return null;
     const x=canvas.getContext('2d',{willReadFrequently:true});
@@ -24735,6 +24772,12 @@ function maakTatnetGL(json, canvas) {
       if(tekening) gebied=null;
     }
     window.__matteTekening=tekening;   // dev: was de laatste uitsnede een tekening
+    /* Vangnet (2026-10-05): vindt Tatnet in de uitsnede (vrijwel) niets, dan zou de matte met dat lege gebied ALLES weghalen en
+       stond er een onzichtbare tattoo op het model (deel met een blauw vlak, zwarte ring). Dan het gebied niet gebruiken. */
+    if(gebied && gebied.length===N && window.__matteLeegVangnet!==false){
+      let gd=0; for(let i=0;i<N;i++) if(gebied[i]>0.5) gd++;
+      if(gd<MATTE_GEBIED_MIN*nOp){ gebied=null; window.__matteGebiedLeeg=true; } else window.__matteGebiedLeeg=false;
+    }
     let acc=0, dr=0; for(let L=0;L<256;L++){ acc+=hist[L]; if(acc>=cnt*0.55){ dr=L; break; } }
     const wgt=new Float32Array(n2);
     for(let i=0;i<n2;i++) wgt[i]=lum[i]<0?0:Math.max(0,Math.min(1,(lum[i]-dr*0.85)/(dr*0.15+1e-6)));
@@ -24841,9 +24884,11 @@ function maakTatnetGL(json, canvas) {
     // voor pastel/aquarel. Zonder Tatnet-gebied blijft kleurSterk 0 en beslist de oude 10%-regel (dC > 14).
     if(modus==='auto'){ const st=kandN?kleurSterk/kandN:0, lo=kandN?kleurN/kandN:0;
       let pk=null; if(gebied && window.__kleurModel!==false){ try{ pk=kleurKans(canvas, gebied); }catch(e){ pk=null; } }   // kleur-model (2026-10-03); canvas is hier nog onveranderd
-      modus = (pk!==null) ? (pk>=KLEUR_DREMPEL ? 'kleur' : 'zwart')
+      const _hl=[0,0,0]; _lab(Math.round(gr),Math.round(gg),Math.round(gb),_hl);   // huidhelderheid zoals de matte hem schat (L*)
+      const drempel=kleurDrempel(_hl[0]);
+      modus = (pk!==null) ? (pk>=drempel ? 'kleur' : 'zwart')
             : (kandN>50 && (gebied ? (st>=KLEUR_STERK || lo>=KLEUR_LOS) : lo>=0.10)) ? 'kleur' : 'zwart';   // zonder model: bij twijfel kleur (regel)
-      window.__matteKlas={kandN,kleurN,kleurSterk,sterk:st,los:lo,pk,modus}; }   // dev: tellingen van de laatste auto-beslissing
+      window.__matteKlas={kandN,kleurN,kleurSterk,sterk:st,los:lo,pk,modus,huidL:+_hl[0].toFixed(1),drempel:+drempel.toFixed(3)}; }   // dev: tellingen van de laatste auto-beslissing
     const MP=Object.assign({}, MATTE_STD, window.__matteParam||{});   // drempels (2026-10-03; dev: window.__matteParam)
     if(modus==='zwart'){
       // Vervaagde/lichte inkt (variant C, 2026-09-13, gemeten op 77 TSSD-foto's: gemist 0.47->0.43, lek 0.21->0.22):
@@ -24892,6 +24937,11 @@ function maakTatnetGL(json, canvas) {
     }
     if(gebied && gebied.length===N){   // Tatnet: buiten het gebied zacht naar 0 (0.3..0.6 = verloop), binnen ongemoeid
       for(let i=0;i<N;i++){ const o=i*4; if(!p[o+3]) continue; const gw=Math.max(0,Math.min(1,(gebied[i]-0.3)/0.3)); p[o+3]=Math.round(p[o+3]*gw); } }
+    if(window.__matteLeegVangnet!==false){   // vangnet: blijft er (vrijwel) geen inkt over, dan geen matte (de aanroeper valt terug op 'met huid')
+      let over=0; for(let i=0;i<N;i++) if(p[i*4+3]>128) over++;
+      if(over<MATTE_OVER_MIN*nOp){ window.__matteLeeg=true; return null; }
+      window.__matteLeeg=false;
+    }
     x.putImageData(d,0,0);
     return modus;
   }
@@ -25872,7 +25922,7 @@ function maakTatnetGL(json, canvas) {
     });
   }
   /* ---- Textuurcache (slice 5o) ---- */
-  const TEX_VERSIE=4;   // 4: tekening op papier (2026-10-04); ophogen als de matte, Tatnet of de uitsnede-verwerking anders gaat rekenen (2: kleur-matte houdt het Tatnet-gebied, 2026-10-02; 3: matte-drempels 0,96 / k0 4 + kleur-model, 2026-10-03)
+  const TEX_VERSIE=5;   // 5: vangnetten leeg gebied / niets over + zwart/kleur-drempel per huidtint (2026-10-05); 4: tekening op papier (2026-10-04); ophogen als de matte, Tatnet of de uitsnede-verwerking anders gaat rekenen (2: kleur-matte houdt het Tatnet-gebied, 2026-10-02; 3: matte-drempels 0,96 / k0 4 + kleur-model, 2026-10-03)
   const TEX_DB='tatties-textuur-'+(typeof DB_NAAM!=='undefined' ? DB_NAAM : 'tatties');
   let texDbP=null, texOpgeruimd=false;
   function texDb(){
@@ -25891,6 +25941,19 @@ function maakTatnetGL(json, canvas) {
   }
   function texLees(sleutel){ return texDb().then(db=> db ? new Promise(res=>{ try{ const q=db.transaction('t').objectStore('t').get(sleutel);
     q.onsuccess=()=>res(q.result||null); q.onerror=()=>res(null); }catch(e){ res(null); } }) : null); }
+  /* Thumbnail per deel (2026-10-05): de afgewerkte uitsnede uit de textuurcache (sleutel id of id:deelId), verkleind tot 112 px.
+     null als er (op dit toestel) nog geen textuur is; de detailpagina valt dan terug. */
+  window.__tattiesDeelBeeld=async function(sleutel){
+    const klein=(bron, w, h)=>{ const s=Math.min(1, 112/Math.max(w, h)), c=document.createElement('canvas');
+      c.width=Math.max(1, Math.round(w*s)); c.height=Math.max(1, Math.round(h*s)); c.getContext('2d').drawImage(bron, 0, 0, c.width, c.height); return c.toDataURL('image/png'); };
+    const m=markers.find(q=>q.id+(q.deel ? ':'+q.deel.id : '')===sleutel && q.tex && q.tex.image);   // eerst de decal die op het model staat (net geplaatst: nog niet in de cache)
+    if(m){ const im=m.tex.image; try{ const w=im.width||im.naturalWidth, h=im.height||im.naturalHeight; if(w && h) return klein(im, w, h); }catch(err){ /* via de cache */ } }
+    const e=await texLees(sleutel); if(!(e && e.blob) || typeof createImageBitmap!=='function') return null;
+    try{ const bmp=await createImageBitmap(e.blob), s=Math.min(1, 112/Math.max(bmp.width, bmp.height));
+      const c=document.createElement('canvas'); c.width=Math.max(1, Math.round(bmp.width*s)); c.height=Math.max(1, Math.round(bmp.height*s));
+      c.getContext('2d').drawImage(bmp, 0, 0, c.width, c.height); if(bmp.close) bmp.close();
+      return c.toDataURL('image/png'); }catch(err){ return null; }
+  };
   function texSchrijf(sleutel, v){ return texDb().then(db=>{ if(!db) return; try{ db.transaction('t','readwrite').objectStore('t').put(v, sleutel); }catch(e){ /* vol of weg: dan niet */ } }); }
   /* slice 5u: voorraad. restore3D leest de cache van alle tattoos tegelijk en laat ze tegelijk decoderen; textuurVoor pakt het
      klaarstaande beeld (het herstel wachtte eerst per tattoo op IndexedDB en daarna op het decoderen). */
