@@ -12297,7 +12297,7 @@ function createTattoo(overrides = {}) {
    ============================================================ */
 // App-versie (semver, handmatig ophogen bij een release). Bij een bump ook de
 // CACHE-naam in sw.js meebumpen, zodat clients de nieuwe build ophalen.
-const APP_VERSIE = '0.3.176';
+const APP_VERSIE = '0.3.177';
 
 /* Dev-haken die de CLOUD raken hangen alleen op een ontwikkelmachine aan window. Ze zijn geen
    lek op zichzelf (zonder XSS roept niemand ze aan, en CSP + esc() houden XSS tegen), maar ze
@@ -26511,7 +26511,7 @@ function maakTatnetGL(json, canvas) {
     if (e.target && e.target.type === 'range' && selectieLoopt) { selectieLoopt = false; N('Haptics', 'selectionEnd').catch(function () {}); }
   }, true);
 
-  /* ---------- 2. Delen (foto, filmpje, export) ---------- */
+  /* ---------- 2. Delen (foto, filmpje, export): bestand via TattiesDeel.schrijf, dan het deelvenster ---------- */
   function blobNaarB64(blob) {
     return new Promise(function (res, rej) {
       var r = new FileReader();
@@ -26525,7 +26525,7 @@ function maakTatnetGL(json, canvas) {
     try {
       var data = await blobNaarB64(blob);
       var veilig = String(naam || 'tatties').replace(/[^\w.\-]+/g, '-');
-      var w = await N('Filesystem', 'writeFile', { path: 'delen/' + veilig, data: data, directory: 'CACHE', recursive: true });
+      var w = await N('TattiesDeel', 'schrijf', { naam: veilig, data: data });   // eigen plugin (geen @capacitor/filesystem meer)
       if (!w || !w.uri) return null;
       try { await N('Share', 'share', { title: 'Tatties', files: [w.uri] }); return 'gedeeld'; }
       catch (e) { return geannuleerd(e) ? 'geannuleerd' : null; }
