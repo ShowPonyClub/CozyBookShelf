@@ -1228,7 +1228,24 @@ form label,
    .gepland-toggle.actief en staat later, dus die won de achtergrond terwijl de tekst al naar --op-inkt
    omsloeg -> de knop oogde leeg (donker op donker, in het lichte thema licht op licht). */
 .stage-knoppen .gepland-toggle.actief{background:var(--accent-vlak);}
-.stage-knoppen #toon-gepland-3d{position:static;left:auto;top:auto;z-index:auto;}   /* de oude absolute plek (van de 2D-kaart) viel over 'Heel lichaam' heen */
+/* Wishlist-schakelaar linksonder (2026-10-05, keuze eigenaar): pil met de schakelaar uit Instellingen (.schakelaar), op de hoogte van de +.
+   Weg zolang er iets anders linksonder staat of moet gebeuren: bewerken (balk + pijltjes), plaatsen, 'Tattoo hier plaatsen', de
+   draai-/ledemaat-hint en de lege-staat-pil (zonder tattoos heeft de wishlist geen zin). */
+#view-3d #toon-gepland-3d.wl-schakel{position:absolute;left:max(12px,env(safe-area-inset-left,0px));top:auto;
+  bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:6;min-height:44px;gap:10px;padding:6px 8px 6px 16px;
+  background:var(--kaart);border:1px solid var(--rand);color:var(--tekst);font-size:.86rem;box-shadow:0 4px 14px rgba(0,0,0,.22)}
+#view-3d #toon-gepland-3d.wl-schakel.actief{background:var(--kaart);color:var(--tekst)}   /* de stand zit in de schakelaar, niet in de pil */
+.wl-spoor{position:relative;width:38px;height:24px;border-radius:999px;background:#d6c8af;flex:none;transition:background .15s}
+.wl-knop{position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(34,26,18,.25);transition:left .15s}
+[data-theme="dark"] .wl-spoor{background:#3A352B}   /* zoals .schakelaar .baan: uit = donker, aan = licht */
+.wl-schakel.actief .wl-spoor{background:var(--accent)}
+.wl-schakel.actief .wl-knop{left:17px}
+#toon-gepland-3d.wl-schakel:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+@media (prefers-reduced-motion:reduce){.wl-spoor,.wl-knop{transition:none}}
+#view-3d:has(#editbar.on) #toon-gepland-3d, #view-3d:has(#t3d-duw:not([hidden])) #toon-gepland-3d,
+#view-3d:has(#hint.on) #toon-gepland-3d, #view-3d:has(#lege-hint-3d:not([hidden])) #toon-gepland-3d,
+#view-3d:has(.tik-plaats:not([hidden])) #toon-gepland-3d, body:has(#plaats-hint:not([hidden])) #toon-gepland-3d,
+html.genaan #toon-gepland-3d, html.onbmodel #toon-gepland-3d{display:none}
 .stage-knoppen #t3d-reset,.stage-knoppen #t3d-info,.stage-knoppen #t3d-deel{position:static;top:auto;right:auto;width:44px;height:44px;border-radius:50%;flex:none;
   background:var(--kaart);border:1px solid var(--rand);color:var(--tekst);cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:inherit;}
 .stage-knoppen #t3d-info:hover,.stage-knoppen #t3d-reset:hover,.stage-knoppen #t3d-deel:hover{border-color:var(--accent);}
@@ -2769,10 +2786,6 @@ html.genaan #t3d-menu-paneel, html.onbmodel #t3d-menu-paneel { display:none !imp
       <div class="stage-knoppen">
         <div class="sk-links">
       <button type="button" id="t3d-start" class="t3d-merk" data-i18n-aria="menu.start" data-i18n-title="menu.start" aria-label="Start" title="Start"></button>
-      <button type="button" id="toon-gepland-3d" class="gepland-toggle" aria-pressed="false" data-i18n-aria="ui.toon_gepland" aria-label="Geplande tattoos tonen">
-        <svg viewBox="0 0 24 24" class="ik" aria-hidden="true" style="width:15px;height:15px"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>
-        <span data-i18n="ui.gepland">Gepland</span>
-      </button>
       <button type="button" id="t3d-pose" class="gepland-toggle" aria-pressed="false" data-i18n-title="ui.pose_arm" data-i18n-aria="ui.pose_arm" title="Armen wijd" aria-label="Armen wijd">
         <svg viewBox="0 0 24 24" class="ik" aria-hidden="true" style="width:15px;height:15px"><circle cx="12" cy="5.4" r="1.9"/><path d="M12 8v6"/><path d="M3.5 11.5L12 9l8.5 2.5"/><path d="M9 20.5l3-6.5 3 6.5"/></svg>
         <span data-i18n="ui.pose_kort">Armen</span>
@@ -2795,6 +2808,10 @@ html.genaan #t3d-menu-paneel, html.onbmodel #t3d-menu-paneel { display:none !imp
       <div id="t3d-banner" hidden></div>
       <div id="lege-hint-3d" class="lege-hint" data-i18n="ui.lege_cta" hidden>Nog geen tattoos - tik op + om er een toe te voegen</div>
       <button id="t3d-add" data-i18n-aria="fab.nieuw" data-i18n-title="fab.nieuw" aria-label="Nieuwe tattoo" title="Nieuwe tattoo">+</button>
+      <!-- Wishlist als schakelaar linksonder, tegenover de + (2026-10-05, keuze eigenaar): de stand is te zien en je duim kan erbij -->
+      <button type="button" id="toon-gepland-3d" class="gepland-toggle wl-schakel" role="switch" aria-checked="false" data-i18n-aria="ui.toon_gepland" aria-label="Wishlist op het lichaam tonen">
+        <span data-i18n="ui.gepland">Wishlist</span><span class="wl-spoor" aria-hidden="true"><span class="wl-knop"></span></span>
+      </button>
       <button id="tik-plaats" type="button" class="tik-plaats" hidden data-i18n="ui.tattoo_hier">Tattoo hier plaatsen</button>
       <!-- Delen plaatsen vanuit de kijkhoek (2026-10-03): de uitsnede half doorzichtig midden op het model -->
       <img id="plaats-proj" class="plaats-proj" hidden alt="" aria-hidden="true">
@@ -12335,7 +12352,7 @@ function createTattoo(overrides = {}) {
    ============================================================ */
 // App-versie (semver, handmatig ophogen bij een release). Bij een bump ook de
 // CACHE-naam in sw.js meebumpen, zodat clients de nieuwe build ophalen.
-const APP_VERSIE = '0.3.179';
+const APP_VERSIE = '0.3.180';
 
 /* Dev-haken die de CLOUD raken hangen alleen op een ontwikkelmachine aan window. Ze zijn geen
    lek op zichzelf (zonder XSS roept niemand ze aan, en CSP + esc() houden XSS tegen), maar ze
@@ -14027,12 +14044,17 @@ function vulDelenUitVol(doel, vol) {
     if (v && v.kunst3d && v.kunst3d.srcUrl) { d.kunst3d = d.kunst3d || v.kunst3d; d.kunst3d.srcUrl = v.kunst3d.srcUrl; }
   }
 }
+/* Vingerafdruk van de weggehaalde bronbeelden (2026-10-05): decalVingerafdruk vergelijkt een licht record met de decal die
+   uit het volle record gebouwd is. Zonder dit verschilde die altijd en bouwde elke herlaad() (opstarten, sync, verwijderen)
+   alle decals opnieuw. Sleutel = id (record) of id:deelId, waarde = thumbFp van srcUrl (of kunst.src als terugval). */
+const lichtBronFp = new Map();
 function stripBeelden(t) {
   delete t.foto;
   if (Array.isArray(t.fotos) && t.fotos.length) t.fotos = [];
+  if (t.id && !t.__licht) lichtBronFp.set(t.id, thumbFp((t.kunst3d && t.kunst3d.srcUrl) || (t.kunst && t.kunst.src) || ''));
   if (t.kunst && t.kunst.src) delete t.kunst.src;
   if (t.kunst3d && t.kunst3d.srcUrl) delete t.kunst3d.srcUrl;
-  for (const d of beeldDelen(t)) if (d.kunst3d && d.kunst3d.srcUrl) delete d.kunst3d.srcUrl;
+  for (const d of beeldDelen(t)) if (d.kunst3d && d.kunst3d.srcUrl) { if (t.id) lichtBronFp.set(t.id + ':' + d.id, thumbFp(d.kunst3d.srcUrl)); delete d.kunst3d.srcUrl; }
   // Bewust ENUMERABLE: zo overleeft de marker ook JSON-/structured-clones (bv. de
   // undo-snapshot bij verwijderen) en beschermt de merge-guard élke kloon-flow.
   // saveTattoo/export/stripVoorCloud strippen 'm aan de uitgangs-grenzen weer weg.
@@ -14350,7 +14372,7 @@ function bijModus(t) {
 function zetGeplandUI() {
   ['#toon-gepland', '#toon-gepland-3d'].forEach(sel => {
     const b = document.querySelector(sel);
-    if (b) { b.classList.toggle('actief', toonGepland); b.setAttribute('aria-pressed', toonGepland ? 'true' : 'false'); }
+    if (b) { b.classList.toggle('actief', toonGepland); b.setAttribute(b.getAttribute('role') === 'switch' ? 'aria-checked' : 'aria-pressed', toonGepland ? 'true' : 'false'); }
   });
 }
 function toggleGepland() {
@@ -18639,7 +18661,78 @@ async function verwijderVoorbeelden() {
   const FILM={ W:720, H:1280, FPS:30, SEC:6 };
   const FILM_PAPIER='#EFE4D0';   // achtergrond van het filmpje: papier (licht thema), keuze eigenaar 2026-10-02
   let film=null, filmUit=null;   // film = lopende opname; filmUit = {blob, url, naam, type} van de laatste
-  function filmKan(){ return !!(window.MediaRecorder && HTMLCanvasElement.prototype.captureStream && filmMime()!==null); }
+  function filmKan(){ return !!(filmWebCodecs() || (window.MediaRecorder && HTMLCanvasElement.prototype.captureStream && filmMime()!==null)); }
+  /* ---- Beeldexact filmpje (2026-10-05): WebCodecs + eigen MP4 ----
+     MediaRecorder neemt op in echte tijd: hoek = verstreken tijd, dus op een trage GPU minder beelden en een rommelige tijdlijn.
+     Met VideoEncoder rendert de app elk beeld zelf (beeld i = hoek i/N van het rondje, tijd i/FPS) en schrijft mp4Maak de H.264-stukken
+     in een MP4 (ftyp/moov/mdat, een spoor, vaste beeldduur). Terugval: MediaRecorder zoals voorheen. Schakelaar window.__filmWebCodecs=false. */
+  function filmWebCodecs(){ return !!(window.VideoEncoder && window.VideoFrame && window.__filmWebCodecs!==false); }
+  async function filmCodec(){
+    for(const codec of ['avc1.4D0028','avc1.42E028','avc1.640028','avc1.42E01F']){
+      const cfg={ codec, width:FILM.W, height:FILM.H, bitrate:6000000, framerate:FILM.FPS, avc:{ format:'avc' } };
+      try{ const s=await VideoEncoder.isConfigSupported(cfg); if(s && s.supported) return cfg; }catch(e){}
+    }
+    return null;
+  }
+  /* Kleurruimte van de encoder naar een 'colr'-box (nclx). Het bereik verschilt per encoder (2026-10-05: software 0-255, hardware
+     16-235); zonder box las de speler software-beelden als 16-235 en speelde het filmpje te licht af. */
+  function mp4Kleur(cs){
+    if(!cs || cs.fullRange==null) return null;
+    const P={ bt709:1, bt470bg:5, smpte170m:6, bt2020:9, smpte432:12 }, T={ bt709:1, smpte170m:6, 'iec61966-2-1':13, linear:8, pq:16, hlg:18 },
+      M={ rgb:0, bt709:1, bt470bg:5, smpte170m:6, 'bt2020-ncl':9 };
+    return { p:P[cs.primaries]||2, t:T[cs.transfer]||2, m:(cs.matrix in M) ? M[cs.matrix] : 2, vol:!!cs.fullRange };   // 2 = onbekend
+  }
+  function mp4Maak(stukken, avcC, W, H, fps, kleur){   // stukken: [{data:Uint8Array, key:bool}] in volgorde, elk 1/fps lang; avcC = decoderConfig.description; kleur = mp4Kleur(..)
+    const enc=new TextEncoder();
+    const u32=(n)=>[(n>>>24)&255,(n>>>16)&255,(n>>>8)&255,n&255], u16=(n)=>[(n>>>8)&255,n&255];
+    const cat=(delen)=>{ let n=0; for(const d of delen) n+=d.length; const o=new Uint8Array(n); let p=0; for(const d of delen){ o.set(d,p); p+=d.length; } return o; };
+    const box=(type, ...delen)=>{ const b=cat(delen.map(d=>d instanceof Uint8Array ? d : Uint8Array.from(d))); return cat([Uint8Array.from(u32(b.length+8)), enc.encode(type), b]); };
+    const full=(type, v, f, ...delen)=>box(type, [v, (f>>>16)&255, (f>>>8)&255, f&255], ...delen);
+    const N=stukken.length, matrix=[].concat(u32(0x10000),u32(0),u32(0),u32(0),u32(0x10000),u32(0),u32(0),u32(0),u32(0x40000000));
+    const durMs=Math.round(N*1000/fps);
+    const ftyp=box('ftyp', enc.encode('isom'), u32(512), enc.encode('isomiso2avc1mp41'));
+    const mvhd=full('mvhd',0,0, u32(0),u32(0),u32(1000),u32(durMs),u32(0x10000),u16(0x100),new Array(10).fill(0),matrix,new Array(24).fill(0),u32(2));
+    const tkhd=full('tkhd',0,3, u32(0),u32(0),u32(1),u32(0),u32(durMs),new Array(8).fill(0),u16(0),u16(0),u16(0),u16(0),matrix,u32(W<<16),u32(H<<16));
+    const mdhd=full('mdhd',0,0, u32(0),u32(0),u32(fps),u32(N),u16(0x55C4),u16(0));
+    const hdlr=full('hdlr',0,0, u32(0),enc.encode('vide'),new Array(12).fill(0),enc.encode('VideoHandler\0'));
+    const vmhd=full('vmhd',0,1, new Array(8).fill(0));
+    const dinf=box('dinf', full('dref',0,0, u32(1), full('url ',0,1)));
+    const avc1=box('avc1', new Array(6).fill(0),u16(1),u16(0),u16(0),new Array(12).fill(0),u16(W),u16(H),u32(0x480000),u32(0x480000),u32(0),u16(1),new Array(32).fill(0),u16(0x18),u16(0xFFFF), box('avcC', avcC),
+      ...(kleur ? [box('colr', enc.encode('nclx'), u16(kleur.p), u16(kleur.t), u16(kleur.m), [kleur.vol ? 0x80 : 0])] : []));   // kleurruimte zoals de encoder hem opgeeft
+    const stsd=full('stsd',0,0, u32(1), avc1);
+    const stts=full('stts',0,0, u32(1), u32(N), u32(1));
+    const keys=[]; stukken.forEach((s,i)=>{ if(s.key) keys.push(i+1); });
+    const stss=full('stss',0,0, u32(keys.length), [].concat(...keys.map(u32)));
+    const stsc=full('stsc',0,0, u32(1), u32(1), u32(N), u32(1));
+    const stsz=full('stsz',0,0, u32(0), u32(N), [].concat(...stukken.map(s=>u32(s.data.length))));
+    const maakMoov=(offset)=>box('moov', mvhd, box('trak', tkhd, box('mdia', mdhd, hdlr, box('minf', vmhd, dinf, box('stbl', stsd, stts, stss, stsc, stsz, full('stco',0,0, u32(1), u32(offset)))))));
+    const moovLen=maakMoov(0).length, data=cat(stukken.map(s=>s.data));
+    return new Blob([ftyp, maakMoov(ftyp.length+moovLen+8), Uint8Array.from(u32(data.length+8)), enc.encode('mdat'), data], { type:'video/mp4' });
+  }
+  async function filmOpnemenWebCodecs(f, teken, cfg, voortgang){   // geeft een mp4-blob, of null bij afbreken; gooit bij een fout (terugval)
+    const N=FILM.FPS*FILM.SEC, stukken=[]; let avcC=null, fout=null;
+    const encoder=new VideoEncoder({ output:(chunk, meta)=>{ const d=new Uint8Array(chunk.byteLength); chunk.copyTo(d); stukken.push({ data:d, key:chunk.type==='key' });
+        if(meta && meta.decoderConfig && meta.decoderConfig.colorSpace && !f.kleur) f.kleur=meta.decoderConfig.colorSpace;
+        if(meta && meta.decoderConfig && meta.decoderConfig.description && !avcC){ const ds=meta.decoderConfig.description; avcC=new Uint8Array(ds.buffer ? ds.buffer.slice(ds.byteOffset||0, (ds.byteOffset||0)+ds.byteLength) : ds); } },
+      error:(e)=>{ fout=e; } });
+    try{
+      encoder.configure(cfg);
+      for(let i=0; i<N; i++){
+        if(f.stop || document.hidden){ f.stop=true; return null; }
+        if(fout) throw fout;
+        teken(i/N, i*1000/FILM.FPS);
+        const vf=new VideoFrame(f.canvas, { timestamp:Math.round(i*1e6/FILM.FPS), duration:Math.round(1e6/FILM.FPS) });
+        encoder.encode(vf, { keyFrame: i%FILM.FPS===0 }); vf.close(); f.n=i+1;
+        voortgang(Math.round((i+1)/N*100));
+        await frameAdem();   // de kaart laat het meedraaiende beeld zien; het tempo is niet meer de tijdlijn
+        while(encoder.encodeQueueSize>6 && !fout) await new Promise(r=>setTimeout(r,5));
+      }
+      await encoder.flush();
+      if(fout) throw fout;
+      if(!avcC || stukken.length!==N || !stukken[0].key) throw new Error('webcodecs: onvolledig ('+stukken.length+'/'+N+')');
+      return mp4Maak(stukken, avcC, FILM.W, FILM.H, FILM.FPS, mp4Kleur(f.kleur));
+    } finally { try{ if(encoder.state!=='closed') encoder.close(); }catch(e){} }
+  }
   function filmMime(){
     if(!window.MediaRecorder) return null;
     for(const t of ['video/mp4;codecs=avc1','video/mp4','video/webm;codecs=vp9','video/webm']){ try{ if(MediaRecorder.isTypeSupported(t)) return t; }catch(e){} }
@@ -18705,10 +18798,10 @@ async function verwijderVoorbeelden() {
     const bgWas=scene.background; scene.background=new THREE.Color(FILM_PAPIER);   // vaste papierkleur, ook in donker thema (merk)
     cv.style.visibility='hidden'; if(selRing) selRing.visible=false;
     renderer.setPixelRatio(1); renderer.setSize(FILM.W, FILM.H, false);
-    const teken=(hoek)=>{
+    const teken=(hoek, tijd)=>{   // tijd: vaste beeldtijd (WebCodecs), anders de klok
       cam.position.set(k.r*Math.sin(ph)*Math.sin(hoek), ty+k.r*Math.cos(ph), k.r*Math.sin(ph)*Math.cos(hoek)); cam.lookAt(0,ty,0);
       if(key){ key.position.copy(cam.position); key.position.y+=1.5; key.position.x+=1.0; }
-      if(f.hoekWas!=null) haarDraai+=hoek-f.hoekWas; f.hoekWas=hoek; haarStap(performance.now());   // haar zwaait mee
+      if(f.hoekWas!=null) haarDraai+=hoek-f.hoekWas; f.hoekWas=hoek; haarStap(tijd!=null ? tijd : performance.now());   // haar zwaait mee
       renderer.render(scene, cam);
       fx.drawImage(cv, 0, 0, FILM.W, FILM.H);   // zelfde taak als de render: de tekenbuffer is er nog
       filmLogoTeken(fx);
@@ -18720,31 +18813,41 @@ async function verwijderVoorbeelden() {
     };
     try{
       teken(th0);
-      const mime=filmMime(), stream=fc.captureStream(FILM.FPS), delen=[];
-      rec=new MediaRecorder(stream, Object.assign({ videoBitsPerSecond: 6000000 }, mime ? { mimeType: mime } : {}));
-      rec.ondataavailable=e=>{ if(e.data && e.data.size) delen.push(e.data); };
-      const klaar=new Promise(res=>{ rec.onstop=res; });
-      rec.start(250);
-      const t0=performance.now(), duur=FILM.SEC*1000; let laatstP=-1;
-      await new Promise(res=>{
-        const stap=()=>{
-          if(f.stop || document.hidden){ f.stop=true; res(); return; }
-          const u=Math.min(1,(performance.now()-t0)/duur);
-          teken(th0 + u*2*Math.PI); f.n=(f.n||0)+1;
-          const p=Math.round(u*100); if(p!==laatstP && vg){ laatstP=p; vg.textContent=tr('deel.film_bezig').replace('{p}', p); }
-          if(u>=1){ res(); return; }
+      const t0=performance.now(); let laatstP=-1;
+      const toonP=(p)=>{ if(p!==laatstP && vg){ laatstP=p; vg.textContent=tr('deel.film_bezig').replace('{p}', p); } };
+      let cfg=null; if(filmWebCodecs()){ try{ cfg=await filmCodec(); }catch(e){} }
+      if(cfg && !f.stop){   // beeldexact: elk beeld op zijn eigen hoek en tijd
+        f.canvas=fc; const th=performance.now();
+        try{ blob=await filmOpnemenWebCodecs(f, (u, ms)=>teken(th0 + u*2*Math.PI, th+ms), cfg, toonP); if(blob) f.methode='webcodecs'; }
+        catch(e){ console.warn('filmpje via WebCodecs mislukt, terug naar MediaRecorder', e); blob=null; f.n=0; laatstP=-1; }
+      }
+      if(!blob && !f.stop){
+        const mime=filmMime(), stream=fc.captureStream(FILM.FPS), delen=[];
+        rec=new MediaRecorder(stream, Object.assign({ videoBitsPerSecond: 6000000 }, mime ? { mimeType: mime } : {}));
+        rec.ondataavailable=e=>{ if(e.data && e.data.size) delen.push(e.data); };
+        const klaar=new Promise(res=>{ rec.onstop=res; });
+        rec.start(250);
+        const tr0=performance.now(), duur=FILM.SEC*1000;
+        await new Promise(res=>{
+          const stap=()=>{
+            if(f.stop || document.hidden){ f.stop=true; res(); return; }
+            const u=Math.min(1,(performance.now()-tr0)/duur);
+            teken(th0 + u*2*Math.PI); f.n=(f.n||0)+1;
+            toonP(Math.round(u*100));
+            if(u>=1){ res(); return; }
+            requestAnimationFrame(stap);
+          };
           requestAnimationFrame(stap);
-        };
-        requestAnimationFrame(stap);
-      });
-      rec.stop(); await klaar; stream.getTracks().forEach(t=>t.stop());
+        });
+        rec.stop(); await klaar; stream.getTracks().forEach(t=>t.stop());
+        if(!f.stop){ blob=new Blob(delen, { type:(rec.mimeType || mime || 'video/webm').split(';')[0] }); f.methode='mediarecorder'; }
+      }
       herstel();
       if(f.stop) return;   // afgebroken (Annuleren, terug of app naar de achtergrond)
-      const type=(rec.mimeType || mime || 'video/webm').split(';')[0];
-      blob=new Blob(delen, { type });
+      const type=blob.type || 'video/webm';
       if(!blob.size) throw new Error('leeg filmpje');
       const naam='tatties-'+new Date().toISOString().slice(0,10)+(type.indexOf('mp4')>=0 ? '.mp4' : '.webm');
-      filmUit={ blob, url:URL.createObjectURL(blob), naam, type, beelden:f.n||0, ms:Math.round(performance.now()-t0) };
+      filmUit={ blob, url:URL.createObjectURL(blob), naam, type, beelden:f.n||0, ms:Math.round(performance.now()-t0), methode:f.methode, kleur:f.kleur ? JSON.parse(JSON.stringify(f.kleur.toJSON ? f.kleur.toJSON() : f.kleur)) : null };
       if(fb){ const vd=document.createElement('video'); vd.src=filmUit.url; vd.muted=true; vd.loop=true; vd.autoplay=true; vd.playsInline=true;
         vd.setAttribute('playsinline',''); fb.textContent=''; fb.appendChild(vd); try{ vd.play().catch(()=>{}); }catch(e){} }
       if(vg) vg.textContent='';
@@ -18767,7 +18870,7 @@ async function verwijderVoorbeelden() {
     const a=document.createElement('a'); a.href=u.url; a.download=u.naam; document.body.appendChild(a); a.click(); a.remove();
     toast(tr('toast.film_bewaard'));
   }
-  window.__tattiesFilmDbg={ start:()=>{ openDeelKies(); return startFilm(); }, uit:()=>filmUit && { type:filmUit.type, size:filmUit.blob.size, naam:filmUit.naam, url:filmUit.url, beelden:filmUit.beelden, ms:filmUit.ms },
+  window.__tattiesFilmDbg={ start:()=>{ openDeelKies(); return startFilm(); }, uit:()=>filmUit && { type:filmUit.type, size:filmUit.blob.size, naam:filmUit.naam, url:filmUit.url, beelden:filmUit.beelden, ms:filmUit.ms, methode:filmUit.methode, kleur:filmUit.kleur },
     blob:()=>filmUit && filmUit.blob, bezig:()=>!!film, kan:filmKan, mime:filmMime, papier:FILM_PAPIER, sceneBg:()=>scene && scene.background && scene.background.getHexString() };
   /* slice 5q: beginstand. Staand de vaste CAM0; liggend het hele lichaam op ~86% van de canvashoogte. */
   function camBegin(){
@@ -22426,7 +22529,8 @@ async function verwijderVoorbeelden() {
       const k = Object.assign({}, D.kunst3d);
       const src = k.srcUrl || (!deel && rec.kunst && rec.kunst.src) || '';
       delete k.srcUrl;
-      return (deel ? deel.id + '|' : '') + (src ? src.length + ':' + src.slice(30, 62) : '') + '|' + JSON.stringify(k)
+      const srcFp = src ? thumbFp(src) : (rec.__licht && typeof lichtBronFp!=='undefined' ? (lichtBronFp.get(rec.id + (deel ? ':' + deel.id : '')) || '') : '');   // licht record: bewaarde vingerafdruk
+      return (deel ? deel.id + '|' : '') + srcFp + '|' + JSON.stringify(k)
         + '|' + JSON.stringify(D.positie3d || null)
         + '|' + rec.opacity + '|' + (rec.status || '') + '|' + (rec.stapel || 0);
     }catch(e){ return '?'; }   // onserialiseerbaar record: geen rebuild uitlokken
@@ -22637,6 +22741,7 @@ async function verwijderVoorbeelden() {
     // polijsten op een fijner raster (minder vervaging): scherpere piek voor draaiing en schaal
     const S2=saMeet(m, 144, [S.cx, S.cy]);
     if(S2 && best.ncc>-1){ const nMin2=Math.round(nMin*2.25); let b=best, b2=saScore(S2,b.dx,b.dy,b.th,b.sc,1); b={ dx:b.dx, dy:b.dy, th:b.th, sc:b.sc, ncc:b2.ncc, n:b2.n };
+      const f0=saScore(S2,0,0,0,1,1); best.fijnNul=(f0.n>=nMin2) ? f0.ncc : -1;   // fijne score van de huidige stand (saToepas, tweede ronde)
       let sd=st0/32, sth=0.25*Math.PI/180, ssc=0.004;
       for(let ronde=0; ronde<4; ronde++){ const b0=b;
         for(const a of [-1,0,1]) for(const q of [-1,0,1]) for(const t of [-1,0,1]) for(const z of [-1,0,1]){
@@ -22644,7 +22749,7 @@ async function verwijderVoorbeelden() {
           const c={ dx:b0.dx+a*sd, dy:b0.dy+q*sd, th:b0.th+t*sth, sc:b0.sc*(1+z*ssc), ncc:r.ncc, n:r.n };
           if(r.n>=nMin2 && saWaarde(c)>saWaarde(b)) b=c; }
         if(b===b0){ sd/=2; sth/=2; ssc/=2; } }
-      best={ dx:b.dx, dy:b.dy, th:b.th, sc:b.sc, ncc:best.ncc, n:best.n, fijn:b.ncc }; }
+      best={ dx:b.dx, dy:b.dy, th:b.th, sc:b.sc, ncc:best.ncc, n:best.n, fijn:b.ncc, fijnNul:best.fijnNul }; }
     best.nul=nul.ncc; best.nulN=nul.n; best.nMin=nMin; best.S=S;
     best.ok = best.n>=nMin && best.ncc>=SA_MIN_NCC;
     if(!best.ok) best.reden = (best.n<nMin) ? 'overlap' : 'patroon';
@@ -22663,7 +22768,7 @@ async function verwijderVoorbeelden() {
     return null;
   }
   function saToepas(m, res, log){   // gevonden verschuiving/draaiing/maat op de huid zetten, tweede ronde vanaf de nieuwe plek (kromming)
-    for(let ronde=0; ronde<2; ronde++){
+    for(let ronde=0; ronde<3; ronde++){   // tot drie rondes: elke ronde rekent vanaf de nieuwe plek (kromming, vlak landschap)
       const S=res.S, ct=Math.cos(res.th), st=Math.sin(res.th);
       const mx=S.cx+res.dx-res.sc*(ct*S.cx-st*S.cy), my=S.cy+res.dy-res.sc*(st*S.cx+ct*S.cy);   // nieuw midden van het deel
       let h=saOpHuid(S, mx, my), f=1;
@@ -22677,9 +22782,10 @@ async function verwijderVoorbeelden() {
       m.point=h.point; m.normal=h.normal; m.mesh=h.mesh; m.tri=h.tri;
       m.rot=((((m.rot||0)+res.th*180/Math.PI)%360)+360)%360; m.size=clamp(m.size*res.sc,0.03,0.70);
       rebuildMarker(m);
-      if(ronde===1) break;
+      if(ronde===2) break;
       const r2=sluitAanBereken(m);
-      if(!r2.ok || !(r2.ncc>r2.nul+0.005) || (Math.hypot(r2.dx,r2.dy)<0.0005 && Math.abs(r2.th)<0.002 && Math.abs(r2.sc-1)<0.003)) break;   // alleen bijstellen als het duidelijk beter wordt
+      const fijnBeter=r2.fijnNul>-1 && r2.fijn>r2.fijnNul+0.004;   // grof gelijk, fijn wel beter (vlak landschap: 'verstoord 12 graden' bleef 3,4 graden scheef)
+      if(!r2.ok || !(r2.ncc>r2.nul+0.005 || fijnBeter) || (Math.hypot(r2.dx,r2.dy)<0.0005 && Math.abs(r2.th)<0.002 && Math.abs(r2.sc-1)<0.003)) break;   // alleen bijstellen als het duidelijk beter wordt
       res=r2; }
     return res;
   }
@@ -26028,7 +26134,24 @@ function maakTatnetGL(json, canvas) {
       requestAnimationFrame(()=>{ clearTimeout(t); af(); });
     });
   }
-  async function restore3D(token){
+  /* Een herstelronde tegelijk (2026-10-05): bij het opstarten startte het model een ronde en de host-init (herlaad) meteen een
+     tweede. Die leegde de textuurvoorraad van de eerste (texVooraf), las alle volle records nog eens en zette herstelLoopt te
+     vroeg uit. __tatties3DHerlaad wacht nu op de lopende ronde en start alleen een nieuwe als er decals ontbreken. */
+  var herstelRonde=null;   // var: restore3D is gehoist en mag nooit in de TDZ vallen
+  function restore3D(token){
+    const p=restore3DKern(token); herstelRonde=p;
+    p.then(()=>{ if(herstelRonde===p) herstelRonde=null; }, ()=>{ if(herstelRonde===p) herstelRonde=null; });
+    return p;
+  }
+  function herstelNodig(lijst){   // ontbreekt er een decal voor een tattoo(deel) met een plek? (nieuw lichaam; het oude model kan plekken afleiden)
+    if(!LICHAAM_GEN) return true;
+    const heeft=new Set(markers.map(m=>m.id+':'+(m.deel ? m.deel.id : '')));
+    for(const t of lijst){ if(!t || t.deleted) continue;
+      if(t.positie3d && Array.isArray(t.positie3d.point) && !heeft.has(t.id+':')){ ttTijd.nodig=t.id+':'; return true; }   // dev: welke ontbrak
+      for(const d of beeldDelen(t)) if(d.positie3d && Array.isArray(d.positie3d.point) && !heeft.has(t.id+':'+d.id)){ ttTijd.nodig=t.id+':'+d.id; return true; } }
+    return false;
+  }
+  async function restore3DKern(token){
     if(token!==undefined && token!==loadToken) return;
     ttMerk('tt-herstel-start');
     if(!pickMeshes.length) return;
@@ -26121,11 +26244,13 @@ function maakTatnetGL(json, canvas) {
   };
   // 3D-decals her-synchroniseren met de huidige data (na cloud-sync/import): verwijderde eruit,
   // nieuwe erbij via restore3D (dedup-guard) - ZONDER het model opnieuw te parsen. No-op als al gelijk.
-  let _herlaad3DBezig=false;
+  let _herlaad3DBezig=false, _herlaad3DNogmaals=false;
   window.__tatties3DHerlaad = async function(){
-    if(!inited || !pickMeshes.length || _herlaad3DBezig) return false;   // engine niet klaar of al bezig: overslaan
+    if(!inited || !pickMeshes.length) return false;   // engine niet klaar: overslaan
+    if(_herlaad3DBezig){ _herlaad3DNogmaals=true; return false; }   // al bezig: daarna nog een keer (anders viel een sync tijdens het herstel weg)
     _herlaad3DBezig=true;
-    try{
+    try{ do{ _herlaad3DNogmaals=false;
+      if(herstelRonde){ try{ await herstelRonde; }catch(_){} }   // lopende herstelronde eerst af laten maken
       const lijst=(typeof tattoos!=="undefined" && Array.isArray(tattoos)) ? tattoos : [];
       const versPerId=new Map(lijst.filter(t=>t && !t.deleted).map(t=>[t.id, t]));
       for(const m of markers.slice()){
@@ -26142,8 +26267,8 @@ function maakTatnetGL(json, canvas) {
         // persistEdit dat verouderde record zo weer over de binnengekomen versie heen.
         m.rec=vers; if(m.deel) m.deel=deelVers; m._fp=fp;
       }
-      await restore3D(loadToken);                                                                   // nieuwe + opnieuw te bouwen decals
-    }catch(e){ console.error("3D-herlaad",e); }
+      if(herstelNodig(lijst)) await restore3D(loadToken);                                          // nieuwe + opnieuw te bouwen decals
+    } while(_herlaad3DNogmaals); }catch(e){ console.error("3D-herlaad",e); }
     finally{ _herlaad3DBezig=false; }
     return true;
   };
@@ -26216,7 +26341,7 @@ function maakTatnetGL(json, canvas) {
   let startOpnameVp='', startOpnameT=0, herstelLoopt=false;
   const START_OPNAME='tatties-start-opname:'+(typeof DB_NAAM!=='undefined' ? DB_NAAM : 'tatties');
   function startOpnameVingerafdruk(){
-    const d=['v2', currentGender, underwear, skinMat ? skinMat.color.getHexString() : '', startOpnameHoek().toFixed(2), uiterlijkTag()];   // slice 5p: beeld zonder tattoos
+    const d=['v3', currentGender, underwear, skinMat ? skinMat.color.getHexString() : '', startOpnameHoek().toFixed(2), uiterlijkTag()];   // slice 5p: beeld zonder tattoos
     try{ d.push(localStorage.getItem('tatties-lichaam')||''); }catch(e){}
     return d.join('|');
   }
@@ -26232,12 +26357,25 @@ function maakTatnetGL(json, canvas) {
   /* slice 5n: zelfde kader als startLiveFrame (fov 30, hoogte lang*1,04, midden op de lichaamsas), niet bijgesneden, 1,35x zo breed
      als hoog; het vak op het startscherm is breder, dus de hoogte bepaalt en beide beelden vallen precies op elkaar. */
   let startOpnameHoekNu=null;
+  /* Bovenkant voor het kader op het startscherm (2026-10-05, toesteltest eigenaar: de afro werd bovenaan afgeknipt): de kruin, of de
+     bovenkant van het haar als dat hoger komt. Per haar-object een keer gemeten (het haar volgt het lichaam; nieuw lichaam = nieuw object). */
+  function startKaderTop(lang){
+    let top=lang;
+    if(haarObj && !haarObj.nieuw && haarObj.groep){
+      if(haarObj.__top===undefined){ haarObj.__top=null;
+        try{ const b=new THREE.Box3().setFromObject(haarObj.groep); if(isFinite(b.max.y)) haarObj.__top=b.max.y; }catch(e){} }
+      if(haarObj.__top!=null && haarObj.groep.visible!==false) top=Math.max(top, haarObj.__top+0.01);
+    }
+    return top;
+  }
   function maakStartOpname(){
     if(!renderer || !scene || !modelRoot) return null;
     const lang=(LICHAAM_GEN && LichaamMotor.geometry()) ? LichaamMotor.lengteCm()/100 : 1.8;
-    const H=600, W=Math.round(H*1.35), th=startOpnameHoek(), ph=Math.PI/2-0.06, ty=lang*0.5;
+    if(haarObj && !haarObj.nieuw) haarObj.groep.visible=true;   // voor de kadermeting (staat hieronder ook aan)
+    const top=startKaderTop(lang);
+    const H=600, W=Math.round(H*1.35), th=startOpnameHoek(), ph=Math.PI/2-0.06, ty=top*0.5;
     const cam=new THREE.PerspectiveCamera(30, W/H, 0.05, 100);
-    const beeldH=Math.max(lang*1.04, lang*1.0/(W/H)), r=beeldH/(2*Math.tan(15*Math.PI/180));
+    const beeldH=Math.max(top*1.04, top*1.0/(W/H)), r=beeldH/(2*Math.tan(15*Math.PI/180));
     cam.position.set(r*Math.sin(ph)*Math.sin(th), ty+r*Math.cos(ph), r*Math.sin(ph)*Math.cos(th)); cam.lookAt(0,ty,0); cam.updateMatrixWorld();
     startOpnameHoekNu=th;
     const msaa=!!(renderer.capabilities.isWebGL2 && THREE.WebGLMultisampleRenderTarget);
@@ -26344,8 +26482,10 @@ function maakTatnetGL(json, canvas) {
       theta=isFinite(h) ? h : startOpnameHoek();
     } else { theta+=dt*2*Math.PI/START_RONDJE; haarDraai+=dt*2*Math.PI/START_RONDJE; }   // haar zwaait mee met het draaien
     phi=Math.PI/2-0.06;
-    const beeldH=Math.max(lang*1.04, lang*1.0/(s.w/s.h));   // zelfde kader als het stilstaande beeld (maakStartOpname)
-    radius=beeldH/(2*Math.tan(camera.fov*Math.PI/360)); target.set(0,lang/2,0); targetGoal=null; radiusGoal=null; applyCam();
+    const doel=startKaderTop(lang);   // haar boven de kruin past erin (2026-10-05); komt het haar later, dan zoomt het kader rustig mee
+    s.top=(s.top && s.getoond) ? s.top+(doel-s.top)*Math.min(1, dt*3) : doel;
+    const top=s.top, beeldH=Math.max(top*1.04, top*1.0/(s.w/s.h));   // zelfde kader als het stilstaande beeld (maakStartOpname)
+    radius=beeldH/(2*Math.tan(camera.fov*Math.PI/360)); target.set(0,top/2,0); targetGoal=null; radiusGoal=null; applyCam();
     if(key){ key.position.copy(camera.position); key.position.y+=1.5; key.position.x+=1.0; }
     haarStap(t);
     renderer.render(scene,camera);
