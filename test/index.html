@@ -2374,6 +2374,7 @@ html.onbmodel #lege-hint-3d{visibility:hidden}
 .onboarding.onb-vraag .onboarding-kaart{background:var(--kaart);border:1px solid var(--rand);border-radius:var(--r-lg);
   padding:26px 22px 14px;box-sizing:border-box;box-shadow:0 12px 40px rgba(0,0,0,.35)}
 .onb-acc-icoon svg{width:52px;height:52px;fill:none;stroke:var(--accent);stroke-width:1.4;stroke-linecap:round;stroke-linejoin:round}
+.onb-privacy{margin:16px auto 0;max-width:30em;color:var(--gedempt);font-size:.88rem;line-height:1.45;text-align:center}   /* keuze eigenaar 2026-10-05 */
 .onb-login{margin:22px 0 0;color:var(--gedempt);font-size:.85rem;display:flex;justify-content:center;align-items:center;gap:6px;flex-wrap:wrap}
 .onb-login button{background:transparent;border:0;padding:0 8px;min-height:44px;color:var(--tekst);font:inherit;font-weight:700;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
 .onb-login button:hover{color:var(--accent)}
@@ -3216,6 +3217,7 @@ form label{text-transform:none;letter-spacing:.005em;font-size:.8rem;color:var(-
       <button type="button" class="knop onboarding-start onb-oud" id="onb-next" data-i18n="onb.volgende">Volgende</button>
       <button type="button" class="knop onboarding-start onb-gen" id="onb-gen-maak" data-i18n="onb.gen_maak">Maak je lichaam</button>
       <button type="button" class="linkbtn onb-skip" id="onb-overslaan" data-i18n="onb.overslaan">Overslaan</button>
+      <p class="onb-privacy onb-gen" data-i18n="onb.privacy">Gratis, geen account nodig. Zonder account blijven je foto's op je toestel.</p>
       <p class="onb-login"><span data-i18n="onb.al_account">Al een account?</span> <button type="button" id="onb-inloggen" data-i18n="onb.inloggen">Inloggen</button></p>
     </div>
     <div id="onb-stap-account" hidden>
@@ -11539,6 +11541,7 @@ function standaardNazorg(){
 
 const I18N = {
   nl: {
+    'onb.privacy':'Gratis, geen account nodig. Zonder account blijven je foto\'s op je toestel.',
     'stats.herstellend':'Nu herstellend','detail.maat':'Maat op het model',
     'ui.zoek_tattoo':'Zoek de tattoo','ui.zoek_gevonden':'Gevonden. Klopt de lijn niet? Teken zelf of stel bij met punten.','ui.zoek_niet':'Geen tattoo gevonden. Trek met je vinger een lijn eromheen.',
     'tips.volgende':'Volgende','tips.begrepen':'Begrepen','tips.overslaan':'Overslaan',
@@ -11758,6 +11761,7 @@ const I18N = {
     'opslag.gebruik':'Je collectie neemt {maat} in beslag','opslag.van':'van de ±{maat} op dit toestel.','opslag.bijnavol':'Bijna vol - exporteer een back-up.'
   },
   en: {
+    'onb.privacy':'Free, no account needed. Without an account, your photos stay on your phone.',
     'stats.herstellend':'Healing now','detail.maat':'Size on the model',
     'ui.zoek_tattoo':'Find tattoo','ui.zoek_gevonden':'Found it. Line not right? Draw your own or adjust it with points.','ui.zoek_niet':'Couldn\'t find a tattoo. Draw a line around it with your finger.',
     'tips.volgende':'Next','tips.begrepen':'Got it','tips.overslaan':'Skip',
@@ -12172,7 +12176,7 @@ function createTattoo(overrides = {}) {
    ============================================================ */
 // App-versie (semver, handmatig ophogen bij een release). Bij een bump ook de
 // CACHE-naam in sw.js meebumpen, zodat clients de nieuwe build ophalen.
-const APP_VERSIE = '0.3.169';
+const APP_VERSIE = '0.3.170';
 
 /* Dev-haken die de CLOUD raken hangen alleen op een ontwikkelmachine aan window. Ze zijn geen
    lek op zichzelf (zonder XSS roept niemand ze aan, en CSP + esc() houden XSS tegen), maar ze
@@ -18147,7 +18151,13 @@ async function verwijderVoorbeelden() {
   try{ const s=localStorage.getItem("tatties-vorm"); if(s && BODY_SHAPES.includes(s)) currentShape=s; }catch(e){}
   // Onderbroek op het model (voor deelbare screenshots). Voorlopig alleen man: 'geen' | 'boxer' | 'brief'.
   let underwear="geen", underwearMesh=null;
-  try{ const u=localStorage.getItem("tatties-onderbroek"); if(u==='boxer'||u==='brief'||u==='bikini'||u==='geen') underwear=u; }catch(e){}
+  let onderbroekGekozen=false;   // false = standaard (volgt de vorm, keuze eigenaar 2026-10-05)
+  try{ const u=localStorage.getItem("tatties-onderbroek"); if(u==='boxer'||u==='brief'||u==='bikini'||u==='geen'){ underwear=u; onderbroekGekozen=true; } }catch(e){}
+  function onderbroekAuto(){   // zonder eigen keuze: boxer bij een mannelijke vorm, bikini bij een vrouwelijke (alleen het nieuwe lichaam)
+    if(onderbroekGekozen || !LICHAAM_GEN) return;
+    let v=1; try{ const L=LichaamMotor.lichaamNu(); if(L && isFinite(L.vorm)) v=L.vorm; }catch(e){}
+    underwear = v < 0.5 ? 'bikini' : 'boxer';
+  }
   const SHAPE_NODES={};   // bv. "man-atletisch":"model-male-athletic"; leeg = val terug op het geslacht-model
   function modelNodeId(gender){ const key=gender+"-"+currentShape; return SHAPE_NODES[key] || (gender==="vrouw"?"model-female":"model-male"); }
   function presetId(){ return currentGender+"-"+currentShape; }
@@ -18945,6 +18955,7 @@ async function verwijderVoorbeelden() {
     return ok;
   }
   function rebuildUnderwear(){
+    { let wk=null; try{ wk=welkom; }catch(e){} if(!wk) onderbroekAuto(); }   // het welkom zet zijn eigen boxer (welkom staat verderop in de module)
     removeUnderwear();
     if(LICHAAM_GEN){ if(underwear!=='geen') bouwOnderbroekLichaam(); return; }
     if(underwear==='geen' || underwear==='bikini' || currentGender!=='man') return;   // bikini alleen op het nieuwe lichaam
@@ -19005,7 +19016,7 @@ async function verwijderVoorbeelden() {
       const bm=new THREE.Mesh(bg,bmat); bm.renderOrder=2; grp.add(bm); }
     underwearMesh=grp; body.add(grp);
   }
-  function setUnderwear(u){ u=(u==='boxer'||u==='brief'||u==='bikini')?u:'geen'; underwear=u;
+  function setUnderwear(u){ u=(u==='boxer'||u==='brief'||u==='bikini')?u:'geen'; underwear=u; onderbroekGekozen=true;
     try{ localStorage.setItem("tatties-onderbroek",u); }catch(e){}
     if(inited){ try{ rebuildUnderwear(); }catch(e){ console.error(e); } } }
   /* ---- Lichaamsgenerator (LICHAAM_GEN): een model voor iedereen, de vorm komt uit LichaamMotor ----
