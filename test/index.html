@@ -12213,7 +12213,7 @@ function createTattoo(overrides = {}) {
    ============================================================ */
 // App-versie (semver, handmatig ophogen bij een release). Bij een bump ook de
 // CACHE-naam in sw.js meebumpen, zodat clients de nieuwe build ophalen.
-const APP_VERSIE = '0.3.171';
+const APP_VERSIE = '0.3.172';
 
 /* Dev-haken die de CLOUD raken hangen alleen op een ontwikkelmachine aan window. Ze zijn geen
    lek op zichzelf (zonder XSS roept niemand ze aan, en CSP + esc() houden XSS tegen), maar ze
@@ -26425,6 +26425,8 @@ function maakTatnetGL(json, canvas) {
   document.addEventListener('visibilitychange', function () { if (document.visibilityState === 'visible') window.__tattiesNazorgPlan(); });
 
   /* ---------- 5. Moment op het startscherm: nazorgvraag, daarna de beoordeling ---------- */
+  // Beoordelingsvraag staat UIT tot de store-release (keuze eigenaar 2026-10-05); dan op true zetten.
+  var REVIEW_AAN = false;
   var REVIEW = 'tatties-review', REVIEW_LATER = 'tatties-review-later', REVIEW_VANAF = 5;
   var momentTimer = null, rv = null;
   window.__tattiesStartMoment = function () { clearTimeout(momentTimer); momentTimer = setTimeout(moment, 1500); };
@@ -26445,6 +26447,7 @@ function maakTatnetGL(json, canvas) {
       toastMetActie(tr('nazorg.herinner_vraag'), tr('nazorg.herinner_ja'), function () { nzZet(true); });
       return;
     }
+    if (!REVIEW_AAN) return;
     var n = aantalTattoos();
     if (n < REVIEW_VANAF || ls.get(REVIEW)) return;
     var later = parseInt(ls.get(REVIEW_LATER) || '0', 10);
