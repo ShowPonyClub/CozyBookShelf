@@ -12266,7 +12266,7 @@ function createTattoo(overrides = {}) {
    ============================================================ */
 // App-versie (semver, handmatig ophogen bij een release). Bij een bump ook de
 // CACHE-naam in sw.js meebumpen, zodat clients de nieuwe build ophalen.
-const APP_VERSIE = '0.3.173';
+const APP_VERSIE = '0.3.174';
 
 /* Dev-haken die de CLOUD raken hangen alleen op een ontwikkelmachine aan window. Ze zijn geen
    lek op zichzelf (zonder XSS roept niemand ze aan, en CSP + esc() houden XSS tegen), maar ze
@@ -18383,6 +18383,11 @@ async function verwijderVoorbeelden() {
   // Onderbroek op het model (voor deelbare screenshots). Voorlopig alleen man: 'geen' | 'boxer' | 'brief'.
   let underwear="geen", underwearMesh=null;
   let onderbroekGekozen=false;   // false = standaard (volgt de vorm, keuze eigenaar 2026-10-05)
+  // Bestaande gebruikers houden wat ze hadden (2026-10-05): intro al gedaan en nooit gekozen = eenmalig 'geen' vastzetten.
+  // Bij een verse installatie is de intro nog niet gedaan: dan alleen de vlag, en geldt de automatische standaard.
+  try{ if(!localStorage.getItem("tatties-onderbroek-migr")){
+    if(localStorage.getItem("tatties-onboarding-gedaan")==="1" && !localStorage.getItem("tatties-onderbroek")) localStorage.setItem("tatties-onderbroek","geen");
+    localStorage.setItem("tatties-onderbroek-migr","1"); } }catch(e){}
   try{ const u=localStorage.getItem("tatties-onderbroek"); if(u==='boxer'||u==='brief'||u==='bikini'||u==='geen'){ underwear=u; onderbroekGekozen=true; } }catch(e){}
   function onderbroekAuto(){   // zonder eigen keuze: boxer bij een mannelijke vorm, bikini bij een vrouwelijke (alleen het nieuwe lichaam)
     if(onderbroekGekozen || !LICHAAM_GEN) return;
