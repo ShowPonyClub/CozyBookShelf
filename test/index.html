@@ -12266,7 +12266,7 @@ function createTattoo(overrides = {}) {
    ============================================================ */
 // App-versie (semver, handmatig ophogen bij een release). Bij een bump ook de
 // CACHE-naam in sw.js meebumpen, zodat clients de nieuwe build ophalen.
-const APP_VERSIE = '0.3.174';
+const APP_VERSIE = '0.3.175';
 
 /* Dev-haken die de CLOUD raken hangen alleen op een ontwikkelmachine aan window. Ze zijn geen
    lek op zichzelf (zonder XSS roept niemand ze aan, en CSP + esc() houden XSS tegen), maar ze
@@ -18745,6 +18745,7 @@ async function verwijderVoorbeelden() {
   }
   function resetZoom(){ zoom=1; panX=0; panY=0; }
   const cutPointers=new Map();   // actieve pointers in het uitsnijvak (voor pinch)
+  const modalAanraking=new Set();   // alle vingers op de knipmodal (ook op de gereedschapsbalk)
   let pinch=null;                // {dist, cx, cy, zoom0, panX0, panY0}
   let lassoBackup=null;          // lasso vóór een vrije stroke (terugzetten bij pinch)
   let puntToegevoegd=false;      // of de laatste punten-tik een nieuw punt toevoegde
@@ -20276,7 +20277,7 @@ async function verwijderVoorbeelden() {
   const NEK_ONDER=0.78;       // vanaf welke lichaamshoogte we naar de nek zoeken
   const NEK_VOET=1.6;         // knip bij de nekVOET: omlaag tot de doorsnede zoveel keer de nek is
   let LEDE_DEKSEL=true;       // knip dichtmaken (anders kijk je van bovenaf in de holle schaal)
-  const LEDE_DEKSEL_TINT=0.45;   // hoeveel donkerder dan de huid het dekseltje is
+  const LEDE_DEKSEL_TINT=0.82;   // tint van het dekseltje t.o.v. de huid (0.45 las als een donker gat, eigenaar 2026-10-05)
   const LEDE_ROMP_OP=0.10;    // doorzichtigheid van de rest van het lichaam
   const LEDE_DECAL_OP=0.18;   // tattoos buiten het gekozen deel dimmen mee (bij een kleine collectie)
   const LEDE_DECAL_MIN=0.07;  // ondergrens; bij een volle collectie telt de som van alle inkt zwaar
@@ -20904,7 +20905,20 @@ async function verwijderVoorbeelden() {
     }
   }
   let ledeActief_diepte=[];   // diepte-voorpass van de doorzichtige romp tijdens ledemaat los (slice 4g)
+  // Zachte overgang (2026-10-05): de rest van het lichaam vervaagt bij losmaken en komt terug bij 'Heel lichaam'.
+  let ledeFadeId=0;
+  function ledeFade(van, naar, ms, klaar){
+    const id=++ledeFadeId;
+    if(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches){ skinMat.opacity=naar; if(klaar) klaar(); return; }
+    const t0=performance.now(); skinMat.opacity=van;
+    const stap=()=>{ if(id!==ledeFadeId) return;
+      const k=Math.min(1,(performance.now()-t0)/ms), e=k*k*(3-2*k);
+      skinMat.opacity=van+(naar-van)*e;
+      if(k<1) requestAnimationFrame(stap); else if(klaar) klaar(); };
+    requestAnimationFrame(stap);
+  }
   function stopIsolatie(){
+    ledeFadeId++;   // lopende overgang stoppen
     if(!ledeActief) return;
     ledeDecals(false);
     body.remove(ledeActief.groep);
@@ -20913,6 +20927,7 @@ async function verwijderVoorbeelden() {
     for(const dmesh of ledeActief_diepte){ if(dmesh.parent) dmesh.parent.remove(dmesh); if(dmesh.material) dmesh.material.dispose(); }   // diepte-voorpass weg (slice 4g)
     ledeActief_diepte=[];
     ledeActief=null;
+    if(underwearMesh) underwearMesh.visible=true;   // terug na ledemaat los
     zetLedeUI();
   }
   /* Een ledemaat isoleren: 'arm-links', 'arm-rechts', 'been-links', 'been-rechts' of 'hoofd'. */
@@ -20983,6 +20998,8 @@ async function verwijderVoorbeelden() {
     skinMat.opacity=Math.max(0.08, Math.min(0.22, LEDE_ROMP_OP+(1-Math.min(1,lum))*0.10));
     skinMat.polygonOffset=true; skinMat.polygonOffsetFactor=2; skinMat.polygonOffsetUnits=8;   // romp achter het losse deel (slice 4n)
     skinMat.needsUpdate=true;
+    ledeFade(1, skinMat.opacity, 400);   // zacht vervagen i.p.v. meteen doorzichtig
+    if(underwearMesh) underwearMesh.visible=false;   // onderbroek dekte de dij af bij een los been/arm
     ledeActief={ deel, groep, delen, box, decalOp:new Map() };
     zetLedeUI();
     ledeDecals(true);
@@ -21269,7 +21286,8 @@ async function verwijderVoorbeelden() {
   }
   function heelLichaam(){
     if(!ledeActief) return;
-    stopIsolatie(); rol=0;   // slice 5x
+    rol=0;   // slice 5x
+    { const lede=ledeActief; ledeFade(skinMat.opacity, 1, 350, ()=>{ if(ledeActief===lede) stopIsolatie(); }); }   // eerst terug laten komen, dan opruimen
     { const b=camBegin(); targetGoal=new THREE.Vector3(CAM0.tx,b.ty,CAM0.tz); radiusGoal=b.radius; }   // soepel terug (liggend: eigen kader, slice 5q)
   }
   /* De knip van alle delen alvast meten zodra het model geladen is, met een adempauze ertussen.
@@ -21287,7 +21305,7 @@ async function verwijderVoorbeelden() {
   /* Dev-haakje: meten en isoleren zonder UI.
      Bv. __tattiesLedemaat.isoleer('been-links') en __tattiesLedemaat.stop(). */
   window.__tattiesLedeUI=zetLedeUI;   // taalwissel zet de hint terug; hierna weer ons eigen bericht
-  window.__tattiesLedemaat={ isoleer:isoleerLedemaat, stop:stopIsolatie, delen:LEDE_DELEN,
+  window.__tattiesLedemaat={ isoleer:isoleerLedemaat, stop:stopIsolatie, delen:LEDE_DELEN, heel:()=>heelLichaam(), romp:()=>skinMat.opacity,
     actief:()=>ledeActief&&ledeActief.deel,
     deksel:(aan)=>{ LEDE_DEKSEL=!!aan; const d=ledeActief&&ledeActief.deel; if(d){ stopIsolatie(); return isoleerLedemaat(d); } return LEDE_DEKSEL; },
     meet:(deel)=>pickMeshes.map(m=>{ const K=knipVoor(m,deel||'arm-links'); return K&&K.meta; }) };
@@ -24032,7 +24050,7 @@ async function verwijderVoorbeelden() {
     plaatsHerhaal=false; plaatsKetting=false; window.__tattiesHerhaalSrc=null; herhaalTeller=1; vorigeLassos=[]; addDoel='3d';   // D6(a): herhaal-state opruimen + doel terug naar default (geen stale vlag/lasso/doel)
     deelVoor=null; zetDeelUI();
     if(imgTexture && imgTexture.dispose){ imgTexture.dispose(); } imgTexture=null;   // niet-geplaatste textuur vrijgeven (geen lek)
-    cutPointers.clear(); pinch=null; drawingFree=false; gumStroke=null; lassoDragIdx=-1; clearTimeout(wheelEind);
+    cutPointers.clear(); modalAanraking.clear(); pinch=null; drawingFree=false; gumStroke=null; lassoDragIdx=-1; clearTimeout(wheelEind);
   }
   // 2D: open dezelfde uitsnede-modal voor een dubbeltik op de 2D-kaart
   function openCutModal2D(x,y,zone,side){
@@ -25270,6 +25288,7 @@ function maakTatnetGL(json, canvas) {
         return;
       }
       if(!baseCanvas) rebuildBase();
+      if(e.pointerType==='touch' && [...modalAanraking].some(id=>id!==e.pointerId && !cutPointers.has(id))) return;   // andere vinger buiten de foto (balk): niet tekenen
       cutPointers.set(e.pointerId,{x:e.clientX,y:e.clientY});
       if(cutPointers.size>=2){              // tweede vinger -> pinch-zoom/pan; lopende tekening afbreken
         if(gumStroke){ gumStroke=null; rebuildBase(); }   // lopende gum-streek blijft staan, alleen sleep afbreken
@@ -25333,6 +25352,18 @@ function maakTatnetGL(json, canvas) {
       lassoDragIdx=-1;
       drawLasso(); updateCutout();
     }
+    // Aanrakingen over de hele knipmodal (2026-10-05): knijpen met een vinger op de gereedschapsbalk startte een streek.
+    cutModal.addEventListener('pointerdown', e=>{
+      if(e.pointerType!=='touch') return;
+      modalAanraking.add(e.pointerId);
+      if(cutPrev.contains(e.target)) return;
+      if(gumStroke){ if(eraseStrokes[eraseStrokes.length-1]===gumStroke) eraseStrokes.pop(); gumStroke=null; rebuildBase(); updateCutout(); drawLasso(); }
+      else if(drawingFree){ drawingFree=false; if(lassoBackup) lassoPts=lassoBackup; drawPreview(baseCanvas); drawLasso(); }
+      else if(lassoDragIdx>=0){ if(puntToegevoegd) lassoPts.pop(); lassoDragIdx=-1; drawPreview(baseCanvas); drawLasso(); }
+      for(const id of [...cutPointers.keys()]) if(!pinch) cutPointers.delete(id);
+    }, true);
+    { const los=e=>{ modalAanraking.delete(e.pointerId); };
+      cutModal.addEventListener('pointerup', los, true); cutModal.addEventListener('pointercancel', los, true); }
     cutPrev.addEventListener("pointerup", eindigPointer);
     cutPrev.addEventListener("pointercancel", eindigPointer);
     function startPinch(){
