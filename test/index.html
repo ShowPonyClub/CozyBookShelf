@@ -2481,6 +2481,34 @@ form label{text-transform:none;letter-spacing:.005em;font-size:.8rem;color:var(-
 @media (prefers-reduced-motion:reduce){#bootsplash .bs-lijn{animation:none}}
 html.is-native #bootsplash{display:none}
 </style>
+<style>/* IPAD-CSS (apply_ipad.py): tablet = minstens 768 breed EN 600 hoog; een iPhone liggend valt erbuiten */
+.start-kol{display:flex;flex-direction:column;gap:16px}
+.start-kol:empty{display:none}
+@media (min-width:768px) and (min-height:600px){
+  main{max-width:720px;padding:24px 28px 40px}
+  #view-start{max-width:none}
+  .start-model{height:clamp(240px,34vh,420px)}
+  .zoek-rij{flex-direction:row}
+  .zoek-rij input{flex:2 1 0;min-width:0}
+  .zoek-rij select{flex:1 1 0;width:auto}
+  #tattoo-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+  #tattoo-list > .leeg{grid-column:1/-1}
+  .detail-kunst img{max-height:min(40vh,420px)}
+}
+@media (min-width:1000px) and (min-height:600px){
+  main{max-width:1100px;padding:28px 40px 48px}
+  .start-wrap:not(.leeg){display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);column-gap:44px;row-gap:16px;align-items:start}
+  .start-wrap:not(.leeg) > :not(.start-kol){grid-column:1/-1}
+  .start-wrap:not(.leeg) .start-kol-b{padding-top:12px}
+  .start-wrap.leeg{max-width:640px;margin:0 auto}
+  #tattoo-list{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .detail-grid{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,6fr);gap:28px;align-items:start}
+  .detail-media{position:sticky;top:84px}
+  .detail-kunst img{max-height:min(46vh,460px)}
+  #view-stats:not([hidden]){display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);column-gap:24px;align-items:start}
+  #view-stats > :not(.stat-blok){grid-column:1/-1}
+}
+</style>
 </head>
 <body>
 <div id="bootsplash" aria-hidden="true"><span class="bs-merk">tatties</span><span class="bs-lijn"></span></div>
@@ -2525,6 +2553,7 @@ html.is-native #bootsplash{display:none}
        (statisch; teksten/stats worden bij boot door i18n/renderStart ingevuld). -->
   <section id="view-start">
     <div class="start-wrap">
+      <div class="start-kol start-kol-a">
       <div class="start-hero">
         <h2 class="start-titel" data-i18n="start.titel">Welkom terug</h2>
         <p class="start-tagline" data-i18n="start.leeg_uitleg">Plan of bewaar je volgende tattoo.</p>
@@ -2547,6 +2576,8 @@ html.is-native #bootsplash{display:none}
       </button>
       <!-- START-3: bij 0 tattoos zijn de tegels verborgen; dit linkje is dan de route naar het 3D-model (rondkijken zonder toevoegen) -->
       <button type="button" class="start-kijk3d" id="start-kijk3d" data-i18n="start.kijk3d" hidden>Bekijk eerst het 3D-lichaam</button>
+      </div>
+      <div class="start-kol start-kol-b">
       <div class="start-stats" id="start-stats"></div>
       <div class="start-tegels" id="start-tegels">
         <button type="button" class="start-tegel" data-ga="3d" data-i18n="start.tegel3d">3D-model</button>
@@ -12266,7 +12297,7 @@ function createTattoo(overrides = {}) {
    ============================================================ */
 // App-versie (semver, handmatig ophogen bij een release). Bij een bump ook de
 // CACHE-naam in sw.js meebumpen, zodat clients de nieuwe build ophalen.
-const APP_VERSIE = '0.3.175';
+const APP_VERSIE = '0.3.176';
 
 /* Dev-haken die de CLOUD raken hangen alleen op een ontwikkelmachine aan window. Ze zijn geen
    lek op zichzelf (zonder XSS roept niemand ze aan, en CSP + esc() houden XSS tegen), maar ze
@@ -15756,7 +15787,7 @@ function openStats(retour) {
     return Object.entries(m).sort((a, b) => b[1] - a[1]);
   };
   const rij = (k, v) => `<div class="veldrij"><dt>${esc(k)}</dt><dd>${v}</dd></div>`;
-  const blok = (titel, inhoud) => `<p class="sectiekop">${titel}</p><div class="paneel"><dl>${inhoud || '<p class="gedempt">' + tr('stats.geendata') + '</p>'}</dl></div>`;
+  const blok = (titel, inhoud) => `<section class="stat-blok"><p class="sectiekop">${titel}</p><div class="paneel"><dl>${inhoud || '<p class="gedempt">' + tr('stats.geendata') + '</p>'}</dl></div></section>`;
 
   // Goedkoopste tattoo (alleen tattoos met een prijs > 0) en lievelingsartiest (meest voorkomend)
   const metPrijs = gezet.filter(t => (Number(t.kosten) || 0) > 0);
@@ -15792,7 +15823,7 @@ function openStats(retour) {
       rij(tr('stats.zituren'), `<button type="button" class="stat-toggle" id="stat-zituren" title="${esc(tr('stats.wissel_eenheid'))}" aria-label="${esc(tr('stats.wissel_eenheid'))}">${ziturenStr()}</button>`) +
       (gemPijn ? rij(tr('stats.gempijn'), pijnSterren(Math.round(gemPijn), true) + ' ' + (taal === 'nl' ? gemPijn.toFixed(1).replace('.', ',') : gemPijn.toFixed(1)) + '/5') : '') +
       (gezet.some(t => helingsStand(t) === 'herstellende') ? rij(tr('stats.herstellend'), gezet.filter(t => helingsStand(t) === 'herstellende').length) : '') +
-      (gezet.some(t => t.geheeld) ? rij(tr('stats.geheeld'), gezet.filter(t => t.geheeld).length + ' ' + tr('woord.van') + ' ' + gezet.length) : ''))}   // UX-doorloop 2026-10-05: geen 'Healed 0 of 4'
+      (gezet.some(t => t.geheeld) ? rij(tr('stats.geheeld'), gezet.filter(t => t.geheeld).length + ' ' + tr('woord.van') + ' ' + gezet.length) : ''))}
     ${blok(tr('stats.hoogtepunten'),
       rij(tr('stats.goedkoopste'), goedkoopste ? esc(goedkoopste.naam || '-') + ' \u00b7 ' + euro.format(goedkoopste.kosten) : '-') +
       rij(tr('stats.lievelingsartiest'), lieveling ? esc(lieveling[0]) + ' (' + lieveling[1] + 'x)' : '-'))}
@@ -16137,15 +16168,18 @@ function renderDetail() {
       <button class="icoonknop" id="d-bewerk" aria-label="${tr('aria.bewerken')}" title="${tr('aria.bewerken')}">${ICONEN.potlood}</button>
       <button class="icoonknop knop-gevaar" id="d-verwijder" aria-label="${tr('aria.verwijderen')}" title="${tr('aria.verwijderen')}">${ICONEN.prullenbak}</button>
     </div>
+    <div class="detail-grid"><div class="detail-media">
     ${(t.kunst && t.kunst.src) ? `<div class="detail-kunst${t.status === 'wens' ? ' wens' : ''}"><img src="${esc(t.kunst.src)}" alt="${tr('detail.fotovan').replace('{naam}', esc(t.naam))}"></div>` : ''}
     ${fotos.length ? `<div class="galerij">${fotos.map(f => `<img src="${esc(f)}" alt="${tr('detail.fotovan').replace('{naam}', esc(t.naam))}">`).join('')}</div>` : ''}
     ${fotos.length > 1 ? `<p class="galerij-hint">${tr('detail.galerijhint').replace('{n}', fotos.length)}</p>` : ''}
+    </div><div class="detail-info">
     <div class="tabs" role="tablist">
       <button role="tab" id="tab-info" aria-controls="tabpaneel" aria-selected="${detailTab === 'info'}" data-tab="info" class="${detailTab === 'info' ? 'actief' : ''}">${tr('tab.info')}</button>
       ${isWens ? '' : `<button role="tab" id="tab-sessies" aria-controls="tabpaneel" aria-selected="${detailTab === 'sessies'}" data-tab="sessies" class="${detailTab === 'sessies' ? 'actief' : ''}">${tr('tab.sessies')}</button>`}
       ${isWens ? '' : `<button role="tab" id="tab-nazorg" aria-controls="tabpaneel" aria-selected="${detailTab === 'nazorg'}" data-tab="nazorg" class="${detailTab === 'nazorg' ? 'actief' : ''}">${tr('tab.nazorg')}</button>`}
     </div>
     <div class="paneel" id="tabpaneel" role="tabpanel" aria-labelledby="tab-${detailTab}">${paneel}</div>
+    </div></div>
   `;
 
   $('#d-terug').addEventListener('click', detailTerug);
