@@ -1,0 +1,21 @@
+{
+  "applinks": {
+    "details": [
+      {
+        "appIDs": [
+          "2B5FVN6S6Y.app.tatties"
+        ],
+        "components": [
+          {
+            "/": "/app",
+            "comment": "Mail-links uit de iPhone-app (account bevestigen, wachtwoord resetten)"
+          },
+          {
+            "/": "/app/*",
+            "comment": "Mail-links uit de iPhone-app (account bevestigen, wachtwoord resetten)"
+          }
+        ]
+      }
+    ]
+  }
+}
