@@ -1083,6 +1083,10 @@ input[type=range]:focus{box-shadow:none;border:none}
 .start-model img{transition:opacity .5s}
 .start-model canvas.start-live{position:absolute;inset:0;width:100%!important;height:100%!important;pointer-events:none;transition:opacity .25s}
 .start-wrap.met-model .start-tegel[data-ga="3d"]{display:none}   /* het beeld is de weg naar 3D */
+/* Startscherm stap 1 (2026-10-06, eigenaar): met tattoos geen 'Welkom terug' en tagline meer; het model is de held en wordt groter.
+   De lege staat (nieuwe gebruiker) houdt zijn titel. */
+.start-wrap:not(.leeg) .start-hero{display:none}
+.start-wrap:not(.leeg) .start-model{height:clamp(300px,50vh,560px); margin-top:4px}
 .start-nieuws{position:relative;display:flex;gap:8px;margin:4px 0 14px;padding:14px 44px 14px 16px;text-align:left;
   background:var(--kaart);border:1px solid var(--rand);border-radius:var(--r-md)}
 .start-nieuws[hidden]{display:none}
@@ -2517,6 +2521,7 @@ html.is-native #bootsplash{display:none}
   main{max-width:720px;padding:24px 28px 40px}
   #view-start{max-width:none}
   .start-model{height:clamp(240px,34vh,420px)}
+  .start-wrap:not(.leeg) .start-model{height:clamp(360px,48vh,660px)}   /* tablet: ook groter zonder titel (2026-10-06) */
   .zoek-rij{flex-direction:row}
   .zoek-rij input{flex:2 1 0;min-width:0}
   .zoek-rij select{flex:1 1 0;width:auto}
@@ -12383,7 +12388,7 @@ function createTattoo(overrides = {}) {
    ============================================================ */
 // App-versie (semver, handmatig ophogen bij een release). Bij een bump ook de
 // CACHE-naam in sw.js meebumpen, zodat clients de nieuwe build ophalen.
-const APP_VERSIE = '0.3.183';
+const APP_VERSIE = '0.3.184';
 
 /* Dev-haken die de CLOUD raken hangen alleen op een ontwikkelmachine aan window. Ze zijn geen
    lek op zichzelf (zonder XSS roept niemand ze aan, en CSP + esc() houden XSS tegen), maar ze
