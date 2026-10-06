@@ -396,6 +396,7 @@ main:has(#view-3d:not(.verborgen)){padding:0;max-width:none}
 body:has(#view-3d:not(.verborgen)){background:var(--bg)}
 
 main > section{animation:opkomen .3s ease both}
+main > section#view-3d{animation:none}   /* 3D vult het scherm: de 8 px opschuiven liet de pagina even scrollen (functioneel 'geen paginascroll', onder belasting) */
 @keyframes opkomen{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
 @media (prefers-reduced-motion: reduce){
   *,*::before,*::after{animation:none !important;transition:none !important}
@@ -1086,6 +1087,7 @@ input[type=range]:focus{box-shadow:none;border:none}
 /* Startscherm stap 1 (2026-10-06, eigenaar): met tattoos geen 'Welkom terug' en tagline meer; het model is de held en wordt groter.
    De lege staat (nieuwe gebruiker) houdt zijn titel. */
 .start-wrap:not(.leeg) .start-hero{display:none}
+#start-account.ingelogd{display:none!important}   /* ingelogd en gesynct is geen nieuws; uitgelogd blijft 'zet je collectie veilig' (2026-10-06) */
 .start-wrap:not(.leeg) .start-model{height:clamp(300px,50vh,560px); margin-top:4px}
 .start-nieuws{position:relative;display:flex;gap:8px;margin:4px 0 14px;padding:14px 44px 14px 16px;text-align:left;
   background:var(--kaart);border:1px solid var(--rand);border-radius:var(--r-md)}
@@ -12388,7 +12390,7 @@ function createTattoo(overrides = {}) {
    ============================================================ */
 // App-versie (semver, handmatig ophogen bij een release). Bij een bump ook de
 // CACHE-naam in sw.js meebumpen, zodat clients de nieuwe build ophalen.
-const APP_VERSIE = '0.3.184';
+const APP_VERSIE = '0.3.185';
 
 /* Dev-haken die de CLOUD raken hangen alleen op een ontwikkelmachine aan window. Ze zijn geen
    lek op zichzelf (zonder XSS roept niemand ze aan, en CSP + esc() houden XSS tegen), maar ze
@@ -26433,7 +26435,7 @@ function maakTatnetGL(json, canvas) {
   let startOpnameVp='', startOpnameT=0, herstelLoopt=false;
   const START_OPNAME='tatties-start-opname:'+(typeof DB_NAAM!=='undefined' ? DB_NAAM : 'tatties');
   function startOpnameVingerafdruk(){
-    const d=['v3', currentGender, underwear, skinMat ? skinMat.color.getHexString() : '', startOpnameHoek().toFixed(2), uiterlijkTag()];   // slice 5p: beeld zonder tattoos
+    const d=['v4', currentGender, underwear, skinMat ? skinMat.color.getHexString() : '', startOpnameHoek().toFixed(2), uiterlijkTag()];   // slice 5p: beeld zonder tattoos
     try{ d.push(localStorage.getItem('tatties-lichaam')||''); }catch(e){}
     return d.join('|');
   }
@@ -26460,14 +26462,18 @@ function maakTatnetGL(json, canvas) {
     }
     return top;
   }
+  /* Hoogte van het midden van het kader (2026-10-06, eigenaar: model iets hoger): is het kader hoger dan het lichaam (breed vak, armen), dan
+     gaat 70% van de vrije ruimte onder de voeten en niet boven het hoofd. Stilstaand beeld en live gebruiken dezelfde regel. */
+  const START_HOGER=0.7;
+  function startKaderMidden(top, beeldH){ return top*0.5-Math.max(0, beeldH-top*1.04)*0.5*START_HOGER; }
   function maakStartOpname(){
     if(!renderer || !scene || !modelRoot) return null;
     const lang=(LICHAAM_GEN && LichaamMotor.geometry()) ? LichaamMotor.lengteCm()/100 : 1.8;
     if(haarObj && !haarObj.nieuw) haarObj.groep.visible=true;   // voor de kadermeting (staat hieronder ook aan)
     const top=startKaderTop(lang);
-    const H=600, W=Math.round(H*1.35), th=startOpnameHoek(), ph=Math.PI/2-0.06, ty=top*0.5;
+    const H=600, W=Math.round(H*1.35), th=startOpnameHoek(), ph=Math.PI/2-0.06;
     const cam=new THREE.PerspectiveCamera(30, W/H, 0.05, 100);
-    const beeldH=Math.max(top*1.04, top*1.0/(W/H)), r=beeldH/(2*Math.tan(15*Math.PI/180));
+    const beeldH=Math.max(top*1.04, top*1.0/(W/H)), r=beeldH/(2*Math.tan(15*Math.PI/180)), ty=startKaderMidden(top, beeldH);
     cam.position.set(r*Math.sin(ph)*Math.sin(th), ty+r*Math.cos(ph), r*Math.sin(ph)*Math.cos(th)); cam.lookAt(0,ty,0); cam.updateMatrixWorld();
     startOpnameHoekNu=th;
     const msaa=!!(renderer.capabilities.isWebGL2 && THREE.WebGLMultisampleRenderTarget);
@@ -26603,7 +26609,7 @@ function maakTatnetGL(json, canvas) {
     const doel=startKaderTop(lang);   // haar boven de kruin past erin (2026-10-05); komt het haar later, dan zoomt het kader rustig mee
     s.top=(s.top && s.getoond) ? s.top+(doel-s.top)*Math.min(1, dt*3) : doel;
     const top=s.top, beeldH=Math.max(top*1.04, top*1.0/(s.w/s.h));   // zelfde kader als het stilstaande beeld (maakStartOpname)
-    radius=beeldH/(2*Math.tan(camera.fov*Math.PI/360)); target.set(0,top/2,0); targetGoal=null; radiusGoal=null; applyCam();
+    radius=beeldH/(2*Math.tan(camera.fov*Math.PI/360)); target.set(0,startKaderMidden(top, beeldH),0); targetGoal=null; radiusGoal=null; applyCam();
     if(key){ key.position.copy(camera.position); key.position.y+=1.5; key.position.x+=1.0; }
     haarStap(t);
     renderer.render(scene,camera);
