@@ -1076,6 +1076,9 @@ input[type=range]:focus{box-shadow:none;border:none}
 .start-model[hidden]{display:none}
 .start-model img{display:block;height:100%;width:auto;max-width:100%;margin:0 auto;object-fit:contain}
 .start-model:active img{transform:scale(.98)}
+.start-model{touch-action:pan-y;-webkit-user-select:none;user-select:none}   /* opzij vegen draait het model (2026-10-06); verticaal scrollt de pagina */
+.start-model:active,.start-model.draait:active{transform:none}
+.start-model.draait img{transform:none}
 .start-model{position:relative}
 .start-model img{transition:opacity .5s}
 .start-model canvas.start-live{position:absolute;inset:0;width:100%!important;height:100%!important;pointer-events:none;transition:opacity .25s}
@@ -1248,6 +1251,8 @@ form label,
 .wl-schakel.actief .wl-spoor{background:var(--accent)}
 .wl-schakel.actief .wl-knop{left:17px}
 #toon-gepland-3d.wl-schakel:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+#view-3d #toon-gepland-3d.wl-schakel:active{transform:none}   /* geen indrukken: met het schuivende bolletje voelde de schakelaar als stuiteren (eigenaar 2026-10-06) */
+#toon-gepland-3d.wl-schakel{-webkit-tap-highlight-color:transparent}
 @media (prefers-reduced-motion:reduce){.wl-spoor,.wl-knop{transition:none}}
 #view-3d:has(#editbar.on) #toon-gepland-3d, #view-3d:has(#t3d-duw:not([hidden])) #toon-gepland-3d,
 #view-3d:has(#hint.on) #toon-gepland-3d, #view-3d:has(#lege-hint-3d:not([hidden])) #toon-gepland-3d,
@@ -12359,7 +12364,7 @@ function createTattoo(overrides = {}) {
    ============================================================ */
 // App-versie (semver, handmatig ophogen bij een release). Bij een bump ook de
 // CACHE-naam in sw.js meebumpen, zodat clients de nieuwe build ophalen.
-const APP_VERSIE = '0.3.181';
+const APP_VERSIE = '0.3.182';
 
 /* Dev-haken die de CLOUD raken hangen alleen op een ontwikkelmachine aan window. Ze zijn geen
    lek op zichzelf (zonder XSS roept niemand ze aan, en CSP + esc() houden XSS tegen), maar ze
@@ -26521,11 +26526,33 @@ function maakTatnetGL(json, canvas) {
     theta=startOpnameHoek(); phi=Math.PI/2-0.06;   // begint waar het stilstaande beeld staat
     startLiveMaat();
     if('IntersectionObserver' in window){ startLive.io=new IntersectionObserver(e=>{ if(startLive) startLive.zicht=e[e.length-1].isIntersecting; }); startLive.io.observe(host); }
+    startSwipeAan(startLive);
     return true;
   };
+  /* Draaien met je vinger op het startscherm (2026-10-06, vraag eigenaar): opzij vegen draait het model (zelfde gevoeligheid als in 3D,
+     baanVeeg), loslaten geeft naloop die terugzakt naar het gewone draaien; tikken opent nog steeds 3D, verticaal vegen scrollt
+     (touch-action pan-y). Een veeg onderdrukt de klik die erna komt. Dev: window.__tattiesStartLiveDbg().hand. */
+  function startSwipeAan(s){
+    const host=s.host, sp={ id:null, x0:0, y0:0, x:0, t:0, draai:false };
+    const neer=(e)=>{ if(e.pointerType==='mouse' && e.button!==0) return; sp.id=e.pointerId; sp.x0=sp.x=e.clientX; sp.y0=e.clientY; sp.t=performance.now(); sp.draai=false; s.negeerKlik=0; };   // nieuwe aanraking: een tik meteen na een veeg telt weer
+    const beweeg=(e)=>{ if(sp.id!==e.pointerId || startLive!==s) return;
+      if(!sp.draai){ const dx=e.clientX-sp.x0, dy=e.clientY-sp.y0;
+        if(Math.abs(dx)>8 && Math.abs(dx)>1.2*Math.abs(dy)){ sp.draai=true; sp.x=e.clientX; s.vastHand=true; s.vrij=0; host.classList.add('draait'); try{ host.setPointerCapture(e.pointerId); }catch(_){} }
+        else if(Math.abs(dy)>10) sp.id=null;   // verticaal: de pagina scrollt
+        return; }
+      const d=-(e.clientX-sp.x)*0.008, nu=performance.now(), dt=Math.max(0.008,(nu-sp.t)/1000); sp.x=e.clientX; sp.t=nu;
+      s.hand=(s.hand||0)+d; s.handTot=(s.handTot||0)+d; s.vrij=0.6*(s.vrij||0)+0.4*Math.max(-12,Math.min(12,d/dt)); };
+    const op=(e)=>{ if(sp.id!==e.pointerId) return; sp.id=null;
+      if(sp.draai){ s.vastHand=false; s.negeerKlik=performance.now(); host.classList.remove('draait'); s.losGat=Math.round(performance.now()-sp.t); if(s.losGat>120) s.vrij=0; } };   // vinger eerst stilgehouden: geen naloop
+    const klik=(e)=>{ if(startLive===s && s.negeerKlik && performance.now()-s.negeerKlik<400 && e.target && e.target.closest && e.target.closest('#start-model')){ e.stopImmediatePropagation(); e.preventDefault(); s.negeerKlik=0; } };
+    host.addEventListener('pointerdown', neer, { passive:true }); host.addEventListener('pointermove', beweeg, { passive:true });
+    host.addEventListener('pointerup', op); host.addEventListener('pointercancel', op); document.addEventListener('click', klik, true);
+    s.swipeWeg=()=>{ host.removeEventListener('pointerdown', neer); host.removeEventListener('pointermove', beweeg); host.removeEventListener('pointerup', op);
+      host.removeEventListener('pointercancel', op); document.removeEventListener('click', klik, true); host.classList.remove('draait'); };
+  }
   function stopStartLive(){
     const s=startLive; if(!s) return; startLive=null;
-    if(s.io) s.io.disconnect();
+    if(s.io) s.io.disconnect(); if(s.swipeWeg) s.swipeWeg();
     const cv=renderer.domElement; cv.classList.remove('start-live'); cv.style.opacity='';
     if(stage) stage.insertBefore(cv, (s.na && s.na.parentNode===stage) ? s.na : null);
     const im=s.host.querySelector('img'); if(im){ im.style.opacity=''; im.style.transition=''; }
@@ -26543,7 +26570,11 @@ function maakTatnetGL(json, canvas) {
     if(!s.getoond){   // begin op de hoek van het stilstaande beeld, en draai pas na de overgang
       let h=NaN; try{ h=parseFloat(localStorage.getItem(START_OPNAME+':hoek')); }catch(e){}
       theta=isFinite(h) ? h : startOpnameHoek();
-    } else { theta+=dt*2*Math.PI/START_RONDJE; haarDraai+=dt*2*Math.PI/START_RONDJE; }   // haar zwaait mee met het draaien
+    } else {   // gewoon draaien, plus wat je met je vinger doet (vasthouden = geen eigen draai, loslaten = naloop die terugzakt)
+      const hand=s.hand||0; s.hand=0;
+      let d=hand+(s.vastHand ? 0 : dt*(2*Math.PI/START_RONDJE+(s.vrij||0)));
+      if(!s.vastHand && s.vrij){ s.vrij*=Math.exp(-dt/0.45); if(Math.abs(s.vrij)<0.02) s.vrij=0; }
+      theta+=d; haarDraai+=d; }   // haar zwaait mee met het draaien
     phi=Math.PI/2-0.06;
     const doel=startKaderTop(lang);   // haar boven de kruin past erin (2026-10-05); komt het haar later, dan zoomt het kader rustig mee
     s.top=(s.top && s.getoond) ? s.top+(doel-s.top)*Math.min(1, dt*3) : doel;
@@ -26560,7 +26591,7 @@ function maakTatnetGL(json, canvas) {
   }
   { const pauze=window.__tatties3DPauze;   // naar een andere weergave dan start: canvas terug
     window.__tatties3DPauze=function(){ if(typeof huidigeView==='undefined' || huidigeView!=='start') stopStartLive(); pauze(); }; }
-  window.__tattiesStartLiveDbg=()=>startLive && { w:startLive.w, h:startLive.h, getoond:startLive.getoond, zicht:startLive.zicht, theta };
+  window.__tattiesStartLiveDbg=()=>startLive && { w:startLive.w, h:startLive.h, getoond:startLive.getoond, zicht:startLive.zicht, theta, hand:{ vast:!!startLive.vastHand, vrij:startLive.vrij||0, tot:startLive.handTot||0, losGat:startLive.losGat } };
   /* Zachte schaduwvlek onder het model: alpha 1 in het midden, 0 aan de rand. Tegen de donkere studio-achtergrond viel een
      vlakke schijf niet op, op papier wel (grijs vlak met een harde rand). */
   function vloerTextuur(){
