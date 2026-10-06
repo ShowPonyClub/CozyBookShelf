@@ -99,7 +99,7 @@
 <style>/* NATIVE-CSS */
 .is-native #inst-install, .is-native #inst-install-uitleg { display:none !important; }
 html.is-native:not(.natief-sociaal) #account-google, html.is-native:not(.natief-sociaal) #account-google + .account-of { display:none !important; }
-.is-native .app-header { padding-top:calc(12px + env(safe-area-inset-top, 0px)); }   /* statusbalk niet over de knoppen */
+.is-native .app-header { padding-top:calc(10px + env(safe-area-inset-top, 0px)); }   /* statusbalk niet over de knoppen */
 </style>
 <style>/* NATIEF-EXTRA-CSS (apply_native_extra.py) */
 #account-apple.knop-apple { display:none; background:#000; color:#fff; border-color:#000; }
@@ -2548,6 +2548,25 @@ body:has(#view-3d:not(.verborgen)) .stage-knoppen #t3d-info { display:none; }
 body:has(#view-3d:not(.verborgen)) #t3d-menu-paneel:not([hidden]) { display:flex; }
 #t3d-start { align-items:center; height:44px; padding:0; margin:0; border:0; background:none; cursor:pointer; flex:none; box-shadow:none !important; }
 #t3d-start .merk-logo { height:44px; padding:10px 10px; box-sizing:border-box; border-radius:999px; }
+/* Kop gelijk met 3D (2026-10-06, keuzes eigenaar): geen balk en geen lijn, logo en knoppen op dezelfde plek en in dezelfde vorm als de knoppenrij
+   in 3D (10 px + safe-area van boven, 16 px van de zijkant, logo 44 px hoog, ronde knoppen van 44 px met schaduw), op alle schermen met een
+   kop. Blijft bovenaan bij scrollen; een zachte overgang naar het papier houdt lange lijsten leesbaar onder de knoppen. */
+.app-header{padding:calc(10px + env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-right, 0px)) 14px max(16px, env(safe-area-inset-left, 0px));
+  border-bottom:0; backdrop-filter:none; -webkit-backdrop-filter:none; pointer-events:none;
+  background:linear-gradient(to bottom, var(--bg) 0%, var(--bg) 62%, rgba(0,0,0,0) 100%); }
+[data-theme="dark"] .app-header{background:linear-gradient(to bottom, var(--bg) 0%, var(--bg) 62%, rgba(0,0,0,0) 100%)}
+.app-header .merk, .app-header .kop-knoppen{pointer-events:auto}
+.app-header .merk-logo{height:44px; padding:10px; box-sizing:border-box; border-radius:999px; box-shadow:0 4px 14px rgba(0,0,0,.22)}
+.app-header .kop-knoppen{gap:8px}
+.app-header .seg-toggle{border:0; background:none; border-radius:0; overflow:visible; gap:8px}
+.app-header .seg-btn, .app-header .icoonknop{width:44px; min-width:44px; height:44px; min-height:44px; padding:0; border-radius:50%;
+  background:var(--kaart); border:1px solid var(--rand); color:var(--tekst); box-shadow:0 4px 14px rgba(0,0,0,.22)}
+.app-header .seg-btn+.seg-btn{border-left:1px solid var(--rand)}
+.app-header .seg-btn.actief, .app-header .icoonknop.actief{background:var(--accent-vlak); border-color:var(--accent-vlak); color:var(--op-inkt)}
+.app-header .icoonknop .ik{width:22px; height:22px}
+.app-header .seg-btn:hover, .app-header .icoonknop:hover{border-color:var(--accent)}
+@media (max-width:380px){ .app-header .kop-knoppen, .app-header .seg-toggle{gap:6px} }
+#t3d-start .logo-wrap{display:inline-flex}
 @media (max-width:380px) { body:has(#view-3d:not(.verborgen)) .stage-knoppen .sk-rechts { gap:6px; } }
 .stage-knoppen #t3d-menu { position:static; width:44px; height:44px; border-radius:50%; flex:none; background:var(--kaart); border:1px solid var(--rand);
   color:var(--tekst); cursor:pointer; align-items:center; justify-content:center; font-family:inherit; }
@@ -12364,7 +12383,7 @@ function createTattoo(overrides = {}) {
    ============================================================ */
 // App-versie (semver, handmatig ophogen bij een release). Bij een bump ook de
 // CACHE-naam in sw.js meebumpen, zodat clients de nieuwe build ophalen.
-const APP_VERSIE = '0.3.182';
+const APP_VERSIE = '0.3.183';
 
 /* Dev-haken die de CLOUD raken hangen alleen op een ontwikkelmachine aan window. Ze zijn geen
    lek op zichzelf (zonder XSS roept niemand ze aan, en CSP + esc() houden XSS tegen), maar ze
@@ -17942,7 +17961,7 @@ async function verwijderVoorbeelden() {
   { const merk = document.querySelector('.merk'); if (merk) merk.addEventListener('click', () => toonView('start')); }
   // Kop weg in 3D (optie A, 2026-10-05): logo in de knoppenrij = start, menuknop met de rest van de kop.
   { const st = $('#t3d-start'), mk = $('#t3d-menu'), mp = $('#t3d-menu-paneel');
-    if (st) { const logo = document.querySelector('.app-header .merk-logo'); if (logo) { const k = logo.cloneNode(true); k.alt = ''; k.removeAttribute('id'); st.appendChild(k); }
+    if (st) { const logo = document.querySelector('.app-header .logo-wrap') || document.querySelector('.app-header .merk-logo'); if (logo) { const k = logo.cloneNode(true); k.removeAttribute('id'); k.querySelectorAll('img').forEach(i => { i.alt = ''; i.removeAttribute('id'); }); if (k.tagName === 'IMG') k.alt = ''; st.appendChild(k); }   // met BETA-label, zoals de kop (2026-10-06)
       st.addEventListener('click', () => toonView('start')); }
     const sluit = () => { if (mp && !mp.hidden) { mp.hidden = true; if (mk) mk.setAttribute('aria-expanded', 'false'); } };
     window.__tattiesMenu3DSluit = sluit;
