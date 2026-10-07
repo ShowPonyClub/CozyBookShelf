@@ -13215,7 +13215,7 @@ function createTattoo(overrides = {}) {
    ============================================================ */
 // App-versie (semver, handmatig ophogen bij een release). Bij een bump ook de
 // CACHE-naam in sw.js meebumpen, zodat clients de nieuwe build ophalen.
-const APP_VERSIE = '0.3.196';
+const APP_VERSIE = '0.3.197';
 
 /* Dev-haken die de CLOUD raken hangen alleen op een ontwikkelmachine aan window. Ze zijn geen
    lek op zichzelf (zonder XSS roept niemand ze aan, en CSP + esc() houden XSS tegen), maar ze
@@ -25918,7 +25918,48 @@ function maakTatnetGL(json, canvas) {
   }
   // Foto zonder lasso: het model zoekt de tattoo op de hele (schone) foto; convexe omhulling van het gebied (+8%) wordt de lasso.
   // Geeft true als er een lasso is gezet. Grenzen: gebied 1%..92% van de foto (anders niets gevonden / alles is tattoo).
+  /* Tekening op papier (2026-10-08): de lijn om alle inkt in plaats van het Tatnet-gebied. Geeft punten (genormaliseerd) of null. */
+  function tekeningLassoPunten(full){
+    if(!full || window.__tekeningHerkennen===false) return null;
+    const W=full.width, H=full.height; if(!W || !H) return null;
+    const s=Math.min(1, 192/Math.max(W,H)), w=Math.max(1,Math.round(W*s)), h=Math.max(1,Math.round(H*s));
+    const c=document.createElement('canvas'); c.width=w; c.height=h; const x=c.getContext('2d',{willReadFrequently:true});
+    x.imageSmoothingEnabled=true; x.imageSmoothingQuality='high'; x.drawImage(full,0,0,w,h);
+    const q=x.getImageData(0,0,w,h).data, n=w*h, ink=new Uint8Array(n);
+    let pap=0, huid=0, cnt=0;
+    for(let i=0;i<n;i++){ const o=i*4; if(q[o+3]<16) continue; cnt++;
+      const r=q[o], g=q[o+1], b=q[o+2], mx=Math.max(r,g,b), mn=Math.min(r,g,b), L=0.299*r+0.587*g+0.114*b;
+      if(L>=200 && mx-mn<=22){ pap++; continue; }
+      ink[i]=1;
+      if(mx===r && mx-mn>=12 && L>60){ const sat=(mx-mn)/Math.max(mx,1), hue=60*(g-b)/(mx-mn); if(hue>=8 && hue<=48 && sat>=0.12 && sat<=0.75) huid++; } }
+    if(!cnt || !(pap>=cnt*TEKENING_PAPIER && huid<cnt*TEKENING_HUID)) return null;
+    // ruis eruit: een inktpixel telt alleen met minstens 3 inktburen
+    const schoon=new Uint8Array(n);
+    for(let y=1;y<h-1;y++) for(let xx=1;xx<w-1;xx++){ const i=y*w+xx; if(!ink[i]) continue;
+      const b=ink[i-1]+ink[i+1]+ink[i-w]+ink[i+w]+ink[i-w-1]+ink[i-w+1]+ink[i+w-1]+ink[i+w+1]; if(b>=3) schoon[i]=1; }
+    // samenhangende vlakken (8-buren); alleen vlakken van minstens 5% van het grootste
+    const lab=new Int32Array(n), maat=[0], st=[]; let k=0;
+    for(let i=0;i<n;i++){ if(!schoon[i] || lab[i]) continue; k++; let m=0; lab[i]=k; st.push(i);
+      while(st.length){ const j=st.pop(); m++; const yy=(j/w)|0, xx=j-yy*w;
+        for(let dy=-1;dy<=1;dy++) for(let dx=-1;dx<=1;dx++){ const y2=yy+dy, x2=xx+dx; if(y2<0||y2>=h||x2<0||x2>=w) continue; const j2=y2*w+x2; if(schoon[j2] && !lab[j2]){ lab[j2]=k; st.push(j2); } } }
+      maat.push(m); }
+    if(!k) return null;
+    let grootst=0; for(let i=1;i<=k;i++) grootst=Math.max(grootst, maat[i]);
+    const pts=[]; let tot=0;
+    for(let i=0;i<n;i++){ const l=lab[i]; if(l && maat[l]>=grootst*0.05){ pts.push([i%w, (i/w)|0]); tot++; } }
+    if(tot<n*0.01 || pts.length<6) return null;
+    pts.sort((a,b)=>a[0]-b[0]||a[1]-b[1]);   // monotone chain (convexe omhulling)
+    const kr=(o,a,b)=>(a[0]-o[0])*(b[1]-o[1])-(a[1]-o[1])*(b[0]-o[0]);
+    const onder=[]; for(const p of pts){ while(onder.length>=2 && kr(onder[onder.length-2],onder[onder.length-1],p)<=0) onder.pop(); onder.push(p); }
+    const boven=[]; for(let i=pts.length-1;i>=0;i--){ const p=pts[i]; while(boven.length>=2 && kr(boven[boven.length-2],boven[boven.length-1],p)<=0) boven.pop(); boven.push(p); }
+    const hull=onder.slice(0,-1).concat(boven.slice(0,-1)); if(hull.length<3) return null;
+    let cx=0,cy=0; for(const p of hull){ cx+=p[0]; cy+=p[1]; } cx/=hull.length; cy/=hull.length;
+    return hull.map(p=>({ nx:Math.max(0,Math.min(1,(cx+(p[0]+0.5-cx)*1.04)/w)), ny:Math.max(0,Math.min(1,(cy+(p[1]+0.5-cy)*1.04)/h)) }));
+  }
   function tatnetAutoLasso(full){
+    const tek=tekeningLassoPunten(full);   // tekening op papier: de lijn om alle inkt (2026-10-08)
+    if(tek){ lassoPts=tek; window.__tattiesTatnet.laatsteTekening=true; return true; }
+    window.__tattiesTatnet.laatsteTekening=false;
     if(!full || !window.__tattiesTatnet.aan) return false;
     const g=tatnetGebied(full, 0, 0, full.width, full.height, 0); if(!g) return false;
     const W=full.width, H=full.height, st=Math.max(1,Math.round(Math.max(W,H)/96)), pts=[]; let n=0;
@@ -25999,6 +26040,7 @@ function maakTatnetGL(json, canvas) {
     let z=f2.b[0]; for(let i=0;i<Hn;i++) z+=f2.w[i]*h[i];
     return 1/(1+Math.exp(-z));
   }
+  window.__tattiesTatnet.tekeningLasso=tekeningLassoPunten;   // dev (2026-10-08)
   window.__tattiesKleur={ kans:kleurKans, voorspel:kleurVoorspel, net:kleurNet, invoer:kleurInvoer, laatste:null };
   const KLEUR_DREMPEL=0.2;   // kans >= drempel = kleur (bij twijfel kleur; gekozen op de dev-set van de training)
   /* Drempel per huidhelderheid (2026-10-05): lichte kleur op lichte huid werd zwart, zwart op donkere huid kleur. logit(drempel) =
