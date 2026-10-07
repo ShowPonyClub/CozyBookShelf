@@ -13242,7 +13242,7 @@ function createTattoo(overrides = {}) {
    ============================================================ */
 // App-versie (semver, handmatig ophogen bij een release). Bij een bump ook de
 // CACHE-naam in sw.js meebumpen, zodat clients de nieuwe build ophalen.
-const APP_VERSIE = '0.3.202';
+const APP_VERSIE = '0.3.203';
 
 /* Dev-haken die de CLOUD raken hangen alleen op een ontwikkelmachine aan window. Ze zijn geen
    lek op zichzelf (zonder XSS roept niemand ze aan, en CSP + esc() houden XSS tegen), maar ze
@@ -27940,7 +27940,7 @@ function maakTatnetGL(json, canvas) {
     const lang=(LICHAAM_GEN && LichaamMotor.geometry()) ? LichaamMotor.lengteCm()/100 : 1.8;
     const ligt=W>H*1.15, bRad=ligt ? (lang/0.86)/(2*Math.tan(FOV_BASIS*Math.PI/360)) : CAM0.radius, bTy=ligt ? lang*0.5 : CAM0.ty;
     const bTh=CAM0.theta+2*Math.PI*Math.round((theta-CAM0.theta)/(2*Math.PI));   // dichtstbijzijnde: niet een heel rondje terug
-    vakAnim={ t0:performance.now(), luik, cv, klaar, W, H,
+    vakAnim={ t0:performance.now(), luik, cv, klaar, W, H, logo:vakLogoAan(),   // logo blijft zweven (2026-10-08)
       A:{ th:theta, ph:phi, r:radius, tx:target.x, ty:target.y, tz:target.z, fov:camera.fov, rect:{ x:rc.left, y:rc.top, w:rc.width, h:rc.height }, kader:{ x:rb.left, y:rb.top, w:rb.width, h:rb.height } },
       B:{ th:bTh, ph:CAM0.phi, r:bRad, tx:CAM0.tx, ty:bTy, tz:CAM0.tz, fov:FOV_BASIS, rect:{ x:0, y:0, w:W, h:H }, kader:vakKaderRect() } };
     vakFrame(vakAnim.t0);
@@ -27951,6 +27951,18 @@ function maakTatnetGL(json, canvas) {
      luik op het 3D-kader, toonView('start') (startscherm eronder; __tatties3DStartLive wacht), het vak meten (elk beeld opnieuw), en
      de camera van de 3D-stand naar de live-stand van het startscherm (zelfde kaderregel als startLiveFrame). Aan het eind krijgt het
      startscherm het canvas en draait live verder vanaf de hoek waar je was. Geeft false als het niet kan: dan gewoon toonView. */
+  /* Het logo blijft tijdens de wissel zweven (2026-10-08, vraag eigenaar): een kloon van het logo (kop op het startscherm, #t3d-start
+     in 3D: zelfde plek) als vast element boven het luik; weg in vakKlaar, als het echte logo er weer onder staat. De wrapper heeft
+     class app-header zodat de logo-regels (.app-header .logo-wrap, licht/donker) gelden; alles verder inline uitgezet. */
+  function vakLogoAan(){
+    const bron=document.querySelector(actief3D ? '#t3d-start .logo-wrap' : '.app-header .logo-wrap'); if(!bron) return null;
+    const r=bron.getBoundingClientRect(); if(r.width<10 || r.height<10) return null;
+    const w=document.createElement('div'); w.className='app-header vak-logo';
+    w.style.cssText='position:fixed;left:'+r.left+'px;top:'+r.top+'px;width:'+r.width+'px;height:'+r.height+'px;z-index:960;margin:0;padding:0;border:0;'+
+      'background:none;backdrop-filter:none;-webkit-backdrop-filter:none;display:block;min-height:0;box-shadow:none;pointer-events:none;visibility:visible';
+    const k=bron.cloneNode(true); k.querySelectorAll('[id]').forEach(e=>e.removeAttribute('id')); k.querySelectorAll('img').forEach(i=>{ i.alt=''; });
+    w.appendChild(k); document.body.appendChild(w); return w;
+  }
   window.__tatties3DVakKrimp=function(naarStart){
     if(vakAnim) return true;
     let rustig=false; try{ rustig=matchMedia('(prefers-reduced-motion: reduce)').matches; }catch(e){}
@@ -27964,8 +27976,8 @@ function maakTatnetGL(json, canvas) {
     luik.appendChild(cv); cv.style.position='absolute'; cv.style.left=(-kA.x-4)+'px'; cv.style.top=(-kA.y-4)+'px';
     renderer.setSize(W,H);   // het canvas beslaat tijdens de krimp het hele scherm (zoals bij de groei); A.rect = waar het 3D-beeld stond
     const A={ th:theta, ph:phi, r:radius, tx:target.x, ty:target.y, tz:target.z, fov:camera.fov, rect:{ x:rc.left, y:rc.top, w:rc.width, h:rc.height }, kader:kA };
-    vakAnim={ t0:performance.now(), luik, cv, W, H, krimp:true, host:null, A, B:A, rol0:rol, klaar:function(){} };
-    const terug=()=>{ vakAnim=null; cv.style.position=''; cv.style.left=''; cv.style.top=''; if(stage) stage.insertBefore(cv, (na && na.parentNode===stage) ? na : null); luik.remove(); };
+    vakAnim={ t0:performance.now(), luik, cv, W, H, krimp:true, host:null, A, B:A, rol0:rol, logo:vakLogoAan(), klaar:function(){} };
+    const terug=()=>{ if(vakAnim && vakAnim.logo) vakAnim.logo.remove(); vakAnim=null; cv.style.position=''; cv.style.left=''; cv.style.top=''; if(stage) stage.insertBefore(cv, (na && na.parentNode===stage) ? na : null); luik.remove(); };
     try{ naarStart(); }catch(e){ console.error(e); terug(); return true; }   // toonView('start'); pauze plant een opname, die komt na de krimp
     clearTimeout(startOpnameT);
     const host=vakAnim.host || document.getElementById('start-model');
@@ -27980,6 +27992,10 @@ function maakTatnetGL(json, canvas) {
       return true; };
     if(!meet()){ terug(); return true; }
     vakAnim.meet=meet;
+    if(vakAnim.logo){   // het logo glijdt van de 3D-plek naar de plek in de kop (op de telefoon dezelfde plek: dan staat het stil)
+      const lo=document.querySelector('.app-header .logo-wrap'), r2=lo ? lo.getBoundingClientRect() : null;
+      if(r2 && r2.width>10){ vakAnim.logoVan={ x:parseFloat(vakAnim.logo.style.left), y:parseFloat(vakAnim.logo.style.top) }; vakAnim.logoNaar={ x:r2.left, y:r2.top }; }
+    }
     const thEind=theta;
     vakAnim.klaar=function(){   // vakAnim is dan al null: __tatties3DStartLive doet zijn gewone werk
       rol=0;
@@ -28005,6 +28021,7 @@ function maakTatnetGL(json, canvas) {
     Object.assign(a.luik.style, { left:k.x+'px', top:k.y+'px', width:k.w+'px', height:k.h+'px' });
     a.luik.style.setProperty('--ster-op', String(a.krimp ? e : 1-e));   // sterretjes horen bij het vak
     if(a.rol0) rol=a.rol0*(1-e);   // krimp: een gekanteld beeld draait recht (live kent geen rol)
+    if(a.logo && a.logoNaar){ a.logo.style.left=L(a.logoVan.x,a.logoNaar.x)+'px'; a.logo.style.top=L(a.logoVan.y,a.logoNaar.y)+'px'; }   // logo glijdt mee naar de kop
     a.cv.style.left=(-k.x-4)+'px'; a.cv.style.top=(-k.y-4)+'px';   // canvas blijft op het scherm staan (rand 4 px)
     theta=L(A.th,B.th); phi=L(A.ph,B.ph); radius=L(A.r,B.r); target.set(L(A.tx,B.tx), L(A.ty,B.ty), L(A.tz,B.tz));
     const R={ x:L(A.rect.x,B.rect.x), y:L(A.rect.y,B.rect.y), w:L(A.rect.w,B.rect.w), h:L(A.rect.h,B.rect.h) };
@@ -28022,7 +28039,7 @@ function maakTatnetGL(json, canvas) {
     a.cv.style.left=''; a.cv.style.top=''; a.cv.style.position='';
     try{ a.klaar(); }catch(e){ console.error(e); }
     if(actief3D){ resize(); resetView(); renderer.render(scene,camera); }   // eerste 3D-beeld in dezelfde taak: geen knipper
-    a.luik.remove();
+    a.luik.remove(); if(a.logo) a.logo.remove();   // het echte logo staat er nu weer onder
   }
   window.__tattiesVakDbg=()=>({ bezig:!!vakAnim, krimp:!!(vakAnim && vakAnim.krimp), luik:!!document.querySelector('.vak-luik') });
   function startLiveFrame(t){
