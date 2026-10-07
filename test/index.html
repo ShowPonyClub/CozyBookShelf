@@ -13242,7 +13242,7 @@ function createTattoo(overrides = {}) {
    ============================================================ */
 // App-versie (semver, handmatig ophogen bij een release). Bij een bump ook de
 // CACHE-naam in sw.js meebumpen, zodat clients de nieuwe build ophalen.
-const APP_VERSIE = '0.3.201';
+const APP_VERSIE = '0.3.202';
 
 /* Dev-haken die de CLOUD raken hangen alleen op een ontwikkelmachine aan window. Ze zijn geen
    lek op zichzelf (zonder XSS roept niemand ze aan, en CSP + esc() houden XSS tegen), maar ze
@@ -27955,13 +27955,15 @@ function maakTatnetGL(json, canvas) {
     if(vakAnim) return true;
     let rustig=false; try{ rustig=matchMedia('(prefers-reduced-motion: reduce)').matches; }catch(e){}
     if(!actief3D || !LICHAAM_GEN || rustig || !renderer || !modelRoot || glKapot || !window.__vakGroeiAan || genAan() || onbDraai || plaatsModus || editDecal || ledeActief || film || startLive) return false;
-    const cv=renderer.domElement, W=innerWidth, H=innerHeight, kA=vakKaderRect(), na=cv.nextSibling;
+    const cv=renderer.domElement, W=innerWidth, H=innerHeight, kA=vakKaderRect(), na=cv.nextSibling, rc=cv.getBoundingClientRect();
+    if(rc.width<40 || rc.height<40) return false;
     const luik=document.createElement('div'); luik.className='vak-luik';
     Object.assign(luik.style, { left:kA.x+'px', top:kA.y+'px', width:kA.w+'px', height:kA.h+'px' });
     luik.style.setProperty('--ster-op', '0');
     document.body.appendChild(luik);
     luik.appendChild(cv); cv.style.position='absolute'; cv.style.left=(-kA.x-4)+'px'; cv.style.top=(-kA.y-4)+'px';
-    const A={ th:theta, ph:phi, r:radius, tx:target.x, ty:target.y, tz:target.z, fov:camera.fov, rect:{ x:0, y:0, w:W, h:H }, kader:kA };
+    renderer.setSize(W,H);   // het canvas beslaat tijdens de krimp het hele scherm (zoals bij de groei); A.rect = waar het 3D-beeld stond
+    const A={ th:theta, ph:phi, r:radius, tx:target.x, ty:target.y, tz:target.z, fov:camera.fov, rect:{ x:rc.left, y:rc.top, w:rc.width, h:rc.height }, kader:kA };
     vakAnim={ t0:performance.now(), luik, cv, W, H, krimp:true, host:null, A, B:A, rol0:rol, klaar:function(){} };
     const terug=()=>{ vakAnim=null; cv.style.position=''; cv.style.left=''; cv.style.top=''; if(stage) stage.insertBefore(cv, (na && na.parentNode===stage) ? na : null); luik.remove(); };
     try{ naarStart(); }catch(e){ console.error(e); terug(); return true; }   // toonView('start'); pauze plant een opname, die komt na de krimp
@@ -27983,7 +27985,9 @@ function maakTatnetGL(json, canvas) {
       rol=0;
       if(!window.__tatties3DStartLive(host) || !startLive) return;
       startLive.na=na; startLive.getoond=true; startLive.top=top; startLive.opnameGepland=true;   // geen sprong: dezelfde hoek en hetzelfde kader als het eind van de krimp
-      theta=thEind; cv.style.opacity='1';
+      theta=thEind;
+      cv.style.transition='none'; cv.style.opacity='1';   // meteen zichtbaar: de CSS-fade van .start-live (0,25 s) gaf een dof model na de landing
+      setTimeout(()=>{ if(startLive && startLive.host===host) cv.style.transition=''; }, 120);
       const im=host.querySelector('img'); if(im){ im.style.transition='none'; im.style.opacity='0'; }
       startLiveFrame();   // eerste beeld in dezelfde taak, voordat het luik weggaat
       clearTimeout(startOpnameT); startOpnameT=setTimeout(bewaarStartOpname, 2500);   // het stilstaande beeld, zoals de normale flow (niet in de landing)
