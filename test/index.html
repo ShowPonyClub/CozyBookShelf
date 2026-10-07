@@ -2963,6 +2963,23 @@ html[data-theme="dark"] #bootsplash img.bs-logo.logo-licht{display:none}
 html[data-theme="dark"] #bootsplash img.bs-logo.logo-donker{display:block}
 .start-hero .start-titel{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
 </style>
+<style id="decor-3d">
+/* 3D in hetzelfde decor als het vak op het startscherm (apply_3d_decor.py, 2026-10-07) */
+#stage{background:var(--paneel)}
+html:has(#view-3d:not(.verborgen)),body:has(#view-3d:not(.verborgen)){background:var(--paneel)}
+#stage::after{background:none}
+html.kader3d #stage::after{inset:calc(8px + env(safe-area-inset-top,0px)) calc(8px + env(safe-area-inset-right,0px))
+  calc(8px + env(safe-area-inset-bottom,0px)) calc(8px + env(safe-area-inset-left,0px));border:4px double var(--accent)}
+html.genaan #stage::after,html.onbmodel #stage::after{border:0}
+/* Knoppen binnen het kader, op dezelfde plek als de kop op het startscherm (toesteltest eigenaar 2026-10-07): 8 px marge + 4 px lijn + 14 px */
+html.kader3d body:has(#view-3d:not(.verborgen)) .stage-knoppen{top:calc(26px + env(safe-area-inset-top,0px));
+  left:calc(26px + env(safe-area-inset-left,0px));right:calc(26px + env(safe-area-inset-right,0px))}
+html.kader3d #t3d-menu-paneel{top:calc(78px + env(safe-area-inset-top,0px));right:calc(26px + env(safe-area-inset-right,0px))}
+html.kader3d #view-3d #toon-gepland-3d.wl-schakel{left:calc(26px + env(safe-area-inset-left,0px));bottom:calc(28px + env(safe-area-inset-bottom,0px))}
+html.kader3d #t3d-add{right:calc(26px + env(safe-area-inset-right,0px));bottom:calc(26px + env(safe-area-inset-bottom,0px))}
+html.kader3d #view-3d #lege-hint-3d{left:calc(26px + env(safe-area-inset-left,0px));right:calc(86px + env(safe-area-inset-right,0px));bottom:calc(26px + env(safe-area-inset-bottom,0px))}
+html.kader3d .t3d-duw{left:calc(26px + env(safe-area-inset-left,0px))}
+</style>
 <style id="flash-keuzes">
 /* Flash Sheet, keuzes eigenaar 2026-10-07 (apply_flash_keuzes.py) */
 /* 4. Knipscherm: een rode knop, en dat is de volgende stap */
@@ -2999,28 +3016,16 @@ html.knipfull .cutmodal.cm-fullcut:not(.cm-heeft-lijn) .cm-volgende{background:v
    er gescrold is (html.kop-gescrold) dekt papier alles boven de kop af, binnen de zijlijnen; bovenaan blijft de bovenlijn zichtbaar. */
 .app-header{top:calc(env(safe-area-inset-top,0px) + 12px)}
 .app-header::before{position:absolute;top:auto;bottom:100%;left:0;right:0;height:calc(env(safe-area-inset-top,0px) + 12px);display:none}
-html.kop-gescrold .app-header::before{display:block}
+/* Derde ronde (toesteltest 2026-10-07: op het startscherm schoof het model nog door de statusbalk; in donker thema bleef de strook licht).
+   Een vast element op paginaniveau (#kop-papier, buiten de kop: die heeft backdrop-filter), in de themakleur: bovenaan zo hoog als de
+   statusbalk (Safari kleurt de statusbalk naar een vast element bovenin), gescrold tot de kop en over de hele breedte. */
+#kop-papier{position:fixed;top:0;left:0;right:0;height:env(safe-area-inset-top,0px);background:var(--bg);z-index:21;pointer-events:none}
+html.kop-gescrold #kop-papier{height:calc(env(safe-area-inset-top,0px) + 12px)}
+body:has(#view-3d:not(.verborgen)) #kop-papier,html.genaan #kop-papier,html.onbmodel #kop-papier{display:none}
 /* 12. Slogan alleen op het welkom */
 .start-foot-tagline{display:none}
 /* 13. Het stilstaande beeld wordt in JS precies onder het live model gezet (plaatsStartBeeld); wat opzij buiten het vak valt, valt weg */
 .start-model{overflow:hidden}
-</style>
-<style id="decor-3d">
-/* 3D in hetzelfde decor als het vak op het startscherm (apply_3d_decor.py, 2026-10-07) */
-#stage{background:var(--paneel)}
-html:has(#view-3d:not(.verborgen)),body:has(#view-3d:not(.verborgen)){background:var(--paneel)}
-#stage::after{background:none}
-html.kader3d #stage::after{inset:calc(8px + env(safe-area-inset-top,0px)) calc(8px + env(safe-area-inset-right,0px))
-  calc(8px + env(safe-area-inset-bottom,0px)) calc(8px + env(safe-area-inset-left,0px));border:4px double var(--accent)}
-html.genaan #stage::after,html.onbmodel #stage::after{border:0}
-/* Knoppen binnen het kader, op dezelfde plek als de kop op het startscherm (toesteltest eigenaar 2026-10-07): 8 px marge + 4 px lijn + 14 px */
-html.kader3d body:has(#view-3d:not(.verborgen)) .stage-knoppen{top:calc(26px + env(safe-area-inset-top,0px));
-  left:calc(26px + env(safe-area-inset-left,0px));right:calc(26px + env(safe-area-inset-right,0px))}
-html.kader3d #t3d-menu-paneel{top:calc(78px + env(safe-area-inset-top,0px));right:calc(26px + env(safe-area-inset-right,0px))}
-html.kader3d #view-3d #toon-gepland-3d.wl-schakel{left:calc(26px + env(safe-area-inset-left,0px));bottom:calc(28px + env(safe-area-inset-bottom,0px))}
-html.kader3d #t3d-add{right:calc(26px + env(safe-area-inset-right,0px));bottom:calc(26px + env(safe-area-inset-bottom,0px))}
-html.kader3d #view-3d #lege-hint-3d{left:calc(26px + env(safe-area-inset-left,0px));right:calc(86px + env(safe-area-inset-right,0px));bottom:calc(26px + env(safe-area-inset-bottom,0px))}
-html.kader3d .t3d-duw{left:calc(26px + env(safe-area-inset-left,0px))}
 </style>
 </head>
 <body>
@@ -3029,6 +3034,7 @@ html.kader3d .t3d-duw{left:calc(26px + env(safe-area-inset-left,0px))}
   (function(){ var weg=function(){ var b=document.getElementById('bootsplash'); if(b){ b.classList.add('weg'); setTimeout(function(){ if(b.parentNode) b.parentNode.removeChild(b); }, 400); } };
     if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', weg); else weg(); setTimeout(weg, 20000); })();</script>
 
+<div id="kop-papier" aria-hidden="true"></div>
 <header class="app-header">
   <div class="merk">
     <h1 class="visueel-verborgen">Tatties</h1>
@@ -12838,7 +12844,7 @@ function createTattoo(overrides = {}) {
    ============================================================ */
 // App-versie (semver, handmatig ophogen bij een release). Bij een bump ook de
 // CACHE-naam in sw.js meebumpen, zodat clients de nieuwe build ophalen.
-const APP_VERSIE = '0.3.190';
+const APP_VERSIE = '0.3.191';
 
 /* Dev-haken die de CLOUD raken hangen alleen op een ontwikkelmachine aan window. Ze zijn geen
    lek op zichzelf (zonder XSS roept niemand ze aan, en CSP + esc() houden XSS tegen), maar ze
