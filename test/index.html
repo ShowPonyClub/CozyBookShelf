@@ -12128,7 +12128,8 @@ var AFSTAND = 0.024;     /* midden van het horloge zoveel boven de grens onderar
 var RING = 0.010;        /* punten binnen deze afstand van het vlak van het horloge meten de pols */
 var MARGE = 0.7;         /* mm tussen huid en kast/band */
 var VAK = 72;
-var BAND_HALF = 0.010;   /* m: halve breedte van de band (meten op vijf vlakken daarover) */
+var DUIM = 10737, VINGER = 9803;   /* punt van de linkerduim en een vingertop (vertexnummers van het lichaam) */
+var BAND_HALF = 0.010;  /* m: halve breedte van de band (meten op vijf vlakken daarover) */
 var BULT = 0.5;         /* rad voorbij de lugs: tot hier telt de bandmaat van het bronmodel niet (band loopt omhoog naar de kast) */
 var MATERIAAL = {
   staal:       { kleur:'#d4d6d8', metaal:1.0, ruwheid:0.24 },
@@ -12172,17 +12173,6 @@ function kruis(a, b){ return [a[1]*b[2]-a[2]*b[1], a[2]*b[0]-a[0]*b[2], a[0]*b[1
 function norm(a){ var l = Math.hypot(a[0], a[1], a[2]) || 1; return [a[0]/l, a[1]/l, a[2]/l]; }
 function schaal(a, s){ return [a[0]*s, a[1]*s, a[2]*s]; }
 function plus(a, b){ return [a[0]+b[0], a[1]+b[1], a[2]+b[2]]; }
-/* richting met de kleinste spreiding (normaal van een vlak / as van een ring) */
-function kleinsteAs(pts, c){
-  var C = [0,0,0,0,0,0,0,0,0];
-  pts.forEach(function(p){ var d = sub(p, c); for(var i=0;i<3;i++) for(var j=0;j<3;j++) C[i*3+j] += d[i]*d[j]; });
-  var tr = C[0] + C[4] + C[8], v = [0.31, 0.83, 0.47];
-  for(var k=0;k<200;k++){
-    var w = [0,1,2].map(function(i){ return tr*v[i] - (C[i*3]*v[0] + C[i*3+1]*v[1] + C[i*3+2]*v[2]); });
-    v = norm(w);
-  }
-  return v;
-}
 function grootsteAs(pts, c){
   var C = [0,0,0,0,0,0,0,0,0];
   pts.forEach(function(p){ var d = sub(p, c); for(var i=0;i<3;i++) for(var j=0;j<3;j++) C[i*3+j] += d[i]*d[j]; });
@@ -12215,14 +12205,12 @@ function polsMeting(geo, Z){
   var as = grootsteAs(grens.oa.map(function(v){ return v3(P, v); }), oc), hc = [0,0,0];
   grens.hand.forEach(function(v){ hc = plus(hc, v3(P, v)); }); hc = schaal(hc, 1/Math.max(1, grens.hand.length));
   if(dot(as, sub(hc, c)) < 0) as = schaal(as, -1);
-  /* rugzijde: normaal van de hand (2-7 cm voorbij de pols), aan de kant waar vingers en duim NIET naartoe krommen */
-  var hp = [], hm = [0,0,0];
-  grens.hand.forEach(function(v){ var p = v3(P, v), d = dot(sub(p, c), as); if(d > 0.02 && d < 0.07){ hp.push(p); hm = plus(hm, p); } });
-  if(hp.length < 10) return null;
-  hm = schaal(hm, 1/hp.length);
-  var pn = kleinsteAs(hp, hm); pn = norm(sub(pn, schaal(as, dot(pn, as))));
-  var s3 = 0; hp.forEach(function(p){ var d = dot(sub(p, hm), pn); s3 += d*d*d; });
-  if(s3 > 0) pn = schaal(pn, -1);   /* lange staart (gekromde vingers) = handpalm */
+  /* rugzijde (toesteltest eigenaar 2026-10-08: de kast zat aan de binnenkant): anatomisch, met vaste punten van het lichaam
+     (zelfde nummering voor elk lichaam uit de generator). Linkerhand: rugzijde = (richting duim) x (richting vingers). */
+  if(Math.max(DUIM, VINGER) >= z.length || z[DUIM] !== iH || z[VINGER] !== iH) return null;
+  var vf = norm(sub(v3(P, VINGER), c)), vr = sub(v3(P, DUIM), c);
+  vr = norm(sub(vr, schaal(as, dot(vr, as))));
+  var pn = kruis(vr, vf); pn = norm(sub(pn, schaal(as, dot(pn, as))));
   var u = norm(kruis(pn, as));        /* 12 uur */
   /* vlak van het horloge: de doorsnede van de huid (snijpunten van de driehoeken van onderarm en hand met het vlak) */
   var O = plus(c, schaal(as, -AFSTAND)), ring = [], minN = 1e9, maxN = -1e9, minU = 1e9, maxU = -1e9;
@@ -13227,7 +13215,7 @@ function createTattoo(overrides = {}) {
    ============================================================ */
 // App-versie (semver, handmatig ophogen bij een release). Bij een bump ook de
 // CACHE-naam in sw.js meebumpen, zodat clients de nieuwe build ophalen.
-const APP_VERSIE = '0.3.195';
+const APP_VERSIE = '0.3.196';
 
 /* Dev-haken die de CLOUD raken hangen alleen op een ontwikkelmachine aan window. Ze zijn geen
    lek op zichzelf (zonder XSS roept niemand ze aan, en CSP + esc() houden XSS tegen), maar ze
