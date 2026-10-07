@@ -12364,9 +12364,11 @@ function maak(mesh, Z, D, opties){
       var r = rHuid(th) + lift; px[i] = r*Math.cos(th); py[i] = r*Math.sin(th);
       if(i){ L[i] = L[i-1] + Math.hypot(px[i]-px[i-1], py[i]-py[i-1]); if(th <= Math.PI) lPi = L[i]; }
     }
+    /* Rijen: de eerste losse rij precies op het startpunt (= tegen de eindrij aan de kast), aan elke kant; daartussen N-1 stappen
+       van pitch plus de sluiting (2*kh). Toesteltest eigenaar 2026-10-08: met een halve stap vanaf het begin zat er een gat bij de lugs. */
     var lTot = L[nS-1], kh = D.klaspHalf, besch = Math.max(D.pitch, lTot - 2*kh);
-    var N = Math.max(2, Math.min(MAX_RIJEN, Math.round(besch/D.pitch))), pitch = besch/N;
-    var nP = Math.max(1, Math.min(N-1, Math.round((lPi - kh)/pitch)));
+    var N = Math.max(2, Math.min(MAX_RIJEN, Math.round(besch/D.pitch) + 1)), pitch = besch/(N-1);
+    var nP = Math.max(1, Math.min(N-1, Math.round(lPi/pitch)));   /* rijen aan de 12-uur-kant: 0..nP-1, daarna de sluiting, dan de rest */
     if(N !== nRij) bouwIndex(N);
     function frame(s){   /* punt, raaklijn (richting toenemende hoek) en buitennormaal op booglengte s */
       var lo = 0, hi = nS-1;
@@ -12387,11 +12389,11 @@ function maak(mesh, Z, D, opties){
     }
     var kp = D.kop.pos, kn = D.kop.nor;
     for(var k=0;k<nK;k++) zet(k, kp[k*3]*sP + d0, kp[k*3+1]*sP, kp[k*3+2]*sP, kn[k*3]/127, kn[k*3+1]/127, kn[k*3+2]/127);
-    for(var r2=0;r2<N;r2++){ var s = r2 < nP ? (r2 + 0.5)*pitch : 2*kh + (r2 + 0.5)*pitch; plaats(D.rij, nK + r2*nR, frame(s)); }
-    plaats(D.klasp, nK + N*nR, frame(nP*pitch + kh));
+    for(var r2=0;r2<N;r2++){ var s = r2 < nP ? r2*pitch : lTot - (N-1-r2)*pitch; plaats(D.rij, nK + r2*nR, frame(s)); }
+    plaats(D.klasp, nK + N*nR, frame(((nP-1)*pitch + lTot - (N-1-nP)*pitch)/2));   /* midden tussen de laatste rij van elke kant */
     g.attributes.position.needsUpdate = true; g.attributes.normal.needsUpdate = true;
     g.boundingSphere = new THREE.Sphere(new THREE.Vector3(M.O[0], M.O[1], M.O[2]), 0.12);
-    laatste = { rijen:N, voor:nP, omtrek:lTot, pitch:pitch, d0:d0, lift:[hP, hM] };
+    laatste = { rijen:N, voor:nP, omtrek:lTot, pitch:pitch, d0:d0, lift:[hP, hM], sluitRuimte:lTot - (N-1)*pitch - 2*kh };
     return true;
   }
   herbouw();
@@ -13240,7 +13242,7 @@ function createTattoo(overrides = {}) {
    ============================================================ */
 // App-versie (semver, handmatig ophogen bij een release). Bij een bump ook de
 // CACHE-naam in sw.js meebumpen, zodat clients de nieuwe build ophalen.
-const APP_VERSIE = '0.3.199';
+const APP_VERSIE = '0.3.200';
 
 /* Dev-haken die de CLOUD raken hangen alleen op een ontwikkelmachine aan window. Ze zijn geen
    lek op zichzelf (zonder XSS roept niemand ze aan, en CSP + esc() houden XSS tegen), maar ze
