@@ -13240,7 +13240,7 @@ function createTattoo(overrides = {}) {
    ============================================================ */
 // App-versie (semver, handmatig ophogen bij een release). Bij een bump ook de
 // CACHE-naam in sw.js meebumpen, zodat clients de nieuwe build ophalen.
-const APP_VERSIE = '0.3.198';
+const APP_VERSIE = '0.3.199';
 
 /* Dev-haken die de CLOUD raken hangen alleen op een ontwikkelmachine aan window. Ze zijn geen
    lek op zichzelf (zonder XSS roept niemand ze aan, en CSP + esc() houden XSS tegen), maar ze
@@ -15732,7 +15732,7 @@ function plaatsStartBeeld() {
   const cs = getComputedStyle(sm), pt = parseFloat(cs.paddingTop) || 0, pb = parseFloat(cs.paddingBottom) || 0;
   const w = sm.clientWidth, hh = sm.clientHeight - pt - pb; if (w < 40 || hh < 40) return;
   const A = im.naturalWidth / im.naturalHeight, bi = Math.max(1.04, 1 / A), bl = Math.max(1.04, hh / w);
-  const D = hh * bi / bl, B = D * A, mid = b => 0.5 - Math.max(0, b - 1.04) * 0.25;   // 0,5 x START_HOGER (2026-10-08: gecentreerd)
+  const D = hh * bi / bl, B = D * A, mid = b => 0.5;   // 0,5 - max(0, b - 1,04) x 0,5 x START_HOGER, met START_HOGER 0 (2026-10-08: gecentreerd)
   const cy = pt + hh / 2 - (mid(bi) - mid(bl)) * hh / bl;
   Object.assign(im.style, { position: 'absolute', margin: '0', maxWidth: 'none', width: B + 'px', height: D + 'px',
     left: ((w - B) / 2) + 'px', top: (cy - D / 2) + 'px' });
@@ -27754,7 +27754,7 @@ function maakTatnetGL(json, canvas) {
   let startOpnameVp='', startOpnameT=0, herstelLoopt=false;
   const START_OPNAME='tatties-start-opname:'+(typeof DB_NAAM!=='undefined' ? DB_NAAM : 'tatties');
   function startOpnameVingerafdruk(){
-    const d=['v6', currentGender, underwear, skinMat ? skinMat.color.getHexString() : '', startOpnameHoek().toFixed(2), uiterlijkTag()];   // slice 5p: beeld zonder tattoos
+    const d=['v7', currentGender, underwear, skinMat ? skinMat.color.getHexString() : '', startOpnameHoek().toFixed(2), uiterlijkTag()];   // slice 5p: beeld zonder tattoos
     try{ d.push(localStorage.getItem('tatties-lichaam')||''); }catch(e){}
     return d.join('|');
   }
@@ -27781,10 +27781,11 @@ function maakTatnetGL(json, canvas) {
     }
     return top;
   }
-  /* Hoogte van het midden van het kader: is het kader hoger dan het lichaam (breed vak, armen), dan gaat START_HOGER van de vrije
-     ruimte onder de voeten. 2026-10-06 was dat 70% (model iets hoger); sinds 2026-10-08 (toesteltest eigenaar: 'lijkt te zweven') staat het
-     middelpunt van het lichaam in het midden van het vak. Stilstaand beeld, live en plaatsStartBeeld (host) gebruiken dezelfde regel. */
-  const START_HOGER=0.5;
+  /* Hoogte van het midden van het kader: 0 = het middelpunt van het lichaam in het midden van het vak (evenveel vrije ruimte boven
+     het hoofd als onder de voeten), 1 = alles onder de voeten. 2026-10-06 stond hij op 0,7 (model iets hoger, in werkelijkheid ~85%
+     onder); sinds 2026-10-08 (toesteltest eigenaar: 'lijkt te zweven') gecentreerd. Stilstaand beeld, live en plaatsStartBeeld (host)
+     gebruiken dezelfde regel. */
+  const START_HOGER=0;
   function startKaderMidden(top, beeldH){ return top*0.5-Math.max(0, beeldH-top*1.04)*0.5*START_HOGER; }
   function maakStartOpname(){
     if(!renderer || !scene || !modelRoot) return null;
