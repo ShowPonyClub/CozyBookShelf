@@ -7,20 +7,20 @@
 <meta name="color-scheme" content="light dark">
 <meta name="theme-color" content="#EFE4D0" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#181511" media="(prefers-color-scheme: dark)">
-<title>Tatties - plan your next tattoo</title>
+<title>Tatties - your tattoos on your own 3D body</title>
 <meta name="description" content="Place the tattoos you already have on your own 3D body, then see where new designs fit. A private log of your ink, no account needed. In beta.">
 <link rel="canonical" href="https://tatties.app/">
-<meta property="og:title" content="Tatties - plan your next tattoo">
-<meta property="og:description" content="Plan your next tattoo on a 3D body - then log the ink you already have. Private by design. In private beta.">
+<meta property="og:title" content="Tatties - your tattoos on your own 3D body">
+<meta property="og:description" content="Place the tattoos you already have on your own 3D body, then see where new designs fit. Private by design. In beta.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://tatties.app/">
 <meta property="og:image" content="https://tatties.app/img/og-image.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="Tatties - plan your next tattoo">
+<meta property="og:image:alt" content="Tatties - your tattoos on your own 3D body">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Tatties - plan your next tattoo">
-<meta name="twitter:description" content="Plan your next tattoo on a 3D body - then log the ink you already have. Private by design. In private beta.">
+<meta name="twitter:title" content="Tatties - your tattoos on your own 3D body">
+<meta name="twitter:description" content="Place the tattoos you already have on your own 3D body, then see where new designs fit. Private by design. In beta.">
 <meta name="twitter:image" content="https://tatties.app/img/og-image.png">
 <link rel="preload" as="font" type="font/woff2" href="fonts/recoleta-semibold.woff2" crossorigin>
 <link rel="preload" as="image" href="img/tatties-logo-hart.png">
@@ -89,6 +89,8 @@
   .tagline{font-size:clamp(1rem,2vw,1.12rem);font-weight:600;color:var(--tekst);margin:0 auto 18px}
   .lede{font-size:clamp(1.05rem,2.2vw,1.25rem);color:var(--op-grond);max-width:560px;margin:0 auto 28px;line-height:1.5}
   .lede strong{color:var(--tekst);font-weight:700}
+  .headline-zin{font-size:clamp(1.4rem,3.1vw,1.95rem);font-weight:600;line-height:1.25;max-width:620px;text-wrap:balance;margin:0 auto 28px;color:var(--op-grond)}
+  .headline-zin strong{display:block;color:var(--tekst);font-weight:700}
 
   /* ---- notify-formulier ---- */
   .waitlist{max-width:470px;margin:0 auto;position:relative;z-index:2}
@@ -181,11 +183,7 @@
     <div class="wrap">
       <span class="eyebrow">In beta</span>
       <picture><source srcset="img/tatties-logo-hart-dark.png" media="(prefers-color-scheme: dark)"><img class="hero-logo" src="img/tatties-logo-hart.png" alt="Tatties" width="880" height="662" decoding="async"></picture>
-      <h1 class="headline">Plan your next tattoo</h1>
-      <p class="tagline">show me your tatties</p>
-      <p class="lede">
-        Place tattoos you already have on your own 3D body. <strong>Then see where new designs fit.</strong>
-      </p>
+      <h1 class="headline headline-zin">Place tattoos you already have on your own 3D body. <strong>Then see where new designs fit.</strong></h1>
       <div class="waitlist" id="waitlist">
         <form id="waitlistForm" novalidate>
           <div class="form-row">
