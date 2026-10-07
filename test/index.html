@@ -13242,7 +13242,7 @@ function createTattoo(overrides = {}) {
    ============================================================ */
 // App-versie (semver, handmatig ophogen bij een release). Bij een bump ook de
 // CACHE-naam in sw.js meebumpen, zodat clients de nieuwe build ophalen.
-const APP_VERSIE = '0.3.200';
+const APP_VERSIE = '0.3.201';
 
 /* Dev-haken die de CLOUD raken hangen alleen op een ontwikkelmachine aan window. Ze zijn geen
    lek op zichzelf (zonder XSS roept niemand ze aan, en CSP + esc() houden XSS tegen), maar ze
@@ -27947,10 +27947,10 @@ function maakTatnetGL(json, canvas) {
     return true;
   };
   window.__vakGroeiAan=true;   // schakelaar (dev): false = meteen naar 3D zoals voorheen
-  /* Terug (2026-10-08, vraag eigenaar): het 3D-venster krimpt naar het vak op het startscherm. Zelfde animatie als de groei, andersom:
-     luik op het 3D-kader, toonView('start') (startscherm eronder; __tatties3DStartLive wacht), het vak meten, en de camera van de
-     3D-stand naar de live-stand van het startscherm (zelfde kaderregel als startLiveFrame). Aan het eind krijgt het startscherm het
-     canvas en draait live verder vanaf de hoek waar je was. Geeft false als het niet kan: dan doet de aanroeper gewoon toonView. */
+  /* KRIMP-BEGIN: terug (2026-10-08, vraag eigenaar): het 3D-venster krimpt naar het vak op het startscherm. Zelfde animatie als de groei, andersom:
+     luik op het 3D-kader, toonView('start') (startscherm eronder; __tatties3DStartLive wacht), het vak meten (elk beeld opnieuw), en
+     de camera van de 3D-stand naar de live-stand van het startscherm (zelfde kaderregel als startLiveFrame). Aan het eind krijgt het
+     startscherm het canvas en draait live verder vanaf de hoek waar je was. Geeft false als het niet kan: dan gewoon toonView. */
   window.__tatties3DVakKrimp=function(naarStart){
     if(vakAnim) return true;
     let rustig=false; try{ rustig=matchMedia('(prefers-reduced-motion: reduce)').matches; }catch(e){}
@@ -27962,38 +27962,45 @@ function maakTatnetGL(json, canvas) {
     document.body.appendChild(luik);
     luik.appendChild(cv); cv.style.position='absolute'; cv.style.left=(-kA.x-4)+'px'; cv.style.top=(-kA.y-4)+'px';
     const A={ th:theta, ph:phi, r:radius, tx:target.x, ty:target.y, tz:target.z, fov:camera.fov, rect:{ x:0, y:0, w:W, h:H }, kader:kA };
-    vakAnim={ t0:performance.now(), luik, cv, W, H, krimp:true, host:null, A, B:A, klaar:function(){} };
+    vakAnim={ t0:performance.now(), luik, cv, W, H, krimp:true, host:null, A, B:A, rol0:rol, klaar:function(){} };
     const terug=()=>{ vakAnim=null; cv.style.position=''; cv.style.left=''; cv.style.top=''; if(stage) stage.insertBefore(cv, (na && na.parentNode===stage) ? na : null); luik.remove(); };
     try{ naarStart(); }catch(e){ console.error(e); terug(); return true; }   // toonView('start'); pauze plant een opname, die komt na de krimp
     clearTimeout(startOpnameT);
     const host=vakAnim.host || document.getElementById('start-model');
     if(!host || host.hidden || !host.isConnected){ terug(); return true; }   // geen vak (laag scherm, lege staat): niets te krimpen
-    const rb=host.getBoundingClientRect(), cs=getComputedStyle(host), bw=parseFloat(cs.borderLeftWidth)||0, bt=parseFloat(cs.borderTopWidth)||0;
-    if(rb.width<40 || rb.height<40){ terug(); return true; }
-    const rect={ x:rb.left+bw, y:rb.top+bt, w:Math.max(40, rb.width-2*bw), h:Math.max(40, rb.height-2*bt) };
     const lang=(LICHAAM_GEN && LichaamMotor.geometry()) ? LichaamMotor.lengteCm()/100 : 1.8, top=startKaderTop(lang);
-    const beeldH=Math.max(top*1.04, top*1.0/(rect.w/rect.h));
-    vakAnim.B={ th:theta, ph:Math.PI/2-0.06, r:beeldH/(2*Math.tan(15*Math.PI/180)), tx:0, ty:startKaderMidden(top, beeldH), tz:0, fov:30,
-                rect, kader:{ x:rb.left, y:rb.top, w:rb.width, h:rb.height } };
+    const meet=()=>{   // het vak op dit moment (het startscherm kan tijdens de krimp nog verschuiven); het canvas zit binnen de rand
+      const rb=host.getBoundingClientRect(), cs=getComputedStyle(host), bw=parseFloat(cs.borderLeftWidth)||0, bt=parseFloat(cs.borderTopWidth)||0;
+      if(rb.width<40 || rb.height<40) return false;
+      const rect={ x:rb.left+bw, y:rb.top+bt, w:Math.max(40, rb.width-2*bw), h:Math.max(40, rb.height-2*bt) }, beeldH=Math.max(top*1.04, top*1.0/(rect.w/rect.h));
+      vakAnim.B={ th:theta, ph:Math.PI/2-0.06, r:beeldH/(2*Math.tan(15*Math.PI/180)), tx:0, ty:startKaderMidden(top, beeldH), tz:0, fov:30,
+                  rect, kader:{ x:rb.left, y:rb.top, w:rb.width, h:rb.height } };
+      return true; };
+    if(!meet()){ terug(); return true; }
+    vakAnim.meet=meet;
     const thEind=theta;
     vakAnim.klaar=function(){   // vakAnim is dan al null: __tatties3DStartLive doet zijn gewone werk
+      rol=0;
       if(!window.__tatties3DStartLive(host) || !startLive) return;
-      startLive.na=na; startLive.getoond=true; startLive.top=top;   // geen sprong: dezelfde hoek en hetzelfde kader als het eind van de krimp
+      startLive.na=na; startLive.getoond=true; startLive.top=top; startLive.opnameGepland=true;   // geen sprong: dezelfde hoek en hetzelfde kader als het eind van de krimp
       theta=thEind; cv.style.opacity='1';
       const im=host.querySelector('img'); if(im){ im.style.transition='none'; im.style.opacity='0'; }
       startLiveFrame();   // eerste beeld in dezelfde taak, voordat het luik weggaat
-      clearTimeout(startOpnameT); startOpnameT=setTimeout(bewaarStartOpname, 600);   // het stilstaande beeld (was uitgesteld)
+      clearTimeout(startOpnameT); startOpnameT=setTimeout(bewaarStartOpname, 2500);   // het stilstaande beeld, zoals de normale flow (niet in de landing)
     };
     vakFrame(vakAnim.t0);
     return true;
   };
+  /* KRIMP-EINDE */
   function vakFrame(t){
     const a=vakAnim, u=Math.max(0, Math.min(1, (t-a.t0)/VAK_DUUR));
+    if(a.meet) a.meet();   // krimp (2026-10-08): het vak kan nog verschuiven terwijl het startscherm opbouwt
     const e=u<0.5 ? 4*u*u*u : 1-Math.pow(-2*u+2,3)/2;   // rustig weg, rustig aan
     const L=(p,q)=>p+(q-p)*e, A=a.A, B=a.B;
     const k={ x:L(A.kader.x,B.kader.x), y:L(A.kader.y,B.kader.y), w:L(A.kader.w,B.kader.w), h:L(A.kader.h,B.kader.h) };
     Object.assign(a.luik.style, { left:k.x+'px', top:k.y+'px', width:k.w+'px', height:k.h+'px' });
-    a.luik.style.setProperty('--ster-op', String(1-e));
+    a.luik.style.setProperty('--ster-op', String(a.krimp ? e : 1-e));   // sterretjes horen bij het vak
+    if(a.rol0) rol=a.rol0*(1-e);   // krimp: een gekanteld beeld draait recht (live kent geen rol)
     a.cv.style.left=(-k.x-4)+'px'; a.cv.style.top=(-k.y-4)+'px';   // canvas blijft op het scherm staan (rand 4 px)
     theta=L(A.th,B.th); phi=L(A.ph,B.ph); radius=L(A.r,B.r); target.set(L(A.tx,B.tx), L(A.ty,B.ty), L(A.tz,B.tz));
     const R={ x:L(A.rect.x,B.rect.x), y:L(A.rect.y,B.rect.y), w:L(A.rect.w,B.rect.w), h:L(A.rect.h,B.rect.h) };
