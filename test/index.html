@@ -13316,7 +13316,7 @@ function createTattoo(overrides = {}) {
    ============================================================ */
 // App-versie (semver, handmatig ophogen bij een release). Bij een bump ook de
 // CACHE-naam in sw.js meebumpen, zodat clients de nieuwe build ophalen.
-const APP_VERSIE = '0.4.4';
+const APP_VERSIE = '0.4.5';
 
 /* Dev-haken die de CLOUD raken hangen alleen op een ontwikkelmachine aan window. Ze zijn geen
    lek op zichzelf (zonder XSS roept niemand ze aan, en CSP + esc() houden XSS tegen), maar ze
@@ -28944,7 +28944,13 @@ function maakTatnetGL(json, canvas) {
         var a = await N('TattiesLogin', 'apple', { nonce: nonce });
         if (!a || !a.idToken) return { fout: new Error('geen token') };
         var ra = await sb.auth.signInWithIdToken({ provider: 'apple', token: a.idToken, nonce: nonce });
-        return ra && ra.error ? { fout: ra.error } : { ok: true };
+        if (ra && ra.error) return { fout: ra.error };
+        // Refresh-token bij Apple bewaren (server), zodat account verwijderen hem kan intrekken (richtlijn 5.1.1(v)).
+        // Op de achtergrond: inloggen hangt er niet van af; mislukt dit, dan wordt hij bij de volgende Apple-login opnieuw gevraagd.
+        var tok = ra && ra.data && ra.data.session && ra.data.session.access_token;
+        if (a.code && tok) sb.functions.invoke('apple-token', { method: 'POST', body: { code: a.code }, headers: { Authorization: 'Bearer ' + tok } })
+          .then(function (r) { if (r && r.error) console.warn('apple-token', r.error); }).catch(function () {});
+        return { ok: true };
       }
       var o = await sb.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: LOGIN_TERUG, skipBrowserRedirect: true } });
       if (o.error || !o.data || !o.data.url) return { fout: o.error || new Error('geen inlogadres') };
