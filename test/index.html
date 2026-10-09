@@ -3174,6 +3174,10 @@ input[type=date]::-webkit-date-and-time-value{text-align:left;margin:0}
 .start-wrap:not(.leeg) .start-versie{margin:0}
 .start-legal-links{display:none}
 .inst-versie{margin:14px 0 4px;text-align:center;color:var(--gedempt);font-size:.72rem;letter-spacing:.04em}
+/* Paginarand (body, dubbele lijn) minimaal de KLEINE schermhoogte: 100vh is in Safari de hoogte zonder adresbalk, dus met de balk in
+   beeld scrolde het startscherm dat stukje en stond er lege ruimte onder het versienummer (toesteltest eigenaar 2026-10-09). */
+body{min-height:calc(100svh - 16px - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px))}
+@supports not (height:100svh){body{min-height:calc(100vh - 16px - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px))}}
 </style>
 </head>
 <body>
@@ -13299,7 +13303,7 @@ function createTattoo(overrides = {}) {
    ============================================================ */
 // App-versie (semver, handmatig ophogen bij een release). Bij een bump ook de
 // CACHE-naam in sw.js meebumpen, zodat clients de nieuwe build ophalen.
-const APP_VERSIE = '0.3.213';
+const APP_VERSIE = '0.3.214';
 
 /* Dev-haken die de CLOUD raken hangen alleen op een ontwikkelmachine aan window. Ze zijn geen
    lek op zichzelf (zonder XSS roept niemand ze aan, en CSP + esc() houden XSS tegen), maar ze
