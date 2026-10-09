@@ -9,13 +9,14 @@
 <link rel="canonical" href="https://tatties.app/privacy.html">
 <meta name="color-scheme" content="light dark">
 <style>
-  @font-face{font-family:'Recoleta';src:url('fonts/recoleta-medium.woff2') format('woff2');font-weight:100 550;font-style:normal;font-display:swap}
-  @font-face{font-family:'Recoleta';src:url('fonts/recoleta-semibold.woff2') format('woff2');font-weight:560 900;font-style:normal;font-display:swap}
+  /* Zelf gehost (privacy: geen bezoekers-IP naar een font-CDN). Archivo en Ultra, dezelfde lettertypen als de app (Google Fonts, OFL). */
+  @font-face{font-family:'Archivo';src:url('fonts/archivo.woff2') format('woff2');font-weight:400 800;font-stretch:62% 100%;font-style:normal;font-display:swap}
+  @font-face{font-family:'Ultra';src:url('fonts/ultra.woff2') format('woff2');font-weight:400;font-style:normal;font-display:swap}
   :root{
     --bg:#EFE4D0; --was:#EFE4D0; --tekst:#221A12; --gedempt:#5A503F; --op-grond:#3E3428;
     --accent:#221A12; --op-inkt:#F0EDE8; --kaart:#FBF7EE; --veldbg:#FFFCF5; --rand:#D9CBB3;
     --rasterlijn:rgba(34,26,18,.06); --r-sm:8px; --r-md:12px;
-    --app-font:'Recoleta', ui-serif, Georgia, 'Times New Roman', serif;
+    --app-font:'Archivo', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; --display-font:'Ultra', 'Archivo', Georgia, serif;
     --label-font:ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
     --maxw:680px; color-scheme:light;
   }
@@ -43,7 +44,7 @@
   .nav-back:hover{color:var(--tekst)}
 
   main{padding:44px 0 72px}
-  .page-title{font-size:clamp(1.7rem,5vw,2.2rem);font-weight:700;line-height:1.1;margin-bottom:6px}
+  .page-title{font-family:var(--display-font);font-size:clamp(1.7rem,5vw,2.2rem);font-weight:400;line-height:1.1;margin-bottom:6px}
   .page-sub{font-family:var(--label-font);font-size:.82rem;color:var(--gedempt);margin-bottom:36px}
 
   h2{font-size:1.02rem;font-weight:700;margin:30px 0 6px;color:var(--tekst)}
@@ -52,8 +53,10 @@
   ul{margin:0 0 10px;padding-left:20px}
   strong{color:var(--tekst);font-weight:700}
   a{color:var(--tekst);text-decoration:underline;text-underline-offset:3px}
-  .callout{background:var(--kaart);border:1px solid var(--rand);border-left:4px solid var(--accent);border-radius:var(--r-md);padding:14px 18px;margin:24px 0}
-  .callout p{margin:0;font-weight:600;color:var(--tekst)}
+  .callout{position:relative;background:var(--kaart);border:2px solid var(--accent);border-radius:0;padding:16px 20px 16px;margin:28px 0;box-shadow:4px 5px 0 var(--rand)}
+  .callout::before{content:"";position:absolute;inset:5px;border:1px solid var(--accent);opacity:.5;pointer-events:none}
+  .callout-lbl{display:block;font-family:var(--label-font);font-size:.7rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--gedempt);margin:0 0 6px}
+  .callout p{margin:0;font-weight:500;color:var(--tekst);line-height:1.55}
 
   footer{border-top:1px solid var(--rand);padding:26px 0 34px;text-align:center;color:var(--op-grond);font-family:var(--label-font);font-size:.82rem}
   footer a{color:var(--tekst)}
@@ -75,7 +78,7 @@
     <p class="page-sub">Last updated: October 9, 2026</p>
 
     <div class="callout">
-      <p>Tatties is local-first. Your data stays on your device by default - nothing is sent to a server unless you explicitly create an account and choose to sync, or say yes to the anonymous daily count. Your tattoos are recognised and cut out on your device itself.</p>
+      <span class="callout-lbl">In short</span><p>Tatties is local-first. Your data stays on your device by default - nothing is sent to a server unless you explicitly create an account and choose to sync, or say yes to the anonymous daily count. Your tattoos are recognised and cut out on your device itself.</p>
     </div>
 
     <h2>What Tatties stores</h2>

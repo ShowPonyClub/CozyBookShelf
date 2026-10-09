@@ -22,12 +22,12 @@
 <meta name="twitter:title" content="Tatties - your tattoos on your own 3D body">
 <meta name="twitter:description" content="Place the tattoos you already have on your own 3D body, then see where new designs fit. Private by design. In beta.">
 <meta name="twitter:image" content="https://tatties.app/img/og-image.png">
-<link rel="preload" as="font" type="font/woff2" href="fonts/recoleta-semibold.woff2" crossorigin>
+<link rel="preload" as="font" type="font/woff2" href="fonts/archivo.woff2" crossorigin>
 <link rel="preload" as="image" href="img/tatties-logo-hart.png">
 <style>
-  /* Zelf gehost (privacy: geen bezoekers-IP naar een font-CDN). Recoleta, dezelfde twee gewichten als de app. */
-  @font-face{font-family:'Recoleta';src:url('fonts/recoleta-medium.woff2') format('woff2');font-weight:100 550;font-style:normal;font-display:swap}
-  @font-face{font-family:'Recoleta';src:url('fonts/recoleta-semibold.woff2') format('woff2');font-weight:560 900;font-style:normal;font-display:swap}
+  /* Zelf gehost (privacy: geen bezoekers-IP naar een font-CDN). Archivo en Ultra, dezelfde lettertypen als de app (Google Fonts, OFL). */
+  @font-face{font-family:'Archivo';src:url('fonts/archivo.woff2') format('woff2');font-weight:400 800;font-stretch:62% 100%;font-style:normal;font-display:swap}
+  @font-face{font-family:'Ultra';src:url('fonts/ultra.woff2') format('woff2');font-weight:400;font-style:normal;font-display:swap}
 
   /* Tokens = HUISSTIJL.md van de app (inkt op papier, een rood). */
   :root{
@@ -39,7 +39,7 @@
     --rasterlijn:rgba(34,26,18,.06);
     --invalid:#8A5A00; --succes-diep:#1E6E37; /* op papier, niet op een kaart: --succes-diep uit de app haalt hier 4,25:1, dit 5,0:1 */
     --r-sm:8px; --r-md:12px; --r-lg:16px;
-    --app-font:'Recoleta', ui-serif, Georgia, 'Times New Roman', serif;
+    --app-font:'Archivo', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; --display-font:'Ultra', 'Archivo', Georgia, serif;
     --label-font:ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
     --maxw:1060px;
     color-scheme:light;
@@ -85,12 +85,12 @@
   .eyebrow{display:inline-block;background:var(--accent);color:var(--op-inkt);font-family:var(--label-font);font-size:.72rem;font-weight:700;
     letter-spacing:.14em;text-transform:uppercase;padding:5px 12px;border-radius:999px;margin-bottom:26px}
   .hero-logo{width:min(330px,70vw);height:auto;display:block;margin:0 auto 22px}
-  .headline{font-size:clamp(2.1rem,5.4vw,3.1rem);font-weight:700;line-height:1.06;letter-spacing:-.01em;margin:0 auto 8px}
+  .headline{font-family:var(--display-font);font-size:clamp(2.1rem,5.4vw,3.1rem);font-weight:400;line-height:1.06;letter-spacing:-.01em;margin:0 auto 8px}
   .tagline{font-size:clamp(1rem,2vw,1.12rem);font-weight:600;color:var(--tekst);margin:0 auto 18px}
   .lede{font-size:clamp(1.05rem,2.2vw,1.25rem);color:var(--op-grond);max-width:560px;margin:0 auto 28px;line-height:1.5}
   .lede strong{color:var(--tekst);font-weight:700}
   .headline-zin{font-size:clamp(1.4rem,3.1vw,1.95rem);font-weight:600;line-height:1.25;max-width:620px;text-wrap:balance;margin:0 auto 28px;color:var(--op-grond)}
-  .headline-zin strong{display:block;color:var(--tekst);font-weight:700}
+  .headline-zin strong{display:block;color:var(--tekst);font-weight:400}
 
   /* ---- notify-formulier ---- */
   .waitlist{max-width:470px;margin:0 auto;position:relative;z-index:2}
@@ -112,7 +112,7 @@
   .story li{position:relative;padding:22px 22px 24px;border-left:1px solid var(--rand)}
   .story li:first-child{border-left:0}
   .story .nr{display:block;font-family:var(--label-font);font-size:.72rem;font-weight:700;letter-spacing:.14em;color:var(--gedempt);margin-bottom:8px}
-  .story h3{font-size:1.3rem;font-weight:700;line-height:1.15;margin-bottom:6px;display:flex;align-items:center;gap:10px}
+  .story h3{font-family:var(--display-font);font-size:1.3rem;font-weight:400;line-height:1.15;margin-bottom:6px;display:flex;align-items:center;gap:10px}
   .story h3 .ik{width:20px;height:20px;flex:none;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
   .story p{font-size:.95rem;color:var(--gedempt);line-height:1.5}
   .story li::after{content:"";position:absolute;right:-7px;top:50%;width:12px;height:12px;background:var(--kaart);border-right:1px solid var(--rand);
@@ -138,7 +138,7 @@
   .card:hover{transform:translateY(-2px);border-color:var(--gedempt)}
   .card .ic{width:44px;height:44px;display:grid;place-items:center;border:1.5px solid var(--tekst);border-radius:var(--r-sm);margin-bottom:16px;color:var(--tekst)}
   .card .ic svg{width:22px;height:22px}
-  .card h3{font-weight:700;font-size:1.3rem;line-height:1.2;margin-bottom:6px}
+  .card h3{font-family:var(--display-font);font-weight:400;font-size:1.3rem;line-height:1.2;margin-bottom:6px}
   .card p{color:var(--gedempt);font-size:.95rem;line-height:1.55}
 
   /* ---- footer ---- */
