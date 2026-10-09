@@ -13288,7 +13288,7 @@ function createTattoo(overrides = {}) {
    ============================================================ */
 // App-versie (semver, handmatig ophogen bij een release). Bij een bump ook de
 // CACHE-naam in sw.js meebumpen, zodat clients de nieuwe build ophalen.
-const APP_VERSIE = '0.3.210';
+const APP_VERSIE = '0.3.211';
 
 /* Dev-haken die de CLOUD raken hangen alleen op een ontwikkelmachine aan window. Ze zijn geen
    lek op zichzelf (zonder XSS roept niemand ze aan, en CSP + esc() houden XSS tegen), maar ze
@@ -20788,7 +20788,7 @@ async function verwijderVoorbeelden() {
     const vulSticker=(st)=>{ const T=st.T, P=st.geo.attributes.position.array, N=st.geo.attributes.normal.array, UV=st.geo.attributes.uv.array;
       for(let k=0;k<T.length/2;k++){ const [sP,sN]=STOF[T[k*2]], o=T[k*2+1]*9;
         for(let j=0;j<3;j++){ const a=o+j*3, p=(k*3+j)*3, q=(k*3+j)*2;
-          const x=sP[a]+sN[a]*BOXER_LOGO.los, y=sP[a+1]+sN[a+1]*BOXER_LOGO.los, z=sP[a+2]+sN[a+2]*BOXER_LOGO.los;
+          const los=st.los||BOXER_LOGO.los, x=sP[a]+sN[a]*los, y=sP[a+1]+sN[a+1]*los, z=sP[a+2]+sN[a+2]*los;
           P[p]=x; P[p+1]=y; P[p+2]=z; N[p]=sN[a]; N[p+1]=sN[a+1]; N[p+2]=sN[a+2];
           const px=x-st.c[0], py=y-st.c[1], pz=z-st.c[2];
           UV[q]=(px*st.R[0]+py*st.R[1]+pz*st.R[2])/st.w+0.5; UV[q+1]=(px*st.U[0]+py*st.U[1]+pz*st.U[2])/st.h+0.5; } }
@@ -20807,7 +20807,7 @@ async function verwijderVoorbeelden() {
       const dz=Math.sin(B.voor), dx=Math.cos(B.voor);
       if(!slip) for(const zij of [1,-1]) stickers.push({ soort:'been', zij, beeld:beelden.hart, d:[zij*dx,0,dz], w:B.breed, h:B.breed*beelden.hart.height/beelden.hart.width,
         mag:(x,y,z)=>x*zij>0.04 });
-      stickers.push({ soort:'kont', beeld:beelden.logo, d:[0,0,-1], midden:true, diep:0.10, w:Kt.breed, h:Kt.breed*beelden.logo.height/beelden.logo.width,
+      stickers.push({ soort:'kont', beeld:beelden.logo, d:[0,0,-1], midden:true, diep:0.10, los:slip ? 0.007 : BOXER_LOGO.los, w:Kt.breed, h:Kt.breed*beelden.logo.height/beelden.logo.width,
         mag:(x,y,z)=>z<0.02 && Math.abs(x)<Kt.breed });
       stickerPlan();
       for(const st of stickers){
@@ -20819,7 +20819,7 @@ async function verwijderVoorbeelden() {
         const tex=new THREE.CanvasTexture(st.beeld); tex.encoding=THREE.sRGBEncoding; tex.anisotropy=8;
         tex.wrapS=tex.wrapT=THREE.ClampToEdgeWrapping;
         const m=new THREE.Mesh(g, new THREE.MeshStandardMaterial({map:tex, transparent:true, depthWrite:false, roughness:0.6, metalness:0,
-          side:THREE.FrontSide, polygonOffset:true, polygonOffsetFactor:-1, polygonOffsetUnits:-2}));   // klein: factor -10 trok de kont-sticker bij een scherende kijkhoek door de stof heen (gele flarden op de voorkant van de band, toesteltest 2026-10-09); de sticker ligt al 4 mm boven de stof (los)
+          side:THREE.FrontSide, polygonOffset:true, polygonOffsetFactor:-10, polygonOffsetUnits:-4}));   // NIET verlagen: met -1 verloren de logo's op de iPhone-GPU de dieptetest tegen de stof (toesteltest 2026-10-09: 'Ta  ie' op de slip, naden door het boxerlogo); de gele flarden kwamen niet van de offset maar van de driehoekkeuze (st.diep)
         m.renderOrder=3; m.userData.logo=st.soort; grp.add(m); } }
     maakStickers(grp);
     const med=(ids)=>{ const a=Array.from(ids,v=>Q[v*3+1]).sort((p,q)=>p-q); return a[a.length>>1]; };
