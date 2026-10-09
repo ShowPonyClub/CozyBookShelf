@@ -10,7 +10,7 @@
    (controllerchange na skipWaiting+claim; zie de registratie in tatties-3d.html).
    Cachenaam is geversioneerd; bij activatie worden oude caches opgeruimd.
    Bump CACHE bij elke release (gelijk aan APP_VERSIE in tatties-3d.html). */
-const CACHE = 'tatties-test-v0.4.3';
+const CACHE = 'tatties-test-v0.4.4';
 const NET_TIMEOUT_MS = 3500;     // deadline op de response-headers
 const BODY_TIMEOUT_MS = 20000;   // deadline op de volledige body (app is ~3.5MB)
 
@@ -44,6 +44,9 @@ self.addEventListener('fetch', (e) => {
 
   // Navigaties (de HTML zelf): network-first met deadlines + cache-fallback.
   if (req.mode === 'navigate') {
+    // Cachesleutel zonder query/hash (security-audit 2026-10-09): de PKCE-code uit een mail-link (?code=) hoort niet in CacheStorage;
+    // alle varianten van de pagina delen zo een cache-item.
+    const u = new URL(req.url), sleutel = new Request(u.origin + u.pathname);
     e.respondWith((async () => {
       const netP = fetch(req);
       try {
@@ -59,7 +62,7 @@ self.addEventListener('fetch', (e) => {
         const buf = await metDeadline(net.arrayBuffer(), BODY_TIMEOUT_MS);
         const resp = new Response(buf, { status: net.status, statusText: net.statusText, headers: net.headers });
         const cache = await caches.open(CACHE);
-        await cache.put(req, resp.clone());
+        await cache.put(sleutel, resp.clone());
         return resp;
       } catch {
         // Traag/gestald/offline -> gecachte build. Laat het netwerk op de achtergrond
@@ -68,10 +71,10 @@ self.addEventListener('fetch', (e) => {
         e.waitUntil(netP.then(async (n) => {
           if (n && n.ok && !n.redirected && !n.bodyUsed) {
             const c = await caches.open(CACHE);
-            await c.put(req, n.clone());
+            await c.put(sleutel, n.clone());
           }
         }).catch(() => { /* offline */ }));
-        const cached = (await caches.match(req))
+        const cached = (await caches.match(sleutel))
                     || (await caches.match('./index.html'))
                     || (await caches.match('./'));
         if (cached) return cached;
