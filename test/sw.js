@@ -10,7 +10,7 @@
    (controllerchange na skipWaiting+claim; zie de registratie in tatties-3d.html).
    Cachenaam is geversioneerd; bij activatie worden oude caches opgeruimd.
    Bump CACHE bij elke release (gelijk aan APP_VERSIE in tatties-3d.html). */
-const CACHE = 'tatties-test-v0.4.0';
+const CACHE = 'tatties-test-v0.4.1';
 const NET_TIMEOUT_MS = 3500;     // deadline op de response-headers
 const BODY_TIMEOUT_MS = 20000;   // deadline op de volledige body (app is ~3.5MB)
 
@@ -29,7 +29,10 @@ self.addEventListener('install', () => {
 self.addEventListener('activate', (e) => {
   e.waitUntil((async () => {
     const namen = await caches.keys();
-    await Promise.all(namen.filter((n) => n !== CACHE).map((n) => caches.delete(n)));
+    // Alleen de eigen caches opruimen (2026-10-09): /test/ en /web/ delen het domein en dus de Cache API; zonder prefix gooide
+    // de ene service worker bij elke update de cache van de andere weg.
+    const PREFIX = CACHE.replace(/v[\d.]+$/, '');
+    await Promise.all(namen.filter((n) => n.startsWith(PREFIX) && n !== CACHE).map((n) => caches.delete(n)));
     await self.clients.claim();   // bestaande tabs meteen onder controle van deze SW
   })());
 });
