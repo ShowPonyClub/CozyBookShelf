@@ -13288,7 +13288,7 @@ function createTattoo(overrides = {}) {
    ============================================================ */
 // App-versie (semver, handmatig ophogen bij een release). Bij een bump ook de
 // CACHE-naam in sw.js meebumpen, zodat clients de nieuwe build ophalen.
-const APP_VERSIE = '0.3.211';
+const APP_VERSIE = '0.3.212';
 
 /* Dev-haken die de CLOUD raken hangen alleen op een ontwikkelmachine aan window. Ze zijn geen
    lek op zichzelf (zonder XSS roept niemand ze aan, en CSP + esc() houden XSS tegen), maar ze
@@ -15266,6 +15266,57 @@ function hoofdFoto(t) {
 const THUMB_MAX = 240;
 function lijstBron(t) { return hoofdFoto(t) || (t.kunst && t.kunst.src) || null; }
 function thumbFp(src) { return src ? (src.length + ':' + src.slice(30, 62)) : ''; }   // lengte + stukje data (na de mime-prefix)
+/* Rechtop zoals op het model (toesteltest eigenaar 2026-10-09, apply_kaart_rechtop.py): de kaarten (detail, collectie, startgreep,
+   deel-thumbs) tonen de uitsnede met de draaiing die hij in 3D heeft. 3D: + = linksom op de huid (rotateDecal; rechtsom-knop = -15),
+   canvas: + = met de klok mee, dus hoek = -rot. Alleen-2D-records: kunst.rotatie (SVG, + = met de klok mee). Eenmalig gedraaid op
+   een canvas (rechthoek om de gedraaide uitsnede), onthouden per bron + hoek. Schakelaar window.__kaartRechtop=false. */
+const RECHTOP_MIN = 2, rechtopCache = new Map();
+function rechtopHoek(t, deel) {
+  if (window.__kaartRechtop === false || !t) return 0;
+  const P = deel ? deel.positie3d : t.positie3d;
+  let a;
+  if (P && P.point) a = -(Number(P.rot) || 0);
+  else if (!deel && t.kunst && t.positie) a = Number(t.kunst.rotatie) || 0;
+  else return 0;
+  a = ((a % 360) + 540) % 360 - 180;
+  return Math.abs(a) < RECHTOP_MIN ? 0 : Math.round(a);
+}
+function rechtopSrc(src, hoek) {
+  if (!src || !hoek) return Promise.resolve(src);
+  const k = thumbFp(src) + '|' + hoek;
+  if (rechtopCache.has(k)) return rechtopCache.get(k);
+  const p = new Promise((res) => {
+    const img = new Image();
+    img.onload = () => { try {
+      const r = hoek * Math.PI / 180, c = Math.abs(Math.cos(r)), si = Math.abs(Math.sin(r)), w = img.naturalWidth, h = img.naturalHeight;
+      const cv = document.createElement('canvas');
+      cv.width = Math.max(1, Math.ceil(w * c + h * si)); cv.height = Math.max(1, Math.ceil(w * si + h * c));
+      const x = cv.getContext('2d'); x.imageSmoothingQuality = 'high';
+      x.translate(cv.width / 2, cv.height / 2); x.rotate(r); x.drawImage(img, -w / 2, -h / 2);
+      res(cv.toDataURL('image/png'));
+    } catch (e) { res(src); } };
+    img.onerror = () => res(src);
+    img.src = src;
+  });
+  rechtopCache.set(k, p);
+  if (rechtopCache.size > 40) rechtopCache.delete(rechtopCache.keys().next().value);
+  return p;
+}
+/* img krijgt de gedraaide uitsnede; tot die er is onzichtbaar (geen scheef-dan-recht-flits) */
+function zetRechtop(img, src, hoek) {
+  if (!img || !src) return;
+  const tok = img.__rechtop = {};
+  if (!hoek) { if (img.getAttribute('src') !== src) img.src = src; img.style.visibility = ''; return; }
+  img.style.visibility = 'hidden';
+  rechtopSrc(src, hoek).then((r) => { if (img.__rechtop !== tok) return; img.src = r; img.style.visibility = ''; });
+}
+/* Is dit lijst-/greepbeeld de uitsnede (draaien) of een gewone foto (niet draaien)? */
+function isUitsnedeBeeld(t, src) {
+  if (!src) return false;
+  if (t.kunst && t.kunst.src && src === t.kunst.src) return true;
+  return !hoofdFoto(t) && src.startsWith('data:image/png');
+}
+window.__tattiesRechtop = { hoek: rechtopHoek, src: rechtopSrc };
 function lijstThumbSrc(t) {
   // Thumb is leidend: saveTattoo houdt 'm vers bij elke beeld-wijziging. Bij een licht
   // record (beelden in de DB) is de thumb bovendien het enige beschikbare beeld.
@@ -15835,11 +15886,11 @@ function vulStartGreep(gezet) {
     if (k.dataset.greep === 'nieuw') { if (typeof window.__tattiesNieuweTattoo === 'function') window.__tattiesNieuweTattoo(); } else openDetail(k.dataset.greep, 'info', 'start'); }); }
   for (const t of kies) {
     const knop = rij.querySelector(`[data-greep="${CSS.escape(String(t.id))}"]`); if (!knop) continue;
-    const sleutel = t.id + '|' + (t.updatedAt || ''), zet = (src) => { const im = knop.querySelector('img'); if (!src || !im || !knop.isConnected) return; im.src = src; im.hidden = false; knop.classList.add('met-beeld'); };
-    if (startGreepBeeld.has(sleutel)) { zet(startGreepBeeld.get(sleutel)); continue; }
+    const sleutel = t.id + '|' + (t.updatedAt || ''), zet = (src, uitsnede) => { const im = knop.querySelector('img'); if (!src || !im || !knop.isConnected) return; zetRechtop(im, src, (uitsnede || isUitsnedeBeeld(t, src)) ? rechtopHoek(t) : 0); im.hidden = false; knop.classList.add('met-beeld'); };
+    if (startGreepBeeld.has(sleutel)) { zet(startGreepBeeld.get(sleutel), true); continue; }
     zet(lijstThumbSrc(t));   // meteen iets; de uitsnede vervangt het zodra die er is
     Promise.resolve(typeof window.__tattiesDeelBeeld === 'function' ? window.__tattiesDeelBeeld(t.id) : null)
-      .then(src => { if (src) { startGreepBeeld.set(sleutel, src); zet(src); } }).catch(() => {});
+      .then(src => { if (src) { startGreepBeeld.set(sleutel, src); zet(src, true); } }).catch(() => {});
   }
 }
 function renderStart() {
@@ -17134,7 +17185,7 @@ function renderLijst() {
       : (stand ? `<span class="badge ${stand}">${tr(stand === 'geheeld' ? 'badge.geheeld' : 'badge.herstellende')}</span>` : '');
     return `
     <button class="tcard${t.status === 'wens' ? ' wens' : ''}" data-id="${esc(t.id)}">
-      <span class="thumb${kunstFoto ? ' thumb-kunst' : ''}">${foto ? `<img src="${esc(foto)}" alt="">` : ICONEN.galerij}</span>
+      <span class="thumb${kunstFoto ? ' thumb-kunst' : ''}">${foto ? `<img src="${esc(foto)}" alt=""${isUitsnedeBeeld(t, foto) && rechtopHoek(t) ? ` data-rechtop="${rechtopHoek(t)}" style="visibility:hidden"` : ''}>` : ICONEN.galerij}</span>
       ${t.status !== 'wens' ? `<span class="tcard-nr">${flashNr(t)}</span>` : ''}
       <span class="info">
         <h3>${esc(t.naam)}</h3>
@@ -17144,6 +17195,7 @@ function renderLijst() {
       ${badge}
     </button>`;
   }).join('');
+  lijst.querySelectorAll('img[data-rechtop]').forEach(im => zetRechtop(im, im.getAttribute('src'), +im.dataset.rechtop));   // rechtop zoals op het model
 
   lijst.querySelectorAll('.tcard').forEach(el =>
     el.addEventListener('click', () => openDetail(el.dataset.id))
@@ -17222,7 +17274,8 @@ async function vulDeelThumbs(t) {
     try { if (typeof window.__tattiesDeelBeeld === 'function') src = await window.__tattiesDeelBeeld(f.dataset.sleutel); } catch { /* geen beeld */ }
     if (!src && i === 0 && t.kunst && t.kunst.src) src = t.kunst.src;
     if (!src || !f.isConnected) continue;
-    const im = f.querySelector('img'); im.src = src; im.hidden = false; f.classList.add('met-beeld');
+    const sl = String(f.dataset.sleutel || ''), dId = sl.includes(':') ? sl.slice(sl.indexOf(':') + 1) : null;
+    const im = f.querySelector('img'); zetRechtop(im, src, rechtopHoek(t, dId ? deelBij(t, dId) : null)); im.hidden = false; f.classList.add('met-beeld');
   }
 }
 function renderDetail() {
@@ -17415,6 +17468,7 @@ function renderDetail() {
       $('#btn-3d').click();
       setTimeout(() => { if (typeof window.__tattiesDeelToevoegen === 'function') window.__tattiesDeelToevoegen(t); }, 60);
     }); }
+  { const im = view.querySelector('#d-kunst img'); if (im && t.kunst && t.kunst.src) zetRechtop(im, t.kunst.src, rechtopHoek(t)); }   // rechtop zoals op het model
   vulDeelThumbs(t);
   $('#d-verwijder').addEventListener('click', async (e) => {
     const btn = e.currentTarget; if (btn.disabled) return; btn.disabled = true;   // dubbelklik-race voorkomen
@@ -19748,7 +19802,7 @@ async function verwijderVoorbeelden() {
     // Multisample-target (WebGL2) voor anti-aliasing zoals op het scherm; r128 leest bij readRenderTargetPixels uit het
     // opgeloste framebuffer, dus eerst setRenderTarget(null) (= de resolve) en dan pas uitlezen.
     const msaa=!!(renderer.capabilities.isWebGL2 && THREE.WebGLMultisampleRenderTarget);
-    const rt=msaa ? new THREE.WebGLMultisampleRenderTarget(w,h) : new THREE.WebGLRenderTarget(w,h);
+    const rt=msaa ? new THREE.WebGLMultisampleRenderTarget(w,h,{stencilBuffer:true}) : new THREE.WebGLRenderTarget(w,h,{stencilBuffer:true});
     if(msaa) rt.samples=Math.min(4, renderer.capabilities.maxSamples||4);
     rt.texture.encoding=renderer.outputEncoding;
     const ringWas=!!(selRing && selRing.visible); if(selRing) selRing.visible=false;
@@ -20553,13 +20607,13 @@ async function verwijderVoorbeelden() {
     if(bodyP.length){ const ng=new THREE.BufferGeometry();
       ng.setAttribute('position',new THREE.Float32BufferAttribute(bodyP,3)); ng.setAttribute('normal',new THREE.Float32BufferAttribute(bodyN,3));
       ng.setAttribute('uv',new THREE.Float32BufferAttribute(bodyUV,2));
-      const mat=new THREE.MeshStandardMaterial({color:0xffffff, roughness:0.6, metalness:0.0, side:THREE.DoubleSide, polygonOffset:true, polygonOffsetFactor:-8});   // voor de tattoos (slice 5e)
+      const mat=new THREE.MeshStandardMaterial({color:0xffffff, roughness:0.6, metalness:0.0, side:THREE.DoubleSide, polygonOffset:true, polygonOffsetUnits:-2, ...stofStencil()});   // boven de tattoos via de stencil (2026-10-09; was factor -8, slice 5e)
       if(underwear==='bikini'){ mat.color.setHex(0x1c1b1d).convertSRGBToLinear(); mat.roughness=0.55; }   // bikini: effen zwart (keuze eigenaar)
       const mm=new THREE.Mesh(ng,mat); mm.renderOrder=1; grp.add(mm);
       mm.userData.volg={ T:Uint32Array.from(volgTW.get(bodyP).T), W:Float32Array.from(volgTW.get(bodyP).W), off:OFF }; }
     if(bP.length){ const bg=new THREE.BufferGeometry();
       bg.setAttribute('position',new THREE.Float32BufferAttribute(bP,3)); bg.setAttribute('normal',new THREE.Float32BufferAttribute(bN,3));
-      const bmat=new THREE.MeshStandardMaterial({color:(underwear==='bikini') ? new THREE.Color(0x1c1b1d).convertSRGBToLinear() : 0x9aa0ad, roughness:0.5, metalness:0.0, side:THREE.DoubleSide, polygonOffset:true, polygonOffsetFactor:-9});   // voor de tattoos (slice 5e); bikini: bandjes zwart
+      const bmat=new THREE.MeshStandardMaterial({color:(underwear==='bikini') ? new THREE.Color(0x1c1b1d).convertSRGBToLinear() : 0x9aa0ad, roughness:0.5, metalness:0.0, side:THREE.DoubleSide, polygonOffset:true, polygonOffsetUnits:-2, ...stofStencil()});   // voor de tattoos (slice 5e); bikini: bandjes zwart
       const bm=new THREE.Mesh(bg,bmat); bm.renderOrder=2; grp.add(bm);
       bm.userData.volg={ T:Uint32Array.from(volgTW.get(bP).T), W:Float32Array.from(volgTW.get(bP).W), off:OFF }; }
     grp.userData.obRand={ taille:+taille.toFixed(3), pijpL:+pijpL.toFixed(3), pijpR:+pijpR.toFixed(3) };
@@ -20710,11 +20764,11 @@ async function verwijderVoorbeelden() {
     g1.setAttribute('position',new THREE.BufferAttribute(sP,3)); g1.setAttribute('normal',new THREE.BufferAttribute(sN,3));
     const slip=D.soort==='slip', kleur=slip ? new THREE.Color(SLIP_KLEUR).convertSRGBToLinear() : new THREE.Color(0xffffff);
     const KT=slip ? SLIP_TEKST : BOXER_LOGO.kont;   // kont-sticker: logo (boxer) of het woord Tatties (slip)
-    const mat=new THREE.MeshStandardMaterial({color:kleur, roughness:slip ? 0.85 : 0.6, metalness:0.0, side:THREE.FrontSide, polygonOffset:true, polygonOffsetFactor:-8});
+    const mat=new THREE.MeshStandardMaterial({color:kleur, roughness:slip ? 0.85 : 0.6, metalness:0.0, side:THREE.FrontSide, polygonOffset:true, polygonOffsetUnits:-2, ...stofStencil()});   // geen factor: trok de pijpopening door de dij (iPhone)
     const m1=new THREE.Mesh(g1,mat); m1.renderOrder=1; grp.add(m1);
     const g2=new THREE.BufferGeometry();
     g2.setAttribute('position',new THREE.BufferAttribute(bP,3)); g2.setAttribute('normal',new THREE.BufferAttribute(bN,3));
-    const bmat=new THREE.MeshStandardMaterial({color:slip ? kleur.clone().multiplyScalar(0.8) : new THREE.Color(0xffffff), roughness:slip ? 0.8 : 0.45, metalness:0.0, side:THREE.FrontSide, polygonOffset:true, polygonOffsetFactor:-9});   // witte elastiek (eigenaar); slip: iets donkerder groen
+    const bmat=new THREE.MeshStandardMaterial({color:slip ? kleur.clone().multiplyScalar(0.8) : new THREE.Color(0xffffff), roughness:slip ? 0.8 : 0.45, metalness:0.0, side:THREE.FrontSide, polygonOffset:true, polygonOffsetUnits:-2, ...stofStencil()});   // witte elastiek (eigenaar); slip: iets donkerder groen
     const m2=new THREE.Mesh(g2,bmat); m2.renderOrder=2; m2.userData.band=true; grp.add(m2);
     /* Lint met 'Tatties' vooraan in het midden van de elastiek (keuze eigenaar 2026-10-08; eerst rondom): een eigen glad lint over de band,
        per hoekvak de bovenkant van de band (hoogste punt aan de buitenkant) en de buitenste straal + 2 mm; de tekst staat op een
@@ -20884,12 +20938,12 @@ async function verwijderVoorbeelden() {
       ng.setAttribute('position',new THREE.Float32BufferAttribute(bodyP,3));
       ng.setAttribute('normal',new THREE.Float32BufferAttribute(bodyN,3));
       ng.setAttribute('uv',new THREE.Float32BufferAttribute(bodyUV,2));
-      const mat=new THREE.MeshStandardMaterial({color:0xffffff, roughness:0.6, metalness:0.0, side:THREE.DoubleSide, polygonOffset:true, polygonOffsetFactor:-8});   // voor de tattoos (slice 5e)
+      const mat=new THREE.MeshStandardMaterial({color:0xffffff, roughness:0.6, metalness:0.0, side:THREE.DoubleSide, polygonOffset:true, polygonOffsetUnits:-2, ...stofStencil()});   // boven de tattoos via de stencil (2026-10-09; was factor -8, slice 5e)
       const mm=new THREE.Mesh(ng,mat); mm.renderOrder=1; grp.add(mm); }
     if(bP.length){ const bg=new THREE.BufferGeometry();
       bg.setAttribute('position',new THREE.Float32BufferAttribute(bP,3));
       bg.setAttribute('normal',new THREE.Float32BufferAttribute(bN,3));
-      const bmat=new THREE.MeshStandardMaterial({color:0x9aa0ad, roughness:0.5, metalness:0.0, side:THREE.DoubleSide, polygonOffset:true, polygonOffsetFactor:-9});   // voor de tattoos (slice 5e)
+      const bmat=new THREE.MeshStandardMaterial({color:0x9aa0ad, roughness:0.5, metalness:0.0, side:THREE.DoubleSide, polygonOffset:true, polygonOffsetUnits:-2, ...stofStencil()});   // voor de tattoos (slice 5e)
       const bm=new THREE.Mesh(bg,bmat); bm.renderOrder=2; grp.add(bm); }
     underwearMesh=grp; body.add(grp);
   }
@@ -23399,6 +23453,13 @@ async function verwijderVoorbeelden() {
     g.setAttribute('uv', new THREE.Float32BufferAttribute(out.U,2));
     g.__wikkel=true; g.__proj=true; return g;
   }
+  /* Stof boven tattoos zonder hellings-offset (toesteltest 2026-10-09, apply_stof_stencil.py): onderbroekstof schrijft stencil 1 waar
+     hij zichtbaar is (renderOrder 1/2: na het lichaam, dus niet waar een arm ervoor zit), tattoos (transparant, dus later) tekenen niet
+     op stencil 1. De oude polygonOffsetFactor -8 trok op de iPhone de achterkant van de pijpopening door de dij. */
+  function stofStencil(){ return { stencilWrite:true, stencilRef:1, stencilFunc:THREE.AlwaysStencilFunc,
+    stencilFail:THREE.KeepStencilOp, stencilZFail:THREE.KeepStencilOp, stencilZPass:THREE.ReplaceStencilOp }; }
+  function decalStencil(){ return window.__stofStencil===false ? {} : { stencilWrite:true, stencilRef:1, stencilFunc:THREE.NotEqualStencilFunc,
+    stencilFail:THREE.KeepStencilOp, stencilZFail:THREE.KeepStencilOp, stencilZPass:THREE.KeepStencilOp }; }
   function makeImage(point, normal, rotDeg, sizeM, tex, mesh, mul, geoVooraf, proj){
     const aspect=(tex&&tex.image&&tex.image.width) ? (tex.image.height/tex.image.width) : 1;
     // Multiply-blend: lichte huid in de foto verdwijnt (×onderlaag = ongewijzigd), donkere inkt
@@ -23439,13 +23500,13 @@ async function verwijderVoorbeelden() {
         }
         if(geo.attributes.position && geo.attributes.position.count>0){
           const mat=new THREE.MeshBasicMaterial({map:tex, transparent:true, alphaTest:AT, side:THREE.DoubleSide,
-            blending:BL, depthTest:true, depthWrite:false, polygonOffset:true, polygonOffsetFactor:-6});
+            blending:BL, depthTest:true, depthWrite:false, polygonOffset:true, polygonOffsetFactor:-6, ...decalStencil()});
           const dm=new THREE.Mesh(geo,mat); body.add(dm); return dm;
         }
       }catch(e){ console.error("decal mislukt, val terug op platte sticker", e); }
     }
     // fallback: platte sticker langs de normaal
-    const mat=new THREE.MeshBasicMaterial({map:tex, transparent:true, alphaTest:AT, side:THREE.DoubleSide, blending:BL, depthWrite:false, polygonOffset:true, polygonOffsetFactor:-4});
+    const mat=new THREE.MeshBasicMaterial({map:tex, transparent:true, alphaTest:AT, side:THREE.DoubleSide, blending:BL, depthWrite:false, polygonOffset:true, polygonOffsetFactor:-4, ...decalStencil()});
     const g=new THREE.Mesh(new THREE.PlaneGeometry(sizeM, sizeM*aspect), mat);
     g.position.copy(point).addScaledVector(normal,0.006);
     g.lookAt(point.clone().add(normal)); g.rotateZ(rotDeg*Math.PI/180);
@@ -27885,7 +27946,7 @@ function maakTatnetGL(json, canvas) {
     cam.position.set(r*Math.sin(ph)*Math.sin(th), ty+r*Math.cos(ph), r*Math.sin(ph)*Math.cos(th)); cam.lookAt(0,ty,0); cam.updateMatrixWorld();
     startOpnameHoekNu=th;
     const msaa=!!(renderer.capabilities.isWebGL2 && THREE.WebGLMultisampleRenderTarget);
-    const rt=msaa ? new THREE.WebGLMultisampleRenderTarget(W,H) : new THREE.WebGLRenderTarget(W,H);
+    const rt=msaa ? new THREE.WebGLMultisampleRenderTarget(W,H,{stencilBuffer:true}) : new THREE.WebGLRenderTarget(W,H,{stencilBuffer:true});
     if(msaa) rt.samples=Math.min(4, renderer.capabilities.maxSamples||4);
     rt.texture.encoding=renderer.outputEncoding;
     const bg=scene.background, ringWas=!!(selRing && selRing.visible), kp=key ? key.position.clone() : null, gv=!!(ground && ground.visible);
