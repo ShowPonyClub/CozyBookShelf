@@ -13320,7 +13320,7 @@ function createTattoo(overrides = {}) {
    ============================================================ */
 // App-versie (semver, handmatig ophogen bij een release). Bij een bump ook de
 // CACHE-naam in sw.js meebumpen, zodat clients de nieuwe build ophalen.
-const APP_VERSIE = '0.4.8';
+const APP_VERSIE = '0.4.9';
 
 /* Dev-haken die de CLOUD raken hangen alleen op een ontwikkelmachine aan window. Ze zijn geen
    lek op zichzelf (zonder XSS roept niemand ze aan, en CSP + esc() houden XSS tegen), maar ze
@@ -15922,12 +15922,21 @@ function pasStartHoogte() {
   const oud = sm.style.height;
   const aan = window.__startPast !== false && !sm.hidden && wrap.classList.contains('met-model') && !wrap.classList.contains('leeg') &&
     !wrap.classList.contains('laden') && !matchMedia('(min-width:1000px) and (min-height:600px)').matches;
+  // Tijdens het laden: de hoogte van de vorige keer (zelfde schermhoogte), zodat het model niet verspringt als de collectie verschijnt
+  if (!aan && wrap.classList.contains('laden') && window.__startPast !== false && !sm.hidden && !matchMedia('(min-width:1000px) and (min-height:600px)').matches) {
+    let vorig = null; try { vorig = JSON.parse(localStorage.getItem('tatties-start-vakh') || 'null'); } catch (e) { /* geen opslag */ }
+    if (vorig && vorig.sh === Math.round(startSchermH()) && vorig.h >= START_MIN_H) {
+      if (sm.style.height !== vorig.h + 'px') { sm.style.height = vorig.h + 'px'; naStartHoogte(); }
+      return;
+    }
+  }
   if (!aan) { if (oud) { sm.style.height = ''; naStartHoogte(); } return; }
   const y = window.scrollY;
   sm.style.height = '3000px';
   const rest = document.documentElement.scrollHeight - 3000;
   const h = Math.max(START_MIN_H, Math.floor(startSchermH() - rest));
   sm.style.height = h + 'px';
+  try { localStorage.setItem('tatties-start-vakh', JSON.stringify({ h, sh: Math.round(startSchermH()) })); } catch (e) { /* geen opslag */ }
   if (window.scrollY !== y) window.scrollTo(0, y);
   if (sm.style.height !== oud) naStartHoogte();
 }
@@ -28054,7 +28063,7 @@ function maakTatnetGL(json, canvas) {
   let startOpnameVp='', startOpnameT=0, herstelLoopt=false;
   const START_OPNAME='tatties-start-opname:'+(typeof DB_NAAM!=='undefined' ? DB_NAAM : 'tatties');
   function startOpnameVingerafdruk(){
-    const d=['v7', currentGender, underwear, skinMat ? skinMat.color.getHexString() : '', startOpnameHoek().toFixed(2), uiterlijkTag()];   // slice 5p: beeld zonder tattoos
+    const d=['v8', currentGender, underwear, skinMat ? skinMat.color.getHexString() : '', startOpnameHoek().toFixed(2), uiterlijkTag()];   // slice 5p: beeld zonder tattoos
     try{ d.push(localStorage.getItem('tatties-lichaam')||''); }catch(e){}
     return d.join('|');
   }
@@ -28132,7 +28141,7 @@ function maakTatnetGL(json, canvas) {
     startOpnameT=0;
     if(herstelLoopt && !actief3D){ startOpnameNaHerstel=true; return; }   // slice 5o: alsnog zodra het herstel klaar is
     if(!LICHAAM_GEN || !inited || !modelRoot || glKapot || herstelLoopt || ledeActief || genAan() || onbDraai) return;
-    if(uiterlijkBezig || uiterlijkTag().indexOf('?')>=0 || (haarObj && haarObj.bouwt())) return;   // haar/bril nog niet klaar: straks (uiterlijkBouw)
+    if(uiterlijkBezig || uiterlijkTag().indexOf('?')>=0 || (haarObj && (haarObj.bouwt() || (haarObj.verouderd && haarObj.verouderd())))) return;   // haar/bril nog niet klaar: straks (uiterlijkBouw)
     const vp=startOpnameVingerafdruk();
     let heeft=false; try{ heeft=!!localStorage.getItem(START_OPNAME+':src'); }catch(e){}
     let vpOud=''; try{ vpOud=localStorage.getItem(START_OPNAME+':vp')||''; }catch(e){}
