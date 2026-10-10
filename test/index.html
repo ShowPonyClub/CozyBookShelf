@@ -13320,7 +13320,7 @@ function createTattoo(overrides = {}) {
    ============================================================ */
 // App-versie (semver, handmatig ophogen bij een release). Bij een bump ook de
 // CACHE-naam in sw.js meebumpen, zodat clients de nieuwe build ophalen.
-const APP_VERSIE = '0.4.9';
+const APP_VERSIE = '0.4.10';
 
 /* Dev-haken die de CLOUD raken hangen alleen op een ontwikkelmachine aan window. Ze zijn geen
    lek op zichzelf (zonder XSS roept niemand ze aan, en CSP + esc() houden XSS tegen), maar ze
@@ -13457,7 +13457,7 @@ const sb = (typeof supabase !== 'undefined' && supabase.createClient)
       auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true, flowType: 'pkce' }
     })
   : null;
-window.__sb = sb;   // dev/test-haak
+window.__sb = sb;   // ook in productie: native_extra (Apple/Google-login) gebruikt hem; de sessie staat toch al in localStorage
 
 /* ---- Sync-metadata per record (hardening plak 1) ----
    Wat DIT toestel weet over de relatie tussen een record en de cloud. Bewust in een
@@ -13815,6 +13815,11 @@ devHaak('__tattiesBeslisSync', beslisSync);   // dev/test-haak (nog niet aangesl
 /* Strip de zware beeldvelden eruit voor de cloud-backup. Foto's/uitsnedes gaan
    in slice 6 naar Supabase Storage, niet in de database (gratis tier = 500 MB).
    Werkt op een diepe kopie, dus het lokale record blijft compleet. */
+/* Review R1 SB-2: een verwijderde tattoo gaat zonder inhoud naar de cloud. beslisSync en cloudNaarLokaal hebben alleen id, updatedAt
+   en deleted nodig; lokaal blijft het record compleet (ongedaan maken), en wie elders nog bewerkt wint met de volledige versie. */
+function cloudData(t) {
+  return t && t.deleted ? { id: t.id, updatedAt: t.updatedAt, deleted: true } : stripVoorCloud(t);
+}
 function stripVoorCloud(t) {
   const c = JSON.parse(JSON.stringify(t));
   delete c.foto;            // verouderd enkel-foto-veld
@@ -13844,7 +13849,7 @@ async function backupNaarCloud() {
     id: t.id,
     user_id: user.id,
     deleted: !!t.deleted,
-    data: stripVoorCloud(t)
+    data: cloudData(t)
   }));
   if (!rows.length) return { ok: true, n: 0 };
   const BATCH = 200;                                   // grote collecties niet in één request
@@ -14653,7 +14658,7 @@ async function _syncMetCloudKern() {
     }
     const l = item.rec || await volledigVoorSync(item.id);
     if (!l) continue;   // record is tijdens de ronde verdwenen
-    const data = stripVoorCloud(l);
+    const data = cloudData(l);
     const vorigMan = assetsVan(cById.get(l.id));
     if (!l.deleted) {
       // Faalt de beeld-upload, dan dit record deze ronde OVERSLAAN (niet upserten).
@@ -18406,9 +18411,7 @@ function fotoNaarBase64(bestand, maxAfm = 1280, kwaliteit = 0.82) {
       img.onload = () => {
         const { width: b, height: h } = img;
         const schaal = Math.min(1, maxAfm / Math.max(b, h));
-        // PNG die niet verkleind hoeft: verbatim houden (behoudt transparantie;
-        // opnieuw als PNG coderen levert toch geen winst op).
-        if (alsPng && schaal === 1) { resolve(lezer.result); return; }
+        // Review R1 WEB-2: altijd opnieuw coderen (ook PNG en kleine foto's): zo gaat er geen EXIF/GPS mee.
         const canvas = document.createElement('canvas');
         canvas.width = Math.max(1, Math.round(b * schaal));
         canvas.height = Math.max(1, Math.round(h * schaal));
@@ -27190,11 +27193,11 @@ function maakTatnetGL(json, canvas) {
       rd.onload=ev=>{ const im=new Image(); im.onerror=()=>toast(tr('ui.foto_mislukt'));
         im.onload=()=>{
           const mx=Math.max(im.naturalWidth, im.naturalHeight);
-          if(mx<=FOTO_MAX_DIM){ klaar(im); return; }            // al klein genoeg -> origineel houden
-          const sc=FOTO_MAX_DIM/mx, cw=Math.round(im.naturalWidth*sc), ch=Math.round(im.naturalHeight*sc);
+          // Review R1 WEB-2: ook een kleine foto opnieuw coderen via een canvas: dat haalt EXIF (GPS, toestel) weg uit de bron die wordt bewaard
+          const sc=Math.min(1, FOTO_MAX_DIM/mx), cw=Math.max(1,Math.round(im.naturalWidth*sc)), ch=Math.max(1,Math.round(im.naturalHeight*sc));
           let src;
           try{ const c=document.createElement("canvas"); c.width=cw; c.height=ch; c.getContext("2d").drawImage(im,0,0,cw,ch);
-            src=c.toDataURL(f.type==="image/png"?"image/png":"image/jpeg", 0.85); }
+            src=c.toDataURL(f.type==="image/png"?"image/png":"image/jpeg", sc<1 ? 0.85 : 0.92); }
           catch(e){ klaar(im); return; }                        // verkleinen mislukt -> val terug op origineel
           const im2=new Image(); im2.onerror=()=>klaar(im); im2.onload=()=>klaar(im2); im2.src=src;
         };
@@ -28981,7 +28984,9 @@ function maakTatnetGL(json, canvas) {
         // Op de achtergrond: inloggen hangt er niet van af; mislukt dit, dan wordt hij bij de volgende Apple-login opnieuw gevraagd.
         var tok = ra && ra.data && ra.data.session && ra.data.session.access_token;
         if (a.code && tok) sb.functions.invoke('apple-token', { method: 'POST', body: { code: a.code }, headers: { Authorization: 'Bearer ' + tok } })
-          .then(function (r) { if (r && r.error) console.warn('apple-token', r.error); }).catch(function () {});
+          .then(function (r) { if (r && r.error) { console.warn('apple-token', r.error);   // review R1 AU-2: niet stil laten mislukken
+            if (typeof signaal === 'function') signaal('verwijderfout', ('apple-token opslaan: ' + ((r.error && (r.error.context && r.error.context.status || r.error.message)) || 'fout')).slice(0, 120)); } })
+          .catch(function (e) { if (typeof signaal === 'function') signaal('verwijderfout', ('apple-token opslaan: ' + ((e && e.message) || 'fout')).slice(0, 120)); });
         return { ok: true };
       }
       var o = await sb.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: LOGIN_TERUG, skipBrowserRedirect: true } });
