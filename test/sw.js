@@ -10,7 +10,7 @@
    (controllerchange na skipWaiting+claim; zie de registratie in tatties-3d.html).
    Cachenaam is geversioneerd; bij activatie worden oude caches opgeruimd.
    Bump CACHE bij elke release (gelijk aan APP_VERSIE in tatties-3d.html). */
-const CACHE = 'tatties-test-v0.4.10';
+const CACHE = 'tatties-test-v0.4.11';
 const NET_TIMEOUT_MS = 3500;     // deadline op de response-headers
 const BODY_TIMEOUT_MS = 20000;   // deadline op de volledige body (app is ~3.5MB)
 
@@ -32,7 +32,27 @@ self.addEventListener('activate', (e) => {
     // Alleen de eigen caches opruimen (2026-10-09): /test/ en /web/ delen het domein en dus de Cache API; zonder prefix gooide
     // de ene service worker bij elke update de cache van de andere weg.
     const PREFIX = CACHE.replace(/v[\d.]+$/, '');
-    await Promise.all(namen.filter((n) => n.startsWith(PREFIX) && n !== CACHE).map((n) => caches.delete(n)));
+    const oud = namen.filter((n) => n.startsWith(PREFIX) && n !== CACHE);
+    // review R3 AC-1: eerst de laatst gecachte pagina('s) meenemen naar de nieuwe cache, pas dan de oude wissen. De nieuwe cache is
+    // bij activeren nog leeg (alleen een navigatie vult hem), dus zonder deze stap was de app na elke update offline weg.
+    // Nieuwste oude cache eerst; sleutels met een query (oude ?code=-items) niet meenemen.
+    if (oud.length) {
+      try {
+        const nieuw = await caches.open(CACHE);
+        for (const n of oud.slice().reverse()) {
+          try {
+            const c = await caches.open(n);
+            for (const k of await c.keys()) {
+              if (new URL(k.url).search) continue;
+              if (await nieuw.match(k)) continue;
+              const r = await c.match(k);
+              if (r) await nieuw.put(k, r);
+            }
+          } catch { /* deze cache overslaan */ }
+        }
+      } catch { /* geen Cache API-ruimte: dan alleen opruimen */ }
+    }
+    await Promise.all(oud.map((n) => caches.delete(n)));
     await self.clients.claim();   // bestaande tabs meteen onder controle van deze SW
   })());
 });
@@ -49,38 +69,47 @@ self.addEventListener('fetch', (e) => {
     const u = new URL(req.url), sleutel = new Request(u.origin + u.pathname);
     e.respondWith((async () => {
       const netP = fetch(req);
+      // review R3 AC-1: de body-download (bufP) bewaren. Na een deadline loopt hij op de achtergrond door en vult hij alsnog de
+      // cache (voorheen sloeg dat over omdat de body al 'gebruikt' was), en zonder cache wachten we erop in plaats van een
+      // Response met een gebruikte body terug te geven (= foutpagina).
+      let net = null, bufP = null;
+      const kopie = (n, buf) => new Response(buf, { status: n.status, statusText: n.statusText, headers: n.headers });
+      const bewaar = async (n, buf) => { try { const c = await caches.open(CACHE); await c.put(sleutel, kopie(n, buf)); } catch { /* vol */ } };
       try {
-        const net = await metDeadline(netP, NET_TIMEOUT_MS);
+        net = await metDeadline(netP, NET_TIMEOUT_MS);
         // Alleen geslaagde responses cachen: een tijdelijke 404/500 mag de
         // laatste goede build niet overschrijven en offline geserveerd worden.
-        if (!net.ok) return net;
+        // review R3 AC-1: bij een serverfout (5xx) liever de gecachte pagina dan een kale foutpagina (een 404 blijft een 404).
+        if (!net.ok) return (net.status >= 500 && await caches.match(sleutel)) || net;
         // Redirect-responses niet herbouwen/cachen (uit de SW serveren voor een
         // navigatie geeft dan een security-fout): direct doorgeven.
         if (net.redirected) return net;
         // Body volledig bufferen mét deadline: pas dan weten we zeker dat de stream
         // niet halverwege stokt. Daarna één kopie naar de cache, één naar de browser.
-        const buf = await metDeadline(net.arrayBuffer(), BODY_TIMEOUT_MS);
-        const resp = new Response(buf, { status: net.status, statusText: net.statusText, headers: net.headers });
-        const cache = await caches.open(CACHE);
-        await cache.put(sleutel, resp.clone());
-        return resp;
+        bufP = net.arrayBuffer();
+        const buf = await metDeadline(bufP, BODY_TIMEOUT_MS);
+        await bewaar(net, buf);
+        return kopie(net, buf);
       } catch {
         // Traag/gestald/offline -> gecachte build. Laat het netwerk op de achtergrond
         // uitrazen zodat een trage download alsnog de cache ververst voor de volgende
         // start (alleen als de body nog niet (deels) geconsumeerd is).
-        e.waitUntil(netP.then(async (n) => {
-          if (n && n.ok && !n.redirected && !n.bodyUsed) {
-            const c = await caches.open(CACHE);
-            await c.put(sleutel, n.clone());
-          }
-        }).catch(() => { /* offline */ }));
+        // review R3 AC-1: dezelfde download (bufP) afmaken in plaats van opnieuw aan de body te beginnen.
+        const achter = (async () => {
+          const n = net || await netP;
+          if (!n || !n.ok || n.redirected) return null;
+          const buf = await (bufP || (bufP = n.arrayBuffer()));
+          return { n, buf };
+        })();
+        e.waitUntil(achter.then((r) => r && bewaar(r.n, r.buf)).catch(() => { /* offline */ }));
         const cached = (await caches.match(sleutel))
                     || (await caches.match('./index.html'))
                     || (await caches.match('./'));
         if (cached) return cached;
         // Geen cache (eerste bezoek op een traag netwerk): dan toch op het netwerk
         // wachten - laat tonen is beter dan niets tonen.
-        try { return await netP; } catch { return Response.error(); }
+        try { const r = await achter; if (r) return kopie(r.n, r.buf); } catch { /* offline of afgebroken */ }
+        try { return await netP; } catch { return Response.error(); }   // 4xx/5xx of redirect: body nog ongebruikt
       }
     })());
     return;
