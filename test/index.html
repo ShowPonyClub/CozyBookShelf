@@ -12902,7 +12902,7 @@ const I18N = {
     'toast.gebruik_aan':'Dank je - je helpt Tatties hiermee vooruit','toast.gebruik_uit':'Er wordt niets meer verstuurd','toast.opslaanmislukt':'Opslaan mislukt: ',
     'toast.nietsexport':'Niets te exporteren - nog geen tattoos','toast.geexporteerd':'{n} tattoo{s} geëxporteerd','toast.exportmislukt':'Export mislukt. Probeer het opnieuw.',
     'toast.importgeslaagd':'Import geslaagd: {n} tattoo{s} hersteld','toast.geengeldige':'Bestand gelezen, maar geen geldige tattoos gevonden',
-    'toast.importmislukt':'Import mislukt: dit is geen geldig Tatties-back-upbestand','toast.import_te_groot':'Bestand te groot om te importeren (max 1 GB)','toast.opslagvol':'De opslag is vol. Exporteer een back-up en verwijder wat foto\'s.','toast.kosten_ongeldig':'Kosten niet herkend - typ alleen cijfers, bijvoorbeeld 12,50','confirm.import':'Importeren voegt {n} nieuwe toe en overschrijft {m} bestaande tattoo{s}. Doorgaan?','confirm.import_ja':'Importeren','toast.importgeannuleerd':'Import geannuleerd',
+    'toast.importmislukt':'Import mislukt: dit is geen geldig Tatties-back-upbestand','toast.import_te_groot':'Bestand te groot om te importeren (max 512 MB)','toast.opslagvol':'De opslag is vol. Exporteer een back-up en verwijder wat foto\'s.','toast.noodopslag_vol':'De tijdelijke opslag is vol. Sluit Tatties en open hem opnieuw.','toast.kosten_ongeldig':'Kosten niet herkend - typ alleen cijfers, bijvoorbeeld 12,50','confirm.import':'Importeren voegt {n} nieuwe toe en overschrijft {m} bestaande tattoo{s}. Doorgaan?','confirm.import_ja':'Importeren','toast.importgeannuleerd':'Import geannuleerd',
     'toast.persist':'Je browser kan de opslag van deze app wissen. Maak regelmatig een back-up.',
     'toast.opbeginscherm':'Tatties staat op je beginscherm','toast.ladenmislukt':'Laden van gegevens mislukt: ',
     'opslag.gebruik':'Je collectie neemt {maat} in beslag','opslag.van':'van de ±{maat} op dit toestel.','opslag.bijnavol':'Bijna vol - exporteer een back-up.'
@@ -13124,7 +13124,7 @@ const I18N = {
     'toast.gebruik_aan':'Thank you - this helps improve Tatties','toast.gebruik_uit':'Nothing is sent anymore','toast.opslaanmislukt':'Saving failed: ',
     'toast.nietsexport':'Nothing to export - no tattoos yet','toast.geexporteerd':'{n} tattoo{s} exported','toast.exportmislukt':'Export failed. Please try again.',
     'toast.importgeslaagd':'Import successful: {n} tattoo{s} restored','toast.geengeldige':'File read, but no valid tattoos found',
-    'toast.importmislukt':"Import failed: this isn't a valid Tatties backup file",'toast.import_te_groot':'File too large to import (max 1 GB)','toast.opslagvol':'Storage is full. Export a backup and delete some photos.','toast.kosten_ongeldig':'Cost not recognised - type numbers only, for example 12.50','confirm.import':'Importing adds {n} new and overwrites {m} existing tattoo{s}. Continue?','confirm.import_ja':'Import','toast.importgeannuleerd':'Import cancelled',
+    'toast.importmislukt':"Import failed: this isn't a valid Tatties backup file",'toast.import_te_groot':'File too large to import (max 512 MB)','toast.opslagvol':'Storage is full. Export a backup and delete some photos.','toast.noodopslag_vol':'Temporary storage is full. Close Tatties and open it again.','toast.kosten_ongeldig':'Cost not recognised - type numbers only, for example 12.50','confirm.import':'Importing adds {n} new and overwrites {m} existing tattoo{s}. Continue?','confirm.import_ja':'Import','toast.importgeannuleerd':'Import cancelled',
     'toast.persist':'Your browser may clear this app\'s storage. Back up regularly.',
     'toast.opbeginscherm':'Tatties is on your home screen','toast.ladenmislukt':'Loading data failed: ',
     'opslag.gebruik':'Your collection takes up {maat}','opslag.van':'of the ~{maat} on this device.','opslag.bijnavol':'Almost full - export a backup.'
@@ -13335,7 +13335,7 @@ function createTattoo(overrides = {}) {
    ============================================================ */
 // App-versie (semver, handmatig ophogen bij een release). Bij een bump ook de
 // CACHE-naam in sw.js meebumpen, zodat clients de nieuwe build ophalen.
-const APP_VERSIE = '0.4.13';
+const APP_VERSIE = '0.4.14';
 
 /* Dev-haken die de CLOUD raken hangen alleen op een ontwikkelmachine aan window. Ze zijn geen
    lek op zichzelf (zonder XSS roept niemand ze aan, en CSP + esc() houden XSS tegen), maar ze
@@ -13555,9 +13555,23 @@ let _dbPromise = null;
 const SUPABASE_URL = 'https://uhrbvwwiovefrpscgweo.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_oR3igYlqHgrgsa2QdaewqQ_-GCrDzNQ';
 // supabase = global uit de inline meegebakken UMD (<script id="supabase-lib">).
+/* review R4 CL-6: elk Supabase-verzoek krijgt een time-out (30 s, Storage-upload/-download 120 s). Zonder bleef een half open
+   verbinding de sync 'bezig' houden tot de browser zelf opgaf. Een signal van de aanroeper blijft werken (gecombineerd). */
+function sbTijdslimiet(url) { return /\/storage\/v1\//.test(String(url || '')) ? 120000 : 30000; }   // puur
+function sbFetch(input, init) {
+  const opties = Object.assign({}, init || {});
+  if (typeof AbortController !== 'function') return fetch(input, opties);
+  const url = typeof input === 'string' ? input : ((input && input.url) || String(input));
+  const ac = new AbortController(), eigen = opties.signal || (input && typeof input === 'object' && input.signal) || null;
+  const t = setTimeout(() => { try { ac.abort(new DOMException('Supabase time-out', 'TimeoutError')); } catch (e) { ac.abort(); } }, sbTijdslimiet(url));
+  if (eigen) { if (eigen.aborted) ac.abort(eigen.reason); else eigen.addEventListener('abort', () => ac.abort(eigen.reason), { once: true }); }
+  opties.signal = ac.signal;
+  return fetch(input, opties).finally(() => clearTimeout(t));
+}
 const sb = (typeof supabase !== 'undefined' && supabase.createClient)
   ? supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-      auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true, flowType: 'pkce' }
+      auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true, flowType: 'pkce' },
+      global: { fetch: sbFetch }   // review R4 CL-6
     })
   : null;
 // review R3 AC-8: een mail-link (?code= of #error=) vastleggen voordat supabase-js de URL verwerkt. Zonder code-verifier (andere
@@ -15117,11 +15131,16 @@ function fallbackSchrijf() {
     // heeft - zonder deze guard wist de eerste schrijfactie na een storing de noodopslag.
     if (!geheugenStore.length) {
       const bestaand = localStorage.getItem(FALLBACK_SLEUTEL);
-      if (bestaand && bestaand !== '[]') return;
+      if (bestaand && bestaand !== '[]') return true;   // review R4 CL-4: overgeslagen telt als gelukt
     }
     localStorage.setItem(FALLBACK_SLEUTEL, JSON.stringify(geheugenStore));
+    return true;
   }
-  catch { /* alleen geheugen */ }
+  catch (e) {
+    // review R4 CL-4: vol (quota) = niet bewaard, dat moet de gebruiker weten. Geblokkeerd (prive-venster) = alleen geheugen,
+    // daar waarschuwde toast.beperkt al bij de omschakeling.
+    return !(e && (e.name === 'QuotaExceededError' || e.name === 'NS_ERROR_DOM_QUOTA_REACHED' || e.code === 22 || /quota/i.test(e.message || '')));
+  }
 }
 
 /* Een mislukte transactie betekent NIET dat IndexedDB onbruikbaar is. Een verbinding kan
@@ -15456,6 +15475,13 @@ async function laadLichteTattoos(poging2 = false) {
   }
 }
 
+/* review R4 CL-8: ruimte maken door de herbouwbare textuur-/geometriecache (tatties-textuur-<DB_NAAM>) leeg te maken. */
+async function texCacheVrijmaken() {
+  try { if (typeof window.__tattiesTexCacheLeeg === 'function') return !!(await window.__tattiesTexCacheLeeg()); }
+  catch (e) { console.error('textuurcache leegmaken', e); }
+  return false;
+}
+
 /* behoudTijd: bewaar een al aanwezige updatedAt (bv. import van een backup),
    zodat sync-tijdstempels niet verloren gaan. Standaard stempelt elke save 'nu'
    - dat is "updatedAt gezet bij elke wijziging". saveTattoo is het enige schrijfpunt. */
@@ -15499,7 +15525,7 @@ async function saveTattoo(tattoo, behoudTijd = false, poging2 = false) {
     fallbackLees();
     const i = geheugenStore.findIndex(t => t.id === tattoo.id);
     if (i >= 0) geheugenStore[i] = tattoo; else geheugenStore.push(tattoo);
-    fallbackSchrijf();
+    if (!fallbackSchrijf()) throw new Error(tr('toast.noodopslag_vol'));   // review R4 CL-4: niet stil 'opgeslagen' melden
     return tattoo;
   }
   try {
@@ -15515,6 +15541,8 @@ async function saveTattoo(tattoo, behoudTijd = false, poging2 = false) {
     });
   } catch (e) {
     if (e && (e.name === 'QuotaExceededError' || /quota/i.test(e.message || ''))) {
+      // review R4 CL-8: eerst de herbouwbare textuurcache leegmaken en een keer opnieuw proberen; lukt dat niet, dan de melding
+      if (!poging2 && await texCacheVrijmaken()) return saveTattoo(tattoo, behoudTijd, true);
       throw new Error(tr('toast.opslagvol'));   // gelokaliseerd: bereikt de gebruiker via toast(opslaanmislukt + message)
     }
     if (!poging2 && await dbOpnieuwVerbinden()) return saveTattoo(tattoo, behoudTijd, true);
@@ -18983,7 +19011,7 @@ $('#import-file').addEventListener('change', async (e) => {
   if (!bestand) return;
   // Groottelimiet: een echte back-up is tientallen MB; een absurd groot bestand zou de
   // opslag (IndexedDB-quota) kunnen vullen. Vroeg afvangen voordat we het inlezen/parsen.
-  const IMPORT_MAX_BYTES = 1024 * 1024 * 1024;   // review R3 SY-2: was 200 MB, kleiner dan een eigen export van een grote collectie
+  const IMPORT_MAX_BYTES = 512 * 1024 * 1024;   // review R4 ME-8: bestand.text() + JSON.parse in een keer, groter faalt bij het inlezen (review R3 SY-2: was 200 MB)
   if (bestand.size > IMPORT_MAX_BYTES) { toast(tr('toast.import_te_groot')); return; }
   try {
     const tekst = await bestand.text();
@@ -20426,8 +20454,11 @@ async function verwijderVoorbeelden() {
   // ---- Opname delen (2026-09-20, opvolger van 'Kaart als PNG') -----------------------------------
   // De huidige weergave als PNG: eigen render target (de canvas bewaart zijn buffer niet), selectiering buiten beeld,
   // texture.encoding = outputEncoding zodat de kleuren gelijk zijn aan het scherm. Max ~1600 px op de langste zijde.
+  /* review R4 CL-7: tijdens een verloren WebGL-context leest readRenderTargetPixels alleen nullen: dan geen opname (startbeeld of
+     delen), anders bleef een leeg startbeeld met een geldige vingerafdruk staan. */
+  function glContextWeg(){ try{ const g=renderer && renderer.getContext && renderer.getContext(); return !!(g && g.isContextLost && g.isContextLost()); }catch(e){ return false; } }
   function maakOpname(){
-    if(!renderer || !scene || !camera) return null;
+    if(!renderer || !scene || !camera || glContextWeg()) return null;
     const src=renderer.domElement, cw=src.clientWidth||320, ch=src.clientHeight||320;
     const schaal=Math.min(2, Math.max(renderer.getPixelRatio()||1, 1600/Math.max(cw,ch)));
     const w=Math.round(cw*schaal), h=Math.round(ch*schaal);
@@ -20442,6 +20473,7 @@ async function verwijderVoorbeelden() {
     try{
       renderer.setRenderTarget(rt); renderer.render(scene,camera); renderer.setRenderTarget(null);
       const buf=new Uint8Array(w*h*4); renderer.readRenderTargetPixels(rt,0,0,w,h,buf);
+      if(glContextWeg()) return null;   // review R4 CL-7: context tijdens de opname kwijt
       const c=document.createElement('canvas'); c.width=w; c.height=h; const x=c.getContext('2d');
       const id=x.createImageData(w,h); for(let y=0;y<h;y++) id.data.set(buf.subarray((h-1-y)*w*4,(h-y)*w*4), y*w*4);
       x.putImageData(id,0,0); return c;
@@ -24752,7 +24784,7 @@ async function verwijderVoorbeelden() {
     const cv=m.tex.image; if(!cv.toBlob) return;
     const sleutel=m.id+(m.deel ? ':'+m.deel.id : ''), fp=texVingerafdruk(k);
     const meta={ blend:k.blend||null, inktAuto:k.inktAuto||null, tatnet:k.tatnet||null };
-    try{ cv.toBlob(b=>{ if(b) texSchrijf(sleutel, Object.assign({ fpVoor:fp, fpNa:fp, blob:b }, meta)); }, 'image/png'); }
+    try{ texCacheBlob(cv, k.blend, b=>texSchrijf(sleutel, Object.assign({ fpVoor:fp, fpNa:fp, blob:b }, meta))); }   // review R4 ME-4
     catch(e){ /* geen cache: de volgende start rekent hem uit */ }
   }
   function enterEditDecal(m, modus){
@@ -28053,6 +28085,7 @@ function maakTatnetGL(json, canvas) {
           if(typeof window.__tattiesStartPlaats2D==='function') window.__tattiesStartPlaats2D({ naam, info, kunst3d, src, aspect, status, herhaal });
           return;
         }
+        imgTexture=texBegrensTex(imgTexture);   // review R4 ME-1: plaatsingstextuur binnen TEX_MAX
         plaatsData={ tex:imgTexture, texAf, naam, info, kunst3d, status, herhaal, ketting, deelVoor:deel, proj:!!(deel || ketting) && window.__projDelen!==false };   // delen: projectie (2026-10-03)
         imgTexture=null;   // eigendom gaat naar plaatsData; geen dispose
         cutModal.classList.remove("on"); cutHistoryOpruimen(); pendingNew=null; toonCutInstellingen(false); toonInfo(false);
@@ -28098,7 +28131,7 @@ function maakTatnetGL(json, canvas) {
           return; }
         cutModal.classList.remove("on"); cutHistoryOpruimen(); pendingEdit=null;
         if(m.tex && m.tex!==imgTexture && m.tex.dispose) m.tex.dispose();   // oude textuur vrijgeven
-        m.tex=imgTexture; rebuildMarker(m);
+        imgTexture=texBegrensTex(imgTexture); m.tex=imgTexture; rebuildMarker(m);   // review R4 ME-1
         if(m.rec){
           Object.assign(m.rec,{ naam, artiest:info.artiest, studio:info.studio, stijl:info.stijl, kosten:info.kosten, pijn:info.pijn, datum:info.datum, zituren:info.zituren, accentkleur:info.accentkleur, notities:info.notities, status });
           { const D=deelVan(m); D.kunst3d=blendNaBewerk(bouwKunst3d(), D.kunst3d); }   // bij een deel: alleen de uitsnede van dat deel; review R3 KN-1: gekozen blend houden
@@ -28117,6 +28150,7 @@ function maakTatnetGL(json, canvas) {
       if(!pendingPlace){ closeCutModal(); return; }
       const pp=pendingPlace; cutModal.classList.remove("on"); cutHistoryOpruimen(); pendingPlace=null;
       const rot=0, size=0.09;
+      imgTexture=texBegrensTex(imgTexture);   // review R4 ME-1
       const obj=makeImage(pp.point, pp.normal, rot, size, imgTexture, pp.mesh);
       if(!obj){ toast(tr('ui.plaatsen_mislukt')); if(imgTexture&&imgTexture.dispose){imgTexture.dispose();} imgTexture=null; return; }   // textuur niet laten lekken bij faal
       zetDecalOpacity(obj, 1);
@@ -28155,6 +28189,35 @@ function maakTatnetGL(json, canvas) {
   /* ============================================================
      HERSTEL: bouw textuur headless uit kunst3d en plaats decal
      ============================================================ */
+  /* review R4 ME-1/CL-1: decal-texturen hooguit TEX_MAX px op de langste zijde. Elke decal hield een canvas van de volle uitsnede
+     (tot 1600 px) plus de GPU-textuur met mipmaps vast (~6 MB per tattoo, p90 11,5 MB). De matte en het inktgebied rekenen nog op de
+     volle uitsnede; alleen het eindbeeld voor de textuur wordt verkleind. Schakelaar window.__texMax=false = oude werking. */
+  const TEX_MAX=1024;
+  function texMaat(w, h, max){   // puur: doelmaat binnen max op de langste zijde (s = schaal, 1 = ongewijzigd)
+    const l=Math.max(w||0, h||0), m=max||1024;
+    if(!(l>m)) return { w:w, h:h, s:1 };
+    const s=m/l; return { w:Math.max(1, Math.round(w*s)), h:Math.max(1, Math.round(h*s)), s:s };
+  }
+  function texBegrens(c){   // canvas/beeld binnen TEX_MAX; te groot = nieuw verkleind canvas, anders hetzelfde
+    if(!c || window.__texMax===false) return c;
+    const w=c.width||c.naturalWidth||0, h=c.height||c.naturalHeight||0, M=texMaat(w, h, TEX_MAX);
+    if(M.s===1) return c;
+    let bron=c, bw=w, bh=h;
+    while(bw>=M.w*2 && bh>=M.h*2){   // eerst halveren: een stap van meer dan 2x laat fijne lijnen wegvallen
+      const hw=Math.max(M.w, Math.round(bw/2)), hh=Math.max(M.h, Math.round(bh/2));
+      const t=document.createElement('canvas'); t.width=hw; t.height=hh; const tx=t.getContext('2d'); tx.imageSmoothingEnabled=true; tx.imageSmoothingQuality='high';
+      tx.drawImage(bron, 0, 0, hw, hh); bron=t; bw=hw; bh=hh; }
+    if(bw===M.w && bh===M.h) return bron;
+    const d=document.createElement('canvas'); d.width=M.w; d.height=M.h; const dx=d.getContext('2d'); dx.imageSmoothingEnabled=true; dx.imageSmoothingQuality='high';
+    dx.drawImage(bron, 0, 0, M.w, M.h); return d;
+  }
+  function texBegrensTex(tex){   // bestaande CanvasTexture: bij een te groot beeld een nieuwe op het verkleinde canvas (oude vrijgeven)
+    if(!tex || !tex.image) return tex;
+    const c=texBegrens(tex.image); if(c===tex.image) return tex;
+    const t=new THREE.CanvasTexture(c); t.encoding=tex.encoding; t.anisotropy=tex.anisotropy; t.needsUpdate=true;
+    if(tex.__vers) t.__vers=true;
+    if(tex.dispose) tex.dispose(); return t;
+  }
   function rebuildTextureFromKunst(k){
     return new Promise((resolve,reject)=>{
       if(!k || !k.srcUrl){ reject(new Error("geen srcUrl")); return; }
@@ -28208,7 +28271,7 @@ function maakTatnetGL(json, canvas) {
               if(gebiedBewaarbaar(gebied)) k.tatnet=gebiedNaarPng(gebied, shown.width, shown.height); } }   // oud record: eenmalig berekenen en bewaren (persist volgt bij de volgende opslag)
           const _tm=performance.now(); const md=inktMatte(shown, blendInkt(k.blend), gebied); ttTijd.matte=(ttTijd.matte||0)+performance.now()-_tm;   // inkt-matte; 'auto' wordt hier zwart/kleur
           k.blend = md ? ('inkt-'+md) : 'normaal'; if(md && wasAuto) k.inktAuto=md; }   // onthoud de automatische keuze voor de knop-cyclus
-        const tex=new THREE.CanvasTexture(shown); tex.encoding=THREE.sRGBEncoding; tex.anisotropy=maxAniso(); tex.needsUpdate=true; resolve(tex);
+        const tex=new THREE.CanvasTexture(texBegrens(shown)); tex.encoding=THREE.sRGBEncoding; tex.anisotropy=maxAniso(); tex.needsUpdate=true; resolve(tex);   // review R4 ME-1: binnen TEX_MAX
         }catch(e){ reject(e); } };
         const metTat=(aiImg)=>{ if(k.tatnet && k.tatnet.png && window.__tattiesTatnet && window.__tattiesTatnet.aan){ const t=new Image(); t.onload=()=>verder(aiImg,t); t.onerror=()=>verder(aiImg,null); t.src=k.tatnet.png; } else verder(aiImg,null); };
         if(k.aiMask){ const mim=new Image(); mim.onload=()=>metTat(mim); mim.onerror=()=>metTat(null); mim.src=k.aiMask; }
@@ -28251,6 +28314,24 @@ function maakTatnetGL(json, canvas) {
       c.getContext('2d').drawImage(bmp, 0, 0, c.width, c.height); if(bmp.close) bmp.close();
       return c.toDataURL('image/png'); }catch(err){ return null; }
   };
+  /* review R4 ME-4: de cache bewaart de begrensde textuur; JPEG (0,9) als er geen doorzichtigheid nodig is ('normaal'/'multiply' en
+     geen pixel met alpha onder 255 in een steekproef van max 512 px, zoals review R3 KN-8), anders PNG. Lezen kan beide
+     (createImageBitmap / Image kijken naar de inhoud, niet naar het formaat). */
+  function texCacheSoort(blend, doorzichtig){   // puur
+    return (!doorzichtig && (!blend || blend==='normaal' || blend==='multiply')) ? 'image/jpeg' : 'image/png';
+  }
+  function texHeeftAlpha(cv){
+    try{ const w=cv.width, h=cv.height, f=Math.min(1, 512/Math.max(w, h)), tw=Math.max(1, Math.round(w*f)), th=Math.max(1, Math.round(h*f));
+      const t=document.createElement('canvas'); t.width=tw; t.height=th; const tx=t.getContext('2d', {willReadFrequently:true}); tx.drawImage(cv, 0, 0, tw, th);
+      const pd=tx.getImageData(0, 0, tw, th).data; for(let i=3;i<pd.length;i+=4){ if(pd[i]<255) return true; } return false; }
+    catch(e){ return true; }   // niet te lezen: PNG (veilig)
+  }
+  function texCacheBlob(cv, blend, klaar){
+    if(!cv || !cv.toBlob) return;
+    let soort='image/png';
+    try{ if(texCacheSoort(blend, false)==='image/jpeg') soort=texCacheSoort(blend, texHeeftAlpha(cv)); }catch(e){ soort='image/png'; }
+    try{ cv.toBlob(b=>{ if(b) klaar(b); }, soort, 0.9); }catch(e){ /* geen cache: de volgende start rekent hem uit */ }
+  }
   function texSchrijf(sleutel, v){ return texDb().then(db=>{ if(!db) return; try{ db.transaction('t','readwrite').objectStore('t').put(v, sleutel); }catch(e){ /* vol of weg: dan niet */ } }); }
   /* slice 5u: voorraad. restore3D leest de cache van alle tattoos tegelijk en laat ze tegelijk decoderen; textuurVoor pakt het
      klaarstaande beeld (het herstel wachtte eerst per tattoo op IndexedDB en daarna op het decoderen). */
@@ -28305,8 +28386,10 @@ function maakTatnetGL(json, canvas) {
       try{
         const bmp=klaarBmp ? klaarBmp : (typeof createImageBitmap==='function') ? await createImageBitmap(e.blob)
           : await new Promise((res,rej)=>{ const i=new Image(); i.onload=()=>res(i); i.onerror=rej; i.src=URL.createObjectURL(e.blob); });
-        const c=document.createElement('canvas'); c.width=bmp.width; c.height=bmp.height; c.getContext('2d').drawImage(bmp,0,0);
+        let c=document.createElement('canvas'); c.width=bmp.width; c.height=bmp.height; c.getContext('2d').drawImage(bmp,0,0);
         if(bmp.close) bmp.close();
+        { const cb=texBegrens(c); if(cb!==c){ c=cb;   // review R4 ME-1/ME-4: cache van voor de grens verkleinen en zo terugbewaren
+            if(!oud) texCacheBlob(c, e.blend||k.blend, b=>texSchrijf(sleutel, Object.assign({}, e, { blob:b }))); } }
         if(e.blend) k.blend=e.blend; if(e.inktAuto) k.inktAuto=e.inktAuto; if(e.tatnet && !k.tatnet) k.tatnet=e.tatnet;   // wat de verwerking ook zou zetten
         const tex=new THREE.CanvasTexture(c); tex.encoding=THREE.sRGBEncoding; tex.anisotropy=maxAniso(); tex.needsUpdate=true;
         if(oud){ ttTijd.texOud=(ttTijd.texOud||0)+1; texLater.set(sleutel, { k, fp }); }   // later vernieuwen (texVersStap)
@@ -28318,7 +28401,7 @@ function maakTatnetGL(json, canvas) {
     if(tex) tex.__vers=true;   // net berekend (niet uit de cache): het herstel kan het 2D-plaatje eenmalig verversen
     if(tex && tex.image && tex.image.toBlob){
       const fpNa=texVingerafdruk(k);   // na de verwerking (blend opgelost, inktgebied erbij): ook daarop treffen
-      tex.image.toBlob(b=>{ if(b) texSchrijf(sleutel, { fpVoor:fp, fpNa, blob:b, blend:k.blend||null, inktAuto:k.inktAuto||null, tatnet:k.tatnet||null }); }, 'image/png');
+      texCacheBlob(tex.image, k.blend, b=>texSchrijf(sleutel, { fpVoor:fp, fpNa, blob:b, blend:k.blend||null, inktAuto:k.inktAuto||null, tatnet:k.tatnet||null }));   // review R4 ME-4
     }
     return tex;
   }
@@ -28334,7 +28417,7 @@ function maakTatnetGL(json, canvas) {
   async function textuurVers(sleutel, k){   // opnieuw maken en bewaren (staart van textuurVoor)
     const fp=texVingerafdruk(k), tex=await rebuildTextureFromKunst(k);
     if(tex && tex.image && tex.image.toBlob){ const fpNa=texVingerafdruk(k);
-      tex.image.toBlob(b=>{ if(b) texSchrijf(sleutel, { fpVoor:fp, fpNa, blob:b, blend:k.blend||null, inktAuto:k.inktAuto||null, tatnet:k.tatnet||null }); }, 'image/png'); }
+      texCacheBlob(tex.image, k.blend, b=>texSchrijf(sleutel, { fpVoor:fp, fpNa, blob:b, blend:k.blend||null, inktAuto:k.inktAuto||null, tatnet:k.tatnet||null })); }   // review R4 ME-4
     return tex;
   }
   const texLater=new Map(); let texVersT=0, texLaatsteTik=0, texVersGedaan=0;
@@ -28374,6 +28457,10 @@ function maakTatnetGL(json, canvas) {
     texDb().then(db=>{ if(!db) return; try{ const st=db.transaction('t','readwrite').objectStore('t'), q=st.getAllKeys();
       q.onsuccess=()=>{ for(const k of (q.result||[])) if(!houd.has(String(k).replace(/^g:/,''))) st.delete(k); }; }catch(e){ /* niets */ } });   // 'g:' = geometrie van dezelfde tattoo
   }
+  /* review R4 CL-8: de textuur-/geometriecache is herbouwbaar en deelt het quotum met de records; saveTattoo maakt hem leeg bij een
+     QuotaExceededError (true = leeggemaakt, wacht op de commit). */
+  window.__tattiesTexCacheLeeg=()=>texDb().then(db=> db ? new Promise(res=>{ try{ const tx=db.transaction('t','readwrite'); tx.objectStore('t').clear();
+    tx.oncomplete=()=>res(true); tx.onerror=()=>res(false); tx.onabort=()=>res(false); }catch(e){ res(false); } }) : false).catch(()=>false);
   window.__tattiesTexCache={ vingerafdruk:texVingerafdruk, wis:()=>texDb().then(db=>{ if(db) db.transaction('t','readwrite').objectStore('t').clear(); }) };   // dev
   // Bij herstel weten we het punt+normaal maar niet op welke mesh ze liggen.
   // Bij één samengevoegde mesh is dat pickMeshes[0]; bij meerdere meshes zoeken
@@ -28814,7 +28901,7 @@ function maakTatnetGL(json, canvas) {
   const START_HOGER=0;
   function startKaderMidden(top, beeldH){ return top*0.5-Math.max(0, beeldH-top*1.04)*0.5*START_HOGER; }
   function maakStartOpname(){
-    if(!renderer || !scene || !modelRoot) return null;
+    if(!renderer || !scene || !modelRoot || glContextWeg()) return null;   // review R4 CL-7
     const lang=(LICHAAM_GEN && LichaamMotor.geometry()) ? LichaamMotor.lengteCm()/100 : 1.8;
     if(haarObj && !haarObj.nieuw) haarObj.groep.visible=true;   // voor de kadermeting (staat hieronder ook aan)
     const top=startKaderTop(lang);
@@ -28843,7 +28930,7 @@ function maakTatnetGL(json, canvas) {
     finally{ renderer.setRenderTarget(null); rt.dispose(); renderer.setClearColor(cc,ca); scene.background=bg;
       if(selRing) selRing.visible=ringWas; if(ground) ground.visible=gv; if(vloerRaster) vloerRaster.visible=rv; if(key && kp) key.position.copy(kp);
       markers.forEach((m,i)=>{ if(m.obj) m.obj.visible=mz[i]; }); }
-    if(!buf) return null;
+    if(!buf || glContextWeg()) return null;   // review R4 CL-7: geen leeg beeld (en geen vingerafdruk) bewaren
     const c=document.createElement('canvas'); c.width=W; c.height=H;
     const x=c.getContext('2d'), id=x.createImageData(W,H);
     for(let y=0;y<H;y++){ const bron=(H-1-y)*W*4, doel=y*W*4;   // readPixels is bottom-up; randpixels terug naar de echte kleur
