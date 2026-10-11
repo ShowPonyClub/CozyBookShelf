@@ -1050,6 +1050,8 @@ input[type=range]:focus{box-shadow:none;border:none}
 .account-bericht{font-size:.85rem;line-height:1.4;margin:10px 0 0;color:var(--gedempt)}
 .account-bericht.fout{color:var(--invalid)}
 .account-bericht.ok{color:var(--accent)}
+.account-laatste-sync{font-size:var(--fs-xs,.76rem);line-height:1.4;margin:8px 0 0;color:var(--gedempt)}
+.account-laatste-sync.oud{color:var(--rood);font-weight:600}   /* review R3 AC-7: lang niet gesynct terwijl er wijzigingen wachten */
 .account-verwijder{display:block;margin:16px auto 0;background:none;border:none;color:var(--gevaar);font-size:.82rem;text-decoration:underline;cursor:pointer;padding:6px;min-height:44px}
 .account-verwijder:disabled{opacity:.5;cursor:not-allowed}
 .account-link{display:inline-block;margin-top:4px;background:none;border:none;color:var(--gedempt);font-size:.82rem;text-decoration:underline;cursor:pointer;padding:6px;min-height:44px}
@@ -3963,6 +3965,7 @@ body{min-height:calc(100svh - 16px - env(safe-area-inset-top,0px) - env(safe-are
       <div class="account-knoppen" id="account-sync-rij">
         <button type="button" class="knop-sec" id="account-sync" data-i18n="account.sync_knop">Nu synchroniseren</button>
       </div>
+      <p class="account-laatste-sync" id="account-laatste-sync" hidden></p>
       <div class="account-knoppen" style="margin-top:8px">
         <button type="button" class="knop-sec" id="account-uitloggen" data-i18n="account.uitloggen">Uitloggen</button>
       </div>
@@ -12828,7 +12831,7 @@ const I18N = {
     'legal.terms_titel':'Gebruiksvoorwaarden','legal.privacy_titel':'Privacybeleid','legal.bijw':'Laatst bijgewerkt: 9 oktober 2026','legal.bijw_privacy':'Laatst bijgewerkt: 9 oktober 2026',
     'legal.terms_body':'<h3>1. Over Tatties</h3><p>Tatties is een persoonlijke tattoo-tracking-app. De app werkt op je apparaat en slaat je gegevens daar lokaal op. Met een optioneel account kun je je collectie tussen apparaten synchroniseren.</p><p>Tatties is nu gratis. Er kunnen later betaalde functies of een abonnement bijkomen; dan zie je vooraf in de app wat het kost en kies je zelf of je het neemt. Founders (de eerste 300 accounts) houden alle functies van de app gratis, ook functies die later betaald worden, zolang hun account bestaat.</p><p>Tatties is niet bedoeld voor kinderen onder de 16; voor een account moet je minstens 16 zijn.</p><h3>2. Toegestaan gebruik</h3><p>Je mag Tatties gebruiken voor je eigen collectie, ook als tattoo-artiest of studio, bijvoorbeeld om werk te laten zien of met een klant te bespreken. Je mag de app niet verspreiden, doorverkopen of reverse-engineeren.</p><p>Het optionele account en de cloud-sync zijn bedoeld voor je eigen collectie. Gebruik ze niet om materiaal op te slaan dat onrechtmatig is of waar je geen recht op hebt, en probeer geen limieten te omzeilen, uploads te automatiseren of de dienst anderszins onredelijk te belasten. Elk account heeft een redelijke grens voor opslag en aantal tattoos; de app meldt het als je die bereikt. Wordt een account in strijd met deze voorwaarden gebruikt, dan kunnen we het (inclusief de cloud-gegevens) opschorten of verwijderen, waar redelijkerwijs mogelijk na een waarschuwing. Je lokale collectie op je apparaat blijft daarbij staan.</p><h3>3. Jouw content</h3><p>Alle tattoofoto\'s en gegevens die je toevoegt, blijven van jou. Wij claimen geen eigendom over jouw content. Je bent zelf verantwoordelijk voor het recht om de foto\'s te gebruiken die je uploadt.</p><h3>4. Disclaimer</h3><p>De app wordt aangeboden "as is", zonder enige garantie. Voor zover de wet dat toestaat zijn wij niet aansprakelijk voor gegevensverlies, storingen of schade die voortkomt uit je gebruik van de app. Nazorgtips in de app zijn algemene verzorgingsadviezen, geen medisch advies; volg de aanwijzingen van je artiest of een arts.</p><h3>5. Wijzigingen</h3><p>We kunnen deze voorwaarden van tijd tot tijd bijwerken. Door de app te blijven gebruiken na wijzigingen ga je akkoord met de nieuwe voorwaarden.</p><h3>6. Toepasselijk recht</h3><p>Op deze voorwaarden is Nederlands recht van toepassing. Gebruik je de app uit de App Store, dan geldt daarnaast de standaard-licentieovereenkomst van Apple (Licensed Application End User License Agreement); deze voorwaarden vullen die aan.</p><h3>7. Contact</h3><p><a href="mailto:hello@tatties.app">hello@tatties.app</a></p><h3>8. Credits</h3><p>Het 3D-lichaam is gemaakt met MakeHuman (CC0). De boxershort is <a href="http://www.makehumancommunity.org/clothes/boxer_shorts.html" target="_blank" rel="noopener">Boxer Shorts</a> van WojackOWL (MakeHuman Community), licentie CC BY, aangepast voor Tatties; de slip is zijn <a href="http://www.makehumancommunity.org/clothes/male_high_cut_briefs.html" target="_blank" rel="noopener">Male - High Cut Briefs</a> (CC BY). De bikini is <a href="https://static.makehumancommunity.org/assets/assetpacks/underwear02.html" target="_blank" rel="noopener">Brazilian Bikini</a> van punkduck (MakeHuman asset pack Underwear 02), licentie CC BY 3.0, aangepast voor Tatties. Het horloge is <a href="https://skfb.ly/pMITT" target="_blank" rel="noopener">Gold Watch</a> van nadeeshalakshan03, licentie CC BY 4.0, aangepast voor Tatties. De voorbeeldtattoos op het welkomstscherm komen uit flash van het Smithsonian American Art Museum en etsen van Wenceslaus Hollar (The Metropolitan Museum of Art), publiek domein (CC0). De app gebruikt open source: <a href="https://github.com/mrdoob/three.js/blob/dev/LICENSE" target="_blank" rel="noopener">three.js</a> en <a href="https://github.com/supabase/supabase-js/blob/master/LICENSE" target="_blank" rel="noopener">supabase-js</a> (MIT-licentie, copyright bij de makers).</p>',
     'legal.privacy_body':'<h3>Wat Tatties opslaat</h3><p>Tatties slaat de volgende gegevens <strong>lokaal op je apparaat</strong> op (in de ingebouwde database van de app):</p><ul><li>Tattoo-info die je invult: naam, artiest, studio, stijl, datum, notities, kosten, sessies</li><li>Foto\'s die je uploadt of maakt</li><li>Je lichaam (vorm, leeftijd, lengte, gewicht en maten) en huidskleur</li></ul><p>Je collectie, foto\'s en lichaam gaan standaard niet naar een server. Het herkennen en uitsnijden van je tattoo gebeurt op je apparaat zelf; je foto\'s gaan niet naar een AI-dienst. Je collectie verlaat je apparaat alleen als je zelf cloud-sync gebruikt. Een anonieme dagelijkse telling gaat alleen mee als je daar ja op zegt (zie hieronder).</p><p>In de iPhone-app kun je een nazorg-herinnering aanzetten; die meldingen worden op je telefoon zelf gepland. De fotokiezer toont je recente foto\'s alleen op je telefoon; de app gebruikt alleen de foto die je kiest.</p><h3>Optionele cloud-sync</h3><p>Als je een account aanmaakt, worden je collectie (inclusief foto\'s) en je lichaam (vorm, leeftijd, lengte, gewicht en maten) tijdens de verzending versleuteld en opgeslagen op een beveiligde server in de EU (Supabase, Stockholm, Zweden). Jij bepaalt wanneer er gesynchroniseerd wordt. Je kunt je account en alle bijbehorende cloud-gegevens op elk moment verwijderen via Instellingen → Account. Log je in met Google of Apple, dan krijgen we van hen alleen je e-mailadres (bij Apple kan dat een doorstuuradres zijn).</p><h3>Wat we NIET verzamelen</h3><ul><li>Geen gedragstracking: geen klikpaden, geen schermen, geen advertentie-profielen</li><li>Geen gebruiksstatistieken, behalve de anonieme dagelijkse telling als je die zelf aanzet (zie hieronder)</li><li>Geen advertenties of advertentienetwerken</li><li>Geen verkoop van je gegevens en geen gegevens naar advertentiebedrijven (de dienstverleners die de app laten werken staan hieronder)</li></ul><h3>Anonieme telling (alleen als je ja zegt)</h3><p>De app vraagt je een keer of je anoniem gebruik wilt delen. Dat staat <strong>standaard uit</strong>; in de instellingen (\'Anoniem gebruik delen\') kun je het altijd aan- of uitzetten. De app stuurt hooguit \u00e9\u00e9n bericht per dag naar onze eigen server in de EU met: een willekeurig nummer dat de app zelf aanmaakt (geen account- of apparaat-id), de datum, de app-versie, je taalkeuze, of je de 3D-weergave hebt geopend en in welke bandbreedte je aantal tattoos valt (bijvoorbeeld \u201c4-10\u201d). Geen namen, geen foto\'s, geen tattoo-gegevens, geen locatie, geen klikgedrag. We gebruiken het voor \u00e9\u00e9n vraag: komen mensen terug. Dat doen we alleen met je toestemming, en het nummer is aan niets anders gekoppeld. Zet je het uit, dan stopt het versturen meteen; eerder verstuurde rijen bevatten niets dat naar jou te herleiden is.</p><h3>Dienstverleners</h3><p>Deze bedrijven verwerken gegevens in onze opdracht, alleen om de app te laten werken: <strong>Supabase</strong> (database, opslag en inloggen; servers in de EU, Stockholm) voor je account en cloud-sync; <strong>Resend</strong> voor accountmails (bevestiging, wachtwoord resetten; ontvangt alleen je e-mailadres en het bericht); <strong>Apple</strong> en <strong>Google</strong> alleen als je met hen inlogt (zij geven ons je e-mailadres). Zonder account gebruikt de app geen van deze diensten.</p><h3>Bewaartermijnen</h3><p>Je cloud-gegevens bewaren we tot je je account verwijdert; dan worden ze binnen 30 dagen volledig gewist. Rijen van de anonieme telling bewaren we hooguit 13 maanden. Lokale gegevens staan alleen op je apparaat en worden door jou beheerd.</p><h3>Leeftijd</h3><p>Tatties is niet bedoeld voor kinderen onder de 16. We verzamelen niet bewust gegevens van hen; is dat toch gebeurd, mail ons dan en we verwijderen ze.</p><h3>Jouw rechten (AVG)</h3><ul><li><strong>Inzien &amp; corrigeren</strong> - al je gegevens zijn zichtbaar en aanpasbaar in de app</li><li><strong>Lokale gegevens wissen</strong> - gebruik "Alle lokale data wissen" in Instellingen, of verwijder de app (webversie: wis de sitegegevens voor tatties.app)</li><li><strong>Cloud-gegevens wissen</strong> - verwijder je account in Instellingen → Account</li><li><strong>Overdraagbaarheid</strong> - gebruik de Exporteren-functie om een kopie van al je gegevens te downloaden</li></ul><h3>Verwerkingsverantwoordelijke</h3><p>Tatties, Nederland - <a href="mailto:hello@tatties.app">hello@tatties.app</a></p>',
-    'inst.account':'Account & cloud-sync','inst.account_uit':'Niet ingelogd','account.uitleg':'Optioneel. Synchroniseer je tattoos en foto\'s tussen toestellen. Zonder account blijft alles op dit toestel.','account.email_ph':'E-mailadres','account.ww_ph':'Wachtwoord','account.inloggen':'Inloggen','account.aanmaken':'Account aanmaken','account.uitloggen':'Uitloggen','account.ingelogd_als':'Ingelogd als','account.bezig':'Bezig…','account.check_mail':'Kijk in {email} voor de bevestigingslink.','account.ingelogd':'Ingelogd. Welkom terug!','account.uitgelogd':'Uitgelogd.','sw.update':'Er staat een nieuwe versie van Tatties klaar.','sync.klok_skew':'Je klok loopt ~{min} min af. Zet hem op automatisch.','sync.conflict':'Op twee toestellen bewerkt: {n} tattoo{s}. Allebei bewaard; de kopie heeft de datum in de naam.','sync.undelete':'Bewaard: {n} tattoo{s}, op een ander toestel verwijderd maar hier daarna nog bewerkt.','sync.te_groot':'Niet gesynchroniseerd, een foto is groter dan 10 MB: {namen}. Kies via bewerken een kleinere foto.','sync.quota':'Cloudopslag vol (500 MB, 3.000 foto\'s of 2.000 tattoos). Verwijder wat, of exporteer een back-up.','sync.conflict_versie':'{naam} (versie van {datum})','sw.ververs':'Ververs','sync.bezig':'Synchroniseren…','sync.klaar':'Bijgewerkt','account.fout_velden':'Vul een e-mailadres en wachtwoord in.','account.fout_generiek':'Er ging iets mis. Probeer het later opnieuw.','account.offline':'Cloud-sync is nu niet beschikbaar (geen verbinding).','account.backup_uitleg':'Zet je gegevens veilig in de cloud, inclusief foto\'s.','account.backup_knop':'Back-up maken','account.backup_bezig':'Bezig met de back-up…','account.backup_klaar':'{n} item{s} naar de cloud gezet.','account.backup_fout':'Back-up mislukt. Probeer het later opnieuw.','account.pull_knop':'Ophalen uit cloud','account.pull_bezig':'Bezig met ophalen…','account.pull_klaar':'{n} item{s} opgehaald uit de cloud.','account.pull_niks':'Niets nieuws om op te halen.','account.pull_fout':'Ophalen mislukt. Probeer het later opnieuw.','account.sync_uitleg':'','account.sync_knop':'Nu synchroniseren','account.sync_bezig':'Bezig met synchroniseren…','account.sync_klaar':'Gesynchroniseerd: {omhoog} verstuurd, {omlaag} opgehaald.','account.sync_niks':'Alles is al up-to-date.','account.sync_fout':'Synchroniseren mislukt. Probeer het later opnieuw.','account.verwijder_knop':'Account verwijderen','account.verwijder_bevestig':'Je account en alle clouddata verwijderen? Je lokale collectie blijft. Dit kan niet ongedaan worden gemaakt.','account.verwijder_bezig':'Account verwijderen…','account.verwijder_klaar':'Je account en cloud-gegevens zijn verwijderd.','account.verwijder_fout':'Verwijderen mislukt. Probeer het later opnieuw.','account.fout_login':'E-mail of wachtwoord klopt niet.','account.fout_onbevestigd':'E-mail nog niet bevestigd. Kijk in je inbox (en spam).','account.resend_knop':'Bevestigingsmail opnieuw sturen','account.resend_klaar':'Bevestigingsmail opnieuw verstuurd. Check je inbox.','account.reset_knop':'Wachtwoord vergeten?','account.reset_geen_email':'Vul je e-mailadres in.','account.reset_natief':'We openen Tatties in Safari. Stel daar je wachtwoord opnieuw in en log hier in.','account.reset_klaar':'Kijk in je mail. Als er een account met dit adres is, hebben we een link gestuurd om een nieuw wachtwoord in te stellen.','account.herstel_titel':'Stel een nieuw wachtwoord in.','account.herstel_ph':'Nieuw wachtwoord','account.herstel_knop':'Wachtwoord opslaan','account.ww_kort':'Kies een wachtwoord van minstens 8 tekens.','account.ww_zwak':'Kies een wachtwoord van minstens 8 tekens met een letter en een cijfer.','account.mail_druk':'Het is even druk: de mail kon niet verstuurd worden. Probeer het over een uur opnieuw.','account.herstel_klaar':'Je wachtwoord is bijgewerkt. Je bent ingelogd.','account.herstel_fout':'Opslaan mislukt. Vraag eventueel een nieuwe resetlink aan.','account.google':'Doorgaan met Google','account.of':'of',
+    'inst.account':'Account & cloud-sync','inst.account_uit':'Niet ingelogd','account.uitleg':'Optioneel. Synchroniseer je tattoos en foto\'s tussen toestellen. Zonder account blijft alles op dit toestel.','account.email_ph':'E-mailadres','account.ww_ph':'Wachtwoord','account.inloggen':'Inloggen','account.aanmaken':'Account aanmaken','account.uitloggen':'Uitloggen','account.ingelogd_als':'Ingelogd als','account.bezig':'Bezig…','account.check_mail':'Kijk in {email} voor de bevestigingslink.','account.ingelogd':'Ingelogd. Welkom terug!','account.uitgelogd':'Uitgelogd.','sw.update':'Er staat een nieuwe versie van Tatties klaar.','sync.klok_skew':'Je klok loopt ~{min} min af. Zet hem op automatisch.','sync.conflict':'Op twee toestellen bewerkt: {n} tattoo{s}. Allebei bewaard; de kopie heeft de datum in de naam.','sync.undelete':'Bewaard: {n} tattoo{s}, op een ander toestel verwijderd maar hier daarna nog bewerkt.','sync.te_groot':'Niet gesynchroniseerd, een foto is groter dan 10 MB: {namen}. Kies via bewerken een kleinere foto.','sync.quota':'Cloudopslag vol (500 MB, 3.000 foto\'s of 2.000 tattoos). Verwijder wat, of exporteer een back-up.','sync.conflict_versie':'{naam} (versie van {datum})','sw.ververs':'Ververs','sync.bezig':'Synchroniseren…','sync.klaar':'Bijgewerkt','account.fout_velden':'Vul een e-mailadres en wachtwoord in.','account.fout_generiek':'Er ging iets mis. Probeer het later opnieuw.','account.offline':'Cloud-sync is nu niet beschikbaar (geen verbinding).','account.backup_uitleg':'Zet je gegevens veilig in de cloud, inclusief foto\'s.','account.backup_knop':'Back-up maken','account.backup_bezig':'Bezig met de back-up…','account.backup_klaar':'{n} item{s} naar de cloud gezet.','account.backup_fout':'Back-up mislukt. Probeer het later opnieuw.','account.pull_knop':'Ophalen uit cloud','account.pull_bezig':'Bezig met ophalen…','account.pull_klaar':'{n} item{s} opgehaald uit de cloud.','account.pull_niks':'Niets nieuws om op te halen.','account.pull_fout':'Ophalen mislukt. Probeer het later opnieuw.','account.sync_uitleg':'','account.sync_knop':'Nu synchroniseren','account.sync_bezig':'Bezig met synchroniseren…','account.sync_klaar':'Gesynchroniseerd: {omhoog} verstuurd, {omlaag} opgehaald.','account.sync_niks':'Alles is al up-to-date.','account.sync_fout':'Synchroniseren mislukt. Probeer het later opnieuw.','account.sync_laatst':'Laatst gesynchroniseerd: {wanneer}','account.sync_laatst_oud':'Laatst gesynchroniseerd: {wanneer}. Recente wijzigingen staan nog niet in de cloud.','account.sync_nooit':'Nog niet gesynchroniseerd','account.sync_zojuist':'zojuist','account.sync_min':'{n} min geleden','account.sync_uur':'{n} uur geleden','account.verwijder_knop':'Account verwijderen','account.verwijder_bevestig':'Je account en alle clouddata verwijderen? Je lokale collectie blijft. Dit kan niet ongedaan worden gemaakt.','account.verwijder_bezig':'Account verwijderen…','account.verwijder_klaar':'Je account en cloud-gegevens zijn verwijderd.','account.verwijder_fout':'Verwijderen mislukt. Probeer het later opnieuw.','account.fout_login':'E-mail of wachtwoord klopt niet.','account.fout_onbevestigd':'E-mail nog niet bevestigd. Kijk in je inbox (en spam).','account.resend_knop':'Bevestigingsmail opnieuw sturen','account.resend_klaar':'Bevestigingsmail opnieuw verstuurd. Check je inbox.','account.reset_knop':'Wachtwoord vergeten?','account.reset_geen_email':'Vul je e-mailadres in.','account.reset_natief':'We openen Tatties in Safari. Stel daar je wachtwoord opnieuw in en log hier in.','account.reset_klaar':'Kijk in je mail. Als er een account met dit adres is, hebben we een link gestuurd om een nieuw wachtwoord in te stellen.','account.herstel_titel':'Stel een nieuw wachtwoord in.','account.herstel_ph':'Nieuw wachtwoord','account.herstel_knop':'Wachtwoord opslaan','account.ww_kort':'Kies een wachtwoord van minstens 8 tekens.','account.ww_zwak':'Kies een wachtwoord van minstens 8 tekens met een letter en een cijfer.','account.mail_druk':'Het is even druk: de mail kon niet verstuurd worden. Probeer het over een uur opnieuw.','account.herstel_klaar':'Je wachtwoord is bijgewerkt. Je bent ingelogd.','account.herstel_fout':'Opslaan mislukt. Vraag eventueel een nieuwe resetlink aan.','account.google':'Doorgaan met Google','account.of':'of',
     'stats.titel':'Statistieken','stats.collectie':'Collectie','stats.aantal':'Aantal tattoos','stats.uitgegeven':'Totaal uitgegeven',
     'stats.zituren':'Totale zituren','stats.gempijn':'Gemiddelde pijn','stats.geheeld':'Geheeld','stats.perstijl':'Per stijl','stats.perartiest':'Per artiest',
     'stats.perdeel':'Per lichaamsdeel','stats.tijdlijn':'Tijdlijn (per jaar)','stats.wishlist':'Wishlist','stats.hoogtepunten':'Hoogtepunten','stats.duurste':'Duurste tattoo','stats.lievelingsartiest':'Lievelingsartiest',
@@ -13050,7 +13053,7 @@ const I18N = {
     'legal.terms_titel':'Terms of Use','legal.privacy_titel':'Privacy policy','legal.bijw':'Last updated: October 9, 2026','legal.bijw_privacy':'Last updated: October 9, 2026',
     'legal.terms_body':'<h3>1. About Tatties</h3><p>Tatties is a personal tattoo-tracking app. It runs on your device and stores your data locally there. An optional account lets you sync your collection across devices.</p><p>Tatties is free for now. Paid features or a subscription may be added later; if so, the app shows you the price first and you choose whether to take it. Founders (the first 300 accounts) keep every feature of the app free, including features that later become paid, for as long as their account exists.</p><p>Tatties is not intended for children under 16; you must be at least 16 to create an account.</p><h3>2. Permitted use</h3><p>You may use Tatties for your own collection, including as a tattoo artist or studio, for example to show work or discuss it with a client. You may not redistribute, resell, or reverse-engineer the app.</p><p>The optional account and cloud sync are meant for your own collection. Do not use them to store material that is unlawful or that you have no right to hold, and do not try to circumvent limits, automate uploads or otherwise put an unreasonable load on the service. Each account has a fair limit on storage and number of tattoos; the app tells you when you reach it. If an account is used in breach of these terms, we may suspend or delete it (including its cloud data), after a warning where reasonably possible. Your local collection on your device is not affected.</p><h3>3. Your content</h3><p>All tattoo photos and data you add remain yours. We make no claim of ownership over your content. You are responsible for ensuring you have the right to use any photos you upload.</p><h3>4. Disclaimer</h3><p>The app is provided "as is", without warranties of any kind. To the extent permitted by law, we are not liable for data loss, service interruptions, or any damages arising from your use of the app. Aftercare tips in the app are general care guidance, not medical advice; follow the instructions of your artist or a doctor.</p><h3>5. Changes</h3><p>We may update these terms from time to time. Continued use of the app after changes constitutes your acceptance of the new terms.</p><h3>6. Governing law</h3><p>These terms are governed by the laws of the Netherlands. If you use the app from the App Store, Apple\'s standard Licensed Application End User License Agreement also applies; these terms are in addition to it.</p><h3>7. Contact</h3><p><a href="mailto:hello@tatties.app">hello@tatties.app</a></p><h3>8. Credits</h3><p>The 3D body is made with MakeHuman (CC0). The boxer shorts are <a href="http://www.makehumancommunity.org/clothes/boxer_shorts.html" target="_blank" rel="noopener">Boxer Shorts</a> by WojackOWL (MakeHuman Community), licensed CC BY, adapted for Tatties; the briefs are his <a href="http://www.makehumancommunity.org/clothes/male_high_cut_briefs.html" target="_blank" rel="noopener">Male - High Cut Briefs</a> (CC BY). The bikini is <a href="https://static.makehumancommunity.org/assets/assetpacks/underwear02.html" target="_blank" rel="noopener">Brazilian Bikini</a> by punkduck (MakeHuman asset pack Underwear 02), licensed CC BY 3.0, adapted for Tatties. The watch is <a href="https://skfb.ly/pMITT" target="_blank" rel="noopener">Gold Watch</a> by nadeeshalakshan03, licensed CC BY 4.0, adapted for Tatties. The sample tattoos on the welcome screen come from flash in the Smithsonian American Art Museum and etchings by Wenceslaus Hollar (The Metropolitan Museum of Art), public domain (CC0). The app uses open-source software: <a href="https://github.com/mrdoob/three.js/blob/dev/LICENSE" target="_blank" rel="noopener">three.js</a> and <a href="https://github.com/supabase/supabase-js/blob/master/LICENSE" target="_blank" rel="noopener">supabase-js</a> (MIT licence, copyright with their authors).</p>',
     'legal.privacy_body':'<h3>What Tatties stores</h3><p>Tatties stores the following data <strong>locally on your device</strong> (in the app\'s built-in database):</p><ul><li>Tattoo info you enter: name, artist, studio, style, date, notes, cost, sessions</li><li>Photos you upload or take</li><li>Your body (shape, age, height, weight and measurements) and skin tone</li></ul><p>Your collection, photos and body are not sent to any server by default. Recognising and cutting out your tattoo happens on your device itself; your photos do not go to an AI service. Your collection only leaves your device when you use cloud sync yourself. An anonymous daily count is only sent if you say yes to it (see below).</p><p>In the iPhone app you can turn on an aftercare reminder; those notifications are scheduled on your phone itself. The photo picker shows your recent photos only on your phone; the app only uses the photo you choose.</p><h3>Optional cloud sync</h3><p>If you create an account, your collection (including photos) and your body (shape, age, height, weight and measurements) are encrypted in transit and stored on a secure server in the EU (Supabase, Stockholm, Sweden). You control when sync happens. You can delete your account and all associated cloud data at any time via Settings → Account. If you sign in with Google or Apple, we only receive your email address from them (with Apple, this can be a forwarding address).</p><h3>What we do NOT collect</h3><ul><li>No behavioural tracking: no click paths, no screen tracking, no advertising profiles</li><li>No usage statistics, except the anonymous daily count if you switch it on yourself (see below)</li><li>No advertising or ad networks</li><li>No selling of your data and no data to advertising companies (the service providers that make the app work are listed below)</li></ul><h3>Anonymous count (only if you say yes)</h3><p>The app asks you once whether you want to share anonymous usage. It is <strong>off by default</strong>; you can switch it on or off at any time in Settings (\'Share anonymous usage\'). The app sends at most one message per day to our own server in the EU containing: a random number the app generates itself (not an account or device id), the date, the app version, your language, whether you opened the 3D view, and which band your number of tattoos falls into (for example \u201c4-10\u201d). No names, no photos, no tattoo data, no location, no click tracking. We use it for one question: do people come back. We only do this with your consent, and the number is not linked to anything else. Switch it off and sending stops immediately; rows sent earlier contain nothing that identifies you.</p><h3>Service providers</h3><p>These companies process data on our behalf, only to make the app work: <strong>Supabase</strong> (database, storage and sign-in; servers in the EU, Stockholm) for your account and cloud sync; <strong>Resend</strong> for account emails (confirmation, password reset; it only receives your email address and the message); <strong>Apple</strong> and <strong>Google</strong> only if you sign in with them (they give us your email address). Without an account the app uses none of these services.</p><h3>Retention</h3><p>We keep your cloud data until you delete your account; it is then fully erased within 30 days. Rows of the anonymous count are kept for at most 13 months. Local data lives only on your device and is managed by you.</p><h3>Age</h3><p>Tatties is not intended for children under 16. We do not knowingly collect their data; if that has happened anyway, email us and we will delete it.</p><h3>Your rights (GDPR)</h3><ul><li><strong>Access &amp; correct</strong> - all your data is visible and editable in the app</li><li><strong>Delete local data</strong> - use "Erase all local data" in Settings, or delete the app (web version: clear the site data for tatties.app)</li><li><strong>Delete cloud data</strong> - delete your account in Settings → Account</li><li><strong>Portability</strong> - use the Export function to download a copy of all your data</li></ul><h3>Data controller</h3><p>Tatties, the Netherlands - <a href="mailto:hello@tatties.app">hello@tatties.app</a></p>',
-    'inst.account':'Account & cloud sync','inst.account_uit':'Not signed in','account.uitleg':'Optional. Sync your tattoos and photos across devices. Without an account, everything stays on this device.','account.email_ph':'Email address','account.ww_ph':'Password','account.inloggen':'Sign in','account.aanmaken':'Create account','account.uitloggen':'Sign out','account.ingelogd_als':'Signed in as','account.bezig':'Working…','account.check_mail':'Check {email} for the confirmation link.','account.ingelogd':'Signed in. Welcome back!','account.uitgelogd':'Signed out.','sw.update':'A new version of Tatties is ready.','sync.klok_skew':'Your clock is ~{min} min off. Set it to automatic.','sync.conflict':'Edited on two devices: {n} tattoo{s}. Both kept; the copy has the date in its name.','sync.undelete':'Kept: {n} tattoo{s}, deleted on another device but edited here afterwards.','sync.te_groot':'Not synced, a photo is larger than 10 MB: {namen}. Pick a smaller photo via edit.','sync.quota':'Cloud storage full (500 MB, 3,000 photos or 2,000 tattoos). Delete some, or export a backup.','sync.conflict_versie':'{naam} (version from {datum})','sw.ververs':'Refresh','sync.bezig':'Syncing…','sync.klaar':'Updated','account.fout_velden':'Enter an email address and password.','account.fout_generiek':'Something went wrong. Please try again later.','account.offline':'Cloud sync is unavailable right now (no connection).','account.backup_uitleg':'Save your data safely to the cloud, including photos.','account.backup_knop':'Back up now','account.backup_bezig':'Backing up…','account.backup_klaar':'Backed up {n} item{s} to the cloud.','account.backup_fout':'Backup failed. Please try again later.','account.pull_knop':'Download from cloud','account.pull_bezig':'Downloading…','account.pull_klaar':'Downloaded {n} item{s} from the cloud.','account.pull_niks':'Nothing new to download.','account.pull_fout':'Download failed. Please try again later.','account.sync_uitleg':'','account.sync_knop':'Sync now','account.sync_bezig':'Syncing…','account.sync_klaar':'Synced: {omhoog} uploaded, {omlaag} downloaded.','account.sync_niks':'Everything is already up to date.','account.sync_fout':'Sync failed. Please try again later.','account.verwijder_knop':'Delete account','account.verwijder_bevestig':'Delete your account and all cloud data? Your local collection stays. This cannot be undone.','account.verwijder_bezig':'Deleting account…','account.verwijder_klaar':'Your account and cloud data have been deleted.','account.verwijder_fout':'Deletion failed. Please try again later.','account.fout_login':'Email or password is incorrect.','account.fout_onbevestigd':'Email not confirmed yet. Check your inbox (and spam).','account.resend_knop':'Resend confirmation email','account.resend_klaar':'Confirmation email resent. Check your inbox.','account.reset_knop':'Forgot password?','account.reset_geen_email':'Enter your email address.','account.reset_natief':'We\'ll open Tatties in Safari. Reset your password there, then sign in here.','account.reset_klaar':'Check your inbox. If there\'s an account with this email, we\'ve sent a link to set a new password.','account.herstel_titel':'Set a new password.','account.herstel_ph':'New password','account.herstel_knop':'Save password','account.ww_kort':'Choose a password of at least 8 characters.','account.ww_zwak':'Choose a password of at least 8 characters with a letter and a digit.','account.mail_druk':'It is busy right now: the email could not be sent. Please try again in an hour.','account.herstel_klaar':'Your password has been updated. You\'re signed in.','account.herstel_fout':'Saving failed. Request a new reset link if needed.','account.google':'Continue with Google','account.of':'or',
+    'inst.account':'Account & cloud sync','inst.account_uit':'Not signed in','account.uitleg':'Optional. Sync your tattoos and photos across devices. Without an account, everything stays on this device.','account.email_ph':'Email address','account.ww_ph':'Password','account.inloggen':'Sign in','account.aanmaken':'Create account','account.uitloggen':'Sign out','account.ingelogd_als':'Signed in as','account.bezig':'Working…','account.check_mail':'Check {email} for the confirmation link.','account.ingelogd':'Signed in. Welcome back!','account.uitgelogd':'Signed out.','sw.update':'A new version of Tatties is ready.','sync.klok_skew':'Your clock is ~{min} min off. Set it to automatic.','sync.conflict':'Edited on two devices: {n} tattoo{s}. Both kept; the copy has the date in its name.','sync.undelete':'Kept: {n} tattoo{s}, deleted on another device but edited here afterwards.','sync.te_groot':'Not synced, a photo is larger than 10 MB: {namen}. Pick a smaller photo via edit.','sync.quota':'Cloud storage full (500 MB, 3,000 photos or 2,000 tattoos). Delete some, or export a backup.','sync.conflict_versie':'{naam} (version from {datum})','sw.ververs':'Refresh','sync.bezig':'Syncing…','sync.klaar':'Updated','account.fout_velden':'Enter an email address and password.','account.fout_generiek':'Something went wrong. Please try again later.','account.offline':'Cloud sync is unavailable right now (no connection).','account.backup_uitleg':'Save your data safely to the cloud, including photos.','account.backup_knop':'Back up now','account.backup_bezig':'Backing up…','account.backup_klaar':'Backed up {n} item{s} to the cloud.','account.backup_fout':'Backup failed. Please try again later.','account.pull_knop':'Download from cloud','account.pull_bezig':'Downloading…','account.pull_klaar':'Downloaded {n} item{s} from the cloud.','account.pull_niks':'Nothing new to download.','account.pull_fout':'Download failed. Please try again later.','account.sync_uitleg':'','account.sync_knop':'Sync now','account.sync_bezig':'Syncing…','account.sync_klaar':'Synced: {omhoog} uploaded, {omlaag} downloaded.','account.sync_niks':'Everything is already up to date.','account.sync_fout':'Sync failed. Please try again later.','account.sync_laatst':'Last synced: {wanneer}','account.sync_laatst_oud':'Last synced: {wanneer}. Recent changes aren\'t in the cloud yet.','account.sync_nooit':'Not synced yet','account.sync_zojuist':'just now','account.sync_min':'{n} min ago','account.sync_uur':'{n} h ago','account.verwijder_knop':'Delete account','account.verwijder_bevestig':'Delete your account and all cloud data? Your local collection stays. This cannot be undone.','account.verwijder_bezig':'Deleting account…','account.verwijder_klaar':'Your account and cloud data have been deleted.','account.verwijder_fout':'Deletion failed. Please try again later.','account.fout_login':'Email or password is incorrect.','account.fout_onbevestigd':'Email not confirmed yet. Check your inbox (and spam).','account.resend_knop':'Resend confirmation email','account.resend_klaar':'Confirmation email resent. Check your inbox.','account.reset_knop':'Forgot password?','account.reset_geen_email':'Enter your email address.','account.reset_natief':'We\'ll open Tatties in Safari. Reset your password there, then sign in here.','account.reset_klaar':'Check your inbox. If there\'s an account with this email, we\'ve sent a link to set a new password.','account.herstel_titel':'Set a new password.','account.herstel_ph':'New password','account.herstel_knop':'Save password','account.ww_kort':'Choose a password of at least 8 characters.','account.ww_zwak':'Choose a password of at least 8 characters with a letter and a digit.','account.mail_druk':'It is busy right now: the email could not be sent. Please try again in an hour.','account.herstel_klaar':'Your password has been updated. You\'re signed in.','account.herstel_fout':'Saving failed. Request a new reset link if needed.','account.google':'Continue with Google','account.of':'or',
     'stats.titel':'Statistics','stats.collectie':'Collection','stats.aantal':'Number of tattoos','stats.uitgegeven':'Total spent',
     'stats.zituren':'Total chair time','stats.gempijn':'Average pain','stats.geheeld':'Healed','stats.perstijl':'By style','stats.perartiest':'By artist',
     'stats.perdeel':'By body part','stats.tijdlijn':'Timeline (by year)','stats.wishlist':'Wishlist','stats.hoogtepunten':'Highlights','stats.duurste':'Most expensive tattoo','stats.lievelingsartiest':'Favourite artist',
@@ -13332,7 +13335,7 @@ function createTattoo(overrides = {}) {
    ============================================================ */
 // App-versie (semver, handmatig ophogen bij een release). Bij een bump ook de
 // CACHE-naam in sw.js meebumpen, zodat clients de nieuwe build ophalen.
-const APP_VERSIE = '0.4.12';
+const APP_VERSIE = '0.4.13';
 
 /* Dev-haken die de CLOUD raken hangen alleen op een ontwikkelmachine aan window. Ze zijn geen
    lek op zichzelf (zonder XSS roept niemand ze aan, en CSP + esc() houden XSS tegen), maar ze
@@ -13406,6 +13409,94 @@ function signaal(soort, detail) {
   } catch (e) { /* nooit storen */ }
 }
 window.__tattiesSignaal = signaal;   // dev
+
+/* review R3 AC-7: is een syncfout van voorbijgaande aard (offline, netwerk weg, sessie verlopen, server even onbereikbaar)? Dan
+   geen signaal: de volgende ronde probeert het gewoon opnieuw. Puur (sync.test.js). */
+function syncFoutTijdelijk(err, online) {
+  if (online === false || !err) return true;
+  const st = +(err.status || err.statusCode || 0) || 0;
+  if (st === 401 || st === 408 || st === 429 || (st >= 502 && st <= 504)) return true;
+  if (/AuthRetryableFetchError|FunctionsFetchError|AbortError|TimeoutError/.test(String(err.name || ''))) return true;
+  const code = String(err.code || '');
+  if (code === 'PGRST301' || code === '57014') return true;   // JWT verlopen, statement-timeout
+  const m = String((typeof err === 'string') ? err : (err.message || ''));
+  return /failed to fetch|load failed|networkerror|network request failed|fetch failed|network connection|timed out|timeout|aborted|jwt expired|offline/i.test(m);
+}
+/* review R3 AC-7: korte omschrijving voor signaal(): stap, foutcode en bericht, zonder ids, adressen of rijwaarden (de 'details' van
+   PostgREST bevatten de rij en gaan dus niet mee). Hooguit 120 tekens. Puur (sync.test.js). */
+function syncFoutDetail(err, stap) {
+  const e = (err && typeof err === 'object') ? err : { message: String(err || '') };
+  const code = String(e.code || e.statusCode || e.status || e.name || '').replace(/[^\w.-]/g, '').slice(0, 24);
+  const m = String(e.message || '')
+    .replace(/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/gi, '#')
+    .replace(/\S+@\S+/g, '#')
+    .replace(/\([^)]*\)=\([^)]*\)/g, '#')
+    .replace(/\b[\w-]*\d[\w-]{5,}/g, '#')
+    .replace(/\s+/g, ' ').trim();
+  const kop = [stap, code].filter(Boolean).join(' ');
+  return (kop && m ? kop + ': ' + m : (kop || m || 'onbekend')).slice(0, 120);
+}
+/* review R3 AC-7: signaal sturen bij deze uitkomst van syncMetCloud? Geeft het detail, of null. Alleen een echte fout (reden 'fout')
+   of een rij/upload die op een blijvende fout stuitte; niet bij een quotafout of te groot beeld (eigen melding), niet bij een
+   tijdelijke fout, en hooguit een keer per 24 uur (laatst = tijd van het vorige syncfout-signaal). Puur (sync.test.js). */
+function syncFoutSignaal(r, nu, laatst, online) {
+  if (!r) return null;
+  let err, stap;
+  if (!r.ok) {
+    if (r.reden !== 'fout') return null;
+    err = r.error || { message: 'onbekend' }; stap = r.stap || 'sync';
+  } else if (r.deelFout && r.deelFout.error) { err = r.deelFout.error; stap = r.deelFout.stap || 'rij'; }
+  else return null;
+  if (quotaFout(err) || beeldTeGroot(err)) return null;
+  if (syncFoutTijdelijk(err, online)) return null;
+  if (Number.isFinite(laatst) && laatst > 0 && nu >= laatst && nu - laatst < 864e5) return null;
+  return syncFoutDetail(err, stap);
+}
+const SYNCFOUT_SLEUTEL = 'tatties-syncfout-signaal';
+function meldSyncFout(r) {
+  try {
+    if (typeof gebruikDev === 'function' && gebruikDev() && !window.__signaalDev) return false;   // zoals signaal(): de dagtijd niet verbruiken
+    let laatst = 0; try { laatst = +(localStorage.getItem(SYNCFOUT_SLEUTEL) || 0); } catch (e) { laatst = 0; }
+    const online = (typeof navigator !== 'undefined') ? navigator.onLine : undefined;
+    const detail = syncFoutSignaal(r, Date.now(), laatst, online);
+    if (!detail) return false;
+    try { localStorage.setItem(SYNCFOUT_SLEUTEL, String(Date.now())); } catch (e) { /* geen opslag: dan elke keer, signaal heeft een daggrens */ }
+    signaal('syncfout', detail);
+    return true;
+  } catch (e) { return false; }
+}
+/* review R3 AC-7: stand van de regel 'Laatst gesynchroniseerd' in het accountvenster. Rood als de laatste geslaagde sync langer dan
+   3 dagen geleden is terwijl er lokale wijzigingen wachten. Puur (sync.test.js). */
+function laatsteSyncStand(laatst, nu, wachtend) {
+  if (!Number.isFinite(laatst) || laatst <= 0) return { nooit: true, rood: false };
+  const d = Math.max(0, nu - laatst), rood = d > 3 * 864e5 && wachtend > 0;
+  if (d < 6e4) return { soort: 'zojuist', rood };
+  if (d < 36e5) return { soort: 'min', n: Math.max(1, Math.floor(d / 6e4)), rood };
+  if (d < 864e5) return { soort: 'uur', n: Math.floor(d / 36e5), rood };
+  return { soort: 'datum', rood };
+}
+async function toonLaatsteSync() {
+  const el = document.getElementById('account-laatste-sync'); if (!el) return;
+  try { if (syncGeblokkeerd) { el.hidden = true; return; } } catch (e) { /* nog niet bekend */ }
+  let laatst = 0; try { laatst = +(localStorage.getItem('tatties-laatste-sync') || 0); } catch (e) { laatst = 0; }
+  let wachtend = 0;
+  try {
+    for (const [id, m] of await alleSyncMeta())
+      if (id !== SYNC_CURSOR_ID && id !== SYNC_EIGENAAR_ID && m && m.dirty) wachtend++;
+  } catch (e) { wachtend = 0; }
+  const st = laatsteSyncStand(laatst, Date.now(), wachtend);
+  let wanneer = '';
+  if (st.soort === 'zojuist') wanneer = tr('account.sync_zojuist');
+  else if (st.soort === 'min' || st.soort === 'uur') wanneer = tr('account.sync_' + st.soort).replace('{n}', String(st.n));
+  else if (st.soort === 'datum') {
+    const d = new Date(laatst), opt = { day: 'numeric', month: 'short' };
+    if (d.getFullYear() !== new Date().getFullYear()) opt.year = 'numeric';
+    wanneer = d.toLocaleDateString(taal === 'en' ? 'en-GB' : 'nl-NL', opt);
+  }
+  el.textContent = st.nooit ? tr('account.sync_nooit') : tr(st.rood ? 'account.sync_laatst_oud' : 'account.sync_laatst').replace('{wanneer}', wanneer);
+  el.classList.toggle('oud', !!st.rood);
+  el.hidden = false;
+}
 function zetGebruikUI() {
   const aan = gebruikDelenAan();
   document.querySelectorAll('#gebruik-keuze button[data-gebruik]').forEach((b) =>
@@ -14141,21 +14232,27 @@ async function downloadBeelden(rec, ref) {
   if (Array.isArray(ref.fotos) && ref.fotos.length) {
     // review R3 SY-1: per plek. Mislukt een download, dan de lokale foto met dezelfde vingerafdruk houden (bij een oud manifest
     // zonder vingerafdruk die op dezelfde plek); eerder schoof een gemiste foto de rest op en viel de lokale terugval weg.
-    const oud = Array.isArray(rec.fotos) ? rec.fotos : [], oudFp = oud.map(thumbFp), out = [];
+    const oud = Array.isArray(rec.fotos) ? rec.fotos : [], oudFp = oud.map(thumbFp), out = [], gebruikt = new Set();
     for (let i = 0; i < ref.fotos.length; i++) {
+      const fp = fpVanAsset(ref.fotos[i]);
+      // review R3 SY-6: een lokale foto met dezelfde vingerafdruk is deze foto al: niet opnieuw downloaden (een naamswijziging op
+      // een ander toestel liet eerder alle foto's opnieuw ophalen)
+      const k = fp ? oudFp.findIndex((f, x) => f === fp && !gebruikt.has(x)) : -1;
+      if (k >= 0 && oud[k]) { gebruikt.add(k); out.push(oud[k]); continue; }
       const u = await dl(ref.fotos[i]);
       if (u) { out.push(u); continue; }
-      const fp = fpVanAsset(ref.fotos[i]), j = fp ? oudFp.indexOf(fp) : i;
-      if (j >= 0 && oud[j]) out.push(oud[j]);
+      if (!fp && oud[i]) out.push(oud[i]);   // oud manifest zonder vingerafdruk: de lokale foto op dezelfde plek
     }
     if (out.length) rec.fotos = out;
   } else if (Array.isArray(ref.fotos) && rec.fotosWeg === true) {
     rec.fotos = [];   // review R3 SY-7: elders zijn alle foto's weggehaald (vlag uit het formulier): de lokale terugval niet houden
   }
-  if (ref.kunst) { const u = await dl(ref.kunst); if (u) { rec.kunst = rec.kunst || {}; rec.kunst.src = u; } }
-  if (ref.kunst3d) { const u = await dl(ref.kunst3d); if (u) { rec.kunst3d = rec.kunst3d || {}; rec.kunst3d.srcUrl = u; } }
+  // review R3 SY-6: zelfde vingerafdruk als het lokale beeld op die plek: niet opnieuw downloaden
+  const alHier = (a, src) => { const fp = fpVanAsset(a); return !!(fp && src && fp === thumbFp(src)); };
+  if (ref.kunst && !alHier(ref.kunst, rec.kunst && rec.kunst.src)) { const u = await dl(ref.kunst); if (u) { rec.kunst = rec.kunst || {}; rec.kunst.src = u; } }
+  if (ref.kunst3d && !alHier(ref.kunst3d, rec.kunst3d && rec.kunst3d.srcUrl)) { const u = await dl(ref.kunst3d); if (u) { rec.kunst3d = rec.kunst3d || {}; rec.kunst3d.srcUrl = u; } }
   if (ref.delen && typeof ref.delen === 'object') {   // delen: op deel-id koppelen
-    for (const d of beeldDelen(rec)) { const a = ref.delen[d.id]; if (!a) continue;
+    for (const d of beeldDelen(rec)) { const a = ref.delen[d.id]; if (!a || alHier(a, d.kunst3d && d.kunst3d.srcUrl)) continue;
       const u = await dl(a); if (u) { d.kunst3d = d.kunst3d || {}; d.kunst3d.srcUrl = u; } }
   }
   return { compleet: gemist === 0, gemist };
@@ -14577,9 +14674,14 @@ async function syncMetCloud() {
       toast(tr('sync.veilig').replace('{n}', String(r.omhoog)).replace('{s}', r.omhoog === 1 ? '' : 's')
         .replace('{f}', String(r.beeldenGeteld || 0)).replace('{fs}', (r.beeldenGeteld || 0) === 1 ? '' : tr('mv.foto_s')));
     }
+    meldSyncFout(r);   // review R3 AC-7: blijvende fout -> signaal (hooguit een keer per dag)
     return r;
-  } catch (e) { zetSyncIndicator('uit'); throw e; }
-  finally { clearTimeout(tShow); syncLoopt = false; }
+  } catch (e) { zetSyncIndicator('uit'); meldSyncFout({ ok: false, reden: 'fout', error: e, stap: 'intern' }); throw e; }
+  finally {
+    clearTimeout(tShow); syncLoopt = false;
+    const am = document.getElementById('account-modal');   // review R3 AC-7: regel bijwerken als het accountvenster open staat
+    if (am && !am.hidden) toonLaatsteSync();
+  }
 }
 /* Klokafwijking van dit toestel, gemeten tegen het 'iat' (issued-at) van een VERS
    access-token - dat zet de Supabase-server met zijn eigen klok. (Een Date-header
@@ -14823,7 +14925,8 @@ async function _syncMetCloudKern() {
   const opruimen = new Map();   // id -> {oud, nieuw} manifest; pas opruimen NA een geslaagde schrijf
   let beeldenGeteld = 0, gedaan = 0;
   const teGroot = [];   // namen van records waarvan een beeld boven de bucketlimiet zit (blijvend, geen retry helpt)
-  let quotaVol = false;   // account-quota (500 MB / 3000 foto's) bereikt bij een upload
+  let quotaVol = false;
+  let deelFout = null;   // review R3 AC-7: eerste blijvende fout van een losse upload of rij (de ronde zelf gaat door)   // account-quota (500 MB / 3000 foto's) bereikt bij een upload
   for (const item of pushLijst) {
     // Bij een grote eerste overzetting is stilte onprettig: laat zien hoe ver hij is.
     // Tellen vóór het tonen, zodat de reeks bij 1 begint en op het totaal eindigt.
@@ -14859,7 +14962,8 @@ async function _syncMetCloudKern() {
         // elke ronde weer. Dat hoort de gebruiker te horen, anders staat het record voorgoed
         // alleen op dit toestel terwijl de indicator 'Bijgewerkt' zegt.
         if (beeldTeGroot(e)) teGroot.push(hardRecord(l).naam);
-        if (quotaFout(e)) quotaVol = true;   // cloud-opslag vol: één duidelijke melding, geen stil 'uitgesteld'
+        if (quotaFout(e)) quotaVol = true;
+        else if (!beeldTeGroot(e) && !deelFout) deelFout = { error: e, stap: 'upload' };   // review R3 AC-7   // cloud-opslag vol: één duidelijke melding, geen stil 'uitgesteld'
         console.error('Foto-upload mislukt, record uitgesteld tot volgende sync:', l.id, e); uitgesteld++; continue;
       }
     } else {
@@ -14881,13 +14985,13 @@ async function _syncMetCloudKern() {
   }
 
   // 3a) Voorwaardelijk, per record: alleen schrijven als de cloud nog op onze basisversie staat.
-  let verlopen = 0, opgeruimd = 0;
+  let verlopen = 0, opgeruimd = 0, geweigerd = 0;   // review R3 AC-7: geweigerd = rijen die de database per stuk afwees
   const rest = [];
   for (const rij of rijen) {
     if (rij.__base === null) { rest.push(rij); continue; }
     const base = rij.__base; delete rij.__base;
     const uit = await pushMetControle(rij, base);
-    if (uit.error) return { ok: false, reden: 'fout', error: uit.error };
+    if (uit.error) return { ok: false, reden: 'fout', error: uit.error, stap: 'push' };
     if (uit.verlopen) {
       // Een ander toestel was ons voor. Niets overschrijven, dirty laten staan: de volgende
       // ronde ziet rev > baseRev én dirty, en behandelt het als conflict.
@@ -14906,7 +15010,28 @@ async function _syncMetCloudKern() {
     let vraag = sb.from('tattoos').upsert(brok, { onConflict: 'user_id,id' });
     if (revKolommen) vraag = vraag.select('id,rev');   // de rev die de SERVER toekende
     const { data: terug, error } = await vraag;
-    if (error) return { ok: false, reden: 'fout', error };
+    if (error) {
+      // review R3 AC-7: een rij die de database weigert hield elke ronde de hele batch tegen. Bij een blijvende fout per rij opnieuw
+      // proberen, zodat de rest wel in de cloud komt; geweigerde rijen blijven dirty (volgende ronde opnieuw). Falen de eerste drie
+      // allemaal, dan ligt het niet aan een rij: dan afbreken zoals voorheen.
+      if (brok.length < 2 || quotaFout(error) || syncFoutTijdelijk(error, (typeof navigator !== 'undefined') ? navigator.onLine : undefined))
+        return { ok: false, reden: 'fout', error, stap: 'batch' };
+      let gelukt = 0, mis = 0;
+      for (const r of brok) {
+        if (!gelukt && mis >= 3) break;
+        let v1 = sb.from('tattoos').upsert([r], { onConflict: 'user_id,id' });
+        if (revKolommen) v1 = v1.select('id,rev');
+        const { data: t1, error: e1 } = await v1;
+        if (e1) { mis++; if (!deelFout) deelFout = { error: e1, stap: 'rij' }; continue; }
+        gelukt++;
+        await _naPush(r.id, (t1 && t1[0] && t1[0].id === r.id) ? t1[0].rev : null, metaVoor, user.id);
+        const taak = opruimen.get(r.id);
+        if (taak) opgeruimd += await ruimWeesBeelden(taak.oud, taak.nieuw);
+      }
+      if (!gelukt) return { ok: false, reden: 'fout', error, stap: 'batch' };
+      geweigerd += mis;
+      continue;
+    }
     const revs = new Map((terug || []).map(r => [r.id, r.rev]));
     for (const r of brok) {
       await _naPush(r.id, revs.has(r.id) ? revs.get(r.id) : null, metaVoor, user.id);
@@ -14929,7 +15054,7 @@ async function _syncMetCloudKern() {
   try { localStorage.setItem('tatties-laatste-sync', String(Date.now())); } catch { /* geen marker-opslag */ }
   // uitgesteld: beeld-upload faalde (volgende sync opnieuw). verlopen: een ander toestel
   // was ons voor, wordt volgende ronde een conflict. conflicten/undeletes: gemeld aan de gebruiker.
-  return { ok: true, omlaag: omlaag.length, omhoog: rijen.length - verlopen, uitgesteld, verlopen,
+  return { ok: true, omlaag: omlaag.length, omhoog: rijen.length - verlopen - geweigerd, uitgesteld, verlopen, geweigerd, deelFout,
            conflicten, undeletes, backfill, beeldenOpen, opgeruimd, overgeslagenBeelden,
            eersteRonde, beeldenGeteld, teGroot, quotaVol };
 }
@@ -15516,7 +15641,7 @@ function rechtopHoek(t, deel) {
 function rechtopSrc(src, hoek) {
   if (!src || !hoek) return Promise.resolve(src);
   const k = thumbFp(src) + '|' + hoek;
-  if (rechtopCache.has(k)) return rechtopCache.get(k);
+  if (rechtopCache.has(k)) { const p0 = rechtopCache.get(k); rechtopCache.delete(k); rechtopCache.set(k, p0); return p0; }   // review R3 VW-6: LRU bij lezen
   const p = new Promise((res) => {
     const img = new Image();
     img.onload = () => { try {
@@ -15531,7 +15656,7 @@ function rechtopSrc(src, hoek) {
     img.src = src;
   });
   rechtopCache.set(k, p);
-  if (rechtopCache.size > 40) rechtopCache.delete(rechtopCache.keys().next().value);
+  if (rechtopCache.size > 200) rechtopCache.delete(rechtopCache.keys().next().value);   // review R3 VW-6: was 40, te klein voor een grote collectie
   return p;
 }
 /* img krijgt de gedraaide uitsnede; tot die er is onzichtbaar (geen scheef-dan-recht-flits) */
@@ -16303,6 +16428,49 @@ async function verversDetailNaHerlaad() {
   window.scrollTo(0, y);
 }
 
+/* review R3 VW-2: gerichte lijstupdates. herlaad() leest alle records met alle foto's uit IndexedDB (cursor deserialiseert de
+   hele value) en kostte bij een grote collectie seconden na elke verwijdering. Verwijderen, ongedaan maken en het formulier werken
+   de lijst daarom zelf bij. lijstBijwerken is puur (logica.test.js): record met dat id eruit, t (geen tombstone) op dezelfde plek
+   terug of erbij, dan dezelfde sortering als herlaad(). */
+function lijstBijwerken(lijst, id, t) {
+  const i = lijst.findIndex(x => x && x.id === id);
+  if (i >= 0) lijst.splice(i, 1);
+  if (t && !t.deleted) { if (i >= 0) lijst.splice(i, 0, t); else lijst.push(t); }
+  lijst.sort((a, b) => (b.datum || '').localeCompare(a.datum || ''));
+  return lijst;
+}
+/* Lichte kopie van een net opgeslagen (vol) record, in dezelfde vorm als laadLichteTattoos levert: sync-velden, migratie, dan
+   strippen (thumb blijft, lichtBronFp wordt gezet). Een kopie, want het record deelt geneste objecten (kunst3d, delen) met het
+   oude object, dat 3D-markers nog vasthouden tot ze opnieuw gekoppeld zijn. Zonder IndexedDB staat alles toch vol in RAM. */
+function lichteLijstKopie(rec) {
+  if (!dbBeschikbaar) return rec;
+  let t;
+  try { t = structuredClone(rec); } catch (e) { t = JSON.parse(JSON.stringify(rec)); }
+  _hardSyncVelden([t]);
+  migreerRecord(t);
+  return stripBeelden(t);
+}
+function verversNaLijstWijziging() {
+  renderBodyMap();
+  renderLijst();
+  renderSamenvatting();
+  renderStart();
+  toonOpslagInfo();
+}
+/* Net opgeslagen record in de lijst zetten (vervangen of toevoegen) en de schermen verversen. Geeft het lichte lijstrecord. */
+function lijstZet(rec) {
+  if (!rec || !rec.id) return null;
+  const t = lichteLijstKopie(rec);
+  lijstBijwerken(tattoos, t.id, t);
+  verversNaLijstWijziging();
+  return t.deleted ? null : t;
+}
+/* Record uit de lijst halen (na een soft-delete) en de schermen verversen. */
+function lijstWeg(id) {
+  lijstBijwerken(tattoos, id, null);
+  verversNaLijstWijziging();
+}
+
 /* Soft-delete-tombstones bewaren we voor cloud-sync, maar oude exemplaren stapelen op in
    IndexedDB. Ruim tombstones ouder dan ~30 dagen op (sync heeft ze dan allang verwerkt;
    lokaal-only gebruikers hebben er sowieso niets aan). Niet-blokkerend bij opstart. */
@@ -16312,13 +16480,42 @@ function tombstoneMagWeg(t, m, heeftEigenaar, grens) {
   if (!t || t.deleted !== true || !((Number(t.updatedAt) || 0) < grens)) return false;
   return !heeftEigenaar || (!!m && !m.dirty);
 }
+/* review R3 SY-6: ids van de tombstones die weg mogen, per cursor: elke value wordt meteen weer losgelaten. */
+async function tombstoneIds(magWeg) {
+  if (!dbBeschikbaar) return fallbackLees().filter(t => t && t.deleted === true && magWeg(t)).map(t => t.id);
+  const db = await openDB();
+  return await new Promise((resolve, reject) => {
+    const ids = [];
+    const rq = db.transaction(STORE, 'readonly').objectStore(STORE).openCursor();
+    rq.onsuccess = () => {
+      const cur = rq.result;
+      if (!cur) { resolve(ids); return; }
+      const t = cur.value;
+      if (t && t.deleted === true && magWeg(t)) ids.push(t.id);
+      cur.continue();
+    };
+    rq.onerror = () => reject(rq.error);
+  });
+}
+/* review R3 SY-6: niet tegelijk met het 3D-herstel (dat leest de collectie ook); wachten op de mark tt-herstel-eind, uiterlijk 30 s. */
+function planTombstonePurge() {
+  const t0 = Date.now();
+  const stap = () => {
+    let klaar = true;
+    try { klaar = performance.getEntriesByName('tt-herstel-eind').length > 0; } catch (e) { /* geen marks: meteen */ }
+    if (klaar || Date.now() - t0 > 30000) purgeTombstones();
+    else setTimeout(stap, 1000);
+  };
+  setTimeout(stap, 1500);
+}
 async function purgeTombstones(maxDagen = 30) {
   try {
     const grens = Date.now() - maxDagen * 86400000;
     const metas = await alleSyncMeta(), eig = metas.get(SYNC_EIGENAAR_ID);
     const heeftEigenaar = !!((eig && eig.ownerId) || collectieEigenaar);
-    const oud = (await getAllTattoos()).filter(t => tombstoneMagWeg(t, metas.get(t.id), heeftEigenaar, grens));
-    for (const t of oud) await hardDeleteTattoo(t.id);
+    // review R3 SY-6: per cursor en alleen de ids vasthouden (getAllTattoos hield alle volle records met foto's tegelijk vast)
+    const oud = await tombstoneIds(t => tombstoneMagWeg(t, metas.get(t.id), heeftEigenaar, grens));
+    for (const id of oud) await hardDeleteTattoo(id);
     if (oud.length) console.info(`Tatties: ${oud.length} oude tombstone(s) opgeruimd`);
   } catch (e) { console.error('tombstone-purge mislukt', e); }
 }
@@ -16917,7 +17114,8 @@ async function verwijderMetUndo(t){
   const kopie = JSON.parse(JSON.stringify(t));
   await deleteTattoo(t.id);
   if (typeof window.__tatties3DVerwijder === 'function') window.__tatties3DVerwijder(t.id);
-  await herlaad();
+  lijstWeg(t.id);   // review R3 VW-2: gericht, geen herlaad(); de Ongedaan-melding komt zo meteen
+  verversDetailNaHerlaad().catch(() => {});
   toastMetActie(t.status === 'wens' ? tr('toast.wensverwijderd') : tr('toast.tattooverwijderd'),
                 tr('toast.ongedaan'), async () => {
     kopie.deleted = false;   // ongedaan maken = tombstone opheffen
@@ -16926,7 +17124,8 @@ async function verwijderMetUndo(t){
     try { await saveTattoo(kopie); }
     catch (e) { console.error(e);
       toast(tr('toast.opslaanmislukt') + (e && e.message ? e.message : tr('ui.fout'))); return; }
-    await herlaad();
+    lijstZet(kopie);   // review R3 VW-2: gericht terug in de lijst (licht), geen herlaad()
+    verversDetailNaHerlaad().catch(() => {});
     if (typeof window.__tatties3DHerstel === 'function') window.__tatties3DHerstel(kopie.id);
     toast(tr('toast.teruggezet').replace('{naam}', kopie.naam));
   });
@@ -17495,6 +17694,7 @@ function renderLijst() {
     return;
   }
 
+  const nrs = flashNummers();   // review R3 VW-6: een keer per render (flashNr(t) zonder kaart sorteerde per kaart de hele collectie)
   lijst.innerHTML = items.map(t => {
     const galerijFoto = hoofdFoto(t);
     const kunstFoto = (!galerijFoto && t.kunst && t.kunst.src) ? t.kunst.src : null;
@@ -17506,7 +17706,7 @@ function renderLijst() {
     return `
     <button class="tcard${t.status === 'wens' ? ' wens' : ''}" data-id="${esc(t.id)}">
       <span class="thumb${kunstFoto ? ' thumb-kunst' : ''}">${foto ? `<img src="${esc(foto)}" alt=""${isUitsnedeBeeld(t, foto) && rechtopHoek(t) ? ` data-rechtop="${rechtopHoek(t)}" style="visibility:hidden"` : ''}>` : ICONEN.galerij}</span>
-      ${t.status !== 'wens' ? `<span class="tcard-nr">${flashNr(t)}</span>` : ''}
+      ${t.status !== 'wens' ? `<span class="tcard-nr">${flashNr(t, nrs)}</span>` : ''}
       <span class="info">
         <h3>${esc(t.naam)}</h3>
         <p>${[zoneLabel(t.lichaamsdeel), t.artiest, (beeldDelen(t).length ? tr('kaart.delen').replace('{n}', 1 + beeldDelen(t).length) : '')].filter(Boolean).map(esc).join(' · ')}</p>
@@ -18593,7 +18793,8 @@ async function openFormulier(id = null) {
     bezigMetOpslaan = true;
     try {
       await saveTattoo(record);
-      await herlaad();
+      lijstZet(record);   // review R3 VW-2: gericht in de lijst, geen herlaad()
+      if (typeof window.__tatties3DHerlaad === 'function') window.__tatties3DHerlaad();   // decal opnieuw koppelen (m.rec) of bouwen
       if (bewerkId) {
         toast(tr('toast.wijzigingenopgeslagen'));
       } else {
@@ -19160,6 +19361,7 @@ function openAccount() {
   m.hidden = false;
   document.body.style.overflow = 'hidden';
   laagOpenHistory('account', sluitAccount);
+  toonLaatsteSync();   // review R3 AC-7
 }
 function sluitAccount() {
   const m = $('#account-modal'), o = $('#account-overlay');
@@ -19739,6 +19941,7 @@ async function verwijderVoorbeelden() {
       }
       updateStartAccount(session);
       toonFounder(session);   // founder-teller 2026-10-05
+      if (ingelogd) toonLaatsteSync();   // review R3 AC-7
       toonBeloningen(session);   // beloningen 2026-10-08
     }
     /* Beloningen (2026-10-08): de eigen rijen uit public.beloning (RLS: alleen lezen), lokaal onthouden per account. */
@@ -20103,7 +20306,8 @@ async function verwijderVoorbeelden() {
       renderBodyMap();
       renderLijst();
     }));
-  $('#zoek').addEventListener('input', (e) => { zoekTekst = e.target.value.trim(); renderLijst(); });
+  // review R3 VW-6: de lijst pas na 150 ms stilte opnieuw tekenen (elke toetsaanslag tekende de hele collectie); zoekTekst wel meteen
+  { let zoekT = 0; $('#zoek').addEventListener('input', (e) => { zoekTekst = e.target.value.trim(); clearTimeout(zoekT); zoekT = setTimeout(renderLijst, 150); }); }
   $('#sorteer').addEventListener('change', (e) => { sorteer = e.target.value; renderLijst(); });
   { const cc = $('#col-chips'), af = $('#filter-artiest');   // Flash Sheet: filterchips (een luisteraar op de rij)
     if (cc) cc.addEventListener('click', (e) => { const k = e.target.closest('.chip-f'); if (!k) return;
@@ -20128,7 +20332,7 @@ async function verwijderVoorbeelden() {
   collectieGeladenZet();   // mislukt het laden, dan toch uit de laadstand (anders geen +-knop/greep op het startscherm)
   toonView('home');
   toonOnboarding();
-  purgeTombstones();   // oude soft-delete-tombstones opruimen (niet-blokkerend)
+  planTombstonePurge();   // oude soft-delete-tombstones opruimen (niet-blokkerend); review R3 SY-6: na het 3D-herstel
   /* Lag er nog een halve uitsnede? Vraag of we verdergaan. Niet tijdens de onboarding: die
      overlay ligt erboven en de vraag zou erachter verdwijnen (zelfde val als de
      opslagmelding, ONB-2). De 3D-module publiceert de haak bij het laden, dus even wachten. */
@@ -21520,34 +21724,83 @@ async function verwijderVoorbeelden() {
     return new THREE.Matrix4().makeBasis(x, new THREE.Vector3().crossVectors(n,x), n).setPosition(p);
   }
   function markerBind(m){ const D=deelVan(m), P=D&&D.positie3d; return (P && P.bind && P.bind.n===LichaamMotor.DRIEHOEKEN) ? P.bind : null; }
-  function genFrames(){ for(const m of markers){ const b=markerBind(m); m.__genB0=b ? huidFrame(m.mesh||pickMeshes[0], b) : null; } }
+  /* review R3 D3-5/LI-1: zolang de generator open is volgen de tattoos het lichaam alleen stijf (genVolgDecals), ook na loslaten.
+     De exacte herbouw (uitBind + rebuildMarker) pas als hij dicht is (Klaar, Annuleren, of een lichaam uit de sync), en dan in
+     stukjes (genHerbouwStukjes: zichtbare en naar de camera gekeerde tattoos eerst, verborgen wensdecals als laatste, afbreekbaar).
+     Eerder bouwde elk loslaten van een schuif alle decals synchroon opnieuw (bij 100+ tattoos seconden stilstand), ook Annuleren
+     zonder wijziging. Per marker: __genB0 = huidframe van de plek op het lichaam waarvoor de decal gebouwd is, __genFp = meshFp van
+     dat lichaam, __genStijf = stijf meebewogen en wacht op de herbouw (rebuildMarker zet hem terug). */
+  function genFrameVan(m, fp){   // frame van de plek en vingerafdruk van het lichaam waarop de decal nu gebouwd is
+    const b=markerBind(m); m.__genB0=b ? huidFrame(m.mesh||pickMeshes[0], b) : null;
+    m.__genFp=(fp!==undefined) ? fp : (pickMeshes[0] ? meshFp(pickMeshes[0]) : '');
+  }
+  function genFrames(){
+    const fp=pickMeshes[0] ? meshFp(pickMeshes[0]) : '';
+    for(const m of markers){
+      if(m.__genStijf && m.__genB0) continue;   // nog niet opnieuw gebouwd: houdt het frame van het lichaam van zijn geometrie
+      genFrameVan(m, fp); }
+  }
   const _genInv=new THREE.Matrix4();
-  function genVolg(){
-    uiterlijkVolg();   // haar en bril stijf mee (2026-10-01)
-    if(underwearMesh && !volgOnderbroek()) underwearMesh.visible=false;   // volgt de huid (slice 5d); exact herbouwd bij loslaten (genHerbouw)
+  function genVolgDecals(){
     for(const m of markers){
       if(!m.obj || !m.__genB0) continue;
       const nu=huidFrame(m.mesh||pickMeshes[0], markerBind(m)); if(!nu) continue;
       m.obj.matrixAutoUpdate=false;
       m.obj.matrix.multiplyMatrices(nu, _genInv.copy(m.__genB0).invert());
       m.obj.matrixWorldNeedsUpdate=true;
+      m.__genStijf=true;
     }
   }
+  function genVolg(){
+    uiterlijkVolg();   // haar en bril stijf mee (2026-10-01)
+    if(underwearMesh && !volgOnderbroek()) underwearMesh.visible=false;   // volgt de huid (slice 5d); exact herbouwd bij loslaten (genHerbouw)
+    genVolgDecals();
+  }
+  let genHerbouwNr=0;
   function genHerbouw(){
     for(const mesh of pickMeshes){ mesh.__faceGrid=null; mesh.__faceGridBouw=null; mesh.__vgBouw=null; mesh.__straal=null; mesh.__straalBouw=null; mesh.__ledeScan=null; mesh.__ledeKnip=null; }   // wereldposities zijn veranderd
-    for(const m of markers){
-      const b=markerBind(m); if(!b) continue;
-      const ub=uitBind(m.mesh||pickMeshes[0], b); if(!ub) continue;
-      m.point=ub.point; m.normal=ub.normal; m.rot=ub.rot;
-      rebuildMarker(m);
-      if(!m.obj) continue;
-      const wens=m.rec && m.rec.status==='wens';   // zoals herstelDeel: geplande gedimd en alleen met de toggle
-      m.obj.visible=!wens || toonGepland;
-      zetDecalOpacity(m.obj, (m.rec && isFinite(+m.rec.opacity) ? Math.max(0.2,Math.min(1,+m.rec.opacity)) : 1)*(wens?0.5:1));
-    }
     try{ rebuildUnderwear(); }catch(e){ console.error("onderbroek", e); }
     uiterlijkNaLichaam();   // haar en bril (2026-10-01)
-    genFrames();
+    genVolgDecals();   // eerst stijf op het lichaam van nu (ook na zet() bij Klaar/Annuleren of een lichaam uit de sync)
+    if(genAan()){ genHerbouwNr++; return; }   // generator open (loslaten): de exacte herbouw wacht tot hij dicht is
+    genHerbouwStukjes();
+  }
+  async function genHerbouwStukjes(){
+    const nr=++genHerbouwNr, fpNu=pickMeshes[0] ? meshFp(pickMeshes[0]) : '';
+    const rij=[];
+    for(const m of markers){
+      const nieuw=!m.__genStijf && m.__genFp===undefined && !!markerBind(m);   // hersteld terwijl de generator open was: lichaam onbekend
+      if(!m.__genStijf && !nieuw) continue;   // niet meebewogen: de geometrie hoort al bij dit lichaam
+      const b=markerBind(m), ub=b ? uitBind(m.mesh||pickMeshes[0], b) : null;
+      if(!ub){ m.__genStijf=false; continue; }
+      m.point=ub.point; m.normal=ub.normal; m.rot=ub.rot;   // meteen: bewerken, focus en een vroege herbouw gebruiken de plek van nu
+      if(m.__genStijf && m.__genFp===fpNu){   // zelfde lichaam als waarvoor de decal gebouwd is (Annuleren zonder wijziging): exact de oude stand
+        if(m.obj){ m.obj.matrixAutoUpdate=true; m.obj.updateMatrix(); m.obj.matrixWorldNeedsUpdate=true; }
+        m.__genStijf=false; continue; }
+      rij.push(m);
+    }
+    ttTijd.genRij=rij.length;   // dev
+    if(!rij.length) return;
+    await frameAdem();   // eerst de generator dicht laten tekenen (camera terug), dan in die kijkrichting ordenen
+    if(nr!==genHerbouwNr || genAan()) return;
+    const cam=camera.position, _v=new THREE.Vector3();
+    const score=m=>((m.obj && m.obj.visible) ? 2 : 0) + ((m.point && m.normal) ? m.normal.dot(_v.subVectors(cam, m.point).normalize()) : 0);
+    const sc=new Map(rij.map(m=>[m, score(m)]));
+    rij.sort((a,b)=>sc.get(b)-sc.get(a));
+    let t0=performance.now();
+    for(const m of rij){
+      if(nr!==genHerbouwNr || genAan()) return;   // nieuwe herbouw, of de generator weer open: daar gaat het verder
+      if(!markers.includes(m) || (!m.__genStijf && m.__genFp!==undefined)) continue;   // intussen verwijderd of al opnieuw gebouwd (bewerken)
+      rebuildMarker(m);
+      if(m.obj){
+        const wens=m.rec && m.rec.status==='wens';   // zoals herstelDeel: geplande gedimd en alleen met de toggle
+        m.obj.visible=!wens || toonGepland;
+        zetDecalOpacity(m.obj, (m.rec && isFinite(+m.rec.opacity) ? Math.max(0.2,Math.min(1,+m.rec.opacity)) : 1)*(wens?0.5:1));
+      }
+      genFrameVan(m, fpNu);
+      ttTijd.genRij--;
+      if(performance.now()-t0>12){ await frameAdem(); t0=performance.now(); }
+    }
   }
   let genNa=null;   // terugmelding van wie de generator opende (onboarding: door naar stap 2)
   function genDicht(soort){
@@ -21587,7 +21840,7 @@ async function verwijderVoorbeelden() {
     let tex=null; try{ tex=await rebuildTextureFromKunst(k3); }catch(e){ console.error(e); }
     if(!tex){ toast(tr('ui.plaatsen_mislukt')); return false; }
     if(editDecal) exitEditDecal();
-    plaatsData={ tex, kunst3d:k3, herplaats:r, proj:(!!(opties && opties.proj) || beeldDelen(r).length>1) && window.__projDelen!==false };   // tattoo met delen: vanuit de kijkhoek
+    plaatsData={ tex, texAf:true, kunst3d:k3, herplaats:r, proj:(!!(opties && opties.proj) || beeldDelen(r).length>1) && window.__projDelen!==false };   // tattoo met delen: vanuit de kijkhoek
     plaatsModus=true; if(window.__plaatsHintAan) window.__plaatsHintAan();
     /* UX-doorloop 2026-09-25: de oude plek vaag laten zien en de camera erheen, de instructie onderaan (niet op de romp). */
     const oud=markers.filter(q=>q.id===r.id && !q.deel && q.obj && q.obj.material);
@@ -21605,7 +21858,7 @@ async function verwijderVoorbeelden() {
   };
   window.__tatties3DLichaam = function(L){
     if(!LICHAAM_GEN || !inited || !pickMeshes.length || !LichaamMotor.geometry() || genAan()) return false;
-    LichaamMotor.zet(L); genHerbouw(); uiterlijkBouw(); return true;
+    genFrames(); LichaamMotor.zet(L); genHerbouw(); uiterlijkBouw(); return true;   // review R3 D3-5: frames van het oude lichaam, dan stijf mee en in stukjes herbouwen
   };
   /* ---- Haar en bril (2026-10-01, lichaam_haar.js; overdracht spikes/haar/INBOUWEN.md) ----
      Alleen met het nieuwe lichaam, standaard uit (Instellingen > Lichaam). Kind van modelRoot (NIET van de mesh: de raycasts
@@ -23976,10 +24229,13 @@ async function verwijderVoorbeelden() {
   function decalAlphaBasis(mul){ return mul ? 0.5 : 0.03; }
   // Doorzichtigheid van een geplaatst decal (alphaTest meeschalen, anders verdwijnt het bij lage opaciteit)
   /* slice 5p: tattoo rustig laten verschijnen (herstel). Stopt als iets anders intussen de opacity zet (dekking, ledemaat los). */
-  const infaden=new Set(); let infadeLaatst=0, infadeRaf=0;
+  const infaden=new Set(); let infadeLaatst=0, infadeRaf=0, infadeStap=140;
+  /* review R3 D3-4: spreiding per herstelronde begrensd (alle tattoos samen hooguit ~1,5 s na elkaar) en per ronde opnieuw beginnen.
+     Met vaste 140 ms begon bij 200 tattoos de laatste pas na 28 s (en was hij tot dan onzichtbaar maar wel aan te tikken). */
+  function infadeRonde(n){ infadeLaatst=0; infadeStap=Math.min(140, 1500/Math.max(1, n|0)); }
   function decalInfaden(obj){
     const m=obj && obj.material; if(!m) return;
-    const nu=performance.now(), start=Math.max(nu, infadeLaatst+140); infadeLaatst=start;
+    const nu=performance.now(), start=Math.max(nu, infadeLaatst+infadeStap); infadeLaatst=start;
     const f={ obj, doel:m.opacity, start, laatst:0 };
     m.opacity=0; m.alphaTest=0.01; m.needsUpdate=true;   // een keer: tijdens het invloeien verandert alleen de opacity
     infaden.add(f);
@@ -24249,7 +24505,7 @@ async function verwijderVoorbeelden() {
       if(ledeActief) ledeDecalSplits(m);
       projUIUit(); plaatsData=null; plaatsModus=false; verbergBanner(); if(window.__plaatsHintUit) window.__plaatsHintUit();
       if(typeof renderMarkers==="function"){ try{renderMarkers();}catch(_){} }
-      toast(tr('ui.tattoo_herplaatst')); enterEditDecal(m); pasBlendOpNieuw(m);
+      toast(tr('ui.tattoo_herplaatst')); enterEditDecal(m); naPlaatsTex(m, d);
       if(proj) autoAansluiten(m).then(ok=>{ toast(tr(ok ? 'ui.auto_ok' : 'ui.tattoo_herplaatst')); });   // eerste deel opnieuw vanuit de kijkhoek: ook aansluiten
       if(typeof window.__tattiesNaBewerk==="function") window.__tattiesNaBewerk(rec.id);
       return;
@@ -24272,7 +24528,7 @@ async function verwijderVoorbeelden() {
       if(ledeActief) ledeDecalSplits(m);
       projUIUit(); plaatsData=null; plaatsModus=false; verbergBanner(); if(window.__plaatsHintUit) window.__plaatsHintUit();
       if(typeof renderMarkers==="function"){ try{renderMarkers();}catch(_){} }
-      enterEditDecal(m, 'deel'); pasBlendOpNieuw(m);   // net geplaatst: alleen dit deel (aansluiten, met doorkijk), slice 5v
+      enterEditDecal(m, 'deel'); naPlaatsTex(m, d);   // net geplaatst: alleen dit deel (aansluiten, met doorkijk), slice 5v
       const deelToast=(aan)=>{
         if(proj && !(rec.positie3d && rec.positie3d.proj) && window.__projDelen!==false)   // eerste deel nog uitgerold: ook vanuit de kijkhoek leggen, dan passen ze
           toastMetActie(tr(aan ? 'ui.auto_ok_eerste' : 'ui.proj_eerste'), tr('ui.proj_eerste_knop'), ()=>{ if(editDecal) exitEditDecal(); window.__tattiesHerplaats(rec, { proj:true }); });
@@ -24304,7 +24560,7 @@ async function verwijderVoorbeelden() {
     if(ledeActief) ledeDecalSplits(m);   // meteen meedoen met de dimming/splitsing van het losse deel
     projUIUit(); plaatsData=null; plaatsModus=false; verbergBanner(); if(window.__plaatsHintUit) window.__plaatsHintUit();
     if(typeof renderMarkers==="function"){ try{renderMarkers();}catch(_){} }
-    toast(tr('ui.tattoo_geplaatst')); enterEditDecal(m); pasBlendOpNieuw(m);   // auto-blend meteen tonen
+    toast(tr('ui.tattoo_geplaatst')); enterEditDecal(m); naPlaatsTex(m, d);   // auto-blend meteen tonen (review R3 KN-5: alleen als dat nog nodig is)
     if(rec.status==='wens' && typeof window.__tattiesNaStatus==='function') window.__tattiesNaStatus('wens');   // wens: 'geplande tonen' aan + dimmen
     if(d.herhaal && rec.kunst3d && rec.kunst3d.srcUrl){ window.__tattiesHerhaalSrc=rec.kunst3d.srcUrl; toast(tr('ui.herhaal_hint')); }   // D6(a): pas bij ✓ heropenen met dezelfde foto
     if(d.ketting){ volgendDeelVan=rec; toast(tr('ui.deel_ketting_hint')); }   // '+ Nog een deel': pas bij ✓ de deel-stand openen
@@ -24459,6 +24715,8 @@ async function verwijderVoorbeelden() {
   }
   function onthoudFp(m){ if(m){ m._fp = decalVingerafdruk(m.rec, m.deel); naadPlan(m.id); } }   // naad: na elke nieuwe/herstelde decal
   function rebuildMarker(m){
+    m.__genStijf=false;   // review R3 D3-5: opnieuw gebouwd op het lichaam van nu (stijve generator-volgstand voorbij)
+    if(LICHAAM_GEN && genAan()) genFrameVan(m);   // tijdens de open generator (zeldzaam): volgt vanaf dit lichaam
     ledeDecalTerug(m);   // eventuele splitsing over de knip eerst terugdraaien
     if(m.obj){ body.remove(m.obj);
       if(m.obj.geometry)m.obj.geometry.dispose();
@@ -24483,6 +24741,19 @@ async function verwijderVoorbeelden() {
       if(m.tex && m.tex!==tex && m.tex.dispose) m.tex.dispose(); m.tex=tex; rebuildMarker(m); setBlendUI();
       persistEdit(m);   // opgeloste blend (inkt-auto -> zwart/kleur) + 2D-PNG uit de nieuwe textuur (sync2D) opslaan
     }).catch(()=>{});
+  }
+  /* review R3 KN-5: na het plaatsen. Komt de textuur al uit de volledige verwerking (matteVoorOpslag bij een nieuwe tattoo of een deel,
+     rebuildTextureFromKunst bij opnieuw plaatsen) en is de blend opgelost, dan niet nog eens (pasBlendOpNieuw laadde de bron opnieuw,
+     draaide de inkt-matte nog een keer en sloeg het record een tweede keer op, net als je wilde slepen). Blend en 2D-plaatje zijn al
+     bewaard; de textuur gaat meteen in de textuurcache, zodat de volgende start hem niet opnieuw berekent. */
+  function naPlaatsTex(m, d){
+    const D=m && deelVan(m), k=D && D.kunst3d;
+    if(!(d && d.texAf && k && k.srcUrl && k.blend!=='inkt-auto' && m.tex && m.tex.image)){ pasBlendOpNieuw(m); return; }
+    const cv=m.tex.image; if(!cv.toBlob) return;
+    const sleutel=m.id+(m.deel ? ':'+m.deel.id : ''), fp=texVingerafdruk(k);
+    const meta={ blend:k.blend||null, inktAuto:k.inktAuto||null, tatnet:k.tatnet||null };
+    try{ cv.toBlob(b=>{ if(b) texSchrijf(sleutel, Object.assign({ fpVoor:fp, fpNa:fp, blob:b }, meta)); }, 'image/png'); }
+    catch(e){ /* geen cache: de volgende start rekent hem uit */ }
   }
   function enterEditDecal(m, modus){
     tipsBewerk();   // uitleg in stapjes, eenmalig (na de eerste plaatsing)
@@ -27771,6 +28042,7 @@ function maakTatnetGL(json, canvas) {
         if(herhaal && lassoPts.length>=3) vorigeLassos.push({pts:lassoPts.slice(), rot90, flipH});   // verb.3: vorige uitsnede onthouden
         const kunst3d=bouwKunst3d();
         const cvM=matteVoorOpslag(imgTexture.image, kunst3d, tatnetBron());   // inkt-matte meteen bij opslag: 2D-PNG en de plaatsingstextuur tonen wat je krijgt
+        const texAf=(cvM!==imgTexture.image);   // review R3 KN-5: matte toegepast, blend opgelost: na het plaatsen niet nog eens verwerken
         if(cvM!==imgTexture.image){ const t=new THREE.CanvasTexture(cvM); t.encoding=THREE.sRGBEncoding; t.anisotropy=maxAniso(); t.needsUpdate=true;
           if(imgTexture.dispose) imgTexture.dispose(); imgTexture=t; }
         if(addDoel==='2d'){
@@ -27781,7 +28053,7 @@ function maakTatnetGL(json, canvas) {
           if(typeof window.__tattiesStartPlaats2D==='function') window.__tattiesStartPlaats2D({ naam, info, kunst3d, src, aspect, status, herhaal });
           return;
         }
-        plaatsData={ tex:imgTexture, naam, info, kunst3d, status, herhaal, ketting, deelVoor:deel, proj:!!(deel || ketting) && window.__projDelen!==false };   // delen: projectie (2026-10-03)
+        plaatsData={ tex:imgTexture, texAf, naam, info, kunst3d, status, herhaal, ketting, deelVoor:deel, proj:!!(deel || ketting) && window.__projDelen!==false };   // delen: projectie (2026-10-03)
         imgTexture=null;   // eigendom gaat naar plaatsData; geen dispose
         cutModal.classList.remove("on"); cutHistoryOpruimen(); pendingNew=null; toonCutInstellingen(false); toonInfo(false);
         deelVoor=null; zetDeelUI();   // deel-stand van de modal opruimen (plaatsData weet zelf nog bij welk record)
@@ -27988,17 +28260,38 @@ function maakTatnetGL(json, canvas) {
       if(typeof createImageBitmap!=='function') return { e, bmp:null };
       return createImageBitmap(e.blob).then(bmp=>({ e, bmp }), ()=>({ e, bmp:null })); }).catch(()=>null);
   }
+  /* review R3 D3-2: niet meer alles tegelijk. texVooraf zet alleen de dragers zonder decal in een rij; daarvan staan er hooguit
+     TEX_VOORUIT tegelijk gelezen en gedecodeerd klaar. Na elke tattoo geeft het herstel zijn voorraad vrij (texKlaar) en start de
+     volgende. Eerder decodeerde het voor elke tattoo(deel) tegelijk een bitmap, ook voor tattoos die al op het model stonden. */
+  const TEX_VOORUIT=5;
+  let texRij=[], texRijI=0, texRijKlaar=0;   // [sleutel, tattoo-id] in herstelvolgorde; gestart tot texRijI, klaar tot texRijKlaar
+  function texVrij(s){
+    const p=texVoorraad.get(s); if(p){ texVoorraad.delete(s); p.then(r=>{ if(r && r.bmp && r.bmp.close) r.bmp.close(); }); }
+    geoVoorraad.delete(s);
+  }
   function texVoorraadLeeg(){
     for(const p of texVoorraad.values()) p.then(r=>{ if(r && r.bmp && r.bmp.close) r.bmp.close(); });
     texVoorraad.clear(); geoVoorraad.clear();
+    texRij=[]; texRijI=0; texRijKlaar=0;
+  }
+  function texVooruit(){
+    while(texRijI<texRij.length && texRijI<texRijKlaar+TEX_VOORUIT){ const s=texRij[texRijI++][0];
+      texVoorraad.set(s, texLeesBeeld(s)); geoVoorraad.set(s, texLees('g:'+s)); }
+  }
+  function texKlaar(id){   // tattoo hersteld (of niet): zijn voorraad weg, de volgende in de rij starten
+    while(texRijKlaar<texRij.length && texRij[texRijKlaar][1]===id){ texVrij(texRij[texRijKlaar][0]); texRijKlaar++; }
+    if(texRijI<texRijKlaar) texRijI=texRijKlaar;
+    texVooruit();
   }
   function texVooraf(list){
     texVoorraadLeeg();
+    const heeft=new Set(markers.map(m=>m.id+(m.deel ? ':'+m.deel.id : '')));
     for(const t of list){ if(!t || t.deleted) continue;
       const dragers=[[t.id, t]].concat(beeldDelen(t).map(d=>[t.id+':'+d.id, d]));
       for(const [s, dr] of dragers){ const P=dr.positie3d, k=dr.kunst3d;
-        if(!P || !P.point || (P.gender||'man')!==currentGender || !(k && k.srcUrl)) continue;
-        texVoorraad.set(s, texLeesBeeld(s)); geoVoorraad.set(s, texLees('g:'+s)); } }
+        if(heeft.has(s) || !P || !P.point || (P.gender||'man')!==currentGender || !k) continue;   // licht record: srcUrl staat niet in RAM
+        texRij.push([s, t.id]); } }
+    texVooruit();
   }
   /* De textuur van een tattoo(deel): uit de cache als de vingerafdruk klopt, anders maken (rebuildTextureFromKunst) en bewaren. */
   async function textuurVoor(sleutel, k){
@@ -28231,25 +28524,73 @@ function maakTatnetGL(json, canvas) {
     p.then(()=>{ if(herstelRonde===p) herstelRonde=null; }, ()=>{ if(herstelRonde===p) herstelRonde=null; });
     return p;
   }
+  /* review R3 D3-2: wat in deze sessie niet te herstellen bleek (mislukte migratie, geen of kapotte textuur, ander model), onthouden
+     op zijn stand. Verandert het record (updatedAt), de plek of het model, dan wordt het opnieuw geprobeerd. Zonder dit zag
+     herstelNodig zo'n tattoo bij elke herlaad als ontbrekend en liep er steeds een volle herstelronde (met de migratiemelding). */
+  var nietHerstelbaar=new Map();   // sleutel id:deelId -> stand (var: het herstel kan vroeg starten, nooit in de TDZ)
+  function herstelStand(t, deel){
+    const D=deel||t;
+    try{ return (+t.updatedAt||0)+'|'+JSON.stringify((D && D.positie3d)||null)+'|'+currentGender+'|'+presetId(); }catch(e){ return '?'; }
+  }
+  function nietTeHerstellen(t, deel){ const s=nietHerstelbaar.get(t.id+':'+(deel ? deel.id : '')); return s!==undefined && s===herstelStand(t, deel); }
+  function herstelOntbreekt(t, heeft){   // sleutel van de eerste tattoo(deel) die een decal zou moeten krijgen, anders null
+    if(!t || t.deleted) return null;
+    if(!heeft.has(t.id+':') && (!LICHAAM_GEN || (t.positie3d && Array.isArray(t.positie3d.point))) && !nietTeHerstellen(t, null)) return t.id+':';   // oud model: plek afleiden kan
+    for(const d of beeldDelen(t)) if(d.positie3d && Array.isArray(d.positie3d.point) && !heeft.has(t.id+':'+d.id) && !nietTeHerstellen(t, d)) return t.id+':'+d.id;
+    return null;
+  }
+  function onthoudOnherstelbaar(lt){   // na herstelEen: wat nog geen decal heeft (en niet elders bezig is) onthouden
+    const heeftNu=new Set(markers.filter(m=>m.id===lt.id).map(m=>m.deel ? m.deel.id : ''));
+    if(!heeftNu.has('') && !herstelBezig.has(lt.id+':') && (!LICHAAM_GEN || (lt.positie3d && Array.isArray(lt.positie3d.point))))
+      nietHerstelbaar.set(lt.id+':', herstelStand(lt, null));
+    for(const d of beeldDelen(lt)) if(d.positie3d && Array.isArray(d.positie3d.point) && !heeftNu.has(d.id) && !herstelBezig.has(lt.id+':'+d.id))
+      nietHerstelbaar.set(lt.id+':'+d.id, herstelStand(lt, d));
+    ttTijd.onherstelbaar=nietHerstelbaar.size;   // dev
+  }
+  /* De lijst voor het herstel: de lichte lijst als de collectie geladen is, anders zelf licht gelezen per cursor (een vol record
+     tegelijk in het geheugen, beeldvelden eraf; gemarkeerd als licht, dus nooit als vol record gebruikt). */
+  async function herstelLijst(){
+    if(typeof collectieGeladen!=='undefined' && collectieGeladen && typeof tattoos!=='undefined' && Array.isArray(tattoos) && tattoos.length) return tattoos;   // leeg: misschien mislukte herlaad, dan zelf lezen
+    if(typeof dbBeschikbaar!=='undefined' && !dbBeschikbaar) return (typeof getAllTattoos==='function') ? await getAllTattoos() : [];
+    const db=await openDB();
+    return await new Promise((res, rej)=>{ const uit=[];
+      const rq=db.transaction(STORE, 'readonly').objectStore(STORE).openCursor();
+      rq.onsuccess=()=>{ const c=rq.result; if(!c){ res(uit); return; }
+        const t=c.value;
+        if(t && typeof t==='object'){ delete t.foto; delete t.fotos; if(t.kunst) delete t.kunst.src; if(t.kunst3d) delete t.kunst3d.srcUrl;
+          for(const d of beeldDelen(t)) if(d.kunst3d) delete d.kunst3d.srcUrl;
+          t.__licht=true; uit.push(t); }
+        c.continue(); };
+      rq.onerror=()=>rej(rq.error); });
+  }
+  async function herstelVol(lt){   // het volle record (bronbeeld) voor een tattoo uit de lichte lijst; null = overslaan
+    if(!lt) return null;
+    let t=null; try{ t=(typeof volledigRecord==='function') ? await volledigRecord(lt.id) : null; }catch(e){ t=null; }
+    if(t) return t;
+    return lt.__licht ? null : lt;   // niet in de database (nog niet opgeslagen, of de DB is weg): een vol record in RAM kan zelf
+  }
   function herstelNodig(lijst){   // ontbreekt er een decal voor een tattoo(deel) met een plek? (nieuw lichaam; het oude model kan plekken afleiden)
     if(!LICHAAM_GEN) return true;
     const heeft=new Set(markers.map(m=>m.id+':'+(m.deel ? m.deel.id : '')));
-    for(const t of lijst){ if(!t || t.deleted) continue;
-      if(t.positie3d && Array.isArray(t.positie3d.point) && !heeft.has(t.id+':')){ ttTijd.nodig=t.id+':'; return true; }   // dev: welke ontbrak
-      for(const d of beeldDelen(t)) if(d.positie3d && Array.isArray(d.positie3d.point) && !heeft.has(t.id+':'+d.id)){ ttTijd.nodig=t.id+':'+d.id; return true; } }
+    for(const t of lijst){ const s=herstelOntbreekt(t, heeft); if(s){ ttTijd.nodig=s; return true; } }   // dev: welke ontbrak
     return false;
   }
   async function restore3DKern(token){
     if(token!==undefined && token!==loadToken) return;
     ttMerk('tt-herstel-start');
     if(!pickMeshes.length) return;
-    let list=[];
-    try{ list = (typeof getAllTattoos==="function") ? await getAllTattoos()
-                 : (typeof tattoos!=="undefined" ? tattoos : []); }
-    catch(e){ console.error(e); list = (typeof tattoos!=="undefined"?tattoos:[]); }
+    /* review R3 D3-2: de lichte lijst en alleen de tattoos(delen) zonder decal; per tattoo pas in de lus het volle record. Eerder las
+       elke ronde alle volle records (foto's, bronbeelden) tegelijk, ook bij een herlaad voor een enkele decal. */
+    let alle=[];
+    try{ alle=await herstelLijst(); }
+    catch(e){ console.error(e); alle=(typeof tattoos!=="undefined" && Array.isArray(tattoos)) ? tattoos : []; }
     ttMerk('tt-gelezen');
     if(token!==undefined && token!==loadToken) return;
-    texVooraf(list);   // slice 5u: textuurcache voor alle tattoos tegelijk lezen en decoderen
+    const _heeft=new Set(markers.map(m=>m.id+':'+(m.deel ? m.deel.id : '')));
+    const list=alle.filter(t=>!!herstelOntbreekt(t, _heeft));
+    ttTijd.herstelN=list.length;   // dev: hoeveel tattoos deze ronde herstelt
+    texVooraf(list);   // slice 5u; review R3 D3-2: alleen wat ontbreekt, hooguit TEX_VOORUIT tegelijk
+    infadeRonde(Math.max(list.length, texRij.length));   // review R3 D3-4
     migTel.gedaan=0; migTel.mislukt=0; herstelLoopt=true;   // geen startscherm-opname van een half herstel (slice 5a)
     try{ await uiterlijkEerst(); }catch(e){ console.error('uiterlijk', e); }   // haar en bril eerst, daarna de tattoos (2026-10-04)
     if(token!==undefined && token!==loadToken){ herstelLoopt=false; return; }
@@ -28257,10 +28598,16 @@ function maakTatnetGL(json, canvas) {
     // zodat de UI niet bevriest en de voortgang ('Laden… X/N') zichtbaar is bij veel tattoos.
     const total=list.reduce((n,t)=>n+((t&&!t.deleted)?1:0),0);
     let done=0, _laatsteYield=performance.now();
-    for(const t of list){
+    for(const lt of list){
       if(token!==undefined && token!==loadToken){ zetLaadVoortgang(0,0); return; }   // ander model intussen geladen
-      if(t && t.deleted) continue;                          // tombstones niet als 3D-decal herstellen
-      try{ await herstelEen(t, token); }catch(e){ console.error(e); }
+      if(lt && lt.deleted) continue;                          // tombstones niet als 3D-decal herstellen
+      const t=await herstelVol(lt);   // review R3 D3-2: per tattoo het volle record
+      if(token!==undefined && token!==loadToken){ zetLaadVoortgang(0,0); return; }
+      if(t && !t.deleted){
+        try{ await herstelEen(t, token); }catch(e){ console.error(e); }
+        if(token===undefined || token===loadToken) onthoudOnherstelbaar(lt);
+      }
+      texKlaar(lt.id);
       done++; zetLaadVoortgang(done,total);
       // Yield op tijdsbudget (~12ms) i.p.v. vast per 4 decals: zo blijft de UI per frame
       // responsief, ongeacht hoe zwaar een losse decal is (één trage decal blokkeerde voorheen
@@ -28283,7 +28630,7 @@ function maakTatnetGL(json, canvas) {
     // zijn (voorheen 'verdwenen' ze stil). Alleen bij een echte wissel, niet bij elke 3D-entry.
     if(meldAndereModel){
       meldAndereModel=false;
-      const verborgen=list.reduce((n,t)=>n+((t && !t.deleted && t.positie3d && t.positie3d.point &&
+      const verborgen=alle.reduce((n,t)=>n+((t && !t.deleted && t.positie3d && t.positie3d.point &&
         ((t.positie3d.gender||"man")!==currentGender))?1:0),0);
       if(verborgen>0) toast(tr('ui.ander_model_verborgen').replace('{n}', verborgen).replace('{s}', verborgen === 1 ? '' : 's'));
     }
@@ -28322,7 +28669,8 @@ function maakTatnetGL(json, canvas) {
   window.__tatties3DHerstel = async function(id){
     if(!inited || !pickMeshes.length) return false;
     let t=null;
-    try{ const list=(typeof tattoos!=="undefined")?tattoos:await getAllTattoos(); t=list.find(x=>x.id===id); }catch(e){}
+    try{ t=await volledigRecord(id); }catch(e){ t=null; }   // review R3 D3-2: het volle record (een licht record in RAM heeft geen bronbeeld)
+    if(!t){ try{ const list=(typeof tattoos!=="undefined")?tattoos:await getAllTattoos(); t=list.find(x=>x.id===id) || null; if(t && t.__licht) t=null; }catch(e){} }
     if(!t || t.deleted) return false;   // tombstone niet herplaatsen
     const ok=await herstelEen(t);
     if(ok && typeof renderMarkers==="function"){ try{renderMarkers();}catch(_){} }
