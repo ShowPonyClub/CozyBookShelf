@@ -13424,7 +13424,7 @@ function createTattoo(overrides = {}) {
    ============================================================ */
 // App-versie (semver, handmatig ophogen bij een release). Bij een bump ook de
 // CACHE-naam in sw.js meebumpen, zodat clients de nieuwe build ophalen.
-const APP_VERSIE = '0.4.16';
+const APP_VERSIE = '0.4.17';
 
 /* Dev-haken die de CLOUD raken hangen alleen op een ontwikkelmachine aan window. Ze zijn geen
    lek op zichzelf (zonder XSS roept niemand ze aan, en CSP + esc() houden XSS tegen), maar ze
@@ -15040,6 +15040,7 @@ async function _syncMetCloudKern() {
     }
     const l = item.rec || await volledigVoorSync(item.id);
     if (!l) continue;   // record is tijdens de ronde verdwenen
+    if (huidigeUserId !== user.id) return { ok: false, reden: 'niet-ingelogd', afgebroken: true };   // 2026-10-12: intussen uitgelogd of ander account: niet met een ingetrokken token uploaden
     const data = cloudData(l);
     const vorigMan = assetsVan(cById.get(l.id));
     if (!l.deleted) {
@@ -19357,6 +19358,7 @@ function planAccountVraag() {
     { const sl = $('#start-lichaam'); if (sl && !sl.hidden) return; }   // niet samen met de Nieuw-kaart (slice 5k): een vraag tegelijk
     const ov = $('#onboarding'), am = $('#account-modal'), ip = $('#inst-paneel');
     if ((ov && !ov.hidden) || (am && !am.hidden) || (ip && ip.classList.contains('open'))) return;
+    { const n = aantalTattoos(), d = accountNudgeDrempel(n); if (d) { toonAccountNudge(n); return; } }   // al 5+: meteen de kaart met het aantal
     toonAccountStap('vraag');
   }, 900);
 }
@@ -19388,7 +19390,7 @@ function zetAccountStapTekst() {   // kop en subtekst van de kaart: met aantal (
 function accountNudgeKan() {   // alles behalve de drempel: geen kaart als er al een kwam, de sessie onbekend is, je ingelogd bent of er iets open staat
   if (accountNudgeGetoond || accountVraagNu || accountStapModus) return false;
   try { if (localStorage.getItem('tatties-onboarding-gedaan') !== '1') return false; } catch (e) { return false; }
-  try { if (sessionStorage.getItem('tatties-account-intro') === '1') return false; } catch (e) { /* geen opslag */ }
+  /* toesteltest 2026-10-12: NIET de intro-sessieregel van de 1e-tattoo-vraag: in de iOS-app duurt die sessie zolang de app open blijft */
   if (huidigeView !== 'start' || !collectieGeladen || !accountStapKan()) return false;
   { const sl = $('#start-lichaam'); if (sl && !sl.hidden) return false; }
   const ov = $('#onboarding'), am = $('#account-modal'), ip = $('#inst-paneel');
@@ -20643,6 +20645,7 @@ async function verwijderVoorbeelden() {
         try { if (typeof openAccount === 'function') openAccount(); } catch(_) {}
         bericht('account.herstel_titel', null);
       } else {
+        if (!session) { try { clearTimeout(autoSyncTimer); } catch (_) {} }   // 2026-10-12: uitgelogd = geen geplande sync meer afvuren
         toonSessie(session);
         // Eerst de accountgrens, dan pas synchroniseren: anders staat de collectie al in het
         // verkeerde account voordat de vraag beantwoord is.
