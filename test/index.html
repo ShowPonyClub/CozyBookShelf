@@ -12630,6 +12630,41 @@ function maak(mesh, Z, D, opties){
     return m;
   });
   var nK = D.kop.n, nR = D.rij.n, nC = D.klasp.n, nMax = nK + MAX_RIJEN*nR + nC;
+  /* Sluiting als een gesloten Oysterclasp (toesteltest eigenaar 2026-10-14, met productfoto): alleen de dekplaat telt. Het bronmodel heeft
+     naast de dekplaat het binnenblad (een lage grijze tong) dat bij een gesloten sluiting onder de plaat zit; dat stak uit en liet een kier.
+     Dekplaat = de onderdelen die ergens hoger komen dan 60% van het hoogste punt; de rest valt weg en de ketting vult de ruimte met
+     schakels. Het sjabloon staat ook niet symmetrisch om zijn nulpunt, dus het midden van de plaat komt tussen de schakels. */
+  var KL = (function(){
+    var P = D.klasp.pos, yMax = 0, k;
+    for(k=0;k<nC;k++) yMax = Math.max(yMax, P[k*3+1]*sP);
+    var drempel = 0.6*yMax;
+    /* losse onderdelen (gedeelde hoekpunten); een onderdeel dat nergens boven de drempel komt is het binnenblad: weg */
+    var ouder = new Int32Array(nC); for(k=0;k<nC;k++) ouder[k] = k;
+    function wortel(i){ while(ouder[i] !== i){ ouder[i] = ouder[ouder[i]]; i = ouder[i]; } return i; }
+    for(var m in D.klasp.idx){ var ix = D.klasp.idx[m]; for(var t=0;t<ix.length;t+=3){ var r0 = wortel(ix[t]); ouder[wortel(ix[t+1])] = r0; ouder[wortel(ix[t+2])] = r0; } }
+    var hoog = {}; for(k=0;k<nC;k++){ if(P[k*3+1]*sP >= drempel) hoog[wortel(k)] = 1; }
+    var houd = new Uint8Array(nC), lo = Infinity, hi = -Infinity;
+    for(k=0;k<nC;k++){ if(!hoog[wortel(k)]) continue; houd[k] = 1; var x = P[k*3]*sP; if(x < lo) lo = x; if(x > hi) hi = x; }
+    if(!(hi > lo)) return { midden:0, half:D.klaspHalf, houd:null, krom:null };
+    /* Kromming: de onderrand (laagste punt per mm langs de band) als parabool y = a + b x + c x^2. De app buigt de sluiting daarmee
+       recht en legt hem op het pad van de ketting, zodat hij elke pols volgt zoals de schakels (stijf passen alleen bij de bronpols). */
+    var bak = {}; for(k=0;k<nC;k++){ if(!houd[k]) continue; var xb = Math.round(P[k*3]*sP), yb = P[k*3+1]*sP; if(bak[xb] === undefined || yb < bak[xb]) bak[xb] = yb; }
+    var S = [0,0,0,0,0], Ty = [0,0,0]; for(var xs in bak){ var xv = +xs, yv = bak[xs], x2v = xv*xv; S[0]++; S[1] += xv; S[2] += x2v; S[3] += x2v*xv; S[4] += x2v*x2v; Ty[0] += yv; Ty[1] += xv*yv; Ty[2] += x2v*yv; }
+    function det3(m){ return m[0]*(m[4]*m[8]-m[5]*m[7]) - m[1]*(m[3]*m[8]-m[5]*m[6]) + m[2]*(m[3]*m[7]-m[4]*m[6]); }
+    var A = [S[0],S[1],S[2], S[1],S[2],S[3], S[2],S[3],S[4]], dA = det3(A), krom = null;
+    if(S[0] >= 5 && Math.abs(dA) > 1e-9){
+      var ca = det3([Ty[0],S[1],S[2], Ty[1],S[2],S[3], Ty[2],S[3],S[4]])/dA, cb = det3([S[0],Ty[0],S[2], S[1],Ty[1],S[3], S[2],Ty[2],S[4]])/dA, cc = det3([S[0],S[1],Ty[0], S[1],S[2],Ty[1], S[2],S[3],Ty[2]])/dA;
+      var boog = function(x){ var n = Math.max(2, Math.ceil(Math.abs(x)/0.5)), h = x/n, som = 0; for(var j=0;j<n;j++){ var t = (j + 0.5)*h, sl = cb + 2*cc*t; som += Math.sqrt(1 + sl*sl)*h; } return som; };
+      krom = { u0:boog(lo), u1:boog(hi), u:new Float32Array(nC), dy:new Float32Array(nC), wx:new Float32Array(nC), wy:new Float32Array(nC) };
+      var Kn = D.klasp.nor;
+      for(k=0;k<nC;k++){   /* eenmalig per punt: booglengte, hoogte loodrecht op de onderrand, normaal in het rechtgebogen stelsel */
+        var x3 = P[k*3]*sP, y3 = P[k*3+1]*sP, an = Math.atan(cb + 2*cc*x3), co = Math.cos(an), si = Math.sin(an), vx = Kn[k*3]/127, vy = Kn[k*3+1]/127;
+        krom.u[k] = boog(x3); krom.dy[k] = (y3 - (ca + cb*x3 + cc*x3*x3))*co; krom.wx[k] = vx*co + vy*si; krom.wy[k] = -vx*si + vy*co;
+      }
+    }
+    return krom ? { midden:(krom.u0 + krom.u1)/2, half:(krom.u1 - krom.u0)/2, houd:houd, krom:krom }
+                : { midden:(lo + hi)/2, half:(hi - lo)/2, houd:houd, krom:null };
+  })();
   var g = new THREE.BufferGeometry(), pos = new Float32Array(nMax*3), nor = new Float32Array(nMax*3);
   g.setAttribute('position', new THREE.BufferAttribute(pos, 3));
   g.setAttribute('normal', new THREE.BufferAttribute(nor, 3));
@@ -12648,7 +12683,9 @@ function maak(mesh, Z, D, opties){
       function zet(src, off){ if(!src) return; for(var i=0;i<src.length;i++) I[at++] = src[i] + off; }
       zet(D.kop.idx[m], 0);
       for(var r=0;r<N;r++) zet(D.rij.idx[m], nK + r*nR);
-      zet(D.klasp.idx[m], nK + N*nR);
+      { var ki = D.klasp.idx[m]; if(ki) for(var t=0;t<ki.length;t+=3){   /* binnenblad weg (KL.houd) */
+          if(KL.houd && !(KL.houd[ki[t]] && KL.houd[ki[t+1]] && KL.houd[ki[t+2]])) continue;
+          I[at++] = ki[t] + nK + N*nR; I[at++] = ki[t+1] + nK + N*nR; I[at++] = ki[t+2] + nK + N*nR; } }
       if(at > st) g.addGroup(st, at - st, mi);
     });
     idxAttr.needsUpdate = true;
@@ -12686,7 +12723,7 @@ function maak(mesh, Z, D, opties){
     }
     /* Rijen: de eerste losse rij precies op het startpunt (= tegen de eindrij aan de kast), aan elke kant; daartussen N-1 stappen
        van pitch plus de sluiting (2*kh). Toesteltest eigenaar 2026-10-08: met een halve stap vanaf het begin zat er een gat bij de lugs. */
-    var lTot = L[nS-1], kh = D.klaspHalf, besch = Math.max(D.pitch, lTot - 2*kh);
+    var lTot = L[nS-1], kh = KL.half, besch = Math.max(D.pitch, lTot - 2*kh);
     var N = Math.max(2, Math.min(MAX_RIJEN, Math.round(besch/D.pitch) + 1)), pitch = besch/(N-1);
     var nP = Math.max(1, Math.min(N-1, Math.round(lPi/pitch)));   /* rijen aan de 12-uur-kant: 0..nP-1, daarna de sluiting, dan de rest */
     if(N !== nRij) bouwIndex(N);
@@ -12721,7 +12758,18 @@ function maak(mesh, Z, D, opties){
     var kp = D.kop.pos, kn = D.kop.nor;
     for(var k=0;k<nK;k++){ zet(k, kp[k*3]*sP + d0, kp[k*3+1]*sP, kp[k*3+2]*sP, kn[k*3]/127, kn[k*3+1]/127, kn[k*3+2]/127); zetAo(k, D.kop, k); }
     for(var r2=0;r2<N;r2++){ var s = r2 < nP ? r2*pitch : lTot - (N-1-r2)*pitch; plaats(D.rij, nK + r2*nR, frame(s), breedVan(r2 < nP ? r2 : N-1-r2)); }
-    plaats(D.klasp, nK + N*nR, frame(((nP-1)*pitch + lTot - (N-1-nP)*pitch)/2));   /* midden tussen de laatste rij van elke kant */
+    /* midden tussen de laatste rij van elke kant. Toesteltest eigenaar 2026-10-14: het sjabloon loopt niet symmetrisch om zijn nulpunt
+       (Datejust: -20,2 .. +25,3 mm), dus zonder correctie schoof de sluiting 2,6 mm op en zat er aan een kant een kier bij de schakels. */
+    var sKl = ((nP-1)*pitch + lTot - (N-1-nP)*pitch)/2;
+    if(KL.krom){   /* elk punt: booglengte langs de rechtgebogen onderrand -> plek op het pad; hoogte boven de onderrand langs de buitennormaal */
+      var Kp = D.klasp.pos, Kn = D.klasp.nor, kr = KL.krom, offK = nK + N*nR;
+      for(var kk=0;kk<nC;kk++){
+        if(KL.houd && !KL.houd[kk]) continue;   /* binnenblad: wordt niet getekend */
+        var F = frame(sKl + kr.u[kk] - KL.midden), dy = kr.dy[kk], wx = kr.wx[kk], wy = kr.wy[kk];
+        zet(offK + kk, F.o[0] + F.Nr[0]*dy, F.o[1] + F.Nr[1]*dy, Kp[kk*3+2]*sP, F.T[0]*wx + F.Nr[0]*wy, F.T[1]*wx + F.Nr[1]*wy, Kn[kk*3+2]/127);
+        zetAo(offK + kk, D.klasp, kk);
+      }
+    } else plaats(D.klasp, nK + N*nR, frame(sKl - KL.midden));
     g.attributes.position.needsUpdate = true; g.attributes.normal.needsUpdate = true; if(kl) g.attributes.color.needsUpdate = true;
     g.boundingSphere = new THREE.Sphere(new THREE.Vector3(M.O[0], M.O[1], M.O[2]), 0.12);
     if(tijd) tijd.zet(M, d0);
@@ -13593,7 +13641,7 @@ function createTattoo(overrides = {}) {
    ============================================================ */
 // App-versie (semver, handmatig ophogen bij een release). Bij een bump ook de
 // CACHE-naam in sw.js meebumpen, zodat clients de nieuwe build ophalen.
-const APP_VERSIE = '0.4.20';
+const APP_VERSIE = '0.4.21';
 
 /* Dev-haken die de CLOUD raken hangen alleen op een ontwikkelmachine aan window. Ze zijn geen
    lek op zichzelf (zonder XSS roept niemand ze aan, en CSP + esc() houden XSS tegen), maar ze
