@@ -96,6 +96,9 @@
     setTimeout(splashWeg, 10000);   // vangnet: launchAutoHide staat uit
   })();
 </script>
+<script>/* TESTSTAND-NATIEF (apply_teststand_natief.py, richtlijn 2.5.19): geen teststand in de iOS-app */
+  if (window.TATTIES_NATIEF) { try { localStorage.removeItem('tatties-dev'); } catch (e) {} }
+</script>
 <style>/* NATIVE-CSS */
 .is-native #inst-install, .is-native #inst-install-uitleg { display:none !important; }
 html.is-native:not(.natief-sociaal) #account-google, html.is-native:not(.natief-sociaal) #account-google + .account-of { display:none !important; }
@@ -13641,7 +13644,7 @@ function createTattoo(overrides = {}) {
    ============================================================ */
 // App-versie (semver, handmatig ophogen bij een release). Bij een bump ook de
 // CACHE-naam in sw.js meebumpen, zodat clients de nieuwe build ophalen.
-const APP_VERSIE = '0.4.22';
+const APP_VERSIE = '0.4.23';
 
 /* Dev-haken die de CLOUD raken hangen alleen op een ontwikkelmachine aan window. Ze zijn geen
    lek op zichzelf (zonder XSS roept niemand ze aan, en CSP + esc() houden XSS tegen), maar ze
@@ -20311,7 +20314,8 @@ async function verwijderVoorbeelden() {
   { const ve = $('#start-versie'); if (ve) { ve.textContent = 'v' + APP_VERSIE;
       // Teststand (doorloop 2026-09-21): vijf tikken binnen 2 s op het versienummer wisselen 'tatties-dev' (Tatnet-tijden in een melding).
       let tikN = 0, tikT = 0;
-      ve.addEventListener('click', () => { const nu = performance.now(); tikN = (nu - tikT < 2000) ? tikN + 1 : 1; tikT = nu; if (tikN < 5) return; tikN = 0;
+      ve.addEventListener('click', () => { if (window.TATTIES_NATIEF) return;   // apply_teststand_natief.py: niet in de iOS-app (2.5.19)
+        const nu = performance.now(); tikN = (nu - tikT < 2000) ? tikN + 1 : 1; tikT = nu; if (tikN < 5) return; tikN = 0;
         let aan = false; try { aan = localStorage.getItem('tatties-dev') !== '1'; localStorage.setItem('tatties-dev', aan ? '1' : '0'); } catch (e) {}
         toast(tr(aan ? 'ui.dev_aan' : 'ui.dev_uit')); }); } }
   document.querySelectorAll('#lichaam-gen-keuze button[data-lichaam-gen]').forEach(b => b.addEventListener('click', () => {
