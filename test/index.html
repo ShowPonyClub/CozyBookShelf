@@ -3286,6 +3286,20 @@ body.onb-inlog .account-modal{z-index:100002}
 .inst-export-account button::before{content:"";position:absolute;inset:-13px -4px}
 .gen-getalblok .gen-eenheid{flex:none;min-width:44px;min-height:44px}
 </style>
+<style id="r2-rest">/* apply_r2_rest.py (2026-10-18): R2 punten 11, 15 en 37 */
+#t3d-loading.on.pil{inset:auto;left:50%;top:calc(env(safe-area-inset-top,0px) + 84px);transform:translateX(-50%);flex-direction:row;gap:8px;
+  padding:7px 14px;background:var(--kaart);color:var(--tekst);border:2px solid var(--knop-rand);border-radius:4px;backdrop-filter:none;pointer-events:none;
+  box-shadow:3px 3px 0 rgba(var(--accent-rgb),.25);font-family:var(--label-font);font-stretch:75%;font-weight:800;letter-spacing:.1em;
+  text-transform:uppercase;font-size:.72rem;white-space:nowrap}
+#t3d-loading.on.pil .t3d-spin{width:14px;height:14px;border-width:2px;border-color:color-mix(in srgb,var(--tekst) 25%,transparent);border-top-color:var(--rood)}
+.t3d-editbar .eb-sa-uitkomst{flex:1 1 100%;margin:2px 0 0;text-align:center;font-size:.8rem;line-height:1.35;color:var(--gedempt)}
+.t3d-editbar .eb-sa-uitkomst.ok{color:var(--tekst)}
+.t3d-editbar .eb-sa-uitkomst[hidden]{display:none}
+.gen-keuzes{border:2px solid var(--accent);border-radius:4px;padding:2px;background:var(--kaart)}
+.gen-keuze{border-radius:2px;color:var(--tekst);font-family:var(--label-font);font-stretch:75%;font-weight:800;letter-spacing:.1em;
+  text-transform:uppercase;font-size:.78rem}
+.gen-keuze.actief{background:var(--accent-vlak);color:var(--op-inkt)}
+</style>
 </head>
 <body>
 <div id="bootsplash" aria-hidden="true"><img class="bs-logo logo-licht" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjIzLjAgMjIgMjU0LjAgNzAiIHdpZHRoPSI1MDgiIGhlaWdodD0iMTQwIj4NCjx0aXRsZT5UYXR0aWVzPC90aXRsZT4NCjxwb2x5Z29uIHBvaW50cz0iMjYuMCw0MCA2OC4wLDQwIDY4LjAsOTAgMjYuMCw5MCAzNi44LDY1IiBmaWxsPSIjQ0UyNzI3IiBzdHJva2U9IiMxNzEzMEYiIHN0cm9rZS13aWR0aD0iMy41IiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+DQo8cG9seWdvbiBwb2ludHM9IjI3NC4wLDQwIDIzMi4wLDQwIDIzMi4wLDkwIDI3NC4wLDkwIDI2My4yLDY1IiBmaWxsPSIjQ0UyNzI3IiBzdHJva2U9IiMxNzEzMEYiIHN0cm9rZS13aWR0aD0iMy41IiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+DQo8cG9seWdvbiBwb2ludHM9IjU2LjAsNzYgNjguMCw3NiA2OC4wLDkwIiBmaWxsPSIjMTcxMzBGIiBzdHJva2U9IiMxNzEzMEYiIHN0cm9rZS13aWR0aD0iMy41IiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+DQo8cG9seWdvbiBwb2ludHM9IjI0NC4wLDc2IDIzMi4wLDc2IDIzMi4wLDkwIiBmaWxsPSIjMTcxMzBGIiBzdHJva2U9IiMxNzEzMEYiIHN0cm9rZS13aWR0aD0iMy41IiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+DQo8cmVjdCB4PSI1Ni4wIiB5PSIyNCIgd2lkdGg9IjE4OCIgaGVpZ2h0PSI1MiIgZmlsbD0iI0ZBRjRFOCIgc3Ryb2tlPSIjMTcxMzBGIiBzdHJva2Utd2lkdGg9IjMuNSIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPg0KPHBhdGggZmlsbD0iIzE3MTMwRiIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoNzQuNjY0IDYzLjE5MSkgc2NhbGUoMC4wMTY4MikiIGQ9Ik0xNjM0IC0xNDczVi04ODdIMTMwNVExMzA1IC05NTQgMTMwMS41IC0xMDAzLjVRMTI5OCAtMTA1MyAxMjg2LjAgLTEwODMuNVExMjc0IC0xMTE0IDEyNDkuNSAtMTEyOC41UTEyMjUgLTExNDMgMTE4NCAtMTE0M0gxMTIyVi00ODNRMTEyMiAtNDE4IDExNjAuMCAtMzk0LjVRMTE5OCAtMzcxIDEyODYgLTM3MVYwSDM2OVYtMzcxUTQ1NyAtMzcxIDQ5NC41IC0zOTQuNVE1MzIgLTQxOCA1MzIgLTQ4M1YtMTE0M0g0NzFRNDMwIC0xMTQzIDQwNS41IC0xMTI4LjVRMzgxIC0xMTE0IDM2OC41IC0xMDgzLjVRMzU2IC0xMDUzIDM1My4wIC0xMDAzLjVRMzUwIC05NTQgMzUwIC04ODdIMjBWLTE0NzNaTTIyMDAuMCAtOTYzUTIxNDkuMCAtOTYzIDIxMTIuNSAtOTU1LjVRMjA3Ni4wIC05NDggMjA1MC4wIC05MzguMFEyMDI0LjAgLTkyOCAyMDA3LjAgLTkxNS41UTE5OTAuMCAtOTAzIDE5NzcuMCAtODkzTDE5ODcuMCAtODgzUTIwMDYuMCAtODkzIDIwMjguNSAtOTAzLjBRMjA1MS4wIC05MTMgMjA4Ni4wIC05MTNRMjE0NS4wIC05MTMgMjE4OC4wIC04NzQuNVEyMjMxLjAgLTgzNiAyMjMxLjAgLTc1MlEyMjMxLjAgLTY3MiAyMTY1LjUgLTYyMy41UTIxMDAuMCAtNTc1IDE5OTAuMCAtNTc1UTE4ODUuMCAtNTc1IDE4MjIuNSAtNjM1LjVRMTc2MC4wIC02OTYgMTc2MC4wIC04MDdRMTc2MC4wIC04NjggMTc5NC4wIC05MjguNVExODI4LjAgLTk4OSAxODk5LjUgLTEwMzcuMFExOTcxLjAgLTEwODUgMjA4MS41IC0xMTE2LjBRMjE5Mi4wIC0xMTQ3IDIzNDguMCAtMTE0N1EyNTM0LjAgLTExNDcgMjY1Mi4wIC0xMTEyLjBRMjc3MC4wIC0xMDc3IDI4MzUuNSAtMTAyMi4wUTI5MDEuMCAtOTY3IDI5MjUuNSAtODk3LjBRMjk1MC4wIC04MjcgMjk1MC4wIC03NTZWLTM2NVEyOTUwLjAgLTI3NCAyOTU2LjAgLTI0MS41UTI5NjIuMCAtMjA5IDMwMDEuMCAtMjA5UTMwMzIuMCAtMjA5IDMwNDQuNSAtMjM4LjVRMzA1Ny4wIC0yNjggMzA1Ny4wIC0zNDBWLTQ2NUgzMTcxLjBWLTMzOFEzMTcxLjAgLTI0OCAzMTU2LjAgLTE3OC41UTMxNDEuMCAtMTA5IDMwOTkuMCAtNTkuNVEzMDU3LjAgLTEwIDI5ODUuMCAxNS41UTI5MTMuMCA0MSAyODAxLjAgNDFRMjcwMC4wIDQxIDI2MzMuNSAxOS41UTI1NjcuMCAtMiAyNTI4LjAgLTM0LjBRMjQ4OS4wIC02NiAyNDcyLjUgLTEwMC41UTI0NTYuMCAtMTM1IDI0NTYuMCAtMTYySDI0NDAuMFEyNDM0LjAgLTEyMSAyNDA1LjUgLTg0LjBRMjM3Ny4wIC00NyAyMzI2LjUgLTE4LjVRMjI3Ni4wIDEwIDIyMDUuNSAyNy41UTIxMzUuMCA0NSAyMDQ1LjAgNDVRMTk1OS4wIDQ1IDE4ODguNSAyOC41UTE4MTguMCAxMiAxNzY4LjUgLTIzLjVRMTcxOS4wIC01OSAxNjkxLjUgLTExNS41UTE2NjQuMCAtMTcyIDE2NjQuMCAtMjUwUTE2NjQuMCAtMzQ2IDE3MTguMCAtNDAxLjVRMTc3Mi4wIC00NTcgMTg1NC4wIC00ODkuNVExOTM2LjAgLTUyMiAyMDMyLjUgLTU0Mi41UTIxMjkuMCAtNTYzIDIyMTEuMCAtNTkyLjBRMjI5My4wIC02MjEgMjM0Ny4wIC02NjcuMFEyNDAxLjAgLTcxMyAyNDAxLjAgLTc5N1EyNDAxLjAgLTg3MiAyMzU0LjAgLTkxNy41UTIzMDcuMCAtOTYzIDIyMDAuMCAtOTYzWk0yNDAxLjAgLTUzMFEyMzc5LjAgLTQ5OCAyMzQ2LjAgLTQ3OC41UTIzMTMuMCAtNDU5IDIyODIuNSAtNDQwLjVRMjI1Mi4wIC00MjIgMjIyOS41IC0zOTYuNVEyMjA3LjAgLTM3MSAyMjA3LjAgLTMyOFEyMjA3LjAgLTI5NSAyMjI1LjAgLTI2OC41UTIyNDMuMCAtMjQyIDIyOTUuMCAtMjQyUTIzNDIuMCAtMjQyIDIzNzEuNSAtMjc4LjVRMjQwMS4wIC0zMTUgMjQwMS4wIC0zODFaTTM4OTYuMCAtMTQ3M1YtMTEwMkg0MTk1LjBWLTczMUgzODk2LjBWLTQyNFEzODk2LjAgLTM1OCAzOTE0LjUgLTMxNi4wUTM5MzMuMCAtMjc0IDM5OTEuMCAtMjc0UTQwMjMuMCAtMjc0IDQwNDIuNSAtMjg2LjVRNDA2Mi4wIC0yOTkgNDA3My41IC0zMTkuNVE0MDg1LjAgLTM0MCA0MDg4LjAgLTM2Ni41UTQwOTEuMCAtMzkzIDQwOTEuMCAtNDI0Vi01NzNINDIwNi4wVi00MTJRNDIwNi4wIC0zMTUgNDE4NS41IC0yMzEuMFE0MTY1LjAgLTE0NyA0MTE1LjUgLTg2LjBRNDA2Ni4wIC0yNSAzOTgxLjAgMTEuMFEzODk2LjAgNDcgMzc2Ny4wIDQ3UTM2MjQuMCA0NyAzNTM5LjAgMTIuMFEzNDU0LjAgLTIzIDM0MTAuMCAtODQuMFEzMzY2LjAgLTE0NSAzMzUyLjUgLTIyOS4wUTMzMzkuMCAtMzEzIDMzMzkuMCAtNDEyVi03MzFIMzE4Mi4wVi0xMDYxUTMyNTcuMCAtMTA2MSAzMzIxLjUgLTEwOTMuNVEzMzg2LjAgLTExMjYgMzQzMi41IC0xMTgzLjVRMzQ3OS4wIC0xMjQxIDM1MDQuNSAtMTMxNS4wUTM1MzAuMCAtMTM4OSAzNTMwLjAgLTE0NzNaTTQ5NjcuMCAtMTQ3M1YtMTEwMkg1MjY2LjBWLTczMUg0OTY3LjBWLTQyNFE0OTY3LjAgLTM1OCA0OTg1LjUgLTMxNi4wUTUwMDQuMCAtMjc0IDUwNjIuMCAtMjc0UTUwOTQuMCAtMjc0IDUxMTMuNSAtMjg2LjVRNTEzMy4wIC0yOTkgNTE0NC41IC0zMTkuNVE1MTU2LjAgLTM0MCA1MTU5LjAgLTM2Ni41UTUxNjIuMCAtMzkzIDUxNjIuMCAtNDI0Vi01NzNINTI3Ny4wVi00MTJRNTI3Ny4wIC0zMTUgNTI1Ni41IC0yMzEuMFE1MjM2LjAgLTE0NyA1MTg2LjUgLTg2LjBRNTEzNy4wIC0yNSA1MDUyLjAgMTEuMFE0OTY3LjAgNDcgNDgzOC4wIDQ3UTQ2OTUuMCA0NyA0NjEwLjAgMTIuMFE0NTI1LjAgLTIzIDQ0ODEuMCAtODQuMFE0NDM3LjAgLTE0NSA0NDIzLjUgLTIyOS4wUTQ0MTAuMCAtMzEzIDQ0MTAuMCAtNDEyVi03MzFINDI1My4wVi0xMDYxUTQzMjguMCAtMTA2MSA0MzkyLjUgLTEwOTMuNVE0NDU3LjAgLTExMjYgNDUwMy41IC0xMTgzLjVRNDU1MC4wIC0xMjQxIDQ1NzUuNSAtMTMxNS4wUTQ2MDEuMCAtMTM4OSA0NjAxLjAgLTE0NzNaTTYwNzcuMCAtMTEwMlYtNDc5UTYwNzcuMCAtNDEyIDYxMTAuMCAtMzkxLjVRNjE0My4wIC0zNzEgNjE5NC4wIC0zNzFINjIyMS4wVjBINTM3OS4wVi0zNzFINTQxOC4wUTU0NzEuMCAtMzcxIDU0OTYuNSAtNDA0LjVRNTUyMi4wIC00MzggNTUyMi4wIC00NzdWLTYxOFE1NTIyLjAgLTY3NiA1NDg1LjUgLTcwMy41UTU0NDkuMCAtNzMxIDU0MDEuMCAtNzMxSDUzNzkuMFYtMTEwMlpNNTUwNi4wIC0xMzQ4UTU1MDYuMCAtMTQzNCA1NTcxLjUgLTE0OTUuMFE1NjM3LjAgLTE1NTYgNTc1OC4wIC0xNTU2UTU4ODEuMCAtMTU1NiA1OTQ3LjUgLTE0OTUuMFE2MDE0LjAgLTE0MzQgNjAxNC4wIC0xMzQ4UTYwMTQuMCAtMTI2MCA1OTQ3LjUgLTExOTkuNVE1ODgxLjAgLTExMzkgNTc1OC4wIC0xMTM5UTU2MzcuMCAtMTEzOSA1NTcxLjUgLTExOTkuNVE1NTA2LjAgLTEyNjAgNTUwNi4wIC0xMzQ4Wk02ODUzLjAgLTQ4OVE2ODU3LjAgLTM0MCA2OTA5LjUgLTI4My41UTY5NjIuMCAtMjI3IDcwNjAuMCAtMjI3UTcwOTMuMCAtMjI3IDcxMjQuNSAtMjM2LjVRNzE1Ni4wIC0yNDYgNzE4My4wIC0yNjcuNVE3MjEwLjAgLTI4OSA3MjI5LjUgLTMyNC41UTcyNDkuMCAtMzYwIDcyNTUuMCAtNDE0SDc2MTkuMFE3NTk5LjAgLTI4NSA3NTQ1LjUgLTE5OC4wUTc0OTIuMCAtMTExIDc0MDguMCAtNTcuNVE3MzI0LjAgLTQgNzIxMi41IDE5LjVRNzEwMS4wIDQzIDY5NjQuMCA0M1E2ODIzLjAgNDMgNjY5OS4wIDcuMFE2NTc1LjAgLTI5IDY0ODEuNSAtMTAyLjVRNjM4OC4wIC0xNzYgNjMzNS4wIC0yODcuNVE2MjgyLjAgLTM5OSA2MjgyLjAgLTU1M1E2MjgyLjAgLTcwMCA2MzMyLjAgLTgxMS4wUTYzODIuMCAtOTIyIDY0NzIuNSAtOTk2LjVRNjU2My4wIC0xMDcxIDY2ODYuNSAtMTEwOS4wUTY4MTAuMCAtMTE0NyA2OTU4LjAgLTExNDdRNzE0MC4wIC0xMTQ3IDcyNzEuMCAtMTA5OS4wUTc0MDIuMCAtMTA1MSA3NDg1LjAgLTk2NS4wUTc1NjguMCAtODc5IDc2MDcuMCAtNzU4LjBRNzY0Ni4wIC02MzcgNzY0NC4wIC00ODlaTTcwMDEuMCAtODc3UTY5MzEuMCAtODc3IDY4OTcuNSAtODI3LjVRNjg2NC4wIC03NzggNjg1My4wIC02NjRINzE0Ni4wUTcxNDAuMCAtNzYyIDcxMDQuMCAtODE5LjVRNzA2OC4wIC04NzcgNzAwMS4wIC04NzdaTTg5MDQuMCAtNzM3SDg2MjkuMFE4NjAwLjAgLTgwOSA4NTM5LjAgLTg1MS4wUTg0NzguMCAtODkzIDg0MTIuMCAtODkzUTgzNjcuMCAtODkzIDgzNDAuNSAtODc2LjVRODMxNC4wIC04NjAgODMxNC4wIC04MjdRODMxNC4wIC03ODYgODM2MC4wIC03NjUuNVE4NDA2LjAgLTc0NSA4NDc1LjUgLTcyOS4wUTg1NDUuMCAtNzEzIDg2MjYuMCAtNjkwLjVRODcwNy4wIC02NjggODc3Ni41IC02MjYuMFE4ODQ2LjAgLTU4NCA4ODkyLjAgLTUxMy4wUTg5MzguMCAtNDQyIDg5MzguMCAtMzI2UTg5MzguMCAtMjM2IDg4OTguMCAtMTY5LjBRODg1OC4wIC0xMDIgODc4OC41IC01OS4wUTg3MTkuMCAtMTYgODYyNS4wIDUuNVE4NTMxLjAgMjcgODQyMi4wIDI3UTgzMTYuMCAyNyA4MjIxLjUgNi41UTgxMjcuMCAtMTQgODA0MS4wIC02M0w4MDMxLjAgNkg3NzY3LjBWLTM5NUg4MDQxLjBRODA4MC4wIC0zMTUgODEzOS41IC0yNzEuMFE4MTk5LjAgLTIyNyA4MjcxLjAgLTIyN1E4MzI2LjAgLTIyNyA4MzQ5LjUgLTI0Ny41UTgzNzMuMCAtMjY4IDgzNzMuMCAtMjkzUTgzNzMuMCAtMzM0IDgzMjcuMCAtMzU2LjVRODI4MS4wIC0zNzkgODIxMy41IC0zOTYuNVE4MTQ2LjAgLTQxNCA4MDY1LjAgLTQzNS41UTc5ODQuMCAtNDU3IDc5MTYuNSAtNDk4LjBRNzg0OS4wIC01MzkgNzgwMy4wIC02MDguNVE3NzU3LjAgLTY3OCA3NzU3LjAgLTc5MVE3NzU3LjAgLTg3MiA3NzkzLjUgLTkzOS4wUTc4MzAuMCAtMTAwNiA3ODk4LjAgLTEwNTIuMFE3OTY2LjAgLTEwOTggODA1OC4wIC0xMTIyLjVRODE1MC4wIC0xMTQ3IDgyNjAuMCAtMTE0N1E4MzgzLjAgLTExNDcgODQ4MS41IC0xMTE5LjVRODU4MC4wIC0xMDkyIDg2MjkuMCAtMTA1OUw4NjM5LjAgLTExMzBIODkwNC4wWiIvPg0KPC9zdmc+DQo=" alt=""><img class="bs-logo logo-donker" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjIzLjAgMjIgMjU0LjAgNzAiIHdpZHRoPSI1MDgiIGhlaWdodD0iMTQwIj4NCjx0aXRsZT5UYXR0aWVzPC90aXRsZT4NCjxwb2x5Z29uIHBvaW50cz0iMjYuMCw0MCA2OC4wLDQwIDY4LjAsOTAgMjYuMCw5MCAzNi44LDY1IiBmaWxsPSIjQ0UyNzI3IiBzdHJva2U9IiNFREUzQ0YiIHN0cm9rZS13aWR0aD0iMy41IiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+DQo8cG9seWdvbiBwb2ludHM9IjI3NC4wLDQwIDIzMi4wLDQwIDIzMi4wLDkwIDI3NC4wLDkwIDI2My4yLDY1IiBmaWxsPSIjQ0UyNzI3IiBzdHJva2U9IiNFREUzQ0YiIHN0cm9rZS13aWR0aD0iMy41IiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+DQo8cG9seWdvbiBwb2ludHM9IjU2LjAsNzYgNjguMCw3NiA2OC4wLDkwIiBmaWxsPSIjOEUxQjFCIiBzdHJva2U9IiNFREUzQ0YiIHN0cm9rZS13aWR0aD0iMy41IiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+DQo8cG9seWdvbiBwb2ludHM9IjI0NC4wLDc2IDIzMi4wLDc2IDIzMi4wLDkwIiBmaWxsPSIjOEUxQjFCIiBzdHJva2U9IiNFREUzQ0YiIHN0cm9rZS13aWR0aD0iMy41IiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+DQo8cmVjdCB4PSI1Ni4wIiB5PSIyNCIgd2lkdGg9IjE4OCIgaGVpZ2h0PSI1MiIgZmlsbD0iIzE3MTMwRiIgc3Ryb2tlPSIjRURFM0NGIiBzdHJva2Utd2lkdGg9IjMuNSIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPg0KPHBhdGggZmlsbD0iI0VERTNDRiIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoNzQuNjY0IDYzLjE5MSkgc2NhbGUoMC4wMTY4MikiIGQ9Ik0xNjM0IC0xNDczVi04ODdIMTMwNVExMzA1IC05NTQgMTMwMS41IC0xMDAzLjVRMTI5OCAtMTA1MyAxMjg2LjAgLTEwODMuNVExMjc0IC0xMTE0IDEyNDkuNSAtMTEyOC41UTEyMjUgLTExNDMgMTE4NCAtMTE0M0gxMTIyVi00ODNRMTEyMiAtNDE4IDExNjAuMCAtMzk0LjVRMTE5OCAtMzcxIDEyODYgLTM3MVYwSDM2OVYtMzcxUTQ1NyAtMzcxIDQ5NC41IC0zOTQuNVE1MzIgLTQxOCA1MzIgLTQ4M1YtMTE0M0g0NzFRNDMwIC0xMTQzIDQwNS41IC0xMTI4LjVRMzgxIC0xMTE0IDM2OC41IC0xMDgzLjVRMzU2IC0xMDUzIDM1My4wIC0xMDAzLjVRMzUwIC05NTQgMzUwIC04ODdIMjBWLTE0NzNaTTIyMDAuMCAtOTYzUTIxNDkuMCAtOTYzIDIxMTIuNSAtOTU1LjVRMjA3Ni4wIC05NDggMjA1MC4wIC05MzguMFEyMDI0LjAgLTkyOCAyMDA3LjAgLTkxNS41UTE5OTAuMCAtOTAzIDE5NzcuMCAtODkzTDE5ODcuMCAtODgzUTIwMDYuMCAtODkzIDIwMjguNSAtOTAzLjBRMjA1MS4wIC05MTMgMjA4Ni4wIC05MTNRMjE0NS4wIC05MTMgMjE4OC4wIC04NzQuNVEyMjMxLjAgLTgzNiAyMjMxLjAgLTc1MlEyMjMxLjAgLTY3MiAyMTY1LjUgLTYyMy41UTIxMDAuMCAtNTc1IDE5OTAuMCAtNTc1UTE4ODUuMCAtNTc1IDE4MjIuNSAtNjM1LjVRMTc2MC4wIC02OTYgMTc2MC4wIC04MDdRMTc2MC4wIC04NjggMTc5NC4wIC05MjguNVExODI4LjAgLTk4OSAxODk5LjUgLTEwMzcuMFExOTcxLjAgLTEwODUgMjA4MS41IC0xMTE2LjBRMjE5Mi4wIC0xMTQ3IDIzNDguMCAtMTE0N1EyNTM0LjAgLTExNDcgMjY1Mi4wIC0xMTEyLjBRMjc3MC4wIC0xMDc3IDI4MzUuNSAtMTAyMi4wUTI5MDEuMCAtOTY3IDI5MjUuNSAtODk3LjBRMjk1MC4wIC04MjcgMjk1MC4wIC03NTZWLTM2NVEyOTUwLjAgLTI3NCAyOTU2LjAgLTI0MS41UTI5NjIuMCAtMjA5IDMwMDEuMCAtMjA5UTMwMzIuMCAtMjA5IDMwNDQuNSAtMjM4LjVRMzA1Ny4wIC0yNjggMzA1Ny4wIC0zNDBWLTQ2NUgzMTcxLjBWLTMzOFEzMTcxLjAgLTI0OCAzMTU2LjAgLTE3OC41UTMxNDEuMCAtMTA5IDMwOTkuMCAtNTkuNVEzMDU3LjAgLTEwIDI5ODUuMCAxNS41UTI5MTMuMCA0MSAyODAxLjAgNDFRMjcwMC4wIDQxIDI2MzMuNSAxOS41UTI1NjcuMCAtMiAyNTI4LjAgLTM0LjBRMjQ4OS4wIC02NiAyNDcyLjUgLTEwMC41UTI0NTYuMCAtMTM1IDI0NTYuMCAtMTYySDI0NDAuMFEyNDM0LjAgLTEyMSAyNDA1LjUgLTg0LjBRMjM3Ny4wIC00NyAyMzI2LjUgLTE4LjVRMjI3Ni4wIDEwIDIyMDUuNSAyNy41UTIxMzUuMCA0NSAyMDQ1LjAgNDVRMTk1OS4wIDQ1IDE4ODguNSAyOC41UTE4MTguMCAxMiAxNzY4LjUgLTIzLjVRMTcxOS4wIC01OSAxNjkxLjUgLTExNS41UTE2NjQuMCAtMTcyIDE2NjQuMCAtMjUwUTE2NjQuMCAtMzQ2IDE3MTguMCAtNDAxLjVRMTc3Mi4wIC00NTcgMTg1NC4wIC00ODkuNVExOTM2LjAgLTUyMiAyMDMyLjUgLTU0Mi41UTIxMjkuMCAtNTYzIDIyMTEuMCAtNTkyLjBRMjI5My4wIC02MjEgMjM0Ny4wIC02NjcuMFEyNDAxLjAgLTcxMyAyNDAxLjAgLTc5N1EyNDAxLjAgLTg3MiAyMzU0LjAgLTkxNy41UTIzMDcuMCAtOTYzIDIyMDAuMCAtOTYzWk0yNDAxLjAgLTUzMFEyMzc5LjAgLTQ5OCAyMzQ2LjAgLTQ3OC41UTIzMTMuMCAtNDU5IDIyODIuNSAtNDQwLjVRMjI1Mi4wIC00MjIgMjIyOS41IC0zOTYuNVEyMjA3LjAgLTM3MSAyMjA3LjAgLTMyOFEyMjA3LjAgLTI5NSAyMjI1LjAgLTI2OC41UTIyNDMuMCAtMjQyIDIyOTUuMCAtMjQyUTIzNDIuMCAtMjQyIDIzNzEuNSAtMjc4LjVRMjQwMS4wIC0zMTUgMjQwMS4wIC0zODFaTTM4OTYuMCAtMTQ3M1YtMTEwMkg0MTk1LjBWLTczMUgzODk2LjBWLTQyNFEzODk2LjAgLTM1OCAzOTE0LjUgLTMxNi4wUTM5MzMuMCAtMjc0IDM5OTEuMCAtMjc0UTQwMjMuMCAtMjc0IDQwNDIuNSAtMjg2LjVRNDA2Mi4wIC0yOTkgNDA3My41IC0zMTkuNVE0MDg1LjAgLTM0MCA0MDg4LjAgLTM2Ni41UTQwOTEuMCAtMzkzIDQwOTEuMCAtNDI0Vi01NzNINDIwNi4wVi00MTJRNDIwNi4wIC0zMTUgNDE4NS41IC0yMzEuMFE0MTY1LjAgLTE0NyA0MTE1LjUgLTg2LjBRNDA2Ni4wIC0yNSAzOTgxLjAgMTEuMFEzODk2LjAgNDcgMzc2Ny4wIDQ3UTM2MjQuMCA0NyAzNTM5LjAgMTIuMFEzNDU0LjAgLTIzIDM0MTAuMCAtODQuMFEzMzY2LjAgLTE0NSAzMzUyLjUgLTIyOS4wUTMzMzkuMCAtMzEzIDMzMzkuMCAtNDEyVi03MzFIMzE4Mi4wVi0xMDYxUTMyNTcuMCAtMTA2MSAzMzIxLjUgLTEwOTMuNVEzMzg2LjAgLTExMjYgMzQzMi41IC0xMTgzLjVRMzQ3OS4wIC0xMjQxIDM1MDQuNSAtMTMxNS4wUTM1MzAuMCAtMTM4OSAzNTMwLjAgLTE0NzNaTTQ5NjcuMCAtMTQ3M1YtMTEwMkg1MjY2LjBWLTczMUg0OTY3LjBWLTQyNFE0OTY3LjAgLTM1OCA0OTg1LjUgLTMxNi4wUTUwMDQuMCAtMjc0IDUwNjIuMCAtMjc0UTUwOTQuMCAtMjc0IDUxMTMuNSAtMjg2LjVRNTEzMy4wIC0yOTkgNTE0NC41IC0zMTkuNVE1MTU2LjAgLTM0MCA1MTU5LjAgLTM2Ni41UTUxNjIuMCAtMzkzIDUxNjIuMCAtNDI0Vi01NzNINTI3Ny4wVi00MTJRNTI3Ny4wIC0zMTUgNTI1Ni41IC0yMzEuMFE1MjM2LjAgLTE0NyA1MTg2LjUgLTg2LjBRNTEzNy4wIC0yNSA1MDUyLjAgMTEuMFE0OTY3LjAgNDcgNDgzOC4wIDQ3UTQ2OTUuMCA0NyA0NjEwLjAgMTIuMFE0NTI1LjAgLTIzIDQ0ODEuMCAtODQuMFE0NDM3LjAgLTE0NSA0NDIzLjUgLTIyOS4wUTQ0MTAuMCAtMzEzIDQ0MTAuMCAtNDEyVi03MzFINDI1My4wVi0xMDYxUTQzMjguMCAtMTA2MSA0MzkyLjUgLTEwOTMuNVE0NDU3LjAgLTExMjYgNDUwMy41IC0xMTgzLjVRNDU1MC4wIC0xMjQxIDQ1NzUuNSAtMTMxNS4wUTQ2MDEuMCAtMTM4OSA0NjAxLjAgLTE0NzNaTTYwNzcuMCAtMTEwMlYtNDc5UTYwNzcuMCAtNDEyIDYxMTAuMCAtMzkxLjVRNjE0My4wIC0zNzEgNjE5NC4wIC0zNzFINjIyMS4wVjBINTM3OS4wVi0zNzFINTQxOC4wUTU0NzEuMCAtMzcxIDU0OTYuNSAtNDA0LjVRNTUyMi4wIC00MzggNTUyMi4wIC00NzdWLTYxOFE1NTIyLjAgLTY3NiA1NDg1LjUgLTcwMy41UTU0NDkuMCAtNzMxIDU0MDEuMCAtNzMxSDUzNzkuMFYtMTEwMlpNNTUwNi4wIC0xMzQ4UTU1MDYuMCAtMTQzNCA1NTcxLjUgLTE0OTUuMFE1NjM3LjAgLTE1NTYgNTc1OC4wIC0xNTU2UTU4ODEuMCAtMTU1NiA1OTQ3LjUgLTE0OTUuMFE2MDE0LjAgLTE0MzQgNjAxNC4wIC0xMzQ4UTYwMTQuMCAtMTI2MCA1OTQ3LjUgLTExOTkuNVE1ODgxLjAgLTExMzkgNTc1OC4wIC0xMTM5UTU2MzcuMCAtMTEzOSA1NTcxLjUgLTExOTkuNVE1NTA2LjAgLTEyNjAgNTUwNi4wIC0xMzQ4Wk02ODUzLjAgLTQ4OVE2ODU3LjAgLTM0MCA2OTA5LjUgLTI4My41UTY5NjIuMCAtMjI3IDcwNjAuMCAtMjI3UTcwOTMuMCAtMjI3IDcxMjQuNSAtMjM2LjVRNzE1Ni4wIC0yNDYgNzE4My4wIC0yNjcuNVE3MjEwLjAgLTI4OSA3MjI5LjUgLTMyNC41UTcyNDkuMCAtMzYwIDcyNTUuMCAtNDE0SDc2MTkuMFE3NTk5LjAgLTI4NSA3NTQ1LjUgLTE5OC4wUTc0OTIuMCAtMTExIDc0MDguMCAtNTcuNVE3MzI0LjAgLTQgNzIxMi41IDE5LjVRNzEwMS4wIDQzIDY5NjQuMCA0M1E2ODIzLjAgNDMgNjY5OS4wIDcuMFE2NTc1LjAgLTI5IDY0ODEuNSAtMTAyLjVRNjM4OC4wIC0xNzYgNjMzNS4wIC0yODcuNVE2MjgyLjAgLTM5OSA2MjgyLjAgLTU1M1E2MjgyLjAgLTcwMCA2MzMyLjAgLTgxMS4wUTYzODIuMCAtOTIyIDY0NzIuNSAtOTk2LjVRNjU2My4wIC0xMDcxIDY2ODYuNSAtMTEwOS4wUTY4MTAuMCAtMTE0NyA2OTU4LjAgLTExNDdRNzE0MC4wIC0xMTQ3IDcyNzEuMCAtMTA5OS4wUTc0MDIuMCAtMTA1MSA3NDg1LjAgLTk2NS4wUTc1NjguMCAtODc5IDc2MDcuMCAtNzU4LjBRNzY0Ni4wIC02MzcgNzY0NC4wIC00ODlaTTcwMDEuMCAtODc3UTY5MzEuMCAtODc3IDY4OTcuNSAtODI3LjVRNjg2NC4wIC03NzggNjg1My4wIC02NjRINzE0Ni4wUTcxNDAuMCAtNzYyIDcxMDQuMCAtODE5LjVRNzA2OC4wIC04NzcgNzAwMS4wIC04NzdaTTg5MDQuMCAtNzM3SDg2MjkuMFE4NjAwLjAgLTgwOSA4NTM5LjAgLTg1MS4wUTg0NzguMCAtODkzIDg0MTIuMCAtODkzUTgzNjcuMCAtODkzIDgzNDAuNSAtODc2LjVRODMxNC4wIC04NjAgODMxNC4wIC04MjdRODMxNC4wIC03ODYgODM2MC4wIC03NjUuNVE4NDA2LjAgLTc0NSA4NDc1LjUgLTcyOS4wUTg1NDUuMCAtNzEzIDg2MjYuMCAtNjkwLjVRODcwNy4wIC02NjggODc3Ni41IC02MjYuMFE4ODQ2LjAgLTU4NCA4ODkyLjAgLTUxMy4wUTg5MzguMCAtNDQyIDg5MzguMCAtMzI2UTg5MzguMCAtMjM2IDg4OTguMCAtMTY5LjBRODg1OC4wIC0xMDIgODc4OC41IC01OS4wUTg3MTkuMCAtMTYgODYyNS4wIDUuNVE4NTMxLjAgMjcgODQyMi4wIDI3UTgzMTYuMCAyNyA4MjIxLjUgNi41UTgxMjcuMCAtMTQgODA0MS4wIC02M0w4MDMxLjAgNkg3NzY3LjBWLTM5NUg4MDQxLjBRODA4MC4wIC0zMTUgODEzOS41IC0yNzEuMFE4MTk5LjAgLTIyNyA4MjcxLjAgLTIyN1E4MzI2LjAgLTIyNyA4MzQ5LjUgLTI0Ny41UTgzNzMuMCAtMjY4IDgzNzMuMCAtMjkzUTgzNzMuMCAtMzM0IDgzMjcuMCAtMzU2LjVRODI4MS4wIC0zNzkgODIxMy41IC0zOTYuNVE4MTQ2LjAgLTQxNCA4MDY1LjAgLTQzNS41UTc5ODQuMCAtNDU3IDc5MTYuNSAtNDk4LjBRNzg0OS4wIC01MzkgNzgwMy4wIC02MDguNVE3NzU3LjAgLTY3OCA3NzU3LjAgLTc5MVE3NzU3LjAgLTg3MiA3NzkzLjUgLTkzOS4wUTc4MzAuMCAtMTAwNiA3ODk4LjAgLTEwNTIuMFE3OTY2LjAgLTEwOTggODA1OC4wIC0xMTIyLjVRODE1MC4wIC0xMTQ3IDgyNjAuMCAtMTE0N1E4MzgzLjAgLTExNDcgODQ4MS41IC0xMTE5LjVRODU4MC4wIC0xMDkyIDg2MjkuMCAtMTA1OUw4NjM5LjAgLTExMzBIODkwNC4wWiIvPg0KPC9zdmc+DQo=" alt=""><span class="bs-lijn"></span></div>
@@ -3582,6 +3596,7 @@ body.onb-inlog .account-modal{z-index:100002}
           <button type="button" class="seg-btn" data-samen="deel" data-i18n="eb.dit_deel">Dit deel</button>
         </div>
         <button type="button" class="eb-sluitaan" data-act="sluitaan" hidden data-i18n="eb.sluit_aan" data-i18n-title="eb.sluit_aan_uitleg" data-i18n-aria="eb.sluit_aan_uitleg" title="Leg dit deel precies aan op het andere deel" aria-label="Leg dit deel precies aan op het andere deel">Sluit aan</button>
+        <p class="eb-sa-uitkomst" hidden aria-live="polite"></p>
         </div>
         <div class="eb-legend" hidden role="group" data-i18n-aria="ui.knop_uitleg" aria-label="Wat doen de knoppen?"></div>
         <div class="eb-btns">
@@ -13000,7 +13015,7 @@ const I18N = {
     'tips.knip2':'Meer gereedschap: punten, draaien, spiegelen, toverstaf, gum.',
     'tips.knip3':'Klopt de lijn? Hier ga je verder.',
     'tips.bewerk1':'Sleep naast de tattoo om het model te draaien.',
-    'tips.bewerk2':'Knijp voor de maat, draai met twee vingers om te draaien.',
+    'tips.bewerk2':'Knijp op de tattoo voor de maat, draai met twee vingers om te draaien.',
     'tips.bewerk3':'De schuif zet de sterkte van de inkt.',
     'uitleg.tips_opnieuw':'Tips opnieuw tonen','tips.terug':'De tips komen terug bij je volgende tattoo.',
     'natief.account_sub':'Veilig in de cloud en op elk toestel.','natief.account_n_sub':'Met een account staan ze ook op een nieuwe telefoon.',
@@ -13043,7 +13058,7 @@ const I18N = {
     'start.titel':'Welkom terug','start.titel_nieuw':'Welkom bij Tatties','start.tagline':'show me your tatties','start.nieuw':'Nieuwe tattoo',
     'start.stat_aantal':'Tattoos','start.stat_zituren':'Zituren','start.stat_uitgegeven':'Uitgegeven','start.leeg':'Nog geen tattoos - voeg je eerste toe.','start.recent':'Recent toegevoegd','start.greep':'Uit je collectie','start.regel_aantal':'{n} tattoo{s}','start.regel_uren':'{u} in de stoel','start.regel_kosten':'{k} uitgegeven',
     'start.tegel3d':'3D-model','start.tegel2d':'2D-kaart','start.tegelcol':'Collectie','start.tegelstats':'Statistieken',
-    'start.account_uit':'Inloggen om te synchroniseren','start.account_backup':'Back-up naar de cloud','sync.voortgang':'{n} van {totaal} overgezet','sync.veilig':'Je collectie staat in de cloud: {n} tattoo{s} en {f} foto{fs}.','sync.grens_uitleg':'Deze collectie hoort bij een ander account; synchroniseren staat uit. Log uit en log in met dat account, of voeg de tattoos aan dit account toe.','sync.grens_knop':'Deze tattoos aan dit account toevoegen','sync.grens_bevestig_sub':'Ze komen in {email} te staan. Het andere account houdt zijn eigen kopie. Dit kun je niet ongedaan maken.','sync.grens_ja':'Toevoegen','ui.cut_hint_deel':'Trek met je vinger een lijn om het volgende deel van {naam}.','eb.wens':'Wishlist','lijst.legecollectie_wens':'Nog niets gezet. Op je wishlist: {n}.','start.regel_wens':'{n} op je wishlist','ui.wens_geen_plek':'Nog niet op het model: {n} van je wishlist.','onb.account_wens_sub':'Je wishlist in de cloud en op elk toestel.','onb.account_wens_titel':'Zet je ideeën veilig','ui.knip_terug_naam':'Naam: {naam}','ui.knip_terug_sub':'Begonnen {wanneer}.','ui.knip_terug_nee':'Weggooien','start.account_rood_deels':'Niet alles staat in de cloud','start.account_rood':'Niet in de cloud sinds {wanneer}','sync.bekijk':'Bekijk','account.fout_email':'Dit e-mailadres klopt niet.','sync.grens_bevestig':'Deze tattoos aan dit account toevoegen?','sync.grens_klaar':'Je tattoos horen nu bij dit account. Synchroniseren staat weer aan.','sync.ander_account_geblokkeerd':'Synchroniseren staat uit: deze collectie hoort bij een ander account.','start.account_in':'Gesynchroniseerd ✓',
+    'start.account_uit':'Inloggen om te synchroniseren','start.account_backup':'Back-up naar de cloud','sync.voortgang':'{n} van {totaal} overgezet','sync.veilig':'Je collectie staat in de cloud: {n} tattoo{s} en {f} foto{fs}.','sync.grens_uitleg':'Deze collectie hoort bij een ander account; synchroniseren staat uit. Log uit en log in met dat account, of voeg de tattoos aan dit account toe.','sync.grens_knop':'Deze tattoos aan dit account toevoegen','sync.grens_bevestig_sub':'Ze komen in {email} te staan. Het andere account houdt zijn eigen kopie. Dit kun je niet ongedaan maken.','sync.grens_ja':'Toevoegen','tips.sluitaan':'Sluit aan zoekt waar dit deel over het andere ligt en legt de lijnen precies op elkaar. Leg het eerst een stukje over het andere deel.','ui.cut_hint_deel':'Trek met je vinger een lijn om het volgende deel van {naam}.','eb.wens':'Wishlist','lijst.legecollectie_wens':'Nog niets gezet. Op je wishlist: {n}.','start.regel_wens':'{n} op je wishlist','ui.wens_geen_plek':'Nog niet op het model: {n} van je wishlist.','onb.account_wens_sub':'Je wishlist in de cloud en op elk toestel.','onb.account_wens_titel':'Zet je ideeën veilig','ui.knip_terug_naam':'Naam: {naam}','ui.knip_terug_sub':'Begonnen {wanneer}.','ui.knip_terug_nee':'Weggooien','start.account_rood_deels':'Niet alles staat in de cloud','start.account_rood':'Niet in de cloud sinds {wanneer}','sync.bekijk':'Bekijk','account.fout_email':'Dit e-mailadres klopt niet.','sync.grens_bevestig':'Deze tattoos aan dit account toevoegen?','sync.grens_klaar':'Je tattoos horen nu bij dit account. Synchroniseren staat weer aan.','sync.ander_account_geblokkeerd':'Synchroniseren staat uit: deze collectie hoort bij een ander account.','start.account_in':'Gesynchroniseerd ✓',
     'start.leeg_uitleg':'Je tattoos, op je eigen 3D-lichaam.','start.privacy':'Alles blijft op dit toestel. Sync is optioneel.','start.privacy_magic':'Alles blijft op dit toestel. Sync en Magic cut zijn optioneel.','start.kijk3d':'Bekijk eerst het 3D-lichaam','ui.geen_foto_link':'Geen foto? Alleen gegevens opslaan','ui.gl_onbeschikbaar':'3D-weergave is niet beschikbaar op dit toestel (WebGL werkt niet).','inapp.tekst':'In-app-browser: je tattoos worden hier mogelijk niet bewaard. Open Tatties in Safari of Chrome.','inapp.kopieer':'Kopieer link','inapp.gekopieerd':'Link gekopieerd - plak hem in je browser','ui.gl_verloren':'3D is gestopt (te weinig geheugen). Ververs om door te gaan.',
     'start.kies_titel':'Tattoo toevoegen','start.kies_3d':'Op het 3D-model','start.kies_3d_sub':'Plaats op het 3D-lichaam',
     'start.kies_2d':'Op de 2D-kaart','start.kies_2d_sub':'Plaats op de platte voor/achter-kaart','start.kies_2d_wip':'Nog in aanbouw',
@@ -13224,7 +13239,7 @@ const I18N = {
     'tips.knip2':'More tools: points, rotate, mirror, wand, eraser.',
     'tips.knip3':'Happy with the line? Continue here.',
     'tips.bewerk1':'Drag beside the tattoo to turn the model.',
-    'tips.bewerk2':'Pinch to resize, twist to turn.',
+    'tips.bewerk2':'Pinch on the tattoo to resize, twist to turn.',
     'tips.bewerk3':'The slider sets the ink strength.',
     'uitleg.tips_opnieuw':'Show tips again','tips.terug':'Tips return with your next tattoo.',
     'natief.account_sub':'Backed up and on every device.','natief.account_n_sub':'With an account they\'re on a new phone too.',
@@ -13267,7 +13282,7 @@ const I18N = {
     'start.titel':'Welcome back','start.titel_nieuw':'Welcome to Tatties','start.tagline':'show me your tatties','start.nieuw':'New tattoo',
     'start.stat_aantal':'Tattoos','start.stat_zituren':'Chair time','start.stat_uitgegeven':'Spent','start.leeg':'No tattoos yet - add your first.','start.recent':'Recently added','start.greep':'From your collection','start.regel_aantal':'{n} tattoo{s}','start.regel_uren':'{u} in the chair','start.regel_kosten':'{k} spent',
     'start.tegel3d':'3D model','start.tegel2d':'2D map','start.tegelcol':'Collection','start.tegelstats':'Statistics',
-    'start.account_uit':'Sign in to sync','start.account_backup':'Back up to the cloud','sync.voortgang':'{n} of {totaal} uploaded','sync.veilig':'Your collection is in the cloud: {n} tattoo{s} and {f} photo{fs}.','sync.grens_uitleg':'This collection belongs to another account; syncing is off. Sign out and sign in with that account, or add the tattoos to this account.','sync.grens_knop':'Add these tattoos to this account','sync.grens_bevestig_sub':'They\'ll be saved in {email}. The other account keeps its own copy. You can\'t undo this.','sync.grens_ja':'Add','ui.cut_hint_deel':'Draw a line around the next part of {naam} with your finger.','eb.wens':'Wishlist','lijst.legecollectie_wens':'Nothing done yet. On your wishlist: {n}.','start.regel_wens':'{n} on your wishlist','ui.wens_geen_plek':'Not on the model yet: {n} from your wishlist.','onb.account_wens_sub':'Your wishlist backed up and on every device.','onb.account_wens_titel':'Keep your ideas safe','ui.knip_terug_naam':'Name: {naam}','ui.knip_terug_sub':'Started {wanneer}.','ui.knip_terug_nee':'Discard','start.account_rood_deels':'Not everything is in the cloud','start.account_rood':'Not backed up since {wanneer}','sync.bekijk':'View','account.fout_email':'That email address doesn\'t look right.','sync.grens_bevestig':'Add these tattoos to this account?','sync.grens_klaar':'Your tattoos now belong to this account. Syncing is back on.','sync.ander_account_geblokkeerd':'Syncing is off: this collection belongs to a different account.','start.account_in':'Synced ✓',
+    'start.account_uit':'Sign in to sync','start.account_backup':'Back up to the cloud','sync.voortgang':'{n} of {totaal} uploaded','sync.veilig':'Your collection is in the cloud: {n} tattoo{s} and {f} photo{fs}.','sync.grens_uitleg':'This collection belongs to another account; syncing is off. Sign out and sign in with that account, or add the tattoos to this account.','sync.grens_knop':'Add these tattoos to this account','sync.grens_bevestig_sub':'They\'ll be saved in {email}. The other account keeps its own copy. You can\'t undo this.','sync.grens_ja':'Add','tips.sluitaan':'Line up finds where this part overlaps the other one and matches the lines exactly. Move it a little over the other part first.','ui.cut_hint_deel':'Draw a line around the next part of {naam} with your finger.','eb.wens':'Wishlist','lijst.legecollectie_wens':'Nothing done yet. On your wishlist: {n}.','start.regel_wens':'{n} on your wishlist','ui.wens_geen_plek':'Not on the model yet: {n} from your wishlist.','onb.account_wens_sub':'Your wishlist backed up and on every device.','onb.account_wens_titel':'Keep your ideas safe','ui.knip_terug_naam':'Name: {naam}','ui.knip_terug_sub':'Started {wanneer}.','ui.knip_terug_nee':'Discard','start.account_rood_deels':'Not everything is in the cloud','start.account_rood':'Not backed up since {wanneer}','sync.bekijk':'View','account.fout_email':'That email address doesn\'t look right.','sync.grens_bevestig':'Add these tattoos to this account?','sync.grens_klaar':'Your tattoos now belong to this account. Syncing is back on.','sync.ander_account_geblokkeerd':'Syncing is off: this collection belongs to a different account.','start.account_in':'Synced ✓',
     'start.leeg_uitleg':'Your tattoos, on your own 3D body.','start.privacy':'Everything stays on this device. Syncing is optional.','start.privacy_magic':'Everything stays on this device. Syncing and Magic cut are optional.','start.kijk3d':'Explore the 3D body','ui.geen_foto_link':'No photo? Just save the details','ui.gl_onbeschikbaar':'3D view isn\'t available on this device (WebGL isn\'t working).','inapp.tekst':'In-app browser: your tattoos may not be saved. Open Tatties in Safari or Chrome.','inapp.kopieer':'Copy link','inapp.gekopieerd':'Link copied - paste it in your browser','ui.gl_verloren':'3D stopped (out of memory). Refresh to continue.',
     'start.kies_titel':'Add tattoo','start.kies_3d':'On the 3D model','start.kies_3d_sub':'Place on the 3D body',
     'start.kies_2d':'On the 2D map','start.kies_2d_sub':'Place on the flat front/back map','start.kies_2d_wip':'Under construction',
@@ -13644,7 +13659,7 @@ function createTattoo(overrides = {}) {
    ============================================================ */
 // App-versie (semver, handmatig ophogen bij een release). Bij een bump ook de
 // CACHE-naam in sw.js meebumpen, zodat clients de nieuwe build ophalen.
-const APP_VERSIE = '0.4.23';
+const APP_VERSIE = '0.4.24';
 
 /* Dev-haken die de CLOUD raken hangen alleen op een ontwikkelmachine aan window. Ze zijn geen
    lek op zichzelf (zonder XSS roept niemand ze aan, en CSP + esc() houden XSS tegen), maar ze
@@ -16354,7 +16369,10 @@ function toastPlaats(el) {
     const eb = document.getElementById(id);
     if (!eb || !eb.classList.contains('on') || !eb.offsetParent) continue;
     const r = eb.getBoundingClientRect(); if (!(r.height > 0)) continue;
-    bodem = Math.round(window.innerHeight - r.top + 10) + 'px'; break;
+    let top = r.top;
+    const du = id === 'editbar' ? document.getElementById('t3d-duw') : null;   // R2-15 (apply_r2_rest.py): ook boven de pijltjes (Nudge)
+    if (du && du.getClientRects().length) { const d = du.getBoundingClientRect(); if (d.height > 0) top = Math.min(top, d.top); }
+    bodem = Math.round(window.innerHeight - top + 10) + 'px'; break;
   }
   el.style.bottom = bodem;
 }
@@ -21533,7 +21551,9 @@ async function verwijderVoorbeelden() {
       ring.updateMatrix(); ring._bouwBasis=ring.matrix.clone();   // slice 5y: volgt de decal tijdens het slepen
       selRing=ring; }
   }
-  function showLoading(b){ const el2=document.getElementById("t3d-loading"); if(el2) el2.classList.toggle("on",!!b); }
+  function showLoading(b){ const el2=document.getElementById("t3d-loading"); if(el2){ el2.classList.toggle("on",!!b); el2.classList.remove("pil"); } }
+  // R2-11 (apply_r2_rest.py): het model staat, de tattoos komen nog: geen laag over het venster maar een pilletje bovenin
+  function laadPil(){ if(window.__laadPil===false) return; const el2=document.getElementById("t3d-loading"); if(el2 && el2.classList.contains("on")) el2.classList.add("pil"); }
   // Voortgang tonen tijdens het herstellen van decals: 'Laden… X/N' (of terug naar 'Laden…' bij 0).
   function zetLaadVoortgang(done,total){
     const el2=document.getElementById("t3d-loading"); if(!el2) return;
@@ -21706,6 +21726,7 @@ async function verwijderVoorbeelden() {
   /* Alleen de UI van de 3D-aanpasmodus sluiten (editbar/hint/+-knop herstellen). Bewust UI-only
      (geen dispose/save) zodat het ook veilig kan bij de START van een gender-wissel, vóór het async laden. */
   function exitEditUI(){
+    if(saUitkomstVoor) saUitkomstWeg();   // R2-15c
     herbouwAf();   // slice 5y
     const wasEdit=editDecal;
     editDecal=null; showSel(false);   // timers worden per marker geclear'd in disposeMarker
@@ -22378,7 +22399,7 @@ async function verwijderVoorbeelden() {
       if(token!==loadToken) return;
       LichaamMotor.zet(welkom ? WELKOM_LICHAAM : lichaamOpgeslagen());   // welkom: het lichaam van de landing (2026-10-04)
       const root=new THREE.Group(); root.add(new THREE.Mesh(geo, activeSkin));
-      setModel(root);
+      setModel(root); laadPil();
       meldAndereModel=true;   // eenmalig melden hoeveel tattoos van het oude model hier niet te zien zijn
       Promise.resolve(restore3D(token)).finally(()=>{ if(token===loadToken) showLoading(false); });
     }).catch(err=>{ console.error(err); toast(tr('ui.model_mislukt')); showLoading(false); });
@@ -22800,7 +22821,7 @@ async function verwijderVoorbeelden() {
     try{
       loader.parse(b64ToBuffer(b64),"",gltf=>{
         if(token!==loadToken) return;            // verouderd: er is intussen iets anders gekozen
-        setModel(gltf.scene||gltf.scenes[0]);
+        setModel(gltf.scene||gltf.scenes[0]); laadPil();
         // Bij een lege collectie staat de 'nog geen tattoos - tik op +'-hint al in beeld. Deze
         // melding wijst dan naar een tweede route (dubbeltikken) en dat maakt de eerste keer
         // alleen maar onduidelijker. Met tattoos erin is het gewoon nuttige informatie.
@@ -25217,6 +25238,19 @@ async function verwijderVoorbeelden() {
     ray.setFromCamera(nd,camera);
     return ray.intersectObject(editDecal.obj,false).length>0;
   }
+  /* R2-40 (apply_r2_rest.py): een tattoo van 9 cm is van opzij 20-25 px; het midden van twee vingers viel er vaak naast en dan zoomde
+     het lichaam. Knijpen telt nu ook als een vinger op de tattoo ligt of het midden binnen KNIJP_RUIM px van het midden van de tattoo. */
+  const KNIJP_RUIM=48, _knV=new THREE.Vector3(), _knC=new THREE.Vector3();
+  function knijpOpDecal(e){
+    const a=e.touches[0], b=e.touches[1], mx=(a.clientX+b.clientX)/2, my=(a.clientY+b.clientY)/2;
+    if(onEditDecal(mx,my)) return true;
+    if(window.__knijpRuim===false) return false;
+    if(onEditDecal(a.clientX,a.clientY) || onEditDecal(b.clientX,b.clientY)) return true;
+    if(!editDecal || !editDecal.point) return false;
+    if(editDecal.normal && _knC.copy(camera.position).sub(editDecal.point).dot(editDecal.normal)<=0) return false;   // achterkant: niet
+    const r=el.getBoundingClientRect(), v=_knV.copy(editDecal.point).project(camera); if(v.z>1) return false;
+    return Math.hypot(r.left+(v.x+1)/2*r.width-mx, r.top+(1-v.y)/2*r.height-my) <= KNIJP_RUIM;
+  }
   function dblAt(x,y){
     if(plaatsModus){ plaatsNieuwe(x,y); return; }
     const m=pickDecal(x,y);
@@ -25547,6 +25581,7 @@ async function verwijderVoorbeelden() {
       if (!coarse) toast(tr('ui.aanpas_hint')); }
   }
   function exitEditDecal(){
+    if(saUitkomstVoor) saUitkomstWeg();   // R2-15c
     herbouwAf();   // slice 5y
     if(editDecal && groepAan()) for(const q of groepLeden()) persistEdit(q);   // slice 5v: de andere delen ook opslaan
     const m=editDecal; editDecal=null; showSel(false);
@@ -25562,11 +25597,20 @@ async function verwijderVoorbeelden() {
   let groepModus='hele', groepLay=null;
   function groepLeden(){ return editDecal ? markers.filter(q=>q!==editDecal && q.id===editDecal.id && q.obj) : []; }
   function groepAan(){ return groepModus==='hele' && groepLeden().length>0; }
+  let saUitkomstVoor=null, saTipGepland=false;   // R2-15 (apply_r2_rest.py)
+  function zetSaUitkomst(t, ok){ const u=document.querySelector('#editbar .eb-sa-uitkomst'); if(!u){ toast(t); return; }
+    u.textContent=t; u.hidden=false; u.classList.toggle('ok', !!ok); saUitkomstVoor=editDecal; resize(); }
+  function saUitkomstWeg(){ const u=document.querySelector('#editbar .eb-sa-uitkomst'); saUitkomstVoor=null;
+    if(u && !u.hidden){ u.hidden=true; u.textContent=''; resize(); } }
   function setSamenUI(){
     const w=document.querySelector('#editbar .eb-samen'); if(!w) return;
     const meer=!!editDecal && markers.some(q=>q!==editDecal && q.id===editDecal.id && q.obj);
     const rij=w.closest('.eb-samenrij'); if(rij) rij.hidden=!meer;
     const sa=document.querySelector('#editbar .eb-sluitaan'); if(sa) sa.hidden=!(meer && groepModus==='deel');
+    if(saUitkomstVoor && (saUitkomstVoor!==editDecal || !sa || sa.hidden)) saUitkomstWeg();   // R2-15c
+    if(sa && !sa.hidden && !saTipGepland){ saTipGepland=true;   // R2-15b: eenmalig uitleg bij de eerste keer
+      setTimeout(()=>{ saTipGepland=false; if(!editDecal || sa.hidden || typeof window.__tattiesTips!=='function') return;
+        window.__tattiesTips('sluitaan', [{ doel:'#editbar .eb-sluitaan', tekst:'tips.sluitaan' }], false, ()=>!!editDecal && !sa.hidden); }, 700); }
     w.querySelectorAll('[data-samen]').forEach(b=>{ const aan=b.dataset.samen===groepModus; b.classList.toggle('actief', aan); b.setAttribute('aria-pressed', String(aan)); });
   }
   function zetGroepModus(mo){
@@ -26015,7 +26059,7 @@ async function verwijderVoorbeelden() {
     zicht:()=>{ const p=document.getElementById('t3d-duw'); return !!p && !p.hidden; } };
   /* ---- Undo voor tattoo-bewerken (positie/schaal/draai), stap voor stap per bewerksessie ---- */
   let editHist=[];
-  function snapEdit(m){ if(!m||!m.point) return; editHist.push({point:m.point.clone(), normal:m.normal&&m.normal.clone(), mesh:m.mesh, size:m.size, rot:m.rot, tri:m.tri, proj:m.proj||null,
+  function snapEdit(m){ if(!m||!m.point) return; if(saUitkomstVoor) saUitkomstWeg(); editHist.push({point:m.point.clone(), normal:m.normal&&m.normal.clone(), mesh:m.mesh, size:m.size, rot:m.rot, tri:m.tri, proj:m.proj||null,
     groep:(m===editDecal && groepAan()) ? groepLeden().map(q=>({ q, point:q.point.clone(), normal:q.normal&&q.normal.clone(), mesh:q.mesh, size:q.size, rot:q.rot, tri:q.tri })) : null });   // slice 5v: ook de andere delen
     if(editHist.length>60) editHist.shift(); }
   function undoEdit(){
@@ -26427,9 +26471,9 @@ async function verwijderVoorbeelden() {
         await frameAdem();
         let r=null; try{ r=await sluitAan(editDecal); }catch(e){ console.error('sluit aan', e); r={ ok:false, reden:'fout' }; }
         if(knop) knop.classList.remove('bezig');
-        if(r && r.ok && r.al) toast(tr('ui.sluit_aan_al'));
-        else if(r && r.ok){ tril(12); toast(tr('ui.sluit_aan_ok')); }
-        else toast(tr(r && r.reden==='patroon' ? 'ui.sluit_aan_patroon' : 'ui.sluit_aan_overlap'));
+        if(r && r.ok && r.al) zetSaUitkomst(tr('ui.sluit_aan_al'), true);   // R2-15c: uitkomst blijft als regel in de balk staan
+        else if(r && r.ok){ tril(12); zetSaUitkomst(tr('ui.sluit_aan_ok'), true); }
+        else zetSaUitkomst(tr(r && r.reden==='patroon' ? 'ui.sluit_aan_patroon' : 'ui.sluit_aan_overlap'), false);
         return; }
       if(a==="lock"){ if(editDecal){ editDecal.locked=!editDecal.locked; setLockUI();
         toast(editDecal.locked?tr('ui.vergrendeld'):tr('ui.ontgrendeld')); persistEdit(editDecal); } return; }
@@ -26507,7 +26551,7 @@ async function verwijderVoorbeelden() {
         lastX=downX=e.touches[0].clientX;lastY=downY=e.touches[0].clientY;
         decalDrag = (editDecal && !editDecal.locked) ? onEditDecal(e.touches[0].clientX,e.touches[0].clientY) : false; gSnap=false;}   // op de (ontgrendelde) tattoo? -> verslepen, anders model draaien
       else if(e.touches.length===2){drag=false;pinchD=dist2(e);pinchA=angle2(e);pinchMid=mid2(e); twistSom=0; rolAan=false; rolUit=false; pinchD0=pinchD;
-        const m=mid2(e); pinchModel = (editDecal && !editDecal.locked) ? onEditDecal(m.x,m.y) : false; gSnap=false;}},{passive:false});   // knijpen op de (ontgrendelde) tattoo? -> schalen, anders lichaam zoomen
+        pinchModel = (editDecal && !editDecal.locked) ? knijpOpDecal(e) : false; gSnap=false;}},{passive:false});   // knijpen op de (ontgrendelde) tattoo? -> schalen, anders lichaam zoomen
     el.addEventListener("touchmove",e=>{ e.preventDefault();
       if(e.touches.length===1&&drag){const x=e.touches[0].clientX,y=e.touches[0].clientY;
         const dx=x-lastX,dy=y-lastY;lastX=x;lastY=y;
@@ -27129,7 +27173,7 @@ async function verwijderVoorbeelden() {
   const TIPS_KNIP=[ { doel:'#cmAutoBtn', tekst:'tips.knip1' }, { doel:'#cmToolsToggle', tekst:'tips.knip2' }, { doel:'#cmVolgende', tekst:'tips.knip3' } ];
   const TIPS_BEWERK=[ { midden:true, tekst:'tips.bewerk1' }, { midden:true, tekst:'tips.bewerk2' }, { doel:'#eb3d-opacity', tekst:'tips.bewerk3' } ];
   { const to=document.getElementById('t3d-tips-opnieuw'); if(to) to.addEventListener('click', ()=>{
-      try{ localStorage.removeItem('tatties-tips-knip'); localStorage.removeItem('tatties-tips-bewerk'); }catch(e){}
+      try{ localStorage.removeItem('tatties-tips-knip'); localStorage.removeItem('tatties-tips-bewerk'); localStorage.removeItem('tatties-tips-sluitaan'); }catch(e){}
       window.toast(tr('tips.terug')); }); }
   /* Typen in de gegevens (2026-10-05): de modal krimpt achter het toetsenbord; dan alleen de velden en de rode knop.
      Op document: cutModal krijgt pas later een waarde. */
@@ -28153,6 +28197,21 @@ function maakTatnetGL(json, canvas) {
       aiMask:aiMask||null,
       blend:blendVoorOpslag() };
   }
+  /* R2-9 (apply_r2_rest.py): een bronfoto met een doorzichtige achtergrond (sticker, flash-PNG) is al een uitgeknipt plaatje; de
+     inkt-matte nam daar de lichtste opake kleur als huid en haalde de kleur weg. Dan 'met huid' (= het plaatje zoals het is). */
+  const _doorzichtig=new WeakMap();
+  function fotoDoorzichtig(img){
+    img=img||origImg; if(!img || window.__stickerHerkennen===false) return false;
+    if(_doorzichtig.has(img)) return _doorzichtig.get(img);
+    let uit=false;
+    try{ const W=img.naturalWidth||img.width, H=img.naturalHeight||img.height;
+      if(W && H){ const k=Math.min(1, 160/Math.max(W,H)), w=Math.max(1,Math.round(W*k)), h=Math.max(1,Math.round(H*k));
+        const c=document.createElement('canvas'); c.width=w; c.height=h; const x=c.getContext('2d',{willReadFrequently:true}); x.drawImage(img,0,0,w,h);
+        const p=x.getImageData(0,0,w,h).data; let n=0; for(let i=3;i<p.length;i+=4) if(p[i]<128) n++;
+        uit = n >= 0.05*w*h; } }catch(e){}
+    _doorzichtig.set(img, uit); return uit;
+  }
+  window.__tattiesSticker=fotoDoorzichtig;   // dev
   // Welke blend-modus krijgt deze opslag? Bij BEWERKEN de bestaande keuze behouden (nooit
   // ongevraagd aan/uit zetten); bij een NIEUWE tattoo de voorzichtige auto-stand.
   function blendVoorOpslag(){
@@ -28162,6 +28221,7 @@ function maakTatnetGL(json, canvas) {
     // bv. een donkere achtergrond -> null -> 'normaal' in matteVoorOpslag), en een tik op de knop zet
     // 'm terug op 'Met huid'. De oude lichte-huid-drempel (inktSuggestie) sloeg op donkere of
     // onderbelichte huid niet aan terwijl de matte daar prima werkt (relatief aan de huid).
+    if(fotoDoorzichtig()) return 'normaal';   // R2-9: sticker
     return 'inkt-auto';
   }
   /* review R3 KN-1: bij BEWERKEN via het knipscherm de blend van het record houden (pendingEdit/pendingEdit2D staan dan al op null,
@@ -28182,7 +28242,7 @@ function maakTatnetGL(json, canvas) {
     const zelfde=(k3.srcUrl===oud.srcUrl) && knipRecept(k3)===knipRecept(oud);
     const auto= was==='inkt-auto' || (!!oud.inktAuto && was==='inkt-'+oud.inktAuto) || (was==='normaal' && !oud.inktAuto);
     if(zelfde){ k3.blend=was; if(oud.tatnet) k3.tatnet=oud.tatnet; if(oud.inktAuto) k3.inktAuto=oud.inktAuto; }
-    else if(auto) k3.blend='inkt-auto';
+    else if(auto) k3.blend = fotoDoorzichtig() ? 'normaal' : 'inkt-auto';   // R2-9: sticker
     else { k3.blend=was; if(oud.inktAuto) k3.inktAuto=oud.inktAuto; }   // met de hand gekozen: blijft, en blijft herkenbaar als handkeuze
     return k3;
   }
