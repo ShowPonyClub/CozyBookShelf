@@ -3830,7 +3830,7 @@ body.onb-inlog .account-modal{z-index:100002}
       </div>
     </div>
     <label class="fb-label" for="fb-email" data-i18n="feedback.email_label">E-mail (als je antwoord wilt)</label>
-    <input type="email" id="fb-email" class="account-input fb-email" autocomplete="email" inputmode="email" maxlength="254" data-i18n-ph="feedback.email_ph" placeholder="je@voorbeeld.nl">
+    <input type="email" id="fb-email" class="account-input fb-email" autocomplete="email" inputmode="email" maxlength="200" data-i18n-ph="feedback.email_ph" placeholder="je@voorbeeld.nl">
     <p class="fb-melding" id="fb-melding" role="alert" hidden></p>
     <button type="submit" class="fb-versturen" id="fb-versturen" data-i18n="feedback.versturen">Versturen</button>
   </form>
@@ -13659,7 +13659,7 @@ function createTattoo(overrides = {}) {
    ============================================================ */
 // App-versie (semver, handmatig ophogen bij een release). Bij een bump ook de
 // CACHE-naam in sw.js meebumpen, zodat clients de nieuwe build ophalen.
-const APP_VERSIE = '0.4.24';
+const APP_VERSIE = '0.4.25';
 
 /* Dev-haken die de CLOUD raken hangen alleen op een ontwikkelmachine aan window. Ze zijn geen
    lek op zichzelf (zonder XSS roept niemand ze aan, en CSP + esc() houden XSS tegen), maar ze
@@ -13777,13 +13777,32 @@ function syncFoutSignaal(r, nu, laatst, online) {
   return syncFoutDetail(err, stap);
 }
 const SYNCFOUT_SLEUTEL = 'tatties-syncfout-signaal';
+/* R6 B10: een time-out geldt als tijdelijk (geen signaal), maar drie op rij terwijl het toestel online is wijst op een blijvend probleem
+   (bv. elke ronde te veel data voor de verbinding). Geeft de nieuwe stand van de teller. Puur (sync.test.js). */
+const SYNC_TIJD_SLEUTEL = 'tatties-sync-timeouts';
+function syncTijdReeks(r, online, vorig) {
+  const n = Number.isFinite(+vorig) ? +vorig : 0;
+  if (!r) return n;
+  if (r.ok && !r.deelFout) return 0;
+  const err = !r.ok ? r.error : (r.deelFout && r.deelFout.error);
+  if (!err || online === false) return n;
+  const m = String((typeof err === 'string') ? err : (err.message || ''));
+  const tijd = /TimeoutError|AbortError/.test(String(err.name || '')) || /time-?out|timed out/i.test(m);
+  return tijd ? n + 1 : n;
+}
 function meldSyncFout(r) {
   try {
     if (typeof gebruikDev === 'function' && gebruikDev() && !window.__signaalDev) return false;   // zoals signaal(): de dagtijd niet verbruiken
     if (typeof huidigeUserId !== 'undefined' && !huidigeUserId) return false;   // R6 B1: uitgelogd: een 403/RLS-fout is dan geen storing
     let laatst = 0; try { laatst = +(localStorage.getItem(SYNCFOUT_SLEUTEL) || 0); } catch (e) { laatst = 0; }
     const online = (typeof navigator !== 'undefined') ? navigator.onLine : undefined;
-    const detail = syncFoutSignaal(r, Date.now(), laatst, online);
+    let detail = syncFoutSignaal(r, Date.now(), laatst, online);
+    let reeks = 0; try { reeks = +(localStorage.getItem(SYNC_TIJD_SLEUTEL) || 0); } catch (e) { reeks = 0; }   // R6 B10
+    reeks = syncTijdReeks(r, online, reeks); try { localStorage.setItem(SYNC_TIJD_SLEUTEL, String(reeks)); } catch (e) { /* geen opslag */ }
+    if (!detail && reeks === 3 && !(laatst > 0 && Date.now() - laatst < 864e5)) {
+      const err = !r.ok ? r.error : (r.deelFout && r.deelFout.error);
+      detail = ('time-out 3x ' + syncFoutDetail(err, (!r.ok ? r.stap : (r.deelFout && r.deelFout.stap)) || 'sync')).slice(0, 120);
+    }
     if (!detail) return false;
     try { localStorage.setItem(SYNCFOUT_SLEUTEL, String(Date.now())); } catch (e) { /* geen opslag: dan elke keer, signaal heeft een daggrens */ }
     signaal('syncfout', detail);
@@ -13894,7 +13913,10 @@ const SUPABASE_ANON_KEY = 'sb_publishable_oR3igYlqHgrgsa2QdaewqQ_-GCrDzNQ';
 // supabase = global uit de inline meegebakken UMD (<script id="supabase-lib">).
 /* review R4 CL-6: elk Supabase-verzoek krijgt een time-out (30 s, Storage-upload/-download 120 s). Zonder bleef een half open
    verbinding de sync 'bezig' houden tot de browser zelf opgaf. Een signal van de aanroeper blijft werken (gecombineerd). */
-function sbTijdslimiet(url) { return /\/storage\/v1\//.test(String(url || '')) ? 120000 : 30000; }   // puur
+function sbTijdslimiet(url) {   // puur. R6 B10: Edge Functions 90 s (account verwijderen kan langer dan 30 s duren)
+  const u = String(url || '');
+  return /\/storage\/v1\//.test(u) ? 120000 : /\/functions\/v1\//.test(u) ? 90000 : 30000;
+}
 function sbFetch(input, init) {
   const opties = Object.assign({}, init || {});
   if (typeof AbortController !== 'function') return fetch(input, opties);
@@ -14119,8 +14141,9 @@ async function bewaarAfgeleid(rec) {
   try { db = await volledigRecord(rec.id); } catch (e) { db = null; }
   if (db ? db.deleted === true : !inLijst) return false;
   if (db && Number.isFinite(+db.updatedAt) && Number.isFinite(+rec.updatedAt) && +db.updatedAt !== +rec.updatedAt) return false;
-  await zonderDirty(() => saveTattoo(rec, true));
-  return true;
+  const verwacht = Number.isFinite(+rec.updatedAt) ? +rec.updatedAt : undefined;   // R6 B8: de vergelijking nog eens in de schrijf-transactie
+  const r = await zonderDirty(() => saveTattoo(rec, true, false, false, verwacht));
+  return r !== null;
 }
 
 devHaak('__tattiesSyncMeta', { lees: leesSyncMeta, alle: alleSyncMeta, zet: zetSyncMeta, wis: wisSyncMeta,
@@ -14135,7 +14158,7 @@ let revKolommen = true;
 function _onbekendeKolom(error) {
   return !!error && (error.code === '42703' || /column .* does not exist/i.test(error.message || ''));
 }
-const CLOUD_PAGINA = 1000;   // PostgREST levert standaard maximaal 1000 rijen per verzoek
+const CLOUD_PAGINA = 200;   // R6 B10: 200 rijen per verzoek (was 1000, de PostgREST-grens): met data tot 128 KB per rij liep een trage verbinding anders elke ronde in de time-out
 
 function _cloudKolommen() { return revKolommen ? 'id,data,deleted,rev,assets' : 'id,data,deleted'; }
 
@@ -14340,10 +14363,27 @@ function beeldFpsManifest(man) {
   } catch (e) { return null; }
   return uit.sort();
 }
+function beeldSrcsLokaal(t) {   // R6 B7: [soort, src] per beeld, voor versiebewust vergelijken
+  const uit = [];
+  if (!t || typeof t !== 'object') return uit;
+  for (const f of (Array.isArray(t.fotos) ? t.fotos : [])) if (typeof f === 'string' && f) uit.push(['f', f]);
+  if (t.kunst && typeof t.kunst.src === 'string' && t.kunst.src) uit.push(['k', t.kunst.src]);
+  if (t.kunst3d && typeof t.kunst3d.srcUrl === 'string' && t.kunst3d.srcUrl) uit.push(['b', t.kunst3d.srcUrl]);
+  for (const d of beeldDelen(t)) if (d.kunst3d && typeof d.kunst3d.srcUrl === 'string' && d.kunst3d.srcUrl) uit.push(['d', d.kunst3d.srcUrl]);
+  return uit;
+}
 function zelfdeBeelden(t, man) {
   const c = beeldFpsManifest(man);
   if (!c) return false;
-  return beeldFpsLokaal(t).join('|') === c.join('|');
+  const vrij = beeldSrcsLokaal(t);   // R6 B7: per manifest-item een lokaal beeld van dezelfde soort met een passende vingerafdruk (elke versie)
+  if (vrij.length !== c.length) return false;
+  for (const item of c) {
+    const soort = item.slice(0, 1), fp = item.slice(2);
+    const j = vrij.findIndex(x => x && x[0] === soort && fpPast(fp, x[1]));
+    if (j < 0) return false;
+    vrij[j] = null;
+  }
+  return true;
 }
 
 /* Strip de zware beeldvelden eruit voor de cloud-backup. Foto's/uitsnedes gaan
@@ -14367,67 +14407,6 @@ function stripVoorCloud(t) {
   return c;
 }
 
-/* Eenrichtings-backup (toestel -> cloud), slice 3. Pusht alle records van de
-   ingelogde gebruiker (incl. tombstones) via upsert naar de `tattoos`-tabel.
-   Eenrichting: leest niets terug, overschrijft niets lokaal. */
-async function backupNaarCloud() {
-  if (!sb) return { ok: false, reden: 'geen-client' };
-  // Accountgrens hier en niet alleen bij de aanroeper: deze functie schrijft naar de
-  // cloud van wie er nu is ingelogd, en dat is precies wat de grens moet tegenhouden.
-  if (syncGeblokkeerd) return { ok: false, reden: 'ander-account' };
-  const { data: s } = await sb.auth.getSession();
-  const user = s && s.session && s.session.user;
-  if (!user) return { ok: false, reden: 'niet-ingelogd' };
-  const alle = await getAllTattoos();                  // alle records incl. tombstones (lazy-defaulted)
-  const rows = alle.map(t => ({
-    id: t.id,
-    user_id: user.id,
-    deleted: !!t.deleted,
-    data: cloudData(t)
-  }));
-  if (!rows.length) return { ok: true, n: 0 };
-  const BATCH = 200;                                   // grote collecties niet in één request
-  for (let i = 0; i < rows.length; i += BATCH) {
-    const { error } = await sb.from('tattoos').upsert(rows.slice(i, i + BATCH), { onConflict: 'user_id,id' });
-    if (error) return { ok: false, reden: 'fout', error };
-  }
-  return { ok: true, n: rows.length };
-}
-devHaak('__tattiesBackup', backupNaarCloud);   // dev/test-haak
-
-/* Pull (cloud -> toestel), slice 4. ADDITIEF: haalt cloud-records op die hier
-   nog NIET bestaan en voegt ze lokaal toe (zonder foto's - die volgen in slice 6).
-   Raakt bestaande lokale records NIET aan; updates/verwijderingen in beide
-   richtingen komen pas in slice 5 (merge). Zo kan een pull nooit lokale data
-   overschrijven of foto's wissen. */
-async function pullVanCloud() {
-  if (!sb) return { ok: false, reden: 'geen-client' };
-  // Accountgrens hier en niet alleen bij de aanroeper: deze functie schrijft naar de
-  // cloud van wie er nu is ingelogd, en dat is precies wat de grens moet tegenhouden.
-  if (syncGeblokkeerd) return { ok: false, reden: 'ander-account' };
-  const { data: s } = await sb.auth.getSession();
-  const user = s && s.session && s.session.user;
-  if (!user) return { ok: false, reden: 'niet-ingelogd' };
-  let cloud;
-  try {
-    const { data, error } = await sb.from('tattoos').select('id,data,deleted').eq('user_id', user.id);
-    if (error) return { ok: false, reden: 'fout', error };
-    cloud = data || [];
-  } catch (e) { return { ok: false, reden: 'fout', error: e }; }
-  const lokaal = await getAllTattoos();
-  const bestaande = new Set(lokaal.map(t => t.id));
-  let nieuw = 0;
-  for (const row of cloud) {
-    if (!row || row.deleted) continue;           // tombstones niet als nieuw record ophalen
-    if (bestaande.has(row.id)) continue;         // additief: bestaande lokale records met rust laten
-    const data = (row.data && typeof row.data === 'object') ? row.data : {};
-    const rec = hardRecord(createTattoo(Object.assign({}, data, { id: row.id, deleted: false })));
-    try { await zonderDirty(() => saveTattoo(rec, true)); nieuw++; } // behoudTijd: cloud-updatedAt bewaren
-    catch (e) { console.error('Pull: record overgeslagen', e); }
-  }
-  return { ok: true, n: nieuw };
-}
-devHaak('__tattiesPull', pullVanCloud);   // dev/test-haak
 
 /* ---- Foto's via Supabase Storage (slice 6) ----
    Privé bucket; map per gebruiker: {user_id}/{tattoo_id}/...
@@ -14501,17 +14480,22 @@ function quotaFout(e) {
    staan (ook als hij hier ontbreekt: niet binnengekomen is niet weggehaald); een lokale foto met dezelfde vingerafdruk is dezelfde
    foto; alleen de overige lokale foto's gaan omhoog, op een vrij foto-nummer. Puur (sync.test.js).
    lokaalFps: thumbFp per lokale foto; oud: de fotolijst uit het vorige manifest. Geeft [{houd: asset} | {lokaal: i, nr: k}]. */
-function fotoPlanOnvolledig(lokaalFps, oud) {
+function fotoPlanOnvolledig(lokaalFps, oud, gemist) {
+  /* R6 B4 (apply_r6_b4b7.py): gemist = de beelden (fp, of pad zonder fp) die hier niet binnenkwamen. Alleen die blijven staan als ze
+     hier ontbreken; een cloudfoto die hier wel binnen was en nu niet meer lokaal staat, is hier weggehaald en gaat uit het manifest.
+     gemist onbekend (null) = het oude gedrag: elke cloudfoto blijft. Een lokale fp mag een lijst zijn (meerdere fp-versies, R6 B7). */
   const plan = [], gebruikt = new Set(), nrs = new Set();
+  const past = (f, fp) => Array.isArray(f) ? f.includes(fp) : f === fp;
+  const gm = Array.isArray(gemist) ? new Set(gemist) : null;
   let zonderFp = false;
   for (const a of (Array.isArray(oud) ? oud : [])) {
     const pad = padVanAsset(a); if (!pad) continue;
     const m = /\/foto-(\d+)\.bin$/.exec(pad); if (m) nrs.add(+m[1]);
     const fp = fpVanAsset(a);
     if (!fp) zonderFp = true;
-    const j = fp ? lokaalFps.findIndex((f, i) => f === fp && !gebruikt.has(i)) : -1;
-    if (j >= 0) gebruikt.add(j);
-    plan.push({ houd: a });
+    const j = fp ? lokaalFps.findIndex((f, i) => past(f, fp) && !gebruikt.has(i)) : -1;
+    if (j >= 0) { gebruikt.add(j); plan.push({ houd: a }); continue; }
+    if (!fp || !gm || gm.has(fp) || gm.has(pad)) plan.push({ houd: a });   // niet binnengekomen (of onbekend): blijft staan
   }
   // Oud manifest zonder vingerafdrukken: welke lokale foto welke cloudfoto is valt niet te zeggen. Dan niets erbij uploaden (anders
   // staat elke foto er twee keer); de cloudfoto's blijven zoals ze waren.
@@ -14525,7 +14509,7 @@ function fotoPlanOnvolledig(lokaalFps, oud) {
   }
   return plan;
 }
-async function uploadBeelden(userId, t, vorig, onvolledig) {
+async function uploadBeelden(userId, t, vorig, onvolledig, gemist) {   // gemist: R6 B4 (null = onbekend)
   const man = { fotos: [], kunst: null, kunst3d: null, delen: {} };
   // Tweede slot op de plek waar het pad echt gebouwd wordt: hardRecord hoort dit al te hebben
   // afgevangen, dus komen we hier toch, dan is er iets grondig mis en uploaden we niets.
@@ -14545,7 +14529,7 @@ async function uploadBeelden(userId, t, vorig, onvolledig) {
   const oudeFotos = (vorig && Array.isArray(vorig.fotos)) ? vorig.fotos : [];
   const fotos = Array.isArray(t.fotos) ? t.fotos : [];
   if (onvolledig && oudeFotos.length) {   // review R3 SY-1: niet alle foto's binnen: de cloudfoto's blijven staan
-    for (const p of fotoPlanOnvolledig(fotos.map(thumbFp), oudeFotos)) {
+    for (const p of fotoPlanOnvolledig(fotos.map(f => [thumbFp(f), thumbFpV1(f)]), oudeFotos, gemist)) {   // R6 B4/B7
       if (p.houd) man.fotos.push(p.houd);
       else { const a = await up(basis + '/foto-' + p.nr + '.bin', fotos[p.lokaal], null); if (a) man.fotos.push(a); }
     }
@@ -14555,10 +14539,11 @@ async function uploadBeelden(userId, t, vorig, onvolledig) {
   }
   // review R3 SY-1: een beeld dat hier ontbreekt terwijl de plek bestaat (of het record nog niet compleet binnen is) is niet
   // weggehaald maar niet binnengekomen: het manifest-item blijft, dus ruimWeesBeelden gooit het bestand niet weg.
+  const behoud = a => !Array.isArray(gemist) || gemist.includes(fpVanAsset(a)) || gemist.includes(padVanAsset(a));   // R6 B4: alleen wat niet binnenkwam
   if (t.kunst && t.kunst.src) man.kunst = await up(basis + '/kunst.bin', t.kunst.src, vorig && vorig.kunst);
-  else if (vorig && vorig.kunst && (onvolledig || t.kunst)) man.kunst = vorig.kunst;
+  else if (vorig && vorig.kunst && (t.kunst || (onvolledig && behoud(vorig.kunst)))) man.kunst = vorig.kunst;
   if (t.kunst3d && t.kunst3d.srcUrl) man.kunst3d = await up(basis + '/kunst3d.bin', t.kunst3d.srcUrl, vorig && vorig.kunst3d);
-  else if (vorig && vorig.kunst3d && (onvolledig || t.kunst3d)) man.kunst3d = vorig.kunst3d;
+  else if (vorig && vorig.kunst3d && (t.kunst3d || (onvolledig && behoud(vorig.kunst3d)))) man.kunst3d = vorig.kunst3d;
   for (const d of beeldDelen(t)) {   // extra delen: elk zijn eigen bronfoto, pad op deel-id
     if (!veiligeId(d.id)) continue;
     if (!(d.kunst3d && d.kunst3d.srcUrl)) { const v = vorig && vorig.delen && vorig.delen[d.id]; if (v) man.delen[d.id] = v; continue; }   // review R3 SY-1
@@ -14597,29 +14582,31 @@ function heeftBeelden(t) {
    opgehaald record mag niet als 'gezien' worden afgestempeld, anders blijft het permanent
    zonder beeld staan. Dat was het spiegelbeeld van de upload-skip die omhoog al bestond. */
 async function downloadBeelden(rec, ref) {
-  if (!ref || typeof ref !== 'object') return { compleet: true, gemist: 0 };
+  if (!ref || typeof ref !== 'object') return { compleet: true, gemist: 0, gemistKeys: [] };
   let gemist = 0;
+  const gemistKeys = [];   // R6 B4: welke beelden niet binnenkwamen (fp, of pad zonder fp)
+  const mis = (a) => { gemist++; gemistKeys.push(fpVanAsset(a) || padVanAsset(a)); };
   async function dl(a) {
     const pad = padVanAsset(a);
     if (!pad) return null;
     const { data, error } = await sb.storage.from(FOTO_BUCKET).download(pad);
-    if (error || !data) { gemist++; return null; }
+    if (error || !data) { mis(a); return null; }
     // veiligeBeeldSrc: alleen data:image/ terug; een gemanipuleerde niet-beeld-blob wordt geweigerd
     try {
       const u = veiligeBeeldSrc(await blobNaarDataUrl(data));
-      if (!u) gemist++;
+      if (!u) mis(a);
       return u;
-    } catch { gemist++; return null; }
+    } catch { mis(a); return null; }
   }
   if (Array.isArray(ref.fotos) && ref.fotos.length) {
     // review R3 SY-1: per plek. Mislukt een download, dan de lokale foto met dezelfde vingerafdruk houden (bij een oud manifest
     // zonder vingerafdruk die op dezelfde plek); eerder schoof een gemiste foto de rest op en viel de lokale terugval weg.
-    const oud = Array.isArray(rec.fotos) ? rec.fotos : [], oudFp = oud.map(thumbFp), out = [], gebruikt = new Set();
+    const oud = Array.isArray(rec.fotos) ? rec.fotos : [], out = [], gebruikt = new Set();
     for (let i = 0; i < ref.fotos.length; i++) {
       const fp = fpVanAsset(ref.fotos[i]);
       // review R3 SY-6: een lokale foto met dezelfde vingerafdruk is deze foto al: niet opnieuw downloaden (een naamswijziging op
       // een ander toestel liet eerder alle foto's opnieuw ophalen)
-      const k = fp ? oudFp.findIndex((f, x) => f === fp && !gebruikt.has(x)) : -1;
+      const k = fp ? oud.findIndex((f, x) => fpPast(fp, f) && !gebruikt.has(x)) : -1;   // R6 B7: elke fp-versie
       if (k >= 0 && oud[k]) { gebruikt.add(k); out.push(oud[k]); continue; }
       const u = await dl(ref.fotos[i]);
       if (u) { out.push(u); continue; }
@@ -14630,20 +14617,21 @@ async function downloadBeelden(rec, ref) {
     rec.fotos = [];   // review R3 SY-7: elders zijn alle foto's weggehaald (vlag uit het formulier): de lokale terugval niet houden
   }
   // review R3 SY-6: zelfde vingerafdruk als het lokale beeld op die plek: niet opnieuw downloaden
-  const alHier = (a, src) => { const fp = fpVanAsset(a); return !!(fp && src && fp === thumbFp(src)); };
+  const alHier = (a, src) => fpPast(fpVanAsset(a), src);   // R6 B7: elke fp-versie
   if (ref.kunst && !alHier(ref.kunst, rec.kunst && rec.kunst.src)) { const u = await dl(ref.kunst); if (u) { rec.kunst = rec.kunst || {}; rec.kunst.src = u; } }
   if (ref.kunst3d && !alHier(ref.kunst3d, rec.kunst3d && rec.kunst3d.srcUrl)) { const u = await dl(ref.kunst3d); if (u) { rec.kunst3d = rec.kunst3d || {}; rec.kunst3d.srcUrl = u; } }
   if (ref.delen && typeof ref.delen === 'object') {   // delen: op deel-id koppelen
     for (const d of beeldDelen(rec)) { const a = ref.delen[d.id]; if (!a || alHier(a, d.kunst3d && d.kunst3d.srcUrl)) continue;
       const u = await dl(a); if (u) { d.kunst3d = d.kunst3d || {}; d.kunst3d.srcUrl = u; } }
   }
-  return { compleet: gemist === 0, gemist };
+  return { compleet: gemist === 0, gemist, gemistKeys };
 }
 
 /* review R3 SY-1: haal alleen de beelden op die hier ontbreken, zonder iets lokaals te vervangen. Foto's in de volgorde van het
    manifest (een lokale foto met dezelfde vingerafdruk telt als binnen), lokale foto's die niet in het manifest staan erachter. */
 async function vulOntbrekendeBeelden(rec, man) {
-  let gemist = 0, gevuld = false;
+  let gemist = 0, gevuld = false, onbekend = false;
+  const gemistKeys = [], mis = (a) => { gemist++; gemistKeys.push(fpVanAsset(a) || padVanAsset(a)); };   // R6 B4
   async function dl(a) {
     const pad = padVanAsset(a); if (!pad) return null;
     try {
@@ -14653,30 +14641,30 @@ async function vulOntbrekendeBeelden(rec, man) {
     } catch { return null; }
   }
   if (man.kunst && !(rec.kunst && rec.kunst.src)) {
-    const u = await dl(man.kunst); if (u) { rec.kunst = rec.kunst || {}; rec.kunst.src = u; gevuld = true; } else gemist++; }
+    const u = await dl(man.kunst); if (u) { rec.kunst = rec.kunst || {}; rec.kunst.src = u; gevuld = true; } else mis(man.kunst); }
   if (man.kunst3d && !(rec.kunst3d && rec.kunst3d.srcUrl)) {
-    const u = await dl(man.kunst3d); if (u) { rec.kunst3d = rec.kunst3d || {}; rec.kunst3d.srcUrl = u; gevuld = true; } else gemist++; }
+    const u = await dl(man.kunst3d); if (u) { rec.kunst3d = rec.kunst3d || {}; rec.kunst3d.srcUrl = u; gevuld = true; } else mis(man.kunst3d); }
   if (man.delen && typeof man.delen === 'object') {
     for (const d of beeldDelen(rec)) { const a = man.delen[d.id]; if (!a || (d.kunst3d && d.kunst3d.srcUrl)) continue;
-      const u = await dl(a); if (u) { d.kunst3d = d.kunst3d || {}; d.kunst3d.srcUrl = u; gevuld = true; } else gemist++; }
+      const u = await dl(a); if (u) { d.kunst3d = d.kunst3d || {}; d.kunst3d.srcUrl = u; gevuld = true; } else mis(a); }
   }
   const mf = Array.isArray(man.fotos) ? man.fotos : [];
   if (mf.length) {
-    const lok = Array.isArray(rec.fotos) ? rec.fotos : [], lokFp = lok.map(thumbFp), gebruikt = new Set(), uit = [];
+    const lok = Array.isArray(rec.fotos) ? rec.fotos : [], gebruikt = new Set(), uit = [];
     let zonderFp = false, erbij = false;
     for (const a of mf) {
       const fp = fpVanAsset(a);
       if (!fp) { zonderFp = true; break; }
-      const j = lokFp.findIndex((f, i) => f === fp && !gebruikt.has(i));
+      const j = lok.findIndex((f, i) => fpPast(fp, f) && !gebruikt.has(i));   // R6 B7: elke fp-versie
       if (j >= 0) { gebruikt.add(j); uit.push(lok[j]); continue; }
       const u = await dl(a);
-      if (u) { uit.push(u); erbij = true; } else gemist++;
+      if (u) { uit.push(u); erbij = true; } else mis(a);
     }
     // Oud manifest zonder vingerafdrukken: alleen te zien of er minder foto's zijn; die haalt de gewone herkansing (omlaag) op.
-    if (zonderFp) { if (lok.length < mf.length) gemist++; }
+    if (zonderFp) { if (lok.length < mf.length) { gemist++; onbekend = true; } }
     else if (erbij) { for (let i = 0; i < lok.length; i++) if (!gebruikt.has(i)) uit.push(lok[i]); rec.fotos = uit; gevuld = true; }
   }
-  return { compleet: gemist === 0, gevuld };
+  return { compleet: gemist === 0, gevuld, gemistKeys: onbekend ? null : gemistKeys };
 }
 
 /* R6 B3: na het aanvullen van beelden in de database ook het record in het geheugen bijwerken, anders schrijft een Opslaan vanaf de
@@ -14712,9 +14700,10 @@ async function beeldenAanvullenVoorPush(l, man, metaVoor) {
       if (!syncBewerktSinds(m, await leesSyncMeta(l.id))) { await zonderDirty(() => saveTattoo(l, true)); bewaard = true; ramBeeldenBijwerken(l); }   // R6 B3
     } catch (e) { console.error('Aangevulde beelden bewaren:', e); }
   }
+  if (!uit.compleet) m.assetsGemist = Array.isArray(uit.gemistKeys) ? uit.gemistKeys : null;   // R6 B4: voor uploadBeelden in deze push
   try {
-    if (uit.compleet && (bewaard || !uit.gevuld)) await zetSyncMeta(l.id, { assetsPending: false, assetsPogingen: 0 });
-    else if (!uit.compleet) await zetSyncMeta(l.id, { assetsPending: true, assetsPogingen: pogingen + 1 });
+    if (uit.compleet && (bewaard || !uit.gevuld)) await zetSyncMeta(l.id, { assetsPending: false, assetsPogingen: 0, assetsGemist: [] });
+    else if (!uit.compleet) await zetSyncMeta(l.id, { assetsPending: true, assetsPogingen: pogingen + 1, assetsGemist: m.assetsGemist });
   } catch (e) { /* administratie: nooit fataal */ }
   return !uit.compleet;
 }
@@ -15308,6 +15297,7 @@ async function _syncMetCloudKern() {
         // nog niet bestond valt de vergelijking terug op de tijd, en die is dan gelijk.)
         baseRev: Number.isFinite(c.rev) ? c.rev : null,
         dirty: naBewerkt, assetsPending: !beelden.compleet,   // review R3 SY-1: blijft ook na het opgeven staan (spoor voor de push)
+        assetsGemist: beelden.compleet ? [] : (Array.isArray(beelden.gemistKeys) ? beelden.gemistKeys : null),   // R6 B4: welke (null = onbekend)
         assetsPogingen: pogingen, ownerId: user.id
       });
       if (!beelden.compleet) beeldenOpen++;
@@ -15354,7 +15344,7 @@ async function _syncMetCloudKern() {
         // review R3 SY-1: beelden van dit record nog niet (allemaal) binnen? Eerst opnieuw ophalen; wat dan nog ontbreekt blijft in
         // de cloud staan (uploadBeelden neemt die manifest-items over en ruimWeesBeelden laat ze dus staan).
         const onvolledig = await beeldenAanvullenVoorPush(l, vorigMan, metaVoor);
-        const uit = await uploadBeelden(user.id, l, vorigMan, onvolledig);
+        const uit = await uploadBeelden(user.id, l, vorigMan, onvolledig, onvolledig ? ((metaVoor.get(l.id) || {}).assetsGemist || null) : null);   // R6 B4
         data._cloud = legacyManifest(uit.man);   // oude vorm voor builds die de kolom nog niet lezen
         overgeslagenBeelden += uit.overgeslagen;
         beeldenGeteld += assetPaden(uit.man).length;
@@ -15884,12 +15874,14 @@ async function texCacheVrijmaken() {
 /* behoudTijd: bewaar een al aanwezige updatedAt (bv. import van een backup),
    zodat sync-tijdstempels niet verloren gaan. Standaard stempelt elke save 'nu'
    - dat is "updatedAt gezet bij elke wijziging". saveTattoo is het enige schrijfpunt. */
-async function saveTattoo(tattoo, behoudTijd = false, poging2 = false) {
-  const vanSync = _cloudSchrijft > 0;   // review R3 SY-3: synchroon vastleggen (zonderDirty staat alleen tijdens deze eerste regels aan)
+async function saveTattoo(tattoo, behoudTijd = false, poging2 = false, vanSyncVoor = false, verwacht) {
+  // review R3 SY-3: synchroon vastleggen (zonderDirty staat alleen tijdens deze eerste regels aan). R6 B8: de herkansing (vol quotum,
+  // verbinding weg) komt na een await, dan staat de teller al op 0: daarom geeft die vanSync zelf door.
+  const vanSync = vanSyncVoor === true || _cloudSchrijft > 0;
   if (!(behoudTijd && Number.isFinite(tattoo.updatedAt))) tattoo.updatedAt = Date.now();
   if (typeof tattoo.deleted !== 'boolean') tattoo.deleted = false;
   if (window.__tattiesNazorgPlan) window.__tattiesNazorgPlan();   // iOS-app: nazorg-herinneringen opnieuw plannen
-  await stempelDirty(tattoo.id);   // sync-administratie: lokaal gewijzigd sinds de laatst geziene cloudversie
+  if (!vanSync) await stempelDirty(tattoo.id);   // sync-administratie: lokaal gewijzigd sinds de laatst geziene cloudversie
   // Merge-guard (PERF-1 slice 2): een licht record mag bij opslaan nooit de beelden in de
   // DB overschrijven. Ontbrekende zware velden komen uit de DB-kopie; velden die de flow
   // juist nieuw zette (recrop, sync2D) blijven staan. Na de merge is het record vol.
@@ -15914,7 +15906,7 @@ async function saveTattoo(tattoo, behoudTijd = false, poging2 = false) {
     try {
       const bron = lijstBron(tattoo);
       if (!bron) { if (tattoo.thumb) delete tattoo.thumb; }
-      else if (!tattoo.thumb || !tattoo.thumb.src || tattoo.thumb.fp !== thumbFp(bron)) {
+      else if (!tattoo.thumb || !tattoo.thumb.src || !fpPast(tattoo.thumb.fp, bron)) {   // R6 B7: een oude thumb-fp blijft geldig
         tattoo.thumb = { src: await maakThumbDataURL(bron), fp: thumbFp(bron) };
       }
     } catch { /* thumb blijft eventueel oud; wordt bij een volgende save opnieuw geprobeerd */ }
@@ -15930,23 +15922,29 @@ async function saveTattoo(tattoo, behoudTijd = false, poging2 = false) {
   try {
     const db = await openDB();
     return await new Promise((resolve, reject) => {
-      const tx = db.transaction(STORE, 'readwrite');
-      tx.objectStore(STORE).put(tattoo);
+      const tx = db.transaction(STORE, 'readwrite'), st = tx.objectStore(STORE);
+      let overgeslagen = false;
+      if (verwacht !== undefined) {   // R6 B8: vergelijken en schrijven in een transactie (afgeleide opslag mag een nieuwere versie niet overschrijven)
+        const g = st.get(tattoo.id);
+        g.onsuccess = () => { const d = g.result;
+          if (d && (d.deleted === true || (Number.isFinite(+d.updatedAt) && +d.updatedAt !== +verwacht))) { overgeslagen = true; return; }
+          st.put(tattoo); };
+      } else st.put(tattoo);
       // Pas resolven als de transactie écht commit (niet al bij put-success),
       // zodat een abort tijdens commit niet als 'opgeslagen' wordt gemeld.
-      tx.oncomplete = () => resolve(tattoo);
+      tx.oncomplete = () => resolve(overgeslagen ? null : tattoo);
       tx.onerror = () => reject(tx.error);
       tx.onabort = () => reject(tx.error || new Error('opslag-transactie afgebroken'));
     });
   } catch (e) {
     if (e && (e.name === 'QuotaExceededError' || /quota/i.test(e.message || ''))) {
       // review R4 CL-8: eerst de herbouwbare textuurcache leegmaken en een keer opnieuw proberen; lukt dat niet, dan de melding
-      if (!poging2 && await texCacheVrijmaken()) return saveTattoo(tattoo, behoudTijd, true);
+      if (!poging2 && await texCacheVrijmaken()) return saveTattoo(tattoo, behoudTijd, true, vanSync, verwacht);
       throw new Error(tr('toast.opslagvol'));   // gelokaliseerd: bereikt de gebruiker via toast(opslaanmislukt + message)
     }
-    if (!poging2 && await dbOpnieuwVerbinden()) return saveTattoo(tattoo, behoudTijd, true);
+    if (!poging2 && await dbOpnieuwVerbinden()) return saveTattoo(tattoo, behoudTijd, true, vanSync, verwacht);
     dbBeschikbaar = false; meldFallback();
-    return saveTattoo(tattoo, behoudTijd, true);
+    return saveTattoo(tattoo, behoudTijd, true, vanSync, verwacht);
   }
 }
 
@@ -16049,7 +16047,20 @@ function hoofdFoto(t) {
    (saveTattoo behoudTijd=true), zodat sync/sortering er niets van merken. */
 const THUMB_MAX = 240;
 function lijstBron(t) { return hoofdFoto(t) || (t.kunst && t.kunst.src) || null; }
-function thumbFp(src) { return src ? (src.length + ':' + src.slice(30, 62)) : ''; }   // lengte + stukje data (na de mime-prefix)
+function thumbFpV1(src) { return src ? (src.length + ':' + src.slice(30, 62)) : ''; }   // oude vorm: lengte + stukje kop (R6 B7: alleen nog om oude te herkennen)
+/* R6 B7 (apply_r6_b4b7.py): vingerafdruk v2 = lengte + twee 32-bits FNV/murmur-achtige hashes over 65 stukjes van 24 tekens verspreid over de
+   hele data (na de komma). Snel (~1500 tekens), ook voor foto's van megabytes. */
+function thumbFp(src) {
+  if (!src) return '';
+  const n = src.length, k = src.indexOf(',') + 1, W = 24, S = 64, stap = Math.max(1, Math.floor((n - k - W) / S));
+  let h1 = 0x811c9dc5, h2 = (0x01000193 ^ n) >>> 0;
+  for (let s = 0; s <= S; s++) {
+    const p = Math.max(0, Math.min(n - W, k + s * stap));
+    for (let i = p; i < p + W && i < n; i++) { const c = src.charCodeAt(i); h1 = Math.imul(h1 ^ c, 16777619); h2 = Math.imul(h2 ^ c, 0x5bd1e995) ^ (h2 >>> 15); }
+  }
+  return '2:' + n + ':' + (h1 >>> 0).toString(36) + '.' + (h2 >>> 0).toString(36);
+}
+function fpPast(fp, src) { return !!(fp && src) && fp === (String(fp).startsWith('2:') ? thumbFp(src) : thumbFpV1(src)); }   // R6 B7: elke versie in zijn eigen vorm
 /* Rechtop zoals op het model (toesteltest eigenaar 2026-10-09, apply_kaart_rechtop.py): de kaarten (detail, collectie, startgreep,
    deel-thumbs) tonen de uitsnede met de draaiing die hij in 3D heeft. 3D: + = linksom op de huid (rotateDecal; rechtsom-knop = -15),
    canvas: + = met de klok mee, dus hoek = -rot. Alleen-2D-records: kunst.rotatie (SVG, + = met de klok mee). Eenmalig gedraaid op
@@ -16140,7 +16151,7 @@ async function zorgLijstThumbs(naKlaar, forceerRender = false) {
         // record door saveTattoo, dus een lichte thumb kan niet stiekem verouderen).
         if (t.__licht) continue;
         const bron = lijstBron(t);
-        if (bron && t.thumb.fp === thumbFp(bron)) continue;   // vers
+        if (bron && fpPast(t.thumb.fp, bron)) continue;   // vers (R6 B7: elke fp-versie)
       } else if (!t.__licht && !lijstBron(t)) {
         continue;   // vol record zonder beeld: niets te maken
       }
@@ -16949,6 +16960,24 @@ function tombstoneMagWeg(t, m, heeftEigenaar, grens) {
   if (!t || t.deleted !== true || !((Number(t.updatedAt) || 0) < grens)) return false;
   return !heeftEigenaar || (!!m && !m.dirty);
 }
+/* R6 B9 (apply_r6_rest.py): een oude tombstone die nog niet weg mag (collectie met eigenaar, verwijdering nog niet in de cloud) hoeft
+   zijn foto's niet te houden: verkleinen tot {id, updatedAt, deleted}. Puur (sync.test.js). */
+function tombstoneMagStrippen(t, m, heeftEigenaar, grens) {
+  if (!t || t.deleted !== true || !((Number(t.updatedAt) || 0) < grens)) return false;
+  if (tombstoneMagWeg(t, m, heeftEigenaar, grens)) return false;
+  return Object.keys(t).some(k => k !== 'id' && k !== 'updatedAt' && k !== 'deleted');
+}
+async function tombstoneStrippen(id, grens) {   // R6 B9: in een transactie, en alleen als het nog steeds een oude tombstone is
+  if (!dbBeschikbaar) return false;
+  const db = await openDB();
+  return await new Promise(resolve => {
+    const tx = db.transaction(STORE, 'readwrite'), st = tx.objectStore(STORE); let ok = false;
+    const g = st.get(id);
+    g.onsuccess = () => { const t = g.result;
+      if (t && t.deleted === true && (Number(t.updatedAt) || 0) < grens) { st.put({ id: t.id, updatedAt: t.updatedAt, deleted: true }); ok = true; } };
+    tx.oncomplete = () => resolve(ok); tx.onerror = () => resolve(false); tx.onabort = () => resolve(false);
+  });
+}
 /* review R3 SY-6: ids van de tombstones die weg mogen, per cursor: elke value wordt meteen weer losgelaten. */
 async function tombstoneIds(magWeg) {
   if (!dbBeschikbaar) return fallbackLees().filter(t => t && t.deleted === true && magWeg(t)).map(t => t.id);
@@ -16986,6 +17015,9 @@ async function purgeTombstones(maxDagen = 30) {
     const oud = await tombstoneIds(t => tombstoneMagWeg(t, metas.get(t.id), heeftEigenaar, grens));
     for (const id of oud) await hardDeleteTattoo(id);
     if (oud.length) console.info(`Tatties: ${oud.length} oude tombstone(s) opgeruimd`);
+    const kaal = await tombstoneIds(t => tombstoneMagStrippen(t, metas.get(t.id), heeftEigenaar, grens));   // R6 B9
+    let n = 0; for (const id of kaal) if (await tombstoneStrippen(id, grens)) n++;
+    if (n) console.info(`Tatties: ${n} oude tombstone(s) zonder foto's bewaard tot de volgende sync`);
   } catch (e) { console.error('tombstone-purge mislukt', e); }
 }
 
@@ -18142,7 +18174,7 @@ function renderLijst() {
   items = pasFiltersToe(items);
   if (zoekTekst) {
     const z = zoekTekst.toLowerCase();
-    items = items.filter(t => [t.naam, t.artiest, t.studio, t.stijl]
+    items = items.filter(t => [t.naam, t.artiest, t.studio, t.stijl, tStyle(t.stijl), zoneLabel(t.lichaamsdeel)]   // R3 VW-9: ook vertaalde stijl en lichaamsdeel
       .some(v => (v || '').toLowerCase().includes(z)));
   }
   const sorteringen = {
@@ -19758,6 +19790,19 @@ function zetAccountStapTekst() {   // kop en subtekst van de kaart: met aantal (
   const maak = $('#onb-acc-maak');   // inlog-variant: de rode knop heet Inloggen (hij opent het accountvenster, daar kun je ook inloggen)
   if (maak) { const k = inlog ? 'onb.inloggen' : 'onb.account_maak'; maak.setAttribute('data-i18n', k); maak.textContent = tr(k); }
 }
+/* R6 B12 (apply_r6_rest.py): staat er een venster open? Een gesloten sheet-paneel (Uitleg, Feedback) of Instellingen blijft in de
+   pagina staan (overlay op doorzichtig, paneel weggeschoven) en heeft dus wel afmetingen: die tellen alleen met de class 'open', de
+   knipmodal met 'on'. De rest (accountvenster, intro, keuzemenu's, native sheets) gaat via hidden. */
+function dialoogOpen() {
+  for (const d of document.querySelectorAll('[aria-modal="true"]')) {
+    if (d.hidden || !d.getClientRects().length || getComputedStyle(d).visibility === 'hidden') continue;
+    if (d.classList.contains('sheet-paneel') || d.id === 'inst-paneel') { if (d.classList.contains('open')) return true; continue; }
+    if (d.classList.contains('cutmodal')) { if (d.classList.contains('on')) return true; continue; }
+    return true;
+  }
+  return false;
+}
+window.__tattiesDialoogOpen = dialoogOpen;
 function accountNudgeKan() {   // alles behalve de drempel: geen kaart als er al een kwam, de sessie onbekend is, je ingelogd bent of er iets open staat
   if (accountNudgeGetoond || accountVraagNu || accountStapModus) return false;
   try { if (localStorage.getItem('tatties-onboarding-gedaan') !== '1') return false; } catch (e) { return false; }
@@ -19766,6 +19811,10 @@ function accountNudgeKan() {   // alles behalve de drempel: geen kaart als er al
   { const sl = $('#start-lichaam'); if (sl && !sl.hidden) return false; }
   const ov = $('#onboarding'), am = $('#account-modal'), ip = $('#inst-paneel');
   if ((ov && !ov.hidden) || (am && !am.hidden) || (ip && ip.classList.contains('open')) || document.querySelector('.flash-dialoog')) return false;
+  // R6 B12 (apply_r6_rest.py): elk ander open venster (ook de native nazorg-/reviewsheets) en een drempelvlag die niet op te slaan
+  // is (dan kwam de kaart bij elke start)
+  if (dialoogOpen()) return false;
+  try { localStorage.setItem('tatties-opslag-proef', '1'); localStorage.removeItem('tatties-opslag-proef'); } catch (e) { return false; }
   return true;
 }
 function toonAccountNudge(n) {
@@ -19946,7 +19995,7 @@ function fbToestel() {
   else t = 'desktop ' + browser;
   return (t + ', ' + w + ' px').slice(0, 120);
 }
-function fbEmailGeldig(e) { return e.length <= 254 && /^[^\s@]+@[^\s@.]+(\.[^\s@.]+)+$/.test(e) && /\.[^\s@.]{2,}$/.test(e); }
+function fbEmailGeldig(e) { return e.length <= 200 && /^[^\s@]+@[^\s@.]+(\.[^\s@.]+)+$/.test(e) && /\.[^\s@.]{2,}$/.test(e); }
 function fbMelding(sleutel) {
   const m = fbEl('fb-melding'); if (!m) return;
   m.textContent = sleutel ? tr(sleutel) : ''; m.hidden = !sleutel;
@@ -20031,6 +20080,9 @@ function openFeedback() {
   fbMelding(null); fbTeller(); fbVulEmail();
   o.classList.add('open'); p.classList.add('open'); document.body.style.overflow = 'hidden';
   laagOpenHistory('feedback', sluitFeedback);
+  fbStaat.focusVoor = document.activeElement;   // R6 B12: focus naar het paneel (niet naar het tekstveld: dat opent het toetsenbord)
+  if (!p.hasAttribute('tabindex')) p.setAttribute('tabindex', '-1');
+  try { p.focus({ preventScroll: true }); } catch (e) { /* geen focus */ }
 }
 function sluitFeedback() {
   const o = fbEl('fb-overlay'), p = fbEl('fb-paneel'); if (!o || !p) return;
@@ -20039,6 +20091,8 @@ function sluitFeedback() {
   const inst = document.getElementById('inst-paneel');   // vanuit Instellingen geopend: dat paneel blijft open, de pagina dus vast
   if (!(inst && inst.classList.contains('open'))) document.body.style.overflow = '';
   if (wasOpen) laagSluitHistory('feedback');
+  const terug = fbStaat.focusVoor; fbStaat.focusVoor = null;   // R6 B12: focus terug naar waar hij was
+  if (wasOpen && terug && terug.isConnected && typeof terug.focus === 'function') { try { terug.focus({ preventScroll: true }); } catch (e) { /* geen focus */ } }
 }
 async function verstuurFeedback() {
   if (fbStaat.bezig) return;
@@ -20053,7 +20107,7 @@ async function verstuurFeedback() {
   fbMelding(null);
   const payload = { soort: fbStaat.soort, tekst, email: email || null, app_versie: String(APP_VERSIE).slice(0, 20),
                     toestel: fbToestel(), beeld: fbStaat.beeld || null };
-  fbStaat.laatstePayload = payload;
+  fbStaat.laatstePayload = (typeof gebruikDev === 'function' && gebruikDev()) ? payload : null;   // R6 B12: met afbeelding alleen voor tests vasthouden
   if (typeof gebruikDev === 'function' && gebruikDev() && !window.__feedbackDev) {   // lokale tests: nooit een echte rij
     console.info('[feedback] niet verstuurd (dev)', Object.assign({}, payload, { beeld: payload.beeld ? payload.beeld.slice(0, 40) + '... (' + payload.beeld.length + ' tekens)' : null }));
     fbZetLaatst(); toast(tr('feedback.dev')); fbLeeg(); sluitFeedback(); return;
@@ -20620,7 +20674,7 @@ async function verwijderVoorbeelden() {
           elEmail = $('#account-email'), elWw = $('#account-ww'),
           elWeergave = $('#account-email-weergave'), elBericht = $('#account-bericht'),
           btnIn = $('#account-inloggen'), btnMaak = $('#account-aanmaken'), btnUit = $('#account-uitloggen'),
-          btnBackup = $('#account-backup'), btnPull = $('#account-pull'), btnSync = $('#account-sync'),
+          btnSync = $('#account-sync'),
           btnVerwijder = $('#account-verwijder'),
           btnReset = $('#account-reset'), btnResend = $('#account-resend'), blokHerstel = $('#account-herstel'),
           blokGrens = $('#account-grens'), btnSamenvoeg = $('#account-samenvoegen'),
@@ -20754,7 +20808,7 @@ async function verwijderVoorbeelden() {
       if (elIn) elIn.hidden = true;
       if (blokHerstel) blokHerstel.hidden = false;
     }
-    function bezig(aan){ [btnGoogle, btnIn, btnMaak, btnUit, btnBackup, btnPull, btnSync, btnVerwijder, btnReset, btnResend, btnHerstel, btnSamenvoeg].forEach(b => { if (b) b.disabled = aan; }); }
+    function bezig(aan){ [btnGoogle, btnIn, btnMaak, btnUit, btnSync, btnVerwijder, btnReset, btnResend, btnHerstel, btnSamenvoeg].forEach(b => { if (b) b.disabled = aan; }); }
     /* Accountgrens zichtbaar maken. De collectie hoort bij een ander account: dat blijft
        staan tot de gebruiker zelf kiest, in plaats van een toast die je gemist kunt hebben.
        Zolang het blok er staat is synchroniseren zinloos, dus die knop gaat weg. */
@@ -20862,38 +20916,6 @@ async function verwijderVoorbeelden() {
       bezig(true);
       try { await sb.auth.signOut({ scope: 'local' }); bericht('account.uitgelogd', null); }   // review R3 AC-5: alleen dit toestel, niet overal
       catch(e){ bericht(foutTekst(e),'fout'); }
-      finally { bezig(false); }
-    });
-    if (btnBackup) btnBackup.addEventListener('click', async () => {
-      bezig(true); bericht('account.backup_bezig', null);
-      try {
-        const r = await backupNaarCloud();
-        if (r.ok) bericht('account.backup_klaar','ok',{ n: r.n, s: r.n === 1 ? '' : 's' });
-        else {
-          const key = foutTekst(r.error || {});
-          bericht(key === 'account.fout_generiek' ? 'account.backup_fout' : key, 'fout');
-        }
-      } catch(e){
-        const key = foutTekst(e);
-        bericht(key === 'account.fout_generiek' ? 'account.backup_fout' : key, 'fout');
-      }
-      finally { bezig(false); }
-    });
-    if (btnPull) btnPull.addEventListener('click', async () => {
-      bezig(true); bericht('account.pull_bezig', null);
-      try {
-        const r = await pullVanCloud();
-        if (r.ok) {
-          if (typeof herlaad === 'function') await herlaad();   // lijsten/2D/3D verversen met opgehaalde records
-          bericht(r.n ? 'account.pull_klaar' : 'account.pull_niks','ok',{ n: r.n, s: r.n === 1 ? '' : 's' });
-        } else {
-          const key = foutTekst(r.error || {});
-          bericht(key === 'account.fout_generiek' ? 'account.pull_fout' : key, 'fout');
-        }
-      } catch(e){
-        const key = foutTekst(e);
-        bericht(key === 'account.fout_generiek' ? 'account.pull_fout' : key, 'fout');
-      }
       finally { bezig(false); }
     });
     if (btnSync) btnSync.addEventListener('click', async () => {
@@ -21408,7 +21430,10 @@ async function verwijderVoorbeelden() {
         const klaar=new Promise(res=>{ rec.onstop=res; });
         rec.start(250);
         const tr0=performance.now(), duur=FILM.SEC*1000;
-        await new Promise(res=>{
+        await new Promise(res0=>{
+          let klaarS=false; const res=()=>{ if(klaarS) return; klaarS=true; document.removeEventListener('visibilitychange', opAchter); res0(); };
+          const opAchter=()=>{ if(document.hidden){ f.stop=true; res(); } };   // R3 LI-5: rAF vuurt niet op de achtergrond, dus hier afbreken
+          document.addEventListener('visibilitychange', opAchter);
           const stap=()=>{
             if(f.stop || document.hidden){ f.stop=true; res(); return; }
             const u=Math.min(1,(performance.now()-tr0)/duur);
@@ -21686,6 +21711,7 @@ async function verwijderVoorbeelden() {
     if(h>cur+1){ stage.style.setProperty("--stage-h", h+"px"); if(renderer) resize(); }
   }
   function resize(){ if(!renderer||!stage)return;
+    if(film) return;   // R3 LI-5: tijdens een opname beheert het filmpje het canvas (draaien vervormde de rest van het filmpje)
     if(vakAnim) return;   // groei/krimp beheert het canvas zelf; een resize (startscherm-hoogte) zette de renderer anders op de verborgen stage (2026-10-09)
     if(startLive){ startLiveMaat(); return; }   // canvas staat op het startscherm (slice 5j)
     pinStageHoogte();
@@ -22585,8 +22611,7 @@ async function verwijderVoorbeelden() {
     resize();   // stage terug onder de kopbalk (slice 4o)
     resetView();
     uiterlijkNaLichaam();   // generator dicht: het haar weer met physics op het (nieuwe) lichaam
-    planStraalRaster();
-    uiterlijkNaLichaam();   // generator dicht: het haar weer met physics op het (nieuwe) lichaam
+    planStraalRaster();   // R3 LI-7: uiterlijkNaLichaam stond hier twee keer
     const na=genNa; genNa=null; if(na){ try{ na(soort); }catch(e){ console.error(e); } }
   }
   function zetGenTop(){ if(stage) document.documentElement.style.setProperty('--gen-top', Math.max(0, stage.getBoundingClientRect().top)+'px'); }
@@ -22602,8 +22627,14 @@ async function verwijderVoorbeelden() {
       if(typeof planAutoSync==="function"){ try{ planAutoSync(); }catch(e){} }
       genDicht('klaar');
       if(vorig && vorig.eigen!==false && typeof lichaamVerschilt==='function' && typeof bewaarLichaamReserve==='function' && lichaamVerschilt(vorig, L)){
-        bewaarLichaamReserve(vorig, 'generator');
-        if(typeof toastMetActie==='function') toastMetActie(tr('lichaam.klaar_toast'), tr('lichaam.ongedaan'), ()=>{ try{ zetLichaamReserveTerug(); }catch(e){ console.error(e); } }); } },
+        // R3 LI-3 (apply_r3_rest.py): een reserve uit de eerste-sync-keuze (toestel- of accountlichaam) is de enige kopie: niet overschrijven;
+        // 'Ongedaan' zet het vorige lichaam dan rechtstreeks terug
+        const R=(typeof lichaamReserve==='function') ? lichaamReserve() : null, syncRes=!!(R && (R.bron==='toestel' || R.bron==='account'));
+        if(!syncRes) bewaarLichaamReserve(vorig, 'generator');
+        const terug=syncRes ? ()=>{ const T=Object.assign({}, vorig, { bijgewerkt:Date.now() }); try{ localStorage.setItem("tatties-lichaam", JSON.stringify(T)); }catch(e){ return; }
+            if(typeof window.__tatties3DLichaam==='function') window.__tatties3DLichaam(T); if(typeof planAutoSync==='function'){ try{ planAutoSync(); }catch(e){} } }
+          : ()=>zetLichaamReserveTerug();
+        if(typeof toastMetActie==='function') toastMetActie(tr('lichaam.klaar_toast'), tr('lichaam.ongedaan'), ()=>{ try{ terug(); }catch(e){ console.error(e); } }); } },
     annuleer:()=>genDicht('annuleer')
   };
   /* Opnieuw plaatsen (slice 4e): vanaf de detailpagina de plaatsstand met de bestaande uitsnede van het record. */
@@ -28246,27 +28277,6 @@ function maakTatnetGL(json, canvas) {
     else { k3.blend=was; if(oud.inktAuto) k3.inktAuto=oud.inktAuto; }   // met de hand gekozen: blijft, en blijft herkenbaar als handkeuze
     return k3;
   }
-  // Voorzichtige heuristiek: alleen "in huid blenden" voorstellen als de uitsnede er duidelijk
-  // uitziet als zwart/grijze inkt op lichte huid. Veel lichte huid-pixels + genoeg donkere inkt
-  // + die inkt laag verzadigd (geen kleur). Bij twijfel: niet aanzetten (geen verrassingen).
-  function autoBlendSuggestie(){
-    try{
-      const src=clippedCanvas(); if(!src||!src.width) return false;
-      const W=Math.min(160, src.width), H=Math.max(1,Math.round(src.height*(W/src.width)));
-      const c=document.createElement('canvas'); c.width=W; c.height=H;
-      const x=c.getContext('2d',{willReadFrequently:true}); x.drawImage(src,0,0,W,H);
-      const p=x.getImageData(0,0,W,H).data, N=W*H;
-      let opaq=0, licht=0, inkN=0, satSom=0;
-      for(let i=0;i<N;i++){ const o=i*4; if(p[o+3]<16) continue; opaq++;
-        const r=p[o],g=p[o+1],b=p[o+2], L=0.299*r+0.587*g+0.114*b;
-        if(L>180) licht++;
-        if(L<110){ inkN++; const mx=Math.max(r,g,b),mn=Math.min(r,g,b); satSom+=mx>0?(mx-mn)/mx:0; }
-      }
-      if(opaq<50) return false;
-      const lichtFr=licht/opaq, inkFr=inkN/opaq, inkSat=inkN?satSom/inkN:1;
-      return lichtFr>0.50 && inkFr>0.03 && inkSat<0.20;
-    }catch(e){ return false; }
-  }
   /* Lasso als zacht masker: de rand verloopt over ~1,5% van de kleinste lasso-maat, en dat verloop ligt BINNEN de
      lasso (het masker wordt op kleine schaal geblurd en dan verschoven: alpha 0 op de lijn, 1 op afstand r erbinnen).
      Een harde knip gaf op grote stukken een zichtbare naad tussen foto-huid en model-huid (Zero-vergelijking). */
@@ -29778,7 +29788,7 @@ function maakTatnetGL(json, canvas) {
     if((vp===startOpnameVp || vp===vpOud) && heeft) return;   // slice 5p: vingerafdruk ook over sessies heen
     const c=maakStartOpname(); if(!c) return;
     let src=''; try{ src=c.toDataURL('image/webp',0.86); }catch(e){}
-    if(src.indexOf('data:image/webp')!==0) src=c.toDataURL('image/png');   // Safari maakt geen webp
+    if(src.indexOf('data:image/webp')!==0 && src.indexOf('data:image/png')!==0) src=c.toDataURL('image/png');   // Safari maakt geen webp en geeft dan al een PNG (R3 LI-7: niet twee keer coderen)
     const ids=[...new Set(markers.filter(m=>m.obj && m.obj.visible && m.rec).map(m=>m.rec.id))];
     try{ localStorage.setItem(START_OPNAME+':src', src); localStorage.setItem(START_OPNAME+':ids', JSON.stringify(ids)); startOpnameVp=vp;
       if(startOpnameHoekNu!==null) localStorage.setItem(START_OPNAME+':hoek', String(startOpnameHoekNu));   // live begint op deze hoek (slice 5n)
@@ -30513,8 +30523,9 @@ function maakTatnetGL(json, canvas) {
   window.__tattiesStartMoment = function () { clearTimeout(momentTimer); momentTimer = setTimeout(moment, 1500); };
   function vrijScherm() {
     try { if (huidigeView !== 'start') return false; } catch (e) { return false; }
-    var open = document.querySelectorAll('[aria-modal="true"]');
-    for (var i = 0; i < open.length; i++) if (!open[i].hidden && open[i].getClientRects().length) return false;
+    if (typeof window.__tattiesDialoogOpen === 'function') { if (window.__tattiesDialoogOpen()) return false; }   // R6 B12: gesloten panelen telden als open
+    else { var open = document.querySelectorAll('[aria-modal="true"]');
+      for (var i = 0; i < open.length; i++) if (!open[i].hidden && open[i].getClientRects().length) return false; }
     var cm = document.getElementById('cutModal');
     if (cm && cm.classList.contains('on')) return false;
     if (document.querySelector('#toast.zichtbaar')) return false;
