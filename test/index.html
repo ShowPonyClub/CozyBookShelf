@@ -13663,7 +13663,7 @@ function createTattoo(overrides = {}) {
    ============================================================ */
 // App-versie (semver, handmatig ophogen bij een release). Bij een bump ook de
 // CACHE-naam in sw.js meebumpen, zodat clients de nieuwe build ophalen.
-const APP_VERSIE = '0.4.26';
+const APP_VERSIE = '0.4.27';
 
 /* Dev-haken die de CLOUD raken hangen alleen op een ontwikkelmachine aan window. Ze zijn geen
    lek op zichzelf (zonder XSS roept niemand ze aan, en CSP + esc() houden XSS tegen), maar ze
@@ -13902,7 +13902,8 @@ const KNIP_FULLSCREEN = true;   // FASE-2-EXPERIMENT: knip-stap schermvullend op
 if (KNIP_FULLSCREEN && document.documentElement) document.documentElement.classList.add('knipfull');
 const DB_NAAM = 'tatties';
 const OUD_DB_NAAM = 'tattoostics';   // vorige naam - eenmalig overgezet
-const DB_VERSIE = 2;                 // 2: extra store 'sync' (sync-metadata per record, hardening plak 1)
+const DB_VERSIE = 3;                 // 2: extra store 'sync' (sync-metadata per record, hardening plak 1); 3: store 'licht' + index 'upd' (R4 ME-2)
+const LICHT_STORE = 'licht';         // R4 ME-2 (apply_licht_opslag.py): lichte kopie per record (geen beelden) voor een snelle start
 const STORE = 'tattoos';
 const SYNC_STORE = 'sync';           // sync-metadata NAAST het record (nooit in export/import/cloud)
 let _dbPromise = null;
@@ -14218,6 +14219,8 @@ async function lichteIndex() {
     return uit;
   }
   try {
+    try { const snel = await lichteRecords(); if (snel) { for (const t of snel) if (t && t.id) uit.set(t.id, kort(t)); return uit; } }   // R4 CL-5: zonder beelden
+    catch (e) { console.warn('lichte index: terug naar alles vol lezen', e); }
     const db = await openDB();
     await new Promise((resolve, reject) => {
       const rq = db.transaction(STORE, 'readonly').objectStore(STORE).openCursor();
@@ -15603,6 +15606,10 @@ function openDB() {
       if (!db.objectStoreNames.contains(SYNC_STORE)) {
         db.createObjectStore(SYNC_STORE, { keyPath: 'id' });
       }
+      // R4 ME-2: ook strikt additief: een lege store 'licht' en een index op updatedAt (de index wordt eenmalig opgebouwd, records blijven gelijk)
+      if (!db.objectStoreNames.contains(LICHT_STORE)) db.createObjectStore(LICHT_STORE, { keyPath: 'id' });
+      try { const os = e.target.transaction.objectStore(STORE); if (!os.indexNames.contains('upd')) os.createIndex('upd', 'updatedAt'); }
+      catch (err) { console.warn('index upd', err); }
     };
     // Twee-vensters-bescherming (relevant zodra DB_VERSIE ooit omhoog gaat):
     // - onblocked: een ouder venster houdt de connectie vast -> zichtbaar loggen i.p.v. stil eeuwig wachten.
@@ -15614,7 +15621,15 @@ function openDB() {
       db.onversionchange = () => { try { db.close(); } catch (e) {} _dbPromise = null; };
       resolve(db);
     };
-    req.onerror = () => reject(req.error);
+    req.onerror = () => {
+      // R4 ME-2: VersionError = de database is nieuwer dan deze build (een latere build heeft hem al opgehoogd). Dan openen zoals hij is:
+      // de stores die deze build kent zijn er (upgrades zijn strikt additief), de nieuwe laat hij links liggen.
+      if (req.error && req.error.name === 'VersionError') {
+        try { const r2 = indexedDB.open(DB_NAAM); r2.onsuccess = () => { const db = r2.result; db.onversionchange = () => { try { db.close(); } catch (e) {} _dbPromise = null; }; resolve(db); };
+          r2.onerror = () => reject(r2.error); return; } catch (e) { /* valt door naar reject */ }
+      }
+      reject(req.error);
+    };
   });
   return _dbPromise;
 }
@@ -15776,13 +15791,44 @@ function vulDelenUitVol(doel, vol) {
    uit het volle record gebouwd is. Zonder dit verschilde die altijd en bouwde elke herlaad() (opstarten, sync, verwijderen)
    alle decals opnieuw. Sleutel = id (record) of id:deelId, waarde = thumbFp van srcUrl (of kunst.src als terugval). */
 const lichtBronFp = new Map();
+/* R4 ME-2 stap B: dezelfde hash en lengte die texVingerafdruk (3D-module) over srcUrl rekent, zodat een licht record zonder bronbeeld toch
+   de textuurcache kan vinden. Niet wijzigen zonder texVingerafdruk mee te nemen (anders is de hele cache ongeldig). */
+function texBronHash(s) {
+  s = s || ''; let h = 2166136261 >>> 0;
+  for (let i = 0; i < s.length; i += 31) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619) >>> 0; }
+  return { h, n: s.length };
+}
+/* R4 ME-2 stap A: de lichte kopie die in de store 'licht' komt. Nieuw object (het volle record blijft heel); zelfde velden als na
+   stripBeelden, plus srcH per bronbeeld en _bronFp (de vingerafdrukken voor lichtBronFp). */
+function lichteKopie(t) {
+  const c = Object.assign({}, t);
+  delete c.foto; delete c.__licht; delete c.__geenBeeld;
+  if (Array.isArray(c.fotos) && c.fotos.length) c.fotos = [];
+  const bf = { '': thumbFp((t.kunst3d && t.kunst3d.srcUrl) || (t.kunst && t.kunst.src) || '') };
+  if (c.kunst && typeof c.kunst === 'object') { c.kunst = Object.assign({}, c.kunst); if (c.kunst.src) c.kunst.srcN = c.kunst.src.length; delete c.kunst.src; }
+  if (c.kunst3d && typeof c.kunst3d === 'object') { const k = c.kunst3d; c.kunst3d = Object.assign({}, k); delete c.kunst3d.srcUrl; if (k.srcUrl) c.kunst3d.srcH = texBronHash(k.srcUrl); }
+  if (Array.isArray(c.delen)) c.delen = c.delen.map(d => {
+    if (!d || typeof d !== 'object') return d;
+    const n = Object.assign({}, d);
+    if (d.kunst3d && typeof d.kunst3d === 'object') { n.kunst3d = Object.assign({}, d.kunst3d); delete n.kunst3d.srcUrl; if (d.kunst3d.srcUrl) { n.kunst3d.srcH = texBronHash(d.kunst3d.srcUrl); bf[d.id] = thumbFp(d.kunst3d.srcUrl); } }
+    return n;
+  });
+  c._bronFp = bf;
+  return c;
+}
+function lichtUitKopie(c) {   // lichte kopie uit de store -> licht record in RAM (zoals na stripBeelden)
+  const bf = c._bronFp; delete c._bronFp;
+  if (bf && c.id) for (const k of Object.keys(bf)) lichtBronFp.set(k ? c.id + ':' + k : c.id, bf[k]);
+  c.__licht = true;
+  return c;
+}
 function stripBeelden(t) {
   delete t.foto;
   if (Array.isArray(t.fotos) && t.fotos.length) t.fotos = [];
   if (t.id && !t.__licht) lichtBronFp.set(t.id, thumbFp((t.kunst3d && t.kunst3d.srcUrl) || (t.kunst && t.kunst.src) || ''));
-  if (t.kunst && t.kunst.src) delete t.kunst.src;
-  if (t.kunst3d && t.kunst3d.srcUrl) delete t.kunst3d.srcUrl;
-  for (const d of beeldDelen(t)) if (d.kunst3d && d.kunst3d.srcUrl) { if (t.id) lichtBronFp.set(t.id + ':' + d.id, thumbFp(d.kunst3d.srcUrl)); delete d.kunst3d.srcUrl; }
+  if (t.kunst && t.kunst.src) { t.kunst.srcN = t.kunst.src.length; delete t.kunst.src; }   // R4 ME-2: weten dat er een 2D-plaatje is
+  if (t.kunst3d && t.kunst3d.srcUrl) { t.kunst3d.srcH = texBronHash(t.kunst3d.srcUrl); delete t.kunst3d.srcUrl; }   // R4 ME-2 stap B
+  for (const d of beeldDelen(t)) if (d.kunst3d && d.kunst3d.srcUrl) { if (t.id) lichtBronFp.set(t.id + ':' + d.id, thumbFp(d.kunst3d.srcUrl)); d.kunst3d.srcH = texBronHash(d.kunst3d.srcUrl); delete d.kunst3d.srcUrl; }
   // Bewust ENUMERABLE: zo overleeft de marker ook JSON-/structured-clones (bv. de
   // undo-snapshot bij verwijderen) en beschermt de merge-guard élke kloon-flow.
   // saveTattoo/export/stripVoorCloud strippen 'm aan de uitgangs-grenzen weer weg.
@@ -15832,6 +15878,47 @@ function migreerRecord(t) {
   if (!Array.isArray(t.touchUps)) { t.touchUps = []; gewijzigd = true; }
   return gewijzigd;
 }
+/* R4 ME-2 stap A: alle records licht, zonder beelden te lezen. Geeft null als de store of index er niet is (dan het oude pad). */
+async function lichteRecords() {
+  if (window.__lichtOpslag === false || !dbBeschikbaar) return null;
+  const db = await openDB();
+  if (!db.objectStoreNames.contains(LICHT_STORE)) return null;
+  const { kopieen, upd, sleutels } = await new Promise((resolve, reject) => {
+    let tx; try { tx = db.transaction([STORE, LICHT_STORE], 'readonly'); } catch (e) { resolve({ kopieen: null }); return; }
+    const os = tx.objectStore(STORE);
+    if (!os.indexNames.contains('upd')) { resolve({ kopieen: null }); return; }
+    const uit = { kopieen: null, upd: new Map(), sleutels: null };
+    tx.objectStore(LICHT_STORE).getAll().onsuccess = (ev) => { uit.kopieen = ev.target.result || []; };
+    os.getAllKeys().onsuccess = (ev) => { uit.sleutels = ev.target.result || []; };
+    const cur = os.index('upd').openKeyCursor();
+    cur.onsuccess = () => { const c = cur.result; if (!c) return; uit.upd.set(c.primaryKey, c.key); c.continue(); };
+    tx.oncomplete = () => resolve(uit);
+    tx.onerror = () => reject(tx.error);
+  });
+  if (!kopieen) return null;
+  const perId = new Map(kopieen.map(c => [c.id, c]));
+  const uit = [], teLaden = [];
+  for (const id of sleutels) {
+    const c = perId.get(id), u = upd.get(id);
+    if (c && u !== undefined && +c.updatedAt === +u) { uit.push(lichtUitKopie(c)); perId.delete(id); }
+    else { teLaden.push(id); perId.delete(id); }
+  }
+  const herstel = [], teMigreren = [];
+  for (const id of teLaden) {   // ontbrekende of verouderde kopie: alleen dit record vol lezen
+    const t = await volledigRecord(id); if (!t) continue;
+    if (migreerRecord(t)) { teMigreren.push(t); uit.push(t); continue; }
+    herstel.push(lichteKopie(t)); stripBeelden(t); uit.push(t);
+  }
+  for (const t of teMigreren) { try { await saveTattoo(t); } catch (e) { console.error(e); } stripBeelden(t); }   // saveTattoo schrijft de kopie zelf
+  const weg = [...perId.keys()];   // kopie zonder record
+  if (herstel.length || weg.length) {
+    try { await new Promise((resolve) => { const tx = db.transaction(LICHT_STORE, 'readwrite'), st = tx.objectStore(LICHT_STORE);
+      for (const c of herstel) st.put(c); for (const id of weg) st.delete(id);
+      tx.oncomplete = resolve; tx.onerror = resolve; tx.onabort = resolve; }); } catch (e) { console.warn('licht herstellen', e); }
+  }
+  if (typeof ttTijd === 'undefined') { try { window.__ttLicht = { kopie: uit.length - teLaden.length, vol: teLaden.length, weg: weg.length }; } catch (e) {} }
+  return uit;
+}
 async function laadLichteTattoos(poging2 = false) {
   if (!dbBeschikbaar) {
     // Fallback-modus (localStorage): alles staat toch al vol in RAM - niet strippen.
@@ -15840,6 +15927,8 @@ async function laadLichteTattoos(poging2 = false) {
     return alles;
   }
   try {
+    try { const snel = await lichteRecords(); if (snel) return _hardSyncVelden(snel); }   // R4 ME-2 stap A
+    catch (e) { console.warn('lichte opslag: terug naar alles vol lezen', e); }
     const db = await openDB();
     const { uit, teMigreren } = await new Promise((resolve, reject) => {
       const uit = [], teMigreren = [];
@@ -15902,6 +15991,8 @@ async function saveTattoo(tattoo, behoudTijd = false, poging2 = false, vanSyncVo
     } catch (e) { console.error('merge-guard', e); }
   }
   // Interne markers nooit persisteren (enumerable, dus zouden anders mee de DB in gaan)
+  for (const k of [tattoo.kunst3d].concat(beeldDelen(tattoo).map(d => d && d.kunst3d))) if (k && k.srcUrl) delete k.srcH;   // R4 ME-2
+  if (tattoo.kunst && tattoo.kunst.src) delete tattoo.kunst.srcN;
   delete tattoo.__licht;
   delete tattoo.__geenBeeld;
   // Lijst-thumb vers houden op het enige schrijfpunt (goedkope fp-check, regeneratie
@@ -15926,14 +16017,16 @@ async function saveTattoo(tattoo, behoudTijd = false, poging2 = false, vanSyncVo
   try {
     const db = await openDB();
     return await new Promise((resolve, reject) => {
-      const tx = db.transaction(STORE, 'readwrite'), st = tx.objectStore(STORE);
+      const metLicht = db.objectStoreNames.contains(LICHT_STORE);   // R4 ME-2: de lichte kopie in dezelfde transactie
+      const tx = db.transaction(metLicht ? [STORE, LICHT_STORE] : STORE, 'readwrite'), st = tx.objectStore(STORE);
+      const zet2 = () => { st.put(tattoo); if (metLicht) { try { tx.objectStore(LICHT_STORE).put(lichteKopie(tattoo)); } catch (e) { console.warn('lichte kopie', e); } } };
       let overgeslagen = false;
       if (verwacht !== undefined) {   // R6 B8: vergelijken en schrijven in een transactie (afgeleide opslag mag een nieuwere versie niet overschrijven)
         const g = st.get(tattoo.id);
         g.onsuccess = () => { const d = g.result;
           if (d && (d.deleted === true || (Number.isFinite(+d.updatedAt) && +d.updatedAt !== +verwacht))) { overgeslagen = true; return; }
-          st.put(tattoo); };
-      } else st.put(tattoo);
+          zet2(); };
+      } else zet2();
       // Pas resolven als de transactie écht commit (niet al bij put-success),
       // zodat een abort tijdens commit niet als 'opgeslagen' wordt gemeld.
       tx.oncomplete = () => resolve(overgeslagen ? null : tattoo);
@@ -15971,12 +16064,13 @@ async function deleteTattoo(id, poging2 = false) {
   try {
     const db = await openDB();
     return await new Promise((resolve, reject) => {
-      const tx = db.transaction(STORE, 'readwrite');
+      const metLicht = db.objectStoreNames.contains(LICHT_STORE);   // R4 ME-2
+      const tx = db.transaction(metLicht ? [STORE, LICHT_STORE] : STORE, 'readwrite');
       const os = tx.objectStore(STORE);
       const get = os.get(id);
       get.onsuccess = () => {
         const r = get.result;
-        if (r) { r.deleted = true; r.updatedAt = Date.now(); os.put(r); }
+        if (r) { r.deleted = true; r.updatedAt = Date.now(); os.put(r); if (metLicht) tx.objectStore(LICHT_STORE).put(lichteKopie(r)); }
         // record bestaat niet (meer): niets te doen, transactie commit leeg
       };
       tx.oncomplete = () => resolve(id);
@@ -16003,9 +16097,11 @@ async function hardDeleteTattoo(id, poging2 = false) {
   try {
     const db = await openDB();
     return await new Promise((resolve, reject) => {
-      const rq = db.transaction(STORE, 'readwrite').objectStore(STORE).delete(id);
-      rq.onsuccess = () => resolve(id);
-      rq.onerror = () => reject(rq.error);
+      const metLicht = db.objectStoreNames.contains(LICHT_STORE);   // R4 ME-2
+      const tx = db.transaction(metLicht ? [STORE, LICHT_STORE] : STORE, 'readwrite');
+      tx.objectStore(STORE).delete(id); if (metLicht) tx.objectStore(LICHT_STORE).delete(id);
+      tx.oncomplete = () => resolve(id);
+      tx.onerror = () => reject(tx.error);
     });
   } catch {
     if (!poging2 && await dbOpnieuwVerbinden()) return hardDeleteTattoo(id, true);
@@ -16983,10 +17079,12 @@ async function tombstoneStrippen(id, grens) {   // R6 B9: in een transactie, en 
   if (!dbBeschikbaar) return false;
   const db = await openDB();
   return await new Promise(resolve => {
-    const tx = db.transaction(STORE, 'readwrite'), st = tx.objectStore(STORE); let ok = false;
+    const metLicht = db.objectStoreNames.contains(LICHT_STORE);   // R4 ME-2
+    const tx = db.transaction(metLicht ? [STORE, LICHT_STORE] : STORE, 'readwrite'), st = tx.objectStore(STORE); let ok = false;
     const g = st.get(id);
     g.onsuccess = () => { const t = g.result;
-      if (t && t.deleted === true && (Number(t.updatedAt) || 0) < grens) { st.put({ id: t.id, updatedAt: t.updatedAt, deleted: true }); ok = true; } };
+      if (t && t.deleted === true && (Number(t.updatedAt) || 0) < grens) { const kaal = { id: t.id, updatedAt: t.updatedAt, deleted: true };
+        st.put(kaal); if (metLicht) tx.objectStore(LICHT_STORE).put(lichteKopie(kaal)); ok = true; } };
     tx.oncomplete = () => resolve(ok); tx.onerror = () => resolve(false); tx.onabort = () => resolve(false);
   });
 }
@@ -29153,8 +29251,9 @@ function maakTatnetGL(json, canvas) {
     return texDbP;
   }
   function texVingerafdruk(k, versie){
-    const s=k.srcUrl||''; let h=2166136261>>>0;
-    for(let i=0;i<s.length;i+=31){ h^=s.charCodeAt(i); h=Math.imul(h,16777619)>>>0; }
+    // R4 ME-2 stap B: hash en lengte van het bronbeeld uit texBronHash (host); een licht record heeft ze bewaard in k.srcH
+    const bh=k.srcUrl ? texBronHash(k.srcUrl) : (k.srcH && Number.isFinite(k.srcH.h) ? k.srcH : texBronHash('')); let h=bh.h>>>0;
+    const s={ length: bh.n };
     const rest=JSON.stringify([versie||TEX_VERSIE, s.length, k.lasso||[], k.wand||[], k.wandKeep||null, k.erase||[], !!k.flipH, k.rot90||0,
       k.bg!==false, k.bgColor||null, k.thresh, k.spread, k.huidMethode||null, k.blend||null, k.aiMask ? k.aiMask.length : 0,
       (k.tatnet && k.tatnet.png) ? k.tatnet.png.length : 0, !!(window.__tattiesTatnet && window.__tattiesTatnet.aan), window.__matteLokaal===false]);
@@ -29237,7 +29336,23 @@ function maakTatnetGL(json, canvas) {
     texVooruit();
   }
   /* De textuur van een tattoo(deel): uit de cache als de vingerafdruk klopt, anders maken (rebuildTextureFromKunst) en bewaren. */
+  const herstelVolNodig=new Set();   // R4 ME-2 stap B: sleutels waarvoor de cache miste en het volle record nodig is
   async function textuurVoor(sleutel, k){
+    if(k && !k.srcUrl && k.srcH){   // R4 ME-2 stap B: licht record: alleen de cache; mist die, dan het volle record laten ophalen
+      const fp=texVingerafdruk(k); let e=null, bmp=null; const vr=texVoorraad.get(sleutel);
+      if(vr){ texVoorraad.delete(sleutel); const r=await vr; if(r){ e=r.e; bmp=r.bmp; } } else e=await texLees(sleutel);
+      if(e && e.blob && (e.fpVoor===fp || e.fpNa===fp)){
+        try{ const b=bmp ? bmp : (typeof createImageBitmap==='function') ? await createImageBitmap(e.blob)
+            : await new Promise((res,rej)=>{ const i=new Image(); i.onload=()=>res(i); i.onerror=rej; i.src=URL.createObjectURL(e.blob); });
+          let c=document.createElement('canvas'); c.width=b.width; c.height=b.height; c.getContext('2d').drawImage(b,0,0); if(b.close) b.close();
+          c=texBegrens(c);
+          if(e.blend) k.blend=e.blend; if(e.inktAuto) k.inktAuto=e.inktAuto; if(e.tatnet && !k.tatnet) k.tatnet=e.tatnet;
+          const tex=new THREE.CanvasTexture(c); tex.encoding=THREE.sRGBEncoding; tex.anisotropy=maxAniso(); tex.needsUpdate=true;
+          ttTijd.cache=(ttTijd.cache||0)+1; ttTijd.licht=(ttTijd.licht||0)+1; return tex;
+        }catch(err){ /* kapot beeld: dan het volle record */ }
+      } else if(bmp && bmp.close) bmp.close();
+      herstelVolNodig.add(sleutel); return null;
+    }
     if(!k || !k.srcUrl) return rebuildTextureFromKunst(k);
     const fp=texVingerafdruk(k), vr=texVoorraad.get(sleutel); let e=null, klaarBmp=null;
     if(vr){ texVoorraad.delete(sleutel); const r=await vr; if(r){ e=r.e; klaarBmp=r.bmp; } }   // slice 5u: uit de voorraad
@@ -29381,7 +29496,7 @@ function maakTatnetGL(json, canvas) {
     const eigenP=(P===D.positie3d);   // alleen een ECHT opgeslagen plek migreren, geen afgeleide
     if(!P||!P.point) return false;
     if((P.gender||"man")!==currentGender) return false;    // alleen tattoos van dit model
-    const k3 = (D.kunst3d && D.kunst3d.srcUrl) ? D.kunst3d
+    const k3 = (D.kunst3d && (D.kunst3d.srcUrl || D.kunst3d.srcH)) ? D.kunst3d   // R4 ME-2 stap B: licht record met srcH probeert de cache
              : (!deel && t.kunst && t.kunst.src ? { srcUrl:t.kunst.src, bg:false, lasso:[], wand:[] } : null);   // fallback: 2D-uitsnede als 3D-textuur
     let tex=null;
     const _tt0=performance.now(), _tatVoor=!!(k3 && k3.tatnet), _blendVoor=k3 && k3.blend;
@@ -29441,7 +29556,7 @@ function maakTatnetGL(json, canvas) {
        uit de nieuwe textuur halen, anders blijft daar de oude, vervaagde versie staan. */
     const ververs2D=!deel && !!(tex && tex.__vers) && !!k3 && k3===D.kunst3d && k3.blend==='inkt-kleur' && ((recRef.kunst3d && recRef.kunst3d.tex2D)|0)<TEX_VERSIE;
     if(ververs2D && recRef.kunst3d) recRef.kunst3d.tex2D=TEX_VERSIE;
-    const magSync=!deel && (!t.positie || !t.kunst || !t.kunst.src || ververs2D);   // 2D-kaart volgt alleen het eerste deel
+    const magSync=!deel && (!t.positie || !t.kunst || !(t.kunst.src || (t.__licht && t.kunst.srcN)) || ververs2D);   // R4 ME-2: licht record kent srcN   // 2D-kaart volgt alleen het eerste deel
     // De 2D-kaart hoort altijd de rusthouding te tonen, ook als de armen nu wijd staan.
     const rustPt=(ubRust?ubRust.point:point), rustRot=(ubRust?ubRust.rot:rot);
     if(magSync) sync2D(recRef, rustPt, P.side||"voor", rustRot, P.size||0.09, tex);
@@ -29501,6 +29616,8 @@ function maakTatnetGL(json, canvas) {
   async function herstelLijst(){
     if(typeof collectieGeladen!=='undefined' && collectieGeladen && typeof tattoos!=='undefined' && Array.isArray(tattoos) && tattoos.length) return tattoos;   // leeg: misschien mislukte herlaad, dan zelf lezen
     if(typeof dbBeschikbaar!=='undefined' && !dbBeschikbaar) return (typeof getAllTattoos==='function') ? await getAllTattoos() : [];
+    try{ const snel=(typeof lichteRecords==='function') ? await lichteRecords() : null; if(snel) return snel; }   // R4 ME-2: zonder beelden, met srcH
+    catch(e){ console.warn('herstel: lichte opslag mislukt', e); }
     const db=await openDB();
     return await new Promise((res, rej)=>{ const uit=[];
       const rq=db.transaction(STORE, 'readonly').objectStore(STORE).openCursor();
@@ -29550,10 +29667,16 @@ function maakTatnetGL(json, canvas) {
     for(const lt of list){
       if(token!==undefined && token!==loadToken){ zetLaadVoortgang(0,0); return; }   // ander model intussen geladen
       if(lt && lt.deleted) continue;                          // tombstones niet als 3D-decal herstellen
-      const t=await herstelVol(lt);   // review R3 D3-2: per tattoo het volle record
+      // R4 ME-2 stap B: een licht record met srcH op elk bronbeeld eerst zonder beelden (textuur uit de cache); pas als een textuur
+      // ontbreekt het volle record lezen en die delen opnieuw (herstelDeel slaat wat al staat over)
+      const viaLicht=!!(lt && lt.__licht && window.__lichtHerstel!==false && [lt].concat(beeldDelen(lt)).every(D=>!D.kunst3d || D.kunst3d.srcH));
+      let t=viaLicht ? lt : await herstelVol(lt);   // review R3 D3-2: per tattoo het volle record
       if(token!==undefined && token!==loadToken){ zetLaadVoortgang(0,0); return; }
       if(t && !t.deleted){
         try{ await herstelEen(t, token); }catch(e){ console.error(e); }
+        if(viaLicht){ const mis=[lt.id].concat(beeldDelen(lt).map(d=>lt.id+':'+d.id)).filter(k=>herstelVolNodig.has(k));
+          if(mis.length){ mis.forEach(k=>herstelVolNodig.delete(k)); ttTijd.vol=(ttTijd.vol||0)+1;
+            const v=await herstelVol(lt); if(v && !v.deleted && (token===undefined || token===loadToken)){ try{ await herstelEen(v, token); }catch(e){ console.error(e); } } } }
         if(token===undefined || token===loadToken) onthoudOnherstelbaar(lt);
       }
       texKlaar(lt.id);
