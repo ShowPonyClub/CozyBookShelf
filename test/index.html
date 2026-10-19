@@ -13663,7 +13663,7 @@ function createTattoo(overrides = {}) {
    ============================================================ */
 // App-versie (semver, handmatig ophogen bij een release). Bij een bump ook de
 // CACHE-naam in sw.js meebumpen, zodat clients de nieuwe build ophalen.
-const APP_VERSIE = '0.4.28';
+const APP_VERSIE = '0.4.29';
 
 /* Dev-haken die de CLOUD raken hangen alleen op een ontwikkelmachine aan window. Ze zijn geen
    lek op zichzelf (zonder XSS roept niemand ze aan, en CSP + esc() houden XSS tegen), maar ze
@@ -14193,6 +14193,37 @@ async function leesCloudRijen(userId, naRev) {
   return { error: new Error('cloud-rijen lezen mislukt') };
 }
 
+/* R4 BE-6: alleen id en rev van alle cloudrijen van dit account (klein, ook bij duizenden rijen). */
+async function leesCloudRevs(userId) {
+  const uit = []; let vanaf = 0;
+  for (;;) {
+    const { data, error } = await sb.from('tattoos').select('id,rev').eq('user_id', userId).order('rev', { ascending: true }).range(vanaf, vanaf + 999);
+    if (error) return { error };
+    const brok = data || []; for (const r of brok) uit.push(r);
+    if (brok.length < 1000) break;
+    vanaf += 1000;
+  }
+  return { rijen: uit };
+}
+/* R4 BE-6: wat klopt er niet tussen de cloud en de sync-administratie van dit toestel? Puur (sync.test.js).
+   cloudRevs: [{id, rev}]; metas: Map id -> {baseRev, ownerId}; lokaalIds: ids die hier bestaan; cursor: de pull-cursor.
+   Geeft { ontbreekt: [ids lokaal gesynct, niet in de cloud], gemist: [ids met rev <= cursor die dit toestel niet zo kent], cloudMax }. */
+function cloudAfwijkingen(cloudRevs, metas, lokaalIds, cursor, userId) {
+  const inCloud = new Map(); let cloudMax = 0;
+  for (const r of (cloudRevs || [])) { if (!r || !r.id) continue; inCloud.set(r.id, r.rev); if (Number.isFinite(r.rev) && r.rev > cloudMax) cloudMax = r.rev; }
+  const ontbreekt = [], gemist = [];
+  for (const id of (lokaalIds || [])) {
+    const m = metas && metas.get(id);
+    if (m && Number.isFinite(m.baseRev) && (!m.ownerId || m.ownerId === userId) && !inCloud.has(id)) ontbreekt.push(id);
+  }
+  for (const [id, rev] of inCloud) {
+    if (!Number.isFinite(rev) || rev > cursor) continue;   // komt via de gewone pull
+    const m = metas && metas.get(id);
+    if (!m || m.baseRev !== rev) gemist.push(id);
+  }
+  return { ontbreekt, gemist, cloudMax };
+}
+let cloudControleVoor = null;   // R4 BE-6: account waarvoor deze app-start de controle al deed
 /* Gerichte aanvulling: de cloudrijen van records die deze ronde aandacht nodig hebben maar
    niet in de cursor-pull zaten (lokaal gewijzigd, of beelden die nog moeten komen). Zonder
    deze aanvulling zou de sync hun huidige rev en manifest niet kennen. */
@@ -14301,6 +14332,8 @@ function beslisSync(l, c, m) {
   const rev = Number.isFinite(c.rev) ? c.rev : null;
   if (base === null || rev === null) return _syncTerugvalTijd(l, c);
 
+  // R4 BE-6 (apply_be6.py): een cloud-rev LAGER dan de laatst gedeelde = de database is teruggezet (back-up); de lokale versie is nieuwer
+  if (rev < base) return _syncBesluit('omhoog', 'cloud teruggezet');
   const lokaalGewijzigd = m ? !!m.dirty : true;   // zonder metadata is 'onbekend' = veiligheidshalve pushen
   const cloudGewijzigd = rev > base;
 
@@ -15183,8 +15216,23 @@ async function _syncMetCloudKern() {
 
   const lById = await lichteIndex();          // id + tijd + verwijderd, zonder de beelden
   const cById = new Map(cloud.map(r => [r.id, r]));
+  // R4 BE-6: een keer per app-start de hele cloud (alleen id + rev) naast de administratie leggen; vangt een teruggezette database
+  let afw = null, cursorBasis = cursor;
+  if (revKolommen && cursor > 0 && cloudControleVoor !== user.id && window.__cloudControle !== false) {
+    try {
+      const r = await leesCloudRevs(user.id);
+      if (!r.error) {
+        afw = cloudAfwijkingen(r.rijen, metaVoor, [...lById.values()].filter(x => x && !x.deleted).map(x => x.id), cursor, user.id);   // tombstones: de server ruimt ze na 30 dagen op, dat is geen verlies
+        if (afw.cloudMax < cursor) cursorBasis = afw.cloudMax;   // de cursor zakt mee, anders blijven nieuwe rijen onder de oude cursor onzichtbaar
+        cloudControleVoor = user.id;
+        if (afw.ontbreekt.length || afw.gemist.length || afw.cloudMax < cursor) {
+          try { if (typeof signaal === 'function') signaal('syncfout', ('cloud teruggezet: ' + afw.ontbreekt.length + ' ontbrekend, ' + afw.gemist.length + ' gemist, max ' + afw.cloudMax + ' < cursor ' + cursor).slice(0, 120)); } catch (e) { /* signaal is nooit fataal */ }
+        }
+      }
+    } catch (e) { console.warn('cloudcontrole', e); }
+  }
   // Hoogste rev die deze ronde binnenkwam; de cursor schuift daar pas naartoe als alles lukte.
-  let maxRev = cursor;
+  let maxRev = cursorBasis;
   for (const r of cloud) if (Number.isFinite(r.rev) && r.rev > maxRev) maxRev = r.rev;
 
   /* Kandidaten: alles wat deze ronde aandacht kan nodig hebben. Records die noch in de
@@ -15197,6 +15245,7 @@ async function _syncMetCloudKern() {
   }
   // Records van vóór de sync-administratie (of na verlies daarvan): één keer alsnog meenemen.
   for (const id of lById.keys()) if (!metaVoor.has(id)) kandidaten.add(id);
+  if (afw) { for (const id of afw.ontbreekt) kandidaten.add(id); for (const id of afw.gemist) kandidaten.add(id); }   // R4 BE-6
 
   // De cloudrijen van kandidaten die niet in de pull zaten alsnog ophalen. Bij cursor 0 is
   // de pull al compleet, dan is er niets aan te vullen.
@@ -15452,7 +15501,7 @@ async function _syncMetCloudKern() {
   // Cursor pas nu opschuiven, en alleen als élke binnengekomen rij verwerkt is. Ging er
   // iets mis, dan haalt de volgende ronde hetzelfde bereik opnieuw op; alle stappen zijn
   // idempotent, dus dat kost hooguit tijd.
-  if (allesGelukt && maxRev > cursor) {
+  if (allesGelukt && (maxRev > cursor || cursorBasis < cursor)) {   // R4 BE-6: ook omlaag als de cloud is teruggezet
     await zetSyncMeta(SYNC_CURSOR_ID, { baseRev: maxRev, ownerId: user.id, dirty: false });
   }
   // Vanaf hier hoort deze collectie bij dit account. Pas nu vastleggen: een ronde die
