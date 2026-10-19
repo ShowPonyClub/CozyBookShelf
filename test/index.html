@@ -13663,7 +13663,7 @@ function createTattoo(overrides = {}) {
    ============================================================ */
 // App-versie (semver, handmatig ophogen bij een release). Bij een bump ook de
 // CACHE-naam in sw.js meebumpen, zodat clients de nieuwe build ophalen.
-const APP_VERSIE = '0.4.29';
+const APP_VERSIE = '0.4.30';
 
 /* Dev-haken die de CLOUD raken hangen alleen op een ontwikkelmachine aan window. Ze zijn geen
    lek op zichzelf (zonder XSS roept niemand ze aan, en CSP + esc() houden XSS tegen), maar ze
@@ -24676,6 +24676,39 @@ async function verwijderVoorbeelden() {
     if(o) o.classList.remove('open'); if(pn) pn.classList.remove('open'); document.body.style.overflow='';
     if(typeof laagSluitHistory==='function') laagSluitHistory('uitleg3d');
   }
+  /* R2-40 (apply_r2_kader.py): staat de tattoo na de vink in beeld? Midden binnen 80% van het venster, de huid kijkt naar de camera en
+     het lichaam zit er niet voor. */
+  const _kv=new THREE.Vector3(), _kd=new THREE.Vector3(), _krc=new THREE.Raycaster();
+  function tattooInBeeld(m){
+    if(!m || !m.point) return true;
+    _kv.copy(m.point).project(camera);
+    if(_kv.z>1 || Math.abs(_kv.x)>0.8 || Math.abs(_kv.y)>0.8) return false;
+    _kd.copy(camera.position).sub(m.point);
+    if(m.normal && m.normal.dot(_kd)<=0) return false;
+    const afst=_kd.length(); _krc.set(camera.position, _kd.normalize().negate()); _krc.far=afst;
+    const raak=_krc.intersectObjects(pickMeshes, false);
+    return !raak.length || raak[0].distance>=afst-0.02;
+  }
+  function camTween(doelTheta, doelPhi, doelTarget, doelRadius, ms){   // zacht draaien + verplaatsen + zoomen (smoothstep)
+    const t0=performance.now(), th0=theta, ph0=phi, tg0=target.clone(), r0=radius;
+    let dth=doelTheta-th0; dth=Math.atan2(Math.sin(dth), Math.cos(dth));   // kortste kant
+    targetGoal=null; radiusGoal=null;
+    const stap=(nu)=>{ const u=Math.min(1,(nu-t0)/ms), e=u*u*(3-2*u);
+      theta=th0+dth*e; phi=ph0+(doelPhi-ph0)*e; target.lerpVectors(tg0, doelTarget, e); radius=r0+(doelRadius-r0)*e; applyCam();
+      if(u<1) requestAnimationFrame(stap); };
+    requestAnimationFrame(stap);
+  }
+  function kaderNaVink(m){
+    if(window.__kaderNaVink===false || !m || !m.point || ledeActief || plaatsModus) return false;
+    if(tattooInBeeld(m)) return false;
+    const n=m.normal || new THREE.Vector3(0,0,1);
+    const th=Math.atan2(n.x, n.z), ph=Math.max(0.7, Math.min(2.3, Math.acos(Math.max(-1, Math.min(1, n.y*0.6)))));
+    const b=camBegin(), r=Math.max(1.1, Math.min(b.radius, (m.size||0.09)*9));
+    rol=0;
+    camTween(th, ph, m.point.clone(), r, 520);
+    return true;
+  }
+  window.__tattiesKaderDbg={ zicht:()=>{ const ms=markers.filter(x=>x.obj); return ms.map(tattooInBeeld); }, kader:(i)=>kaderNaVink(markers.filter(x=>x.obj)[i||0]) };   // dev
   function heelLichaam(){
     if(!ledeActief) return;
     rol=0;   // slice 5x
@@ -26656,7 +26689,9 @@ async function verwijderVoorbeelden() {
         if(!(await bevestigVerwijderen(rec && rec.naam))) return;
         markers.forEach(q=>{ if(q.id===rec.id) clearTimeout(q._persistT); });   // slice 5v: geen uitgestelde opslag meer (schreef het record na het verwijderen terug)
         exitEditUI(); await verwijderMetUndo(rec); return; }
-      if(a==="done"){ exitEditDecal(); if(window.__tattiesHerhaalSrc){ const s=window.__tattiesHerhaalSrc; window.__tattiesHerhaalSrc=null; openCutModalAddMetFoto(s,'3d'); }   // D6(a): na ✓ volgende uitsnede
+      if(a==="done"){ const _mVink=editDecal; exitEditDecal();
+        if(!window.__tattiesHerhaalSrc && !volgendDeelVan && !fotoWachtrij.length) kaderNaVink(_mVink);   // R2-40: tattoo weer in beeld
+        if(window.__tattiesHerhaalSrc){ const s=window.__tattiesHerhaalSrc; window.__tattiesHerhaalSrc=null; openCutModalAddMetFoto(s,'3d'); }   // D6(a): na ✓ volgende uitsnede
         else if(volgendDeelVan){ const r=volgendDeelVan; volgendDeelVan=null; openCutModalAdd('3d', r); }   // ketting: volgende deel van dezelfde tattoo
         else if(fotoWachtrij.length && window.__tattiesFotoUitBlob){ const f=fotoWachtrij.shift(); fotoWachtrijNr++; openCutModalAdd('3d'); window.__tattiesFotoUitBlob(f, true); }   // volgende gekozen foto
         return; }
