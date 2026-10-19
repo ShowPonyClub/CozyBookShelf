@@ -13663,7 +13663,7 @@ function createTattoo(overrides = {}) {
    ============================================================ */
 // App-versie (semver, handmatig ophogen bij een release). Bij een bump ook de
 // CACHE-naam in sw.js meebumpen, zodat clients de nieuwe build ophalen.
-const APP_VERSIE = '0.4.27';
+const APP_VERSIE = '0.4.28';
 
 /* Dev-haken die de CLOUD raken hangen alleen op een ontwikkelmachine aan window. Ze zijn geen
    lek op zichzelf (zonder XSS roept niemand ze aan, en CSP + esc() houden XSS tegen), maar ze
@@ -29374,6 +29374,12 @@ function maakTatnetGL(json, canvas) {
         return tex;
       }catch(err){ /* kapot beeld: gewoon opnieuw maken */ }
     }
+    // R4 ME-3 (apply_koud_start.py): koude cache tijdens het herstel en een blend met inkt-matte: eerst de goedkope uitsnede 'met huid'
+    // (geen Tatnet, geen matte), de echte verwerking doet texVersStap daarna een voor een op de achtergrond
+    if(window.__koudSnel!==false && herstelLoopt && blendInkt(k.blend)){
+      try{ const snel=await rebuildTextureFromKunst(Object.assign({}, k, { blend:'normaal' }));
+        if(snel){ texLater.set(sleutel, { k, fp }); ttTijd.koud=(ttTijd.koud||0)+1; return snel; } }catch(e){ /* dan meteen de volle verwerking */ }
+    }
     const tex=await rebuildTextureFromKunst(k);
     if(tex) tex.__vers=true;   // net berekend (niet uit de cache): het herstel kan het 2D-plaatje eenmalig verversen
     if(tex && tex.image && tex.image.toBlob){
@@ -29406,7 +29412,7 @@ function maakTatnetGL(json, canvas) {
     const [sleutel, item]=texLater.entries().next().value; texLater.delete(sleutel);
     const ms=markers.filter(m=>m.id+(m.deel ? ':'+m.deel.id : '')===sleutel && m.tex);
     const D=ms.length ? deelVan(ms[0]) : null, k=item.k, H=D && D.kunst3d;   // k = de volle kopie uit het herstel; H = het (lichte) record in RAM
-    const zonderSrc=(o)=>{ const c=Object.assign({}, o); delete c.srcUrl; delete c.tex2D; return JSON.stringify(c); };
+    const zonderSrc=(o)=>{ const c=Object.assign({}, o); delete c.srcUrl; delete c.tex2D; delete c.srcH; return JSON.stringify(c); };   // srcH: licht record (v0.4.27)
     if(H && zonderSrc(H)===zonderSrc(k) && texVingerafdruk(k)===item.fp){   // intussen bewerkt (andere uitsnede/blend): dat bouwt zelf opnieuw
       try{
         const blendVoor=k.blend, tatVoor=!!k.tatnet;
