@@ -13675,7 +13675,7 @@ function createTattoo(overrides = {}) {
    ============================================================ */
 // App-versie (semver, handmatig ophogen bij een release). Bij een bump ook de
 // CACHE-naam in sw.js meebumpen, zodat clients de nieuwe build ophalen.
-const APP_VERSIE = '0.4.31';
+const APP_VERSIE = '0.4.32';
 
 /* Dev-haken die de CLOUD raken hangen alleen op een ontwikkelmachine aan window. Ze zijn geen
    lek op zichzelf (zonder XSS roept niemand ze aan, en CSP + esc() houden XSS tegen), maar ze
@@ -30652,11 +30652,17 @@ function maakTatnetGL(json, canvas) {
     });
   }
   // 'gedeeld' | 'geannuleerd' | null (null = lukte niet, de aanroeper valt terug op het oude pad)
+  var DEEL_STUK = 3 * 1024 * 1024;   // R4 ME-5 / R3 AC-10: groter dan dit gaat in stukken over de brug (een back-up van 100 tattoos is ~50 MB)
   window.__tattiesDeelBestand = async function (blob, naam) {
     try {
-      var data = await blobNaarB64(blob);
       var veilig = String(naam || 'tatties').replace(/[^\w.\-]+/g, '-');
-      var w = await N('TattiesDeel', 'schrijf', { naam: veilig, data: data });   // eigen plugin (geen @capacitor/filesystem meer)
+      var w = null;
+      for (var van = 0; van === 0 || van < blob.size; van += DEEL_STUK) {   // eigen plugin (geen @capacitor/filesystem meer)
+        var data = await blobNaarB64(blob.size > DEEL_STUK ? blob.slice(van, van + DEEL_STUK) : blob);
+        w = await N('TattiesDeel', 'schrijf', { naam: veilig, data: data, modus: van === 0 ? 'nieuw' : 'erbij' });
+        if (!w || !w.uri) return null;
+        if (blob.size <= DEEL_STUK) break;
+      }
       if (!w || !w.uri) return null;
       try { await N('Share', 'share', { title: 'Tatties', files: [w.uri] }); return 'gedeeld'; }
       catch (e) { return geannuleerd(e) ? 'geannuleerd' : null; }
