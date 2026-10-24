@@ -13731,7 +13731,7 @@ function createTattoo(overrides = {}) {
    ============================================================ */
 // App-versie (semver, handmatig ophogen bij een release). Bij een bump ook de
 // CACHE-naam in sw.js meebumpen, zodat clients de nieuwe build ophalen.
-const APP_VERSIE = '0.4.36';
+const APP_VERSIE = '0.4.37';
 
 /* Dev-haken die de CLOUD raken hangen alleen op een ontwikkelmachine aan window. Ze zijn geen
    lek op zichzelf (zonder XSS roept niemand ze aan, en CSP + esc() houden XSS tegen), maar ze
@@ -14265,7 +14265,7 @@ async function leesCloudRijen(userId, naRev) {
 async function leesCloudRevs(userId) {
   const uit = []; let vanaf = 0;
   for (;;) {
-    const { data, error } = await sb.from('tattoos').select('id,rev').eq('user_id', userId).order('rev', { ascending: true }).range(vanaf, vanaf + 999);
+    const { data, error } = await sb.from('tattoos').select('id,rev,deleted').eq('user_id', userId).order('rev', { ascending: true }).range(vanaf, vanaf + 999);
     if (error) return { error };
     const brok = data || []; for (const r of brok) uit.push(r);
     if (brok.length < 1000) break;
@@ -14274,18 +14274,20 @@ async function leesCloudRevs(userId) {
   return { rijen: uit };
 }
 /* R4 BE-6: wat klopt er niet tussen de cloud en de sync-administratie van dit toestel? Puur (sync.test.js).
-   cloudRevs: [{id, rev}]; metas: Map id -> {baseRev, ownerId}; lokaalIds: ids die hier bestaan; cursor: de pull-cursor.
+   cloudRevs: [{id, rev, deleted}]; metas: Map id -> {baseRev, ownerId}; lokaalIds: ids die hier bestaan; cursor: de pull-cursor.
    Geeft { ontbreekt: [ids lokaal gesynct, niet in de cloud], gemist: [ids met rev <= cursor die dit toestel niet zo kent], cloudMax }. */
 function cloudAfwijkingen(cloudRevs, metas, lokaalIds, cursor, userId) {
   const inCloud = new Map(); let cloudMax = 0;
   for (const r of (cloudRevs || [])) { if (!r || !r.id) continue; inCloud.set(r.id, r.rev); if (Number.isFinite(r.rev) && r.rev > cloudMax) cloudMax = r.rev; }
-  const ontbreekt = [], gemist = [];
+  const ontbreekt = [], gemist = [], hier = new Set(lokaalIds || []), weg = new Set();
+  for (const r of (cloudRevs || [])) if (r && r.id && r.deleted === true) weg.add(r.id);
   for (const id of (lokaalIds || [])) {
     const m = metas && metas.get(id);
     if (m && Number.isFinite(m.baseRev) && (!m.ownerId || m.ownerId === userId) && !inCloud.has(id)) ontbreekt.push(id);
   }
   for (const [id, rev] of inCloud) {
     if (!Number.isFinite(rev) || rev > cursor) continue;   // komt via de gewone pull
+    if (weg.has(id) && !hier.has(id)) continue;   // tombstone van een record dat hier al weg is: niets gemist
     const m = metas && metas.get(id);
     if (!m || m.baseRev !== rev) gemist.push(id);
   }
