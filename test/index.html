@@ -79,15 +79,19 @@
     var C = window.Capacitor;
     var natief = !!(C && typeof C.isNativePlatform === 'function' && C.isNativePlatform());
     window.TATTIES_NATIEF = natief;
+    var plat = ''; try { plat = natief ? String((C.getPlatform && C.getPlatform()) || '') : ''; } catch (e) { /* oude bridge */ }
+    window.TATTIES_PLATFORM = plat;   // 'ios' | 'android' (apply_android.py)
+    window.TATTIES_ANDROID = plat === 'android';
     window.TATTIES_APP_URL = 'https://tatties.app/app/';   // universal link (native/bouw_ios.py APP_LINKS), mail-links openen de app
     window.TATTIES_APP_LINKS = false;                       // gezet uit TattiesThema.info (NATIEF-EXTRA)
-    window.TATTIES_WEB_URL = 'https://tatties.app/test/';   // alleen de terugval zonder universal links (APP_LINKS staat aan sinds 0.3.172); /app zelf zijn de universal links
+    window.TATTIES_WEB_URL = 'https://tatties.app/web/';   // alleen de terugval zonder universal links (APP_LINKS staat aan sinds 0.3.172); /app zelf zijn de universal links
     window.__tattiesNatief = function (plugin, methode, opties) {   // zonder @capacitor/core: rechtstreeks via de bridge
       try { if (natief && C.nativePromise) return C.nativePromise(plugin, methode, opties || {}); } catch (e) { /* geen bridge */ }
       return Promise.resolve(null);
     };
     if (!natief) return;
     document.documentElement.classList.add('is-native');
+    if (window.TATTIES_ANDROID) document.documentElement.classList.add('is-android');
     var weg = false, splashWeg = function () {
       if (weg) return; weg = true;
       window.__tattiesNatief('SplashScreen', 'hide', { fadeOutDuration: 200 }).catch(function () {});
@@ -13077,6 +13081,7 @@ function standaardNazorg(){
 
 const I18N = {
   nl: {
+    'android.reset':'We openen Tatties in je browser. Stel daar je wachtwoord opnieuw in en log hier in.','android.geen_toestemming':'Meldingen staan uit voor Tatties. Zet ze aan in de instellingen van je telefoon.',
     // feedback (2026-10-11): formulier in de app (apply_feedback.py)
     'feedback.titel':'Stuur feedback','feedback.menu':'Feedback','feedback.soort':'Soort feedback','feedback.bug':'Bug','feedback.idee':'Idee','feedback.tekst_label':'Je bericht','feedback.tekst_ph':'Wat ging er mis, of wat zou je willen?','feedback.beeld':'Afbeelding toevoegen','feedback.beeld_anders':'Andere afbeelding','feedback.beeld_weg':'Afbeelding verwijderen','feedback.beeld_fout':'Deze afbeelding kunnen we niet openen. Probeer een andere.','feedback.te_groot':'De afbeelding is te groot. Kies een kleinere.','feedback.email_label':'E-mail (als je antwoord wilt)','feedback.email_ph':'je@voorbeeld.nl','feedback.email_fout':'Dit e-mailadres klopt niet. Pas het aan of laat het leeg.','feedback.leeg':'Schrijf eerst wat je kwijt wilt.','feedback.versturen':'Versturen','feedback.bezig':'Versturen...','feedback.bedankt':'Bedankt! We lezen alles.','feedback.wacht':'Even wachten: over een halve minuut kun je weer iets sturen.','feedback.offline':'Geen verbinding. Je bericht staat nog klaar; probeer het zo opnieuw.','feedback.fout':'Versturen lukte niet. Probeer het later opnieuw.','feedback.dev':'Testomgeving: niet verstuurd (zie de console).',
     'onb.privacy':'Gratis. Geen account nodig.',
@@ -13314,6 +13319,7 @@ const I18N = {
     'tips.bewerk2':'Pinch on the tattoo to resize, twist to turn.',
     'tips.bewerk3':'The slider sets the ink strength.',
     'uitleg.tips_opnieuw':'Show tips again','tips.terug':'Tips return with your next tattoo.',
+    'android.reset':'We\'ll open Tatties in your browser. Reset your password there and sign in here.','android.geen_toestemming':'Notifications are off for Tatties. Turn them on in your phone\'s settings.',
     'natief.account_sub':'Your tattoos go straight to the cloud, on every device.','natief.account_n_sub':'With an account they\'re on a new phone too, and a full phone can\'t clear them.',
     'aria.instellingen':'Settings','aria.collectie':'Collection and wishlist','aria.stats':'Statistics',
     'aria.sluiten':'Close','aria.terug':'Back','aria.bewerken':'Edit','aria.verwijderen':'Delete','ui.verwijder_tattoo':'Delete tattoo','aria.fotoverwijderen':'Delete photo','ui.gekozen_huid':'Chosen skin tone',
@@ -13525,7 +13531,9 @@ const I18N = {
     'opslag.gebruik':'Your collection takes up {maat}','opslag.van':'of the ~{maat} on this device.','opslag.bijnavol':'Almost full - export a backup.'
   }
 };
+const I18N_ANDROID = { 'account.reset_natief':'android.reset', 'nazorg.geen_toestemming':'android.geen_toestemming' };   // Android-app: geen Safari/iPhone (apply_android.py)
 function tr(k){
+  if (window.TATTIES_ANDROID && I18N_ANDROID[k]) k = I18N_ANDROID[k];
   const v = I18N[taal] && I18N[taal][k];
   if (v !== undefined) return v;
   const f = I18N.nl[k];
@@ -13731,7 +13739,7 @@ function createTattoo(overrides = {}) {
    ============================================================ */
 // App-versie (semver, handmatig ophogen bij een release). Bij een bump ook de
 // CACHE-naam in sw.js meebumpen, zodat clients de nieuwe build ophalen.
-const APP_VERSIE = '0.4.37';
+const APP_VERSIE = '0.4.39';
 
 /* Dev-haken die de CLOUD raken hangen alleen op een ontwikkelmachine aan window. Ze zijn geen
    lek op zichzelf (zonder XSS roept niemand ze aan, en CSP + esc() houden XSS tegen), maar ze
@@ -13968,7 +13976,8 @@ try{ localStorage.removeItem('tatties-magic-akkoord'); }catch(e){}   // oude 'ee
 const KNIP_FASE_ANIMATIE = false;
 const KNIP_FULLSCREEN = true;   // FASE-2-EXPERIMENT: knip-stap schermvullend op donker (iOS-fotokiezer-gevoel); naam/details volgen na 'Volgende'. TERUGDRAAIEN = false.
 if (KNIP_FULLSCREEN && document.documentElement) document.documentElement.classList.add('knipfull');
-const DB_NAAM = 'tatties';
+// Webversie (/web/, apply_web.py): eigen database naast /test op hetzelfde domein; de iOS-app, /test en lokaal houden 'tatties'
+const DB_NAAM = /^\/web(\/|$)/.test(location.pathname) ? 'tatties-web' : 'tatties';
 const OUD_DB_NAAM = 'tattoostics';   // vorige naam - eenmalig overgezet
 const DB_VERSIE = 3;                 // 2: extra store 'sync' (sync-metadata per record, hardening plak 1); 3: store 'licht' + index 'upd' (R4 ME-2)
 const LICHT_STORE = 'licht';         // R4 ME-2 (apply_licht_opslag.py): lichte kopie per record (geen beelden) voor een snelle start
@@ -14827,6 +14836,36 @@ const ASSET_MAX_POGINGEN = 5;
    corrupte/kwaadaardige waarden: alleen ingesloten data:image/-beelden (geen externe
    links), geclampte getallen, gegarandeerde arrays en geldige 3D-coördinaten.
    Idempotent → veilig meermaals toe te passen. Eén bron voor import én sync. */
+// R7-1 (2026-10-28): de getallen van een 3D-plek uit onvertrouwde bron begrenzen (import, sync, herstel). Een back-up met
+// positie3d.size = 1e9 liet de decal-opbouw vastlopen, ook bij elke volgende start. Geldige waarden blijven precies zoals ze zijn.
+// Geeft null als de plek onbruikbaar is (dan staat de tattoo niet op het model, maar de app blijft werken).
+function hardPositie3d(p) {
+  if (!p || typeof p !== 'object') return null;
+  const eindig3 = a => Array.isArray(a) && a.length === 3 && a.every(n => n !== null && n !== '' && isFinite(n));
+  if (!eindig3(p.point) || !eindig3(p.normal)) return null;
+  if (p.point.some(n => Math.abs(+n) > 5)) return null;                     // het lichaam staat binnen een paar meter rond de oorsprong
+  const nl = Math.hypot(+p.normal[0], +p.normal[1], +p.normal[2]);
+  if (!(nl > 1e-6)) return null;
+  const size = Number(p.size);
+  if (!Number.isFinite(size)) p.size = 0.09;
+  else if (size < 0.02 || size > 0.70) p.size = Math.min(0.70, Math.max(0.02, size));   // zelfde grenzen als in de bewerkstand
+  const rot = Number(p.rot);
+  if (p.rot != null && !Number.isFinite(rot)) p.rot = 0;
+  else if (Math.abs(rot) > 360) p.rot = ((rot % 360) + 360) % 360;
+  if (p.proj != null) {
+    const v = p.proj && p.proj.v, D = Number(p.proj && p.proj.D);
+    const vl = eindig3(v) ? Math.hypot(+v[0], +v[1], +v[2]) : 0;
+    if (!(vl > 1e-6) || !Number.isFinite(D) || D <= 0.01 || D >= 20) delete p.proj;
+  }
+  if (p.bind != null) {
+    const b = p.bind, u = Number(b && b.b && b.b[0]), w = Number(b && b.b && b.b[1]);
+    const ok = b && typeof b === 'object' && Number.isInteger(Number(b.tri)) && Number(b.tri) >= 0 && Array.isArray(b.b)
+      && Number.isFinite(u) && Number.isFinite(w) && u >= -0.05 && w >= -0.05 && u + w <= 1.05
+      && (b.rot == null || Number.isFinite(Number(b.rot)));
+    if (!ok) delete p.bind;
+  }
+  return p;
+}
 function hardRecord(record) {
   if (!record || typeof record !== 'object') return record;
   // Geneste lijsten hardenen (voorkomt crashes in detail/sessies)
@@ -14908,10 +14947,7 @@ function hardRecord(record) {
   record.updatedAt = Number.isFinite(+record.updatedAt) ? +record.updatedAt : Date.now();
   record.deleted = record.deleted === true;
   // Coördinaten/lasso hardenen → voorkomt NaN-decals en crashes bij niet-array waarden
-  if (record.positie3d) {
-    const ok3 = a => Array.isArray(a) && a.length === 3 && a.every(n => isFinite(n));
-    if (!ok3(record.positie3d.point) || !ok3(record.positie3d.normal)) record.positie3d = null;
-  }
+  if (record.positie3d) record.positie3d = hardPositie3d(record.positie3d);   // R7-1: ook maat/draaiing/projectie/binding begrenzen
   if (record.positie && !(isFinite(record.positie.x) && isFinite(record.positie.y))) record.positie = null;
   if (record.kunst3d) {
     if (!Array.isArray(record.kunst3d.lasso)) record.kunst3d.lasso = [];
@@ -14920,7 +14956,7 @@ function hardRecord(record) {
   }
   // Delen: alleen goedgevormd (veilige id, geldige 3D-plek); beelden even streng als kunst3d
   { const ok3d = a => Array.isArray(a) && a.length === 3 && a.every(n => isFinite(n));
-    record.delen = beeldDelen(record).filter(d => veiligeId(d.id) && d.positie3d && ok3d(d.positie3d.point) && ok3d(d.positie3d.normal));
+    record.delen = beeldDelen(record).filter(d => veiligeId(d.id) && d.positie3d && ok3d(d.positie3d.point) && ok3d(d.positie3d.normal) && hardPositie3d(d.positie3d));   // R7-1
     for (const d of record.delen) {
       d.kunst3d = (d.kunst3d && typeof d.kunst3d === 'object') ? d.kunst3d : {};
       if (d.kunst3d.srcUrl) { const s = veiligeBeeldSrc(d.kunst3d.srcUrl); if (s) d.kunst3d.srcUrl = s; else delete d.kunst3d.srcUrl; }
@@ -17104,7 +17140,7 @@ const WATNU_WEG_DAGEN = { plek: 3, cloud: 3, details: 7 };
 function watNuWeg() { try { return JSON.parse(localStorage.getItem('tatties-watnu-weg') || '{}') || {}; } catch (e) { return {}; } }
 function watNuWegZet(soort) { const w = watNuWeg(); w[soort] = Date.now(); try { localStorage.setItem('tatties-watnu-weg', JSON.stringify(w)); } catch (e) { } }
 function watNuPauze(soort) { const t = +watNuWeg()[soort] || 0; return t && (Date.now() - t) < (WATNU_WEG_DAGEN[soort] || 3) * 864e5; }
-function watNuHeeftUitsnede(t) { const k = t.kunst3d || {}, k2 = t.kunst || {}; return !!(k.srcUrl || k.srcH || k2.src || k2.srcN || t.thumb); }
+function watNuHeeftUitsnede(t) { const k = t.kunst3d || {}, k2 = t.kunst || {}; return !!(k.srcUrl || k.srcH || k2.src || k2.srcN); }   // R7-2: niet de lijst-thumb (die komt ook uit een gewone foto)
 function watNuKies() {
   if (window.__watNu === false || !collectieGeladen || collectieLeeg()) return null;
   const gezet = tattoos.filter(t => t && !t.deleted && t.status !== 'wens');
@@ -19994,17 +20030,18 @@ $('#import-file').addEventListener('change', async (e) => {
     let geimporteerd = 0;
     for (const item of lijst) {
       if (!item || typeof item !== 'object' || !item.naam) continue;
-      const record = createTattoo(item);            // ontbrekende velden krijgen standaardwaarden
-      if (item.id) record.id = String(item.id);     // bestaand id behouden → overschrijft duplicaat
-      const veiligeFoto = veiligeBeeldSrc(item.foto);
-      if (veiligeFoto && (!record.fotos || record.fotos.length === 0)) {
-        record.fotos = [veiligeFoto];               // backup uit oudere versie
-        record.foto = null;
-      }
-      hardRecord(record);   // arrays/beelden/getallen/coördinaten saneren (gedeeld met cloud-sync)
-      // Per-record afvangen: één slecht record breekt de hele import niet meer af
-      try { await saveTattoo(record, true); geimporteerd++; }   // behoudTijd: backup-updatedAt bewaren
-      catch (e) { console.error('Import: record overgeslagen', e); }
+      // R7-5: alles per record afvangen (ook createTattoo/hardRecord): een raar record breekt de import niet meer af
+      try {
+        const record = createTattoo(item);            // ontbrekende velden krijgen standaardwaarden
+        if (item.id) record.id = String(item.id);     // bestaand id behouden → overschrijft duplicaat
+        const veiligeFoto = veiligeBeeldSrc(item.foto);
+        if (veiligeFoto && (!record.fotos || record.fotos.length === 0)) {
+          record.fotos = [veiligeFoto];               // backup uit oudere versie
+          record.foto = null;
+        }
+        hardRecord(record);   // arrays/beelden/getallen/coördinaten saneren (gedeeld met cloud-sync)
+        await saveTattoo(record, true); geimporteerd++;   // behoudTijd: backup-updatedAt bewaren
+      } catch (e) { console.error('Import: record overgeslagen', e); }
     }
     await herlaad();
     if (geimporteerd > 0) {
@@ -20457,6 +20494,32 @@ window.addEventListener('popstate', (e) => {
   const laag = terugLagen.pop();                            // entry is door de gebruiker geconsumeerd
   if (laag) { try { laag.sluit(); } catch (err) { console.error(err); } }
 });
+/* R7-9 (2026-10-28): de Android-terugknop. native_extra.js luistert op Android naar App 'backButton' en roept dit aan. Sluit het
+   bovenste: bevestigingsvenster > generator een stap terug > keuzemenu '+' en 3D-menu > lagen met een history-entry via history.back()
+   (zoals voorheen) > 3D-standen (plaatsen, bewerken, ledemaat los) > 3D of een andere weergave naar het startscherm.
+   Geeft false op het startscherm: dan gaat de app naar de achtergrond. */
+function tattiesTerug() {
+  const zicht = el => !!el && !el.hidden && el.getClientRects().length > 0;
+  const dlg = document.querySelector('.flash-dialoog');
+  if (zicht(dlg)) { const b = dlg.querySelector('button'); if (b) { b.click(); return true; } }   // eerste knop = nee/annuleren
+  try {
+    if (typeof LICHAAM_GEN !== 'undefined' && LICHAAM_GEN && typeof LichaamMotor !== 'undefined' && LichaamMotor.generator.isOpen()) {
+      const g = document.getElementById('gen-terug'); if (g && !g.hidden) { g.click(); return true; } }   // R7-4: een stap terug
+  } catch (e) { /* geen generator */ }
+  if (zicht(document.getElementById('add-kies'))) { const a = document.getElementById('add-kies-annuleer'); if (a) { a.click(); return true; } }
+  const mp = document.getElementById('t3d-menu-paneel');
+  if (mp && !mp.hidden && typeof window.__tattiesMenu3DSluit === 'function') { window.__tattiesMenu3DSluit(); return true; }
+  const cm = document.getElementById('cutModal');
+  if ((cm && cm.classList.contains('on')) || terugLagen.length) { try { history.back(); return true; } catch (e) { /* geen history */ } }
+  if (typeof window.__tatties3DTerug === 'function' && window.__tatties3DTerug()) return true;
+  const v3 = document.getElementById('view-3d');
+  if (v3 && !v3.classList.contains('verborgen') && huidigeView === '3d') {
+    if (typeof window.__tattiesNaarStartUit3D === 'function') window.__tattiesNaarStartUit3D(); else toonView('start');
+    return true; }
+  if (huidigeView !== 'start' && huidigeView !== 'home') { toonView('start'); return true; }
+  return false;
+}
+window.__tattiesTerug = tattiesTerug;
 
 function lichaamKort(L) {
   const e = L.eenheden || {}, lb = Math.round(L.kg * 2.20462); let h, w;
@@ -20951,6 +21014,7 @@ async function verwijderVoorbeelden() {
   const naarStartUit3D = () => {   // 2026-10-08: het 3D-venster krimpt naar het vak (apply_vak_krimp.py), anders meteen
     if (typeof window.__tatties3DVakKrimp === 'function' && window.__tatties3DVakKrimp(() => toonView('start'))) return;
     toonView('start'); };
+  window.__tattiesNaarStartUit3D = naarStartUit3D;   // R7-9: Android-terugknop
   { const st = $('#t3d-start'), mk = $('#t3d-menu'), mp = $('#t3d-menu-paneel');
     if (st) { const logo = document.querySelector('.app-header .logo-wrap') || document.querySelector('.app-header .merk-logo'); if (logo) { const k = logo.cloneNode(true); k.removeAttribute('id'); k.querySelectorAll('img').forEach(i => { i.alt = ''; i.removeAttribute('id'); }); if (k.tagName === 'IMG') k.alt = ''; st.appendChild(k); }   // met BETA-label, zoals de kop (2026-10-06)
       st.addEventListener('click', naarStartUit3D); }
@@ -27511,6 +27575,13 @@ async function verwijderVoorbeelden() {
   }
   function verbergBanner(){ const b=document.getElementById("t3d-banner"); if(b) b.hidden=true; }
   // Plaats-modus (3D + 2D) volledig annuleren -> geen 'vastgelopen' plaatsstand na wegnavigeren.
+  // R7-9: Android-terugknop in 3D: plaatsen annuleren, bewerken afsluiten (zoals de vink, zonder de vervolgstappen), ledemaat los opheffen
+  window.__tatties3DTerug = function(){
+    if(plaatsModus){ cancelPlaatsModus(); return true; }
+    if(editDecal){ exitEditDecal(); return true; }
+    if(ledeActief){ stopIsolatie(); return true; }
+    return false;
+  };
   function cancelPlaatsModus(){
     // Bewust GEEN wisKnipStaat() hier: toonView roept deze functie bij elke view-wissel aan,
     // en wegnavigeren midden in het plaatsen is een onderbreking, geen afbreking. De
@@ -28796,11 +28867,20 @@ function maakTatnetGL(json, canvas) {
      Alleen de TOEVOEGflow. Bewerken van een bestaand record hoeft niet: dat record staat in de
      database en is gewoon opnieuw te openen. */
   const KNIP_STAAT_SLEUTEL = 'tatties-knip-bezig';
+  // R7-3 (2026-10-28): in de app (iOS/Android) begint een nieuw proces na een stop op de achtergrond met een lege sessionStorage,
+  // dus daar eerst localStorage (lukt dat niet, bv. vol: sessionStorage). Lezen en wissen kijken in beide. Web blijft sessionStorage.
+  const KNIP_STAAT_LEEFTIJD = 24 * 3600 * 1000;   // ouder dan een dag: niet meer vragen
+  function knipOpslagen(){
+    const l = [];
+    try { if (window.TATTIES_NATIEF && window.localStorage) l.push(localStorage); } catch (e) { /* geen localStorage */ }
+    try { if (window.sessionStorage) l.push(sessionStorage); } catch (e) { /* geen sessionStorage */ }
+    return l;
+  }
   const KNIP_STAAT_MAX = 4 * 1024 * 1024;   // ruim onder de sessionStorage-limiet; grotere foto's slaan we over
   let knipBewaarTimer = 0;
   function wisKnipStaat(){
     clearTimeout(knipBewaarTimer);
-    try { sessionStorage.removeItem(KNIP_STAAT_SLEUTEL); } catch (e) { /* geen opslag */ }
+    for (const o of knipOpslagen()) { try { o.removeItem(KNIP_STAAT_SLEUTEL); } catch (e) { /* geen opslag */ } }   // R7-3
   }
   function bewaarKnipStaatNu(){
     // Alleen een nieuwe tattoo die nog niet geplaatst is, en alleen als er echt werk ligt.
@@ -28813,7 +28893,11 @@ function maakTatnetGL(json, canvas) {
                       gegevensFase: cutModal.classList.contains('cm-gegevens'), tijd: Date.now() };
       const json = JSON.stringify(staat);
       if(json.length > KNIP_STAAT_MAX){ wisKnipStaat(); return; }   // te grote foto: liever niets dan een half record
-      sessionStorage.setItem(KNIP_STAAT_SLEUTEL, json);
+      let gelukt = false;   // R7-3: in de app eerst localStorage, anders sessionStorage
+      for (const o of knipOpslagen()) {
+        if (gelukt) { try { o.removeItem(KNIP_STAAT_SLEUTEL); } catch (e) { /* geen opslag */ } continue; }   // geen oude kopie laten staan
+        try { o.setItem(KNIP_STAAT_SLEUTEL, json); gelukt = true; } catch (e) { /* vol: de volgende proberen */ }
+      }
     }catch(e){ /* quota of geen opslag: dan gewoon niet bewaren */ }
   }
   function planKnipBewaren(){ clearTimeout(knipBewaarTimer); knipBewaarTimer=setTimeout(bewaarKnipStaatNu, 700); }
@@ -28822,10 +28906,12 @@ function maakTatnetGL(json, canvas) {
   async function vraagKnipStaatTerug(){
     let staat=null;
     try{
-      const ruw = sessionStorage.getItem(KNIP_STAAT_SLEUTEL);
+      let ruw = null;   // R7-3: eerst localStorage (app), dan sessionStorage
+      for (const o of knipOpslagen()) { try { ruw = o.getItem(KNIP_STAAT_SLEUTEL); } catch (e) { ruw = null; } if (ruw) break; }
       if(!ruw) return false;
       staat = JSON.parse(ruw);
     }catch(e){ wisKnipStaat(); return false; }
+    if(staat && +staat.tijd && Date.now() - (+staat.tijd) > KNIP_STAAT_LEEFTIJD){ wisKnipStaat(); return false; }   // R7-3: te oud
     if(!staat || staat.v!==1 || !staat.kunst || !staat.kunst.srcUrl){ wisKnipStaat(); return false; }
     let sub = '';   // R2 punt 19: wanneer en welke, nee = 'Weggooien'
     try {
@@ -30061,6 +30147,7 @@ function maakTatnetGL(json, canvas) {
     if(!P||!P.point){ if(deel || LICHAAM_GEN) return false; P=afleid3DUitZone(t); if(P) P.preset=presetId(); }   // nieuw lichaam: zones nog niet geijkt   // een deel heeft altijd een echte plek
     const eigenP=(P===D.positie3d);   // alleen een ECHT opgeslagen plek migreren, geen afgeleide
     if(!P||!P.point) return false;
+    if(typeof hardPositie3d==='function' && !hardPositie3d(P)) return false;   // R7-1: absurde maat/plek (oude import, corrupte cloudrij) niet bouwen
     if((P.gender||"man")!==currentGender) return false;    // alleen tattoos van dit model
     const k3 = (D.kunst3d && (D.kunst3d.srcUrl || D.kunst3d.srcH)) ? D.kunst3d   // R4 ME-2 stap B: licht record met srcH probeert de cache
              : (!deel && t.kunst && t.kunst.src ? { srcUrl:t.kunst.src, bg:false, lasso:[], wand:[] } : null);   // fallback: 2D-uitsnede als 3D-textuur
@@ -31183,7 +31270,7 @@ function maakTatnetGL(json, canvas) {
     document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && fk && !fk.hidden) sluitFk(); });
   }
   // true = de kiezer is open (de aanroeper opent dan niet de gewone file-input)
-  window.__tattiesFotoKiezer = function () {
+  if (!window.TATTIES_ANDROID) window.__tattiesFotoKiezer = function () {   // Android: TattiesFotos niet geport, de gewone file-input (systeemkiezer)
     maakFk();
     fk.querySelectorAll('[data-fk-tekst]').forEach(function (el) { el.textContent = tr(el.dataset.fkTekst); });
     fk.setAttribute('aria-label', tr('fotokies.titel'));
@@ -31219,8 +31306,8 @@ function maakTatnetGL(json, canvas) {
       if (op <= nu) continue;
       var l = helend(op);
       if (!l.length) continue;
-      uit.push({ id: NZ_BASIS + d, title: tr('nazorg.melding_titel'), body: nzTekst(l),
-        schedule: { on: { year: op.getFullYear(), month: op.getMonth() + 1, day: op.getDate(), hour: hh, minute: mm } } });
+      uit.push({ id: NZ_BASIS + d, title: tr('nazorg.melding_titel'), body: nzTekst(l), isExactNotification: false,   // Android: geen exact alarm (anders de systeempagina bij elke schedule)
+        schedule: { on: { year: op.getFullYear(), month: op.getMonth() + (window.TATTIES_ANDROID ? 0 : 1), day: op.getDate(), hour: hh, minute: mm } } });   // Android telt de maand vanaf 0, iOS vanaf 1
     }
     return uit;
   }
@@ -31302,7 +31389,7 @@ function maakTatnetGL(json, canvas) {
       toastMetActie(tr('nazorg.herinner_vraag'), tr('nazorg.herinner_ja'), function () { nzZet(true); });
       return;
     }
-    if (!REVIEW_AAN) return;
+    if (!REVIEW_AAN || window.TATTIES_ANDROID) return;   // Android: TattiesReview doet nog niets (later Play In-App Review), vlag blijft leeg
     var n = aantalTattoos();
     if (n < REVIEW_VANAF || ls.get(REVIEW)) return;
     var later = parseInt(ls.get(REVIEW_LATER) || '0', 10);
@@ -31367,6 +31454,12 @@ function maakTatnetGL(json, canvas) {
     catch (e) { toast(tr('account.link_mislukt')); }
   }
   luister('App', 'appUrlOpen', function (d) { verwerkLink(d && d.url); });
+  // R7-4/R7-9 (2026-10-28): op Android de terugknop zelf afhandelen (Capacitor deed alleen webView.goBack en anders niets)
+  if (window.TATTIES_ANDROID) luister('App', 'backButton', function () {
+    var ok = false;
+    try { ok = !!(window.__tattiesTerug && window.__tattiesTerug()); } catch (e) { console.warn('terugknop', e); }
+    if (!ok) N('App', 'minimizeApp').catch(function () {});   // startscherm: naar de achtergrond
+  });
   N('App', 'getLaunchUrl').then(function (r) { verwerkLink(r && r.url); }).catch(function () {});
 
   /* ---------- 7. Inloggen met Apple of Google (TattiesLogin, eigen plugin in native/bouw_ios.py) ---------- */
