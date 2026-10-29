@@ -3362,6 +3362,15 @@ body.onb-inlog .account-modal{z-index:100002}
 .foto-kies-kaart .fk-kop{margin:4px 0 -2px;font-size:var(--fs-xs,.76rem);font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--gedempt)}
 .foto-kies-kaart .fk-kop:has(+ .fk-raster:empty){display:none}
 </style>
+<style id="r7-ux">
+/* R7-10 (2026-10-28): raakvlak 44 px, uiterlijk gelijk (Wishlist-schakelaar en (i) hadden er al een via ::before/::after) */
+.inst-kaart .silhouet-keuze button{position:relative}
+.inst-kaart .silhouet-keuze button::before{content:"";position:absolute;inset:-5px 0}
+#stat-zituren{position:relative}
+#stat-zituren::before{content:"";position:absolute;inset:0 -12px}
+/* R7-11: 'Nieuwe tattoo' op de rode tegel: wit (5,2:1 in donker) */
+.greep-plus .greep-plus-tekst{color:#fff}
+</style>
 </head>
 <body>
 <div id="bootsplash" aria-hidden="true"><img class="bs-logo logo-licht" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjIzLjAgMjIgMjU0LjAgNzAiIHdpZHRoPSI1MDgiIGhlaWdodD0iMTQwIj4NCjx0aXRsZT5UYXR0aWVzPC90aXRsZT4NCjxwb2x5Z29uIHBvaW50cz0iMjYuMCw0MCA2OC4wLDQwIDY4LjAsOTAgMjYuMCw5MCAzNi44LDY1IiBmaWxsPSIjQ0UyNzI3IiBzdHJva2U9IiMxNzEzMEYiIHN0cm9rZS13aWR0aD0iMy41IiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+DQo8cG9seWdvbiBwb2ludHM9IjI3NC4wLDQwIDIzMi4wLDQwIDIzMi4wLDkwIDI3NC4wLDkwIDI2My4yLDY1IiBmaWxsPSIjQ0UyNzI3IiBzdHJva2U9IiMxNzEzMEYiIHN0cm9rZS13aWR0aD0iMy41IiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+DQo8cG9seWdvbiBwb2ludHM9IjU2LjAsNzYgNjguMCw3NiA2OC4wLDkwIiBmaWxsPSIjMTcxMzBGIiBzdHJva2U9IiMxNzEzMEYiIHN0cm9rZS13aWR0aD0iMy41IiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+DQo8cG9seWdvbiBwb2ludHM9IjI0NC4wLDc2IDIzMi4wLDc2IDIzMi4wLDkwIiBmaWxsPSIjMTcxMzBGIiBzdHJva2U9IiMxNzEzMEYiIHN0cm9rZS13aWR0aD0iMy41IiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+DQo8cmVjdCB4PSI1Ni4wIiB5PSIyNCIgd2lkdGg9IjE4OCIgaGVpZ2h0PSI1MiIgZmlsbD0iI0ZBRjRFOCIgc3Ryb2tlPSIjMTcxMzBGIiBzdHJva2Utd2lkdGg9IjMuNSIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPg0KPHBhdGggZmlsbD0iIzE3MTMwRiIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoNzQuNjY0IDYzLjE5MSkgc2NhbGUoMC4wMTY4MikiIGQ9Ik0xNjM0IC0xNDczVi04ODdIMTMwNVExMzA1IC05NTQgMTMwMS41IC0xMDAzLjVRMTI5OCAtMTA1MyAxMjg2LjAgLTEwODMuNVExMjc0IC0xMTE0IDEyNDkuNSAtMTEyOC41UTEyMjUgLTExNDMgMTE4NCAtMTE0M0gxMTIyVi00ODNRMTEyMiAtNDE4IDExNjAuMCAtMzk0LjVRMTE5OCAtMzcxIDEyODYgLTM3MVYwSDM2OVYtMzcxUTQ1NyAtMzcxIDQ5NC41IC0zOTQuNVE1MzIgLTQxOCA1MzIgLTQ4M1YtMTE0M0g0NzFRNDMwIC0xMTQzIDQwNS41IC0xMTI4LjVRMzgxIC0xMTE0IDM2OC41IC0xMDgzLjVRMzU2IC0xMDUzIDM1My4wIC0xMDAzLjVRMzUwIC05NTQgMzUwIC04ODdIMjBWLTE0NzNaTTIyMDAuMCAtOTYzUTIxNDkuMCAtOTYzIDIxMTIuNSAtOTU1LjVRMjA3Ni4wIC05NDggMjA1MC4wIC05MzguMFEyMDI0LjAgLTkyOCAyMDA3LjAgLTkxNS41UTE5OTAuMCAtOTAzIDE5NzcuMCAtODkzTDE5ODcuMCAtODgzUTIwMDYuMCAtODkzIDIwMjguNSAtOTAzLjBRMjA1MS4wIC05MTMgMjA4Ni4wIC05MTNRMjE0NS4wIC05MTMgMjE4OC4wIC04NzQuNVEyMjMxLjAgLTgzNiAyMjMxLjAgLTc1MlEyMjMxLjAgLTY3MiAyMTY1LjUgLTYyMy41UTIxMDAuMCAtNTc1IDE5OTAuMCAtNTc1UTE4ODUuMCAtNTc1IDE4MjIuNSAtNjM1LjVRMTc2MC4wIC02OTYgMTc2MC4wIC04MDdRMTc2MC4wIC04NjggMTc5NC4wIC05MjguNVExODI4LjAgLTk4OSAxODk5LjUgLTEwMzcuMFExOTcxLjAgLTEwODUgMjA4MS41IC0xMTE2LjBRMjE5Mi4wIC0xMTQ3IDIzNDguMCAtMTE0N1EyNTM0LjAgLTExNDcgMjY1Mi4wIC0xMTEyLjBRMjc3MC4wIC0xMDc3IDI4MzUuNSAtMTAyMi4wUTI5MDEuMCAtOTY3IDI5MjUuNSAtODk3LjBRMjk1MC4wIC04MjcgMjk1MC4wIC03NTZWLTM2NVEyOTUwLjAgLTI3NCAyOTU2LjAgLTI0MS41UTI5NjIuMCAtMjA5IDMwMDEuMCAtMjA5UTMwMzIuMCAtMjA5IDMwNDQuNSAtMjM4LjVRMzA1Ny4wIC0yNjggMzA1Ny4wIC0zNDBWLTQ2NUgzMTcxLjBWLTMzOFEzMTcxLjAgLTI0OCAzMTU2LjAgLTE3OC41UTMxNDEuMCAtMTA5IDMwOTkuMCAtNTkuNVEzMDU3LjAgLTEwIDI5ODUuMCAxNS41UTI5MTMuMCA0MSAyODAxLjAgNDFRMjcwMC4wIDQxIDI2MzMuNSAxOS41UTI1NjcuMCAtMiAyNTI4LjAgLTM0LjBRMjQ4OS4wIC02NiAyNDcyLjUgLTEwMC41UTI0NTYuMCAtMTM1IDI0NTYuMCAtMTYySDI0NDAuMFEyNDM0LjAgLTEyMSAyNDA1LjUgLTg0LjBRMjM3Ny4wIC00NyAyMzI2LjUgLTE4LjVRMjI3Ni4wIDEwIDIyMDUuNSAyNy41UTIxMzUuMCA0NSAyMDQ1LjAgNDVRMTk1OS4wIDQ1IDE4ODguNSAyOC41UTE4MTguMCAxMiAxNzY4LjUgLTIzLjVRMTcxOS4wIC01OSAxNjkxLjUgLTExNS41UTE2NjQuMCAtMTcyIDE2NjQuMCAtMjUwUTE2NjQuMCAtMzQ2IDE3MTguMCAtNDAxLjVRMTc3Mi4wIC00NTcgMTg1NC4wIC00ODkuNVExOTM2LjAgLTUyMiAyMDMyLjUgLTU0Mi41UTIxMjkuMCAtNTYzIDIyMTEuMCAtNTkyLjBRMjI5My4wIC02MjEgMjM0Ny4wIC02NjcuMFEyNDAxLjAgLTcxMyAyNDAxLjAgLTc5N1EyNDAxLjAgLTg3MiAyMzU0LjAgLTkxNy41UTIzMDcuMCAtOTYzIDIyMDAuMCAtOTYzWk0yNDAxLjAgLTUzMFEyMzc5LjAgLTQ5OCAyMzQ2LjAgLTQ3OC41UTIzMTMuMCAtNDU5IDIyODIuNSAtNDQwLjVRMjI1Mi4wIC00MjIgMjIyOS41IC0zOTYuNVEyMjA3LjAgLTM3MSAyMjA3LjAgLTMyOFEyMjA3LjAgLTI5NSAyMjI1LjAgLTI2OC41UTIyNDMuMCAtMjQyIDIyOTUuMCAtMjQyUTIzNDIuMCAtMjQyIDIzNzEuNSAtMjc4LjVRMjQwMS4wIC0zMTUgMjQwMS4wIC0zODFaTTM4OTYuMCAtMTQ3M1YtMTEwMkg0MTk1LjBWLTczMUgzODk2LjBWLTQyNFEzODk2LjAgLTM1OCAzOTE0LjUgLTMxNi4wUTM5MzMuMCAtMjc0IDM5OTEuMCAtMjc0UTQwMjMuMCAtMjc0IDQwNDIuNSAtMjg2LjVRNDA2Mi4wIC0yOTkgNDA3My41IC0zMTkuNVE0MDg1LjAgLTM0MCA0MDg4LjAgLTM2Ni41UTQwOTEuMCAtMzkzIDQwOTEuMCAtNDI0Vi01NzNINDIwNi4wVi00MTJRNDIwNi4wIC0zMTUgNDE4NS41IC0yMzEuMFE0MTY1LjAgLTE0NyA0MTE1LjUgLTg2LjBRNDA2Ni4wIC0yNSAzOTgxLjAgMTEuMFEzODk2LjAgNDcgMzc2Ny4wIDQ3UTM2MjQuMCA0NyAzNTM5LjAgMTIuMFEzNDU0LjAgLTIzIDM0MTAuMCAtODQuMFEzMzY2LjAgLTE0NSAzMzUyLjUgLTIyOS4wUTMzMzkuMCAtMzEzIDMzMzkuMCAtNDEyVi03MzFIMzE4Mi4wVi0xMDYxUTMyNTcuMCAtMTA2MSAzMzIxLjUgLTEwOTMuNVEzMzg2LjAgLTExMjYgMzQzMi41IC0xMTgzLjVRMzQ3OS4wIC0xMjQxIDM1MDQuNSAtMTMxNS4wUTM1MzAuMCAtMTM4OSAzNTMwLjAgLTE0NzNaTTQ5NjcuMCAtMTQ3M1YtMTEwMkg1MjY2LjBWLTczMUg0OTY3LjBWLTQyNFE0OTY3LjAgLTM1OCA0OTg1LjUgLTMxNi4wUTUwMDQuMCAtMjc0IDUwNjIuMCAtMjc0UTUwOTQuMCAtMjc0IDUxMTMuNSAtMjg2LjVRNTEzMy4wIC0yOTkgNTE0NC41IC0zMTkuNVE1MTU2LjAgLTM0MCA1MTU5LjAgLTM2Ni41UTUxNjIuMCAtMzkzIDUxNjIuMCAtNDI0Vi01NzNINTI3Ny4wVi00MTJRNTI3Ny4wIC0zMTUgNTI1Ni41IC0yMzEuMFE1MjM2LjAgLTE0NyA1MTg2LjUgLTg2LjBRNTEzNy4wIC0yNSA1MDUyLjAgMTEuMFE0OTY3LjAgNDcgNDgzOC4wIDQ3UTQ2OTUuMCA0NyA0NjEwLjAgMTIuMFE0NTI1LjAgLTIzIDQ0ODEuMCAtODQuMFE0NDM3LjAgLTE0NSA0NDIzLjUgLTIyOS4wUTQ0MTAuMCAtMzEzIDQ0MTAuMCAtNDEyVi03MzFINDI1My4wVi0xMDYxUTQzMjguMCAtMTA2MSA0MzkyLjUgLTEwOTMuNVE0NDU3LjAgLTExMjYgNDUwMy41IC0xMTgzLjVRNDU1MC4wIC0xMjQxIDQ1NzUuNSAtMTMxNS4wUTQ2MDEuMCAtMTM4OSA0NjAxLjAgLTE0NzNaTTYwNzcuMCAtMTEwMlYtNDc5UTYwNzcuMCAtNDEyIDYxMTAuMCAtMzkxLjVRNjE0My4wIC0zNzEgNjE5NC4wIC0zNzFINjIyMS4wVjBINTM3OS4wVi0zNzFINTQxOC4wUTU0NzEuMCAtMzcxIDU0OTYuNSAtNDA0LjVRNTUyMi4wIC00MzggNTUyMi4wIC00NzdWLTYxOFE1NTIyLjAgLTY3NiA1NDg1LjUgLTcwMy41UTU0NDkuMCAtNzMxIDU0MDEuMCAtNzMxSDUzNzkuMFYtMTEwMlpNNTUwNi4wIC0xMzQ4UTU1MDYuMCAtMTQzNCA1NTcxLjUgLTE0OTUuMFE1NjM3LjAgLTE1NTYgNTc1OC4wIC0xNTU2UTU4ODEuMCAtMTU1NiA1OTQ3LjUgLTE0OTUuMFE2MDE0LjAgLTE0MzQgNjAxNC4wIC0xMzQ4UTYwMTQuMCAtMTI2MCA1OTQ3LjUgLTExOTkuNVE1ODgxLjAgLTExMzkgNTc1OC4wIC0xMTM5UTU2MzcuMCAtMTEzOSA1NTcxLjUgLTExOTkuNVE1NTA2LjAgLTEyNjAgNTUwNi4wIC0xMzQ4Wk02ODUzLjAgLTQ4OVE2ODU3LjAgLTM0MCA2OTA5LjUgLTI4My41UTY5NjIuMCAtMjI3IDcwNjAuMCAtMjI3UTcwOTMuMCAtMjI3IDcxMjQuNSAtMjM2LjVRNzE1Ni4wIC0yNDYgNzE4My4wIC0yNjcuNVE3MjEwLjAgLTI4OSA3MjI5LjUgLTMyNC41UTcyNDkuMCAtMzYwIDcyNTUuMCAtNDE0SDc2MTkuMFE3NTk5LjAgLTI4NSA3NTQ1LjUgLTE5OC4wUTc0OTIuMCAtMTExIDc0MDguMCAtNTcuNVE3MzI0LjAgLTQgNzIxMi41IDE5LjVRNzEwMS4wIDQzIDY5NjQuMCA0M1E2ODIzLjAgNDMgNjY5OS4wIDcuMFE2NTc1LjAgLTI5IDY0ODEuNSAtMTAyLjVRNjM4OC4wIC0xNzYgNjMzNS4wIC0yODcuNVE2MjgyLjAgLTM5OSA2MjgyLjAgLTU1M1E2MjgyLjAgLTcwMCA2MzMyLjAgLTgxMS4wUTYzODIuMCAtOTIyIDY0NzIuNSAtOTk2LjVRNjU2My4wIC0xMDcxIDY2ODYuNSAtMTEwOS4wUTY4MTAuMCAtMTE0NyA2OTU4LjAgLTExNDdRNzE0MC4wIC0xMTQ3IDcyNzEuMCAtMTA5OS4wUTc0MDIuMCAtMTA1MSA3NDg1LjAgLTk2NS4wUTc1NjguMCAtODc5IDc2MDcuMCAtNzU4LjBRNzY0Ni4wIC02MzcgNzY0NC4wIC00ODlaTTcwMDEuMCAtODc3UTY5MzEuMCAtODc3IDY4OTcuNSAtODI3LjVRNjg2NC4wIC03NzggNjg1My4wIC02NjRINzE0Ni4wUTcxNDAuMCAtNzYyIDcxMDQuMCAtODE5LjVRNzA2OC4wIC04NzcgNzAwMS4wIC04NzdaTTg5MDQuMCAtNzM3SDg2MjkuMFE4NjAwLjAgLTgwOSA4NTM5LjAgLTg1MS4wUTg0NzguMCAtODkzIDg0MTIuMCAtODkzUTgzNjcuMCAtODkzIDgzNDAuNSAtODc2LjVRODMxNC4wIC04NjAgODMxNC4wIC04MjdRODMxNC4wIC03ODYgODM2MC4wIC03NjUuNVE4NDA2LjAgLTc0NSA4NDc1LjUgLTcyOS4wUTg1NDUuMCAtNzEzIDg2MjYuMCAtNjkwLjVRODcwNy4wIC02NjggODc3Ni41IC02MjYuMFE4ODQ2LjAgLTU4NCA4ODkyLjAgLTUxMy4wUTg5MzguMCAtNDQyIDg5MzguMCAtMzI2UTg5MzguMCAtMjM2IDg4OTguMCAtMTY5LjBRODg1OC4wIC0xMDIgODc4OC41IC01OS4wUTg3MTkuMCAtMTYgODYyNS4wIDUuNVE4NTMxLjAgMjcgODQyMi4wIDI3UTgzMTYuMCAyNyA4MjIxLjUgNi41UTgxMjcuMCAtMTQgODA0MS4wIC02M0w4MDMxLjAgNkg3NzY3LjBWLTM5NUg4MDQxLjBRODA4MC4wIC0zMTUgODEzOS41IC0yNzEuMFE4MTk5LjAgLTIyNyA4MjcxLjAgLTIyN1E4MzI2LjAgLTIyNyA4MzQ5LjUgLTI0Ny41UTgzNzMuMCAtMjY4IDgzNzMuMCAtMjkzUTgzNzMuMCAtMzM0IDgzMjcuMCAtMzU2LjVRODI4MS4wIC0zNzkgODIxMy41IC0zOTYuNVE4MTQ2LjAgLTQxNCA4MDY1LjAgLTQzNS41UTc5ODQuMCAtNDU3IDc5MTYuNSAtNDk4LjBRNzg0OS4wIC01MzkgNzgwMy4wIC02MDguNVE3NzU3LjAgLTY3OCA3NzU3LjAgLTc5MVE3NzU3LjAgLTg3MiA3NzkzLjUgLTkzOS4wUTc4MzAuMCAtMTAwNiA3ODk4LjAgLTEwNTIuMFE3OTY2LjAgLTEwOTggODA1OC4wIC0xMTIyLjVRODE1MC4wIC0xMTQ3IDgyNjAuMCAtMTE0N1E4MzgzLjAgLTExNDcgODQ4MS41IC0xMTE5LjVRODU4MC4wIC0xMDkyIDg2MjkuMCAtMTA1OUw4NjM5LjAgLTExMzBIODkwNC4wWiIvPg0KPC9zdmc+DQo=" alt=""><img class="bs-logo logo-donker" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjIzLjAgMjIgMjU0LjAgNzAiIHdpZHRoPSI1MDgiIGhlaWdodD0iMTQwIj4NCjx0aXRsZT5UYXR0aWVzPC90aXRsZT4NCjxwb2x5Z29uIHBvaW50cz0iMjYuMCw0MCA2OC4wLDQwIDY4LjAsOTAgMjYuMCw5MCAzNi44LDY1IiBmaWxsPSIjQ0UyNzI3IiBzdHJva2U9IiNFREUzQ0YiIHN0cm9rZS13aWR0aD0iMy41IiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+DQo8cG9seWdvbiBwb2ludHM9IjI3NC4wLDQwIDIzMi4wLDQwIDIzMi4wLDkwIDI3NC4wLDkwIDI2My4yLDY1IiBmaWxsPSIjQ0UyNzI3IiBzdHJva2U9IiNFREUzQ0YiIHN0cm9rZS13aWR0aD0iMy41IiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+DQo8cG9seWdvbiBwb2ludHM9IjU2LjAsNzYgNjguMCw3NiA2OC4wLDkwIiBmaWxsPSIjOEUxQjFCIiBzdHJva2U9IiNFREUzQ0YiIHN0cm9rZS13aWR0aD0iMy41IiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+DQo8cG9seWdvbiBwb2ludHM9IjI0NC4wLDc2IDIzMi4wLDc2IDIzMi4wLDkwIiBmaWxsPSIjOEUxQjFCIiBzdHJva2U9IiNFREUzQ0YiIHN0cm9rZS13aWR0aD0iMy41IiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+DQo8cmVjdCB4PSI1Ni4wIiB5PSIyNCIgd2lkdGg9IjE4OCIgaGVpZ2h0PSI1MiIgZmlsbD0iIzE3MTMwRiIgc3Ryb2tlPSIjRURFM0NGIiBzdHJva2Utd2lkdGg9IjMuNSIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPg0KPHBhdGggZmlsbD0iI0VERTNDRiIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoNzQuNjY0IDYzLjE5MSkgc2NhbGUoMC4wMTY4MikiIGQ9Ik0xNjM0IC0xNDczVi04ODdIMTMwNVExMzA1IC05NTQgMTMwMS41IC0xMDAzLjVRMTI5OCAtMTA1MyAxMjg2LjAgLTEwODMuNVExMjc0IC0xMTE0IDEyNDkuNSAtMTEyOC41UTEyMjUgLTExNDMgMTE4NCAtMTE0M0gxMTIyVi00ODNRMTEyMiAtNDE4IDExNjAuMCAtMzk0LjVRMTE5OCAtMzcxIDEyODYgLTM3MVYwSDM2OVYtMzcxUTQ1NyAtMzcxIDQ5NC41IC0zOTQuNVE1MzIgLTQxOCA1MzIgLTQ4M1YtMTE0M0g0NzFRNDMwIC0xMTQzIDQwNS41IC0xMTI4LjVRMzgxIC0xMTE0IDM2OC41IC0xMDgzLjVRMzU2IC0xMDUzIDM1My4wIC0xMDAzLjVRMzUwIC05NTQgMzUwIC04ODdIMjBWLTE0NzNaTTIyMDAuMCAtOTYzUTIxNDkuMCAtOTYzIDIxMTIuNSAtOTU1LjVRMjA3Ni4wIC05NDggMjA1MC4wIC05MzguMFEyMDI0LjAgLTkyOCAyMDA3LjAgLTkxNS41UTE5OTAuMCAtOTAzIDE5NzcuMCAtODkzTDE5ODcuMCAtODgzUTIwMDYuMCAtODkzIDIwMjguNSAtOTAzLjBRMjA1MS4wIC05MTMgMjA4Ni4wIC05MTNRMjE0NS4wIC05MTMgMjE4OC4wIC04NzQuNVEyMjMxLjAgLTgzNiAyMjMxLjAgLTc1MlEyMjMxLjAgLTY3MiAyMTY1LjUgLTYyMy41UTIxMDAuMCAtNTc1IDE5OTAuMCAtNTc1UTE4ODUuMCAtNTc1IDE4MjIuNSAtNjM1LjVRMTc2MC4wIC02OTYgMTc2MC4wIC04MDdRMTc2MC4wIC04NjggMTc5NC4wIC05MjguNVExODI4LjAgLTk4OSAxODk5LjUgLTEwMzcuMFExOTcxLjAgLTEwODUgMjA4MS41IC0xMTE2LjBRMjE5Mi4wIC0xMTQ3IDIzNDguMCAtMTE0N1EyNTM0LjAgLTExNDcgMjY1Mi4wIC0xMTEyLjBRMjc3MC4wIC0xMDc3IDI4MzUuNSAtMTAyMi4wUTI5MDEuMCAtOTY3IDI5MjUuNSAtODk3LjBRMjk1MC4wIC04MjcgMjk1MC4wIC03NTZWLTM2NVEyOTUwLjAgLTI3NCAyOTU2LjAgLTI0MS41UTI5NjIuMCAtMjA5IDMwMDEuMCAtMjA5UTMwMzIuMCAtMjA5IDMwNDQuNSAtMjM4LjVRMzA1Ny4wIC0yNjggMzA1Ny4wIC0zNDBWLTQ2NUgzMTcxLjBWLTMzOFEzMTcxLjAgLTI0OCAzMTU2LjAgLTE3OC41UTMxNDEuMCAtMTA5IDMwOTkuMCAtNTkuNVEzMDU3LjAgLTEwIDI5ODUuMCAxNS41UTI5MTMuMCA0MSAyODAxLjAgNDFRMjcwMC4wIDQxIDI2MzMuNSAxOS41UTI1NjcuMCAtMiAyNTI4LjAgLTM0LjBRMjQ4OS4wIC02NiAyNDcyLjUgLTEwMC41UTI0NTYuMCAtMTM1IDI0NTYuMCAtMTYySDI0NDAuMFEyNDM0LjAgLTEyMSAyNDA1LjUgLTg0LjBRMjM3Ny4wIC00NyAyMzI2LjUgLTE4LjVRMjI3Ni4wIDEwIDIyMDUuNSAyNy41UTIxMzUuMCA0NSAyMDQ1LjAgNDVRMTk1OS4wIDQ1IDE4ODguNSAyOC41UTE4MTguMCAxMiAxNzY4LjUgLTIzLjVRMTcxOS4wIC01OSAxNjkxLjUgLTExNS41UTE2NjQuMCAtMTcyIDE2NjQuMCAtMjUwUTE2NjQuMCAtMzQ2IDE3MTguMCAtNDAxLjVRMTc3Mi4wIC00NTcgMTg1NC4wIC00ODkuNVExOTM2LjAgLTUyMiAyMDMyLjUgLTU0Mi41UTIxMjkuMCAtNTYzIDIyMTEuMCAtNTkyLjBRMjI5My4wIC02MjEgMjM0Ny4wIC02NjcuMFEyNDAxLjAgLTcxMyAyNDAxLjAgLTc5N1EyNDAxLjAgLTg3MiAyMzU0LjAgLTkxNy41UTIzMDcuMCAtOTYzIDIyMDAuMCAtOTYzWk0yNDAxLjAgLTUzMFEyMzc5LjAgLTQ5OCAyMzQ2LjAgLTQ3OC41UTIzMTMuMCAtNDU5IDIyODIuNSAtNDQwLjVRMjI1Mi4wIC00MjIgMjIyOS41IC0zOTYuNVEyMjA3LjAgLTM3MSAyMjA3LjAgLTMyOFEyMjA3LjAgLTI5NSAyMjI1LjAgLTI2OC41UTIyNDMuMCAtMjQyIDIyOTUuMCAtMjQyUTIzNDIuMCAtMjQyIDIzNzEuNSAtMjc4LjVRMjQwMS4wIC0zMTUgMjQwMS4wIC0zODFaTTM4OTYuMCAtMTQ3M1YtMTEwMkg0MTk1LjBWLTczMUgzODk2LjBWLTQyNFEzODk2LjAgLTM1OCAzOTE0LjUgLTMxNi4wUTM5MzMuMCAtMjc0IDM5OTEuMCAtMjc0UTQwMjMuMCAtMjc0IDQwNDIuNSAtMjg2LjVRNDA2Mi4wIC0yOTkgNDA3My41IC0zMTkuNVE0MDg1LjAgLTM0MCA0MDg4LjAgLTM2Ni41UTQwOTEuMCAtMzkzIDQwOTEuMCAtNDI0Vi01NzNINDIwNi4wVi00MTJRNDIwNi4wIC0zMTUgNDE4NS41IC0yMzEuMFE0MTY1LjAgLTE0NyA0MTE1LjUgLTg2LjBRNDA2Ni4wIC0yNSAzOTgxLjAgMTEuMFEzODk2LjAgNDcgMzc2Ny4wIDQ3UTM2MjQuMCA0NyAzNTM5LjAgMTIuMFEzNDU0LjAgLTIzIDM0MTAuMCAtODQuMFEzMzY2LjAgLTE0NSAzMzUyLjUgLTIyOS4wUTMzMzkuMCAtMzEzIDMzMzkuMCAtNDEyVi03MzFIMzE4Mi4wVi0xMDYxUTMyNTcuMCAtMTA2MSAzMzIxLjUgLTEwOTMuNVEzMzg2LjAgLTExMjYgMzQzMi41IC0xMTgzLjVRMzQ3OS4wIC0xMjQxIDM1MDQuNSAtMTMxNS4wUTM1MzAuMCAtMTM4OSAzNTMwLjAgLTE0NzNaTTQ5NjcuMCAtMTQ3M1YtMTEwMkg1MjY2LjBWLTczMUg0OTY3LjBWLTQyNFE0OTY3LjAgLTM1OCA0OTg1LjUgLTMxNi4wUTUwMDQuMCAtMjc0IDUwNjIuMCAtMjc0UTUwOTQuMCAtMjc0IDUxMTMuNSAtMjg2LjVRNTEzMy4wIC0yOTkgNTE0NC41IC0zMTkuNVE1MTU2LjAgLTM0MCA1MTU5LjAgLTM2Ni41UTUxNjIuMCAtMzkzIDUxNjIuMCAtNDI0Vi01NzNINTI3Ny4wVi00MTJRNTI3Ny4wIC0zMTUgNTI1Ni41IC0yMzEuMFE1MjM2LjAgLTE0NyA1MTg2LjUgLTg2LjBRNTEzNy4wIC0yNSA1MDUyLjAgMTEuMFE0OTY3LjAgNDcgNDgzOC4wIDQ3UTQ2OTUuMCA0NyA0NjEwLjAgMTIuMFE0NTI1LjAgLTIzIDQ0ODEuMCAtODQuMFE0NDM3LjAgLTE0NSA0NDIzLjUgLTIyOS4wUTQ0MTAuMCAtMzEzIDQ0MTAuMCAtNDEyVi03MzFINDI1My4wVi0xMDYxUTQzMjguMCAtMTA2MSA0MzkyLjUgLTEwOTMuNVE0NDU3LjAgLTExMjYgNDUwMy41IC0xMTgzLjVRNDU1MC4wIC0xMjQxIDQ1NzUuNSAtMTMxNS4wUTQ2MDEuMCAtMTM4OSA0NjAxLjAgLTE0NzNaTTYwNzcuMCAtMTEwMlYtNDc5UTYwNzcuMCAtNDEyIDYxMTAuMCAtMzkxLjVRNjE0My4wIC0zNzEgNjE5NC4wIC0zNzFINjIyMS4wVjBINTM3OS4wVi0zNzFINTQxOC4wUTU0NzEuMCAtMzcxIDU0OTYuNSAtNDA0LjVRNTUyMi4wIC00MzggNTUyMi4wIC00NzdWLTYxOFE1NTIyLjAgLTY3NiA1NDg1LjUgLTcwMy41UTU0NDkuMCAtNzMxIDU0MDEuMCAtNzMxSDUzNzkuMFYtMTEwMlpNNTUwNi4wIC0xMzQ4UTU1MDYuMCAtMTQzNCA1NTcxLjUgLTE0OTUuMFE1NjM3LjAgLTE1NTYgNTc1OC4wIC0xNTU2UTU4ODEuMCAtMTU1NiA1OTQ3LjUgLTE0OTUuMFE2MDE0LjAgLTE0MzQgNjAxNC4wIC0xMzQ4UTYwMTQuMCAtMTI2MCA1OTQ3LjUgLTExOTkuNVE1ODgxLjAgLTExMzkgNTc1OC4wIC0xMTM5UTU2MzcuMCAtMTEzOSA1NTcxLjUgLTExOTkuNVE1NTA2LjAgLTEyNjAgNTUwNi4wIC0xMzQ4Wk02ODUzLjAgLTQ4OVE2ODU3LjAgLTM0MCA2OTA5LjUgLTI4My41UTY5NjIuMCAtMjI3IDcwNjAuMCAtMjI3UTcwOTMuMCAtMjI3IDcxMjQuNSAtMjM2LjVRNzE1Ni4wIC0yNDYgNzE4My4wIC0yNjcuNVE3MjEwLjAgLTI4OSA3MjI5LjUgLTMyNC41UTcyNDkuMCAtMzYwIDcyNTUuMCAtNDE0SDc2MTkuMFE3NTk5LjAgLTI4NSA3NTQ1LjUgLTE5OC4wUTc0OTIuMCAtMTExIDc0MDguMCAtNTcuNVE3MzI0LjAgLTQgNzIxMi41IDE5LjVRNzEwMS4wIDQzIDY5NjQuMCA0M1E2ODIzLjAgNDMgNjY5OS4wIDcuMFE2NTc1LjAgLTI5IDY0ODEuNSAtMTAyLjVRNjM4OC4wIC0xNzYgNjMzNS4wIC0yODcuNVE2MjgyLjAgLTM5OSA2MjgyLjAgLTU1M1E2MjgyLjAgLTcwMCA2MzMyLjAgLTgxMS4wUTYzODIuMCAtOTIyIDY0NzIuNSAtOTk2LjVRNjU2My4wIC0xMDcxIDY2ODYuNSAtMTEwOS4wUTY4MTAuMCAtMTE0NyA2OTU4LjAgLTExNDdRNzE0MC4wIC0xMTQ3IDcyNzEuMCAtMTA5OS4wUTc0MDIuMCAtMTA1MSA3NDg1LjAgLTk2NS4wUTc1NjguMCAtODc5IDc2MDcuMCAtNzU4LjBRNzY0Ni4wIC02MzcgNzY0NC4wIC00ODlaTTcwMDEuMCAtODc3UTY5MzEuMCAtODc3IDY4OTcuNSAtODI3LjVRNjg2NC4wIC03NzggNjg1My4wIC02NjRINzE0Ni4wUTcxNDAuMCAtNzYyIDcxMDQuMCAtODE5LjVRNzA2OC4wIC04NzcgNzAwMS4wIC04NzdaTTg5MDQuMCAtNzM3SDg2MjkuMFE4NjAwLjAgLTgwOSA4NTM5LjAgLTg1MS4wUTg0NzguMCAtODkzIDg0MTIuMCAtODkzUTgzNjcuMCAtODkzIDgzNDAuNSAtODc2LjVRODMxNC4wIC04NjAgODMxNC4wIC04MjdRODMxNC4wIC03ODYgODM2MC4wIC03NjUuNVE4NDA2LjAgLTc0NSA4NDc1LjUgLTcyOS4wUTg1NDUuMCAtNzEzIDg2MjYuMCAtNjkwLjVRODcwNy4wIC02NjggODc3Ni41IC02MjYuMFE4ODQ2LjAgLTU4NCA4ODkyLjAgLTUxMy4wUTg5MzguMCAtNDQyIDg5MzguMCAtMzI2UTg5MzguMCAtMjM2IDg4OTguMCAtMTY5LjBRODg1OC4wIC0xMDIgODc4OC41IC01OS4wUTg3MTkuMCAtMTYgODYyNS4wIDUuNVE4NTMxLjAgMjcgODQyMi4wIDI3UTgzMTYuMCAyNyA4MjIxLjUgNi41UTgxMjcuMCAtMTQgODA0MS4wIC02M0w4MDMxLjAgNkg3NzY3LjBWLTM5NUg4MDQxLjBRODA4MC4wIC0zMTUgODEzOS41IC0yNzEuMFE4MTk5LjAgLTIyNyA4MjcxLjAgLTIyN1E4MzI2LjAgLTIyNyA4MzQ5LjUgLTI0Ny41UTgzNzMuMCAtMjY4IDgzNzMuMCAtMjkzUTgzNzMuMCAtMzM0IDgzMjcuMCAtMzU2LjVRODI4MS4wIC0zNzkgODIxMy41IC0zOTYuNVE4MTQ2LjAgLTQxNCA4MDY1LjAgLTQzNS41UTc5ODQuMCAtNDU3IDc5MTYuNSAtNDk4LjBRNzg0OS4wIC01MzkgNzgwMy4wIC02MDguNVE3NzU3LjAgLTY3OCA3NzU3LjAgLTc5MVE3NzU3LjAgLTg3MiA3NzkzLjUgLTkzOS4wUTc4MzAuMCAtMTAwNiA3ODk4LjAgLTEwNTIuMFE3OTY2LjAgLTEwOTggODA1OC4wIC0xMTIyLjVRODE1MC4wIC0xMTQ3IDgyNjAuMCAtMTE0N1E4MzgzLjAgLTExNDcgODQ4MS41IC0xMTE5LjVRODU4MC4wIC0xMDkyIDg2MjkuMCAtMTA1OUw4NjM5LjAgLTExMzBIODkwNC4wWiIvPg0KPC9zdmc+DQo=" alt=""><span class="bs-lijn"></span></div>
@@ -3814,7 +3823,7 @@ body.onb-inlog .account-modal{z-index:100002}
               <label class="cm-veld"><span data-i18n="form.stijl">Stijl</span><input id="cmStijl" type="text" maxlength="120"></label>
               <div class="cm-rij2">
                 <label class="cm-veld"><span data-i18n="form.kosten">Kosten</span><span class="kosten-veld"><span class="valuta-prefix" id="cmKostenSym">&euro;</span><input id="cmKosten" type="text" inputmode="decimal" autocomplete="off"></span></label>
-                <label class="cm-veld"><span data-i18n="form.datum">Datum</span><input id="cmDatum" type="date"></label>
+                <label class="cm-veld"><span data-i18n="form.datum">Datum</span><input id="cmDatum" type="date" max="2099-12-31"></label>
               </div>
               <div class="cm-rij2">
                 <div class="cm-veld"><span data-i18n="form.pijn">Pijnscore (1&ndash;5)</span>
@@ -13739,7 +13748,7 @@ function createTattoo(overrides = {}) {
    ============================================================ */
 // App-versie (semver, handmatig ophogen bij een release). Bij een bump ook de
 // CACHE-naam in sw.js meebumpen, zodat clients de nieuwe build ophalen.
-const APP_VERSIE = '0.4.39';
+const APP_VERSIE = '0.4.40';
 
 /* Dev-haken die de CLOUD raken hangen alleen op een ontwikkelmachine aan window. Ze zijn geen
    lek op zichzelf (zonder XSS roept niemand ze aan, en CSP + esc() houden XSS tegen), maar ze
@@ -16536,7 +16545,7 @@ function helingsStand(t) {
   // Na 90 dagen zeggen we niets meer (UI-doorloop 2026-09-14): een tattoo van vorig jaar met "Herstellende"
   // erbij was een verzonnen feit. Wel 'geheeld' laten zetten door de gebruiker, niet automatisch.
   const dagen = (Date.now() - new Date(t.datum).getTime()) / 864e5;
-  return (isFinite(dagen) && dagen <= 90) ? 'herstellende' : null;
+  return (isFinite(dagen) && dagen >= -1 && dagen <= 90) ? 'herstellende' : null;   // R7-6: datum in de toekomst = nog niet gezet (-1: datum is UTC-middernacht)
 }
 /* Flash Sheet (2026-10-06): elke gezette tattoo krijgt een Nº, zoals op een vel flash. Volgorde = datum van zetten; zonder datum
    achteraan, onderling vast op id. Wishlist telt niet mee. */
@@ -16754,6 +16763,18 @@ function kostenNaarVeld(n) {
   const dec = (1.5).toLocaleString(valutaLocale()).indexOf(',') > -1 ? ',' : '.';
   return String(n).replace('.', dec);
 }
+// R7-7 (2026-10-28): alleen tekens die een bedrag kunnen zijn; een minteken, letters of een exponent kwamen er zonder zichtbare melding
+// als 0 uit (de toast valt achter het knipscherm). Zituren: een te hoge waarde springt bij het verlaten zichtbaar naar de grens.
+document.addEventListener('input', (e) => {
+  const el = e.target; if (!el || (el.id !== 'cmKosten' && el.id !== 'f-kosten')) return;
+  const schoon = el.value.replace(/[^0-9.,\s\u00a0\u20ac$\u00a3]/g, '');
+  if (schoon !== el.value) { const p = el.selectionStart; el.value = schoon; try { el.setSelectionRange(Math.max(0, p - 1), Math.max(0, p - 1)); } catch (err) { /* geen cursor */ } }
+}, true);
+document.addEventListener('change', (e) => {
+  const el = e.target; if (!el || (el.id !== 'cmZituren' && el.id !== 'f-zituren')) return;
+  const n = parseFloat(String(el.value).replace(',', '.')); if (!isFinite(n)) { if (el.value !== '') el.value = ''; return; }
+  const k = Math.min(500, Math.max(0, n)); if (k !== n) el.value = String(k);
+}, true);
 function leesKostenVeld(el) {
   const r = parseKosten(el && el.value);
   if (!r.ok) toast(tr('toast.kosten_ongeldig'));
@@ -17236,9 +17257,21 @@ function akLat(x, x0, y0, lengte, cm, staand) {   // maatlat met eindstreepjes, 
   x.beginPath(); x.moveTo(0, 0); x.lineTo(lengte, 0); x.moveTo(0, -11); x.lineTo(0, 11); x.moveTo(lengte, -11); x.lineTo(lengte, 11); x.stroke();
   const per = lengte / cm;
   if (per >= 7 && cm <= 80) { x.lineWidth = 1.2; x.beginPath(); for (let i = 1; i < cm; i++) { const p = i * per, l = i % 5 === 0 ? 8 : 5; x.moveTo(p, 0); x.lineTo(p, -l); } x.stroke(); }
-  x.font = '600 26px Archivo, sans-serif'; x.textAlign = 'center'; x.textBaseline = 'top';
-  x.fillText(akCm(cm), lengte / 2, 12);
+  x.font = '600 26px Archivo, sans-serif'; x.textAlign = 'center'; x.textBaseline = staand ? 'bottom' : 'top';   // R7-12: staand de maat links van de lat
+  x.fillText(akCm(cm), lengte / 2, staand ? -12 : 12);
   x.restore();
+}
+function akInktBox(img) {   // R7-12: kader van de niet-doorzichtige pixels (verkleind gemeten); geen doorzichtigheid = de hele uitsnede
+  const W = img.naturalWidth, H = img.naturalHeight, heel = { x: 0, y: 0, w: W, h: H };
+  try {
+    const f = Math.min(1, 256 / Math.max(W, H)), cw = Math.max(1, Math.round(W * f)), ch = Math.max(1, Math.round(H * f));
+    const c = document.createElement('canvas'); c.width = cw; c.height = ch; const g = c.getContext('2d'); g.drawImage(img, 0, 0, cw, ch);
+    const d = g.getImageData(0, 0, cw, ch).data; let x0 = cw, y0 = ch, x1 = -1, y1 = -1;
+    for (let y = 0; y < ch; y++) for (let xx = 0; xx < cw; xx++) if (d[(y * cw + xx) * 4 + 3] > 24) { if (xx < x0) x0 = xx; if (xx > x1) x1 = xx; if (y < y0) y0 = y; if (y > y1) y1 = y; }
+    if (x1 < 0) return heel;
+    const b = { x: x0 / f, y: y0 / f, w: (x1 - x0 + 1) / f, h: (y1 - y0 + 1) / f };
+    return (b.w < W * 0.05 || b.h < H * 0.05) ? heel : b;
+  } catch (e) { return heel; }
 }
 function akOntwerp(x, img, t, X, Y, W, H) {
   akKader(x, X, Y, W, H, AK.KAART);
@@ -17248,9 +17281,11 @@ function akOntwerp(x, img, t, X, Y, W, H) {
   const dx = L + (R - L - w) / 2, dy = T + (B - T - h) / 2;
   x.drawImage(img, dx, dy, w, h);
   if (!lat) return;
-  const hm = bm * img.naturalHeight / img.naturalWidth;   // de uitsnede op het model: breedte = positie3d.size, hoogte volgt de verhouding
-  akLat(x, dx, dy + h + 22, w, bm, false);
-  akLat(x, dx - 22, dy + h, h, hm, true);
+  // R7-12: de latten passen op de inkt (de doorzichtige rand na de matte telt niet); breedte uitsnede = positie3d.size
+  const ib = akInktBox(img), bx = dx + ib.x * s, by = dy + ib.y * s, bw = ib.w * s, bh = ib.h * s;
+  const cmB = bm * ib.w / img.naturalWidth, cmH = bm * ib.h / img.naturalWidth;
+  akLat(x, bx, by + bh + 22, bw, cmB, false);
+  akLat(x, bx - 22, by + bh, bh, cmH, true);
 }
 async function maakArtiestKaart(t, metNotitie) {
   if (!t) return null;
@@ -17279,11 +17314,15 @@ async function maakArtiestKaart(t, metNotitie) {
   const regel = [zoneLabel(t.lichaamsdeel), maatTekst(t), t.stijl ? tStyle(t.stijl) : ''].filter(Boolean).join('   ·   ');
   const notitie = String(t.notities || '').trim().replace(/\s+/g, ' ');
   x.font = 'italic 30px Archivo, sans-serif';
-  const nRegels = (metNotitie && notitie) ? akRegels(x, '"' + notitie + '"', AK.W - 220, 2) : [];
+  const nRegels = (metNotitie && notitie) ? akRegels(x, notitie, AK.W - 240, 2) : [];   // R7-12: aanhalingstekens om het blok, ook als het afgekapt is
+  if (nRegels.length) { nRegels[0] = '"' + nRegels[0]; nRegels[nRegels.length - 1] += '"'; }
   const blokH = 50 + (regel ? 58 : 0) + (nRegels.length ? 14 + nRegels.length * 42 : 0), y0 = top + ph + 64, y1 = AK.H - 96;
   let y = y0 + Math.max(0, (y1 - y0 - blokH) / 2) + 46;
   x.fillStyle = AK.INKT; x.textAlign = 'center'; x.font = '62px Ultra, Georgia, serif';
-  x.fillText(akKort(x, t.naam || 'Tattoo', AK.W - 170), AK.W / 2, y);
+  { const naam = String(t.naam || 'Tattoo'), maxW = AK.W - 170; let px = 62;   // R7-12: eerst kleiner (tot 40 px), dan twee regels
+    for (; px > 40; px -= 2) { x.font = px + 'px Ultra, Georgia, serif'; if (x.measureText(naam).width <= maxW) break; }
+    if (x.measureText(naam).width <= maxW) x.fillText(naam, AK.W / 2, y);
+    else { const r = akRegels(x, naam, maxW, 2); x.fillText(r[0], AK.W / 2, y - (r.length > 1 ? 22 : 0)); if (r[1]) x.fillText(r[1], AK.W / 2, y + 26); y += r.length > 1 ? 26 : 0; } }
   if (regel) { y += 58; x.font = '34px Archivo, sans-serif'; x.fillText(akKort(x, regel, AK.W - 170), AK.W / 2, y); }
   if (nRegels.length) { y += 14; x.font = 'italic 30px Archivo, sans-serif'; x.fillStyle = AK.GEDEMPT; for (const r of nRegels) { y += 42; x.fillText(r, AK.W / 2, y); } }
   x.fillStyle = AK.GEDEMPT; x.font = '600 24px Archivo, sans-serif'; x.fillText(tr('artiest.voet'), AK.W / 2, AK.H - 62);
@@ -17529,12 +17568,14 @@ async function toonOpslagInfo() {
   if (!el) return;
   if (!(navigator.storage && navigator.storage.estimate)) { el.textContent = ''; return; }
   try {
-    const { usage = 0, quota = 0 } = await navigator.storage.estimate();
+    const est = await navigator.storage.estimate(), quota = est.quota || 0, totaal = est.usage || 0;   // R7-8
+    const det = est.usageDetails, usage = (det && typeof det.indexedDB === 'number') ? det.indexedDB : totaal;   // alleen de collectie, niet de app-cache
+    if (!(usage > 0)) { el.textContent = ''; return; }   // eerste meting kan 0 zijn: dan geen '0 MB'
     // Hoeveel van het toestelbudget vol is, is geen vraag die iemand zich stelt: "4,2 MB van
     // 2984 MB" leest als systeeminformatie. Wat telt is hoeveel jouw collectie kost, en of er
     // iets moet gebeuren. Het budget noemen we dus alleen als het knelt.
     let tekst = tr('opslag.gebruik').replace('{maat}', maatLabel(usage));
-    if (quota && usage / quota > 0.8) {
+    if (quota && totaal / quota > 0.8) {   // R7-8: bijna vol telt alles
       tekst += ' ' + tr('opslag.van').replace('{maat}', maatLabel(quota))
              + ' ' + tr('opslag.bijnavol');
     }
@@ -18914,7 +18955,7 @@ function renderDetail() {
       let statusBlok;
       if (t.geheeld) {
         statusBlok = '<p>' + tr('badge.geheeld') + '</p>';
-      } else if (oud) {
+      } else if (oud || (t.datum && new Date(t.datum + 'T00:00:00').getTime() > Date.now())) {   // R7-6: ook een datum in de toekomst
         statusBlok = '';
       } else if (t.datum) {
         const doel = new Date(t.datum + 'T00:00:00');   // lokale middernacht (voorkomt off-by-one t.o.v. UTC)
@@ -19222,7 +19263,7 @@ async function openFormulier(id = null) {
       <div class="rij2">
         <div class="veld">
           <label for="f-datum" id="f-datum-label">${tr('form.datum')}</label>
-          <input id="f-datum" type="date" value="${esc(t.datum)}">
+          <input id="f-datum" type="date" max="2099-12-31" value="${esc(t.datum)}">
         </div>
         <div class="veld">
           <label for="f-lichaamsdeel">${tr('form.lichaamsdeel')}</label>
