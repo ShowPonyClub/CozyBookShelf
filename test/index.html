@@ -3371,6 +3371,13 @@ body.onb-inlog .account-modal{z-index:100002}
 /* R7-11: 'Nieuwe tattoo' op de rode tegel: wit (5,2:1 in donker) */
 .greep-plus .greep-plus-tekst{color:#fff}
 </style>
+<style id="proefplek">
+#proef-kies .ak-artiest{width:min(420px,94vw);display:flex;flex-direction:column;gap:12px;max-height:92vh;overflow:auto}
+#proef-kies .ak-voorbeeld{display:flex;align-items:center;justify-content:center;min-height:220px;background:var(--bg);border:1px solid var(--rand)}
+#proef-kies .ak-voorbeeld img{display:block;width:100%;max-height:52vh;object-fit:contain}
+#proef-kies .ak-voorbeeld img[hidden]{display:none}
+#proef-kies .ak-voorbeeld p{margin:0;padding:24px;text-align:center}
+</style>
 </head>
 <body>
 <div id="bootsplash" aria-hidden="true"><img class="bs-logo logo-licht" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjIzLjAgMjIgMjU0LjAgNzAiIHdpZHRoPSI1MDgiIGhlaWdodD0iMTQwIj4NCjx0aXRsZT5UYXR0aWVzPC90aXRsZT4NCjxwb2x5Z29uIHBvaW50cz0iMjYuMCw0MCA2OC4wLDQwIDY4LjAsOTAgMjYuMCw5MCAzNi44LDY1IiBmaWxsPSIjQ0UyNzI3IiBzdHJva2U9IiMxNzEzMEYiIHN0cm9rZS13aWR0aD0iMy41IiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+DQo8cG9seWdvbiBwb2ludHM9IjI3NC4wLDQwIDIzMi4wLDQwIDIzMi4wLDkwIDI3NC4wLDkwIDI2My4yLDY1IiBmaWxsPSIjQ0UyNzI3IiBzdHJva2U9IiMxNzEzMEYiIHN0cm9rZS13aWR0aD0iMy41IiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+DQo8cG9seWdvbiBwb2ludHM9IjU2LjAsNzYgNjguMCw3NiA2OC4wLDkwIiBmaWxsPSIjMTcxMzBGIiBzdHJva2U9IiMxNzEzMEYiIHN0cm9rZS13aWR0aD0iMy41IiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+DQo8cG9seWdvbiBwb2ludHM9IjI0NC4wLDc2IDIzMi4wLDc2IDIzMi4wLDkwIiBmaWxsPSIjMTcxMzBGIiBzdHJva2U9IiMxNzEzMEYiIHN0cm9rZS13aWR0aD0iMy41IiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+DQo8cmVjdCB4PSI1Ni4wIiB5PSIyNCIgd2lkdGg9IjE4OCIgaGVpZ2h0PSI1MiIgZmlsbD0iI0ZBRjRFOCIgc3Ryb2tlPSIjMTcxMzBGIiBzdHJva2Utd2lkdGg9IjMuNSIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPg0KPHBhdGggZmlsbD0iIzE3MTMwRiIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoNzQuNjY0IDYzLjE5MSkgc2NhbGUoMC4wMTY4MikiIGQ9Ik0xNjM0IC0xNDczVi04ODdIMTMwNVExMzA1IC05NTQgMTMwMS41IC0xMDAzLjVRMTI5OCAtMTA1MyAxMjg2LjAgLTEwODMuNVExMjc0IC0xMTE0IDEyNDkuNSAtMTEyOC41UTEyMjUgLTExNDMgMTE4NCAtMTE0M0gxMTIyVi00ODNRMTEyMiAtNDE4IDExNjAuMCAtMzk0LjVRMTE5OCAtMzcxIDEyODYgLTM3MVYwSDM2OVYtMzcxUTQ1NyAtMzcxIDQ5NC41IC0zOTQuNVE1MzIgLTQxOCA1MzIgLTQ4M1YtMTE0M0g0NzFRNDMwIC0xMTQzIDQwNS41IC0xMTI4LjVRMzgxIC0xMTE0IDM2OC41IC0xMDgzLjVRMzU2IC0xMDUzIDM1My4wIC0xMDAzLjVRMzUwIC05NTQgMzUwIC04ODdIMjBWLTE0NzNaTTIyMDAuMCAtOTYzUTIxNDkuMCAtOTYzIDIxMTIuNSAtOTU1LjVRMjA3Ni4wIC05NDggMjA1MC4wIC05MzguMFEyMDI0LjAgLTkyOCAyMDA3LjAgLTkxNS41UTE5OTAuMCAtOTAzIDE5NzcuMCAtODkzTDE5ODcuMCAtODgzUTIwMDYuMCAtODkzIDIwMjguNSAtOTAzLjBRMjA1MS4wIC05MTMgMjA4Ni4wIC05MTNRMjE0NS4wIC05MTMgMjE4OC4wIC04NzQuNVEyMjMxLjAgLTgzNiAyMjMxLjAgLTc1MlEyMjMxLjAgLTY3MiAyMTY1LjUgLTYyMy41UTIxMDAuMCAtNTc1IDE5OTAuMCAtNTc1UTE4ODUuMCAtNTc1IDE4MjIuNSAtNjM1LjVRMTc2MC4wIC02OTYgMTc2MC4wIC04MDdRMTc2MC4wIC04NjggMTc5NC4wIC05MjguNVExODI4LjAgLTk4OSAxODk5LjUgLTEwMzcuMFExOTcxLjAgLTEwODUgMjA4MS41IC0xMTE2LjBRMjE5Mi4wIC0xMTQ3IDIzNDguMCAtMTE0N1EyNTM0LjAgLTExNDcgMjY1Mi4wIC0xMTEyLjBRMjc3MC4wIC0xMDc3IDI4MzUuNSAtMTAyMi4wUTI5MDEuMCAtOTY3IDI5MjUuNSAtODk3LjBRMjk1MC4wIC04MjcgMjk1MC4wIC03NTZWLTM2NVEyOTUwLjAgLTI3NCAyOTU2LjAgLTI0MS41UTI5NjIuMCAtMjA5IDMwMDEuMCAtMjA5UTMwMzIuMCAtMjA5IDMwNDQuNSAtMjM4LjVRMzA1Ny4wIC0yNjggMzA1Ny4wIC0zNDBWLTQ2NUgzMTcxLjBWLTMzOFEzMTcxLjAgLTI0OCAzMTU2LjAgLTE3OC41UTMxNDEuMCAtMTA5IDMwOTkuMCAtNTkuNVEzMDU3LjAgLTEwIDI5ODUuMCAxNS41UTI5MTMuMCA0MSAyODAxLjAgNDFRMjcwMC4wIDQxIDI2MzMuNSAxOS41UTI1NjcuMCAtMiAyNTI4LjAgLTM0LjBRMjQ4OS4wIC02NiAyNDcyLjUgLTEwMC41UTI0NTYuMCAtMTM1IDI0NTYuMCAtMTYySDI0NDAuMFEyNDM0LjAgLTEyMSAyNDA1LjUgLTg0LjBRMjM3Ny4wIC00NyAyMzI2LjUgLTE4LjVRMjI3Ni4wIDEwIDIyMDUuNSAyNy41UTIxMzUuMCA0NSAyMDQ1LjAgNDVRMTk1OS4wIDQ1IDE4ODguNSAyOC41UTE4MTguMCAxMiAxNzY4LjUgLTIzLjVRMTcxOS4wIC01OSAxNjkxLjUgLTExNS41UTE2NjQuMCAtMTcyIDE2NjQuMCAtMjUwUTE2NjQuMCAtMzQ2IDE3MTguMCAtNDAxLjVRMTc3Mi4wIC00NTcgMTg1NC4wIC00ODkuNVExOTM2LjAgLTUyMiAyMDMyLjUgLTU0Mi41UTIxMjkuMCAtNTYzIDIyMTEuMCAtNTkyLjBRMjI5My4wIC02MjEgMjM0Ny4wIC02NjcuMFEyNDAxLjAgLTcxMyAyNDAxLjAgLTc5N1EyNDAxLjAgLTg3MiAyMzU0LjAgLTkxNy41UTIzMDcuMCAtOTYzIDIyMDAuMCAtOTYzWk0yNDAxLjAgLTUzMFEyMzc5LjAgLTQ5OCAyMzQ2LjAgLTQ3OC41UTIzMTMuMCAtNDU5IDIyODIuNSAtNDQwLjVRMjI1Mi4wIC00MjIgMjIyOS41IC0zOTYuNVEyMjA3LjAgLTM3MSAyMjA3LjAgLTMyOFEyMjA3LjAgLTI5NSAyMjI1LjAgLTI2OC41UTIyNDMuMCAtMjQyIDIyOTUuMCAtMjQyUTIzNDIuMCAtMjQyIDIzNzEuNSAtMjc4LjVRMjQwMS4wIC0zMTUgMjQwMS4wIC0zODFaTTM4OTYuMCAtMTQ3M1YtMTEwMkg0MTk1LjBWLTczMUgzODk2LjBWLTQyNFEzODk2LjAgLTM1OCAzOTE0LjUgLTMxNi4wUTM5MzMuMCAtMjc0IDM5OTEuMCAtMjc0UTQwMjMuMCAtMjc0IDQwNDIuNSAtMjg2LjVRNDA2Mi4wIC0yOTkgNDA3My41IC0zMTkuNVE0MDg1LjAgLTM0MCA0MDg4LjAgLTM2Ni41UTQwOTEuMCAtMzkzIDQwOTEuMCAtNDI0Vi01NzNINDIwNi4wVi00MTJRNDIwNi4wIC0zMTUgNDE4NS41IC0yMzEuMFE0MTY1LjAgLTE0NyA0MTE1LjUgLTg2LjBRNDA2Ni4wIC0yNSAzOTgxLjAgMTEuMFEzODk2LjAgNDcgMzc2Ny4wIDQ3UTM2MjQuMCA0NyAzNTM5LjAgMTIuMFEzNDU0LjAgLTIzIDM0MTAuMCAtODQuMFEzMzY2LjAgLTE0NSAzMzUyLjUgLTIyOS4wUTMzMzkuMCAtMzEzIDMzMzkuMCAtNDEyVi03MzFIMzE4Mi4wVi0xMDYxUTMyNTcuMCAtMTA2MSAzMzIxLjUgLTEwOTMuNVEzMzg2LjAgLTExMjYgMzQzMi41IC0xMTgzLjVRMzQ3OS4wIC0xMjQxIDM1MDQuNSAtMTMxNS4wUTM1MzAuMCAtMTM4OSAzNTMwLjAgLTE0NzNaTTQ5NjcuMCAtMTQ3M1YtMTEwMkg1MjY2LjBWLTczMUg0OTY3LjBWLTQyNFE0OTY3LjAgLTM1OCA0OTg1LjUgLTMxNi4wUTUwMDQuMCAtMjc0IDUwNjIuMCAtMjc0UTUwOTQuMCAtMjc0IDUxMTMuNSAtMjg2LjVRNTEzMy4wIC0yOTkgNTE0NC41IC0zMTkuNVE1MTU2LjAgLTM0MCA1MTU5LjAgLTM2Ni41UTUxNjIuMCAtMzkzIDUxNjIuMCAtNDI0Vi01NzNINTI3Ny4wVi00MTJRNTI3Ny4wIC0zMTUgNTI1Ni41IC0yMzEuMFE1MjM2LjAgLTE0NyA1MTg2LjUgLTg2LjBRNTEzNy4wIC0yNSA1MDUyLjAgMTEuMFE0OTY3LjAgNDcgNDgzOC4wIDQ3UTQ2OTUuMCA0NyA0NjEwLjAgMTIuMFE0NTI1LjAgLTIzIDQ0ODEuMCAtODQuMFE0NDM3LjAgLTE0NSA0NDIzLjUgLTIyOS4wUTQ0MTAuMCAtMzEzIDQ0MTAuMCAtNDEyVi03MzFINDI1My4wVi0xMDYxUTQzMjguMCAtMTA2MSA0MzkyLjUgLTEwOTMuNVE0NDU3LjAgLTExMjYgNDUwMy41IC0xMTgzLjVRNDU1MC4wIC0xMjQxIDQ1NzUuNSAtMTMxNS4wUTQ2MDEuMCAtMTM4OSA0NjAxLjAgLTE0NzNaTTYwNzcuMCAtMTEwMlYtNDc5UTYwNzcuMCAtNDEyIDYxMTAuMCAtMzkxLjVRNjE0My4wIC0zNzEgNjE5NC4wIC0zNzFINjIyMS4wVjBINTM3OS4wVi0zNzFINTQxOC4wUTU0NzEuMCAtMzcxIDU0OTYuNSAtNDA0LjVRNTUyMi4wIC00MzggNTUyMi4wIC00NzdWLTYxOFE1NTIyLjAgLTY3NiA1NDg1LjUgLTcwMy41UTU0NDkuMCAtNzMxIDU0MDEuMCAtNzMxSDUzNzkuMFYtMTEwMlpNNTUwNi4wIC0xMzQ4UTU1MDYuMCAtMTQzNCA1NTcxLjUgLTE0OTUuMFE1NjM3LjAgLTE1NTYgNTc1OC4wIC0xNTU2UTU4ODEuMCAtMTU1NiA1OTQ3LjUgLTE0OTUuMFE2MDE0LjAgLTE0MzQgNjAxNC4wIC0xMzQ4UTYwMTQuMCAtMTI2MCA1OTQ3LjUgLTExOTkuNVE1ODgxLjAgLTExMzkgNTc1OC4wIC0xMTM5UTU2MzcuMCAtMTEzOSA1NTcxLjUgLTExOTkuNVE1NTA2LjAgLTEyNjAgNTUwNi4wIC0xMzQ4Wk02ODUzLjAgLTQ4OVE2ODU3LjAgLTM0MCA2OTA5LjUgLTI4My41UTY5NjIuMCAtMjI3IDcwNjAuMCAtMjI3UTcwOTMuMCAtMjI3IDcxMjQuNSAtMjM2LjVRNzE1Ni4wIC0yNDYgNzE4My4wIC0yNjcuNVE3MjEwLjAgLTI4OSA3MjI5LjUgLTMyNC41UTcyNDkuMCAtMzYwIDcyNTUuMCAtNDE0SDc2MTkuMFE3NTk5LjAgLTI4NSA3NTQ1LjUgLTE5OC4wUTc0OTIuMCAtMTExIDc0MDguMCAtNTcuNVE3MzI0LjAgLTQgNzIxMi41IDE5LjVRNzEwMS4wIDQzIDY5NjQuMCA0M1E2ODIzLjAgNDMgNjY5OS4wIDcuMFE2NTc1LjAgLTI5IDY0ODEuNSAtMTAyLjVRNjM4OC4wIC0xNzYgNjMzNS4wIC0yODcuNVE2MjgyLjAgLTM5OSA2MjgyLjAgLTU1M1E2MjgyLjAgLTcwMCA2MzMyLjAgLTgxMS4wUTYzODIuMCAtOTIyIDY0NzIuNSAtOTk2LjVRNjU2My4wIC0xMDcxIDY2ODYuNSAtMTEwOS4wUTY4MTAuMCAtMTE0NyA2OTU4LjAgLTExNDdRNzE0MC4wIC0xMTQ3IDcyNzEuMCAtMTA5OS4wUTc0MDIuMCAtMTA1MSA3NDg1LjAgLTk2NS4wUTc1NjguMCAtODc5IDc2MDcuMCAtNzU4LjBRNzY0Ni4wIC02MzcgNzY0NC4wIC00ODlaTTcwMDEuMCAtODc3UTY5MzEuMCAtODc3IDY4OTcuNSAtODI3LjVRNjg2NC4wIC03NzggNjg1My4wIC02NjRINzE0Ni4wUTcxNDAuMCAtNzYyIDcxMDQuMCAtODE5LjVRNzA2OC4wIC04NzcgNzAwMS4wIC04NzdaTTg5MDQuMCAtNzM3SDg2MjkuMFE4NjAwLjAgLTgwOSA4NTM5LjAgLTg1MS4wUTg0NzguMCAtODkzIDg0MTIuMCAtODkzUTgzNjcuMCAtODkzIDgzNDAuNSAtODc2LjVRODMxNC4wIC04NjAgODMxNC4wIC04MjdRODMxNC4wIC03ODYgODM2MC4wIC03NjUuNVE4NDA2LjAgLTc0NSA4NDc1LjUgLTcyOS4wUTg1NDUuMCAtNzEzIDg2MjYuMCAtNjkwLjVRODcwNy4wIC02NjggODc3Ni41IC02MjYuMFE4ODQ2LjAgLTU4NCA4ODkyLjAgLTUxMy4wUTg5MzguMCAtNDQyIDg5MzguMCAtMzI2UTg5MzguMCAtMjM2IDg4OTguMCAtMTY5LjBRODg1OC4wIC0xMDIgODc4OC41IC01OS4wUTg3MTkuMCAtMTYgODYyNS4wIDUuNVE4NTMxLjAgMjcgODQyMi4wIDI3UTgzMTYuMCAyNyA4MjIxLjUgNi41UTgxMjcuMCAtMTQgODA0MS4wIC02M0w4MDMxLjAgNkg3NzY3LjBWLTM5NUg4MDQxLjBRODA4MC4wIC0zMTUgODEzOS41IC0yNzEuMFE4MTk5LjAgLTIyNyA4MjcxLjAgLTIyN1E4MzI2LjAgLTIyNyA4MzQ5LjUgLTI0Ny41UTgzNzMuMCAtMjY4IDgzNzMuMCAtMjkzUTgzNzMuMCAtMzM0IDgzMjcuMCAtMzU2LjVRODI4MS4wIC0zNzkgODIxMy41IC0zOTYuNVE4MTQ2LjAgLTQxNCA4MDY1LjAgLTQzNS41UTc5ODQuMCAtNDU3IDc5MTYuNSAtNDk4LjBRNzg0OS4wIC01MzkgNzgwMy4wIC02MDguNVE3NzU3LjAgLTY3OCA3NzU3LjAgLTc5MVE3NzU3LjAgLTg3MiA3NzkzLjUgLTkzOS4wUTc4MzAuMCAtMTAwNiA3ODk4LjAgLTEwNTIuMFE3OTY2LjAgLTEwOTggODA1OC4wIC0xMTIyLjVRODE1MC4wIC0xMTQ3IDgyNjAuMCAtMTE0N1E4MzgzLjAgLTExNDcgODQ4MS41IC0xMTE5LjVRODU4MC4wIC0xMDkyIDg2MjkuMCAtMTA1OUw4NjM5LjAgLTExMzBIODkwNC4wWiIvPg0KPC9zdmc+DQo=" alt=""><img class="bs-logo logo-donker" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjIzLjAgMjIgMjU0LjAgNzAiIHdpZHRoPSI1MDgiIGhlaWdodD0iMTQwIj4NCjx0aXRsZT5UYXR0aWVzPC90aXRsZT4NCjxwb2x5Z29uIHBvaW50cz0iMjYuMCw0MCA2OC4wLDQwIDY4LjAsOTAgMjYuMCw5MCAzNi44LDY1IiBmaWxsPSIjQ0UyNzI3IiBzdHJva2U9IiNFREUzQ0YiIHN0cm9rZS13aWR0aD0iMy41IiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+DQo8cG9seWdvbiBwb2ludHM9IjI3NC4wLDQwIDIzMi4wLDQwIDIzMi4wLDkwIDI3NC4wLDkwIDI2My4yLDY1IiBmaWxsPSIjQ0UyNzI3IiBzdHJva2U9IiNFREUzQ0YiIHN0cm9rZS13aWR0aD0iMy41IiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+DQo8cG9seWdvbiBwb2ludHM9IjU2LjAsNzYgNjguMCw3NiA2OC4wLDkwIiBmaWxsPSIjOEUxQjFCIiBzdHJva2U9IiNFREUzQ0YiIHN0cm9rZS13aWR0aD0iMy41IiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+DQo8cG9seWdvbiBwb2ludHM9IjI0NC4wLDc2IDIzMi4wLDc2IDIzMi4wLDkwIiBmaWxsPSIjOEUxQjFCIiBzdHJva2U9IiNFREUzQ0YiIHN0cm9rZS13aWR0aD0iMy41IiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+DQo8cmVjdCB4PSI1Ni4wIiB5PSIyNCIgd2lkdGg9IjE4OCIgaGVpZ2h0PSI1MiIgZmlsbD0iIzE3MTMwRiIgc3Ryb2tlPSIjRURFM0NGIiBzdHJva2Utd2lkdGg9IjMuNSIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPg0KPHBhdGggZmlsbD0iI0VERTNDRiIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoNzQuNjY0IDYzLjE5MSkgc2NhbGUoMC4wMTY4MikiIGQ9Ik0xNjM0IC0xNDczVi04ODdIMTMwNVExMzA1IC05NTQgMTMwMS41IC0xMDAzLjVRMTI5OCAtMTA1MyAxMjg2LjAgLTEwODMuNVExMjc0IC0xMTE0IDEyNDkuNSAtMTEyOC41UTEyMjUgLTExNDMgMTE4NCAtMTE0M0gxMTIyVi00ODNRMTEyMiAtNDE4IDExNjAuMCAtMzk0LjVRMTE5OCAtMzcxIDEyODYgLTM3MVYwSDM2OVYtMzcxUTQ1NyAtMzcxIDQ5NC41IC0zOTQuNVE1MzIgLTQxOCA1MzIgLTQ4M1YtMTE0M0g0NzFRNDMwIC0xMTQzIDQwNS41IC0xMTI4LjVRMzgxIC0xMTE0IDM2OC41IC0xMDgzLjVRMzU2IC0xMDUzIDM1My4wIC0xMDAzLjVRMzUwIC05NTQgMzUwIC04ODdIMjBWLTE0NzNaTTIyMDAuMCAtOTYzUTIxNDkuMCAtOTYzIDIxMTIuNSAtOTU1LjVRMjA3Ni4wIC05NDggMjA1MC4wIC05MzguMFEyMDI0LjAgLTkyOCAyMDA3LjAgLTkxNS41UTE5OTAuMCAtOTAzIDE5NzcuMCAtODkzTDE5ODcuMCAtODgzUTIwMDYuMCAtODkzIDIwMjguNSAtOTAzLjBRMjA1MS4wIC05MTMgMjA4Ni4wIC05MTNRMjE0NS4wIC05MTMgMjE4OC4wIC04NzQuNVEyMjMxLjAgLTgzNiAyMjMxLjAgLTc1MlEyMjMxLjAgLTY3MiAyMTY1LjUgLTYyMy41UTIxMDAuMCAtNTc1IDE5OTAuMCAtNTc1UTE4ODUuMCAtNTc1IDE4MjIuNSAtNjM1LjVRMTc2MC4wIC02OTYgMTc2MC4wIC04MDdRMTc2MC4wIC04NjggMTc5NC4wIC05MjguNVExODI4LjAgLTk4OSAxODk5LjUgLTEwMzcuMFExOTcxLjAgLTEwODUgMjA4MS41IC0xMTE2LjBRMjE5Mi4wIC0xMTQ3IDIzNDguMCAtMTE0N1EyNTM0LjAgLTExNDcgMjY1Mi4wIC0xMTEyLjBRMjc3MC4wIC0xMDc3IDI4MzUuNSAtMTAyMi4wUTI5MDEuMCAtOTY3IDI5MjUuNSAtODk3LjBRMjk1MC4wIC04MjcgMjk1MC4wIC03NTZWLTM2NVEyOTUwLjAgLTI3NCAyOTU2LjAgLTI0MS41UTI5NjIuMCAtMjA5IDMwMDEuMCAtMjA5UTMwMzIuMCAtMjA5IDMwNDQuNSAtMjM4LjVRMzA1Ny4wIC0yNjggMzA1Ny4wIC0zNDBWLTQ2NUgzMTcxLjBWLTMzOFEzMTcxLjAgLTI0OCAzMTU2LjAgLTE3OC41UTMxNDEuMCAtMTA5IDMwOTkuMCAtNTkuNVEzMDU3LjAgLTEwIDI5ODUuMCAxNS41UTI5MTMuMCA0MSAyODAxLjAgNDFRMjcwMC4wIDQxIDI2MzMuNSAxOS41UTI1NjcuMCAtMiAyNTI4LjAgLTM0LjBRMjQ4OS4wIC02NiAyNDcyLjUgLTEwMC41UTI0NTYuMCAtMTM1IDI0NTYuMCAtMTYySDI0NDAuMFEyNDM0LjAgLTEyMSAyNDA1LjUgLTg0LjBRMjM3Ny4wIC00NyAyMzI2LjUgLTE4LjVRMjI3Ni4wIDEwIDIyMDUuNSAyNy41UTIxMzUuMCA0NSAyMDQ1LjAgNDVRMTk1OS4wIDQ1IDE4ODguNSAyOC41UTE4MTguMCAxMiAxNzY4LjUgLTIzLjVRMTcxOS4wIC01OSAxNjkxLjUgLTExNS41UTE2NjQuMCAtMTcyIDE2NjQuMCAtMjUwUTE2NjQuMCAtMzQ2IDE3MTguMCAtNDAxLjVRMTc3Mi4wIC00NTcgMTg1NC4wIC00ODkuNVExOTM2LjAgLTUyMiAyMDMyLjUgLTU0Mi41UTIxMjkuMCAtNTYzIDIyMTEuMCAtNTkyLjBRMjI5My4wIC02MjEgMjM0Ny4wIC02NjcuMFEyNDAxLjAgLTcxMyAyNDAxLjAgLTc5N1EyNDAxLjAgLTg3MiAyMzU0LjAgLTkxNy41UTIzMDcuMCAtOTYzIDIyMDAuMCAtOTYzWk0yNDAxLjAgLTUzMFEyMzc5LjAgLTQ5OCAyMzQ2LjAgLTQ3OC41UTIzMTMuMCAtNDU5IDIyODIuNSAtNDQwLjVRMjI1Mi4wIC00MjIgMjIyOS41IC0zOTYuNVEyMjA3LjAgLTM3MSAyMjA3LjAgLTMyOFEyMjA3LjAgLTI5NSAyMjI1LjAgLTI2OC41UTIyNDMuMCAtMjQyIDIyOTUuMCAtMjQyUTIzNDIuMCAtMjQyIDIzNzEuNSAtMjc4LjVRMjQwMS4wIC0zMTUgMjQwMS4wIC0zODFaTTM4OTYuMCAtMTQ3M1YtMTEwMkg0MTk1LjBWLTczMUgzODk2LjBWLTQyNFEzODk2LjAgLTM1OCAzOTE0LjUgLTMxNi4wUTM5MzMuMCAtMjc0IDM5OTEuMCAtMjc0UTQwMjMuMCAtMjc0IDQwNDIuNSAtMjg2LjVRNDA2Mi4wIC0yOTkgNDA3My41IC0zMTkuNVE0MDg1LjAgLTM0MCA0MDg4LjAgLTM2Ni41UTQwOTEuMCAtMzkzIDQwOTEuMCAtNDI0Vi01NzNINDIwNi4wVi00MTJRNDIwNi4wIC0zMTUgNDE4NS41IC0yMzEuMFE0MTY1LjAgLTE0NyA0MTE1LjUgLTg2LjBRNDA2Ni4wIC0yNSAzOTgxLjAgMTEuMFEzODk2LjAgNDcgMzc2Ny4wIDQ3UTM2MjQuMCA0NyAzNTM5LjAgMTIuMFEzNDU0LjAgLTIzIDM0MTAuMCAtODQuMFEzMzY2LjAgLTE0NSAzMzUyLjUgLTIyOS4wUTMzMzkuMCAtMzEzIDMzMzkuMCAtNDEyVi03MzFIMzE4Mi4wVi0xMDYxUTMyNTcuMCAtMTA2MSAzMzIxLjUgLTEwOTMuNVEzMzg2LjAgLTExMjYgMzQzMi41IC0xMTgzLjVRMzQ3OS4wIC0xMjQxIDM1MDQuNSAtMTMxNS4wUTM1MzAuMCAtMTM4OSAzNTMwLjAgLTE0NzNaTTQ5NjcuMCAtMTQ3M1YtMTEwMkg1MjY2LjBWLTczMUg0OTY3LjBWLTQyNFE0OTY3LjAgLTM1OCA0OTg1LjUgLTMxNi4wUTUwMDQuMCAtMjc0IDUwNjIuMCAtMjc0UTUwOTQuMCAtMjc0IDUxMTMuNSAtMjg2LjVRNTEzMy4wIC0yOTkgNTE0NC41IC0zMTkuNVE1MTU2LjAgLTM0MCA1MTU5LjAgLTM2Ni41UTUxNjIuMCAtMzkzIDUxNjIuMCAtNDI0Vi01NzNINTI3Ny4wVi00MTJRNTI3Ny4wIC0zMTUgNTI1Ni41IC0yMzEuMFE1MjM2LjAgLTE0NyA1MTg2LjUgLTg2LjBRNTEzNy4wIC0yNSA1MDUyLjAgMTEuMFE0OTY3LjAgNDcgNDgzOC4wIDQ3UTQ2OTUuMCA0NyA0NjEwLjAgMTIuMFE0NTI1LjAgLTIzIDQ0ODEuMCAtODQuMFE0NDM3LjAgLTE0NSA0NDIzLjUgLTIyOS4wUTQ0MTAuMCAtMzEzIDQ0MTAuMCAtNDEyVi03MzFINDI1My4wVi0xMDYxUTQzMjguMCAtMTA2MSA0MzkyLjUgLTEwOTMuNVE0NDU3LjAgLTExMjYgNDUwMy41IC0xMTgzLjVRNDU1MC4wIC0xMjQxIDQ1NzUuNSAtMTMxNS4wUTQ2MDEuMCAtMTM4OSA0NjAxLjAgLTE0NzNaTTYwNzcuMCAtMTEwMlYtNDc5UTYwNzcuMCAtNDEyIDYxMTAuMCAtMzkxLjVRNjE0My4wIC0zNzEgNjE5NC4wIC0zNzFINjIyMS4wVjBINTM3OS4wVi0zNzFINTQxOC4wUTU0NzEuMCAtMzcxIDU0OTYuNSAtNDA0LjVRNTUyMi4wIC00MzggNTUyMi4wIC00NzdWLTYxOFE1NTIyLjAgLTY3NiA1NDg1LjUgLTcwMy41UTU0NDkuMCAtNzMxIDU0MDEuMCAtNzMxSDUzNzkuMFYtMTEwMlpNNTUwNi4wIC0xMzQ4UTU1MDYuMCAtMTQzNCA1NTcxLjUgLTE0OTUuMFE1NjM3LjAgLTE1NTYgNTc1OC4wIC0xNTU2UTU4ODEuMCAtMTU1NiA1OTQ3LjUgLTE0OTUuMFE2MDE0LjAgLTE0MzQgNjAxNC4wIC0xMzQ4UTYwMTQuMCAtMTI2MCA1OTQ3LjUgLTExOTkuNVE1ODgxLjAgLTExMzkgNTc1OC4wIC0xMTM5UTU2MzcuMCAtMTEzOSA1NTcxLjUgLTExOTkuNVE1NTA2LjAgLTEyNjAgNTUwNi4wIC0xMzQ4Wk02ODUzLjAgLTQ4OVE2ODU3LjAgLTM0MCA2OTA5LjUgLTI4My41UTY5NjIuMCAtMjI3IDcwNjAuMCAtMjI3UTcwOTMuMCAtMjI3IDcxMjQuNSAtMjM2LjVRNzE1Ni4wIC0yNDYgNzE4My4wIC0yNjcuNVE3MjEwLjAgLTI4OSA3MjI5LjUgLTMyNC41UTcyNDkuMCAtMzYwIDcyNTUuMCAtNDE0SDc2MTkuMFE3NTk5LjAgLTI4NSA3NTQ1LjUgLTE5OC4wUTc0OTIuMCAtMTExIDc0MDguMCAtNTcuNVE3MzI0LjAgLTQgNzIxMi41IDE5LjVRNzEwMS4wIDQzIDY5NjQuMCA0M1E2ODIzLjAgNDMgNjY5OS4wIDcuMFE2NTc1LjAgLTI5IDY0ODEuNSAtMTAyLjVRNjM4OC4wIC0xNzYgNjMzNS4wIC0yODcuNVE2MjgyLjAgLTM5OSA2MjgyLjAgLTU1M1E2MjgyLjAgLTcwMCA2MzMyLjAgLTgxMS4wUTYzODIuMCAtOTIyIDY0NzIuNSAtOTk2LjVRNjU2My4wIC0xMDcxIDY2ODYuNSAtMTEwOS4wUTY4MTAuMCAtMTE0NyA2OTU4LjAgLTExNDdRNzE0MC4wIC0xMTQ3IDcyNzEuMCAtMTA5OS4wUTc0MDIuMCAtMTA1MSA3NDg1LjAgLTk2NS4wUTc1NjguMCAtODc5IDc2MDcuMCAtNzU4LjBRNzY0Ni4wIC02MzcgNzY0NC4wIC00ODlaTTcwMDEuMCAtODc3UTY5MzEuMCAtODc3IDY4OTcuNSAtODI3LjVRNjg2NC4wIC03NzggNjg1My4wIC02NjRINzE0Ni4wUTcxNDAuMCAtNzYyIDcxMDQuMCAtODE5LjVRNzA2OC4wIC04NzcgNzAwMS4wIC04NzdaTTg5MDQuMCAtNzM3SDg2MjkuMFE4NjAwLjAgLTgwOSA4NTM5LjAgLTg1MS4wUTg0NzguMCAtODkzIDg0MTIuMCAtODkzUTgzNjcuMCAtODkzIDgzNDAuNSAtODc2LjVRODMxNC4wIC04NjAgODMxNC4wIC04MjdRODMxNC4wIC03ODYgODM2MC4wIC03NjUuNVE4NDA2LjAgLTc0NSA4NDc1LjUgLTcyOS4wUTg1NDUuMCAtNzEzIDg2MjYuMCAtNjkwLjVRODcwNy4wIC02NjggODc3Ni41IC02MjYuMFE4ODQ2LjAgLTU4NCA4ODkyLjAgLTUxMy4wUTg5MzguMCAtNDQyIDg5MzguMCAtMzI2UTg5MzguMCAtMjM2IDg4OTguMCAtMTY5LjBRODg1OC4wIC0xMDIgODc4OC41IC01OS4wUTg3MTkuMCAtMTYgODYyNS4wIDUuNVE4NTMxLjAgMjcgODQyMi4wIDI3UTgzMTYuMCAyNyA4MjIxLjUgNi41UTgxMjcuMCAtMTQgODA0MS4wIC02M0w4MDMxLjAgNkg3NzY3LjBWLTM5NUg4MDQxLjBRODA4MC4wIC0zMTUgODEzOS41IC0yNzEuMFE4MTk5LjAgLTIyNyA4MjcxLjAgLTIyN1E4MzI2LjAgLTIyNyA4MzQ5LjUgLTI0Ny41UTgzNzMuMCAtMjY4IDgzNzMuMCAtMjkzUTgzNzMuMCAtMzM0IDgzMjcuMCAtMzU2LjVRODI4MS4wIC0zNzkgODIxMy41IC0zOTYuNVE4MTQ2LjAgLTQxNCA4MDY1LjAgLTQzNS41UTc5ODQuMCAtNDU3IDc5MTYuNSAtNDk4LjBRNzg0OS4wIC01MzkgNzgwMy4wIC02MDguNVE3NzU3LjAgLTY3OCA3NzU3LjAgLTc5MVE3NzU3LjAgLTg3MiA3NzkzLjUgLTkzOS4wUTc4MzAuMCAtMTAwNiA3ODk4LjAgLTEwNTIuMFE3OTY2LjAgLTEwOTggODA1OC4wIC0xMTIyLjVRODE1MC4wIC0xMTQ3IDgyNjAuMCAtMTE0N1E4MzgzLjAgLTExNDcgODQ4MS41IC0xMTE5LjVRODU4MC4wIC0xMDkyIDg2MjkuMCAtMTA1OUw4NjM5LjAgLTExMzBIODkwNC4wWiIvPg0KPC9zdmc+DQo=" alt=""><span class="bs-lijn"></span></div>
@@ -4242,6 +4249,15 @@ body.onb-inlog .account-modal{z-index:100002}
     <label class="ak-notitie" id="artiest-notitie-rij"><input type="checkbox" id="artiest-notitie" checked><span data-i18n="artiest.notitie">Notitie meesturen</span></label>
     <button type="button" class="knop" id="artiest-delen" data-i18n="artiest.delen">Delen</button>
     <button type="button" class="knop-sec" id="artiest-annuleer" data-i18n="aria.annuleren">Annuleren</button>
+  </div>
+</div>
+<div id="proef-kies" class="add-kies" hidden role="dialog" aria-modal="true" data-i18n-aria="proef.titel" aria-label="Welke plek?">
+  <div class="add-kies-kaart ak-artiest">
+    <p class="add-kies-titel" data-i18n="proef.titel">Welke plek?</p>
+    <div class="ak-voorbeeld"><img id="proef-beeld" alt="" hidden><p id="proef-bezig" class="gedempt">Kaart maken</p></div>
+    <button type="button" class="knop" id="proef-kies-b" data-i18n="proef.kies_b">Kies plek B</button>
+    <button type="button" class="knop-sec" id="proef-delen" data-i18n="artiest.delen">Delen</button>
+    <button type="button" class="knop-sec" id="proef-houd" data-i18n="proef.houd_a">Houd plek A</button>
   </div>
 </div>
 <div id="deel-kies" class="add-kies" hidden role="dialog" aria-modal="true" data-i18n-aria="deel.titel" aria-label="Delen">
@@ -13144,7 +13160,7 @@ const I18N = {
     'start.titel':'Welkom terug','start.titel_nieuw':'Welkom bij Tatties','start.tagline':'show me your tatties','start.nieuw':'Nieuwe tattoo',
     'start.stat_aantal':'Tattoos','start.stat_zituren':'Zituren','start.stat_uitgegeven':'Uitgegeven','start.leeg':'Nog geen tattoos - voeg je eerste toe.','start.recent':'Recent toegevoegd','start.greep':'Uit je collectie','start.regel_aantal':'{n} tattoo{s}','start.regel_uren':'{u} in de stoel','start.regel_kosten':'{k} uitgegeven',
     'start.tegel3d':'3D-model','start.tegel2d':'2D-kaart','start.tegelcol':'Collectie','start.tegelstats':'Statistieken',
-    'start.account_uit':'Inloggen om te synchroniseren','start.account_backup':'Back-up naar de cloud','sync.voortgang':'{n} van {totaal} overgezet','sync.veilig':'Je collectie staat in de cloud: {n} tattoo{s} en {f} foto{fs}.','sync.grens_uitleg':'Deze collectie hoort bij een ander account; synchroniseren staat uit. Log uit en log in met dat account, of voeg de tattoos aan dit account toe.','sync.grens_knop':'Deze tattoos aan dit account toevoegen','sync.grens_bevestig_sub':'Ze komen in {email} te staan. Het andere account houdt zijn eigen kopie. Dit kun je niet ongedaan maken.','sync.grens_ja':'Toevoegen','fotokies.recent':'Recent','filter.been_rechts':'Rechterbeen','filter.been_links':'Linkerbeen','filter.arm_rechts':'Rechterarm','filter.arm_links':'Linkerarm','lichaam.kies_gelijk':'Lengte en gewicht zijn gelijk, andere maten verschillen.','lichaam.kies_datum':'aangepast {d}','account.ww_eis':'Nieuw account: minstens 8 tekens, met een letter en een cijfer','account.verwijder_sub':'Je andere toestellen houden hun kopie, maar synchroniseren niet meer.','account.verwijder_ja':'Account verwijderen','artiest.voet':'Gemaakt met Tatties  ·  tatties.app','artiest.ontwerp':'Het ontwerp','artiest.op_lichaam':'Op het lichaam','artiest.mislukt':'De kaart maken lukte niet','artiest.bezig':'Kaart maken','artiest.delen':'Delen','artiest.notitie':'Notitie meesturen','artiest.titel':'Kaart voor je artiest','artiest.knop':'Naar je artiest','watnu.weg':'Niet nu','watnu.details':'Vul de artiest in bij {naam}','watnu.cloud_inlog':'Log in en bewaar je {n} tattoos','watnu.cloud':'Zet je {n} tattoos in de cloud','watnu.plek_meer':'{n} tattoos staan nog niet op het model','watnu.plek_een':'{naam} staat nog niet op het model','watnu.klaar':'Vandaag gedaan','watnu.nazorg_meer':'{n} tattoos helen: wassen en insmeren','watnu.nazorg_een':'Dag {n} van het helen: wassen en insmeren','safari.waarsch_sub':'Zet Tatties op je beginscherm of maak een account, dan blijft je collectie bewaard.','safari.waarsch_titel':'Safari wist deze gegevens na 7 dagen zonder bezoek','onb.account_vraag_sub':'Maak een account om hem veilig te bewaren.','onb.account_vraag_titel':'Je eerste tattoo staat alleen op dit toestel','inst.wisdata_ja':'Wissen','inst.wisdata_cloud':'Je wordt uitgelogd; wat in de cloud staat blijft.','inst.wisdata_sub':'{n} tattoo{s} met foto\'s en je instellingen. Dit kan niet ongedaan worden gemaakt.','inst.wisdata_vraag':'Alles op dit toestel wissen?','tips.sluitaan':'Sluit aan zoekt waar dit deel over het andere ligt en legt de lijnen precies op elkaar. Leg het eerst een stukje over het andere deel.','ui.cut_hint_deel':'Trek met je vinger een lijn om het volgende deel van {naam}.','eb.wens':'Wishlist','lijst.legecollectie_wens':'Nog niets gezet. Op je wishlist: {n}.','start.regel_wens':'{n} op je wishlist','ui.wens_geen_plek':'Nog niet op het model: {n} van je wishlist.','onb.account_wens_sub':'Je wishlist in de cloud en op elk toestel.','onb.account_wens_titel':'Zet je ideeën veilig','ui.knip_terug_naam':'Naam: {naam}','ui.knip_terug_sub':'Begonnen {wanneer}.','ui.knip_terug_nee':'Weggooien','start.account_rood_deels':'Niet alles staat in de cloud','start.account_rood':'Niet in de cloud sinds {wanneer}','sync.bekijk':'Bekijk','account.fout_email':'Dit e-mailadres klopt niet.','sync.grens_bevestig':'Deze tattoos aan dit account toevoegen?','sync.grens_klaar':'Je tattoos horen nu bij dit account. Synchroniseren staat weer aan.','sync.ander_account_geblokkeerd':'Synchroniseren staat uit: deze collectie hoort bij een ander account.','start.account_in':'Gesynchroniseerd ✓',
+    'start.account_uit':'Inloggen om te synchroniseren','start.account_backup':'Back-up naar de cloud','sync.voortgang':'{n} van {totaal} overgezet','sync.veilig':'Je collectie staat in de cloud: {n} tattoo{s} en {f} foto{fs}.','sync.grens_uitleg':'Deze collectie hoort bij een ander account; synchroniseren staat uit. Log uit en log in met dat account, of voeg de tattoos aan dit account toe.','sync.grens_knop':'Deze tattoos aan dit account toevoegen','sync.grens_bevestig_sub':'Ze komen in {email} te staan. Het andere account houdt zijn eigen kopie. Dit kun je niet ongedaan maken.','sync.grens_ja':'Toevoegen','proef.gekozen':'Verplaatst naar plek B','proef.houd_a':'Houd plek A','proef.kies_b':'Kies plek B','proef.vraag':'Waar komt hij het mooist?','proef.titel':'Welke plek?','proef.hint':'Tik waar je hem ook wilt proberen','proef.uitleg':'Twijfel je? Zet hem ergens anders en vergelijk.','proef.knop':'Probeer een andere plek','fotokies.recent':'Recent','filter.been_rechts':'Rechterbeen','filter.been_links':'Linkerbeen','filter.arm_rechts':'Rechterarm','filter.arm_links':'Linkerarm','lichaam.kies_gelijk':'Lengte en gewicht zijn gelijk, andere maten verschillen.','lichaam.kies_datum':'aangepast {d}','account.ww_eis':'Nieuw account: minstens 8 tekens, met een letter en een cijfer','account.verwijder_sub':'Je andere toestellen houden hun kopie, maar synchroniseren niet meer.','account.verwijder_ja':'Account verwijderen','artiest.voet':'Gemaakt met Tatties  ·  tatties.app','artiest.ontwerp':'Het ontwerp','artiest.op_lichaam':'Op het lichaam','artiest.mislukt':'De kaart maken lukte niet','artiest.bezig':'Kaart maken','artiest.delen':'Delen','artiest.notitie':'Notitie meesturen','artiest.titel':'Kaart voor je artiest','artiest.knop':'Naar je artiest','watnu.weg':'Niet nu','watnu.details':'Vul de artiest in bij {naam}','watnu.cloud_inlog':'Log in en bewaar je {n} tattoos','watnu.cloud':'Zet je {n} tattoos in de cloud','watnu.plek_meer':'{n} tattoos staan nog niet op het model','watnu.plek_een':'{naam} staat nog niet op het model','watnu.klaar':'Vandaag gedaan','watnu.nazorg_meer':'{n} tattoos helen: wassen en insmeren','watnu.nazorg_een':'Dag {n} van het helen: wassen en insmeren','safari.waarsch_sub':'Zet Tatties op je beginscherm of maak een account, dan blijft je collectie bewaard.','safari.waarsch_titel':'Safari wist deze gegevens na 7 dagen zonder bezoek','onb.account_vraag_sub':'Maak een account om hem veilig te bewaren.','onb.account_vraag_titel':'Je eerste tattoo staat alleen op dit toestel','inst.wisdata_ja':'Wissen','inst.wisdata_cloud':'Je wordt uitgelogd; wat in de cloud staat blijft.','inst.wisdata_sub':'{n} tattoo{s} met foto\'s en je instellingen. Dit kan niet ongedaan worden gemaakt.','inst.wisdata_vraag':'Alles op dit toestel wissen?','tips.sluitaan':'Sluit aan zoekt waar dit deel over het andere ligt en legt de lijnen precies op elkaar. Leg het eerst een stukje over het andere deel.','ui.cut_hint_deel':'Trek met je vinger een lijn om het volgende deel van {naam}.','eb.wens':'Wishlist','lijst.legecollectie_wens':'Nog niets gezet. Op je wishlist: {n}.','start.regel_wens':'{n} op je wishlist','ui.wens_geen_plek':'Nog niet op het model: {n} van je wishlist.','onb.account_wens_sub':'Je wishlist in de cloud en op elk toestel.','onb.account_wens_titel':'Zet je ideeën veilig','ui.knip_terug_naam':'Naam: {naam}','ui.knip_terug_sub':'Begonnen {wanneer}.','ui.knip_terug_nee':'Weggooien','start.account_rood_deels':'Niet alles staat in de cloud','start.account_rood':'Niet in de cloud sinds {wanneer}','sync.bekijk':'Bekijk','account.fout_email':'Dit e-mailadres klopt niet.','sync.grens_bevestig':'Deze tattoos aan dit account toevoegen?','sync.grens_klaar':'Je tattoos horen nu bij dit account. Synchroniseren staat weer aan.','sync.ander_account_geblokkeerd':'Synchroniseren staat uit: deze collectie hoort bij een ander account.','start.account_in':'Gesynchroniseerd ✓',
     'start.leeg_uitleg':'Je tattoos, op je eigen 3D-lichaam.','start.privacy':'Alles blijft op dit toestel. Sync is optioneel.','start.privacy_magic':'Alles blijft op dit toestel. Sync en Magic cut zijn optioneel.','start.kijk3d':'Bekijk eerst het 3D-lichaam','ui.geen_foto_link':'Geen foto? Alleen gegevens opslaan','ui.gl_onbeschikbaar':'3D-weergave is niet beschikbaar op dit toestel (WebGL werkt niet).','inapp.tekst':'In-app-browser: je tattoos worden hier mogelijk niet bewaard. Open Tatties in Safari of Chrome.','inapp.kopieer':'Kopieer link','inapp.gekopieerd':'Link gekopieerd - plak hem in je browser','ui.gl_verloren':'3D is gestopt (te weinig geheugen). Ververs om door te gaan.',
     'start.kies_titel':'Tattoo toevoegen','start.kies_3d':'Op het 3D-model','start.kies_3d_sub':'Plaats op het 3D-lichaam',
     'start.kies_2d':'Op de 2D-kaart','start.kies_2d_sub':'Plaats op de platte voor/achter-kaart','start.kies_2d_wip':'Nog in aanbouw',
@@ -13369,7 +13385,7 @@ const I18N = {
     'start.titel':'Welcome back','start.titel_nieuw':'Welcome to Tatties','start.tagline':'show me your tatties','start.nieuw':'New tattoo',
     'start.stat_aantal':'Tattoos','start.stat_zituren':'Chair time','start.stat_uitgegeven':'Spent','start.leeg':'No tattoos yet - add your first.','start.recent':'Recently added','start.greep':'From your collection','start.regel_aantal':'{n} tattoo{s}','start.regel_uren':'{u} in the chair','start.regel_kosten':'{k} spent',
     'start.tegel3d':'3D model','start.tegel2d':'2D map','start.tegelcol':'Collection','start.tegelstats':'Statistics',
-    'start.account_uit':'Sign in to sync','start.account_backup':'Back up to the cloud','sync.voortgang':'{n} of {totaal} uploaded','sync.veilig':'Your collection is in the cloud: {n} tattoo{s} and {f} photo{fs}.','sync.grens_uitleg':'This collection belongs to another account; syncing is off. Sign out and sign in with that account, or add the tattoos to this account.','sync.grens_knop':'Add these tattoos to this account','sync.grens_bevestig_sub':'They\'ll be saved in {email}. The other account keeps its own copy. You can\'t undo this.','sync.grens_ja':'Add','fotokies.recent':'Recent','filter.been_rechts':'Right leg','filter.been_links':'Left leg','filter.arm_rechts':'Right arm','filter.arm_links':'Left arm','lichaam.kies_gelijk':'Height and weight match; other measurements differ.','lichaam.kies_datum':'changed {d}','account.ww_eis':'New account: at least 8 characters, with a letter and a digit','account.verwijder_sub':'Your other devices keep their copy but stop syncing.','account.verwijder_ja':'Delete account','artiest.voet':'Made with Tatties  ·  tatties.app','artiest.ontwerp':'The design','artiest.op_lichaam':'On the body','artiest.mislukt':'Couldn\'t make the card','artiest.bezig':'Making the card','artiest.delen':'Share','artiest.notitie':'Include your note','artiest.titel':'Card for your artist','artiest.knop':'Send to your artist','watnu.weg':'Not now','watnu.details':'Add the artist to {naam}','watnu.cloud_inlog':'Sign in to back up your {n} tattoos','watnu.cloud':'Back up your {n} tattoos','watnu.plek_meer':'{n} tattoos aren\'t on the model yet','watnu.plek_een':'{naam} isn\'t on the model yet','watnu.klaar':'Done for today','watnu.nazorg_meer':'{n} tattoos healing: wash and moisturise','watnu.nazorg_een':'Day {n} of healing: wash and moisturise','safari.waarsch_sub':'Add Tatties to your home screen or create an account to keep your collection.','safari.waarsch_titel':'Safari deletes this data after 7 days without a visit','onb.account_vraag_sub':'Create an account to keep it safe.','onb.account_vraag_titel':'Your first tattoo is only on this device','inst.wisdata_ja':'Erase','inst.wisdata_cloud':'You\'ll be signed out; what\'s in the cloud stays.','inst.wisdata_sub':'{n} tattoo{s} with photos, and your settings. This cannot be undone.','inst.wisdata_vraag':'Erase everything on this device?','tips.sluitaan':'Line up finds where this part overlaps the other one and matches the lines exactly. Move it a little over the other part first.','ui.cut_hint_deel':'Draw a line around the next part of {naam} with your finger.','eb.wens':'Wishlist','lijst.legecollectie_wens':'Nothing done yet. On your wishlist: {n}.','start.regel_wens':'{n} on your wishlist','ui.wens_geen_plek':'Not on the model yet: {n} from your wishlist.','onb.account_wens_sub':'Your wishlist backed up and on every device.','onb.account_wens_titel':'Keep your ideas safe','ui.knip_terug_naam':'Name: {naam}','ui.knip_terug_sub':'Started {wanneer}.','ui.knip_terug_nee':'Discard','start.account_rood_deels':'Not everything is in the cloud','start.account_rood':'Not backed up since {wanneer}','sync.bekijk':'View','account.fout_email':'That email address doesn\'t look right.','sync.grens_bevestig':'Add these tattoos to this account?','sync.grens_klaar':'Your tattoos now belong to this account. Syncing is back on.','sync.ander_account_geblokkeerd':'Syncing is off: this collection belongs to a different account.','start.account_in':'Synced ✓',
+    'start.account_uit':'Sign in to sync','start.account_backup':'Back up to the cloud','sync.voortgang':'{n} of {totaal} uploaded','sync.veilig':'Your collection is in the cloud: {n} tattoo{s} and {f} photo{fs}.','sync.grens_uitleg':'This collection belongs to another account; syncing is off. Sign out and sign in with that account, or add the tattoos to this account.','sync.grens_knop':'Add these tattoos to this account','sync.grens_bevestig_sub':'They\'ll be saved in {email}. The other account keeps its own copy. You can\'t undo this.','sync.grens_ja':'Add','proef.gekozen':'Moved to spot B','proef.houd_a':'Keep spot A','proef.kies_b':'Choose spot B','proef.vraag':'Which spot works best?','proef.titel':'Which spot?','proef.hint':'Tap where you want to try it','proef.uitleg':'Not sure? Put it somewhere else and compare.','proef.knop':'Try another spot','fotokies.recent':'Recent','filter.been_rechts':'Right leg','filter.been_links':'Left leg','filter.arm_rechts':'Right arm','filter.arm_links':'Left arm','lichaam.kies_gelijk':'Height and weight match; other measurements differ.','lichaam.kies_datum':'changed {d}','account.ww_eis':'New account: at least 8 characters, with a letter and a digit','account.verwijder_sub':'Your other devices keep their copy but stop syncing.','account.verwijder_ja':'Delete account','artiest.voet':'Made with Tatties  ·  tatties.app','artiest.ontwerp':'The design','artiest.op_lichaam':'On the body','artiest.mislukt':'Couldn\'t make the card','artiest.bezig':'Making the card','artiest.delen':'Share','artiest.notitie':'Include your note','artiest.titel':'Card for your artist','artiest.knop':'Send to your artist','watnu.weg':'Not now','watnu.details':'Add the artist to {naam}','watnu.cloud_inlog':'Sign in to back up your {n} tattoos','watnu.cloud':'Back up your {n} tattoos','watnu.plek_meer':'{n} tattoos aren\'t on the model yet','watnu.plek_een':'{naam} isn\'t on the model yet','watnu.klaar':'Done for today','watnu.nazorg_meer':'{n} tattoos healing: wash and moisturise','watnu.nazorg_een':'Day {n} of healing: wash and moisturise','safari.waarsch_sub':'Add Tatties to your home screen or create an account to keep your collection.','safari.waarsch_titel':'Safari deletes this data after 7 days without a visit','onb.account_vraag_sub':'Create an account to keep it safe.','onb.account_vraag_titel':'Your first tattoo is only on this device','inst.wisdata_ja':'Erase','inst.wisdata_cloud':'You\'ll be signed out; what\'s in the cloud stays.','inst.wisdata_sub':'{n} tattoo{s} with photos, and your settings. This cannot be undone.','inst.wisdata_vraag':'Erase everything on this device?','tips.sluitaan':'Line up finds where this part overlaps the other one and matches the lines exactly. Move it a little over the other part first.','ui.cut_hint_deel':'Draw a line around the next part of {naam} with your finger.','eb.wens':'Wishlist','lijst.legecollectie_wens':'Nothing done yet. On your wishlist: {n}.','start.regel_wens':'{n} on your wishlist','ui.wens_geen_plek':'Not on the model yet: {n} from your wishlist.','onb.account_wens_sub':'Your wishlist backed up and on every device.','onb.account_wens_titel':'Keep your ideas safe','ui.knip_terug_naam':'Name: {naam}','ui.knip_terug_sub':'Started {wanneer}.','ui.knip_terug_nee':'Discard','start.account_rood_deels':'Not everything is in the cloud','start.account_rood':'Not backed up since {wanneer}','sync.bekijk':'View','account.fout_email':'That email address doesn\'t look right.','sync.grens_bevestig':'Add these tattoos to this account?','sync.grens_klaar':'Your tattoos now belong to this account. Syncing is back on.','sync.ander_account_geblokkeerd':'Syncing is off: this collection belongs to a different account.','start.account_in':'Synced ✓',
     'start.leeg_uitleg':'Your tattoos, on your own 3D body.','start.privacy':'Everything stays on this device. Syncing is optional.','start.privacy_magic':'Everything stays on this device. Syncing and Magic cut are optional.','start.kijk3d':'Explore the 3D body','ui.geen_foto_link':'No photo? Just save the details','ui.gl_onbeschikbaar':'3D view isn\'t available on this device (WebGL isn\'t working).','inapp.tekst':'In-app browser: your tattoos may not be saved. Open Tatties in Safari or Chrome.','inapp.kopieer':'Copy link','inapp.gekopieerd':'Link copied - paste it in your browser','ui.gl_verloren':'3D stopped (out of memory). Refresh to continue.',
     'start.kies_titel':'Add tattoo','start.kies_3d':'On the 3D model','start.kies_3d_sub':'Place on the 3D body',
     'start.kies_2d':'On the 2D map','start.kies_2d_sub':'Place on the flat front/back map','start.kies_2d_wip':'Under construction',
@@ -13749,7 +13765,7 @@ function createTattoo(overrides = {}) {
    ============================================================ */
 // App-versie (semver, handmatig ophogen bij een release). Bij een bump ook de
 // CACHE-naam in sw.js meebumpen, zodat clients de nieuwe build ophalen.
-const APP_VERSIE = '0.4.42';
+const APP_VERSIE = '0.4.43';
 
 /* Dev-haken die de CLOUD raken hangen alleen op een ontwikkelmachine aan window. Ze zijn geen
    lek op zichzelf (zonder XSS roept niemand ze aan, en CSP + esc() houden XSS tegen), maar ze
@@ -17387,6 +17403,125 @@ async function deelArtiestKaart() {
     cb.addEventListener('change', wissel); cb.addEventListener('input', wissel);
   } }
 
+/* Proefplek (apply_proefplek.py, variant C): kaart met het hele lichaam (A en B gemarkeerd) en twee close-ups, plus het venster. */
+const PROEF_ROOD = '#B8312A';
+function proefLabel(x, cx, cy, letter, voor) {   // rood rondje met de letter; gestippeld = aan de andere kant van het lichaam
+  x.save(); x.beginPath(); x.arc(cx, cy, 30, 0, Math.PI * 2);
+  if (voor) { x.fillStyle = PROEF_ROOD; x.fill(); x.lineWidth = 4; x.strokeStyle = AK.PAPIER; x.stroke(); }
+  else { x.fillStyle = AK.PAPIER; x.fill(); x.setLineDash([7, 6]); x.lineWidth = 4; x.strokeStyle = PROEF_ROOD; x.stroke(); x.setLineDash([]); }
+  x.fillStyle = voor ? AK.PAPIER : PROEF_ROOD; x.font = '34px Ultra, Georgia, serif'; x.textAlign = 'center'; x.textBaseline = 'middle';
+  x.fillText(letter, cx, cy + 2); x.restore();
+}
+function proefVul(x, img, X, Y, W, H) {   // beeld vult het vak (bijgesneden), binnen de dubbele rand
+  const iw = W - 24, ih = H - 24, sc = Math.max(iw / img.width, ih / img.height), w = img.width * sc, h = img.height * sc;
+  const ox = X + 12 + (iw - w) / 2, oy = Y + 12 + (ih - h) / 2;
+  x.save(); x.beginPath(); x.rect(X + 12, Y + 12, iw, ih); x.clip(); x.drawImage(img, ox, oy, w, h); x.restore();
+  return { sc, ox, oy };
+}
+async function maakProefKaart(t, B) {
+  if (!t || !B || !B.heel) return null;
+  try { await Promise.all([document.fonts.load('64px Ultra'), document.fonts.load('600 26px Archivo')]); } catch (e) { }
+  const c = document.createElement('canvas'); c.width = AK.W; c.height = AK.H; const x = c.getContext('2d');
+  x.fillStyle = AK.PAPIER; x.fillRect(0, 0, AK.W, AK.H);
+  x.strokeStyle = AK.INKT; x.lineWidth = 4; x.strokeRect(24, 24, AK.W - 48, AK.H - 48); x.lineWidth = 2; x.strokeRect(36, 36, AK.W - 72, AK.H - 72);
+  const logo = document.getElementById('film-logo-bron');
+  if (logo && logo.complete && logo.naturalWidth) { const lw = 300, lh = lw * logo.naturalHeight / logo.naturalWidth; x.drawImage(logo, (AK.W - lw) / 2, 56, lw, lh); }
+  x.fillStyle = AK.INKT; x.textAlign = 'center'; x.textBaseline = 'alphabetic'; x.font = '46px Ultra, Georgia, serif';
+  x.fillText(akKort(x, tr('proef.vraag'), AK.W - 170), AK.W / 2, 222);
+  const top = 256, H = 780, LX = 70, LW = 400, RX = 500, RW = 510;
+  akKader(x, LX, top, LW, H, AK.VAK);
+  const pl = proefVul(x, B.heel, LX, top, LW, H);
+  for (const [letter, p] of [['A', B.pa], ['B', B.pb]]) {   // open ring op de plek (de tattoo blijft zichtbaar), de letter ernaast naar buiten
+    if (!p) continue;
+    const px = pl.ox + p.x * B.heel.width * pl.sc, py = pl.oy + p.y * B.heel.height * pl.sc, kant = px < LX + LW / 2 ? -1 : 1;
+    let cx = Math.min(LX + LW - 44, Math.max(LX + 44, px + kant * 74)), cy = Math.min(top + H - 44, Math.max(top + 44, py));
+    if (Math.hypot(cx - px, cy - py) < 60) { cx = Math.min(LX + LW - 44, Math.max(LX + 44, px)); cy = py - 74 > top + 44 ? py - 74 : py + 74; }   // aan de rand: erboven (of eronder)
+    x.save(); x.strokeStyle = PROEF_ROOD; x.lineWidth = 4; if (!p.voor) x.setLineDash([6, 5]);
+    x.beginPath(); x.arc(px, py, 20, 0, Math.PI * 2); x.stroke();
+    const d = Math.hypot(cx - px, cy - py) || 1; x.setLineDash([]);
+    x.beginPath(); x.moveTo(px + (cx - px) / d * 20, py + (cy - py) / d * 20); x.lineTo(cx - (cx - px) / d * 30, cy - (cy - py) / d * 30); x.stroke(); x.restore();
+    proefLabel(x, cx, cy, letter, p.voor);
+  }
+  const hv = (H - 20) / 2;
+  [['A', B.a, B.zoneA], ['B', B.b, B.zoneB]].forEach(([letter, img, zone], i) => {
+    const Y = top + i * (hv + 20);
+    akKader(x, RX, Y, RW, hv, AK.VAK);
+    if (img) proefVul(x, img, RX, Y, RW, hv);
+    proefLabel(x, RX + 50, Y + 50, letter, true);
+    const lab = zoneLabel(zone);
+    if (lab) { x.fillStyle = AK.PAPIER; x.fillRect(RX + 12, Y + hv - 62, RW - 24, 50); x.fillStyle = AK.INKT; x.font = '600 28px Archivo, sans-serif';
+      x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillText(akKort(x, lab, RW - 60), RX + RW / 2, Y + hv - 37); }
+  });
+  x.textAlign = 'center'; x.textBaseline = 'alphabetic'; x.fillStyle = AK.INKT;
+  let y = top + H + 78;
+  { const naam = String(t.naam || 'Tattoo'); let px = 54; for (; px > 36; px -= 2) { x.font = px + 'px Ultra, Georgia, serif'; if (x.measureText(naam).width <= AK.W - 170) break; }
+    x.fillText(akKort(x, naam, AK.W - 170), AK.W / 2, y); }
+  const maat = maatTekst(t); if (maat) { y += 52; x.font = '32px Archivo, sans-serif'; x.fillText(maat, AK.W / 2, y); }
+  x.fillStyle = AK.GEDEMPT; x.font = '600 24px Archivo, sans-serif'; x.fillText(tr('artiest.voet'), AK.W / 2, AK.H - 62);
+  return c;
+}
+let proefRec = null, proefBlob = null, proefRonde = 0, proefKiesBezig = false;
+window.__tattiesProefGeplaatst = (rec) => openProefKaart(rec);
+function openProefKaart(t) {
+  const ov = $('#proef-kies'); if (!ov || !t) return;
+  proefRec = t; proefBlob = null; ov.hidden = false;
+  if (typeof laagOpenHistory === 'function') laagOpenHistory('proef', () => sluitProefKaart(false));
+  tekenProefKaart();
+}
+async function tekenProefKaart() {
+  const ronde = ++proefRonde, img = $('#proef-beeld'), bezig = $('#proef-bezig'), knop = $('#proef-delen');
+  bezig.textContent = tr('artiest.bezig'); bezig.hidden = false; img.hidden = true; knop.disabled = true;
+  await new Promise(r => requestAnimationFrame(() => r()));   // eerst het venster tekenen, dan de opnames
+  let c = null;
+  try { const B = (typeof window.__tatties3DProefBeelden === 'function') ? await window.__tatties3DProefBeelden() : null; c = await maakProefKaart(proefRec, B); }
+  catch (e) { console.error('proefkaart', e); }
+  if (ronde !== proefRonde) return;
+  if (!c) { bezig.textContent = tr('artiest.mislukt'); return; }
+  const blob = await new Promise(r => c.toBlob(r, 'image/png'));
+  if (ronde !== proefRonde) return;
+  if (!blob) { bezig.textContent = tr('artiest.mislukt'); return; }
+  proefBlob = blob;
+  if (img.dataset.url) URL.revokeObjectURL(img.dataset.url);
+  img.dataset.url = URL.createObjectURL(blob); img.src = img.dataset.url; img.alt = tr('proef.titel');
+  img.hidden = false; bezig.hidden = true; knop.disabled = false;
+}
+function sluitProefKaart(gekozen) {
+  const ov = $('#proef-kies'); if (!ov || ov.hidden) return;
+  ov.hidden = true; proefRonde++;
+  const img = $('#proef-beeld'); if (img && img.dataset.url) { URL.revokeObjectURL(img.dataset.url); delete img.dataset.url; img.removeAttribute('src'); }
+  if (!gekozen && typeof window.__tatties3DProefWeg === 'function') window.__tatties3DProefWeg();   // Houd A: de proef weg
+  if (typeof laagSluitHistory === 'function') laagSluitHistory('proef');
+}
+async function kiesProefB() {
+  if (proefKiesBezig || typeof window.__tatties3DProefKies !== 'function') return;
+  proefKiesBezig = true;
+  try {
+    const t = proefRec, terug = await window.__tatties3DProefKies();
+    sluitProefKaart(true);
+    if (terug && t) toastMetActie(tr('proef.gekozen'), tr('ui.ongedaan'), () => { if (typeof window.__tatties3DProefTerug === 'function') window.__tatties3DProefTerug(t, terug); });
+  } finally { proefKiesBezig = false; }
+}
+async function deelProefKaart() {
+  if (!proefBlob || !proefRec) return;
+  const naam = 'tatties-' + (String(proefRec.naam || 'tattoo').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') || 'tattoo') + '-a-b.png';
+  if (window.__tattiesDeelBestand) { const nr = await window.__tattiesDeelBestand(proefBlob, naam); if (nr) { if (nr === 'gedeeld') tril(12); return; } }
+  const file = (typeof File !== 'undefined') ? new File([proefBlob], naam, { type: 'image/png' }) : null;
+  if (file && navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+    try { await navigator.share({ files: [file], title: 'Tatties' }); tril(12); return; }
+    catch (e) { if (e && e.name === 'AbortError') return; }
+  }
+  const a = document.createElement('a'); a.href = URL.createObjectURL(proefBlob); a.download = naam; document.body.appendChild(a); a.click();
+  setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 2000);
+  toast(tr('toast.opname_bewaard'));
+}
+{ const ov = document.getElementById('proef-kies');
+  if (ov) {
+    ov.addEventListener('click', e => { if (e.target === ov) sluitProefKaart(false); });
+    document.getElementById('proef-houd').addEventListener('click', () => sluitProefKaart(false));
+    document.getElementById('proef-delen').addEventListener('click', deelProefKaart);
+    document.getElementById('proef-kies-b').addEventListener('click', kiesProefB);
+  } }
+
 /* R2-28: de wachtwoordeis staat onder het veld zodra je typt (groen als hij klopt), niet pas na een fout */
 { const ww = document.getElementById('account-ww'), eis = document.getElementById('account-ww-eis');
   if (ww && eis) {
@@ -18905,7 +19040,11 @@ function renderDetail() {
     const herplaatsHtml = kanHerplaatsen
       ? `<div class="detail-delen"><span class="gedempt">${tr(staatOpLichaam ? 'detail.herplaats_uitleg' : 'detail.herplaats_geen')}</span><button type="button" class="knop-sec" id="d-herplaats">${tr(staatOpLichaam ? 'detail.herplaats' : 'ui.plaats_op_model')}</button></div>`
       : '';
-    const plekHtml = (delenHtml || herplaatsHtml) ? `<div class="detail-plek"><p class="sectiekop">${tr('detail.plek')}</p>${delenHtml}${herplaatsHtml}</div>` : '';
+    // proefplek (apply_proefplek.py): een wens op het model (een deel) op een tweede plek proberen
+    const proefHtml = (kanHerplaatsen && staatOpLichaam && t.status === 'wens' && !beeldDelen(t).length)
+      ? `<div class="detail-delen"><span class="gedempt">${tr('proef.uitleg')}</span><button type="button" class="knop-sec" id="d-proef">${tr('proef.knop')}</button></div>`
+      : '';
+    const plekHtml = (delenHtml || herplaatsHtml || proefHtml) ? `<div class="detail-plek"><p class="sectiekop">${tr('detail.plek')}</p>${delenHtml}${herplaatsHtml}${proefHtml}</div>` : '';
     paneel = `<dl${detailToonExtra ? ' class="toon-leeg"' : ''}>${rijenHtml}${notitieHtml}</dl>
       ${heeftLege ? `<button type="button" class="linkbtn" id="d-extra">${detailToonExtra ? tr('detail.extra_verbergen') : tr('detail.extra_tonen')}</button>` : ''}
       ${plekHtml}`;
@@ -19042,6 +19181,11 @@ function renderDetail() {
       if (window.__tatties3DKapot) { toast(tr('ui.zonder3d_formulier')); return; }
       $('#btn-3d').click();
       naBackOpen(() => { if (typeof window.__tattiesHerplaats === 'function') window.__tattiesHerplaats(t); });   // R2 punt 1
+    }); }
+  { const dp = $('#d-proef'); if (dp) dp.addEventListener('click', () => {   // proefplek: naar 3D, dan de plaatsstand voor plek B
+      if (window.__tatties3DKapot) { toast(tr('ui.zonder3d_formulier')); return; }
+      $('#btn-3d').click();
+      naBackOpen(() => { if (typeof window.__tattiesProefplek === 'function') window.__tattiesProefplek(t); });
     }); }
   { const dd = $('#d-deel'); if (dd) dd.addEventListener('click', () => {   // extra deel: naar 3D, dan de knipmodal in deel-stand
       if (window.__tatties3DKapot) { toast(tr('ui.zonder3d_formulier')); return; }
@@ -21886,11 +22030,7 @@ async function verwijderVoorbeelden() {
   }
   /* Kaart voor je artiest (apply_artiestkaart.py): de tattoo op het lichaam, met een eigen camera langs de huidnormaal. Zit er een ander
      lichaamsdeel voor (binnenkant arm, oksel), dan draait de camera opzij. Retour: canvas (w x h) of null. */
-  window.__tatties3DCloseUp=async function(id, w, h){
-    w=w||900; h=h||1200;
-    if(!renderer || !scene || !modelRoot || glContextWeg()) return null;
-    for(let i=0;i<40 && !markers.some(m=>m.id===id && m.obj); i++) await new Promise(r=>setTimeout(r,100));   // herstel loopt nog
-    const ms=markers.filter(m=>m.id===id && m.obj && m.point); if(!ms.length) return null;
+  function closeUpCam(ms, w, h){   // camera langs de (gemiddelde) huidnormaal; ms = [{point, normal, size}]
     const c=new THREE.Vector3(), n=new THREE.Vector3(); let ext=0;
     ms.forEach(m=>{ c.add(m.point); if(m.normal) n.add(m.normal); });
     c.multiplyScalar(1/ms.length); if(n.lengthSq()<1e-6) n.set(0,0,1); n.normalize();
@@ -21911,12 +22051,19 @@ async function verwijderVoorbeelden() {
     cam.position.copy(c).addScaledVector(beste.d, dist);
     cam.up.set(0,1,0); if(Math.abs(beste.d.y)>0.95) cam.up.set(0,0,-1);
     cam.lookAt(c); cam.updateMatrixWorld(); cam.updateProjectionMatrix();
+    return cam;
+  }
+  const KAART_PAPIER='#F7F2E7';   // = AK.VAK (vak op de artiest- en proefkaart)
+  function rtOpname(cam, w, h, toon, verberg){   // render met een eigen camera naar een canvas; toon = tijdelijk zichtbaar (ook een wens), verberg = tijdelijk weg
+    if(!renderer || !scene || glContextWeg()) return null;
+    toon=toon||[]; verberg=verberg||[];
     const msaa=!!(renderer.capabilities.isWebGL2 && THREE.WebGLMultisampleRenderTarget);
     const rt=msaa ? new THREE.WebGLMultisampleRenderTarget(w,h,{stencilBuffer:true}) : new THREE.WebGLRenderTarget(w,h,{stencilBuffer:true});
     if(msaa) rt.samples=Math.min(4, renderer.capabilities.maxSamples||4);
     rt.texture.encoding=renderer.outputEncoding;
-    const zicht=ms.map(m=>m.obj.visible), ringWas=!!(selRing && selRing.visible), keyWas=key ? key.position.clone() : null;
-    ms.forEach(m=>{ m.obj.visible=true; });   // ook een wens-tattoo als de wishlist in 3D uit staat
+    const tz=toon.map(o=>o.visible), vz=verberg.map(o=>o.visible), ringWas=!!(selRing && selRing.visible), keyWas=key ? key.position.clone() : null, bgWas=scene.background;
+    toon.forEach(o=>{ o.visible=true; }); verberg.forEach(o=>{ o.visible=false; });
+    scene.background=new THREE.Color(KAART_PAPIER);   // vaste papierkleur zoals de kaart, ook in donker thema
     if(selRing) selRing.visible=false;
     if(key){ key.position.copy(cam.position); key.position.y+=1.5; key.position.x+=1.0; }
     try{
@@ -21926,8 +22073,16 @@ async function verwijderVoorbeelden() {
       const cv=document.createElement('canvas'); cv.width=w; cv.height=h; const x=cv.getContext('2d');
       const im=x.createImageData(w,h); for(let y=0;y<h;y++) im.data.set(buf.subarray((h-1-y)*w*4,(h-y)*w*4), y*w*4);
       x.putImageData(im,0,0); return cv;
-    }catch(e){ console.error('opname voor de artiestenkaart mislukt', e); return null; }
-    finally{ renderer.setRenderTarget(null); rt.dispose(); ms.forEach((m,i)=>{ m.obj.visible=zicht[i]; }); if(selRing) selRing.visible=ringWas; if(key && keyWas) key.position.copy(keyWas); }
+    }catch(e){ console.error('opname mislukt', e); return null; }
+    finally{ renderer.setRenderTarget(null); rt.dispose(); scene.background=bgWas; toon.forEach((o,i)=>{ o.visible=tz[i]; }); verberg.forEach((o,i)=>{ o.visible=vz[i]; });
+      if(selRing) selRing.visible=ringWas; if(key && keyWas) key.position.copy(keyWas); }
+  }
+  window.__tatties3DCloseUp=async function(id, w, h){
+    w=w||900; h=h||1200;
+    if(!renderer || !scene || !modelRoot || glContextWeg()) return null;
+    for(let i=0;i<40 && !markers.some(m=>m.id===id && m.obj); i++) await new Promise(r=>setTimeout(r,100));   // herstel loopt nog
+    const ms=markers.filter(m=>m.id===id && m.obj && m.point); if(!ms.length) return null;
+    return rtOpname(closeUpCam(ms, w, h), w, h, ms.map(m=>m.obj), []);
   };
   let opnameBezig=false;
   async function deelOpname(){
@@ -23349,6 +23504,95 @@ async function verwijderVoorbeelden() {
     projUIAan();
     return true;
   };
+  /* Proefplek (apply_proefplek.py, variant C): een wens tijdelijk op een tweede plek (B) naast zijn echte plek (A). De decal van B is
+     geen marker en wordt niet opgeslagen tot 'Kies plek B'. */
+  let proefB=null;
+  function proefWeg(houdTex){
+    if(!proefB) return; const P=proefB; proefB=null;
+    if(P.obj){ body.remove(P.obj); if(P.obj.geometry) P.obj.geometry.dispose(); if(P.obj.material && P.obj.material.dispose) P.obj.material.dispose(); }
+    if(!houdTex && P.tex && P.tex.dispose) P.tex.dispose();
+  }
+  window.__tattiesProefplek = async function(rec){
+    if(!LICHAAM_GEN || !rec) return false;
+    if(typeof volledigInRam==="function"){ try{ await volledigInRam(rec.id); }catch(e){ console.error(e); } }
+    const r=(typeof tattoos!=="undefined" && Array.isArray(tattoos)) ? (tattoos.find(x=>x.id===rec.id)||rec) : rec;
+    const k3=(r.kunst3d && r.kunst3d.srcUrl) ? r.kunst3d : ((r.kunst && r.kunst.src) ? { srcUrl:r.kunst.src, bg:false, lasso:[], wand:[] } : null);
+    if(!k3 || !(r.positie3d && r.positie3d.point)){ toast(tr('ui.plaatsen_mislukt')); return false; }
+    for(let i=0;i<300 && !(inited && pickMeshes.length); i++) await frameAdem();
+    let tex=null; try{ tex=await rebuildTextureFromKunst(k3); }catch(e){ console.error(e); }
+    if(!tex){ toast(tr('ui.plaatsen_mislukt')); return false; }
+    if(editDecal) exitEditDecal();
+    proefWeg();
+    plaatsData={ tex, texAf:true, kunst3d:k3, proef:r };
+    plaatsModus=true; if(window.__plaatsHintAan) window.__plaatsHintAan();
+    const ph=document.getElementById('plaats-hint');
+    if(ph){ ph.classList.add('herplaats'); const t=ph.querySelector('.ph-tekst'); if(t) t.textContent=tr('proef.hint'); }   // instructie onderaan, geen ring
+    resetView();
+    return true;
+  };
+  window.__tatties3DProefBeelden=async function(o){
+    o=o||{}; const cw=o.cw||700, ch=o.ch||500, hw=o.hw||520, hh=o.hh||1000;
+    if(!proefB || !renderer || !modelRoot || glContextWeg()) return null;
+    const P=proefB, msA=markers.filter(m=>m.id===P.rec.id && m.obj && m.point);
+    if(!msA.length) return null;
+    const objA=msA.map(m=>m.obj), itemB={ obj:P.obj, point:P.s.point, normal:P.s.normal, size:P.size };
+    const opVol=isFinite(+P.rec.opacity) ? Math.max(0.2, Math.min(1, +P.rec.opacity)) : 1, alle=objA.concat([P.obj]);
+    const opWas=alle.map(o=>o.material ? o.material.opacity : 1);
+    alle.forEach(o=>{ if(o.material) zetDecalOpacity(o, opVol); });   // op de kaart het ontwerp zelf, niet de gedimde wens
+    try{
+    const a=rtOpname(closeUpCam(msA, cw, ch), cw, ch, objA, [P.obj]);
+    const b=rtOpname(closeUpCam([itemB], cw, ch), cw, ch, [P.obj], objA);
+    // het hele lichaam, van de kant waar A en B samen naar wijzen
+    const box=new THREE.Box3().setFromObject(modelRoot), mid=box.getCenter(new THREE.Vector3()), maat=box.getSize(new THREE.Vector3());
+    const pA=msA[0].point, nA=msA[0].normal || new THREE.Vector3(0,0,1), pB=P.s.point, nB=P.s.normal;
+    const dir=new THREE.Vector3(nA.x+nB.x, 0, nA.z+nB.z);
+    if(dir.lengthSq()<0.09) dir.set(nA.x, 0, nA.z);   // A en B tegenover elkaar: vanaf de kant van A, B gestippeld
+    if(dir.lengthSq()<1e-4) dir.set(0, 0, 1);
+    dir.normalize();
+    const fov=30, tn=Math.tan(fov*Math.PI/360), asp=hw/hh;
+    const dist=Math.max(maat.y*1.04/(2*tn), Math.max(maat.x, maat.z)*1.08/(2*tn*asp));
+    const cam=new THREE.PerspectiveCamera(fov, asp, 0.05, 50);
+    cam.position.copy(mid).addScaledVector(dir, dist); cam.up.set(0,1,0); cam.lookAt(mid); cam.updateMatrixWorld(); cam.updateProjectionMatrix();
+    const heel=rtOpname(cam, hw, hh, objA.concat([P.obj]), []);
+    const plek=(p, n)=>{ const v=p.clone().project(cam), naar=cam.position.clone().sub(p); return { x:(v.x+1)/2, y:(1-v.y)/2, voor:!n || n.dot(naar)>0 }; };
+    return { a, b, heel, pa:plek(pA, nA), pb:plek(pB, nB), zoneA:P.rec.lichaamsdeel || null, zoneB:P.nz.zone || null };
+    } finally { alle.forEach((o,i)=>{ if(o.material) zetDecalOpacity(o, opWas[i]); }); }
+  };
+  window.__tatties3DProefKies=async function(){
+    if(!proefB) return null;
+    const P=proefB, rec=P.rec, s=P.s, nz=P.nz, oud=rec.positie3d || {};
+    const terug={ positie3d:rec.positie3d ? JSON.parse(JSON.stringify(rec.positie3d)) : null, positie:rec.positie ? Object.assign({}, rec.positie) : rec.positie,
+      kunst:rec.kunst ? Object.assign({}, rec.kunst) : rec.kunst, zijde:rec.zijde, lichaamsdeel:rec.lichaamsdeel };
+    const N={ point:[s.point.x,s.point.y,s.point.z], normal:[s.normal.x,s.normal.y,s.normal.z],
+              rot:P.rot, size:P.size, gender:currentGender, preset:presetId(), zone:nz.zone, side:nz.side };
+    if(oud.migratie) N.migratie=oud.migratie;
+    zetBind(N, s.mesh, s.point, s.normal, P.rot, s.tri);
+    rec.positie3d=N; rec.zijde=nz.side; rec.lichaamsdeel=nz.zone;
+    sync2D(rec, s.point, nz.side, P.rot, P.size, P.tex);
+    try{ await saveTattoo(rec); }catch(e){ console.error(e); toast(tr('toast.opslaanmislukt')+(e&&e.message?e.message:tr('ui.fout'))); }
+    for(const m0 of markers.filter(q=>q.id===rec.id && !q.deel)) verwijderMarker(m0);
+    proefB=null;   // de proef-decal wordt de marker (zoals bij opnieuw plaatsen)
+    const m={ id:rec.id, rec, obj:P.obj, point:s.point.clone(), normal:s.normal.clone(), mesh:s.mesh,
+      tri:(s.tri>=0 ? s.tri : (N.bind ? N.bind.tri : -1)), rot:P.rot, size:P.size, tex:P.tex };
+    markers.push(m); onthoudFp(m);
+    if(ledeActief) ledeDecalSplits(m);
+    if(typeof renderMarkers==="function"){ try{ renderMarkers(); }catch(_){} }
+    naPlaatsTex(m, P.d);
+    if(typeof window.__tattiesNaBewerk==="function") window.__tattiesNaBewerk(rec.id);
+    return terug;
+  };
+  window.__tatties3DProefTerug=async function(rec, terug){   // Ongedaan na 'Kies plek B'
+    if(!rec || !terug) return false;
+    rec.positie3d=terug.positie3d; rec.positie=terug.positie; rec.kunst=terug.kunst; rec.zijde=terug.zijde; rec.lichaamsdeel=terug.lichaamsdeel;
+    try{ await saveTattoo(rec); }catch(e){ console.error(e); toast(tr('toast.opslaanmislukt')+(e&&e.message?e.message:tr('ui.fout'))); }
+    for(const m0 of markers.filter(q=>q.id===rec.id && !q.deel)) verwijderMarker(m0);
+    try{ await herstelDeel(rec, null); }catch(e){ console.error(e); }
+    if(typeof renderMarkers==="function"){ try{ renderMarkers(); }catch(_){} }
+    if(typeof window.__tattiesNaBewerk==="function") window.__tattiesNaBewerk(rec.id);
+    return true;
+  };
+  window.__tatties3DProefWeg=()=>{ proefWeg(); };
+  window.__tattiesProefDbg={ b:()=>proefB ? { zone:proefB.nz.zone, point:proefB.s.point.toArray(), zicht:!!(proefB.obj && proefB.obj.visible) } : null };   // dev
   window.__tatties3DLichaam = function(L){
     if(!LICHAAM_GEN || !inited || !pickMeshes.length || !LichaamMotor.geometry() || genAan()) return false;
     genFrames(); LichaamMotor.zet(L); genHerbouw(); uiterlijkBouw(); return true;   // review R3 D3-5: frames van het oude lichaam, dan stijf mee en in stukjes herbouwen
@@ -26036,12 +26280,21 @@ async function verwijderVoorbeelden() {
   window.__tattiesPlaatsInZone = plaatsInZone;
   async function plaatsOpPunt(s, over){
     if(!plaatsData) return;
-    const d=plaatsData, hp=d.herplaats && d.herplaats.positie3d;
+    const d=plaatsData, hp=(d.herplaats || d.proef) && (d.herplaats || d.proef).positie3d;   // proefplek: ook maat en draaiing houden
     const rot=(over && over.rot!=null) ? over.rot : ((hp && +hp.rot) || 0), size=(over && over.size) || (hp && +hp.size) || 0.09;   // opnieuw plaatsen: maat en draaiing houden
     const proj=(over && over.proj) || null;   // projectie vanuit de kijkhoek (delen, 2026-10-03)
     const obj=makeImage(s.point,s.normal,rot,size,d.tex,s.mesh,false,null,proj);
     if(!obj){ toast(tr('ui.plaatsen_mislukt')); return; }
     const nz=nearestZone(s.point);
+    if(d.proef){   // proefplek (apply_proefplek.py): tijdelijke decal op B, niets opgeslagen; het venster met de kaart opent
+      proefWeg();
+      const rec=d.proef;
+      obj.renderOrder=rec.stapel||0; zetDecalOpacity(obj, (isFinite(+rec.opacity) ? Math.max(0.2, Math.min(1, +rec.opacity)) : 1)*(rec.status==='wens' ? 0.5 : 1));   // zoals herstelDeel: een wens gedimd
+      proefB={ rec, obj, d, rot, size, tex:d.tex, nz, s:{ point:s.point.clone(), normal:s.normal.clone(), mesh:s.mesh, tri:(s.tri>=0 ? s.tri : -1) } };
+      projUIUit(); plaatsData=null; plaatsModus=false; verbergBanner(); if(window.__plaatsHintUit) window.__plaatsHintUit();
+      if(typeof window.__tattiesProefGeplaatst==='function') window.__tattiesProefGeplaatst(rec);
+      return;
+    }
     if(d.herplaats){   // Opnieuw plaatsen (slice 4e): het record (eerste deel) krijgt een nieuwe plek op het lichaam
       const rec=d.herplaats, oud=rec.positie3d || {};
       for(const m0 of markers.filter(q=>q.id===rec.id && !q.deel)) verwijderMarker(m0);
