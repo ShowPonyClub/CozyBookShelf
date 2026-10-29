@@ -7,22 +7,23 @@
 <meta name="color-scheme" content="light dark">
 <meta name="theme-color" content="#EFE4D0" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#181511" media="(prefers-color-scheme: dark)">
-<title>Tatties - your tattoos on your own 3D body</title>
-<meta name="description" content="Place the tattoos you already have on your own 3D body, then see where new designs fit. A private log of your ink, no account needed. In beta.">
+<title>Tatties - Tattoo tracker and planner on your own 3D body</title>
+<meta name="description" content="Put every tattoo on a 3D body that looks like you and see where your next design fits before you book. Free tattoo tracker and planner, no account needed.">
 <link rel="canonical" href="https://tatties.app/">
+<meta name="apple-itunes-app" content="app-id=6819068062">
 <link rel="icon" href="/img/icon-180.png" type="image/png">
 <link rel="apple-touch-icon" href="/img/icon-180.png">
-<meta property="og:title" content="Tatties - your tattoos on your own 3D body">
-<meta property="og:description" content="Place the tattoos you already have on your own 3D body, then see where new designs fit. Private by design. In beta.">
+<meta property="og:title" content="Tatties - Tattoo tracker and planner on your own 3D body">
+<meta property="og:description" content="Put every tattoo on a 3D body that looks like you and see where your next design fits before you book.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://tatties.app/">
 <meta property="og:image" content="https://tatties.app/img/og-image.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="Tatties - your tattoos on your own 3D body">
+<meta property="og:image:alt" content="Tatties: tattoos on a 3D body">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Tatties - your tattoos on your own 3D body">
-<meta name="twitter:description" content="Place the tattoos you already have on your own 3D body, then see where new designs fit. Private by design. In beta.">
+<meta name="twitter:title" content="Tatties - Tattoo tracker and planner on your own 3D body">
+<meta name="twitter:description" content="Put every tattoo on a 3D body that looks like you and see where your next design fits before you book.">
 <meta name="twitter:image" content="https://tatties.app/img/og-image.png">
 <link rel="preload" as="font" type="font/woff2" href="fonts/archivo.woff2" crossorigin>
 <link rel="preload" as="image" href="img/tatties-logo-hart.png">
@@ -105,6 +106,8 @@
   .form-msg{font-size:.95rem;margin-top:14px;min-height:22px;font-weight:600}
   .form-msg.ok{color:var(--succes-diep)}.form-msg.err{color:var(--invalid)}
   @media (prefers-color-scheme:dark){.form-msg.ok{color:#5FBE86}}
+  .download{display:flex;flex-direction:column;align-items:center;gap:14px;margin-top:6px}
+  .store-badge img{display:block;height:60px;width:auto}
   .form-note{font-family:var(--label-font);font-size:.82rem;color:var(--op-grond);margin-top:14px;line-height:1.5}
 
   /* ---- canvas-verhaal: van idee naar inkt naar collectie ---- */
@@ -164,9 +167,17 @@
   }
   @media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto}}
 </style>
-<link rel="preload" as="script" href="3d/assets/three-bundle.js">
-<link rel="preload" as="fetch" href="3d/assets/body-man.glb" crossorigin>
-<link rel="preload" as="fetch" href="3d/assets/body-vrouw.glb" crossorigin>
+<link rel="preload" as="script" href="3d/assets/three-bundle.js" media="(min-width:861px) and (prefers-reduced-motion:no-preference)">
+<link rel="preload" as="fetch" href="3d/assets/body-man.glb" crossorigin media="(min-width:861px) and (prefers-reduced-motion:no-preference)">
+<link rel="preload" as="fetch" href="3d/assets/body-vrouw.glb" crossorigin media="(min-width:861px) and (prefers-reduced-motion:no-preference)">
+<style id="hero-telefoon-css">
+  /* R2-21: op een telefoon een echt scherm uit de app onder de badge (de 3D-hero staat daar uit) */
+  .hero-telefoon{display:none}
+  @media(max-width:860px){
+    .hero-telefoon{display:block;margin:30px auto 6px;width:min(68vw,290px);border:2.5px solid var(--tekst);border-radius:30px;overflow:hidden;background:var(--kaart);box-shadow:6px 7px 0 var(--tekst)}
+    .hero-telefoon img{display:block;width:100%;height:auto}
+  }
+</style>
 <style id="hero3d-css">
   .hero{min-height:640px}
   #hero3d{position:absolute;inset:0;z-index:0;pointer-events:none}
@@ -174,7 +185,25 @@
   @media(max-width:860px){#hero3d{display:none} .hero{min-height:0}}
   @media(prefers-reduced-motion:reduce){#hero3d{display:none}}
 </style>
-<script type="application/ld+json" id="ld-tatties">{"@context": "https://schema.org", "@graph": [{"@type": "Organization", "@id": "https://tatties.app/#org", "name": "Tatties", "url": "https://tatties.app/", "logo": "https://tatties.app/img/tatties-logo.png", "sameAs": ["https://www.instagram.com/tatties.app", "https://www.tiktok.com/@tatties.app"]}, {"@type": "WebSite", "@id": "https://tatties.app/#website", "url": "https://tatties.app/", "name": "Tatties", "inLanguage": "en", "publisher": {"@id": "https://tatties.app/#org"}}, {"@type": "WebApplication", "@id": "https://tatties.app/#app", "name": "Tatties", "url": "https://tatties.app/", "applicationCategory": "LifestyleApplication", "operatingSystem": "Any (web browser)", "description": "Place the tattoos you already have on your own 3D body, then see where new designs fit. A private log of your ink, no account needed. In beta.", "image": "https://tatties.app/img/og-image.png", "inLanguage": "en", "publisher": {"@id": "https://tatties.app/#org"}}]}</script>
+<script type="application/ld+json" id="ld-tatties">{"@context": "https://schema.org", "@graph": [{"@type": "Organization", "@id": "https://tatties.app/#org", "name": "Tatties", "url": "https://tatties.app/", "logo": "https://tatties.app/img/tatties-logo.png", "sameAs": ["https://www.instagram.com/tatties.app", "https://www.tiktok.com/@tatties.app"]}, {"@type": "WebSite", "@id": "https://tatties.app/#website", "url": "https://tatties.app/", "name": "Tatties", "inLanguage": "en", "publisher": {"@id": "https://tatties.app/#org"}}, {"@type": "WebApplication", "@id": "https://tatties.app/#app", "name": "Tatties", "url": "https://tatties.app/", "downloadUrl": "https://apps.apple.com/app/id6819068062", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "EUR"}, "applicationCategory": "LifestyleApplication", "operatingSystem": "iOS, Web", "description": "Put every tattoo on a 3D body that looks like you and see where your next design fits before you book. Free tattoo tracker and planner, no account needed.", "image": "https://tatties.app/img/og-image.png", "inLanguage": "en", "publisher": {"@id": "https://tatties.app/#org"}}, {"@type": "MobileApplication", "@id": "https://tatties.app/#ios", "name": "Tatties", "operatingSystem": "iOS", "applicationCategory": "LifestyleApplication", "description": "Put every tattoo on a 3D body that looks like you and see where your next design fits before you book. Free tattoo tracker and planner, no account needed.", "image": "https://tatties.app/img/og-image.png", "installUrl": "https://apps.apple.com/app/id6819068062", "downloadUrl": "https://apps.apple.com/app/id6819068062", "inLanguage": "en", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "EUR"}, "publisher": {"@id": "https://tatties.app/#org"}}, {"@type": "FAQPage", "@id": "https://tatties.app/#faq", "mainEntity": [{"@type": "Question", "name": "What is Tatties?", "acceptedAnswer": {"@type": "Answer", "text": "Tatties is a tattoo tracker and tattoo planner. You build a 3D body that looks like you, put the tattoos you already have on it, and try new designs to see where they fit before you book."}}, {"@type": "Question", "name": "Is Tatties free?", "acceptedAnswer": {"@type": "Answer", "text": "Yes. Tatties is free on the App Store, without ads, and keeping your collection always stays free. If paid extras are added later, Founders (the first 100 accounts) keep every feature for free."}}, {"@type": "Question", "name": "Do I need an account?", "acceptedAnswer": {"@type": "Answer", "text": "No. Everything works without an account and your photos stay on your phone. An account is only for syncing your collection between devices. You can sign in with Apple, Google or email."}}, {"@type": "Question", "name": "How do I get my tattoo onto the 3D body?", "acceptedAnswer": {"@type": "Answer", "text": "Take or pick a photo, tap Find tattoo or trace it with your finger, then place it on the body. It wraps around arms and legs, and you move, turn and resize it with two fingers."}}, {"@type": "Question", "name": "Can I try a tattoo before I get it?", "acceptedAnswer": {"@type": "Answer", "text": "Yes. Add a design to your wishlist and put it on the model to check the size and placement. Share a picture or a spinning video with your artist."}}, {"@type": "Question", "name": "Is Tatties on Android?", "acceptedAnswer": {"@type": "Answer", "text": "Not as an app yet. On Android or a computer you can use Tatties in your browser."}}, {"@type": "Question", "name": "Is Tatties available in Dutch?", "acceptedAnswer": {"@type": "Answer", "text": "Yes. Tatties is in English and Dutch. You pick the language on the welcome screen or later in Settings."}}, {"@type": "Question", "name": "Can I suggest a feature?", "acceptedAnswer": {"@type": "Answer", "text": "Yes, please. Tell us which features you'd like to see next: tap Send feedback in the app (in Settings or the menu in the 3D view), email hello@tatties.app, or message us on TikTok or Instagram. We read every message."}}, {"@type": "Question", "name": "Are my photos private?", "acceptedAnswer": {"@type": "Answer", "text": "By default everything stays on your device. If you switch on sync, your collection is stored on servers in the EU, and you can delete your account and all your data at any time in the app."}}]}]}</script>
+<style id="seo-css">
+  .sec-kop{font-family:var(--display-font);font-weight:400;font-size:clamp(1.5rem,3.4vw,2.1rem);line-height:1.15;text-align:center;
+    text-wrap:balance;margin:0 auto 10px;max-width:720px}
+  .story .sec-kop{margin-bottom:22px}
+  .sec-sub{text-align:center;color:var(--op-grond);max-width:560px;margin:0 auto 26px;font-size:1.02rem;line-height:1.5;text-wrap:balance}
+  .faq{padding:0 0 88px}
+  .faq-lijst{max-width:760px;margin:22px auto 0;display:grid;gap:10px}
+  .faq details{background:var(--kaart);border:1px solid var(--rand);border-radius:var(--r-md);padding:0 20px}
+  .faq summary{cursor:pointer;list-style:none;font-weight:700;font-size:1.04rem;padding:16px 28px 16px 0;position:relative}
+  .faq summary::-webkit-details-marker{display:none}
+  .faq summary::after{content:"+";position:absolute;right:0;top:50%;transform:translateY(-50%);font-family:var(--display-font);font-size:1.3rem}
+  .faq details[open] summary::after{content:"\2212"}
+  .faq summary:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:4px}
+  .faq details p{color:var(--gedempt);padding:0 0 18px;line-height:1.55}
+  .faq details a{color:var(--tekst);text-decoration:underline;text-underline-offset:3px}
+  .form-note a{color:var(--tekst);text-decoration:underline;text-underline-offset:3px}
+  @media (min-width:641px){.features .grid{grid-template-columns:repeat(auto-fit,minmax(176px,1fr))}}
+</style>
 </head>
 <body>
 
@@ -183,27 +212,22 @@
     <div id="hero3d"></div>
 
     <div class="wrap">
-      <span class="eyebrow">In beta</span>
+      <span class="eyebrow">Now on the App Store</span>
       <picture><source srcset="img/tatties-logo-hart-dark.png" media="(prefers-color-scheme: dark)"><img class="hero-logo" src="img/tatties-logo-hart.png" alt="Tatties" width="880" height="662" decoding="async"></picture>
       <h1 class="headline headline-zin">Place tattoos you already have on your own 3D body. <strong>Then see where new designs fit.</strong></h1>
-      <div class="waitlist" id="waitlist">
-        <form id="waitlistForm" novalidate>
-          <div class="form-row">
-            <input type="email" id="email" name="email" placeholder="you@email.com" autocomplete="email" required aria-label="Email address">
-            <button type="submit" class="btn btn-primary">Notify me</button>
-          </div>
-          <input type="text" name="_honey" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute!important;left:-9999px;top:-9999px;height:0;width:0;opacity:0;pointer-events:none">
-          <div class="form-msg" id="formMsg" role="status" aria-live="polite"></div>
-        </form>
-        <p class="form-note">We're testing with a small group first. No spam - one email when the beta opens up. If you don't see it, check your spam folder.</p>
+      <div class="download">
+        <a class="store-badge" href="https://apps.apple.com/app/id6819068062"><picture><source srcset="img/app-store-badge-wit.svg" media="(prefers-color-scheme: dark)"><img src="img/app-store-badge.svg" alt="Download on the App Store" width="180" height="60"></picture></a>
+        <p class="form-note">Free, for iPhone. No account needed. <a href="https://tatties.app/web/">Use it in your browser</a> on Android or desktop.</p>
       </div>
+      <figure class="hero-telefoon"><img src="img/app-telefoon.webp" width="600" height="1304" decoding="async" alt="The Tatties app: a swallow tattoo being placed on the arm of a 3D body"></figure>
     </div>
   </section>
 
-  <section class="story" aria-label="How it works">
+  <section class="story" aria-labelledby="kop-werkt">
     <div class="wrap">
+      <h2 class="sec-kop" id="kop-werkt">How Tatties works</h2>
       <ol>
-        <li><span class="nr">01</span><h3><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.7.5 1 1.3 1 2.1h5c0-.8.3-1.6 1-2.1A6 6 0 0 0 12 3z"/></svg>Ideas</h3><p>Save the designs you keep coming back to.</p></li>
+        <li><span class="nr">01</span><h3><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.7.5 1 1.3 1 2.1h5c0-.8.3-1.6 1-2.1A6 6 0 0 0 12 3z"/></svg>Wishlist</h3><p>Save the designs you keep coming back to.</p></li>
         <li><span class="nr">02</span><h3><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3c-3 0-4 2-4 4v2.5c0 1.5-1 2.5-2 3.5 1 1 2 2 2 3.5V21h8v-4.5c0-1.5 1-2.5 2-3.5-1-1-2-2-2-3.5V7c0-2-1-4-4-4z"/></svg>Canvas</h3><p>Try them on a 3D body you can turn around.</p></li>
         <li><span class="nr">03</span><h3><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20l4-1 10-10-3-3L5 16l-1 4z"/><path d="M13 8l3 3"/></svg>Tattoo</h3><p>Once it's real, log the artist, the studio and the sitting.</p></li>
         <li><span class="nr">04</span><h3><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="8" height="8" rx="1.5"/><rect x="13" y="4" width="8" height="8" rx="1.5"/><rect x="3" y="14" width="8" height="7" rx="1.5"/><rect x="13" y="14" width="8" height="7" rx="1.5"/></svg>Collection</h3><p>Every piece you own, in one private place.</p></li>
@@ -211,23 +235,30 @@
     </div>
   </section>
 
-  <section class="features">
+  <section class="features" aria-labelledby="kop-in-een">
     <div class="wrap">
+      <h2 class="sec-kop" id="kop-in-een">A tattoo tracker and tattoo planner in one</h2>
+      <p class="sec-sub">Keep every tattoo you have on a body that looks like yours, and try the next one before you book.</p>
       <div class="grid">
         <div class="card">
+          <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M20 4L8.1 15.9M14.5 14.5 20 20M8.1 8.1 12 12"/></svg></div>
+          <h3>Cut it from any photo</h3>
+          <p>Take a photo of a tattoo, tap Find tattoo or trace it with your finger, and it lands on your 3D body. No AI service, all on your phone.</p>
+        </div>
+        <div class="card">
           <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-4.5-7-10a7 7 0 0 1 14 0c0 5.5-7 10-7 10z"/><circle cx="12" cy="11" r="2.5"/></svg></div>
-          <h3>Plan ahead</h3>
-          <p>Place a design on a 3D body you can turn around, so you see how your next piece sits from every side - and where there's still room.</p>
+          <h3>Try designs before you book</h3>
+          <p>Put a design on your own 3D body and turn it around. See how it sits on your forearm, back or calf, how big it can go, and how it looks next to the tattoos you already have. Then show your artist.</p>
         </div>
         <div class="card">
           <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.6"/><path d="M21 15l-5-5L5 21"/></svg></div>
-          <h3>Photos &amp; story</h3>
-          <p>Save photos, the artist, the studio and the story behind every piece. All in one place.</p>
+          <h3>Your whole tattoo collection</h3>
+          <p>Log the artist, studio, style, date, price and hours in the chair for every piece, with sessions and touch-ups. On iPhone, a daily aftercare reminder while a new tattoo heals.</p>
         </div>
         <div class="card">
           <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v5c0 4.4-3 7.7-7 9-4-1.3-7-4.6-7-9V6z"/><path d="M9 12l2 2 4-4"/></svg></div>
           <h3>Private by design</h3>
-          <p>No body scan, no account needed. By default everything you add stays on your device - yours alone.</p>
+          <p>No body scan: you set your height, weight and build yourself. No account needed, and your photos stay on your phone unless you switch on sync.</p>
         </div>
         <div class="card">
           <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="13" height="10" rx="2"/><path d="M2 18h13"/><rect x="17" y="9" width="5" height="11" rx="1.5"/></svg></div>
@@ -237,12 +268,28 @@
       </div>
     </div>
   </section>
+  <section class="faq" aria-labelledby="kop-faq">
+    <div class="wrap">
+      <h2 class="sec-kop" id="kop-faq">Questions</h2>
+      <div class="faq-lijst">
+        <details><summary>What is Tatties?</summary><p>Tatties is a tattoo tracker and tattoo planner. You build a 3D body that looks like you, put the tattoos you already have on it, and try new designs to see where they fit before you book.</p></details>
+        <details><summary>Is Tatties free?</summary><p>Yes. Tatties is free on the App Store, without ads, and keeping your collection always stays free. If paid extras are added later, Founders (the first 100 accounts) keep every feature for free.</p></details>
+        <details><summary>Do I need an account?</summary><p>No. Everything works without an account and your photos stay on your phone. An account is only for syncing your collection between devices. You can sign in with Apple, Google or email.</p></details>
+        <details><summary>How do I get my tattoo onto the 3D body?</summary><p>Take or pick a photo, tap Find tattoo or trace it with your finger, then place it on the body. It wraps around arms and legs, and you move, turn and resize it with two fingers.</p></details>
+        <details><summary>Can I try a tattoo before I get it?</summary><p>Yes. Add a design to your wishlist and put it on the model to check the size and placement. Share a picture or a spinning video with your artist.</p></details>
+        <details><summary>Is Tatties on Android?</summary><p>Not as an app yet. On Android or a computer you can use Tatties in your browser. <a href="https://tatties.app/web/">Open the web version</a>.</p></details>
+        <details><summary>Is Tatties available in Dutch?</summary><p>Yes. Tatties is in English and Dutch. You pick the language on the welcome screen or later in Settings.</p></details>
+        <details><summary>Can I suggest a feature?</summary><p>Yes, please. Tell us which features you'd like to see next: tap Send feedback in the app (in Settings or the menu in the 3D view), email hello@tatties.app, or message us on TikTok or Instagram. We read every message.</p></details>
+        <details><summary>Are my photos private?</summary><p>By default everything stays on your device. If you switch on sync, your collection is stored on servers in the EU, and you can delete your account and all your data at any time in the app.</p></details>
+      </div>
+    </div>
+  </section>
 </main>
 
 <footer>
   <div class="wrap">
     <picture><source srcset="img/tatties-logo-dark.png" media="(prefers-color-scheme: dark)"><img class="logo" src="img/tatties-logo.png" alt="tatties" width="1100" height="329" decoding="async"></picture>
-    <p class="reach">Want to test early or share ideas? Message us on TikTok or Instagram.</p>
+    <p class="reach">Missing a feature? Let us know what you'd like to see: use Send feedback in the app, or message us on TikTok or Instagram.</p>
     <div class="socials">
       <a href="https://www.tiktok.com/@tatties.app" target="_blank" rel="noopener noreferrer" aria-label="tatties on TikTok" title="TikTok"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z"/></svg></a>
       <a href="https://www.instagram.com/tatties.app" target="_blank" rel="noopener noreferrer" aria-label="tatties on Instagram" title="Instagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4.2"/><circle cx="17.3" cy="6.7" r="1.2" fill="currentColor" stroke="none"/></svg></a>
@@ -256,48 +303,14 @@
   </div>
 </footer>
 
-<script>
-(function(){
-  /* Signups are delivered via FormSubmit. Click "Activate Form" in the FormSubmit
-     email once to start receiving submissions.
-     TODO privacy: vervang het adres hieronder door de door FormSubmit gegenereerde
-     random-alias ("formsubmit.co/ajax/<hash>") zodat hello@tatties.app niet meer in
-     de paginabron staat (tegen e-mail-harvesting). Direct-POST-spam blijft mogelijk
-     zolang _captcha op 'false' staat; dat is een bewuste UX-keuze. */
-  var FORMSPREE_ENDPOINT = "https://formsubmit.co/ajax/hello@tatties.app";
-  // ── LATER: plak hier de Apps Script /exec-URL om aanmeldingen óók in de Google
-  // Sheet te krijgen (mailt dan naar hello@tatties.app + schrijft naar de Sheet).
-  // Zolang dit leeg blijft, gaat alles gewoon via FormSubmit hierboven.
-  var APPS_SCRIPT_URL = "";  // <-- PLAK /exec-URL HIER
-  var form=document.getElementById('waitlistForm'),email=document.getElementById('email'),msg=document.getElementById('formMsg');
-  function show(t,c){msg.textContent=t;msg.className='form-msg '+c;}
-  function valid(v){return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);}
-  form.addEventListener('submit',async function(e){
-    e.preventDefault();var v=email.value.trim();var hp=form.querySelector('[name=_honey]');if(hp&&hp.value)return;
-    if(!valid(v)){show('Please enter a valid email address.','err');email.focus();return;}
-    var btn=form.querySelector('button'),old=btn.textContent;btn.disabled=true;btn.textContent='…';
-    try{
-      if(APPS_SCRIPT_URL){var ad=new URLSearchParams();ad.append('email',v);ad.append('bron','landingspagina');await fetch(APPS_SCRIPT_URL,{method:'POST',mode:'no-cors',body:ad});}
-      else if(FORMSPREE_ENDPOINT){var fd=new FormData();fd.append('email',v);
-        fd.append('_subject','New Tatties waitlist signup');fd.append('_captcha','false');fd.append('_template','table');
-        var res=await fetch(FORMSPREE_ENDPOINT,{method:'POST',headers:{'Accept':'application/json'},body:fd});
-        if(!res.ok)throw new Error('failed');
-      }else{var list=JSON.parse(localStorage.getItem('tatties_waitlist')||'[]');
-        if(list.indexOf(v)===-1){list.push(v);localStorage.setItem('tatties_waitlist',JSON.stringify(list));}}
-      show("You're on the list - we'll email you when the beta opens up. Don't see it? Check your spam folder. 🖤",'ok');form.reset();
-    }catch(err){show('Something went wrong. Please try again.','err');}
-    finally{btn.disabled=false;btn.textContent=old;}
-  });
-})();
-</script>
 <script>window.__CFG={"man":"3d/assets/body-man.glb","vrouw":"3d/assets/body-vrouw.glb","hart":"3d/assets/hart.png","tat":"3d/assets/tat-"};</script>
-<script src="3d/assets/three-bundle.js"></script>
+<script>/* 3D-bibliotheek (648 KB) alleen laden waar de hero getoond wordt (apply_landing_seo.py) */(function(){var mq=window.matchMedia&&matchMedia('(min-width:861px) and (prefers-reduced-motion:no-preference)');function laad(){if(window.__heroBundel)return;window.__heroBundel=1;var t=document.createElement('script');t.src='3d/assets/three-bundle.js';t.onload=function(){if(window.__heroStart)window.__heroStart();};document.body.appendChild(t);}if(mq&&mq.matches)laad();else if(mq&&mq.addEventListener)mq.addEventListener('change',function(e){if(e.matches)laad();});})();</script>
 <script>
 /* 3D-hero (2026-10-04, apply_landing_hero.py in Tatties): de twee lichamen komen uit de app (LichaamMotor), met de onderbroek
    en de tattoos als wikkel-decal (zelfde geometrie als in de app, gebakken door tools/landing/bake_hero.js). De tattoos zijn
    inktlagen (wit = huid, grijs = arcering) en worden belicht als de huid, zodat ze erin opgaan. Ze vloeien een voor een in. */
-(function(){
-  var host=document.getElementById('hero3d'); if(!host||!window.THREE) return;
+window.__heroStart=function(){
+  var host=document.getElementById('hero3d'); if(!host||!window.THREE||window.__hero3d) return;
   var CFG=window.__CFG;
   var renderer,scene,camera,skin,loader,texLoader,groups=[],running=false,inited=false,onscreen=false,faded=false;
   var scrolling=false,scrollT,lastT=0,klaarT=0;
@@ -388,7 +401,8 @@
   iob.observe(host);
   addEventListener('scroll',function(){ scrolling=true; clearTimeout(scrollT); scrollT=setTimeout(function(){ scrolling=false; },160); },{passive:true});
   document.addEventListener('visibilitychange',function(){ if(document.hidden) stop(); else if(onscreen) start(); });
-})();
+};
+if(window.THREE) window.__heroStart();
 </script>
 </body>
 </html>

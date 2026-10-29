@@ -8,6 +8,7 @@
 <meta name="description" content="This link belongs to the Tatties app on your iPhone.">
 <meta name="robots" content="noindex">
 <link rel="canonical" href="https://tatties.app/app/">
+<meta name="apple-itunes-app" content="app-id=6819068062">
 <link rel="icon" href="/img/icon-180.png" type="image/png">
 <link rel="apple-touch-icon" href="/img/icon-180.png">
 <meta name="color-scheme" content="light dark">
@@ -68,6 +69,14 @@
   .verlopen{display:none}
   .is-verlopen .verlopen{display:block}
   .is-verlopen .geldig{display:none}
+  /* R2-22 (apply_app_pagina.py): badge, stappen, webversie */
+  .badge{display:inline-block;margin:6px 0 30px;line-height:0}
+  .badge img{height:52px;width:auto;display:block}
+  .badge .wit{display:none}
+  @media (prefers-color-scheme:dark){.badge .zwart{display:none}.badge .wit{display:block}}
+  ol.stappen{margin:0 0 10px;padding-left:22px}
+  ol.stappen li{margin:0 0 6px}
+  .web{margin-top:34px;padding-top:18px;border-top:1px solid var(--rand)}
 </style>
 </head>
 <body>
@@ -82,15 +91,28 @@
   <div class="wrap">
     <h1 class="page-title">Open this link in the app</h1>
     <p class="page-sub">This link belongs to the Tatties app on your iPhone.</p>
+    <a class="badge" href="https://apps.apple.com/app/id6819068062" target="_blank" rel="noopener" aria-label="Download Tatties on the App Store"><img class="zwart" src="/img/app-store-badge.svg" alt="Download on the App Store" width="156" height="52"><img class="wit" src="/img/app-store-badge-wit.svg" alt="Download on the App Store" width="156" height="52"></a>
 
-    <div class="callout verlopen"><span class="callout-lbl">Note</span><p>This link has expired or was already used. Request a new one in the Tatties app.</p></div>
+    <div class="callout verlopen"><span class="callout-lbl">This link has expired or was already used</span><p>Were you confirming your account? Then it is most likely confirmed already: open Tatties and sign in. Resetting your password? Request a new link from the sign-in screen in the app.</p></div>
 
     <div class="geldig">
       <h2>Confirming your account?</h2>
       <p>Then you're done: your account is confirmed. Open the Tatties app and sign in.</p>
 
       <h2>Resetting your password?</h2>
-      <p>Open the link from the email on the iPhone where you asked for it, with the Tatties app installed. Don't have the app yet? Get Tatties from the App Store first, then request the link again.</p>
+      <p>That link only works inside the app, on the iPhone where you asked for it.</p>
+    </div>
+
+    <h2>How to open the link in the app</h2>
+    <ol class="stappen">
+      <li>Make sure Tatties is installed (see the button above).</li>
+      <li>In the email, press and hold the button, then choose <strong>Open in &lsquo;Tatties&rsquo;</strong>.</li>
+      <li>Ended up here in Safari? Tap <strong>Open</strong> in the Tatties banner at the top of the page.</li>
+    </ol>
+
+    <div class="web">
+      <h2>No iPhone?</h2>
+      <p>Tatties also works in your browser. <a href="https://tatties.app/web/">Use the web version</a>; you can sign in there with the same account.</p>
     </div>
   </div>
 </main>
