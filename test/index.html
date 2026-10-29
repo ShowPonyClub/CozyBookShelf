@@ -13748,7 +13748,7 @@ function createTattoo(overrides = {}) {
    ============================================================ */
 // App-versie (semver, handmatig ophogen bij een release). Bij een bump ook de
 // CACHE-naam in sw.js meebumpen, zodat clients de nieuwe build ophalen.
-const APP_VERSIE = '0.4.40';
+const APP_VERSIE = '0.4.41';
 
 /* Dev-haken die de CLOUD raken hangen alleen op een ontwikkelmachine aan window. Ze zijn geen
    lek op zichzelf (zonder XSS roept niemand ze aan, en CSP + esc() houden XSS tegen), maar ze
@@ -14312,6 +14312,7 @@ function cloudAfwijkingen(cloudRevs, metas, lokaalIds, cursor, userId) {
   return { ontbreekt, gemist, cloudMax };
 }
 let cloudControleVoor = null;   // R4 BE-6: account waarvoor deze app-start de controle al deed
+let cloudControleGemeld = null;   // R7-13: account waarvoor deze app-start het signaal al ging
 /* Gerichte aanvulling: de cloudrijen van records die deze ronde aandacht nodig hebben maar
    niet in de cursor-pull zaten (lokaal gewijzigd, of beelden die nog moeten komen). Zonder
    deze aanvulling zou de sync hun huidige rev en manifest niet kennen. */
@@ -15345,10 +15346,10 @@ async function _syncMetCloudKern() {
     try {
       const r = await leesCloudRevs(user.id);
       if (!r.error) {
-        afw = cloudAfwijkingen(r.rijen, metaVoor, [...lById.values()].filter(x => x && !x.deleted).map(x => x.id), cursor, user.id);   // tombstones: de server ruimt ze na 30 dagen op, dat is geen verlies
+        afw = cloudAfwijkingen(r.rijen, metaVoor, [...lById.values()].filter(x => x && !x.deleted).map(x => x.id), cursor, user.id);   // tombstones: de server stript ze na 30 dagen tot een kale rij, dat is geen verlies
         if (afw.cloudMax < cursor) cursorBasis = afw.cloudMax;   // de cursor zakt mee, anders blijven nieuwe rijen onder de oude cursor onzichtbaar
-        cloudControleVoor = user.id;
-        if (afw.ontbreekt.length || afw.gemist.length || afw.cloudMax < cursor) {
+        if ((afw.ontbreekt.length || afw.gemist.length || afw.cloudMax < cursor) && cloudControleGemeld !== user.id) {
+          cloudControleGemeld = user.id;
           try { if (typeof signaal === 'function') signaal('syncfout', ('cloud teruggezet: ' + afw.ontbreekt.length + ' ontbrekend, ' + afw.gemist.length + ' gemist, max ' + afw.cloudMax + ' < cursor ' + cursor).slice(0, 120)); } catch (e) { /* signaal is nooit fataal */ }
         }
       }
@@ -15627,6 +15628,7 @@ async function _syncMetCloudKern() {
   if (allesGelukt && (maxRev > cursor || cursorBasis < cursor)) {   // R4 BE-6: ook omlaag als de cloud is teruggezet
     await zetSyncMeta(SYNC_CURSOR_ID, { baseRev: maxRev, ownerId: user.id, dirty: false });
   }
+  if (afw && allesGelukt) cloudControleVoor = user.id;   // R7-13: pas als de ronde de afwijkingen ook verwerkt heeft
   // Vanaf hier hoort deze collectie bij dit account. Pas nu vastleggen: een ronde die
   // afbreekt mag de grens niet zetten op een account waar nog niets van gesynct is.
   if (eersteRonde) {
@@ -22181,7 +22183,7 @@ async function verwijderVoorbeelden() {
   function resetView(){
     rol=0;   // slice 5x: Beginstand = ook weer rechtop
     const b=camBegin();
-    targetGoal=null; radiusGoal=null; radius=b.radius; theta=CAM0.theta; phi=CAM0.phi;
+    targetGoal=null; radiusGoal=null; if(typeof camTweenStop==='function') camTweenStop(); radius=b.radius; theta=CAM0.theta; phi=CAM0.phi;
     target.set(CAM0.tx,b.ty,CAM0.tz); applyCam();
   }
   let selRingOn=false;
@@ -25206,11 +25208,17 @@ async function verwijderVoorbeelden() {
     const raak=_krc.intersectObjects(pickMeshes, false);
     return !raak.length || raak[0].distance>=afst-0.02;
   }
+  var camTweenNr=0, camTweenLuistert=false;   // R7-14: een nieuwe tween, aanraking, wiel of resetView breekt de lopende af
+  function camTweenStop(){ camTweenNr++; }
   function camTween(doelTheta, doelPhi, doelTarget, doelRadius, ms){   // zacht draaien + verplaatsen + zoomen (smoothstep)
+    if(!camTweenLuistert && renderer){ camTweenLuistert=true; const c=renderer.domElement;
+      for(const s of ['pointerdown','touchstart','wheel']) c.addEventListener(s, camTweenStop, { capture:true, passive:true }); }
+    const nr=++camTweenNr;
     const t0=performance.now(), th0=theta, ph0=phi, tg0=target.clone(), r0=radius;
     let dth=doelTheta-th0; dth=Math.atan2(Math.sin(dth), Math.cos(dth));   // kortste kant
     targetGoal=null; radiusGoal=null;
-    const stap=(nu)=>{ const u=Math.min(1,(nu-t0)/ms), e=u*u*(3-2*u);
+    const stap=(nu)=>{ if(nr!==camTweenNr || !actief3D || vakAnim) return;   // R7-14
+      const u=Math.min(1,(nu-t0)/ms), e=u*u*(3-2*u);
       theta=th0+dth*e; phi=ph0+(doelPhi-ph0)*e; target.lerpVectors(tg0, doelTarget, e); radius=r0+(doelRadius-r0)*e; applyCam();
       if(u<1) requestAnimationFrame(stap); };
     requestAnimationFrame(stap);
@@ -25225,7 +25233,8 @@ async function verwijderVoorbeelden() {
     camTween(th, ph, m.point.clone(), r, 520);
     return true;
   }
-  window.__tattiesKaderDbg={ zicht:()=>{ const ms=markers.filter(x=>x.obj); return ms.map(tattooInBeeld); }, kader:(i)=>kaderNaVink(markers.filter(x=>x.obj)[i||0]) };   // dev
+  window.__tattiesKaderDbg={ zicht:()=>{ const ms=markers.filter(x=>x.obj); return ms.map(tattooInBeeld); }, kader:(i)=>kaderNaVink(markers.filter(x=>x.obj)[i||0]),
+    tween:(th,ph,r,ms)=>camTween(th, ph, target.clone(), r, ms||520), cam:()=>({ theta, phi, radius }) };   // dev
   function heelLichaam(){
     if(!ledeActief) return;
     rol=0;   // slice 5x
