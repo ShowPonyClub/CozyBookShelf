@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://formsubmit.co; worker-src 'self' blob:; base-uri 'none'; form-action 'none'; frame-ancestors 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://formsubmit.co https://uhrbvwwiovefrpscgweo.supabase.co; worker-src 'self' blob:; base-uri 'none'; form-action 'none'; frame-ancestors 'none'">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="color-scheme" content="light dark">
 <meta name="theme-color" content="#EFE4D0" media="(prefers-color-scheme: light)">
@@ -95,6 +95,15 @@
   .headline-zin{font-size:clamp(1.4rem,3.1vw,1.95rem);font-weight:600;line-height:1.25;max-width:620px;text-wrap:balance;margin:0 auto 28px;color:var(--op-grond)}
   .headline-zin strong{display:block;color:var(--tekst);font-weight:400}
 
+  /* ---- Android-wachtlijst (apply_landing_android.py) ---- */
+  .android-wacht{padding:0 0 72px;text-align:center}
+  .android-sub{max-width:520px;margin:0 auto 18px;color:var(--op-grond);line-height:1.5}
+  .android-verborgen{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+  .android-test{display:flex;gap:10px;align-items:flex-start;text-align:left;margin-top:14px;font-size:.95rem;line-height:1.4;cursor:pointer}
+  .android-test input{width:20px;height:20px;flex:none;margin-top:1px;accent-color:var(--rood)}
+  .android-test small{display:block;color:var(--gedempt);font-size:.85rem;margin-top:2px}
+  @media (max-width:420px){.android-wacht .form-row{flex-direction:column}}
+
   /* ---- notify-formulier ---- */
   .waitlist{max-width:470px;margin:0 auto;position:relative;z-index:2}
   .form-row{display:flex;gap:10px;align-items:stretch}
@@ -185,7 +194,7 @@
   @media(max-width:860px){#hero3d{display:none} .hero{min-height:0}}
   @media(prefers-reduced-motion:reduce){#hero3d{display:none}}
 </style>
-<script type="application/ld+json" id="ld-tatties">{"@context": "https://schema.org", "@graph": [{"@type": "Organization", "@id": "https://tatties.app/#org", "name": "Tatties", "url": "https://tatties.app/", "logo": "https://tatties.app/img/tatties-logo.png", "sameAs": ["https://www.instagram.com/tatties.app", "https://www.tiktok.com/@tatties.app"]}, {"@type": "WebSite", "@id": "https://tatties.app/#website", "url": "https://tatties.app/", "name": "Tatties", "inLanguage": "en", "publisher": {"@id": "https://tatties.app/#org"}}, {"@type": "WebApplication", "@id": "https://tatties.app/#app", "name": "Tatties", "url": "https://tatties.app/", "downloadUrl": "https://apps.apple.com/app/id6819068062", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "EUR"}, "applicationCategory": "LifestyleApplication", "operatingSystem": "iOS, Web", "description": "Put every tattoo on a 3D body that looks like you and see where your next design fits before you book. Free tattoo tracker and planner, no account needed.", "image": "https://tatties.app/img/og-image.png", "inLanguage": "en", "publisher": {"@id": "https://tatties.app/#org"}}, {"@type": "MobileApplication", "@id": "https://tatties.app/#ios", "name": "Tatties", "operatingSystem": "iOS", "applicationCategory": "LifestyleApplication", "description": "Put every tattoo on a 3D body that looks like you and see where your next design fits before you book. Free tattoo tracker and planner, no account needed.", "image": "https://tatties.app/img/og-image.png", "installUrl": "https://apps.apple.com/app/id6819068062", "downloadUrl": "https://apps.apple.com/app/id6819068062", "inLanguage": "en", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "EUR"}, "publisher": {"@id": "https://tatties.app/#org"}}, {"@type": "FAQPage", "@id": "https://tatties.app/#faq", "mainEntity": [{"@type": "Question", "name": "What is Tatties?", "acceptedAnswer": {"@type": "Answer", "text": "Tatties is a tattoo tracker and tattoo planner. You build a 3D body that looks like you, put the tattoos you already have on it, and try new designs to see where they fit before you book."}}, {"@type": "Question", "name": "Is Tatties free?", "acceptedAnswer": {"@type": "Answer", "text": "Yes. Tatties is free on the App Store, without ads, and keeping your collection always stays free. If paid extras are added later, Founders (the first 100 accounts) keep every feature for free."}}, {"@type": "Question", "name": "Do I need an account?", "acceptedAnswer": {"@type": "Answer", "text": "No. Everything works without an account and your photos stay on your phone. An account is only for syncing your collection between devices. You can sign in with Apple, Google or email."}}, {"@type": "Question", "name": "How do I get my tattoo onto the 3D body?", "acceptedAnswer": {"@type": "Answer", "text": "Take or pick a photo, tap Find tattoo or trace it with your finger, then place it on the body. It wraps around arms and legs, and you move, turn and resize it with two fingers."}}, {"@type": "Question", "name": "Can I try a tattoo before I get it?", "acceptedAnswer": {"@type": "Answer", "text": "Yes. Add a design to your wishlist and put it on the model to check the size and placement. Share a picture or a spinning video with your artist."}}, {"@type": "Question", "name": "Is Tatties on Android?", "acceptedAnswer": {"@type": "Answer", "text": "Not as an app yet. On Android or a computer you can use Tatties in your browser."}}, {"@type": "Question", "name": "Is Tatties available in Dutch?", "acceptedAnswer": {"@type": "Answer", "text": "Yes. Tatties is in English and Dutch. You pick the language on the welcome screen or later in Settings."}}, {"@type": "Question", "name": "Can I suggest a feature?", "acceptedAnswer": {"@type": "Answer", "text": "Yes, please. Tell us which features you'd like to see next: tap Send feedback in the app (in Settings or the menu in the 3D view), email hello@tatties.app, or message us on TikTok or Instagram. We read every message."}}, {"@type": "Question", "name": "Are my photos private?", "acceptedAnswer": {"@type": "Answer", "text": "By default everything stays on your device. If you switch on sync, your collection is stored on servers in the EU, and you can delete your account and all your data at any time in the app."}}]}]}</script>
+<script type="application/ld+json" id="ld-tatties">{"@context": "https://schema.org", "@graph": [{"@type": "Organization", "@id": "https://tatties.app/#org", "name": "Tatties", "url": "https://tatties.app/", "logo": "https://tatties.app/img/tatties-logo.png", "sameAs": ["https://www.instagram.com/tatties.app", "https://www.tiktok.com/@tatties.app"]}, {"@type": "WebSite", "@id": "https://tatties.app/#website", "url": "https://tatties.app/", "name": "Tatties", "inLanguage": "en", "publisher": {"@id": "https://tatties.app/#org"}}, {"@type": "WebApplication", "@id": "https://tatties.app/#app", "name": "Tatties", "url": "https://tatties.app/", "downloadUrl": "https://apps.apple.com/app/id6819068062", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "EUR"}, "applicationCategory": "LifestyleApplication", "operatingSystem": "iOS, Web", "description": "Put every tattoo on a 3D body that looks like you and see where your next design fits before you book. Free tattoo tracker and planner, no account needed.", "image": "https://tatties.app/img/og-image.png", "inLanguage": "en", "publisher": {"@id": "https://tatties.app/#org"}}, {"@type": "MobileApplication", "@id": "https://tatties.app/#ios", "name": "Tatties", "operatingSystem": "iOS", "applicationCategory": "LifestyleApplication", "description": "Put every tattoo on a 3D body that looks like you and see where your next design fits before you book. Free tattoo tracker and planner, no account needed.", "image": "https://tatties.app/img/og-image.png", "installUrl": "https://apps.apple.com/app/id6819068062", "downloadUrl": "https://apps.apple.com/app/id6819068062", "inLanguage": "en", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "EUR"}, "publisher": {"@id": "https://tatties.app/#org"}}, {"@type": "FAQPage", "@id": "https://tatties.app/#faq", "mainEntity": [{"@type": "Question", "name": "What is Tatties?", "acceptedAnswer": {"@type": "Answer", "text": "Tatties is a tattoo tracker and tattoo planner. You build a 3D body that looks like you, put the tattoos you already have on it, and try new designs to see where they fit before you book."}}, {"@type": "Question", "name": "Is Tatties free?", "acceptedAnswer": {"@type": "Answer", "text": "Yes. Tatties is free on the App Store, without ads, and keeping your collection always stays free. If paid extras are added later, Founders (the first 100 accounts) keep every feature for free."}}, {"@type": "Question", "name": "Do I need an account?", "acceptedAnswer": {"@type": "Answer", "text": "No. Everything works without an account and your photos stay on your phone. An account is only for syncing your collection between devices. You can sign in with Apple, Google or email."}}, {"@type": "Question", "name": "How do I get my tattoo onto the 3D body?", "acceptedAnswer": {"@type": "Answer", "text": "Take or pick a photo, tap Find tattoo or trace it with your finger, then place it on the body. It wraps around arms and legs, and you move, turn and resize it with two fingers."}}, {"@type": "Question", "name": "Can I try a tattoo before I get it?", "acceptedAnswer": {"@type": "Answer", "text": "Yes. Add a design to your wishlist and put it on the model to check the size and placement. Share a picture or a spinning video with your artist."}}, {"@type": "Question", "name": "Is Tatties on Android?", "acceptedAnswer": {"@type": "Answer", "text": "Not yet: the Android app is coming to Google Play. Leave your email on tatties.app and we'll let you know when it's there. Until then you can use Tatties in your browser."}}, {"@type": "Question", "name": "Is Tatties available in Dutch?", "acceptedAnswer": {"@type": "Answer", "text": "Yes. Tatties is in English and Dutch. You pick the language on the welcome screen or later in Settings."}}, {"@type": "Question", "name": "Can I suggest a feature?", "acceptedAnswer": {"@type": "Answer", "text": "Yes, please. Tell us which features you'd like to see next: tap Send feedback in the app (in Settings or the menu in the 3D view), email hello@tatties.app, or message us on TikTok or Instagram. We read every message."}}, {"@type": "Question", "name": "Are my photos private?", "acceptedAnswer": {"@type": "Answer", "text": "By default everything stays on your device. If you switch on sync, your collection is stored on servers in the EU, and you can delete your account and all your data at any time in the app."}}]}]}</script>
 <style id="seo-css">
   .sec-kop{font-family:var(--display-font);font-weight:400;font-size:clamp(1.5rem,3.4vw,2.1rem);line-height:1.15;text-align:center;
     text-wrap:balance;margin:0 auto 10px;max-width:720px}
@@ -217,7 +226,7 @@
       <h1 class="headline headline-zin">Place tattoos you already have on your own 3D body. <strong>Then see where new designs fit.</strong></h1>
       <div class="download">
         <a class="store-badge" href="https://apps.apple.com/app/id6819068062"><picture><source srcset="img/app-store-badge-wit.svg" media="(prefers-color-scheme: dark)"><img src="img/app-store-badge.svg" alt="Download on the App Store" width="180" height="60"></picture></a>
-        <p class="form-note">Free, for iPhone. No account needed. <a href="https://tatties.app/web/">Use it in your browser</a> on Android or desktop.</p>
+        <p class="form-note">Free, for iPhone. No account needed. <a href="https://tatties.app/web/">Use it in your browser</a> on Android or desktop. <a href="#android">Android app coming soon</a>.</p>
       </div>
       <figure class="hero-telefoon"><img src="img/app-telefoon.webp" width="600" height="1304" decoding="async" alt="The Tatties app: a swallow tattoo being placed on the arm of a 3D body"></figure>
     </div>
@@ -268,6 +277,23 @@
       </div>
     </div>
   </section>
+  <section class="android-wacht" id="android" aria-labelledby="kop-android">
+    <div class="wrap">
+      <h2 class="sec-kop" id="kop-android">On Android?</h2>
+      <p class="android-sub">The Android app is coming to Google Play. Leave your email and we'll let you know when it's there.</p>
+      <form class="waitlist" id="android-form" novalidate>
+        <div class="form-row">
+          <label class="android-verborgen" for="android-email">Email address</label>
+          <input type="email" id="android-email" name="email" autocomplete="email" inputmode="email" maxlength="200" placeholder="you@example.com" required>
+          <button class="btn btn-primary" type="submit" id="android-knop">Notify me</button>
+        </div>
+        <label class="android-test"><input type="checkbox" id="android-tester"> <span>I'd like to help test it before launch. <small>Use the email of your Google account, so we can add you in Google Play.</small></span></label>
+        <p class="form-msg" id="android-msg" role="status" aria-live="polite"></p>
+        <p class="form-note">We only use your email for this and delete it once the app is out. <a href="/privacy.html#waitlist">Privacy</a></p>
+      </form>
+    </div>
+  </section>
+
   <section class="faq" aria-labelledby="kop-faq">
     <div class="wrap">
       <h2 class="sec-kop" id="kop-faq">Questions</h2>
@@ -277,7 +303,7 @@
         <details><summary>Do I need an account?</summary><p>No. Everything works without an account and your photos stay on your phone. An account is only for syncing your collection between devices. You can sign in with Apple, Google or email.</p></details>
         <details><summary>How do I get my tattoo onto the 3D body?</summary><p>Take or pick a photo, tap Find tattoo or trace it with your finger, then place it on the body. It wraps around arms and legs, and you move, turn and resize it with two fingers.</p></details>
         <details><summary>Can I try a tattoo before I get it?</summary><p>Yes. Add a design to your wishlist and put it on the model to check the size and placement. Share a picture or a spinning video with your artist.</p></details>
-        <details><summary>Is Tatties on Android?</summary><p>Not as an app yet. On Android or a computer you can use Tatties in your browser. <a href="https://tatties.app/web/">Open the web version</a>.</p></details>
+        <details><summary>Is Tatties on Android?</summary><p>Not yet: the Android app is coming to Google Play. <a href="#android">Leave your email</a> and we'll let you know when it's there. Until then you can use Tatties in your browser. <a href="https://tatties.app/web/">Open the web version</a>.</p></details>
         <details><summary>Is Tatties available in Dutch?</summary><p>Yes. Tatties is in English and Dutch. You pick the language on the welcome screen or later in Settings.</p></details>
         <details><summary>Can I suggest a feature?</summary><p>Yes, please. Tell us which features you'd like to see next: tap Send feedback in the app (in Settings or the menu in the 3D view), email hello@tatties.app, or message us on TikTok or Instagram. We read every message.</p></details>
         <details><summary>Are my photos private?</summary><p>By default everything stays on your device. If you switch on sync, your collection is stored on servers in the EU, and you can delete your account and all your data at any time in the app.</p></details>
@@ -403,6 +429,29 @@ window.__heroStart=function(){
   document.addEventListener('visibilitychange',function(){ if(document.hidden) stop(); else if(onscreen) start(); });
 };
 if(window.THREE) window.__heroStart();
+</script>
+<script>/* Android-wachtlijst (apply_landing_android.py): insert in public.android_wachtlijst, geen lezen */
+(function(){
+  var f=document.getElementById('android-form'); if(!f) return;
+  var inp=document.getElementById('android-email'), tst=document.getElementById('android-tester'),
+      knop=document.getElementById('android-knop'), msg=document.getElementById('android-msg');
+  function zeg(t,ok){ msg.textContent=t; msg.className='form-msg '+(ok?'ok':'err'); }
+  f.addEventListener('submit',function(e){
+    e.preventDefault();
+    var email=(inp.value||'').trim().toLowerCase();
+    if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)||email.length>200){ zeg('Please enter a valid email address.',false); inp.focus(); return; }
+    var taal=((navigator.language||'').match(/^[A-Za-z]{2,3}(-[A-Za-z0-9]{2,8})?/)||[null])[0];
+    var klaar=function(){ zeg(tst.checked?"Thanks! We'll let you know, and we'll add you as a tester soon.":"Thanks! We'll let you know when it's in Google Play.",true);
+      inp.value=''; tst.checked=false; knop.disabled=false; };
+    knop.disabled=true; zeg('',true);
+    if(window.__androidDev){ window.__androidLaatste={email:email,tester:tst.checked,taal:taal}; setTimeout(klaar,200); return; }
+    fetch('https://uhrbvwwiovefrpscgweo.supabase.co/rest/v1/android_wachtlijst',{method:'POST',
+      headers:{'apikey':'sb_publishable_oR3igYlqHgrgsa2QdaewqQ_-GCrDzNQ','Content-Type':'application/json','Prefer':'return=minimal'},
+      body:JSON.stringify({email:email,tester:!!tst.checked,taal:taal})})
+    .then(function(r){ if(r.ok) klaar(); else { knop.disabled=false; zeg('Something went wrong. Please try again later or email hello@tatties.app.',false); } })
+    .catch(function(){ knop.disabled=false; zeg('No connection. Please try again.',false); });
+  });
+})();
 </script>
 </body>
 </html>
