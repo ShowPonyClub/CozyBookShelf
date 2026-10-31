@@ -3469,6 +3469,19 @@ html.kleedkamer-aan .stage-knoppen .sk-rechts > button .ik{width:20px;height:20p
 html.kleedkamer-aan .stage-knoppen #t3d-kleed .ik{width:22px;height:18px}
 html.kleedkamer-aan #t3d-start{height:40px}
 html.kleedkamer-aan #t3d-start .lint-logo img{height:38px!important}
+/* de kop van de andere schermen (startscherm, collectie) in dezelfde maat als de 3D-rij (2026-10-31, eigenaar): logo 38 px hoog, knoppen 40 px, 6 px ertussen */
+html.kleedkamer-aan .app-header .lint-logo img{height:38px!important}
+html.kleedkamer-aan .app-header .lint-logo{transform:translateY(2px)}   /* zelfde hoogte als in 3D (daar staat het logo in een vak van 44 px) */
+html.kleedkamer-aan .app-header .kop-knoppen{gap:6px!important}
+html.kleedkamer-aan .app-header .kop-knoppen > button, html.kleedkamer-aan .app-header .kop-knoppen .seg-btn{width:40px!important;height:40px!important;min-width:0!important;min-height:0!important;position:relative}
+html.kleedkamer-aan .app-header .kop-knoppen > button::before, html.kleedkamer-aan .app-header .kop-knoppen .seg-btn::before{content:'';position:absolute;inset:-2px}
+html.kleedkamer-aan .app-header .kop-knoppen .ik{width:20px;height:20px}
+/* kruisje van Instellingen in dezelfde maat als de kopknoppen, rechterrand op een lijn met het tandwiel; geen focusring op een touchscherm
+   (bij openen krijgt hij de focus, iOS tekende er dan een tweede ring omheen) */
+html.kleedkamer-aan #inst-sluit{width:40px!important;height:40px!important;min-width:0!important;min-height:0!important;margin-right:8px;position:relative}
+html.kleedkamer-aan #inst-sluit::before{content:'';position:absolute;inset:-2px}
+html.kleedkamer-aan #inst-sluit .ik{width:20px;height:20px}
+@media (pointer:coarse){ #inst-sluit:focus-visible{outline:none} }
 /* beginstand-knop alleen bij een verdraaid beeld; de plek blijft (geen verschuiving), invloeien in .2 s */
 html.kleedkamer-aan .stage-knoppen #t3d-reset{transition:opacity .2s ease, visibility 0s}
 html.kleedkamer-aan .stage-knoppen #t3d-reset.in-rust{opacity:0;visibility:hidden;pointer-events:none;transition:opacity .2s ease, visibility 0s .2s}
@@ -14170,7 +14183,7 @@ function createTattoo(overrides = {}) {
    ============================================================ */
 // App-versie (semver, handmatig ophogen bij een release). Bij een bump ook de
 // CACHE-naam in sw.js meebumpen, zodat clients de nieuwe build ophalen.
-const APP_VERSIE = '0.5.14';
+const APP_VERSIE = '0.5.15';
 
 /* Dev-haken die de CLOUD raken hangen alleen op een ontwikkelmachine aan window. Ze zijn geen
    lek op zichzelf (zonder XSS roept niemand ze aan, en CSP + esc() houden XSS tegen), maar ze
@@ -15902,7 +15915,12 @@ document.addEventListener('click', (e) => {
   if (rg) { const aan = rg.dataset.kkring === '1'; zetUiterlijk({ ring: { aan } }); setTimeout(kkRender, 0);
     setTimeout(() => { if (kkOpen && typeof window.__tatties3DKleed === 'function') window.__tatties3DKleed(aan ? 'ring' : kkTab); }, 80); return; }
   const hw = e.target.closest('#kk [data-kkhorloge]');
-  if (hw) { kkKlik('#horloge-keuze button[data-horloge="' + hw.dataset.kkhorloge + '"]'); setTimeout(kkRender, 0); return; }
+  if (hw) { const aan = hw.dataset.kkhorloge === '1'; kkKlik('#horloge-keuze button[data-horloge="' + hw.dataset.kkhorloge + '"]'); setTimeout(kkRender, 0);
+    /* camera naar de pols (2026-10-31, eigenaar): het horloge bouwt na een tik (eigen pakket), dus even wachten tot het er staat */
+    let n = 0; const naar = () => { if (!kkOpen || typeof window.__tatties3DKleed !== 'function') return;
+      if (!aan) { window.__tatties3DKleed(kkTab); return; }
+      if (!window.__tatties3DKleed('horloge') && ++n < 25) setTimeout(naar, 80); };
+    setTimeout(naar, 80); return; }
   if (e.target.closest('#kk-kopen')) { kkKoop(); return; }
   if (e.target.closest('#kk-koop-terug')) { kkKoopDicht(false); return; }
   if (e.target.closest('#kk-herstel')) { shopHerstel().then(kkRender); return; }
@@ -24584,6 +24602,7 @@ async function verwijderVoorbeelden() {
   const RING={ marge:0.0004, bandB:0.0023, bandD:0.0013, schouderB:0.0048, schouderD:0.0020, hoek:1.3, dP:2.6, segs:180, laag:16,
     kopH:0.00173, vlakR:0.0040, uitloop:0.45, uitloopD:0.0013, goud:'#e3c27a', ruw:0.16, raster:360,
     zegelR:0.985, til:0.00040, randB:0.06, logoB:1.6, groef:[[0.865, 0.010, 0.6]], veld:0.00016, veldR:[0.905, 0.935],
+    inv:true, invGroef:[[0.885, 0.022, 1.6]], invSchaal:0.9,   // inv (2026-10-31, eigenaar): omgekeerd zegel, vlak met een gegraveerde cirkel en het logo erin gegraveerd (intaglio)
     hart:0.00012, bol:0.00030, staart:0.00018, vouw:0.00004, lint:0.00034, letter:0.00016, lijn:0.00012, donker:0.6,
     plaatRuw:0.30 };
     // m. Vorm als een echte zegelring (2026-10-31, eigenaar): rond zegelvlak (straal vlakR) op kopH boven de binnenkant, de kop als kegel
@@ -24641,10 +24660,13 @@ async function verwijderVoorbeelden() {
       let groef=0; for(const [c, b, t] of RING.groef) groef=Math.max(groef, t*glad(1-Math.abs(rho-c)/b));
       const u=(0.5-x/lw)*K.W, v=(y/lh+0.5)*K.H, binnen=u>=0 && v>=0 && u<K.W && v<K.H;
       const hl=binnen ? pak(K.h, u, v) : 0, dl=binnen ? glad((pak(K.d, u, v)-0.1)/0.6) : 0;
-      const veld=RING.veld*(1-glad((rho-RING.veldR[0])/(RING.veldR[1]-RING.veldR[0])));
-      const z=R.H-0.00003+(RING.til+0.00003)*rand-veld-groef*RING.lijn+hl;
+      if(RING.inv){ groef=0; for(const [c, b, t] of RING.invGroef) groef=Math.max(groef, t*glad(1-Math.abs(rho-c)/b)); }
+      const veld=RING.inv ? 0 : RING.veld*(1-glad((rho-RING.veldR[0])/(RING.veldR[1]-RING.veldR[0])));
+      const hz=RING.inv ? -hl*RING.invSchaal : hl;   // omgekeerd: wat eerst uitstak, ligt nu dieper (de omlijning wordt een richeltje)
+      const z=R.H-0.00003+(RING.til+0.00003)*rand-veld-groef*RING.lijn+hz;
       nr[(j+n)*W+i+n]=pos.length/3; pos.push(x, y, z); uv.push(x/(2*Rz)+0.5, y/(2*Rz)+0.5);
-      const c=1-RING.donker*Math.max(dl, groef); kl.push(c, c, c); }
+      const diep=RING.inv ? glad(-hz/0.00035) : dl;   // omgekeerd: donker in de diepte van de gravure
+      const c=1-RING.donker*Math.max(diep, groef); kl.push(c, c, c); }
     for(let j=0;j<2*n;j++) for(let i=0;i<2*n;i++){ const a=nr[j*W+i], b=nr[j*W+i+1], c=nr[(j+1)*W+i], d=nr[(j+1)*W+i+1];
       if(a>=0 && b>=0 && c>=0 && d>=0) idx.push(a, b, c, b, d, c); }
     const g=new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); g.setAttribute('color', new THREE.Float32BufferAttribute(kl, 3));
@@ -25004,6 +25026,23 @@ async function verwijderVoorbeelden() {
   let _genResize=false;
   /* KLEEDKAMER-3D-BEGIN (apply_kleedkamer.py): het kader van een tabblad in het vrije deel boven het paneel, zoals genCamera */
   window.__tatties3DKlaarVoorKleed=()=>!!(inited && pickMeshes.length && !plaatsModus);
+  /* camera op de rug van de linkerpols, zoals de ring (polsMeting: O = midden, n = rugzijde, a = naar de hand), in het vrije deel boven het paneel */
+  function kkHorlogeKader(){
+    if(!horlogeObj || !stage || typeof horlogeObj.meting!=='function') return false;
+    const M=horlogeObj.meting(); if(!M) return false;
+    const wm=modelRoot.matrixWorld, v=a=>new THREE.Vector3(a[0], a[1], a[2]);
+    const m=v(M.O).applyMatrix4(wm), rug=v(M.n).transformDirection(wm), as=v(M.a).transformDirection(wm);
+    const op=new THREE.Vector3(0, 1, 0), kijk=rug.clone().addScaledVector(op, 0.35).normalize();   // op de rug van de pols, iets van boven
+    rol=0; if(camera.view && camera.view.enabled) camera.clearViewOffset();
+    const sr=stage.getBoundingClientRect(), p=document.getElementById('kk'), pr=(p && !p.hidden) ? p.getBoundingClientRect() : null;
+    const bezet=pr ? Math.max(0, sr.bottom-pr.top)+8 : 0, zicht=Math.max(0.3, Math.min(0.95, (sr.height-bezet-76)/sr.height));
+    const tanH=Math.tan(camera.fov*Math.PI/360), r=0.13/(2*tanH)/zicht, midden=76/sr.height+zicht/2;
+    const scherm=op.clone().addScaledVector(kijk, -op.dot(kijk)).normalize();   // omhoog in beeld
+    const doel=m.clone().addScaledVector(scherm, (midden-0.5)*(2*r*tanH));
+    camTween(Math.atan2(kijk.x, kijk.z), Math.max(0.2, Math.min(Math.PI-0.2, Math.acos(Math.max(-1, Math.min(1, kijk.y))))), doel, r, 450);
+    return true;
+  }
+  window.__tatties3DHorlogeKader=kkHorlogeKader;
   var kkTabSnap=null, kkTabSnapT=0;   // het beeld van het tabblad (na de camerabeweging), voor de beginstand-knop in de kleedkamer
   var kkWachtNr=-1;
   function kkTabSnapNu(){ clearTimeout(kkTabSnapT); kkWachtNr=-1; kkTabSnap={ th:theta, ph:phi, r:radius, x:target.x, y:target.y, z:target.z }; }
@@ -25013,6 +25052,7 @@ async function verwijderVoorbeelden() {
     if(!inited || !pickMeshes.length || !stage) return false;
     if(soort==null){ kkTabSnap=null; clearTimeout(kkTabSnapT); resetView(); return true; }
     if(soort==='ring'){ const ok=typeof window.__tatties3DRingKader==='function' ? window.__tatties3DRingKader() : false; if(ok) kkTabSnapLater(); return ok; }   // zegelring (apply_ring.py)
+    if(soort==='horloge'){ const ok=kkHorlogeKader(); if(ok) kkTabSnapLater(); return ok; }   // horloge: camera op de pols (2026-10-31, eigenaar)
     if(editDecal) exitEditUI();
     if(ledeActief) stopIsolatie();
     const sr=stage.getBoundingClientRect(); if(!(sr.width>0 && sr.height>0)) return false;
