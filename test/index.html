@@ -3463,7 +3463,7 @@ html.kleedkamer-aan .stage-knoppen #t3d-kleed{display:flex!important}
 html.kleedkamer-aan #inst-kleedkamer-open.kk-alleen{display:flex!important}
 /* vier knoppen rechtsboven (beginstand, delen, kleedkamer, menu): 40 px met 44 px raakvlak, logo 38 px hoog; past op 375 px */
 html.kleedkamer-aan .stage-knoppen .sk-rechts{gap:6px!important}
-html.kleedkamer-aan .stage-knoppen .sk-rechts > button{width:40px!important;height:40px!important;min-width:0!important;min-height:0!important;position:relative}
+html.kleedkamer-aan .stage-knoppen .sk-rechts > button{width:40px!important;height:40px!important;min-width:0!important;min-height:0!important;position:relative!important}   /* !important: de ID-regels (#t3d-menu, #t3d-reset, ...) zetten static, dan lag het raakvlak (::before) over de hele rij */
 html.kleedkamer-aan .stage-knoppen .sk-rechts > button::before{content:'';position:absolute;inset:-2px}
 html.kleedkamer-aan .stage-knoppen .sk-rechts > button .ik{width:20px;height:20px}
 html.kleedkamer-aan .stage-knoppen #t3d-kleed .ik{width:22px;height:18px}
@@ -14097,7 +14097,7 @@ function createTattoo(overrides = {}) {
    ============================================================ */
 // App-versie (semver, handmatig ophogen bij een release). Bij een bump ook de
 // CACHE-naam in sw.js meebumpen, zodat clients de nieuwe build ophalen.
-const APP_VERSIE = '0.5.10';
+const APP_VERSIE = '0.5.11';
 
 /* Dev-haken die de CLOUD raken hangen alleen op een ontwikkelmachine aan window. Ze zijn geen
    lek op zichzelf (zonder XSS roept niemand ze aan, en CSP + esc() houden XSS tegen), maar ze
