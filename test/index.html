@@ -3484,9 +3484,9 @@ html.kkaan #toon-gepland-3d, html.kkaan #t3d-duw, html.kkaan #t3d-menu-paneel, h
   font-size:18px;color:var(--tekst);pointer-events:auto}
 .kk-rechts{display:flex;gap:8px;pointer-events:auto}
 /* beginstand van het tabblad (2026-10-31, eigenaar): alleen als het beeld afwijkt; de plek blijft (geen verschuiving) */
-.kk-reset{display:flex;align-items:center;justify-content:center;transition:opacity .2s ease, visibility 0s}
+.kk-reset{display:flex;align-items:center;justify-content:center;transition:opacity .2s ease}
 .kk-reset .ik{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
-.kk-reset.in-rust{opacity:0;visibility:hidden;pointer-events:none;transition:opacity .2s ease, visibility 0s .2s}
+.kk-reset.in-rust{opacity:0;pointer-events:none}   /* geen visibility: op iOS kwam de knop daarmee soms zonder icoon terug */
 .kk-x{pointer-events:auto;width:44px;height:44px;border:2px solid var(--accent);border-radius:4px;background:var(--kaart);color:var(--tekst);
   font-size:24px;line-height:1;cursor:pointer;padding:0}
 .kk{position:fixed;left:0;right:0;bottom:0;z-index:20;background:var(--kaart);border-top:2px solid var(--accent);
@@ -14097,7 +14097,7 @@ function createTattoo(overrides = {}) {
    ============================================================ */
 // App-versie (semver, handmatig ophogen bij een release). Bij een bump ook de
 // CACHE-naam in sw.js meebumpen, zodat clients de nieuwe build ophalen.
-const APP_VERSIE = '0.5.11';
+const APP_VERSIE = '0.5.12';
 
 /* Dev-haken die de CLOUD raken hangen alleen op een ontwikkelmachine aan window. Ze zijn geen
    lek op zichzelf (zonder XSS roept niemand ze aan, en CSP + esc() houden XSS tegen), maar ze
@@ -24669,7 +24669,7 @@ async function verwijderVoorbeelden() {
   // referentie eigenaar 2026-10-31: iris groot (boven onder het ooglid, onder tegen het onderooglid), dichte donkere wimperrand, ook onder
   const OGEN_KLEUREN={ bruin:'#5b3a24', hazel:'#7d5e30', groen:'#566f40', blauw:'#4f6f94', grijs:'#6f7a82' };   // gedempt, zoals de haarkleuren
   window.__tattiesOgenKleuren=OGEN_KLEUREN;
-  const WIMPER={ L:0.0065, bins:24, rijen:6, n:110, donker:0.4, voor:0.0025, neer:0.0006, ruw:0.8, onder:0.35, onderDek:0.55, basis:0.16 };   // wimpers (2026-10-31, eigenaar): L = langste wimper (m, buitenhoek), bins x rijen = strook langs het bovenooglid, n = haartjes in de textuur, donker = kleur = haarkleur x donker, voor = basis net voor de ooglidrand; onder = lengte onderwimpers (deel van L), onderDek = hun dekking, basis = dichte donkere rand onderaan de textuur (wimperlijn)
+  const WIMPER={ L:0.0065, bins:24, rijen:6, n:110, donker:0.4, voor:0.0021, neer:0, ruw:0.8, onder:0.35, onderDek:0.55, basis:0.07 };   // wimpers (2026-10-31, eigenaar): L = langste wimper (m, buitenhoek), bins x rijen = strook langs het bovenooglid, n = haartjes in de textuur, donker = kleur = haarkleur x donker, voor = basis net voor de ooglidrand; onder = lengte onderwimpers (deel van L), onderDek = hun dekking, basis = dichte donkere rand onderaan de textuur (wimperlijn)
   /* Wimpertextuur (alphaMap): haartjes van onder (ooglid, v 0) naar boven, naar de buitenhoek (u 1) langer en schuiner. */
   let wimperTex=null;
   function wimperTextuur(){
@@ -24932,7 +24932,10 @@ async function verwijderVoorbeelden() {
   /* KLEEDKAMER-3D-BEGIN (apply_kleedkamer.py): het kader van een tabblad in het vrije deel boven het paneel, zoals genCamera */
   window.__tatties3DKlaarVoorKleed=()=>!!(inited && pickMeshes.length && !plaatsModus);
   var kkTabSnap=null, kkTabSnapT=0;   // het beeld van het tabblad (na de camerabeweging), voor de beginstand-knop in de kleedkamer
-  function kkTabSnapLater(){ kkTabSnap=null; clearTimeout(kkTabSnapT); kkTabSnapT=setTimeout(()=>{ kkTabSnap={ th:theta, ph:phi, r:radius, x:target.x, y:target.y, z:target.z }; }, 520); }
+  var kkWachtNr=-1;
+  function kkTabSnapNu(){ clearTimeout(kkTabSnapT); kkWachtNr=-1; kkTabSnap={ th:theta, ph:phi, r:radius, x:target.x, y:target.y, z:target.z }; }
+  function camTweenNa(nr){ if(nr===kkWachtNr) kkTabSnapNu(); }   // aangeroepen door camTween als hij klaar is
+  function kkTabSnapLater(){ kkTabSnap=null; kkWachtNr=camTweenNr; clearTimeout(kkTabSnapT); kkTabSnapT=setTimeout(kkTabSnapNu, 1500); }   // vangnet: afgebroken beweging
   window.__tatties3DKleed=function(soort){   // 'onderbroek' | 'haar' | 'bril' | null (= beginstand)
     if(!inited || !pickMeshes.length || !stage) return false;
     if(soort==null){ kkTabSnap=null; clearTimeout(kkTabSnapT); resetView(); return true; }
@@ -26701,7 +26704,7 @@ async function verwijderVoorbeelden() {
     const stap=(nu)=>{ if(nr!==camTweenNr || !actief3D || vakAnim) return;   // R7-14
       const u=Math.min(1,(nu-t0)/ms), e=u*u*(3-2*u);
       theta=th0+dth*e; phi=ph0+(doelPhi-ph0)*e; target.lerpVectors(tg0, doelTarget, e); radius=r0+(doelRadius-r0)*e; applyCam();
-      if(u<1) requestAnimationFrame(stap); };
+      if(u<1) requestAnimationFrame(stap); else if(typeof camTweenNa==='function') camTweenNa(nr); };
     requestAnimationFrame(stap);
   }
   function kaderNaVink(m){
