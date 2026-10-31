@@ -3482,6 +3482,11 @@ html.kkaan #toon-gepland-3d, html.kkaan #t3d-duw, html.kkaan #t3d-menu-paneel, h
 .kk-boven[hidden]{display:none}
 .kk-titel{margin:0;padding:6px 12px;background:var(--kaart);border:2px solid var(--accent);border-radius:4px;font-family:var(--display-font);
   font-size:18px;color:var(--tekst);pointer-events:auto}
+.kk-rechts{display:flex;gap:8px;pointer-events:auto}
+/* beginstand van het tabblad (2026-10-31, eigenaar): alleen als het beeld afwijkt; de plek blijft (geen verschuiving) */
+.kk-reset{display:flex;align-items:center;justify-content:center;transition:opacity .2s ease, visibility 0s}
+.kk-reset .ik{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.kk-reset.in-rust{opacity:0;visibility:hidden;pointer-events:none;transition:opacity .2s ease, visibility 0s .2s}
 .kk-x{pointer-events:auto;width:44px;height:44px;border:2px solid var(--accent);border-radius:4px;background:var(--kaart);color:var(--tekst);
   font-size:24px;line-height:1;cursor:pointer;padding:0}
 .kk{position:fixed;left:0;right:0;bottom:0;z-index:20;background:var(--kaart);border-top:2px solid var(--accent);
@@ -3880,7 +3885,10 @@ html:not(.shop-aan) .kk-link.shop-alleen{display:none}
     <!-- KLEEDKAMER-MARKUP-BEGIN (apply_kleedkamer.py) -->
     <div id="kk-boven" class="kk-boven" hidden>
       <p class="kk-titel" id="kk-titel" data-i18n="kk.titel">Kleedkamer</p>
-      <button type="button" class="kk-x" id="kk-x" data-i18n-aria="aria.sluiten" data-i18n-title="aria.sluiten" aria-label="Sluiten" title="Sluiten">&times;</button>
+      <div class="kk-rechts">
+        <button type="button" class="kk-x kk-reset in-rust" id="kk-reset" data-i18n-aria="ui.beginstand" data-i18n-title="ui.beginstand" aria-label="Beginstand" title="Beginstand" tabindex="-1" aria-hidden="true"><svg class="ik" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8V5a1 1 0 0 1 1-1h3"/><path d="M16 4h3a1 1 0 0 1 1 1v3"/><path d="M20 16v3a1 1 0 0 1-1 1h-3"/><path d="M8 20H5a1 1 0 0 1-1-1v-3"/><circle cx="12" cy="8.2" r="1.4"/><path d="M12 10.2v3.8"/><path d="M9.6 11.6h4.8"/><path d="M10.4 17.2l1.6-3.2 1.6 3.2"/></svg></button>
+        <button type="button" class="kk-x" id="kk-x" data-i18n-aria="aria.sluiten" data-i18n-title="aria.sluiten" aria-label="Sluiten" title="Sluiten">&times;</button>
+      </div>
     </div>
     <div id="kk" class="kk" role="dialog" aria-modal="true" aria-labelledby="kk-titel" hidden>
       <div class="kk-binnen">
@@ -14089,7 +14097,7 @@ function createTattoo(overrides = {}) {
    ============================================================ */
 // App-versie (semver, handmatig ophogen bij een release). Bij een bump ook de
 // CACHE-naam in sw.js meebumpen, zodat clients de nieuwe build ophalen.
-const APP_VERSIE = '0.5.9';
+const APP_VERSIE = '0.5.10';
 
 /* Dev-haken die de CLOUD raken hangen alleen op een ontwikkelmachine aan window. Ze zijn geen
    lek op zichzelf (zonder XSS roept niemand ze aan, en CSP + esc() houden XSS tegen), maar ze
@@ -15796,6 +15804,7 @@ window.__tattiesKleedkamerDicht = (verlaat3D) => kleedkamerDicht(!!verlaat3D);
 document.addEventListener('click', (e) => {
   if (!e.target || !e.target.closest) return;
   if (e.target.closest('#t3d-kleed') || e.target.closest('#inst-kleedkamer-open')) { kleedkamerOpen(); return; }
+  if (e.target.closest('#kk-reset')) { kkCamera(); return; }   // terug naar het beeld van dit tabblad
   if (!kkOpen) return;
   const t = e.target.closest('#kk .kk-tabs button[data-kktab]');
   if (t) { if (kkTab !== t.dataset.kktab) { kkTab = t.dataset.kktab; kkRender(); kkCamera(); } return; }
@@ -24655,7 +24664,7 @@ async function verwijderVoorbeelden() {
   /* RING-3D-EINDE */
   /* OGEN-3D-BEGIN (apply_ogen.py): oogbollen in de kassen, mat en gestileerd (HUISSTIJL: lichaam); kind van modelRoot */
   var oogObj=null, oogData=null;
-  const OGEN={ rFac:0.62, voor:0.003, wit:'#ddd3c6', pupil:'#1a1310', rand:0.6, licht:0.3, irisR:1.18, pupilR:0.30, straal:0.16, ruw:0.65, neer:0.17, lid:0.5, hoek:0.25, glim:0.09 };   // r = rFac x breedte van het ooggat; neer = blik iets omlaag (rad), zodat het bovenooglid de bovenkant van de iris bedekt (staren is eng);
+  const OGEN={ rFac:0.62, voor:0.003, wit:'#ddd3c6', pupil:'#1a1310', rand:0.6, licht:0.3, irisR:1.18, pupilR:0.30, straal:0.16, ruw:0.65, neer:0.05, lid:0.5, hoek:0.25, glim:0.09 };   // r = rFac x breedte van het ooggat; neer = blik iets omlaag (rad), zodat het bovenooglid de bovenkant van de iris bedekt (staren is eng);
   // lid = schaduw van het bovenooglid op het oogwit (0..1), hoek = donkerder naar de ooghoeken, glim = maat van het lichtpuntje; voor = m voor het lusvlak; rand/licht = donkere irisrand en lichte ring om de pupil (deel van de kleur), straal = dekking van de straaltjes in de iris;
   // referentie eigenaar 2026-10-31: iris groot (boven onder het ooglid, onder tegen het onderooglid), dichte donkere wimperrand, ook onder
   const OGEN_KLEUREN={ bruin:'#5b3a24', hazel:'#7d5e30', groen:'#566f40', blauw:'#4f6f94', grijs:'#6f7a82' };   // gedempt, zoals de haarkleuren
@@ -24922,10 +24931,12 @@ async function verwijderVoorbeelden() {
   let _genResize=false;
   /* KLEEDKAMER-3D-BEGIN (apply_kleedkamer.py): het kader van een tabblad in het vrije deel boven het paneel, zoals genCamera */
   window.__tatties3DKlaarVoorKleed=()=>!!(inited && pickMeshes.length && !plaatsModus);
+  var kkTabSnap=null, kkTabSnapT=0;   // het beeld van het tabblad (na de camerabeweging), voor de beginstand-knop in de kleedkamer
+  function kkTabSnapLater(){ kkTabSnap=null; clearTimeout(kkTabSnapT); kkTabSnapT=setTimeout(()=>{ kkTabSnap={ th:theta, ph:phi, r:radius, x:target.x, y:target.y, z:target.z }; }, 520); }
   window.__tatties3DKleed=function(soort){   // 'onderbroek' | 'haar' | 'bril' | null (= beginstand)
     if(!inited || !pickMeshes.length || !stage) return false;
-    if(soort==null){ resetView(); return true; }
-    if(soort==='ring') return typeof window.__tatties3DRingKader==='function' ? window.__tatties3DRingKader() : false;   // zegelring (apply_ring.py)
+    if(soort==null){ kkTabSnap=null; clearTimeout(kkTabSnapT); resetView(); return true; }
+    if(soort==='ring'){ const ok=typeof window.__tatties3DRingKader==='function' ? window.__tatties3DRingKader() : false; if(ok) kkTabSnapLater(); return ok; }   // zegelring (apply_ring.py)
     if(editDecal) exitEditUI();
     if(ledeActief) stopIsolatie();
     const sr=stage.getBoundingClientRect(); if(!(sr.width>0 && sr.height>0)) return false;
@@ -24941,25 +24952,30 @@ async function verwijderVoorbeelden() {
     if(camera.view && camera.view.enabled) camera.clearViewOffset();
     rol=0;
     camTween(K[2], Math.PI/2, new THREE.Vector3((b.min.x+b.max.x)/2, ty, (b.min.z+b.max.z)/2), r, 450);
+    kkTabSnapLater();
     return true;
   };
   /* Beginstand-knop alleen als het beeld afwijkt (keuze eigenaar 2026-10-30): in de beginstand doet hij niets. De plek blijft gereserveerd
      (visibility), zodat de andere knoppen niet verschuiven. Altijd zichtbaar met een losse ledemaat (dan is hij 'Heel lichaam'). */
   var kkSnap=null;   // camerastand zoals resetView hem zette (niet herberekend: camBegin hangt af van de schermhoogte, bv. een Safari-balk)
   function kkBeginSnap(){ kkSnap={ th:theta, ph:phi, r:radius, x:target.x, y:target.y, z:target.z }; }
+  function kkAfwijking(S, d){   // d = verschuiving in m die nog telt als 'zelfde beeld'
+    let dth=theta-S.th; dth=Math.atan2(Math.sin(dth), Math.cos(dth));
+    return Math.abs(dth)>0.03 || Math.abs(phi-S.ph)>0.02 || Math.abs(radius-S.r)>0.03*S.r
+      || Math.abs(target.x-S.x)>d || Math.abs(target.y-S.y)>d || Math.abs(target.z-S.z)>d;
+  }
   function kkResetNodig(){
     if(ledeActief || rol) return true;
     if(!kkSnap) return true;
-    let dth=theta-kkSnap.th; dth=Math.atan2(Math.sin(dth), Math.cos(dth));
-    return Math.abs(dth)>0.03 || Math.abs(phi-kkSnap.ph)>0.02 || Math.abs(radius-kkSnap.r)>0.03*kkSnap.r
-      || Math.abs(target.x-kkSnap.x)>0.02 || Math.abs(target.y-kkSnap.y)>0.02 || Math.abs(target.z-kkSnap.z)>0.02;
+    return kkAfwijking(kkSnap, 0.02);
   }
   setInterval(()=>{
     if(!actief3D || !document.documentElement.classList.contains('kleedkamer-aan')) return;
-    const rb=document.getElementById('t3d-reset'); if(!rb) return;
-    const rust=!!(inited && pickMeshes.length) && !kkResetNodig();
-    if(rb.classList.contains('in-rust')!==rust){ rb.classList.toggle('in-rust', rust); rb.tabIndex=rust ? -1 : 0; if(rust) rb.setAttribute('aria-hidden','true'); else rb.removeAttribute('aria-hidden'); }
+    const zet=(rb, rust)=>{ if(rb && rb.classList.contains('in-rust')!==rust){ rb.classList.toggle('in-rust', rust); rb.tabIndex=rust ? -1 : 0; if(rust) rb.setAttribute('aria-hidden','true'); else rb.removeAttribute('aria-hidden'); } };
+    zet(document.getElementById('t3d-reset'), !!(inited && pickMeshes.length) && !kkResetNodig());
+    zet(document.getElementById('kk-reset'), !kkTabSnap || (!rol && !kkAfwijking(kkTabSnap, Math.max(0.004, 0.02*kkTabSnap.r))));   // in de kleedkamer: t.o.v. het beeld van het tabblad (ring = dichtbij, dus naar verhouding)
   }, 200);
+  window.__tatties3DKleedAfwijkt=()=>!!kkTabSnap && (!!rol || kkAfwijking(kkTabSnap, Math.max(0.004, 0.02*kkTabSnap.r)));   // dev/test
   window.__tatties3DResetNodig=()=>kkResetNodig();   // dev/test
   /* KLEEDKAMER-3D-EINDE */
   window.__tattiesLichaamOpen = async function(opties){
