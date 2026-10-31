@@ -14193,7 +14193,7 @@ function createTattoo(overrides = {}) {
    ============================================================ */
 // App-versie (semver, handmatig ophogen bij een release). Bij een bump ook de
 // CACHE-naam in sw.js meebumpen, zodat clients de nieuwe build ophalen.
-const APP_VERSIE = '0.5.16';
+const APP_VERSIE = '0.5.17';
 
 /* Dev-haken die de CLOUD raken hangen alleen op een ontwikkelmachine aan window. Ze zijn geen
    lek op zichzelf (zonder XSS roept niemand ze aan, en CSP + esc() houden XSS tegen), maar ze
@@ -21278,6 +21278,7 @@ function toonOnboarding() {
   if (gedaan) return;
   const ov = document.getElementById('onboarding');
   if (!ov) return;
+  window.__onbInlogWacht = false; document.body.classList.remove('onb-inlog');   // 2026-10-31: vlag van een eerdere 'Sign in' zonder login sloot de intro opnieuw meteen (ingelogd)
   document.querySelectorAll('#onb-geslacht button[data-onb-geslacht]').forEach(b => {
     const aan = b.dataset.onbGeslacht === silhouetKeuze;
     b.classList.toggle('actief', aan); b.setAttribute('aria-pressed', String(aan));   // ONB-4
@@ -22273,7 +22274,7 @@ async function verwijderVoorbeelden() {
   { const ob = $('#inst-onboarding'); if (ob) ob.addEventListener('click', () => {   // 'Introductie opnieuw' vanuit instellingen
       try { localStorage.removeItem('tatties-onboarding-gedaan'); } catch { /* geen vlag */ }
       if (typeof sluitInstellingen === 'function') sluitInstellingen();
-      toonOnboarding();
+      naBackOpen(toonOnboarding);   // 2026-10-31: pas na de back van Instellingen (iOS: die kwam soms na het openen en sloot het welkom)
     }); }
   { const ib = $('#inst-install'); if (ib) ib.addEventListener('click', installApp); }
   { const ip = $('#inst-privacy'); if (ip) ip.addEventListener('click', () => { sluitInstellingen(); legalRetour = huidigeView || 'start'; toonView('privacy'); }); }
