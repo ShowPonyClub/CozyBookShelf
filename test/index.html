@@ -3565,7 +3565,9 @@ html.kkaan #prive-banner{display:none!important}   /* viel over de titel van de 
 .kk-kleur-eigen{background:conic-gradient(from 0deg,#e53935,#fdd835,#43a047,#1e88e5,#8e24aa,#e53935)}
 .kk-kleur-eigen::after{content:'';position:absolute;inset:7px;border-radius:50%;background:var(--k);border:2px solid var(--kaart);opacity:0}
 .kk-kleur-eigen[aria-pressed="true"]::after{opacity:1}
-.kk-kleur-input{position:absolute;left:0;bottom:0;width:1px;height:1px;opacity:0;border:0;padding:0;pointer-events:none}
+.kk-eigen-wrap{position:relative;display:inline-block;width:48px;height:48px;flex:none}
+.kk-eigen-wrap .kk-kleur{position:absolute;inset:0}
+.kk-kleur-input{position:absolute;inset:0;width:48px;height:48px;opacity:0;border:0;padding:0;margin:0;border-radius:50%;cursor:pointer;-webkit-appearance:none;appearance:none}
 </style>
 <style id="gen-knoppen">
 #gen-beeld{width:40px;height:40px;min-width:0;min-height:0;border:2px solid var(--accent);background:var(--kaart);color:var(--tekst)}
@@ -15917,9 +15919,9 @@ window.__tattiesKleedkamerStatus = () => { kkInstStatus(); lichaamKnopNaam(); };
 /* Eigen haarkleur (2026-11-02): zesde bolletje met regenboogrand, de kleurkiezer van het toestel; keuze als hex in haar.kleur */
 function kkEigenKleur(kleur) {
   const eigen = /^#[0-9a-f]{6}$/i.test(String(kleur)), hex = eigen ? String(kleur).toLowerCase() : '#6b4a2e', naam = tr('kk.kleur_eigen');
-  return '<button type="button" class="kk-kleur kk-kleur-eigen" data-kkeigen="1" style="--k:' + hex + '" aria-pressed="' + (eigen ? 'true' : 'false') + '"'
-    + ' aria-label="' + kkEsc(naam) + '" title="' + kkEsc(naam) + '"></button>'
-    + '<input type="color" class="kk-kleur-input" id="kk-kleur-input" value="' + hex + '" aria-label="' + kkEsc(naam) + '" tabindex="-1">';
+  return '<span class="kk-eigen-wrap"><button type="button" class="kk-kleur kk-kleur-eigen" data-kkeigen="1" style="--k:' + hex + '" aria-pressed="' + (eigen ? 'true' : 'false') + '"'
+    + ' aria-label="' + kkEsc(naam) + '" title="' + kkEsc(naam) + '" tabindex="-1"></button>'
+    + '<input type="color" class="kk-kleur-input" id="kk-kleur-input" value="' + hex + '" aria-label="' + kkEsc(naam) + '"></span>';
 }
 let kkEigenT = 0, kkEigenLaatst = null;
 function kkEigenZet(hex, nu) {   /* tijdens het kiezen hooguit elke 120 ms (de hele look wordt herbouwd), de laatste altijd */
