@@ -11597,7 +11597,10 @@ function genHerstelLabel(){
 function genKlaarNuZicht(){
   if(GEN.stap >= GEN_STAPPEN.length-1) return false;
   if(GEN.stap > 0) return true;
-  return !GEN.kiesEerst && genStapVeranderd(GEN_STAPPEN[0]);
+  if(GEN.kiesEerst) return false;
+  var b = GEN.begin || {};   /* alleen de waarden van stap 1 zelf (genStapVeranderd telt ook latere stappen mee, voor Reset) */
+  return (b.gender !== undefined && +sliders.gender.value !== b.gender) || (b.leeftijd !== undefined && leeftijdJaar !== b.leeftijd) ||
+         (b.huidtint !== undefined && huidtint !== b.huidtint);
 }
 function genHerstel(){
   var st = GEN_STAPPEN[GEN.stap];
