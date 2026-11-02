@@ -3568,6 +3568,9 @@ html.kkaan #prive-banner{display:none!important}   /* viel over de titel van de 
 .kk-eigen-wrap{position:relative;display:inline-block;width:48px;height:48px;flex:none}
 .kk-eigen-wrap .kk-kleur{position:absolute;inset:0}
 .kk-kleur-input{position:absolute;inset:0;width:48px;height:48px;opacity:0;border:0;padding:0;margin:0;border-radius:50%;cursor:pointer;-webkit-appearance:none;appearance:none}
+/* toesteltest 2026-11-02: elk tabblad even hoog (de hoogte van Haar en Gezicht), de inhoud scrolt (Accessoires met horloge = drie groepen) */
+html.kleedkamer-aan .kk-kleuren{gap:10px}   /* zes bolletjes (vijf kleuren + eigen) op een rij bij 375 px: 6 x 48 + 5 x 10 = 338 */
+html.kleedkamer-aan .kk-inhoud{height:188px;min-height:0;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
 </style>
 <style id="gen-knoppen">
 #gen-beeld{width:40px;height:40px;min-width:0;min-height:0;border:2px solid var(--accent);background:var(--kaart);color:var(--tekst)}
@@ -16047,12 +16050,12 @@ document.addEventListener('click', (e) => {
   if (br) { kkKlik('#bril-keuze button[data-bril="' + br.dataset.kkbril + '"]'); setTimeout(kkRender, 0); return; }
   const rg = e.target.closest('#kk [data-kkring]');   // zegelring (apply_ring.py): aan = camera naar de hand
   if (rg) { const aan = rg.dataset.kkring === '1'; zetUiterlijk({ ring: { aan } }); setTimeout(kkRender, 0);
-    setTimeout(() => { if (kkOpen && typeof window.__tatties3DKleed === 'function') window.__tatties3DKleed(aan ? 'ring' : kkTab); }, 80); return; }
+    if (aan) setTimeout(() => { if (kkOpen && typeof window.__tatties3DKleed === 'function') window.__tatties3DKleed('ring'); }, 80); return; }   // uit: camera blijft bij de hand (2026-11-02)
   const hw = e.target.closest('#kk [data-kkhorloge]');
   if (hw) { const aan = hw.dataset.kkhorloge === '1'; kkKlik('#horloge-keuze button[data-horloge="' + hw.dataset.kkhorloge + '"]'); setTimeout(kkRender, 0);
     /* camera naar de pols (2026-10-31, eigenaar): het horloge bouwt na een tik (eigen pakket), dus even wachten tot het er staat */
     let n = 0; const naar = () => { if (!kkOpen || typeof window.__tatties3DKleed !== 'function') return;
-      if (!aan) { window.__tatties3DKleed(kkTab); return; }
+      if (!aan) return;   // uit: camera blijft bij de pols (2026-11-02)
       if (!window.__tatties3DKleed('horloge') && ++n < 25) setTimeout(naar, 80); };
     setTimeout(naar, 80); return; }
   if (e.target.closest('#kk-kopen')) { kkKoop(); return; }
@@ -25551,11 +25554,12 @@ async function verwijderVoorbeelden() {
     await frameAdem();   // eerst de layout van het 3D-venster, daarna het kader berekenen
     zetGenTop();
     if(!_genResize){ _genResize=true; window.addEventListener("resize", ()=>{ if(genAan()) zetGenTop(); }); }
-    if(!LichaamMotor.generator.open(genHost, lichaamOpgeslagen(), { kiesEerst:!!opties.kiesEerst, eersteKnop:opties.eersteKnop })) return false;
+    const kiesEerst=!!opties.kiesEerst && !(typeof heeftEigenLichaam==='function' && heeftEigenLichaam());   // met een eigen lichaam (intro opnieuw): daar beginnen, niet neutraal (2026-11-02)
+    if(!LichaamMotor.generator.open(genHost, lichaamOpgeslagen(), { kiesEerst, eersteKnop:opties.eersteKnop })) return false;
     resize(); zetGenTop();   // stage staat nu vast over het scherm (kopbalk weg, slice 4o)
     /* Onboarding: open() zette het neutrale lichaam neer; onderbroek en haar/bril waren nog gebouwd voor het welkomstlichaam en het nieuwe
        lichaam stak door de stof heen (tester 2026-10-11). Meteen opnieuw opbouwen, voor genFrames. */
-    if(opties.kiesEerst){ try{ rebuildUnderwear(); }catch(e){ console.error("onderbroek", e); } try{ uiterlijkNaLichaam(); }catch(e){ console.error("uiterlijk", e); } }
+    if(kiesEerst){ try{ rebuildUnderwear(); }catch(e){ console.error("onderbroek", e); } try{ uiterlijkNaLichaam(); }catch(e){ console.error("uiterlijk", e); } }
     genNa=opties.na||null;
     genFrames();
     if(typeof laagOpenHistory==="function") laagOpenHistory('lichaam', ()=>LichaamMotor.generator.annuleer());
