@@ -15933,8 +15933,16 @@ function kkEigenZet(hex, nu) {   /* tijdens het kiezen hooguit elke 120 ms (de h
   const b = document.querySelector('#kk [data-kkeigen]'); if (b) { b.style.setProperty('--k', hex); b.setAttribute('aria-pressed', 'true'); }
   document.querySelectorAll('#kk [data-kkhaarkleur]').forEach(x => x.setAttribute('aria-pressed', 'false'));
 }
-document.addEventListener('input', (e) => { if (e.target && e.target.id === 'kk-kleur-input') kkEigenZet(e.target.value, false); });
-document.addEventListener('change', (e) => { if (e.target && e.target.id === 'kk-kleur-input') { kkEigenZet(e.target.value, true); setTimeout(kkRender, 0); } });
+/* v3 (toesteltest eigenaar: de kiezer sloot bij elke kleur): tijdens het kiezen alleen het haar meekleuren (licht), bij change de hele look.
+   Geen kkRender hier: dat haalt het invoerveld uit de DOM en daarmee sluit iOS de kiezer. */
+function kkEigenLicht(hex) {
+  if (!/^#[0-9a-f]{6}$/i.test(hex)) return; hex = hex.toLowerCase();
+  const b = document.querySelector('#kk [data-kkeigen]'); if (b) { b.style.setProperty('--k', hex); b.setAttribute('aria-pressed', 'true'); }
+  document.querySelectorAll('#kk [data-kkhaarkleur]').forEach(x => x.setAttribute('aria-pressed', 'false'));
+  try { const h = window.__tattiesHaarDbg && window.__tattiesHaarDbg.haar(); if (h && h.zet) h.zet({ kleur: hex }); } catch (e) { /* geen haar */ }
+}
+document.addEventListener('input', (e) => { if (e.target && e.target.id === 'kk-kleur-input') kkEigenLicht(e.target.value); });
+document.addEventListener('change', (e) => { if (e.target && e.target.id === 'kk-kleur-input') kkEigenZet(e.target.value, true); });
 function kkKoopUI() {
   const k = kkKoopKleur; if (!k) return;
   const soort = kkSoort() || 'slip', std = ONDERGOED_STANDAARD[soort];
