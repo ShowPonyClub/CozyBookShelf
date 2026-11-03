@@ -3980,7 +3980,6 @@ html.genaan #gen-beeld{top:calc(26px + env(safe-area-inset-top,0px));right:max(2
         </div>
         <button type="button" class="kk-kopen" id="kk-kopen">Kopen</button>
         <button type="button" class="kk-link" id="kk-koop-terug"></button>
-        <p class="kk-koop-uitleg" data-i18n="shop.uitleg">Je betaalt via de winkel van je telefoon. Founders krijgen alles uit de shop gratis.</p>
       </div>
     </div>
     <!-- KLEEDKAMER-MARKUP-EINDE -->
@@ -4190,11 +4189,11 @@ html.genaan #gen-beeld{top:calc(26px + env(safe-area-inset-top,0px));right:max(2
   </div>
 
   <div class="inst-tabs" role="tablist">
-    <button class="inst-tab actief" id="inst-tab-lichaam" role="tab" aria-selected="true" aria-controls="inst-pane-lichaam" data-i18n="inst.tab_lichaam">Lichaam</button>
-    <button class="inst-tab" id="inst-tab-app" role="tab" aria-selected="false" aria-controls="inst-pane-app" data-i18n="inst.tab_app">App</button>
+    <button class="inst-tab actief" id="inst-tab-app" role="tab" aria-selected="true" aria-controls="inst-pane-app" data-i18n="inst.tab_app">App</button>
+    <button class="inst-tab" id="inst-tab-lichaam" role="tab" aria-selected="false" aria-controls="inst-pane-lichaam" data-i18n="inst.tab_lichaam">Lichaam</button>
   </div>
 
-  <div id="inst-pane-lichaam" role="tabpanel" aria-labelledby="inst-tab-lichaam">
+  <div id="inst-pane-lichaam" role="tabpanel" aria-labelledby="inst-tab-lichaam" hidden>
   <p class="inst-groepkop" data-i18n="inst.groep_lichaam">Je lichaam</p>
   <div class="paneel inst-kaart">
     <button type="button" class="inst-link-rij" id="inst-lichaam-open">
@@ -4328,7 +4327,7 @@ html.genaan #gen-beeld{top:calc(26px + env(safe-area-inset-top,0px));right:max(2
   </div>
   </div><!-- /inst-pane-lichaam -->
 
-  <div id="inst-pane-app" role="tabpanel" aria-labelledby="inst-tab-app" hidden>
+  <div id="inst-pane-app" role="tabpanel" aria-labelledby="inst-tab-app">
   <p class="inst-groepkop" data-i18n="inst.groep_voorkeuren">Voorkeuren</p>
   <div class="paneel inst-kaart">
     <div class="inst-rij inst-kaart-rij">
@@ -14252,7 +14251,7 @@ function createTattoo(overrides = {}) {
    ============================================================ */
 // App-versie (semver, handmatig ophogen bij een release). Bij een bump ook de
 // CACHE-naam in sw.js meebumpen, zodat clients de nieuwe build ophalen.
-const APP_VERSIE = '0.5.23';
+const APP_VERSIE = '0.6.0';
 
 /* Dev-haken die de CLOUD raken hangen alleen op een ontwikkelmachine aan window. Ze zijn geen
    lek op zichzelf (zonder XSS roept niemand ze aan, en CSP + esc() houden XSS tegen), maar ze
@@ -25032,7 +25031,7 @@ async function verwijderVoorbeelden() {
         Q[k*3]=w0*P[a]+w1*P[b]+w2*P[c]+OFS[k*3]*sx; Q[k*3+1]=w0*P[a+1]+w1*P[b+1]+w2*P[c+1]+OFS[k*3+1]*sy; Q[k*3+2]=w0*P[a+2]+w1*P[b+2]+w2*P[c+2]+OFS[k*3+2]*sz; }
       g.computeVertexNormals(); const N=g.attributes.normal.array;   // haartjes dikker: elke vertex naar buiten langs zijn normaal
       for(let i=0;i<n*3;i++) Q[i]+=N[i]*WB.dik;
-      g.attributes.position.needsUpdate=true; g.computeVertexNormals(); g.computeBoundingSphere();
+      g.attributes.position.needsUpdate=true; g.attributes.normal.needsUpdate=true; g.computeBoundingSphere();   // normalen van voor het dikker maken (apply_volg_rem.py)
     }
     bereken();
     const mat=new THREE.MeshStandardMaterial({ color:0x2a1d16, roughness:WB.ruw, metalness:0 });
@@ -25205,7 +25204,7 @@ async function verwijderVoorbeelden() {
         if(v===k*3) continue; Q[k*3]=Q[v]+(Q[k*3]-Q[v])*f; Q[k*3+1]=Q[v+1]+(Q[k*3+1]-Q[v+1])*f; Q[k*3+2]=Q[v+2]+(Q[k*3+2]-Q[v+2])*f; }
       g.computeVertexNormals(); const N=g.attributes.normal.array;   // buisjes dikker: elke vertex naar buiten langs zijn normaal
       for(let k=0;k<n;k++){ Q[k*3]+=N[k*3]*DIK[k]; Q[k*3+1]+=N[k*3+1]*DIK[k]; Q[k*3+2]+=N[k*3+2]*DIK[k]; }
-      g.attributes.position.needsUpdate=true; g.computeVertexNormals(); g.computeBoundingSphere();
+      g.attributes.position.needsUpdate=true; g.attributes.normal.needsUpdate=true; g.computeBoundingSphere();   // normalen van voor het dikker maken (apply_volg_rem.py)
     }
     bereken();
     const mat=new THREE.MeshStandardMaterial({ color:0x000000, vertexColors:true, roughness:WIMPER_MH.ruw, metalness:0 });
@@ -25294,7 +25293,7 @@ async function verwijderVoorbeelden() {
         const r=OGEN.rFac*(mxx-mnx), d=r-OGEN.voor;
         o.mesh.position.set(c[0]-n[0]*d, c[1]-n[1]*d, c[2]-n[2]*d); o.mesh.scale.setScalar(r);
         o.mesh.quaternion.setFromUnitVectors(new THREE.Vector3(1, 0, 0), new THREE.Vector3(n[0], n[1]-Math.sin(OGEN.neer), n[2]).normalize());   // plek op de lusnormaal, blik iets omlaag
-        o.stroken.forEach(st=>herbouwWimper(st, c, n));
+        o.stroken.forEach(st=>{ if(st.wimper.visible || !st.__gebouwd){ st.__gebouwd=true; herbouwWimper(st, c, n); } });   // verborgen reservestrook niet elke keer (apply_volg_rem.py)
       });
     }
     herbouw();
@@ -25426,7 +25425,22 @@ async function verwijderVoorbeelden() {
   }
   /* Lichaam veranderd (generator losgelaten, sync, annuleren): bril meteen; haar in de generator stijf (physics wacht), anders
      opnieuw opbouwen. Tijdens het slepen in de generator: uiterlijkVolg (alleen de verwijzingen, goedkoop). */
-  function uiterlijkVolg(){ haarBouwToken++; if(haarObj) haarObj.stijf(false); if(brilObj) brilObj.herbouw(false); if(snorObj) snorObj.herbouw(); if(ringObj) ringObj.herbouw(); if(oogObj) oogObj.herbouw(); if(nagelObj) nagelObj.herbouw(); if(wbObj) wbObj.herbouw();
+  /* Tijdens het slepen in de generator (apply_volg_rem.py, 2026-11-03): ogen+wimpers en wenkbrauwen elk hooguit elke VOLG_REM_MS, nooit
+     samen in een beeld; nagels (goedkoop) elk beeld. Exact bij loslaten via uiterlijkNaLichaam. */
+  const VOLG_REM_MS=100; let volgRemOgen=0, volgRemWb=0, volgRemBeurt=0, volgRemNa=0;
+  function volgGezicht(){
+    if(nagelObj) nagelObj.herbouw();
+    if(window.__volgRem===false){ if(oogObj) oogObj.herbouw(); if(wbObj) wbObj.herbouw(); return; }
+    const nu=performance.now(), ogen=!!oogObj && nu-volgRemOgen>=VOLG_REM_MS, wb=!!wbObj && nu-volgRemWb>=VOLG_REM_MS;
+    if(ogen && (!wb || volgRemBeurt===0)){ volgRemOgen=nu; volgRemBeurt=1; oogObj.herbouw(); }
+    else if(wb){ volgRemWb=nu; volgRemBeurt=0; wbObj.herbouw(); }
+    clearTimeout(volgRemNa); volgRemNa=setTimeout(()=>{ volgRemOgen=volgRemWb=performance.now(); if(oogObj) oogObj.herbouw(); if(wbObj) wbObj.herbouw(); }, VOLG_REM_MS+30);   // na de laatste sleepbeweging exact
+  }
+  window.__tattiesUiterlijkVolg=()=>uiterlijkVolg();   // dev: kosten per beeld tijdens slepen meten
+  window.__tattiesUiterlijkVolgDelen=()=>{ const t=f=>{ const a=performance.now(); try{ f(); }catch(e){} return +(performance.now()-a).toFixed(1); };   // dev: per onderdeel
+    return { haar:t(()=>{ if(haarObj) haarObj.stijf(false); }), bril:t(()=>{ if(brilObj) brilObj.herbouw(false); }), snor:t(()=>{ if(snorObj) snorObj.herbouw(); }),
+      ring:t(()=>{ if(ringObj) ringObj.herbouw(); }), gezicht:t(volgGezicht), horloge:!!horlogeObj }; };
+  function uiterlijkVolg(){ haarBouwToken++; if(haarObj) haarObj.stijf(false); if(brilObj) brilObj.herbouw(false); if(snorObj) snorObj.herbouw(); if(ringObj) ringObj.herbouw(); volgGezicht();   // ogen/wimpers en wenkbrauwen afgeremd (apply_volg_rem.py)
     if(horlogeObj && performance.now()-horlogeVolgT>120){ horlogeVolgT=performance.now(); horlogeObj.herbouw(); } }   // horloge: ~20 ms, niet elk beeld
   function uiterlijkNaLichaam(){
     if(brilObj) brilObj.herbouw();
