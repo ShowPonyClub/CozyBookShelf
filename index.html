@@ -3,7 +3,7 @@
 <head>
 <script>/* apply_token_hash.py: mail-link met token_hash zonder app (of via de Site URL) = de webversie bevestigt */(function(){if(/[?&]token_hash=/.test(location.search))location.replace('/web/'+location.search);})();</script>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://formsubmit.co https://uhrbvwwiovefrpscgweo.supabase.co; worker-src 'self' blob:; base-uri 'none'; form-action 'none'; frame-ancestors 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; media-src 'self'; font-src 'self'; connect-src 'self' https://formsubmit.co https://uhrbvwwiovefrpscgweo.supabase.co; worker-src 'self' blob:; base-uri 'none'; form-action 'none'; frame-ancestors 'none'">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="color-scheme" content="light dark">
 <meta name="theme-color" content="#EFE4D0" media="(prefers-color-scheme: light)">
@@ -214,6 +214,13 @@
   .form-note a{color:var(--tekst);text-decoration:underline;text-underline-offset:3px}
   @media (min-width:641px){.features .grid{grid-template-columns:repeat(auto-fit,minmax(176px,1fr))}}
 </style>
+<style id="film-css">
+  .film{padding:8px 0 56px;text-align:center}
+  .film .sec-kop{margin-bottom:22px}
+  .film-telefoon{margin:0 auto;width:min(72vw,300px);border:2.5px solid var(--tekst);border-radius:30px;overflow:hidden;
+    background:var(--kaart);box-shadow:6px 7px 0 var(--tekst);aspect-ratio:9/16}
+  .film-telefoon video{display:block;width:100%;height:100%;object-fit:cover}
+</style>
 </head>
 <body>
 
@@ -232,6 +239,25 @@
       <figure class="hero-telefoon"><img src="img/app-telefoon.webp" width="600" height="1304" decoding="async" alt="The Tatties app: a swallow tattoo being placed on the arm of a 3D body"></figure>
     </div>
   </section>
+
+<!-- FILM-BEGIN -->
+  <section class="film" aria-labelledby="kop-film">
+    <div class="wrap">
+      <h2 class="sec-kop" id="kop-film">See it in 30 seconds</h2>
+      <figure class="film-telefoon"><video id="film-intro" src="img/film/intro.mp4" poster="img/film/intro-poster.jpg" width="720" height="1280" muted loop playsinline preload="none" aria-label="Video: a crocodile tattoo is cut out of a photo, placed on the thigh of a 3D body and saved with the artist, price and aftercare"></video></figure>
+    </div>
+  </section>
+  <script>
+  (function(){
+    var v = document.getElementById('film-intro'); if (!v) return;
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches || !('IntersectionObserver' in window)) { v.controls = true; v.preload = 'metadata'; return; }
+    new IntersectionObserver(function(e){
+      if (e[0].isIntersecting) { var p = v.play(); if (p && p.catch) p.catch(function(){ v.controls = true; }); }
+      else v.pause();
+    }, {threshold: .35}).observe(v);
+  })();
+  </script>
+<!-- FILM-EIND -->
 
   <section class="story" aria-labelledby="kop-werkt">
     <div class="wrap">
