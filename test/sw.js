@@ -10,7 +10,7 @@
    (controllerchange na skipWaiting+claim; zie de registratie in tatties-3d.html).
    Cachenaam is geversioneerd; bij activatie worden oude caches opgeruimd.
    Bump CACHE bij elke release (gelijk aan APP_VERSIE in tatties-3d.html). */
-const CACHE = 'tatties-test-v0.5.23';
+const CACHE = 'tatties-test-v0.6.0';
 const NET_TIMEOUT_MS = 3500;     // deadline op de response-headers
 const BODY_TIMEOUT_MS = 20000;   // deadline op de volledige body (app is ~3.5MB)
 
@@ -84,6 +84,14 @@ self.addEventListener('fetch', (e) => {
         // Redirect-responses niet herbouwen/cachen (uit de SW serveren voor een
         // navigatie geeft dan een security-fout): direct doorgeven.
         if (net.redirected) return net;
+        // Zelfde build als in de cache (2026-11-06): niet opnieuw 15 MB bufferen en wegschrijven, dat kostte elke start ruim een seconde.
+        try {
+          const oud = await caches.match(sleutel), lmN = net.headers.get('last-modified'), etN = net.headers.get('etag');
+          if (oud && ((lmN && lmN === oud.headers.get('last-modified')) || (etN && etN === oud.headers.get('etag')))) {
+            try { net.body && net.body.cancel(); } catch { /* niets te annuleren */ }
+            return oud;
+          }
+        } catch { /* gewoon downloaden */ }
         // Body volledig bufferen mét deadline: pas dan weten we zeker dat de stream
         // niet halverwege stokt. Daarna één kopie naar de cache, één naar de browser.
         bufP = net.arrayBuffer();
