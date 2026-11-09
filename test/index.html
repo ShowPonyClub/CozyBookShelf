@@ -16924,7 +16924,7 @@ const VRIENDEN_AAN = (() => {   /* achter de schakelaar: alleen op /test of loka
     if (!/\/test\//.test(location.pathname) && !/^(localhost|127\.0\.0\.1)$/.test(location.hostname)) return false;
     const q = new URLSearchParams(location.search);
     if (q.get('vrienden') === '1' || q.get('vriend')) localStorage.setItem('tatties-vrienden', '1');
-    return localStorage.getItem('tatties-dev') === '1' || localStorage.getItem('tatties-vrienden') === '1';
+    return localStorage.getItem('tatties-dev') === '1' || localStorage.getItem('tatties-vrienden') === '1' || window.__tabbalkAan === true;
   } catch (e) { return false; }
 })();
 if (VRIENDEN_AAN) document.documentElement.classList.add('vrienden-aan');
