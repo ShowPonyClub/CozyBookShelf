@@ -3728,9 +3728,10 @@ html:not(.tabbalk-aan) .tabbalk-alleen{display:none!important}
   try {
     var q = new URLSearchParams(location.search);
     if (q.get('tabbalk') === '1') localStorage.setItem('tatties-tabbalk', '1');
-    if (q.get('tabbalk') === '0') localStorage.removeItem('tatties-tabbalk');
-    aan = !window.TATTIES_NATIEF && (/\/test\//.test(location.pathname) || /^(localhost|127\.0\.0\.1)$/.test(location.hostname))
-      && localStorage.getItem('tatties-tabbalk') === '1' && localStorage.getItem('tatties-lichaam-gen') !== '0'
+    if (q.get('tabbalk') === '0') localStorage.setItem('tatties-tabbalk', '0');
+    var tbKeuze = localStorage.getItem('tatties-tabbalk');   /* /test: standaard aan, lokaal: alleen met ?tabbalk=1 (apply_tabbalk_test_aan.py) */
+    aan = !window.TATTIES_NATIEF && ((/\/test\//.test(location.pathname) && tbKeuze !== '0') || (/^(localhost|127\.0\.0\.1)$/.test(location.hostname) && tbKeuze === '1'))
+      && localStorage.getItem('tatties-lichaam-gen') !== '0'
       && typeof DecompressionStream !== 'undefined' && window.__tabbalk !== false;
   } catch (e) { aan = false; }
   window.__tabbalkAan = aan;
