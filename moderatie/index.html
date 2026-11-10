@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src https://auth.tatties.app; base-uri 'none'; form-action 'none'; frame-ancestors 'none'">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<meta name="referrer" content="no-referrer">
+<title>Melding afhandelen - Tatties</title>
+<link rel="icon" href="/img/icon-180.png" type="image/png">
+<meta name="color-scheme" content="light dark">
+<style>
+  /* apply_moderatie_pagina.py: zelfde huisstijl als /app/ (Archivo, Ultra, papier en inkt) */
+  @font-face{font-family:'Archivo';src:url('/fonts/archivo.woff2') format('woff2');font-weight:400 800;font-stretch:62% 100%;font-display:swap}
+  @font-face{font-family:'Ultra';src:url('/fonts/ultra.woff2') format('woff2');font-weight:400;font-display:swap}
+  :root{--bg:#EFE4D0;--tekst:#221A12;--gedempt:#5A503F;--kaart:#FBF7EE;--rand:#D9CBB3;--rood:#B8312A;--groen:#2F6B3F;color-scheme:light;
+    --app-font:'Archivo',ui-sans-serif,system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-serif;--display-font:'Ultra','Archivo',Georgia,serif}
+  @media (prefers-color-scheme:dark){:root{--bg:#181511;--tekst:#ECE3D2;--gedempt:#9E9382;--kaart:#221E17;--rand:#3A352B;--rood:#D9584F;--groen:#6FB07F;color-scheme:dark}}
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{background:var(--bg)}
+  body{font-family:var(--app-font);font-weight:500;color:var(--tekst);line-height:1.55;background:var(--bg);min-height:100vh;-webkit-font-smoothing:antialiased}
+  main{max-width:560px;margin:0 auto;padding:32px 16px 64px}
+  .kicker{font-size:.72rem;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--gedempt)}
+  h1{font-family:var(--display-font);font-weight:400;font-size:clamp(1.6rem,6vw,2.1rem);line-height:1.1;margin:4px 0 18px}
+  .kaart{background:var(--kaart);border:2px solid var(--tekst);border-radius:4px;padding:16px;margin:0 0 16px;box-shadow:4px 4px 0 var(--rand)}
+  .rij{display:flex;justify-content:space-between;gap:12px;padding:6px 0;border-bottom:1px solid var(--rand)}
+  .rij:last-child{border-bottom:0}
+  .rij span:first-child{color:var(--gedempt)}
+  .rij span:last-child{font-weight:700;text-align:right;overflow-wrap:anywhere}
+  .beeld{display:block;width:100%;max-height:340px;object-fit:contain;background:#F2EADB;border-radius:4px;margin:0 0 12px}
+  .tnaam{font-size:1.25rem;font-weight:800;margin:0 0 6px;overflow-wrap:anywhere}
+  .status{font-weight:700;margin:0 0 16px;padding:10px 12px;border-radius:4px;border:2px solid currentColor}
+  .status.ok{color:var(--groen)}
+  .status.fout{color:var(--rood)}
+  .knoppen{display:grid;gap:10px}
+  button{font:inherit;font-weight:800;min-height:48px;padding:0 16px;border-radius:4px;border:2px solid var(--tekst);background:var(--kaart);color:var(--tekst);cursor:pointer;text-align:left}
+  button.gevaar{background:var(--rood);border-color:var(--rood);color:#fff}
+  button:disabled{opacity:.5;cursor:default}
+  button small{display:block;font-weight:500;font-size:.82rem;opacity:.85;line-height:1.3;padding-bottom:8px}
+  button b{display:block;padding-top:8px}
+  .gedempt{color:var(--gedempt);font-size:.9rem}
+  [hidden]{display:none!important}
+</style>
+</head>
+<body>
+<main>
+  <p class="kicker">Tatties · moderatie</p>
+  <h1 id="kop">Melding afhandelen</h1>
+  <p class="status" id="status" role="status" hidden></p>
+  <div id="inhoud" hidden>
+    <div class="kaart" id="melding"></div>
+    <div class="kaart" id="tattoo" hidden></div>
+    <div class="knoppen" id="knoppen"></div>
+    <p class="gedempt" style="margin-top:16px">Verbergen is blijvend: vrienden zien het niet meer, ook niet als de app het opnieuw klaarzet. De eigenaar ziet zijn eigen tattoos gewoon. Terugdraaien kan in Supabase (tabel verborgen).</p>
+  </div>
+</main>
+<script>
+(function () {
+  var FUNCTIE = 'https://auth.tatties.app/functions/v1/moderatie';
+  var q = new URLSearchParams(location.search), r = q.get('r'), t = q.get('t');
+  var REDEN = { naakt: 'Naakt', geweld: 'Geweld', haat: 'Haat of discriminatie', niet_van_hen: 'Niet hun eigen tattoo', naam: 'Gebruikersnaam', anders: 'Iets anders' };
+  var ACTIE = { tattoo: 'Tattoo verborgen', account: 'Alles van dit account verborgen', naam: 'Gebruikersnaam teruggezet', niets: 'Afgehandeld zonder actie' };
+  var $ = function (id) { return document.getElementById(id); };
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  function tijd(s) { var d = new Date(s); return isNaN(d) ? '' : d.toLocaleString('nl-NL', { day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' }); }
+  function status(tekst, soort) { var s = $('status'); s.textContent = tekst; s.className = 'status ' + (soort || ''); s.hidden = !tekst; }
+  function rij(a, b) { return b ? '<div class="rij"><span>' + esc(a) + '</span><span>' + esc(b) + '</span></div>' : ''; }
+  async function vraag(actie) {
+    var res = await fetch(FUNCTIE, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ r: r, t: t, actie: actie }) });
+    var j = await res.json().catch(function () { return {}; });
+    if (!res.ok) throw new Error(j.fout || ('http ' + res.status));
+    return j;
+  }
+  function foutTekst(e) {
+    var m = e && e.message;
+    if (m === 'link') return 'Deze link klopt niet (nummer of sleutel). Gebruik de link uit de meldingsmail.';
+    if (m === 'verlopen') return 'Deze link is verlopen (30 dagen). Handel de melding af in Supabase.';
+    return 'Dat lukte niet (' + (m || 'netwerk') + '). Probeer het opnieuw.';
+  }
+  function toon(d) {
+    $('kop').textContent = 'Melding #' + d.id;
+    $('melding').innerHTML = rij('Reden', REDEN[d.reden] || d.reden) + rij('Over', d.over ? '@' + d.over : '(geen gebruikersnaam meer)') +
+      rij('Gemeld door', d.van ? '@' + d.van : '?') + rij('Wanneer', tijd(d.tijd)) +
+      rij('Gedaan', d.actie ? ACTIE[d.actie] + ' (' + tijd(d.actie_op) + ')' : 'Nog niets') +
+      (d.accountVerborgen ? rij('Account', 'Delen staat uit (verborgen)') : '');
+    var tk = $('tattoo');
+    if (d.tattoo) {
+      var x = d.tattoo;
+      tk.innerHTML = (d.beeld ? '<img class="beeld" alt="Gemelde tattoo" src="' + esc(d.beeld) + '">' : '<p class="gedempt">Geen beeld meer.</p>') +
+        '<p class="tnaam">' + esc(x.naam || 'Zonder naam') + '</p>' + rij('Plek', x.lichaamsdeel) + rij('Stijl', x.stijl) + rij('Artiest', x.artiest) +
+        rij('Studio', x.studio) + rij('Datum', x.datum) + (x.verborgen ? rij('Status', 'Verborgen voor vrienden') : '');
+      tk.hidden = false;
+    } else {
+      tk.innerHTML = d.heeftTattoo ? '<p class="gedempt">Deze tattoo wordt niet meer gedeeld.</p>' : '<p class="gedempt">De melding gaat niet over een tattoo.</p>';
+      tk.hidden = false;
+    }
+    var wie = d.over ? '@' + d.over : 'dit account', k = [];
+    if (d.heeftTattoo) k.push(['tattoo', 'Verberg deze tattoo', 'Vrienden zien deze tattoo (alle delen) niet meer.', true]);
+    k.push(['account', 'Verberg alles van ' + wie, 'Vrienden zien geen tattoos en geen lichaam meer van ' + wie + '.', true]);
+    if (d.over) k.push(['naam', 'Gebruikersnaam terugzetten', '@' + d.over + ' moet een nieuwe naam kiezen; deze naam kan niemand meer nemen.', true]);
+    k.push(['niets', 'Niets doen', 'Markeer als afgehandeld zonder iets te verbergen.', false]);
+    $('knoppen').innerHTML = k.map(function (b) {
+      return '<button type="button" data-actie="' + b[0] + '"' + (b[3] ? ' class="gevaar"' : '') + '><b>' + esc(b[1]) + '</b><small>' + esc(b[2]) + '</small></button>';
+    }).join('');
+    $('inhoud').hidden = false;
+  }
+  async function laad() {
+    if (!r || !t) { status('Deze pagina werkt alleen met de link uit een meldingsmail.', 'fout'); return; }
+    status('Laden…');
+    try { var d = await vraag('bekijk'); status(''); toon(d); } catch (e) { status(foutTekst(e), 'fout'); }
+  }
+  $('knoppen').addEventListener('click', async function (e) {
+    var b = e.target.closest('button[data-actie]'); if (!b) return;
+    var actie = b.getAttribute('data-actie'), titel = b.querySelector('b').textContent;
+    if (!confirm(titel + '?')) return;
+    [].forEach.call(document.querySelectorAll('#knoppen button'), function (x) { x.disabled = true; });
+    try {
+      await vraag(actie);
+      var d = await vraag('bekijk'); toon(d); status('Gedaan: ' + ACTIE[actie] + '.', 'ok');
+    } catch (err) {
+      status(foutTekst(err), 'fout');
+      [].forEach.call(document.querySelectorAll('#knoppen button'), function (x) { x.disabled = false; });
+    }
+  });
+  window.__modLaad = laad;
+  laad();
+})();
+</script>
+</body>
+</html>
