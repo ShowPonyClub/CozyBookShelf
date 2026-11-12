@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Condiciones de uso - Tatties</title>
+<meta name="description" content="Las condiciones de uso de Tatties.">
+<link rel="canonical" href="https://tatties.app/es/terms.html">
+<link rel="alternate" hreflang="en" href="https://tatties.app/terms.html">
+<link rel="alternate" hreflang="es" href="https://tatties.app/es/terms.html">
+<link rel="alternate" hreflang="x-default" href="https://tatties.app/terms.html">
+<link rel="icon" href="/img/icon-180.png" type="image/png">
+<link rel="apple-touch-icon" href="/img/icon-180.png">
+<meta name="color-scheme" content="light dark">
+<style>
+  /* Zelf gehost (privacy: geen bezoekers-IP naar een font-CDN). Archivo en Ultra, dezelfde lettertypen als de app (Google Fonts, OFL). */
+  @font-face{font-family:'Archivo';src:url('/fonts/archivo.woff2') format('woff2');font-weight:400 800;font-stretch:62% 100%;font-style:normal;font-display:swap}
+  @font-face{font-family:'Ultra';src:url('/fonts/ultra.woff2') format('woff2');font-weight:400;font-style:normal;font-display:swap}
+  :root{
+    --bg:#EFE4D0; --was:#EFE4D0; --tekst:#221A12; --gedempt:#5A503F; --op-grond:#3E3428;
+    --accent:#221A12; --op-inkt:#F0EDE8; --kaart:#FBF7EE; --veldbg:#FFFCF5; --rand:#D9CBB3;
+    --rasterlijn:transparent; --r-sm:8px; --r-md:12px;
+    --app-font:'Archivo', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; --display-font:'Ultra', 'Archivo', Georgia, serif;
+    --label-font:ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    --maxw:680px; color-scheme:light;
+  }
+  @media (prefers-color-scheme:dark){
+    :root{--bg:#181511; --was:#1B1713; --tekst:#ECE3D2; --gedempt:#9E9382; --op-grond:#9E9382; --accent:#ECE3D2; --op-inkt:#181511;
+      --kaart:#221E17; --veldbg:#201C15; --rand:#3A352B; --rasterlijn:transparent; color-scheme:dark}
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth;background:var(--bg)}
+  body{font-family:var(--app-font);font-weight:500;color:var(--tekst);line-height:1.6;-webkit-font-smoothing:antialiased;min-height:100vh;
+    background:
+      radial-gradient(120% 60% at 50% 0%, var(--was) 0%, var(--was) 38%, transparent 70%),
+      linear-gradient(var(--rasterlijn) 1px, transparent 1px) 0 0/56px 56px,
+      linear-gradient(90deg, var(--rasterlijn) 1px, transparent 1px) 0 0/56px 56px,
+      var(--bg);
+    background-color:var(--bg)}
+  .wrap{width:100%;max-width:var(--maxw);margin:0 auto;padding:0 24px}
+
+  header{position:sticky;top:0;z-index:50;background:var(--kaart);border-bottom:1px solid var(--rand)}
+  .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+  .nav-brand{display:inline-flex;align-items:center}
+  .nav-brand img{height:22px;width:auto;display:block}
+  .nav-back{font-family:var(--label-font);font-size:.82rem;font-weight:600;color:var(--gedempt);text-decoration:none;display:inline-flex;align-items:center;gap:6px;
+    min-height:44px;padding:0 4px}
+  .nav-back:hover{color:var(--tekst)}
+
+  main{padding:44px 0 72px}
+  .page-title{font-family:var(--display-font);font-size:clamp(1.7rem,5vw,2.2rem);font-weight:400;line-height:1.1;margin-bottom:6px}
+  .page-sub{font-family:var(--label-font);font-size:.82rem;color:var(--gedempt);margin-bottom:36px}
+
+  h2{font-size:1.02rem;font-weight:700;margin:30px 0 6px;color:var(--tekst)}
+  h2:first-of-type{margin-top:0}
+  p,li{font-size:.98rem;line-height:1.7;color:var(--op-grond);margin:0 0 8px}
+  ul{margin:0 0 10px;padding-left:20px}
+  strong{color:var(--tekst);font-weight:700}
+  a{color:var(--tekst);text-decoration:underline;text-underline-offset:3px}
+  .callout{position:relative;background:var(--kaart);border:2px solid var(--accent);border-radius:0;padding:16px 20px 16px;margin:28px 0;box-shadow:4px 5px 0 var(--rand)}
+  .callout::before{content:"";position:absolute;inset:5px;border:1px solid var(--accent);opacity:.5;pointer-events:none}
+  .callout-lbl{display:block;font-family:var(--label-font);font-size:.7rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--gedempt);margin:0 0 6px}
+  .callout p{margin:0;font-weight:500;color:var(--tekst);line-height:1.55}
+
+  footer{border-top:1px solid var(--rand);padding:26px 0 34px;text-align:center;color:var(--op-grond);font-family:var(--label-font);font-size:.82rem}
+  footer a{color:var(--tekst)}
+  footer p{font-family:inherit;font-size:inherit;color:inherit;margin:0}
+  .foot-links{display:flex;justify-content:center;gap:20px;margin-top:8px}
+</style>
+<style id="site-taal">.site-taal{position:absolute;top:14px;right:16px;z-index:6;font-size:.86rem;font-weight:700;color:var(--op-grond)}.site-taal a{color:inherit;text-decoration:none;padding:12px 6px;display:inline-block}.site-taal a[aria-current]{color:var(--tekst);text-decoration:underline;text-underline-offset:3px}.nav .site-taal{position:static;margin-left:auto;margin-right:12px}</style>
+</head>
+<body>
+<header>
+  <div class="wrap nav">
+    <a class="nav-brand" href="/es/" aria-label="tatties inicio"><picture><source srcset="/img/tatties-logo-dark.png" media="(prefers-color-scheme: dark)"><img src="/img/tatties-logo.png" alt="tatties" width="1100" height="329"></picture></a>
+    <nav class="site-taal" aria-label="Idioma / Language"><a href="/terms.html" hreflang="en" lang="en" data-site-taal="en">EN</a> | <a href="/es/terms.html" hreflang="es" lang="es" data-site-taal="es" aria-current="true">ES</a></nav>
+    <a class="nav-back" href="/es/">&larr; Volver a tatties.app</a>
+  </div>
+</header>
+
+<main>
+  <div class="wrap">
+    <h1 class="page-title">Condiciones de uso</h1>
+    <p class="page-sub">Última actualización: 10 de noviembre de 2026</p>
+
+    <h2>1. Sobre Tatties</h2>
+    <p>Tatties es una app personal para llevar el registro de tus tatuajes. Funciona en tu dispositivo y guarda ahí tus datos. Con una cuenta opcional puedes sincronizar tu colección entre dispositivos.</p><p>Lo esencial de Tatties es gratis. En las apps puedes comprar extras de pago único (como colores para tu ropa interior) y apoyar a Tatties con una propina; más adelante podría haber una suscripción. Siempre ves el precio antes. Pagas a través de App Store o Google Play; sus condiciones se aplican al pago y a los reembolsos. Un extra que compraste sigue siendo tuyo, también si reinstalas la app (con 'Restaurar compras' o tu cuenta). Una propina es un regalo voluntario: no desbloquea ninguna función. Los Founders (las primeras 100 cuentas) conservan gratis todas las funciones de la app, incluidas las que pasen a ser de pago más adelante, mientras exista su cuenta.</p><p>Tatties no está destinada a menores de 16 años; debes tener al menos 16 años para crear una cuenta.</p>
+
+    <h2>2. Uso permitido</h2>
+    <p>Puedes usar Tatties para tu propia colección, también como artista del tatuaje o estudio, por ejemplo para mostrar tu trabajo o hablarlo con un cliente. No puedes redistribuir, revender ni aplicar ingeniería inversa a la app.</p><p>La cuenta opcional y la sincronización en la nube son para tu propia colección. No las uses para guardar material ilegal o que no tengas derecho a tener, y no intentes eludir límites, automatizar subidas ni sobrecargar el servicio de forma poco razonable. Cada cuenta tiene un límite razonable de almacenamiento y de número de tatuajes; la app te avisa cuando lo alcanzas. Si una cuenta se usa incumpliendo estas condiciones, podemos suspenderla o eliminarla (con sus datos en la nube), con un aviso previo cuando sea razonablemente posible. Tu colección local en tu dispositivo no se ve afectada.</p>
+
+    <h2>3. Tu contenido</h2>
+    <p>Todas las fotos de tatuajes y los datos que agregues siguen siendo tuyos. No reclamamos ninguna propiedad sobre tu contenido. Eres responsable de tener derecho a usar las fotos que agregues.</p>
+
+    <h2>4. Exención de responsabilidad</h2>
+    <p>La app se ofrece "tal cual", sin garantías de ningún tipo. En la medida en que la ley lo permita, no somos responsables de la pérdida de datos, las interrupciones del servicio ni los daños derivados del uso de la app. Los consejos de cuidados de la app son orientaciones generales, no consejo médico; sigue las instrucciones de tu artista o de un médico.</p>
+
+    <h2>5. Cambios</h2>
+    <p>Podemos actualizar estas condiciones de vez en cuando. Si sigues usando la app después de un cambio, aceptas las nuevas condiciones.</p>
+
+    <h2>6. Ley aplicable</h2>
+    <p>Estas condiciones se rigen por las leyes de los Países Bajos. Si descargaste la app de App Store, también se aplica el acuerdo de licencia estándar de Apple para el usuario final (Licensed Application End User License Agreement); estas condiciones se suman a ese acuerdo. Esta es una traducción: si hay diferencias con la versión en inglés, prevalece la versión en inglés.</p>
+
+    <h2>7. Contacto</h2>
+    <p><a href="mailto:hello@tatties.app">hello@tatties.app</a></p>
+
+    <h2>8. Créditos</h2>
+    <p>El cuerpo 3D está hecho con MakeHuman (CC0). Los bóxers son <a href="http://www.makehumancommunity.org/clothes/boxer_shorts.html" target="_blank" rel="noopener">Boxer Shorts</a> de WojackOWL (MakeHuman Community), con licencia CC BY, adaptados para Tatties; el slip es su <a href="http://www.makehumancommunity.org/clothes/male_high_cut_briefs.html" target="_blank" rel="noopener">Male - High Cut Briefs</a> (CC BY). El bikini es <a href="https://static.makehumancommunity.org/assets/assetpacks/underwear02.html" target="_blank" rel="noopener">Brazilian Bikini</a> de punkduck (paquete de MakeHuman Underwear 02), con licencia CC BY 3.0, adaptado para Tatties. El bigote Dalí es <a href="https://static.makehumancommunity.org/assets/assetpacks/bodyparts06.html" target="_blank" rel="noopener">dali_moustache</a> de culturalibre (paquete de MakeHuman Bodyparts 06), con licencia CC BY, adaptado para Tatties. Los tatuajes de muestra de la pantalla de bienvenida provienen de flash del Smithsonian American Art Museum y de grabados de Wenceslaus Hollar (The Metropolitan Museum of Art), de dominio público (CC0). La app usa software de código abierto: <a href="https://github.com/mrdoob/three.js/blob/dev/LICENSE" target="_blank" rel="noopener">three.js</a> y <a href="https://github.com/supabase/supabase-js/blob/master/LICENSE" target="_blank" rel="noopener">supabase-js</a> (licencia MIT, copyright de sus autores).</p>
+
+    <h2>9. Amigos</h2>
+    <p>Con Amigos compartes tatuajes con personas que tú confirmas. Comparte solo tatuajes e imágenes que sean tuyos o que tengas derecho a usar, y nada con desnudos, violencia, odio o discriminación. Elige un nombre de usuario que no sea ofensivo y que no se haga pasar por otra persona (como Tatties o un artista conocido). Si ves algo que no está bien, repórtalo desde la ficha del tatuaje o bloquea a esa persona. Revisamos los reportes y podemos eliminar tatuajes compartidos, nombres de usuario o cuentas, como se indica en el punto 2.</p>
+  </div>
+</main>
+
+<footer>
+  <div class="wrap">
+    <p>&copy; 2026 tatties.app</p>
+    <div class="foot-links">
+      <a href="/es/privacy.html">Política de privacidad</a>
+      <a href="/es/terms.html">Condiciones de uso</a>
+      <a href="/es/">Inicio</a>
+    </div>
+  </div>
+</footer>
+<script>document.addEventListener('click',function(e){var a=e.target.closest&&e.target.closest('[data-site-taal]');if(a)try{localStorage.setItem('tatties-site-taal',a.getAttribute('data-site-taal'))}catch(x){}});</script>
+</body>
+</html>

@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Política de privacidad - Tatties</title>
+<meta name="description" content="Cómo trata Tatties tus datos: primero en tu dispositivo, con la privacidad desde el diseño.">
+<link rel="canonical" href="https://tatties.app/es/privacy.html">
+<link rel="alternate" hreflang="en" href="https://tatties.app/privacy.html">
+<link rel="alternate" hreflang="es" href="https://tatties.app/es/privacy.html">
+<link rel="alternate" hreflang="x-default" href="https://tatties.app/privacy.html">
+<link rel="icon" href="/img/icon-180.png" type="image/png">
+<link rel="apple-touch-icon" href="/img/icon-180.png">
+<meta name="color-scheme" content="light dark">
+<style>
+  /* Zelf gehost (privacy: geen bezoekers-IP naar een font-CDN). Archivo en Ultra, dezelfde lettertypen als de app (Google Fonts, OFL). */
+  @font-face{font-family:'Archivo';src:url('/fonts/archivo.woff2') format('woff2');font-weight:400 800;font-stretch:62% 100%;font-style:normal;font-display:swap}
+  @font-face{font-family:'Ultra';src:url('/fonts/ultra.woff2') format('woff2');font-weight:400;font-style:normal;font-display:swap}
+  :root{
+    --bg:#EFE4D0; --was:#EFE4D0; --tekst:#221A12; --gedempt:#5A503F; --op-grond:#3E3428;
+    --accent:#221A12; --op-inkt:#F0EDE8; --kaart:#FBF7EE; --veldbg:#FFFCF5; --rand:#D9CBB3;
+    --rasterlijn:transparent; --r-sm:8px; --r-md:12px;
+    --app-font:'Archivo', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; --display-font:'Ultra', 'Archivo', Georgia, serif;
+    --label-font:ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    --maxw:680px; color-scheme:light;
+  }
+  @media (prefers-color-scheme:dark){
+    :root{--bg:#181511; --was:#1B1713; --tekst:#ECE3D2; --gedempt:#9E9382; --op-grond:#9E9382; --accent:#ECE3D2; --op-inkt:#181511;
+      --kaart:#221E17; --veldbg:#201C15; --rand:#3A352B; --rasterlijn:transparent; color-scheme:dark}
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth;background:var(--bg)}
+  body{font-family:var(--app-font);font-weight:500;color:var(--tekst);line-height:1.6;-webkit-font-smoothing:antialiased;min-height:100vh;
+    background:
+      radial-gradient(120% 60% at 50% 0%, var(--was) 0%, var(--was) 38%, transparent 70%),
+      linear-gradient(var(--rasterlijn) 1px, transparent 1px) 0 0/56px 56px,
+      linear-gradient(90deg, var(--rasterlijn) 1px, transparent 1px) 0 0/56px 56px,
+      var(--bg);
+    background-color:var(--bg)}
+  .wrap{width:100%;max-width:var(--maxw);margin:0 auto;padding:0 24px}
+
+  header{position:sticky;top:0;z-index:50;background:var(--kaart);border-bottom:1px solid var(--rand)}
+  .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+  .nav-brand{display:inline-flex;align-items:center}
+  .nav-brand img{height:22px;width:auto;display:block}
+  .nav-back{font-family:var(--label-font);font-size:.82rem;font-weight:600;color:var(--gedempt);text-decoration:none;display:inline-flex;align-items:center;gap:6px;
+    min-height:44px;padding:0 4px}
+  .nav-back:hover{color:var(--tekst)}
+
+  main{padding:44px 0 72px}
+  .page-title{font-family:var(--display-font);font-size:clamp(1.7rem,5vw,2.2rem);font-weight:400;line-height:1.1;margin-bottom:6px}
+  .page-sub{font-family:var(--label-font);font-size:.82rem;color:var(--gedempt);margin-bottom:36px}
+
+  h2{font-size:1.02rem;font-weight:700;margin:30px 0 6px;color:var(--tekst)}
+  h2:first-of-type{margin-top:0}
+  p,li{font-size:.98rem;line-height:1.7;color:var(--op-grond);margin:0 0 8px}
+  ul{margin:0 0 10px;padding-left:20px}
+  strong{color:var(--tekst);font-weight:700}
+  a{color:var(--tekst);text-decoration:underline;text-underline-offset:3px}
+  .callout{position:relative;background:var(--kaart);border:2px solid var(--accent);border-radius:0;padding:16px 20px 16px;margin:28px 0;box-shadow:4px 5px 0 var(--rand)}
+  .callout::before{content:"";position:absolute;inset:5px;border:1px solid var(--accent);opacity:.5;pointer-events:none}
+  .callout-lbl{display:block;font-family:var(--label-font);font-size:.7rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--gedempt);margin:0 0 6px}
+  .callout p{margin:0;font-weight:500;color:var(--tekst);line-height:1.55}
+
+  footer{border-top:1px solid var(--rand);padding:26px 0 34px;text-align:center;color:var(--op-grond);font-family:var(--label-font);font-size:.82rem}
+  footer a{color:var(--tekst)}
+  footer p{font-family:inherit;font-size:inherit;color:inherit;margin:0}
+  .foot-links{display:flex;justify-content:center;gap:20px;margin-top:8px}
+</style>
+<style id="site-taal">.site-taal{position:absolute;top:14px;right:16px;z-index:6;font-size:.86rem;font-weight:700;color:var(--op-grond)}.site-taal a{color:inherit;text-decoration:none;padding:12px 6px;display:inline-block}.site-taal a[aria-current]{color:var(--tekst);text-decoration:underline;text-underline-offset:3px}.nav .site-taal{position:static;margin-left:auto;margin-right:12px}</style>
+</head>
+<body>
+<header>
+  <div class="wrap nav">
+    <a class="nav-brand" href="/es/" aria-label="tatties inicio"><picture><source srcset="/img/tatties-logo-dark.png" media="(prefers-color-scheme: dark)"><img src="/img/tatties-logo.png" alt="tatties" width="1100" height="329"></picture></a>
+    <nav class="site-taal" aria-label="Idioma / Language"><a href="/privacy.html" hreflang="en" lang="en" data-site-taal="en">EN</a> | <a href="/es/privacy.html" hreflang="es" lang="es" data-site-taal="es" aria-current="true">ES</a></nav>
+    <a class="nav-back" href="/es/">&larr; Volver a tatties.app</a>
+  </div>
+</header>
+
+<main>
+  <div class="wrap">
+    <h1 class="page-title">Política de privacidad</h1>
+    <p class="page-sub">Última actualización: 10 de noviembre de 2026</p>
+
+    <div class="callout">
+      <span class="callout-lbl">En resumen</span><p>Tatties funciona primero en tu dispositivo. Por defecto, tus datos se quedan en él: nada se envía a un servidor a menos que crees una cuenta y elijas sincronizar, o digas que sí al recuento anónimo diario. Tus tatuajes se reconocen y se recortan en tu propio dispositivo.</p>
+    </div>
+
+    <h2>Qué guarda Tatties</h2>
+    <p>Tatties guarda los siguientes datos <strong>localmente en tu dispositivo</strong> (en la base de datos integrada de la app):</p><ul><li>Datos del tatuaje que escribes: nombre, artista, estudio, estilo, fecha, notas, precio, sesiones</li><li>Fotos que agregas o tomas</li><li>Tu cuerpo (forma, edad, estatura, peso y medidas) y tono de piel</li></ul><p>Tu colección, tus fotos y tu cuerpo no se envían a ningún servidor por defecto. El reconocimiento y el recorte de tu tatuaje se hacen en tu propio dispositivo; tus fotos no van a ningún servicio de IA. Tu colección solo sale de tu dispositivo si tú usas la sincronización en la nube. Solo se envía un recuento anónimo diario si dices que sí (ver abajo).</p><p>En la app de iPhone puedes activar un recordatorio de cuidados; esas notificaciones se programan en tu propio teléfono. El selector de fotos muestra tus fotos recientes solo en tu teléfono; la app solo usa la foto que eliges.</p>
+
+    <h2>Sincronización opcional en la nube</h2>
+    <p>Si creas una cuenta, tu colección (fotos incluidas) y tu cuerpo (forma, edad, estatura, peso y medidas) se cifran en tránsito y se guardan en un servidor seguro en la UE (Supabase, Estocolmo, Suecia). Tú decides cuándo se sincroniza. Puedes eliminar tu cuenta y todos los datos asociados en la nube en cualquier momento en Ajustes → Cuenta. Si inicias sesión con Google o Apple, solo recibimos de ellos tu correo electrónico (con Apple, puede ser una dirección de reenvío). También anotamos qué versión usas (app de iPhone, app de Android o web) y el último día que la usaste, para saber qué versiones seguir mejorando.</p>
+
+    <h2>Lo que NO recopilamos</h2>
+    <ul><li>Sin seguimiento de comportamiento: ni rutas de clics, ni seguimiento de pantallas, ni perfiles publicitarios</li><li>Sin estadísticas de uso, salvo el recuento anónimo diario si tú lo activas (ver abajo)</li><li>Sin publicidad ni redes publicitarias</li><li>No vendemos tus datos ni los damos a empresas de publicidad (abajo se indican los proveedores que hacen funcionar la app)</li></ul>
+
+    <h2>Recuento anónimo (solo si dices que sí)</h2>
+    <p>La app te pregunta una vez si quieres compartir uso anónimo. Está <strong>desactivado por defecto</strong>; puedes activarlo o desactivarlo cuando quieras en Ajustes ('Compartir uso anónimo'). La app envía como máximo un mensaje al día a nuestro propio servidor en la UE con: un número aleatorio que genera la propia app (no un identificador de cuenta o dispositivo), la fecha, la versión de la app, si es la app de iPhone, la de Android o la web, tu idioma, si abriste la vista 3D y en qué rango está tu número de tatuajes (por ejemplo “4-10”). Sin nombres, fotos, datos de tatuajes, ubicación ni seguimiento de clics. Lo usamos para una sola pregunta: si la gente vuelve. Solo lo hacemos con tu consentimiento, y el número no se vincula a nada más. Si lo desactivas, el envío se detiene al instante; las filas enviadas antes no contienen nada que te identifique.</p>
+
+    <h2 id="lista-espera">Lista de espera y avisos</h2>
+    <p>Si dejas tu correo en tatties.app para saber cuándo llega la app para Android a Google Play, guardamos tu correo electrónico, si te ofreciste a ayudar con las pruebas, el idioma de tu navegador y la fecha. Se guarda en Supabase (servidores en la UE, Estocolmo). Lo usamos solo para avisarte cuando la app esté disponible y, si te ofreciste a ayudar con las pruebas, para agregar tu dirección como persona de prueba en Google Play (Google sabe entonces que está en nuestra lista de pruebas). Borramos la lista cuando la app para Android esté en Google Play y hayamos avisado a todo el mundo. Puedes pedirnos que borremos tu dirección antes escribiendo a <a href="mailto:hello@tatties.app">hello@tatties.app</a>.</p>
+
+    <h2>Amigos (opcional)</h2>
+    <p>Con una cuenta puedes elegir un nombre de usuario y agregar amigos. Otras personas solo te encuentran si escriben tu nombre de usuario exacto o reciben tu enlace. Solo ven algo los amigos que confirmaron la solicitud por ambas partes, y solo los tatuajes en los que actives "Compartir con amigos".</p>
+    <p>De esos tatuajes guardamos una copia aparte en el mismo servidor de la UE: el recorte, el lugar en el cuerpo, el nombre, la parte del cuerpo, el estilo, el artista, el estudio y la fecha, además de tu cuerpo (forma, medidas, pelo y tono de piel) o, si lo eliges, un cuerpo estándar. Nunca compartimos precios, dolor, notas ni tus fotos; un deseo de tu lista solo si tú lo compartes. Solo quien comparte un tatuaje ve los corazones que recibe.</p>
+    <p>Compartes esto porque tú lo activas (consentimiento) y puedes desactivarlo en cualquier momento. Si dejas de compartir, eliminas a un amigo o bloqueas a alguien, deja de verlo al instante. Si ya no compartes nada, borramos la copia. Tus amigos sí pueden hacer una captura de pantalla. Si reportas a alguien, guardamos ese reporte (quién reporta, sobre quién, qué tatuaje y el motivo) como máximo un año para revisarlo.</p>
+
+    <h2>Comentarios</h2>
+    <p>Si nos envías comentarios desde la app, recibimos tu mensaje, su tipo (error o idea), la versión de la app y el tipo de dispositivo (por ejemplo 'app de iOS' y el ancho de pantalla), una imagen si la agregas y tu correo si lo escribes (con la sesión iniciada aparece rellenado; quítalo si no quieres respuesta). La imagen primero se reduce y se guarda de nuevo, sin ubicación ni otros datos de la foto. No guardamos tus comentarios con tu cuenta; con la sesión iniciada, la solicitud sí pasa por tu sesión. Los usamos para responderte y para mejorar la app. Se guardan en Supabase (servidores en la UE, Estocolmo), se reenvían a nuestro buzón y se conservan como máximo 2 años. Si quieres que los eliminemos antes, escribe a <a href="mailto:hello@tatties.app">hello@tatties.app</a>.</p>
+
+    <h2>Proveedores de servicios</h2>
+    <p>Estas empresas tratan datos en nuestro nombre, solo para que la app funcione: <strong>Supabase</strong> (base de datos, almacenamiento e inicio de sesión; servidores en la UE, Estocolmo) para tu cuenta y la sincronización en la nube; <strong>Resend</strong> para los correos de la cuenta (confirmación, cambio de contraseña; solo recibe tu correo y el mensaje) y para reenviar a nuestro buzón los comentarios de la app (mensaje, imagen y, si lo escribes, tu correo); <strong>Apple</strong> y <strong>Google</strong> solo si inicias sesión con ellos (nos dan tu correo). <strong>Cloudflare</strong> para el sitio web y la versión web (protege y acelera el tráfico, y para ello ve tu dirección IP y las páginas que pides; no tus datos de tatuajes, que van directamente a Supabase). <strong>RevenueCat</strong> (solo en las apps) para compras y propinas: recibe un identificador aleatorio de cliente o, con la sesión iniciada, tu identificador de cuenta, los datos de tu dispositivo y de la app y qué compras hiciste; sin nombre ni correo. Apple y Google gestionan el pago en sí. Sin cuenta, la app no usa ninguno de estos servicios, salvo Supabase cuando envías comentarios y RevenueCat en las apps.</p>
+
+    <h2>Conservación</h2>
+    <p>Conservamos tus datos en la nube hasta que elimines tu cuenta; después se borran por completo en un plazo de 30 días. Las filas del recuento anónimo se conservan como máximo 13 meses. Los comentarios se conservan como máximo 2 años. Si eliminas tu cuenta, también borramos tus derechos de compra con nosotros y tus datos de cliente en RevenueCat; Apple y Google conservan ellos mismos tu historial de compras (para que puedas restaurarlas). Los datos locales están solo en tu dispositivo y los gestionas tú.</p>
+
+    <h2>Edad</h2>
+    <p>Tatties no está destinada a menores de 16 años. No recopilamos sus datos a sabiendas; si aun así ha ocurrido, escríbenos y los eliminaremos.</p>
+
+    <h2>Tus derechos (RGPD)</h2>
+    <ul><li><strong>Acceso y corrección</strong> - todos tus datos se pueden ver y editar en la app</li><li><strong>Eliminar datos locales</strong> - usa "Borrar todos los datos locales" en Ajustes o elimina la app (versión web: borra los datos del sitio tatties.app)</li><li><strong>Eliminar datos en la nube</strong> - elimina tu cuenta en Ajustes → Cuenta</li><li><strong>Portabilidad</strong> - usa la función Exportar para descargar una copia de todos tus datos</li><li><strong>Eliminación de la lista de espera</strong>: escríbenos y te quitamos en un plazo de 48 horas</li></ul>
+
+    <h2>Responsable del tratamiento</h2>
+    <p>Tatties, Países Bajos - <a href="mailto:hello@tatties.app">hello@tatties.app</a></p>
+  </div>
+</main>
+
+<footer>
+  <div class="wrap">
+    <p>&copy; 2026 tatties.app</p>
+    <div class="foot-links">
+      <a href="/es/privacy.html">Política de privacidad</a>
+      <a href="/es/terms.html">Condiciones de uso</a>
+      <a href="/es/">Inicio</a>
+    </div>
+  </div>
+</footer>
+<script>document.addEventListener('click',function(e){var a=e.target.closest&&e.target.closest('[data-site-taal]');if(a)try{localStorage.setItem('tatties-site-taal',a.getAttribute('data-site-taal'))}catch(x){}});</script>
+</body>
+</html>
