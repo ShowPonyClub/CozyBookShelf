@@ -491,7 +491,7 @@ if(window.THREE) window.__heroStart();
 <script>document.addEventListener('click',function(e){var a=e.target.closest&&e.target.closest('[data-site-taal]');if(a)try{localStorage.setItem('tatties-site-taal',a.getAttribute('data-site-taal'))}catch(x){}});</script>
 <script id="bron-tel">/* apply_bron_site.py: telling per kanaal (alleen kanaal, soort en tijd) */
 (function(){
-  var PT='';
+  var PT='129390911';
   function bron(){ try{ var b=JSON.parse(localStorage.getItem('tatties-bron')||'null');
     if(b&&/^(tiktok|instagram|reddit)$/.test(b.bron)&&Date.now()-b.tijd<30*864e5) return b.bron; }catch(e){} return null; }
   function tel(soort){ var b=bron(); if(!b) return;
