@@ -493,6 +493,9 @@ if(window.THREE) window.__heroStart();
   function bron(){ try{ var b=JSON.parse(localStorage.getItem('tatties-bron')||'null');
     if(b&&/^(tiktok|instagram|reddit)$/.test(b.bron)&&Date.now()-b.tijd<30*864e5) return b.bron; }catch(e){} return null; }
   function tel(soort){ var b=bron(); if(!b) return;
+    if(soort==='bezoek'){ try{ /* de browser in Instagram laadt de pagina soms twee keer: zelfde kanaal binnen 10 s = een bezoek */
+      var v=JSON.parse(localStorage.getItem('tatties-bron-tel')||'null'); if(v&&v.bron===b&&Date.now()-v.tijd<1e4) return;
+      localStorage.setItem('tatties-bron-tel',JSON.stringify({bron:b,tijd:Date.now()})); }catch(e){} }
     if(window.__bronDev){ window.__bronLaatste={bron:b,soort:soort}; return; }
     try{ fetch('https://uhrbvwwiovefrpscgweo.supabase.co/rest/v1/bron_bezoek',{method:'POST',keepalive:true,
       headers:{'apikey':'sb_publishable_oR3igYlqHgrgsa2QdaewqQ_-GCrDzNQ','Content-Type':'application/json','Prefer':'return=minimal'},
