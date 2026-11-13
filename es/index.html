@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+<script id="bron-kop">/* apply_bron_site.py: kanaal uit ?src= onthouden (30 dagen) en uit de adresbalk halen */(function(){try{var m=location.search.match(/[?&]src=(tiktok|instagram|reddit)(&|$)/);if(!m)return;localStorage.setItem('tatties-bron',JSON.stringify({bron:m[1],tijd:Date.now()}));window.__bronNu=m[1];var q=location.search.replace(/([?&])src=[^&]*&?/,'$1').replace(/[?&]$/,'');history.replaceState(null,'',location.pathname+q+location.hash);}catch(e){}})();</script>
 <script>/* apply_token_hash.py: mail-link met token_hash zonder app (of via de Site URL) = de webversie bevestigt */(function(){if(/[?&]token_hash=/.test(location.search))location.replace('/web/'+location.search);})();</script>
 <meta charset="UTF-8">
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; media-src 'self'; font-src 'self'; connect-src 'self' https://formsubmit.co https://uhrbvwwiovefrpscgweo.supabase.co; worker-src 'self' blob:; base-uri 'none'; form-action 'none'; frame-ancestors 'none'">
@@ -479,12 +480,32 @@ if(window.THREE) window.__heroStart();
     if(window.__androidDev){ window.__androidLaatste={email:email,tester:tst.checked,taal:taal}; setTimeout(klaar,200); return; }
     fetch('https://uhrbvwwiovefrpscgweo.supabase.co/rest/v1/android_wachtlijst',{method:'POST',
       headers:{'apikey':'sb_publishable_oR3igYlqHgrgsa2QdaewqQ_-GCrDzNQ','Content-Type':'application/json','Prefer':'return=minimal'},
-      body:JSON.stringify({email:email,tester:!!tst.checked,taal:taal})})
+      body:JSON.stringify((function(){var o={email:email,tester:!!tst.checked,taal:taal},b=window.__tattiesBron&&window.__tattiesBron.bron();if(b){o.bron=b;window.__tattiesBron.tel('android');}return o;})())})
     .then(function(r){ if(r.ok) klaar(); else { knop.disabled=false; zeg('Algo salió mal. Inténtalo más tarde o escribe a hello@tatties.app.',false); } })
     .catch(function(){ knop.disabled=false; zeg('Sin conexión. Inténtalo de nuevo.',false); });
   });
 })();
 </script>
 <script>document.addEventListener('click',function(e){var a=e.target.closest&&e.target.closest('[data-site-taal]');if(a)try{localStorage.setItem('tatties-site-taal',a.getAttribute('data-site-taal'))}catch(x){}});</script>
+<script id="bron-tel">/* apply_bron_site.py: telling per kanaal (alleen kanaal, soort en tijd) */
+(function(){
+  var PT='';
+  function bron(){ try{ var b=JSON.parse(localStorage.getItem('tatties-bron')||'null');
+    if(b&&/^(tiktok|instagram|reddit)$/.test(b.bron)&&Date.now()-b.tijd<30*864e5) return b.bron; }catch(e){} return null; }
+  function tel(soort){ var b=bron(); if(!b) return;
+    if(window.__bronDev){ window.__bronLaatste={bron:b,soort:soort}; return; }
+    try{ fetch('https://uhrbvwwiovefrpscgweo.supabase.co/rest/v1/bron_bezoek',{method:'POST',keepalive:true,
+      headers:{'apikey':'sb_publishable_oR3igYlqHgrgsa2QdaewqQ_-GCrDzNQ','Content-Type':'application/json','Prefer':'return=minimal'},
+      body:JSON.stringify({bron:b,soort:soort})}).catch(function(){}); }catch(e){} }
+  window.__tattiesBron={bron:bron,tel:tel};
+  if(window.__bronNu) tel('bezoek');
+  var b=bron();
+  if(b&&PT) document.querySelectorAll('a[href^="https://apps.apple.com/app/id6819068062"]').forEach(function(a){
+    a.href='https://apps.apple.com/app/apple-store/id6819068062?pt='+PT+'&ct='+b+'&mt=8'; });
+  document.addEventListener('click',function(e){ var a=e.target.closest&&e.target.closest('a[href]'); if(!a) return;
+    if(a.href.indexOf('https://apps.apple.com/app/')===0) tel('appstore');
+    else if(/^https:\/\/tatties\.app\/web\/|^\/web\//.test(a.getAttribute('href'))) tel('web'); }, true);
+})();
+</script>
 </body>
 </html>
