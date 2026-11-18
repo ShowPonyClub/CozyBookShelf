@@ -130,5 +130,19 @@
     </div>
   </div>
 </footer>
+<!-- APP-VRIEND-BEGIN -->
+<script>/* apply_app_vriend.py: uitnodiging van een vriend */(function(){
+  var n = (new URLSearchParams(location.search).get('vriend') || '').trim().toLowerCase().replace(/^@/, '');
+  if (!/^[a-z0-9][a-z0-9_.]{1,18}[a-z0-9]$/.test(n)) return;
+  var h = document.querySelector('.page-title'), p = document.querySelector('.page-sub');
+  if (h) h.textContent = '@' + n + ' invited you to Tatties';
+  if (p) p.textContent = 'Get the app, pick a username in the Friends tab and add @' + n + ' as a friend.';
+  var w = document.querySelectorAll('a[href="https://tatties.app/web/"]');
+  for (var i = 0; i < w.length; i++) w[i].href = 'https://tatties.app/web/?vriend=' + encodeURIComponent(n);
+  var g = document.querySelector('.geldig'); if (g) g.hidden = true;   // uitleg over bevestigen en wachtwoord hoort niet bij een uitnodiging
+  var st = document.querySelector('ol.stappen');                        // net als de stappen over de link in een e-mail
+  if (st) { st.hidden = true; var k = st.previousElementSibling; if (k && k.tagName === 'H2') k.hidden = true; }
+})();</script>
+<!-- APP-VRIEND-EIND -->
 </body>
 </html>
